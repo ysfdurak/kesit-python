@@ -1,4 +1,4 @@
-/* PythonPatika v2/t2 — Operatörler derinlemesine */
+/* Kesit Python v2/t2 — Operatörler derinlemesine */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -154,7 +154,7 @@ while (satir := satirlar[i]) != "":
     i += 1</pre>
 <p>Önceliği en düşük operatör olduğu için koşul içinde genellikle parantez gerekir: <code>(n := len(x)) &gt; 5</code>. Parantezsiz <code>n := len(x) &gt; 5</code>, n'ye <code>True/False</code> atar. Okunurluğu artırdığı yerde kullan; her atamayı mors'a çevirmek kodu zorlaştırır.</p>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın kullanıcı yetki tablosunda her personelin izinleri tek bir tam sayı sütununda tutulur: 1 = hesap görüntüleme, 2 = havale başlatma, 4 = havale onaylama, 8 = limit değiştirme. Denetim ekibi "havale başlatıp aynı zamanda onaylayabilen" riskli kullanıcıları <code>(izin &amp; 6) == 6</code> sorgusuyla bulur. Aynı bit mantığı Linux dosya izinlerinde, ağ maskelerinde (IP alt ağları) ve oyun motorlarındaki çarpışma katmanlarında da karşına çıkacak.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kullanıcı yetki tablosunda her personelin izinleri tek bir tam sayı sütununda tutulur: 1 = hesap görüntüleme, 2 = havale başlatma, 4 = havale onaylama, 8 = limit değiştirme. Denetim ekibi "havale başlatıp aynı zamanda onaylayabilen" riskli kullanıcıları <code>(izin &amp; 6) == 6</code> sorgusuyla bulur. Aynı bit mantığı Linux dosya izinlerinde, ağ maskelerinde (IP alt ağları) ve oyun motorlarındaki çarpışma katmanlarında da karşına çıkacak.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Operatörler aslında metot çağrısıdır</h3>
@@ -230,7 +230,7 @@ while (satir := satirlar[i]) != "":
       id: 'operatorler-2',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank yetki sistemi: <code>GORUNTULE=1</code>, <code>HAVALE=2</code>, <code>ONAY=4</code>, <code>LIMIT=8</code>. Üç fonksiyon yaz:</p><ul><li><code>izin_ekle(mevcut, izin)</code> → izni eklenmiş sayı</li><li><code>izin_kaldir(mevcut, izin)</code> → izni kaldırılmış sayı (izin yoksa sayı değişmez)</li><li><code>izin_var_mi(mevcut, izin)</code> → <b>bool</b>; birden fazla bit verilirse <b>hepsi</b> olmalı</li></ul>',
+      q: '<p>Ilgaz Bank yetki sistemi: <code>GORUNTULE=1</code>, <code>HAVALE=2</code>, <code>ONAY=4</code>, <code>LIMIT=8</code>. Üç fonksiyon yaz:</p><ul><li><code>izin_ekle(mevcut, izin)</code> → izni eklenmiş sayı</li><li><code>izin_kaldir(mevcut, izin)</code> → izni kaldırılmış sayı (izin yoksa sayı değişmez)</li><li><code>izin_var_mi(mevcut, izin)</code> → <b>bool</b>; birden fazla bit verilirse <b>hepsi</b> olmalı</li></ul>',
       guide: ['Eklemek için bit VEYA (|) kullan.', 'Kaldırmak için iznin tümleyeniyle (~izin) bit VE (&) yap.', 'Kontrol için (mevcut & izin) == izin karşılaştırmasını döndür.', 'Sabitleri dosyanın başında tanımla.'],
       example: 'KALIN, ITALIK, ALTI_CIZILI = 1, 2, 4\nstil = KALIN | ALTI_CIZILI\nprint(stil, (stil & ITALIK) == ITALIK)\nstil = stil & ~KALIN\nprint(stil)\n',
       start: 'GORUNTULE, HAVALE, ONAY, LIMIT = 1, 2, 4, 8\n\ndef izin_ekle(mevcut, izin):\n    # TODO: bit VEYA\n    return mevcut + izin\n\ndef izin_kaldir(mevcut, izin):\n    # TODO: bit VE ve tümleyen\n    return mevcut - izin\n\ndef izin_var_mi(mevcut, izin):\n    # TODO: tüm bitler var mı?\n    return bool(mevcut & izin)\n',

@@ -1,11 +1,11 @@
-# PythonPatika — içerik şeması (yazarlar için)
+# Kesit Python — içerik şeması (yazarlar için)
 
-PythonPatika, SQLPatika ve PBIPatika'nın kardeşi: Türkçe, sıfırdan işe hazır seviyeye Python öğreten bir web uygulaması. Tarayıcıda **gerçek Python** (Pyodide, CPython 3.12) çalışır; öğrenci kodu yazar, "Çalıştır"a basar, testler otomatik kontrol eder.
+Kesit Python, Kesit SQL ve Kesit Power BI'ın kardeşi: Türkçe, sıfırdan işe hazır seviyeye Python öğreten bir web uygulaması. Tarayıcıda **gerçek Python** (Pyodide, CPython 3.12) çalışır; öğrenci kodu yazar, "Çalıştır"a basar, testler otomatik kontrol eder.
 
 Her içerik dosyası bir tarayıcı JS dosyasıdır ve şöyle başlar/biter:
 
 ```js
-/* PythonPatika — <dosya açıklaması> */
+/* Kesit Python — <dosya açıklaması> */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -75,8 +75,8 @@ Testler için kurallar:
 - Öğrenciden fonksiyon isteniyorsa fonksiyon adı ve parametreleri görev metninde açıkça geçsin.
 
 ## Ders standardı (kalite çıtası: DataCamp/Codecademy'den daha fazla ve daha iyi)
-- Her ders: neden önemli (iş hayatından somut senaryo: Anadolu Market e-ticaret verisi, Anadolu Bank işlem verisi, İK, lojistik, üretim), kavram, en az 3 çalıştırılabilir örnek, sık hatalar, "Uzmanlaş" bölümü, 4-8 alıştırma, SSS.
-- Kurum senaryosu: "Anadolu Market" (e-ticaret: siparişler, müşteriler, ürünler, şehirler) ve "Anadolu Bank" (hesaplar, işlemler, kredi başvuruları). Örnek verileri küçük listeler/sözlükler/CSV string'leri olarak ders içinde üret.
+- Her ders: neden önemli (iş hayatından somut senaryo: Anadolu Market e-ticaret verisi, Ilgaz Bank işlem verisi, İK, lojistik, üretim), kavram, en az 3 çalıştırılabilir örnek, sık hatalar, "Uzmanlaş" bölümü, 4-8 alıştırma, SSS.
+- Kurum senaryosu: "Anadolu Market" (e-ticaret: siparişler, müşteriler, ürünler, şehirler) ve "Ilgaz Bank" (hesaplar, işlemler, kredi başvuruları). Örnek verileri küçük listeler/sözlükler/CSV string'leri olarak ders içinde üret.
 - Dil: sade, doğrudan, "sen" dili; terimlerin İngilizcesi ilk geçtiğinde parantezde: değişken (variable).
 - Kod stili: PEP 8, snake_case, 4 boşluk girinti, Python 3.12 (match, f-string, type hints, walrus, dataclass, | tip birleşimi).
 - Her dersin body uzunluğu 900-1800 kelime; kod örnekleri kısa ve amaçlı.

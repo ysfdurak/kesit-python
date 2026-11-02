@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: sistem-tasarimi (Sistem tasarımı temelleri) */
+/* Kesit Python — İleri: sistem-tasarimi (Sistem tasarımı temelleri) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

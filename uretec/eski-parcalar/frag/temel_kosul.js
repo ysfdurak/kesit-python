@@ -1,4 +1,4 @@
-/* PythonPatika — Temel seviye 2. bölüm: Akış Kontrolü, Fonksiyonlar ve Modüller, Dosya ve Hata, Bitirme */
+/* Kesit Python — Temel seviye 2. bölüm: Akış Kontrolü, Fonksiyonlar ve Modüller, Dosya ve Hata, Bitirme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -16,11 +16,11 @@ L.push(
     'Karşılaştırma (==, !=, <, >=) ve mantık (and, or, not) operatörlerini doğru öncelikle birleştirebilirim.',
     'Hangi değerlerin "doğru", hangilerinin "yanlış" sayıldığını (truthiness) açıklayabilirim.',
     'İç içe koşulları erken dönüş (early return) ile düzleştirip okunur kod yazabilirim.',
-    'Anadolu Bank kredi uygunluk kuralı gibi bir iş kuralını koda dökebilirim.'
+    'Ilgaz Bank kredi uygunluk kuralı gibi bir iş kuralını koda dökebilirim.'
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Şimdiye kadar yazdığın programlar yukarıdan aşağıya, hiç sapmadan çalıştı. Oysa gerçek iş kuralları hep "eğer ... ise" diye başlar: <i>Eğer sepet tutarı 500 TL'yi geçerse kargo bedava. Eğer başvuranın yaşı 18'in altındaysa krediyi reddet. Eğer stok sıfırsa "tükendi" yaz.</i> Anadolu Bank'ta bir kredi uzmanının her gün uyguladığı kuralı Python'a öğretmek için koşul (condition) yapısına ihtiyacın var.</p>
+<p>Şimdiye kadar yazdığın programlar yukarıdan aşağıya, hiç sapmadan çalıştı. Oysa gerçek iş kuralları hep "eğer ... ise" diye başlar: <i>Eğer sepet tutarı 500 TL'yi geçerse kargo bedava. Eğer başvuranın yaşı 18'in altındaysa krediyi reddet. Eğer stok sıfırsa "tükendi" yaz.</i> Ilgaz Bank'ta bir kredi uzmanının her gün uyguladığı kuralı Python'a öğretmek için koşul (condition) yapısına ihtiyacın var.</p>
 
 <h2>if, elif, else</h2>
 <p>Python'da bir blok yalnızca koşul <code>True</code> olduğunda çalışır. Blok girintiyle (4 boşluk) belirlenir; süslü parantez yok.</p>
@@ -93,7 +93,7 @@ print(bool(0), bool("0"), bool([]), bool([0]))</pre>
 <h2>İç içe koşul ve erken dönüş</h2>
 <p>Koşul içine koşul yazabilirsin ama girinti derinleştikçe kod zorlaşır. Fonksiyon içindeysen (bir sonraki modülde ayrıntısıyla göreceksin) olumsuz durumları başta eleyip <code>return</code> ile çıkmak, kodu düz ve okunur tutar. Buna <b>erken dönüş</b> (early return) ya da "guard clause" denir.</p>
 <pre class="py">def kredi_karari(yas, gelir, kredi_notu, kara_listede):
-    """Anadolu Bank bireysel kredi ön değerlendirme kuralı."""
+    """Ilgaz Bank bireysel kredi ön değerlendirme kuralı."""
     if kara_listede:
         return "RED: kara liste"
     if yas &lt; 18:
@@ -140,7 +140,7 @@ match durum:
       o: ['<code>"0"</code>', '<code>[]</code>', '<code>-1</code>', '<code>[None]</code>'], a: 1,
       why: 'Boş liste falsy sayılır. "0" boş olmayan bir metindir, -1 sıfır olmayan bir sayıdır, [None] bir elemanlı (dolu) bir listedir; üçü de truthy.' },
     { t: 'code', id: 'kosullar-1',
-      q: '<p>Anadolu Bank ön değerlendirme kuralı: <code>kredi_uygun(yas, gelir, kredi_notu)</code> fonksiyonunu yaz. Başvuran <b>18 yaş ve üzeri</b>, aylık geliri <b>en az 25000</b> ve kredi notu <b>en az 600</b> ise <code>True</code>, aksi halde <code>False</code> döndürsün.</p>',
+      q: '<p>Ilgaz Bank ön değerlendirme kuralı: <code>kredi_uygun(yas, gelir, kredi_notu)</code> fonksiyonunu yaz. Başvuran <b>18 yaş ve üzeri</b>, aylık geliri <b>en az 25000</b> ve kredi notu <b>en az 600</b> ise <code>True</code>, aksi halde <code>False</code> döndürsün.</p>',
       start: 'def kredi_uygun(yas, gelir, kredi_notu):\n    # üç şartı and ile birleştir\n    pass\n',
       sol: 'def kredi_uygun(yas, gelir, kredi_notu):\n    return yas >= 18 and gelir >= 25000 and kredi_notu >= 600\n',
       tests: 'assert kredi_uygun(30, 40000, 700) is True, "30 yaş, 40000 gelir, 700 not uygun olmalı"\nassert kredi_uygun(17, 40000, 700) is False, "17 yaş uygun olmamalı"\nassert kredi_uygun(30, 24999, 700) is False, "24999 gelir uygun olmamalı"\nassert kredi_uygun(30, 40000, 599) is False, "599 kredi notu uygun olmamalı"\nassert kredi_uygun(18, 25000, 600) is True, "sınır değerler (18, 25000, 600) uygun olmalı"\n',
@@ -164,7 +164,7 @@ match durum:
       o: ['False', 'True', 'SyntaxError', 'None'], a: 1,
       why: 'not, or\'dan önce işlenir: (not True) or True = False or True = True. Öncelik sırası: not > and > or.' },
     { t: 'code', id: 'kosullar-4',
-      q: '<p>Anadolu Bank ATM kuralı: <code>para_cekme(bakiye, tutar, kart_aktif)</code> fonksiyonu <b>erken dönüş</b> kalıbıyla şu metinlerden birini döndürsün: kart aktif değilse <code>"RED: kart pasif"</code>; tutar 0 veya negatifse <code>"RED: geçersiz tutar"</code>; tutar bakiyeden büyükse <code>"RED: yetersiz bakiye"</code>; aksi halde <code>"ONAY"</code>.</p>',
+      q: '<p>Ilgaz Bank ATM kuralı: <code>para_cekme(bakiye, tutar, kart_aktif)</code> fonksiyonu <b>erken dönüş</b> kalıbıyla şu metinlerden birini döndürsün: kart aktif değilse <code>"RED: kart pasif"</code>; tutar 0 veya negatifse <code>"RED: geçersiz tutar"</code>; tutar bakiyeden büyükse <code>"RED: yetersiz bakiye"</code>; aksi halde <code>"ONAY"</code>.</p>',
       start: 'def para_cekme(bakiye, tutar, kart_aktif):\n    # olumsuz durumları sırayla ele, en sonda "ONAY" döndür\n    pass\n',
       sol: 'def para_cekme(bakiye, tutar, kart_aktif):\n    if not kart_aktif:\n        return "RED: kart pasif"\n    if tutar <= 0:\n        return "RED: geçersiz tutar"\n    if tutar > bakiye:\n        return "RED: yetersiz bakiye"\n    return "ONAY"\n',
       tests: 'assert para_cekme(1000, 200, True) == "ONAY", "1000 bakiye, 200 tutar, aktif kart ONAY olmalı"\nassert para_cekme(1000, 200, False) == "RED: kart pasif", "pasif kart reddedilmeli"\nassert para_cekme(1000, 0, True) == "RED: geçersiz tutar", "0 tutar geçersiz olmalı"\nassert para_cekme(1000, -50, True) == "RED: geçersiz tutar", "negatif tutar geçersiz olmalı"\nassert para_cekme(100, 200, True) == "RED: yetersiz bakiye", "bakiyeden büyük tutar reddedilmeli"\nassert para_cekme(200, 200, True) == "ONAY", "bakiyeye eşit tutar çekilebilmeli"\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — Orta 1: Pythonic Kod (kapsamli-ifadeler … dekoratorler) */
+/* Kesit Python — Orta 1: Pythonic Kod (kapsamli-ifadeler … dekoratorler) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -282,7 +282,7 @@ print(rapor)</pre>
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
+<p>Ilgaz Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
 
 <h2>for döngüsünün perde arkası: iter ve next</h2>
 <p>Bir listeyi <code>for</code> ile gezdiğinde Python iki şey yapar: önce <code>iter(liste)</code> ile bir yineleyici alır, sonra bitene kadar <code>next(yineleyici)</code> çağırır. Bittiğini anlamanın yolu <code>StopIteration</code> istisnasıdır.</p>
@@ -310,7 +310,7 @@ while True:
 <div class="note"><b>next'in ikinci parametresi</b><code>next(it, None)</code> yazarsan tükendiğinde istisna yerine <code>None</code> döner. "İlk eşleşen öğe ya da yok" sorularında çok kullanışlıdır: <code>next((s for s in siparisler if s["no"] == 103), None)</code>.</div>
 
 <h2>Kendi yineleyici sınıfın: __iter__ ve __next__</h2>
-<p>Bir sınıf iki metot tanımlarsa yineleyici olur: <code>__iter__</code> kendisini döndürür, <code>__next__</code> sıradaki öğeyi döndürür ya da <code>StopIteration</code> fırlatır. Örnek: Anadolu Bank'ta bir hesaba günlük faiz işleyen, verilen gün kadar bakiye üreten sayaç.</p>
+<p>Bir sınıf iki metot tanımlarsa yineleyici olur: <code>__iter__</code> kendisini döndürür, <code>__next__</code> sıradaki öğeyi döndürür ya da <code>StopIteration</code> fırlatır. Örnek: Ilgaz Bank'ta bir hesaba günlük faiz işleyen, verilen gün kadar bakiye üreten sayaç.</p>
 <pre class="py">class FaizAkisi:
     """Her gün bakiyeye günlük faiz ekler; gun_sayisi kadar bakiye üretir."""
 
@@ -372,7 +372,7 @@ print(next(u, "son"))</pre>
 </table></div>
 
 <h2>Büyük log akışını satır satır işleme</h2>
-<p>Asıl güç üreteçleri <b>zincirlemekte</b> ortaya çıkar. Her üreteç tek bir iş yapar ve sonucunu bir sonrakine akıtır; hiçbir aşamada tüm veri bellekte olmaz. Anadolu Bank'ın işlem günlüğünden "HATA" satırlarını ayıklayıp tutarlarını toplayalım. Burada log'u bir metin olarak üretiyoruz; gerçekte dosya satırlarını gezersin ve dosya nesnesi de zaten tembel bir yineleyicidir.</p>
+<p>Asıl güç üreteçleri <b>zincirlemekte</b> ortaya çıkar. Her üreteç tek bir iş yapar ve sonucunu bir sonrakine akıtır; hiçbir aşamada tüm veri bellekte olmaz. Ilgaz Bank'ın işlem günlüğünden "HATA" satırlarını ayıklayıp tutarlarını toplayalım. Burada log'u bir metin olarak üretiyoruz; gerçekte dosya satırlarını gezersin ve dosya nesnesi de zaten tembel bir yineleyicidir.</p>
 <pre class="py">LOG = """2024-03-01 09:12 OK EFT 500
 2024-03-01 09:15 HATA Havale 1200
 2024-03-01 09:20 OK Kart 90
@@ -569,7 +569,7 @@ print(list(itertools.accumulate([100, 250, 400])))</pre>
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Anadolu Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
+<p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Ilgaz Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
 
 <h2>Fonksiyon bir değerdir</h2>
 <pre class="py">def kdv_ekle(tutar):
@@ -677,7 +677,7 @@ print(all(b["ad"] for b in basvurular))   # boş ad yok mu?
 print(any([]), all([]))                     # boş kaynakta: False, True</pre>
 
 <h2>Closure: ayarını içinde taşıyan fonksiyon</h2>
-<p>Bir fonksiyon, içinde tanımlanan başka bir fonksiyonu döndürürse, içteki fonksiyon dıştakinin değişkenlerini "hatırlar". Bu yapıya closure (kapanış) denir. Anadolu Bank'ta her şubenin komisyon oranı farklı olsun: tek bir fabrika (factory) fonksiyonundan şubeye özel hesaplayıcılar üretirsin.</p>
+<p>Bir fonksiyon, içinde tanımlanan başka bir fonksiyonu döndürürse, içteki fonksiyon dıştakinin değişkenlerini "hatırlar". Bu yapıya closure (kapanış) denir. Ilgaz Bank'ta her şubenin komisyon oranı farklı olsun: tek bir fabrika (factory) fonksiyonundan şubeye özel hesaplayıcılar üretirsin.</p>
 <pre class="py">def komisyon_hesaplayici(oran, asgari):
     def hesapla(tutar):
         return max(round(tutar * oran, 2), asgari)
@@ -829,7 +829,7 @@ print("Hepsi 1000 üstü mü:", all(s["tutar"] &gt;= 1000 for s in sirali))</pre
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
+<p>Ilgaz Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
 
 <h2>Fonksiyonu saran fonksiyon</h2>
 <p>Dekoratör mekanizmasını önce elle kur. Bir fonksiyon alan, içinde onu çağıran yeni bir fonksiyon tanımlayan ve bu yeni fonksiyonu döndüren bir fonksiyon yaz.</p>
@@ -1138,7 +1138,7 @@ L.push(
 {
     id: 'siniflar-oop', lv: 'orta', mod: 'Nesne Yönelimli Programlama', min: 35,
     title: 'Sınıflar: veri ve davranışı bir arada tutmak',
-    sum: 'class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Anadolu Bank Hesap sınıfını kurarsın.',
+    sum: 'class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın.',
     goals: [
       'class ve __init__ ile nesne oluşturup self\'in ne olduğunu açıklayabilirim.',
       'Örnek niteliği ile sınıf niteliği arasındaki farkı gösterebilirim.',
@@ -1148,7 +1148,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank\'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
+<p>Ilgaz Bank\'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
 
 <h2>class, __init__ ve self</h2>
 <p><code>class</code> bir kalıp tanımlar; o kalıptan üretilen her nesneye <b>örnek</b> (instance) denir. <code>__init__</code> örnek oluşturulurken otomatik çalışan kurucu metottur. <code>self</code>, metodun üzerinde çalıştığı örneğin kendisidir; Python onu ilk parametre olarak otomatik geçirir.</p>
@@ -1353,7 +1353,7 @@ print(len(h.islemler), "işlem;", [t for _, t, _ in h.islemler])</pre>
         o: ['Hesap sınıfının kendisini', 'cek metodunu', 'h örneğini', '500 değerini'],
         a: 2, why: 'Python, metodu çağıran örneği (h) otomatik olarak ilk parametre self\'e geçirir; çağrı Hesap.cek(h, 500) ile eşdeğerdir.' },
       { t: 'code', id: 'siniflar-oop-1',
-        q: '<p>Anadolu Bank için <code>Hesap</code> sınıfını yaz. <code>Hesap(no, sahip, bakiye=0.0)</code> ile kurulsun; <code>yatir(tutar)</code> bakiyeyi artırsın, <code>cek(tutar)</code> yeterli bakiye varsa düşüp <code>True</code>, yoksa bakiyeyi değiştirmeden <code>False</code> döndürsün. <code>__repr__</code> tam olarak <code>Hesap(\'TR01\', \'Ayşe\', 100.0)</code> biçiminde olsun (bakiye float, dizeler tırnaklı).</p>',
+        q: '<p>Ilgaz Bank için <code>Hesap</code> sınıfını yaz. <code>Hesap(no, sahip, bakiye=0.0)</code> ile kurulsun; <code>yatir(tutar)</code> bakiyeyi artırsın, <code>cek(tutar)</code> yeterli bakiye varsa düşüp <code>True</code>, yoksa bakiyeyi değiştirmeden <code>False</code> döndürsün. <code>__repr__</code> tam olarak <code>Hesap(\'TR01\', \'Ayşe\', 100.0)</code> biçiminde olsun (bakiye float, dizeler tırnaklı).</p>',
         start: 'class Hesap:\n    def __init__(self, no, sahip, bakiye=0.0):\n        pass\n\n    def yatir(self, tutar):\n        pass\n\n    def cek(self, tutar):\n        pass\n\n    def __repr__(self):\n        pass\n',
         sol: 'class Hesap:\n    def __init__(self, no, sahip, bakiye=0.0):\n        self.no = no\n        self.sahip = sahip\n        self.bakiye = bakiye\n\n    def yatir(self, tutar):\n        self.bakiye += tutar\n\n    def cek(self, tutar):\n        if tutar > self.bakiye:\n            return False\n        self.bakiye -= tutar\n        return True\n\n    def __repr__(self):\n        return f"Hesap({self.no!r}, {self.sahip!r}, {float(self.bakiye)})"\n',
         tests: 'h = Hesap("TR01", "Ayşe", 100.0)\nassert h.no == "TR01" and h.sahip == "Ayşe", "no ve sahip nitelikleri saklanmalı"\nassert h.bakiye == 100.0, "başlangıç bakiyesi"\nh.yatir(50)\nassert h.bakiye == 150.0, "yatir bakiyeyi artırmalı"\nassert h.cek(200) is False and h.bakiye == 150.0, "yetersizse False ve bakiye değişmemeli"\nassert h.cek(100) is True and h.bakiye == 50.0, "yeterliyse True ve düşmeli"\nassert repr(Hesap("TR01", "Ayşe", 100.0)) == "Hesap(\'TR01\', \'Ayşe\', 100.0)", "__repr__ biçimi"\nassert Hesap("TR09", "Can").bakiye == 0.0, "varsayılan bakiye 0.0"\n',
@@ -1411,7 +1411,7 @@ print(len(h.islemler), "işlem;", [t for _, t, _ in h.islemler])</pre>
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank\'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
+<p>Ilgaz Bank\'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
 
 <h2>Üst sınıf ve alt sınıf</h2>
 <p><code>class Alt(Ust):</code> yazımı Alt sınıfın Ust\'ün tüm nitelik ve metotlarını miras almasını sağlar. Alt sınıf hiçbir şey eklemese bile çalışır.</p>
@@ -1946,12 +1946,12 @@ print(tahsil_et(KrediKarti(), 149.9))</pre>
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Anadolu Bank\'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
+<p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Ilgaz Bank\'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
 
 <h2>Özel istisna hiyerarşisi</h2>
 <p><code>Exception</code>\'dan türeyen bir temel sınıf ve ondan türeyen özel sınıflar tanımlarsın. Hiyerarşi sayesinde çağıran, ister tek tek ister hepsini birden yakalar. Gövde genellikle boştur (<code>pass</code> ya da docstring); gerekirse ek nitelik taşır.</p>
 <pre class="py">class BankaHatasi(Exception):
-    """Anadolu Bank iş kurallarının temel hatası."""
+    """Ilgaz Bank iş kurallarının temel hatası."""
 
 class HesapBulunamadi(BankaHatasi):
     def __init__(self, no):
@@ -2380,7 +2380,7 @@ print("Kümülatif:", list(accumulate(gunluk.values())))</pre>
         hints: ['Counter bir üreteç ifadesi alabilir: Counter(s["sehir"] for s in siparisler).', 'most_common(n) zaten azalan sırada (sehir, adet) listesi döndürür.'],
         why: 'Counter sayımı yapar, most_common(n) en çok geçen n elemanı azalan sırada demet listesi olarak verir.' },
       { t: 'code', id: 'collections-itertools-2',
-        q: '<p>Anadolu Bank işlemlerini hesaba göre gruplayan <code>hesaba_gore(islemler)</code> fonksiyonunu yaz. <code>islemler</code>, <code>(hesap_no, tutar)</code> demetlerinden oluşur. Dönüş değeri normal bir <code>dict</code> olsun: anahtar hesap numarası, değer o hesabın tutarlarının listesi (geliş sırasıyla). <code>defaultdict</code> kullan ve sonucu <code>dict()</code> ile çevir.</p>',
+        q: '<p>Ilgaz Bank işlemlerini hesaba göre gruplayan <code>hesaba_gore(islemler)</code> fonksiyonunu yaz. <code>islemler</code>, <code>(hesap_no, tutar)</code> demetlerinden oluşur. Dönüş değeri normal bir <code>dict</code> olsun: anahtar hesap numarası, değer o hesabın tutarlarının listesi (geliş sırasıyla). <code>defaultdict</code> kullan ve sonucu <code>dict()</code> ile çevir.</p>',
         start: 'from collections import defaultdict\n\ndef hesaba_gore(islemler):\n    # buraya yaz\n    pass\n',
         sol: 'from collections import defaultdict\n\ndef hesaba_gore(islemler):\n    gruplar = defaultdict(list)\n    for hesap, tutar in islemler:\n        gruplar[hesap].append(tutar)\n    return dict(gruplar)\n',
         tests: 'r = hesaba_gore([("TR01", 100), ("TR02", 50), ("TR01", 25)])\nassert r == {"TR01": [100, 25], "TR02": [50]}, "Gruplama yanlış: " + str(r)\nassert type(r) is dict, "Sonuç normal dict olmalı (defaultdict değil)"\nassert hesaba_gore([]) == {}, "Boş girdi için boş sözlük dönmeli"\n',
@@ -2401,7 +2401,7 @@ print("Kümülatif:", list(accumulate(gunluk.values())))</pre>
         hints: ['combinations(sorted(sepet), 2) her sepet için sıralı ikilileri üretir.', 'Counter() boş başlat; sayac[cift] += 1 ile artır. Ya da Counter(chain.from_iterable(...)).'],
         why: 'Sıralama sayesinde (a, b) ve (b, a) aynı anahtara düşer; combinations sırayı önemsemeyen çiftleri üretir, Counter sayar.' },
       { t: 'code', id: 'collections-itertools-5',
-        q: '<p>Anadolu Bank hesap özeti: <code>bakiye_gecmisi(baslangic, hareketler)</code> fonksiyonu başlangıç bakiyesi ve hareket listesinden (pozitif yatırma, negatif çekme) her hareket sonrası bakiyeyi liste olarak döndürsün. <code>itertools.accumulate</code> ve <code>initial</code> parametresini kullan; başlangıç değerinin kendisi listede OLMASIN.</p>',
+        q: '<p>Ilgaz Bank hesap özeti: <code>bakiye_gecmisi(baslangic, hareketler)</code> fonksiyonu başlangıç bakiyesi ve hareket listesinden (pozitif yatırma, negatif çekme) her hareket sonrası bakiyeyi liste olarak döndürsün. <code>itertools.accumulate</code> ve <code>initial</code> parametresini kullan; başlangıç değerinin kendisi listede OLMASIN.</p>',
         start: 'from itertools import accumulate\n\ndef bakiye_gecmisi(baslangic, hareketler):\n    # buraya yaz\n    pass\n',
         sol: 'from itertools import accumulate\n\ndef bakiye_gecmisi(baslangic, hareketler):\n    return list(accumulate(hareketler, initial=baslangic))[1:]\n',
         tests: 'assert bakiye_gecmisi(500, [100, -50, -200]) == [600, 550, 350], "Bakiye geçmişi yanlış"\nassert bakiye_gecmisi(0, []) == [], "Hareket yoksa boş liste dönmeli"\nassert bakiye_gecmisi(1000, [-1000]) == [0], "Tek hareket doğru hesaplanmalı"\n',
@@ -2443,7 +2443,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
+<p>Ilgaz Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
 
 <h2>Üç temel tip</h2>
 <div class="tbl-wrap"><table>
@@ -2596,7 +2596,7 @@ for s in son_hafta:
         o: ['UTC varsayılır', 'TypeError fırlatılır', 'Sonuç None olur', 'Yerel saat varsayılır'], a: 1,
         why: 'Python naive ve aware nesneleri karşılaştırmaya ya da çıkarmaya izin vermez; TypeError verir. Varsayım yapmaz.' },
       { t: 'code', id: 'tarih-saat-1',
-        q: '<p>Anadolu Bank kredi sistemi için <code>vade_tarihi(baslangic: str, gun: int) -> str</code> fonksiyonunu yaz. <code>baslangic</code> "GG.AA.YYYY" biçiminde metin, <code>gun</code> eklenecek gün sayısıdır. Sonucu yine "GG.AA.YYYY" biçiminde döndür.</p>',
+        q: '<p>Ilgaz Bank kredi sistemi için <code>vade_tarihi(baslangic: str, gun: int) -> str</code> fonksiyonunu yaz. <code>baslangic</code> "GG.AA.YYYY" biçiminde metin, <code>gun</code> eklenecek gün sayısıdır. Sonucu yine "GG.AA.YYYY" biçiminde döndür.</p>',
         start: 'from datetime import datetime, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    # buraya yaz\n    pass\n',
         sol: 'from datetime import datetime, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    d = datetime.strptime(baslangic, "%d.%m.%Y")\n    return (d + timedelta(days=gun)).strftime("%d.%m.%Y")\n',
         tests: 'assert vade_tarihi("15.03.2026", 30) == "14.04.2026", "15.03.2026 + 30 gün = 14.04.2026"\nassert vade_tarihi("25.12.2025", 10) == "04.01.2026", "Yıl geçişi doğru olmalı"\nassert vade_tarihi("28.02.2024", 1) == "29.02.2024", "Artık yıl dikkate alınmalı"\nassert vade_tarihi("01.01.2026", 0) == "01.01.2026", "0 gün aynı tarihi vermeli"\n',
@@ -2666,7 +2666,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
+<p>Ilgaz Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
 
 <h2>Temel sözlük</h2>
 <div class="tbl-wrap"><table>
@@ -2801,7 +2801,7 @@ print(TUTAR.search("Toplam: 1.250,00 TL ödendi").groupdict())</pre>
         hints: ['Önek için (?:\\+90|0)? yakalamayan isteğe bağlı grup kullan.', 'Boşluklar için \\s? (0 ya da 1 boşluk) koy; fullmatch ile sonda fazlalığı engelle.', 'Sonucu bool yapmak için "is not None" ya da bool() kullan.'],
         why: 'fullmatch tüm metni kontrol eder; isteğe bağlı önek ve boşluklar ? niceleyicisiyle çözülür; 5 ile başlama şartı kalıba gömülüdür.' },
       { t: 'code', id: 'regex-2',
-        q: '<p>Anadolu Bank EFT açıklamalarından fatura numarası çıkaran <code>fatura_no(aciklama: str) -> str | None</code> fonksiyonunu yaz. Fatura numarası biçimi: <code>FT-</code> + 4 haneli yıl + <code>-</code> + 5 hane (örn. <code>FT-2026-00431</code>). Metnin herhangi bir yerinde olabilir; bulunamazsa <code>None</code> döndür.</p>',
+        q: '<p>Ilgaz Bank EFT açıklamalarından fatura numarası çıkaran <code>fatura_no(aciklama: str) -> str | None</code> fonksiyonunu yaz. Fatura numarası biçimi: <code>FT-</code> + 4 haneli yıl + <code>-</code> + 5 hane (örn. <code>FT-2026-00431</code>). Metnin herhangi bir yerinde olabilir; bulunamazsa <code>None</code> döndür.</p>',
         start: 'import re\n\ndef fatura_no(aciklama):\n    # buraya yaz\n    pass\n',
         sol: 'import re\n\ndef fatura_no(aciklama):\n    m = re.search(r"FT-\\d{4}-\\d{5}", aciklama)\n    return m.group() if m else None\n',
         tests: 'assert fatura_no("EFT - Fatura No: FT-2026-00431, tutar 1.250 TL") == "FT-2026-00431", "Fatura numarası bulunmalı"\nassert fatura_no("Havale FT-2025-99999") == "FT-2025-99999", "Sonda olan numara bulunmalı"\nassert fatura_no("Kira ödemesi") is None, "Numara yoksa None dönmeli"\nassert fatura_no("FT-26-00431 hatalı") is None, "Kısa yıl eşleşmemeli"\n',
@@ -2864,7 +2864,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in sipariş API'si JSON döner; muhasebe ekibi ise Excel'de açacağı CSV ister. Anadolu Bank'ın eski sistemi CSV üretir, yeni mikroservisler JSON konuşur. Bir veri analisti ya da geliştirici olarak işinin önemli bir kısmı bu iki biçim arasında güvenle dönüşüm yapmaktır. İkisi de "düz metin" olduğu için basit görünür; ama Türkçe karakter, tarih, ondalık sayı ve iç içe yapılar en çok hatanın çıktığı yerlerdir.</p>
+<p>Anadolu Market'in sipariş API'si JSON döner; muhasebe ekibi ise Excel'de açacağı CSV ister. Ilgaz Bank'ın eski sistemi CSV üretir, yeni mikroservisler JSON konuşur. Bir veri analisti ya da geliştirici olarak işinin önemli bir kısmı bu iki biçim arasında güvenle dönüşüm yapmaktır. İkisi de "düz metin" olduğu için basit görünür; ama Türkçe karakter, tarih, ondalık sayı ve iç içe yapılar en çok hatanın çıktığı yerlerdir.</p>
 
 <h2>JSON (JavaScript Object Notation)</h2>
 <p>JSON'da altı tip vardır: nesne (object, Python'da dict), dizi (array, list), metin (str), sayı (int/float), boolean (true/false) ve null (None). Demet, küme, tarih ve Decimal gibi tipler JSON'da <b>yoktur</b>; onları sen dönüştürürsün.</p>
@@ -3042,7 +3042,7 @@ print(cikti.getvalue())</pre>
         hints: ['csv.DictReader(io.StringIO(metin)) her satırı sözlük olarak verir.', 'CSV değerleri metindir; float(k["tutar"]) ile çevir.'],
         why: 'DictReader tırnaklı alanları doğru ayrıştırır; dict.get ile toplama yapılır; sonunda yuvarlanır.' },
       { t: 'code', id: 'json-csv-2',
-        q: '<p>Anadolu Bank işlem kayıtlarını JSON\'a çeviren <code>islem_json(islemler: list[dict]) -> str</code> fonksiyonunu yaz. Her işlem sözlüğünde <code>tarih</code> alanı <code>datetime.date</code>, <code>tutar</code> alanı <code>Decimal</code> olabilir. Tarihi ISO metnine, Decimal\'i <code>str</code>\'ye çeviren bir <code>default</code> fonksiyonu kullan; çıktıda Türkçe karakterler kaçırılmasın (<code>ensure_ascii=False</code>) ve anahtarlar sıralı olsun (<code>sort_keys=True</code>). Girinti kullanma.</p>',
+        q: '<p>Ilgaz Bank işlem kayıtlarını JSON\'a çeviren <code>islem_json(islemler: list[dict]) -> str</code> fonksiyonunu yaz. Her işlem sözlüğünde <code>tarih</code> alanı <code>datetime.date</code>, <code>tutar</code> alanı <code>Decimal</code> olabilir. Tarihi ISO metnine, Decimal\'i <code>str</code>\'ye çeviren bir <code>default</code> fonksiyonu kullan; çıktıda Türkçe karakterler kaçırılmasın (<code>ensure_ascii=False</code>) ve anahtarlar sıralı olsun (<code>sort_keys=True</code>). Girinti kullanma.</p>',
         start: 'import json\nfrom datetime import date\nfrom decimal import Decimal\n\ndef islem_json(islemler):\n    # buraya yaz\n    pass\n',
         sol: 'import json\nfrom datetime import date\nfrom decimal import Decimal\n\ndef _cevir(o):\n    if isinstance(o, date):\n        return o.isoformat()\n    if isinstance(o, Decimal):\n        return str(o)\n    raise TypeError(type(o).__name__)\n\ndef islem_json(islemler):\n    return json.dumps(islemler, default=_cevir, ensure_ascii=False, sort_keys=True)\n',
         tests: 'from datetime import date\nfrom decimal import Decimal\nimport json\ns = islem_json([{"tutar": Decimal("1250.75"), "hesap": "TR01", "aciklama": "Kira Şubat", "tarih": date(2026, 2, 1)}])\nassert s == \'[{"aciklama": "Kira Şubat", "hesap": "TR01", "tarih": "2026-02-01", "tutar": "1250.75"}]\', "JSON metni beklenenden farklı: " + s\nassert "\\\\u015e" not in s, "Türkçe karakter kaçırılmamalı (ensure_ascii=False)"\nassert json.loads(islem_json([])) == [], "Boş liste için [] dönmeli"\n',
@@ -3085,7 +3085,7 @@ print(cikti.getvalue())</pre>
   }
 );
 })(window);
-/* PythonPatika — Orta 3: Standart Kütüphane (devam), Kalite ve Proje, Bitirme (standart-kutuphane … proje-orta) */
+/* Kesit Python — Orta 3: Standart Kütüphane (devam), Kalite ve Proje, Bitirme (standart-kutuphane … proje-orta) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -3170,7 +3170,7 @@ print(type(b.limit).__name__)</pre>
 <div class="note"><b>sys ne işe yarar?</b><code>sys.argv</code> dışında <code>sys.exit(1)</code> ile betiği hata koduyla bitirir, <code>sys.version</code> ile sürümü okur, <code>sys.path</code> ile modül arama yollarını görürsün. Betiğin "başarısız" bittiğini zamanlayıcıya bildirmenin yolu sıfır dışı bir çıkış kodudur.</div>
 
 <h2>Para hesabı: neden float değil, Decimal?</h2>
-<p>Anadolu Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
+<p>Ilgaz Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
 <pre class="py">from decimal import Decimal, ROUND_HALF_UP
 from fractions import Fraction
 
@@ -3247,7 +3247,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
       o: ['Python toplama işleminde yuvarlama hatası yapar', 'İkili tabanda 0.1 ve 0.2 tam temsil edilemez', '== işleci float için çalışmaz', 'Sonuç 0.30000000000000004 olduğu için Python onu metne çevirir'],
       a: 1,
       why: 'Float sayılar ikili (binary) kesirlerle saklanır; 0.1 ve 0.2 sonsuz ikili kesir olduğu için en yakın değere yuvarlanır ve toplam 0.3 olmaz. Decimal onluk tabanda çalıştığı için bu sorunu yaşamaz.' },
@@ -3284,7 +3284,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
       hints: ['statistics.mean, statistics.median, statistics.stdev', 'stdev tek elemanda hata verir; len kontrolü yap.'],
       why: 'stdev örneklem sapmasıdır (n-1 ile böler); pstdev ise popülasyon sapması. Tek elemanlı listede stdev StatisticsError fırlatır, bu yüzden korunur.' },
 
-    { t: 'mc', q: 'Anadolu Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
+    { t: 'mc', q: 'Ilgaz Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
       o: ['random.randint(100000, 999999)', 'hashlib.sha256(b"token").hexdigest()', 'secrets.token_urlsafe(32)', 'random.choice(string.ascii_letters)'],
       a: 2,
       why: 'secrets modülü kriptografik olarak güvenli rastgelelik üretir; random tahmin edilebilirdir. hashlib ise rastgele değer üretmez, verilen girdinin özetini alır; sabit girdiyle her zaman aynı sonucu verir.' },
@@ -3333,7 +3333,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
   body: `
 <h2>Neden SQLite?</h2>
 <p>SQLite, tek bir dosyada (ya da bellekte) yaşayan, sunucu gerektirmeyen bir ilişkisel veritabanıdır (relational database). Python ile birlikte gelen <code>sqlite3</code> modülü sayesinde kurulum yapmadan SQL yazabilirsin. Anadolu Market'te bir analist için tipik kullanım şu: binlerce satırlık sipariş CSV'sini bir SQLite tablosuna yükle, SQL ile grupla ve filtrele, sonucu Python ile raporla. Masaüstü uygulamaları, mobil uygulamalar ve tarayıcılar da yerel verisini SQLite'ta tutar; yani öğrendiğin şey oyuncak değil, dünyanın en yaygın veritabanı motoru.</p>
-<p>SQLPatika'da SQL'in kendisini öğrendin. Bu derste sorulan soru farklı: <b>Python, SQL ile nasıl konuşur?</b> Üç kavram yeter: bağlantı (connection), imleç (cursor) ve transaction.</p>
+<p>Kesit SQL'de SQL'in kendisini öğrendin. Bu derste sorulan soru farklı: <b>Python, SQL ile nasıl konuşur?</b> Üç kavram yeter: bağlantı (connection), imleç (cursor) ve transaction.</p>
 
 <h2>Bağlantı, tablo, ekleme, sorgu</h2>
 <p><code>sqlite3.connect(":memory:")</code> yalnızca RAM'de yaşayan bir veritabanı açar; program bitince kaybolur. Derste ve testte idealdir. Dosya istersen <code>connect("market.db")</code> yazarsın. <code>execute</code> bir SQL cümlesi çalıştırır, <code>fetchall</code> sonuç satırlarını demet listesi olarak getirir.</p>
@@ -3406,7 +3406,7 @@ print(json.dumps([dict(r) for r in con.execute("SELECT id, sehir FROM siparis WH
 <p>GROUP BY, SUM ve ORDER BY işini SQL yaptı; Python yalnızca sonucu dolaştı. Bu iş bölümü dersin sonundaki "köprü" bölümünün özeti.</p>
 
 <h2>Transaction: commit, rollback, bağlam yöneticisi</h2>
-<p>Anadolu Bank'ta bir havale iki UPDATE'tir: gönderenden düş, alıcıya ekle. İlki olup ikincisi olmazsa para buharlaşır. Transaction (işlem bütünlüğü) tam bunu çözer: bir grup değişiklik ya hep birlikte kalıcı olur (<code>commit</code>) ya da hep birlikte geri alınır (<code>rollback</code>). sqlite3'te bağlantı nesnesi <code>with</code> ile kullanılınca blok hatasız biterse otomatik commit, istisna çıkarsa otomatik rollback yapar. Dikkat: <code>with con:</code> bağlantıyı <b>kapatmaz</b>, yalnızca transaction'ı yönetir.</p>
+<p>Ilgaz Bank'ta bir havale iki UPDATE'tir: gönderenden düş, alıcıya ekle. İlki olup ikincisi olmazsa para buharlaşır. Transaction (işlem bütünlüğü) tam bunu çözer: bir grup değişiklik ya hep birlikte kalıcı olur (<code>commit</code>) ya da hep birlikte geri alınır (<code>rollback</code>). sqlite3'te bağlantı nesnesi <code>with</code> ile kullanılınca blok hatasız biterse otomatik commit, istisna çıkarsa otomatik rollback yapar. Dikkat: <code>with con:</code> bağlantıyı <b>kapatmaz</b>, yalnızca transaction'ı yönetir.</p>
 <pre class="py">import sqlite3
 
 con = sqlite3.connect(":memory:")
@@ -3434,7 +3434,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
 <div class="tip"><b>Bağlantıyı kapatmayı unutma</b>Dosya tabanlı veritabanında işin bitince <code>con.close()</code> çağır; en temizi bağlantıyı <code>contextlib.closing(sqlite3.connect(...))</code> ile açmak ya da sınıfına <code>__enter__/__exit__</code> yazmaktır. Bellek içi veritabanında kapatma, veriyi de siler.</div>
 <div class="note"><b>Tür eşlemesi</b>SQLite'ın INTEGER, REAL, TEXT, BLOB türleri sırasıyla int, float, str, bytes olarak gelir. Tarih tipi yoktur: tarihleri ISO metni ("2024-03-15") olarak sakla, karşılaştırma yine doğru çalışır. NULL ise Python'da None olur.</div>
 
-<h2>SQLPatika'ya köprü: SQL ne yapar, Python ne yapar?</h2>
+<h2>Kesit SQL'e köprü: SQL ne yapar, Python ne yapar?</h2>
 <p>İki araç rakip değil, iş arkadaşı. Küme işlemleri (filtre, gruplama, birleştirme, sıralama) veritabanı motorunun uzmanlık alanıdır; milyon satırda Python döngüsünden kat kat hızlıdır ve veriyi belleğe taşımaz. Python ise SQL'in beceremediği yerde devreye girer: karmaşık iş kuralları, dış sistemlerle konuşma, rapor biçimleme, test.</p>
 <div class="tbl-wrap"><table>
 <tr><th>İş</th><th>SQL'e bırak</th><th>Python'a bırak</th></tr>
@@ -3475,7 +3475,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
       why: 'Gruplama ve sıralama SQL\'de yapılır; AS ile verilen takma adlar Row üzerinden doğrudan sözlük anahtarı olur.' },
 
     { t: 'code', id: 'sqlite-python-3',
-      q: '<p>Anadolu Bank için <code>havale(con, gonderen, alici, tutar)</code> fonksiyonunu yaz. <code>hesap(no TEXT PRIMARY KEY, bakiye REAL CHECK (bakiye &gt;= 0))</code> tablosu hazır gelir. Fonksiyon <code>with con:</code> bloğu içinde gönderenin bakiyesini düşüp alıcınınkini artırsın. Blok başarılı biterse <code>True</code> döndürsün; <code>sqlite3.IntegrityError</code> çıkarsa (bakiye eksiye düşerse) istisnayı yakalayıp <code>False</code> döndürsün. Başarısız havalede hiçbir bakiye değişmemeli.</p>',
+      q: '<p>Ilgaz Bank için <code>havale(con, gonderen, alici, tutar)</code> fonksiyonunu yaz. <code>hesap(no TEXT PRIMARY KEY, bakiye REAL CHECK (bakiye &gt;= 0))</code> tablosu hazır gelir. Fonksiyon <code>with con:</code> bloğu içinde gönderenin bakiyesini düşüp alıcınınkini artırsın. Blok başarılı biterse <code>True</code> döndürsün; <code>sqlite3.IntegrityError</code> çıkarsa (bakiye eksiye düşerse) istisnayı yakalayıp <code>False</code> döndürsün. Başarısız havalede hiçbir bakiye değişmemeli.</p>',
       start: 'import sqlite3\n\ndef havale(con, gonderen, alici, tutar):\n    pass\n',
       sol: 'import sqlite3\n\ndef havale(con, gonderen, alici, tutar):\n    try:\n        with con:\n            con.execute("UPDATE hesap SET bakiye = bakiye - ? WHERE no = ?", (tutar, gonderen))\n            con.execute("UPDATE hesap SET bakiye = bakiye + ? WHERE no = ?", (tutar, alici))\n        return True\n    except sqlite3.IntegrityError:\n        return False\n',
       tests: 'import sqlite3\ncon = sqlite3.connect(":memory:")\ncon.execute("CREATE TABLE hesap (no TEXT PRIMARY KEY, bakiye REAL NOT NULL CHECK (bakiye >= 0))")\ncon.executemany("INSERT INTO hesap VALUES (?, ?)", [("TR01", 1000.0), ("TR02", 200.0)])\ncon.commit()\ndef bak(): return dict(con.execute("SELECT no, bakiye FROM hesap").fetchall())\nassert havale(con, "TR01", "TR02", 300.0) is True, "Yeterli bakiyede True dönmeli"\nassert bak() == {"TR01": 700.0, "TR02": 500.0}, "300 havale sonrası TR01=700, TR02=500 olmalı"\nassert havale(con, "TR01", "TR02", 5000.0) is False, "Yetersiz bakiyede False dönmeli"\nassert bak() == {"TR01": 700.0, "TR02": 500.0}, "Başarısız havalede bakiyeler değişmemeli (rollback)"\nassert havale(con, "TR02", "TR01", 500.0) is True, "Tam bakiye kadar havale geçerli"\nassert bak() == {"TR01": 1200.0, "TR02": 0.0}, "Son durum TR01=1200, TR02=0"\n',
@@ -3530,7 +3530,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
   ],
   body: `
 <h2>Neden test yazarız?</h2>
-<p>Anadolu Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
+<p>Ilgaz Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
 
 <h2>unittest ile ilk test sınıfı</h2>
 <p>Python'ın standart test çerçevesi <code>unittest</code>'tir. Kural basit: <code>unittest.TestCase</code>'den türeyen bir sınıf yazarsın, adı <code>test_</code> ile başlayan her metot bir testtir, içinde <code>self.assert...</code> metotlarıyla beklentini belirtirsin. Normalde testleri terminalden <code>python -m unittest</code> ile koşarsın; burada tarayıcıda olduğumuz için paketi (suite) elle yükleyip <code>TextTestRunner</code> ile çalıştıracağız. Çıktıyı <code>io.StringIO</code>'ya yönlendirmek, test raporunun program çıktısına karışmasını önler.</p>
@@ -3538,7 +3538,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
 import unittest
 
 def komisyon(tutar: float, kanal: str) -&gt; float:
-    """Anadolu Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
+    """Ilgaz Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
     if tutar &lt;= 0:
         raise ValueError("tutar pozitif olmalı")
     if kanal == "mobil":
@@ -3705,7 +3705,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
       o: ['self.assertEqual(faiz(1000, 0.03), 30)', 'self.assertTrue(faiz(1000, 0.03) == 30.0)', 'self.assertAlmostEqual(faiz(1000, 0.03), 30.0)', 'self.assertIs(faiz(1000, 0.03), 30.0)'],
       a: 2,
       why: 'Float sonuçlar yuvarlama farkı taşıyabilir; assertAlmostEqual 7 basamağa kadar yakınlığı kabul eder. assertEqual ve assertTrue tam eşitlik ister, assertIs ise kimlik (aynı nesne) karşılaştırır ve float için yanlıştır.' },
@@ -3732,7 +3732,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
       why: 'unittest, çalıştırılan testleri bellekten düşürmek için suite\'i run sonrasında boşaltır. Test adlarını ya da sayısını kaydetmek istiyorsan run çağrısından önce topla.' },
 
     { t: 'code', id: 'test-yazma-3',
-      q: '<p>Anadolu Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
+      q: '<p>Ilgaz Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
       start: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    pass\n',
       sol: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    def test_gece(self):\n        with patch.object(IslemKurali, "saat", return_value=2):\n            self.assertTrue(IslemKurali().gece_mi())\n\n    def test_gunduz(self):\n        with patch.object(IslemKurali, "saat", return_value=14):\n            self.assertFalse(IslemKurali().gece_mi())\n',
       tests: 'import io\nimport unittest\nfrom unittest.mock import patch\nsuite = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\nadlar = {t.id().split(".")[-1] for t in suite}\nassert {"test_gece", "test_gunduz"} <= adlar, "test_gece ve test_gunduz metotları olmalı"\n# Testler gerçek saatten bağımsız olmalı: datetime.now sabitlenince de geçmeli\nimport datetime as _dt\nclass _SahteDT(_dt.datetime):\n    _saat = 12\n    @classmethod\n    def now(cls, tz=None):\n        return _dt.datetime(2024, 1, 1, cls._saat, 0, 0)\nfor sabit in (3, 12, 23):\n    _SahteDT._saat = sabit\n    globals()["datetime"] = _SahteDT\n    s2 = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\n    r = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(s2)\n    globals()["datetime"] = _dt.datetime\n    assert r.wasSuccessful(), f"saat {sabit} iken bile testler geçmeli (patch.object kullanılmalı)"\nsonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)\nassert sonuc.testsRun >= 2 and sonuc.wasSuccessful(), "Tüm testler geçmeli"\n',
@@ -3914,7 +3914,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Tekrarlanabilir ortam: kurumsal pratik</h3>
 <p>Kurumsal projelerde iki dosya birlikte yaşar: <code>pyproject.toml</code> geniş aralıklarla "ne istiyoruz"u söyler (<code>pandas&gt;=2.2,&lt;3</code>), kilit dosyası (<code>uv.lock</code>, <code>poetry.lock</code> ya da <code>pip freeze</code> çıktısı) "bugün tam olarak ne kuruldu"yu. Geliştirici esnek aralıkla çalışır, sunucu ve CI kilit dosyasıyla kurar; böylece "testler geçti ama üretimde patladı" sürprizi kalkar. Kilit dosyasını Git'e koyarsın; <code>.venv</code>'i koymazsın.</p>
-<p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Anadolu Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
+<p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Ilgaz Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
 </section>
 `,
   ex: [
@@ -3995,7 +3995,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
   ],
   body: `
 <h2>Neden Git?</h2>
-<p>Anadolu Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
+<p>Ilgaz Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
 <div class="note"><b>Bu derste Git komutları gösterilir</b>Tarayıcıda Git çalıştıramayız; komutları kendi bilgisayarında dene. Kod alıştırmaları Git ve proje yapısının Python tarafını işler: .gitignore kurallarını eşleştirmek, proje ağacını doğrulamak, ortam değişkeni okumak.</div>
 
 <h2>Temel akış: init, add, commit</h2>
@@ -4211,7 +4211,7 @@ except RuntimeError as e:
   lv: 'orta',
   mod: 'Bitirme',
   min: 60,
-  title: 'Orta bitirme projesi: Anadolu Bank işlem analizi',
+  title: 'Orta bitirme projesi: Ilgaz Bank işlem analizi',
   sum: 'Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem kuralı, JSON rapor ve unittest ile doğrulama.',
   goals: [
     'dataclass ile alan tipleri belirli bir Transaction modeli kurup CSV metninden nesne listesi üretebilirim.',
@@ -4222,7 +4222,7 @@ except RuntimeError as e:
   ],
   body: `
 <h2>Proje tanımı</h2>
-<p>Anadolu Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
+<p>Ilgaz Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
 <p>Bu ders diğerlerinden farklı: yeni kavram öğretmez, öğrendiklerini birleştirir. Alıştırmalar birbirini tamamlayan altı parçadır; her parçada bir önceki parçanın fonksiyonu hazır gelir. Aşağıda her parçanın kuramı ve örnek çıktısı var; alıştırmalarda kendi sürümünü yazacaksın.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Parça</th><th>Ne yapar</th><th>Kullandığın dersler</th></tr>

@@ -1,4 +1,4 @@
-/* PythonPatika — Temel 1: Başlangıç ve Veri Türleri (python-nedir … sozlukler) */
+/* Kesit Python — Temel 1: Başlangıç ve Veri Türleri (python-nedir … sozlukler) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -148,7 +148,7 @@ print("5" + "3")</pre>
   ],
   body: `
 <h2>Neden kurulumu önemsiyoruz?</h2>
-<p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Anadolu Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
+<p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Ilgaz Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
 
 <h2>1. Python'ı kurmak</h2>
 <p>Resmî kaynak <b>python.org</b>. İndirme sayfasından işletim sistemine uygun Python 3.12 kurulumunu al.</p>
@@ -279,7 +279,7 @@ print("Uygulama:", platform.python_implementation())</pre>
   ],
   body: `
 <h2>Küçük ama gerçek bir program</h2>
-<p>Bir program, birbiri ardına çalışan satırlardan oluşur. Bu derste üç temel yapı taşını öğreneceksin: ekrana yazmak (<code>print</code>), kodu açıklamak (yorum) ve dışarıdan veri almak (<code>input</code>). Sonunda da her programcının günlük ekmeği olan hata mesajını okumayı. Senaryo: Anadolu Bank'ın şubesinde çalışan bir görevli, müşterinin adını ve hesaba yatırdığı tutarı alıp bir makbuz yazdıran küçük bir program istiyor.</p>
+<p>Bir program, birbiri ardına çalışan satırlardan oluşur. Bu derste üç temel yapı taşını öğreneceksin: ekrana yazmak (<code>print</code>), kodu açıklamak (yorum) ve dışarıdan veri almak (<code>input</code>). Sonunda da her programcının günlük ekmeği olan hata mesajını okumayı. Senaryo: Ilgaz Bank'ın şubesinde çalışan bir görevli, müşterinin adını ve hesaba yatırdığı tutarı alıp bir makbuz yazdıran küçük bir program istiyor.</p>
 
 <h2>print'i daha iyi tanımak</h2>
 <p><code>print</code> birden fazla değeri virgülle alır, aralarına boşluk koyar ve sonunda satır atlar. İki küçük ayar bunu değiştirir: <code>sep</code> (separator, ayraç) değerlerin arasına, <code>end</code> ise satırın sonuna ne konacağını belirler.</p>
@@ -294,7 +294,7 @@ print("-" * 20)</pre>
 <h2>Yorumlar: kendine ve ekibine not</h2>
 <p><code>#</code> işaretinden satır sonuna kadar olan her şey yorumdur (comment); Python onu görmezden gelir. Yorum, "ne" yaptığını değil "neden" yaptığını anlatmalı. Kod zaten ne yaptığını gösterir.</p>
 <pre class="py"># Makbuz başlığı; şube yöneticisi bu biçimi istedi
-print("ANADOLU BANK - MAKBUZ")
+print("ILGAZ BANK - MAKBUZ")
 tutar = 1500  # TL cinsinden, kuruş yok
 print("Yatırılan:", tutar)
 # print("Bu satır çalışmaz, yorum hâline getirildi")</pre>
@@ -330,9 +330,9 @@ print("Toplam:", toplam)</pre>
 <div class="note"><b>Hata, başarısızlık değildir</b>Hata mesajı, Python'ın sana verdiği en dürüst geri bildirimdir. Mesajı okuma alışkanlığı, kod yazmaktan daha değerli bir beceridir; deneyimli geliştiriciyi ayıran şey hata görmemesi değil, mesajı iki saniyede çözmesidir.</div>
 
 <h2>Hepsini birleştirelim</h2>
-<pre class="py"># Anadolu Bank şube makbuzu
+<pre class="py"># Ilgaz Bank şube makbuzu
 print("=" * 28)
-print("ANADOLU BANK - MAKBUZ")
+print("ILGAZ BANK - MAKBUZ")
 print("=" * 28)
 musteri = "Mehmet Kaya"
 tutar = 2750
@@ -367,7 +367,7 @@ print("=" * 28)</pre>
       o: ['42 tam sayısı', '"42" metni', '42.0 ondalıklı sayısı', 'Kullanıcının yazdığına göre tür değişir'], a: 1,
       why: 'input her zaman metin (str) döndürür. Sayı olarak kullanmak için int() ya da float() ile çevirmen gerekir.' },
     { t: 'code', id: 'ilk-program-2',
-      q: '<p>Anadolu Bank görevlisi iki tutar girecek. İki <code>input()</code> ile değerleri al, <code>int()</code> ile sayıya çevir ve toplamlarını <code>toplam</code> değişkenine koy; sonra yazdır. Test girdileri sırasıyla <code>1500</code> ve <code>250</code>.</p>',
+      q: '<p>Ilgaz Bank görevlisi iki tutar girecek. İki <code>input()</code> ile değerleri al, <code>int()</code> ile sayıya çevir ve toplamlarını <code>toplam</code> değişkenine koy; sonra yazdır. Test girdileri sırasıyla <code>1500</code> ve <code>250</code>.</p>',
       start: 'ilk = input("İlk tutar: ")\nikinci = input("İkinci tutar: ")\n# sayıya çevir ve topla\n',
       sol: 'ilk = input("İlk tutar: ")\nikinci = input("İkinci tutar: ")\ntoplam = int(ilk) + int(ikinci)\nprint("Toplam:", toplam)\n',
       tests: 'assert toplam == 1750, "toplam 1750 olmalı; girdileri int ile çevirdin mi?"\nassert isinstance(toplam, int), "toplam bir tam sayı (int) olmalı"\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — sınavlar: seviye tespit, bitirme, kodlama ve PCEP/PCAP tarzı deneme */
+/* Kesit Python — sınavlar: seviye tespit, bitirme, kodlama ve PCEP/PCAP tarzı deneme */
 (function (W) {
 'use strict';
 const E = W.PY_EXAMS = W.PY_EXAMS || [];
@@ -79,8 +79,8 @@ E.push(
       { t: 'mc', topic: 'Değişkenler ve Türler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">print(10 / 4, 10 // 4, 2 ** 3)</pre>',
         o: ['2.5 2 6', '2.5 2 8', '2 2 8', '2.5 2.0 8'], a: 1,
         why: '/ her zaman float verir (2.5), // tam bölme (2), ** üs alma (2 üzeri 3 = 8).' },
-      { t: 'mc', topic: 'Metinler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "  Anadolu Bank  "\nprint(s.strip().lower().replace("bank", "market"))</pre>',
-        o: ['anadolu market', '  anadolu market  ', 'Anadolu market', 'anadolu bank'], a: 0,
+      { t: 'mc', topic: 'Metinler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "  Ilgaz Bank  "\nprint(s.strip().lower().replace("bank", "market"))</pre>',
+        o: ['anadolu market', '  anadolu market  ', 'Anadolu market', 'ilgaz bank'], a: 0,
         why: 'strip boşlukları kırpar, lower küçük harfe çevirir, replace "bank" parçasını "market" yapar. Metin yöntemleri yeni metin döndürür, zincirlenebilir.' },
       { t: 'mc', topic: 'Metinler', q: '<code>"python"[-2:]</code> ifadesinin değeri nedir?',
         o: ['"py"', '"on"', '"ytho"', '"n"'], a: 1,
@@ -286,7 +286,7 @@ E.push(
         hints: ['for döngüsünde her işlemin "tutar" değerini eşikle karşılaştır.', 'return yerine yield islem["id"] yaz; fonksiyon otomatik üreteç olur.'],
         why: 'yield içeren fonksiyon tembel bir üreteç döndürür; büyük veri setlerinde tüm sonuçları bellekte tutmadan tek tek üretir.' },
       { t: 'code', id: 'ex-orta-kod-2', topic: 'OOP', pts: 5,
-        q: '<p>Anadolu Bank için <code>Hesap</code> sınıfını yaz. Kurucu <code>Hesap(sahip, bakiye=0)</code>. Yöntemler: <code>yatir(tutar)</code> bakiyeyi artırır; <code>cek(tutar)</code> bakiye yeterliyse düşer ve <code>True</code> döner, yetersizse bakiyeyi değiştirmeden <code>False</code> döner; negatif ya da sıfır tutarda her iki yöntem de <code>ValueError</code> fırlatır. <code>__repr__</code> şu biçimde olsun: <code>Hesap(\'Ayşe\', 150)</code>.</p>',
+        q: '<p>Ilgaz Bank için <code>Hesap</code> sınıfını yaz. Kurucu <code>Hesap(sahip, bakiye=0)</code>. Yöntemler: <code>yatir(tutar)</code> bakiyeyi artırır; <code>cek(tutar)</code> bakiye yeterliyse düşer ve <code>True</code> döner, yetersizse bakiyeyi değiştirmeden <code>False</code> döner; negatif ya da sıfır tutarda her iki yöntem de <code>ValueError</code> fırlatır. <code>__repr__</code> şu biçimde olsun: <code>Hesap(\'Ayşe\', 150)</code>.</p>',
         start: 'class Hesap:\n    def __init__(self, sahip, bakiye=0):\n        pass\n',
         sol: 'class Hesap:\n    def __init__(self, sahip, bakiye=0):\n        self.sahip = sahip\n        self.bakiye = bakiye\n\n    def yatir(self, tutar):\n        if tutar <= 0:\n            raise ValueError("tutar pozitif olmalı")\n        self.bakiye += tutar\n\n    def cek(self, tutar):\n        if tutar <= 0:\n            raise ValueError("tutar pozitif olmalı")\n        if tutar > self.bakiye:\n            return False\n        self.bakiye -= tutar\n        return True\n\n    def __repr__(self):\n        return f"Hesap({self.sahip!r}, {self.bakiye})"\n',
         tests: 'h = Hesap("Ayşe", 100)\nh.yatir(50)\nassert h.bakiye == 150, "yatir sonrası bakiye 150 olmalı"\nassert h.cek(30) is True, "yeterli bakiyede cek True dönmeli"\nassert h.bakiye == 120, "cek sonrası bakiye 120 olmalı"\nassert h.cek(500) is False, "yetersiz bakiyede False dönmeli"\nassert h.bakiye == 120, "başarısız çekim bakiyeyi değiştirmemeli"\nassert repr(Hesap("Ayşe", 150)) == "Hesap(\'Ayşe\', 150)", "__repr__ biçimi yanlış"\nassert Hesap("Can").bakiye == 0, "varsayılan bakiye 0 olmalı"\ntry:\n    h.yatir(-5)\n    assert False, "negatif tutar ValueError vermeli"\nexcept ValueError:\n    pass\ntry:\n    h.cek(0)\n    assert False, "sıfır tutar ValueError vermeli"\nexcept ValueError:\n    pass\n',
@@ -405,7 +405,7 @@ E.push(
         why: 'CI\'nin amacı her değişiklikte otomatik doğrulamadır: pytest/unittest, ruff/flake8, mypy gibi adımlar push ile tetiklenir.' }
     ] },
   { id: 'pcep-pcap-deneme', title: 'PCEP/PCAP tarzı deneme sınavı', lv: 'orta', kind: 'quiz', min: 45, pass: 70,
-    desc: 'Python Institute PCEP ve PCAP sınavlarının formatına benzer 30 özgün çoktan seçmeli soru: "bu kodun çıktısı nedir", hata bulma, sözdizimi, operatör önceliği, dilimleme, kapsam, istisna hiyerarşisi ve sınıflar. Sorular PythonPatika tarafından yazılmıştır; gerçek sınav sorusu değildir ve sertifika sağlayıcısıyla bağlantısı yoktur. Geçme notu %70.',
+    desc: 'Python Institute PCEP ve PCAP sınavlarının formatına benzer 30 özgün çoktan seçmeli soru: "bu kodun çıktısı nedir", hata bulma, sözdizimi, operatör önceliği, dilimleme, kapsam, istisna hiyerarşisi ve sınıflar. Sorular Kesit Python tarafından yazılmıştır; gerçek sınav sorusu değildir ve sertifika sağlayıcısıyla bağlantısı yoktur. Geçme notu %70.',
     qs: [
       { t: 'mc', topic: 'Operatör Önceliği', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">print(2 + 3 * 2 ** 2)</pre>',
         o: ['20', '14', '100', '16'], a: 1,
@@ -431,7 +431,7 @@ E.push(
       { t: 'mc', topic: 'Değişkenler ve Türler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">print(bool(""), bool("False"), bool(0.0), bool([0]))</pre>',
         o: ['False False False True', 'False True False True', 'False False True True', 'True True False True'], a: 1,
         why: 'Boş metin ve 0.0 falsy; "False" boş olmayan bir metindir (True); [0] tek elemanlı liste de True.' },
-      { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "PythonPatika"\nprint(s[::-1][:3], s[6:], s[-3:-1])</pre>',
+      { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "Kesit Python"\nprint(s[::-1][:3], s[6:], s[-3:-1])</pre>',
         o: ['aki Patika ik', 'aki Patika ka', 'akitaP Patika ik', 'Pyt Python ik'], a: 0,
         why: '[::-1] ters çevirir ("akitaPnohtyP"), ilk 3: "aki". s[6:] "Patika". s[-3:-1] sondan 3. ve 2. karakterler: "ik".' },
       { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">L = [0, 1, 2, 3, 4, 5]\nprint(L[1:5:2], L[::3], L[10:])</pre>',

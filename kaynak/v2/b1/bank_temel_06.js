@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-161 … b-170 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-161 … b-170 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -94,7 +94,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Yol ile güvenli erişim',
-    q: '<p>Anadolu Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
+    q: '<p>Ilgaz Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
     start: 'def guvenli_al(veri, yol, varsayilan=None):\n    # buraya yaz\n    pass\n',
     sol: 'def guvenli_al(veri, yol, varsayilan=None):\n    simdiki = veri\n    for adim in yol:\n        try:\n            simdiki = simdiki[adim]\n        except (KeyError, IndexError, TypeError):\n            return varsayilan\n    return simdiki\n',
     tests: 'v = {"musteri": {"ad": "Ece", "hesaplar": [{"iban": "TR01", "bakiye": 1500}, {"iban": "TR02", "bakiye": 0}]}}\nassert guvenli_al(v, ["musteri", "hesaplar", 0, "bakiye"]) == 1500, "İlk hesabın bakiyesi 1500"\nassert guvenli_al(v, ["musteri", "hesaplar", 1, "bakiye"], -1) == 0, "Değer 0 olduğunda varsayılan değil 0 dönmeli"\nassert guvenli_al(v, ["musteri", "telefon"], "yok") == "yok", "Eksik anahtar → varsayılan"\nassert guvenli_al(v, ["musteri", "hesaplar", 5, "iban"]) is None, "Liste dışı indeks → None"\nassert guvenli_al(v, ["musteri", "ad", "soyad"]) is None, "Metin içinde anahtarla ilerleme → varsayılan (TypeError yakalanmalı)"\nassert guvenli_al(v, []) == v, "Boş yol verinin kendisini döndürmeli"\n',

@@ -15,7 +15,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
+<p>Ilgaz Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
 
 <h2>Temel sözlük</h2>
 <div class="tbl-wrap"><table>
@@ -150,7 +150,7 @@ print(TUTAR.search("Toplam: 1.250,00 TL ödendi").groupdict())</pre>
         hints: ['Önek için (?:\\+90|0)? yakalamayan isteğe bağlı grup kullan.', 'Boşluklar için \\s? (0 ya da 1 boşluk) koy; fullmatch ile sonda fazlalığı engelle.', 'Sonucu bool yapmak için "is not None" ya da bool() kullan.'],
         why: 'fullmatch tüm metni kontrol eder; isteğe bağlı önek ve boşluklar ? niceleyicisiyle çözülür; 5 ile başlama şartı kalıba gömülüdür.' },
       { t: 'code', id: 'regex-2',
-        q: '<p>Anadolu Bank EFT açıklamalarından fatura numarası çıkaran <code>fatura_no(aciklama: str) -> str | None</code> fonksiyonunu yaz. Fatura numarası biçimi: <code>FT-</code> + 4 haneli yıl + <code>-</code> + 5 hane (örn. <code>FT-2026-00431</code>). Metnin herhangi bir yerinde olabilir; bulunamazsa <code>None</code> döndür.</p>',
+        q: '<p>Ilgaz Bank EFT açıklamalarından fatura numarası çıkaran <code>fatura_no(aciklama: str) -> str | None</code> fonksiyonunu yaz. Fatura numarası biçimi: <code>FT-</code> + 4 haneli yıl + <code>-</code> + 5 hane (örn. <code>FT-2026-00431</code>). Metnin herhangi bir yerinde olabilir; bulunamazsa <code>None</code> döndür.</p>',
         start: 'import re\n\ndef fatura_no(aciklama):\n    # buraya yaz\n    pass\n',
         sol: 'import re\n\ndef fatura_no(aciklama):\n    m = re.search(r"FT-\\d{4}-\\d{5}", aciklama)\n    return m.group() if m else None\n',
         tests: 'assert fatura_no("EFT - Fatura No: FT-2026-00431, tutar 1.250 TL") == "FT-2026-00431", "Fatura numarası bulunmalı"\nassert fatura_no("Havale FT-2025-99999") == "FT-2025-99999", "Sonda olan numara bulunmalı"\nassert fatura_no("Kira ödemesi") is None, "Numara yoksa None dönmeli"\nassert fatura_no("FT-26-00431 hatalı") is None, "Kısa yıl eşleşmemeli"\n',

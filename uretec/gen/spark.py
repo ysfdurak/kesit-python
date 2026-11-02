@@ -708,11 +708,11 @@ assert bolum_plani([{"started_at": "2025-01-03 10:00:00"}]) == {"yil=2025/ay=01"
 
 # Hata avı
 ex.append({'t': 'code', 'id': 'spark-dagitik-9', 'stage': 'Hata avı', 'diff': 2, 'kind': 'bug',
-    'q': '<p>Anadolu Bank\'ın işlem tablosu (<code>bank_txns</code>) kanala göre partition\'lanmış. Ekip ortalama işlem tutarını (mutlak değer) dağıtık hesaplamak için her partition\'ın ortalamasını alıp bunların ortalamasını almış. Sonuç pandas\'taki <code>abs().mean()</code> ile tutmuyor. <b>Hatayı bul ve düzelt</b>: <code>dagitik_ortalama(bolumler)</code> doğru genel ortalamayı (2 basamak) döndürsün.</p>',
+    'q': '<p>Ilgaz Bank\'ın işlem tablosu (<code>bank_txns</code>) kanala göre partition\'lanmış. Ekip ortalama işlem tutarını (mutlak değer) dağıtık hesaplamak için her partition\'ın ortalamasını alıp bunların ortalamasını almış. Sonuç pandas\'taki <code>abs().mean()</code> ile tutmuyor. <b>Hatayı bul ve düzelt</b>: <code>dagitik_ortalama(bolumler)</code> doğru genel ortalamayı (2 basamak) döndürsün.</p>',
     'start': C('''
 import veri
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 bolumler = {}
 for t in txns:
     bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))
@@ -728,7 +728,7 @@ print(dagitik_ortalama(bolumler))
     'sol': C('''
 import veri
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 bolumler = {}
 for t in txns:
     bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))

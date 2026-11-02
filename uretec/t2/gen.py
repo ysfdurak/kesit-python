@@ -38,7 +38,7 @@ def emit(L):
     body = fix_html(L['body'])
     assert '`' not in body and '${' not in body, 'body backtick/${'
     body_js = body.replace('\\', '\\\\')
-    out = ['/* PythonPatika v2/t2 — ' + L['title'] + ' */', '(function (W) {', "'use strict';",
+    out = ['/* Kesit Python v2/t2 — ' + L['title'] + ' */', '(function (W) {', "'use strict';",
            'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push({']
     for k in ['id', 'lv', 'mod', 'min', 'title', 'sum', 'goals']:
         out.append(f'  {k}: ' + val(L[k], k) + ',')

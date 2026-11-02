@@ -51,9 +51,9 @@ P.append(dict(
 P.append(dict(
     id='a-217', title='Segmentin en kalabalık şehirleri', track=T, diff='Kolay', needs=NP,
     tags=['pandas', 'filtreleme', 'size', 'sort_values'], src='pandas boolean indexing + value counts',
-    fn='sehir_musteri', ds='anadolu_bank',
-    statement='<p>Anadolu Bank şube ağı ekibi, bir müşteri segmentinin en çok hangi şehirlerde yoğunlaştığını soruyor. '
-              '<code>veri.oku("anadolu_bank", "bank_customers")</code>: <code>customer_id, full_name, gender, birth_date, city, segment, …</code></p>'
+    fn='sehir_musteri', ds='ilgaz_bank',
+    statement='<p>Ilgaz Bank şube ağı ekibi, bir müşteri segmentinin en çok hangi şehirlerde yoğunlaştığını soruyor. '
+              '<code>veri.oku("ilgaz_bank", "bank_customers")</code>: <code>customer_id, full_name, gender, birth_date, city, segment, …</code></p>'
               '<p><code>sehir_musteri(segment, n)</code>: <code>segment</code> sütunu verilen değere eşit olan müşterileri şehre göre say ve en kalabalık <code>n</code> şehrin adını liste olarak döndür. '
               'Sayı eşitse şehir adına göre (Python\'un varsayılan metin sıralaması) artan sırala.</p>',
     input='<p><code>segment</code>: <code>"Bireysel"</code>, <code>"Özel Bankacılık"</code> ya da <code>"KOBİ"</code>; <code>n</code>: int.</p>',
@@ -66,7 +66,7 @@ P.append(dict(
         import pandas as pd
 
         def sehir_musteri(segment, n):
-            df = veri.oku("anadolu_bank", "bank_customers")
+            df = veri.oku("ilgaz_bank", "bank_customers")
             # kodunu yaz
             pass
         ''',
@@ -75,7 +75,7 @@ P.append(dict(
         import pandas as pd
 
         def sehir_musteri(segment, n):
-            df = veri.oku("anadolu_bank", "bank_customers")
+            df = veri.oku("ilgaz_bank", "bank_customers")
             sayim = df[df["segment"] == segment].groupby("city").size().reset_index(name="adet")
             sayim = sayim.sort_values(["adet", "city"], ascending=[False, True])
             return sayim["city"].head(n).tolist()
@@ -404,8 +404,8 @@ P.append(dict(
 P.append(dict(
     id='a-225', title='7 günlük hareketli harcama', track=T, diff='Orta', needs=NP,
     tags=['pandas', 'resample', 'rolling', 'zaman serisi'], src='Zaman serisi: resample + rolling mean',
-    fn='hareketli_harcama', ds='anadolu_bank',
-    statement='<p>Anadolu Bank risk ekibi günlük kart harcamalarındaki dalgalanmayı yumuşatıp izlemek istiyor.</p>'
+    fn='hareketli_harcama', ds='ilgaz_bank',
+    statement='<p>Ilgaz Bank risk ekibi günlük kart harcamalarındaki dalgalanmayı yumuşatıp izlemek istiyor.</p>'
               '<p><code>hareketli_harcama(tarih, pencere=7)</code>: <code>bank_txns</code> tablosunda <code>txn_type == "kart_harcama"</code> olan işlemlerin <b>günlük</b> toplam harcamasını '
               '(tutarın mutlak değeri) hesapla. İşlem olmayan günler 0 sayılsın (tüm takvim günleri serinin içinde olmalı). '
               'Sonra <code>pencere</code> günlük <b>hareketli ortalamayı</b> (o gün dahil geriye doğru) al ve <code>tarih</code> (<code>"YYYY-MM-DD"</code>) günündeki değeri 2 ondalıkla döndür. '
@@ -420,7 +420,7 @@ P.append(dict(
         import pandas as pd
 
         def hareketli_harcama(tarih, pencere=7):
-            df = veri.oku("anadolu_bank", "bank_txns", parse_dates=["txn_time"])
+            df = veri.oku("ilgaz_bank", "bank_txns", parse_dates=["txn_time"])
             # kodunu yaz
             pass
         ''',
@@ -429,7 +429,7 @@ P.append(dict(
         import pandas as pd
 
         def hareketli_harcama(tarih, pencere=7):
-            df = veri.oku("anadolu_bank", "bank_txns", parse_dates=["txn_time"])
+            df = veri.oku("ilgaz_bank", "bank_txns", parse_dates=["txn_time"])
             kart = df[df["txn_type"] == "kart_harcama"]
             gunluk = kart.set_index("txn_time")["amount"].abs().resample("D").sum()
             ortalama = gunluk.rolling(pencere).mean()

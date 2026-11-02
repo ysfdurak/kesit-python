@@ -1,4 +1,4 @@
-/* PythonPatika v2 — ozyineleme */
+/* Kesit Python v2 — ozyineleme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -299,7 +299,7 @@ print(toplam_boyut_yigin(disk))</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 1,
-      q: '<p><code>basamak_toplami(n)</code> fonksiyonunu <b>özyinelemeyle</b> yaz: negatif olmayan bir tam sayının basamaklarının toplamını döndürsün. Örnek: <code>basamak_toplami(4071)</code> → 12. (Anadolu Bank hesap numarası kontrol hanesi hesaplarında bu tür işlemler kullanılır.) Döngü ve <code>str</code> dönüşümü kullanma.</p>',
+      q: '<p><code>basamak_toplami(n)</code> fonksiyonunu <b>özyinelemeyle</b> yaz: negatif olmayan bir tam sayının basamaklarının toplamını döndürsün. Örnek: <code>basamak_toplami(4071)</code> → 12. (Ilgaz Bank hesap numarası kontrol hanesi hesaplarında bu tür işlemler kullanılır.) Döngü ve <code>str</code> dönüşümü kullanma.</p>',
       guide: ['Temel durumu yaz: n tek basamaklıysa (n < 10) n\'nin kendisini döndür.', 'Son basamağı n % 10 ile al.', 'Geri kalan sayıyı n // 10 ile elde et.', 'Son basamak + basamak_toplami(geri kalan) döndür.'],
       example: 'def basamak_sayisi(n):\n    if n < 10:\n        return 1\n    return 1 + basamak_sayisi(n // 10)\n\nprint(basamak_sayisi(4071), basamak_sayisi(7))\n',
       start: 'def basamak_toplami(n):\n    # TODO: temel durum (tek basamak)\n    # TODO: son basamak + kalan sayının basamak toplamı\n    pass\n',

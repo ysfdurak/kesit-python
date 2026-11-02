@@ -191,7 +191,7 @@ T.append(dict(
 T.append(dict(
     id='b-228', topic='Kapanışlar', diff=2, kind='rehberli',
     title='API hız sınırlayıcı',
-    q='<p>Anadolu Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
+    q='<p>Ilgaz Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
     guide=['Dış fonksiyonda kabul edilen isteklerin zamanlarını tutacak bir <code>deque</code> oluştur.',
            'İç <code>izin(zaman)</code> fonksiyonunda önce pencere dışında kalan eski zamanları baştan at (<code>popleft</code>).',
            'Kalan sayı <code>limit</code>\'ten küçükse zamanı ekle ve <code>True</code> döndür; değilse <code>False</code>.',

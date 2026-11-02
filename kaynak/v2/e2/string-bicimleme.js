@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: string-bicimleme */
+/* Kesit Python v2 — uzantı: string-bicimleme */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

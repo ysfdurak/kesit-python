@@ -102,7 +102,7 @@ def emit(ext, needs):
             parts.append(f'    {k}: [\n' + ',\n'.join('      ' + val(x, 6) for x in v) + '\n    ]')
         else: parts.append(f'    {k}: ' + val(v, 4))
     body = ',\n'.join(parts)
-    src = ("/* PythonPatika — '" + ext['id'] + "' dersi uzantısı (Derinleş) */\n" + ("// needs: " + ', '.join(needs) + "\n" if needs else '') + "(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  {\n" + body + "\n  }\n);\n})(window);\n")
+    src = ("/* Kesit Python — '" + ext['id'] + "' dersi uzantısı (Derinleş) */\n" + ("// needs: " + ', '.join(needs) + "\n" if needs else '') + "(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  {\n" + body + "\n  }\n);\n})(window);\n")
     os.makedirs(OUT, exist_ok=True)
     path = f"{OUT}/{ext['id']}.js"
     open(path, 'w').write(src)

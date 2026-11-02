@@ -64,7 +64,7 @@ for e in X.get('ex', []): stages[e.get('stage')] = stages.get(e.get('stage'), 0)
 print('aşamalar:', stages)
 
 html_v = X.pop('html')
-out = "/* PythonPatika — uzantı: " + X['id'] + " (Derinleş) */\n(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  { id: " + jstr(X['id']) + ",\n    min: " + str(X['min']) + ",\n    html: `" + html_v + "`,\n"
+out = "/* Kesit Python — uzantı: " + X['id'] + " (Derinleş) */\n(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  { id: " + jstr(X['id']) + ",\n    min: " + str(X['min']) + ",\n    html: `" + html_v + "`,\n"
 rest = {k: v for k, v in X.items() if k not in ('id', 'min')}
 for k, v in rest.items():
     out += f"    {k}: {js(v, 2)},\n"

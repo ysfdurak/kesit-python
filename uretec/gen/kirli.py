@@ -947,4 +947,4 @@ assert pd.isna(r.loc[r["Kategori"] == "Giyim", "urun_sayisi"]).all(), "Giyim iç
     tags=['merge outer', 'indicator', 'anti-join', 'ffill'], min=10)
 
 if __name__ == '__main__':
-    write('/home/claude/py/v3/d1/ds_kirli.js', 'PythonPatika — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480)', T)
+    write('/home/claude/py/v3/d1/ds_kirli.js', 'Kesit Python — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480)', T)

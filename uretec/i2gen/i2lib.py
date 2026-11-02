@@ -1,4 +1,4 @@
-"""i2 grubu ders yazım yardımcıları: Python sözlüğünden PythonPatika JS dosyası üretir."""
+"""i2 grubu ders yazım yardımcıları: Python sözlüğünden Kesit Python JS dosyası üretir."""
 import html, re, subprocess, sys, os
 from collections import Counter
 
@@ -66,7 +66,7 @@ def write(lesson):
     lesson = dict(lesson)
     body = lesson.pop('body'); ex = lesson.pop('ex'); faq = lesson.pop('faq'); mistakes = lesson.pop('mistakes')
     head = [f'  {k}: {js_val(v)}' for k, v in lesson.items()]
-    s = ('/* PythonPatika — ileri: ' + lid + ' */\n(function (W) {\n\'use strict\';\n'
+    s = ('/* Kesit Python — ileri: ' + lid + ' */\n(function (W) {\n\'use strict\';\n'
          'const L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push({\n')
     s += ',\n'.join(head) + ',\n'
     s += '  body: `\n' + body.strip() + '\n`,\n'

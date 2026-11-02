@@ -1,4 +1,4 @@
-/* PythonPatika — sqlite-python uzantısı (Derinleş) */
+/* Kesit Python — sqlite-python uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -6,7 +6,7 @@ X.push({
   id: 'sqlite-python',
   min: 30,
   html: `<h2>Derinleş: sqlite3 ile gerçek uygulama kalıpları</h2>
-<p>Tablo kurmayı, parametreli sorguyu ve transaction'ı öğrendin. Gerçek bir stok ya da müşteri uygulamasında ise şu sorular gelir: "Eklediğim satırın id'si ne?", "Ürün varsa stoğu artır, yoksa ekle", "Kaç satır güncellendi?", "Sipariş silinmiş müşteriye bağlı kalmasın", "Liste uzunluğu belli olmayan IN sorgusu nasıl yazılır?", "Sorgu neden yavaş?". Bu bölüm bunları yanıtlar. SQL dilinin kendisi (JOIN, GROUP BY, pencere fonksiyonları) için SQLPatika'ya; ORM için <i>sqlalchemy-orm</i>, DataFrame'e okumak için <i>pandas-giris</i> dersine bakabilirsin.</p>
+<p>Tablo kurmayı, parametreli sorguyu ve transaction'ı öğrendin. Gerçek bir stok ya da müşteri uygulamasında ise şu sorular gelir: "Eklediğim satırın id'si ne?", "Ürün varsa stoğu artır, yoksa ekle", "Kaç satır güncellendi?", "Sipariş silinmiş müşteriye bağlı kalmasın", "Liste uzunluğu belli olmayan IN sorgusu nasıl yazılır?", "Sorgu neden yavaş?". Bu bölüm bunları yanıtlar. SQL dilinin kendisi (JOIN, GROUP BY, pencere fonksiyonları) için Kesit SQL'e; ORM için <i>sqlalchemy-orm</i>, DataFrame'e okumak için <i>pandas-giris</i> dersine bakabilirsin.</p>
 <h3>İmlecin verdiği bilgiler: lastrowid, rowcount, fetchmany</h3>
 <pre class="py">import sqlite3
 

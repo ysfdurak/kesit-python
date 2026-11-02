@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Pusula İK (b-481 … b-498) */
+/* Kesit Python — veri seti görevleri: Pusula İK (b-481 … b-498) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — 'ml-kumeleme' dersi uzantısı: market sepeti analizi ve öğe benzerliği önerisi (AUDIT Ekle-7) */
+/* Kesit Python — 'ml-kumeleme' dersi uzantısı: market sepeti analizi ve öğe benzerliği önerisi (AUDIT Ekle-7) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

@@ -1,4 +1,4 @@
-/* PythonPatika v2/n6 — PySpark ile dağıtık veri işleme */
+/* Kesit Python v2/n6 — PySpark ile dağıtık veri işleme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -381,9 +381,9 @@ trips.select(F.col("fare") * 1.2)      # en hızlı: hazır ifade, UDF yok</pre>
       stage: 'Hata avı',
       diff: 2,
       kind: 'bug',
-      q: '<p>Anadolu Bank\'ın işlem tablosu (<code>bank_txns</code>) kanala göre partition\'lanmış. Ekip ortalama işlem tutarını (mutlak değer) dağıtık hesaplamak için her partition\'ın ortalamasını alıp bunların ortalamasını almış. Sonuç pandas\'taki <code>abs().mean()</code> ile tutmuyor. <b>Hatayı bul ve düzelt</b>: <code>dagitik_ortalama(bolumler)</code> doğru genel ortalamayı (2 basamak) döndürsün.</p>',
-      start: 'import veri\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\nbolumler = {}\nfor t in txns:\n    bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))\n\n\ndef dagitik_ortalama(bolumler):\n    kismi = [sum(b) / len(b) for b in bolumler.values()]\n    return round(sum(kismi) / len(kismi), 2)\n\n\nprint(dagitik_ortalama(bolumler))\n',
-      sol: 'import veri\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\nbolumler = {}\nfor t in txns:\n    bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))\n\n\ndef dagitik_ortalama(bolumler):\n    kismi = [(sum(b), len(b)) for b in bolumler.values()]\n    toplam = sum(s for s, _ in kismi)\n    adet = sum(n for _, n in kismi)\n    return round(toplam / adet, 2)\n\n\nprint(dagitik_ortalama(bolumler))\n',
+      q: '<p>Ilgaz Bank\'ın işlem tablosu (<code>bank_txns</code>) kanala göre partition\'lanmış. Ekip ortalama işlem tutarını (mutlak değer) dağıtık hesaplamak için her partition\'ın ortalamasını alıp bunların ortalamasını almış. Sonuç pandas\'taki <code>abs().mean()</code> ile tutmuyor. <b>Hatayı bul ve düzelt</b>: <code>dagitik_ortalama(bolumler)</code> doğru genel ortalamayı (2 basamak) döndürsün.</p>',
+      start: 'import veri\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\nbolumler = {}\nfor t in txns:\n    bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))\n\n\ndef dagitik_ortalama(bolumler):\n    kismi = [sum(b) / len(b) for b in bolumler.values()]\n    return round(sum(kismi) / len(kismi), 2)\n\n\nprint(dagitik_ortalama(bolumler))\n',
+      sol: 'import veri\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\nbolumler = {}\nfor t in txns:\n    bolumler.setdefault(t["channel"], []).append(abs(t["amount"]))\n\n\ndef dagitik_ortalama(bolumler):\n    kismi = [(sum(b), len(b)) for b in bolumler.values()]\n    toplam = sum(s for s, _ in kismi)\n    adet = sum(n for _, n in kismi)\n    return round(toplam / adet, 2)\n\n\nprint(dagitik_ortalama(bolumler))\n',
       tests: 'r = dagitik_ortalama(bolumler)\nassert r == 7506.73, "Genel ortalama 7506.73 olmalı (ortalamaların ortalaması 6528.9 verir); gelen " + str(r)\nassert dagitik_ortalama({"a": [10, 10, 10], "b": [40]}) == 17.5, "3 tane 10 ve 1 tane 40\\\'ın ortalaması 17.5\\\'tir, 25 değil"\n',
       hints: ['Partition boyutları çok farklı: internet 14.802, şube 1.224 işlem.', 'Her partition\'dan ortalama değil (toplam, adet) çifti taşı.', 'Genel ortalama = toplamların toplamı / adetlerin toplamı.'],
       why: 'Ortalamaların ortalaması, partition boyutları eşit değilse yanlıştır: 1.224 işlemlik şube kanalı 14.802 işlemlik internet kanalıyla aynı ağırlığı alır. Spark avg() fonksiyonunu kısmi olarak (sum, count) taşıyarak hesaplar. Aynı kural medyan için daha da sert işler: medyan birleştirilebilir değildir, yaklaşık algoritma (percentile_approx) gerekir.'

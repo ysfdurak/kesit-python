@@ -1,4 +1,4 @@
-# Kesit Python — PythonPatika
+# Kesit Python — Kesit Python
 
 Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Türkçe Python öğrenme uygulaması. Kurulum gerektirmez: Python, [Pyodide](https://pyodide.org) (WebAssembly'e derlenmiş CPython 3.12) ile sayfanın içinde çalışır; pandas, numpy, scikit-learn, polars, DuckDB, statsmodels gibi paketler ihtiyaç anında yüklenir.
 
@@ -16,7 +16,7 @@ Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Tür
 | Sınavlar | 17 sınav: seviye tespit, seviye bitirme, kodlama, PCEP/PCAP tarzı deneme, 10 patika sınavı |
 | Mülakat | 321 yalnız Python mülakat sorusu, role göre; model cevap, takip soruları, kart modu ve 45 dk simülasyon |
 | Sık hatalar | 160 katalog kaydı + derslerdeki hata örnekleri (hatalı kod → gerçek çıktı → doğru kod → kural) |
-| Veri setleri | 8 set, 78 tablo: Anadolu Market, Anadolu Bank, Pusula İK, Lezzet Kurye, Kanat Havayolları, Pedal İzmir, Kesit BI modeli, kirli veri |
+| Veri setleri | 8 set, 78 tablo: Anadolu Market, Ilgaz Bank, Pusula İK, Lezzet Kurye, Kanat Havayolları, Pedal İzmir, Kesit BI modeli, kirli veri |
 
 Dersler ve alıştırmalar veri setlerine `import veri` ile erişir:
 

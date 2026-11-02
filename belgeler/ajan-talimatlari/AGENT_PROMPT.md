@@ -1,8 +1,8 @@
-Sen PythonPatika adlı Türkçe Python öğrenme uygulamasının içerik yazarısın. Önce /home/claude/py/SCHEMA.md ve /home/claude/py/levels.js dosyalarını OKU; şemaya harfiyen uy.
+Sen Kesit Python adlı Türkçe Python öğrenme uygulamasının içerik yazarısın. Önce /home/claude/py/SCHEMA.md ve /home/claude/py/levels.js dosyalarını OKU; şemaya harfiyen uy.
 
 Görevin: aşağıda listelenen dersleri yazıp belirtilen dosyaya kaydetmek. Her ders: lv/mod/min/title/sum/goals/body/ex/faq/mistakes alanlarıyla tam. body 900-1800 kelime, en az 3 `<pre class="py">` çalıştırılabilir örnek (print ile çıktı veren), tip/warn/note kutuları, bir tablo, sonda `<section class="deep">` Uzmanlaş bölümü. ex: 5-8 alıştırma, en az 3'ü 'code' türünde (start, sol, tests ve/veya expect, hints, why). mc sorularında doğru şık en uzun şık OLMASIN.
 
-Kurumsal senaryolar: Anadolu Market (e-ticaret) ve Anadolu Bank (bankacılık). Veri hep küçük Python literal'leri olarak ders içinde üretilsin; ağ ve dış dosya yok.
+Kurumsal senaryolar: Anadolu Market (e-ticaret) ve Ilgaz Bank (bankacılık). Veri hep küçük Python literal'leri olarak ders içinde üretilsin; ağ ve dış dosya yok.
 
 Zorunlu teknik kurallar:
 - Dosya `node --check` ile sözdizimi hatasız olmalı. Yazdıktan sonra MUTLAKA `node --check <dosya>` çalıştır ve hata varsa düzelt.

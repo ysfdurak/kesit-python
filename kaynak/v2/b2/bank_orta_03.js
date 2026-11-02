@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Dekoratörler, OOP (b-231…b-240) */
+/* Kesit Python — pratik bankası (orta): Dekoratörler, OOP (b-231…b-240) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -46,7 +46,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Rol kontrolü yapan dekoratör',
-    q: '<p>Anadolu Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
+    q: '<p>Ilgaz Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
     guide: ['En dış fonksiyon <code>yetki_gerekli(rol)</code> parametreyi alır ve bir dekoratör döndürür.', 'Ortadaki <code>dekorator(fn)</code> sarıcıyı döndürür; sarıcının üstüne <code>@functools.wraps(fn)</code> koy.', 'Sarıcı <code>(kullanici, *args, **kwargs)</code> alsın; <code>rol not in kullanici["roller"]</code> ise <code>PermissionError</code>.', 'Aksi halde <code>return fn(kullanici, *args, **kwargs)</code>.'],
     example: 'import functools\n# Parametreli dekoratör iskeleti: ön ek ekleyen dekoratör\ndef onek(metin):\n    def dekorator(fn):\n        @functools.wraps(fn)\n        def sarici(*args, **kwargs):\n            return metin + str(fn(*args, **kwargs))\n        return sarici\n    return dekorator\n\n@onek("TL ")\ndef fiyat():\n    return 99\nprint(fiyat(), fiyat.__name__)   # TL 99 fiyat\n',
     start: 'import functools\n\ndef yetki_gerekli(rol):\n    # TODO 1: fn alan bir dekorator fonksiyonu tanımla\n    # TODO 2: içinde @functools.wraps(fn) ile sarıcı yaz\n    # TODO 3: rol yoksa PermissionError, varsa fn sonucunu döndür\n    def dekorator(fn):\n        return fn\n    return dekorator\n',

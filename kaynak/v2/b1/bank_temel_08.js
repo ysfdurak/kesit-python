@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-181 … b-190 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-181 … b-190 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -92,7 +92,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'İlk mükerrer işlemi yakala',
-    q: '<p>Anadolu Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
+    q: '<p>Ilgaz Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
     start: 'def ilk_tekrar(islem_nolari):\n    gorulen = set()\n    for no in islem_nolari:\n        # TODO: no daha önce görüldüyse döndür\n        # TODO: değilse kümeye ekle\n        pass\n    # TODO: tekrar yoksa ne döner?\n    return -1\n',
     sol: 'def ilk_tekrar(islem_nolari):\n    gorulen = set()\n    for no in islem_nolari:\n        if no in gorulen:\n            return no\n        gorulen.add(no)\n    return None\n',
     tests: 'assert ilk_tekrar([7, 3, 9, 3, 7]) == 3, "3 ikinci kez 7\\\'den önce görülür"\nassert ilk_tekrar([1, 2, 3]) is None, "Tekrar yoksa None"\nassert ilk_tekrar([]) is None, "Boş akışta None"\nassert ilk_tekrar([5, 5]) == 5, "Hemen tekrar eden 5"\n',

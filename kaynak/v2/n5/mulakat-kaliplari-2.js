@@ -1,4 +1,4 @@
-/* PythonPatika — Orta: mulakat-kaliplari-2 (Mülakat kalıpları II) */
+/* Kesit Python — Orta: mulakat-kaliplari-2 (Mülakat kalıpları II) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

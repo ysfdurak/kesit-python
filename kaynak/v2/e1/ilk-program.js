@@ -1,4 +1,4 @@
-/* PythonPatika — 'ilk-program' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'ilk-program' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -18,12 +18,12 @@ print("Çay\\t5\\t250")
 print("Satır 1\\nSatır 2")
 print("Klasör: C:\\\\raporlar\\\\mart")
 print(r"Ham: C:\\raporlar\\nisan")
-print("Müşteri \\"Kahve Makinesi\\" ürününü iade etti.")</pre><div class="warn"><b>Windows yolunda gizli kaçış</b><code>"C:\\raporlar\\nisan"</code> yazarsan <code>\\n</code> bir satır sonuna, <code>\\r</code> da satır başı karakterine dönüşür ve yol bozulur. Windows yollarını ya <code>r"..."</code> ham metinle ya da düz eğik çizgiyle (<code>"C:/raporlar/nisan"</code>) yaz; Python ikisini de anlar.</div><p>Üç tırnaklı metin, makbuz ya da e-posta şablonu gibi uzun metinler için rahattır:</p><pre class="py">fis = """ANADOLU BANK
+print("Müşteri \\"Kahve Makinesi\\" ürününü iade etti.")</pre><div class="warn"><b>Windows yolunda gizli kaçış</b><code>"C:\\raporlar\\nisan"</code> yazarsan <code>\\n</code> bir satır sonuna, <code>\\r</code> da satır başı karakterine dönüşür ve yol bozulur. Windows yollarını ya <code>r"..."</code> ham metinle ya da düz eğik çizgiyle (<code>"C:/raporlar/nisan"</code>) yaz; Python ikisini de anlar.</div><p>Üç tırnaklı metin, makbuz ya da e-posta şablonu gibi uzun metinler için rahattır:</p><pre class="py">fis = """ILGAZ BANK
 Şube: Konak
 İşlem: Para yatırma
 Tutar: 2750 TL"""
 print(fis)
-print("Satır sayısı:", fis.count("\\n") + 1)</pre><h2>Bir programın iskeleti</h2><p>Gerçek bir betik rastgele satırlardan değil, belli bir düzenden oluşur. Bu düzeni şimdiden alışkanlık edinirsen kodun büyüdüğünde kaybolmazsın:</p><div class="steps-list"><ol><li><b>Belge dizgisi (docstring):</b> Dosyanın en üstünde, betiğin ne yaptığını anlatan üç tırnaklı metin.</li><li><b>İçe aktarmalar:</b> <code>import sys</code> gibi satırlar, hepsi en üstte.</li><li><b>Sabitler:</b> <code>KDV_ORANI = 0.20</code> gibi değişmeyecek değerler.</li><li><b>Ana akış:</b> Girdi al → hesapla → çıktı ver.</li></ol></div><pre class="py">"""Anadolu Bank şube makbuzu: tutar ve komisyondan net tutarı yazar."""
+print("Satır sayısı:", fis.count("\\n") + 1)</pre><h2>Bir programın iskeleti</h2><p>Gerçek bir betik rastgele satırlardan değil, belli bir düzenden oluşur. Bu düzeni şimdiden alışkanlık edinirsen kodun büyüdüğünde kaybolmazsın:</p><div class="steps-list"><ol><li><b>Belge dizgisi (docstring):</b> Dosyanın en üstünde, betiğin ne yaptığını anlatan üç tırnaklı metin.</li><li><b>İçe aktarmalar:</b> <code>import sys</code> gibi satırlar, hepsi en üstte.</li><li><b>Sabitler:</b> <code>KDV_ORANI = 0.20</code> gibi değişmeyecek değerler.</li><li><b>Ana akış:</b> Girdi al → hesapla → çıktı ver.</li></ol></div><pre class="py">"""Ilgaz Bank şube makbuzu: tutar ve komisyondan net tutarı yazar."""
 import sys
 
 KOMISYON = 5          # TL, şube yönetmeliği gereği sabit
@@ -106,7 +106,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         id: 'ilk-program-x6',
         stage: 'Rehberli',
         diff: 1,
-        q: '<p>Anadolu Bank makbuzunu yazdır. Çıktı tam olarak şöyle olmalı (ilk satırdaki tarih tek print ile, <code>sep</code> kullanılarak; ikinci satır <code>end</code> ile iki ayrı print\'ten oluşmalı):</p><pre class="out">14.03.2025\nTutar: 2750 TL\n==========</pre>',
+        q: '<p>Ilgaz Bank makbuzunu yazdır. Çıktı tam olarak şöyle olmalı (ilk satırdaki tarih tek print ile, <code>sep</code> kullanılarak; ikinci satır <code>end</code> ile iki ayrı print\'ten oluşmalı):</p><pre class="out">14.03.2025\nTutar: 2750 TL\n==========</pre>',
         guide: [
           'İlk print\'e "14", "03", "2025" değerlerini ver ve sep="." ekle.',
           'İkinci satırın ilk parçası: print("Tutar:", end=" ") — satır sonu yerine boşluk koyar.',

@@ -1,4 +1,4 @@
-/* PythonPatika — 'django-giris' dersi uzantısı: HTMX ile kısmi güncelleme, CSRF, fetch ile JSON, form hataları ve SPA kararı (AUDIT Ekle-12) */
+/* Kesit Python — 'django-giris' dersi uzantısı: HTMX ile kısmi güncelleme, CSRF, fetch ile JSON, form hataları ve SPA kararı (AUDIT Ekle-12) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

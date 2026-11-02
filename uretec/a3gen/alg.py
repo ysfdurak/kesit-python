@@ -387,7 +387,7 @@ P.append(dict(
     id='a-127', title='Net sıfır işlem üçlüleri', track=T, diff='Orta',
     tags=['iki işaretçi', 'sıralama'], src='LeetCode 15 3Sum benzeri',
     statement=D('''
-        <p>Anadolu Bank denetim ekibi, toplamı tam sıfır olan üç hesap hareketi (örneğin +500, −200, −300) bulduğunda bunları "dengeleyici üçlü" olarak işaretliyor. Aynı tutar değerlerinden oluşan üçlüler tek sayılır: {−1, 0, 1} hangi indekslerden gelirse gelsin bir kez sayılır.</p>
+        <p>Ilgaz Bank denetim ekibi, toplamı tam sıfır olan üç hesap hareketi (örneğin +500, −200, −300) bulduğunda bunları "dengeleyici üçlü" olarak işaretliyor. Aynı tutar değerlerinden oluşan üçlüler tek sayılır: {−1, 0, 1} hangi indekslerden gelirse gelsin bir kez sayılır.</p>
         <p>Farklı indekslerdeki üç hareketten oluşan, toplamı 0 olan <b>farklı değer üçlülerinin</b> sayısını yazdır.</p>'''),
     input='<p>İlk satırda N. İkinci satırda N tam sayı (hareket tutarları).</p>',
     output='<p>Farklı üçlü sayısı.</p>',
@@ -599,7 +599,7 @@ P.append(dict(
     id='a-130', title='Net bakiye değişimi tam K olan dönemler', track=T, diff='Orta',
     tags=['önek toplamı', 'sözlük'], src='LeetCode 560 Subarray Sum Equals K benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın risk ekibi, bir müşterinin günlük bakiye değişimlerini (yatırma pozitif, çekme negatif) inceliyor. Toplam değişimi tam olarak K olan <b>ardışık gün dönemlerinin</b> sayısı şüpheli örüntü göstergesi sayılıyor.</p>
+        <p>Ilgaz Bank\'ın risk ekibi, bir müşterinin günlük bakiye değişimlerini (yatırma pozitif, çekme negatif) inceliyor. Toplam değişimi tam olarak K olan <b>ardışık gün dönemlerinin</b> sayısı şüpheli örüntü göstergesi sayılıyor.</p>
         <p>Toplamı K olan ardışık alt dizi (en az 1 gün) sayısını yazdır.</p>'''),
     input='<p>İlk satırda N ve K. İkinci satırda N tam sayı.</p>',
     output='<p>Dönem sayısı.</p>',
@@ -1492,7 +1492,7 @@ P.append(dict(
     id='a-144', title='Yetki bayraklarının toplam farkı', track=T, diff='Orta',
     tags=['bit işlemleri', 'sayma'], src='LeetCode 477 Total Hamming Distance benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın iç sistemlerinde her kullanıcının yetkileri 30 bitlik bir maske ile tutuluyor (her bit bir yetki). Güvenlik ekibi, yetki dağılımının ne kadar çeşitli olduğunu ölçmek için tüm kullanıcı çiftleri arasındaki <b>Hamming mesafelerinin</b> (farklı bit sayısı) toplamını istiyor.</p>
+        <p>Ilgaz Bank\'ın iç sistemlerinde her kullanıcının yetkileri 30 bitlik bir maske ile tutuluyor (her bit bir yetki). Güvenlik ekibi, yetki dağılımının ne kadar çeşitli olduğunu ölçmek için tüm kullanıcı çiftleri arasındaki <b>Hamming mesafelerinin</b> (farklı bit sayısı) toplamını istiyor.</p>
         <p>Σ<sub>i&lt;j</sub> popcount(m<sub>i</sub> XOR m<sub>j</sub>) değerini yazdır.</p>'''),
     input='<p>İlk satırda N. İkinci satırda N maske (onluk tabanda).</p>',
     output='<p>Toplam mesafe.</p>',

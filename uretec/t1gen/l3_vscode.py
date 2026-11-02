@@ -177,7 +177,7 @@ print(indirimli_fiyat.__doc__)</pre>
 <tr><td>JupyterLab</td><td>Hücre hücre keşif, grafik ve tablo çıktısı</td><td>Uzun kod ve test için uygun değil</td><td>Veri analizi; <b>Jupyter ve Colab</b> dersinde</td></tr>
 </table></div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın veri ekibinde yeni gelen biri depoyu klonlayıp VS Code'da açtığında sağ altta "Bu depo için önerilen eklentileri kurmak ister misiniz?" bildirimi çıkar; bu, <code>.vscode/extensions.json</code> dosyasının işidir. Ardından <code>settings.json</code> yorumlayıcıyı <code>.venv</code>'e, biçimlendiriciyi Ruff'a ayarlar ve herkes aynı stille kaydeder. Kod incelemelerinde (code review) "buraya boşluk koy" yorumları kaybolur; tartışma mantığa odaklanır. Ekip ayrıca <code>launch.json</code>'a "Günlük rapor (test verisi)" gibi hazır hata ayıklama yapılandırmaları koyar; böylece yeni gelen kişi ilk gün F5 ile sistemi uçtan uca çalıştırabilir.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın veri ekibinde yeni gelen biri depoyu klonlayıp VS Code'da açtığında sağ altta "Bu depo için önerilen eklentileri kurmak ister misiniz?" bildirimi çıkar; bu, <code>.vscode/extensions.json</code> dosyasının işidir. Ardından <code>settings.json</code> yorumlayıcıyı <code>.venv</code>'e, biçimlendiriciyi Ruff'a ayarlar ve herkes aynı stille kaydeder. Kod incelemelerinde (code review) "buraya boşluk koy" yorumları kaybolur; tartışma mantığa odaklanır. Ekip ayrıca <code>launch.json</code>'a "Günlük rapor (test verisi)" gibi hazır hata ayıklama yapılandırmaları koyar; böylece yeni gelen kişi ilk gün F5 ile sistemi uçtan uca çalıştırabilir.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Hata ayıklayıcı nasıl çalışır?</h3>

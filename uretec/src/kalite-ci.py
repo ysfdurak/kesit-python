@@ -245,7 +245,7 @@ assert kapi({"auc": 0.900, "gecikme_ms": 60}, T) == (False, ["gecikme arttı"]),
   hints=['İki ayrı hata var: biri karşılaştırma yönünde, biri dönüş değerinde.', 'İhlal koşulu "aday, temel eksi toleranstan KÜÇÜK" olmalı.', 'Geçti bilgisi "neden yok" demektir: len(nedenler) == 0.'],
   why='Kalite kapısındaki ters işaret en tehlikeli hatalardandır: CI yeşil yanar, kötü model prod\'a gider. Kapının kendisini de bilinen iyi ve kötü örneklerle test etmek bu yüzden şarttır.'),
 dict(t='code', id='kalite-ci-y10', stage='Meydan okuma', diff=3, needs=['pandas'],
-  q='<p>Dilim (segment) bazında kalite kapısı. Genel başarı iyi görünse de bir müşteri segmentinde model çökebilir. <code>dilim_kapisi(df, esik=0.05)</code> yaz: <code>df</code> sütunları <code>segment</code>, <code>y</code> (gerçek 0/1), <code>temel</code> ve <code>aday</code> (tahmin 0/1). Her segment için doğruluğu (accuracy) hesapla; adayın doğruluğu temelinkinden <code>esik</code>\'ten <b>fazla</b> düşen segmentlerin adlarını sıralı liste olarak döndür. Gerçek veri: Anadolu Bank müşterilerinin <code>segment</code> sütunu.</p>',
+  q='<p>Dilim (segment) bazında kalite kapısı. Genel başarı iyi görünse de bir müşteri segmentinde model çökebilir. <code>dilim_kapisi(df, esik=0.05)</code> yaz: <code>df</code> sütunları <code>segment</code>, <code>y</code> (gerçek 0/1), <code>temel</code> ve <code>aday</code> (tahmin 0/1). Her segment için doğruluğu (accuracy) hesapla; adayın doğruluğu temelinkinden <code>esik</code>\'ten <b>fazla</b> düşen segmentlerin adlarını sıralı liste olarak döndür. Gerçek veri: Ilgaz Bank müşterilerinin <code>segment</code> sütunu.</p>',
   start=r'''import pandas as pd
 
 def dilim_kapisi(df, esik=0.05):
@@ -262,7 +262,7 @@ def dilim_kapisi(df, esik=0.05):
 ''',
   tests=r'''import veri
 import numpy as np
-m = veri.oku("anadolu_bank", "bank_customers")
+m = veri.oku("ilgaz_bank", "bank_customers")
 rng = np.random.default_rng(3)
 y = (m["risk_score"] > m["risk_score"].median()).astype(int).to_numpy()
 temel = np.where(rng.random(len(m)) < 0.85, y, 1 - y)

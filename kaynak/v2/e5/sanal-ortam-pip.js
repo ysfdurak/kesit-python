@@ -1,4 +1,4 @@
-/* PythonPatika — sanal-ortam-pip uzantısı (Derinleş) */
+/* Kesit Python — sanal-ortam-pip uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -184,7 +184,7 @@ for paket, liste in isteyenler.items():
     print(f"{paket}: {isaret}")
     for satir in liste:
         print("   ", satir)</pre>
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın veri ekibinde yeni gelen birinin ilk günü şu üç komutla başlar: depoyu klonla, <code>uv sync --locked</code>, <code>uv run pytest</code>. Kilit dosyası depodadır; CI aynı kilitle kurar, böylece "bende çalışıyor" tartışması biter. Bağımlılık güncellemeleri haftalık ayrı bir PR'da yapılır (Dependabot/Renovate), testler geçerse birleştirilir. Kurumsal ağda pip ayarları (<code>index-url</code>, <code>cert</code>) BT tarafından <code>pip.conf</code>/<code>pip.ini</code> ile dağıtılır; sen yalnızca <code>python -m pip config list</code> ile hangi ayarın etkin olduğunu kontrol edersin.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın veri ekibinde yeni gelen birinin ilk günü şu üç komutla başlar: depoyu klonla, <code>uv sync --locked</code>, <code>uv run pytest</code>. Kilit dosyası depodadır; CI aynı kilitle kurar, böylece "bende çalışıyor" tartışması biter. Bağımlılık güncellemeleri haftalık ayrı bir PR'da yapılır (Dependabot/Renovate), testler geçerse birleştirilir. Kurumsal ağda pip ayarları (<code>index-url</code>, <code>cert</code>) BT tarafından <code>pip.conf</code>/<code>pip.ini</code> ile dağıtılır; sen yalnızca <code>python -m pip config list</code> ile hangi ayarın etkin olduğunu kontrol edersin.</div>
 `,
   ex: [
     {

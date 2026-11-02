@@ -1,4 +1,4 @@
-/* PythonPatika — standart-kutuphane uzantısı (Derinleş) */
+/* Kesit Python — standart-kutuphane uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

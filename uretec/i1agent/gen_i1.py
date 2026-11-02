@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""i1 grubu: ders kaynak dosyasını (Python, LESSON sözlüğü) PythonPatika JS dosyasına çevirir.
+"""i1 grubu: ders kaynak dosyasını (Python, LESSON sözlüğü) Kesit Python JS dosyasına çevirir.
 Kullanım: python3 gen_i1.py l_xxx.py [-v] -> /home/claude/py/v2/i1/<id>.js yazar, body örneklerini çalıştırır, verify eder."""
 import html, os, re, subprocess, sys, tempfile, runpy
 
@@ -82,7 +82,7 @@ def main():
     body_raw = L['body']
     L['body'] = prep_body(body_raw)
     n_py = len([m for m in PRE.finditer(body_raw) if m.group(1) == 'py'])
-    lines = ['/* PythonPatika — v2/i1: ' + L['title'] + ' */', '(function (W) {', "'use strict';",
+    lines = ['/* Kesit Python — v2/i1: ' + L['title'] + ' */', '(function (W) {', "'use strict';",
              'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push(']
     parts = []
     for k in KEYS:

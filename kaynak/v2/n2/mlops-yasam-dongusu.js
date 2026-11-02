@@ -1,4 +1,4 @@
-/* PythonPatika — ileri: mlops-yasam-dongusu */
+/* Kesit Python — ileri: mlops-yasam-dongusu */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

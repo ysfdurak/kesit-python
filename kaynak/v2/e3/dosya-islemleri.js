@@ -1,4 +1,4 @@
-/* PythonPatika — uzantı: dosya-islemleri (Derinleş) */
+/* Kesit Python — uzantı: dosya-islemleri (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -223,7 +223,7 @@ print("utf-8-sig ile:", kayit)
         example: 'satir = "  sunucu_adi =  db.anadolu.local  "\nanahtar, deger = satir.strip().split("=", 1)\nprint(repr(anahtar.strip()), repr(deger.strip()))\nprint("baglanti=host=x;port=5".split("=", 1))   # yalnız ilk = noktasından\n',
         start: 'def ayar_oku(yol):\n    ayarlar = {}\n    with open(yol, encoding="utf-8") as f:\n        for satir in f:\n            satir = satir.strip()\n            # TODO: boş ya da # ile başlayan satırı atla\n            # TODO: ilk = noktasından böl, temizle, sözlüğe ekle\n            pass\n    return ayarlar\n',
         sol: 'def ayar_oku(yol):\n    ayarlar = {}\n    with open(yol, encoding="utf-8") as f:\n        for satir in f:\n            satir = satir.strip()\n            if not satir or satir.startswith("#"):\n                continue\n            anahtar, deger = satir.split("=", 1)\n            ayarlar[anahtar.strip()] = deger.strip()\n    return ayarlar\n',
-        tests: 'metin = "# Anadolu Bank rapor ayarları\\nsube = Kadıköy\\n\\n   # eski: sube=Ankara\\nesik=1000\\nbaglanti = host=db;port=5432\\n"\nopen("x2_ayar.cfg", "w", encoding="utf-8").write(metin)\na = ayar_oku("x2_ayar.cfg")\nassert isinstance(a, dict), "Sözlük döndürmelisin"\nassert a.get("sube") == "Kadıköy", "sube değeri kenar boşlukları temizlenmiş \'Kadıköy\' olmalı"\nassert a.get("esik") == "1000", "Değerler metin olarak kalmalı: \'1000\'"\nassert a.get("baglanti") == "host=db;port=5432", "Değerin içindeki = korunmalı: split(\'=\', 1) kullan"\nassert len(a) == 3, "Yorumlar (girintili olanlar dahil) ve boş satırlar atlanmalı; 3 anahtar bekleniyor, gelen: " + str(list(a))\n',
+        tests: 'metin = "# Ilgaz Bank rapor ayarları\\nsube = Kadıköy\\n\\n   # eski: sube=Ankara\\nesik=1000\\nbaglanti = host=db;port=5432\\n"\nopen("x2_ayar.cfg", "w", encoding="utf-8").write(metin)\na = ayar_oku("x2_ayar.cfg")\nassert isinstance(a, dict), "Sözlük döndürmelisin"\nassert a.get("sube") == "Kadıköy", "sube değeri kenar boşlukları temizlenmiş \'Kadıköy\' olmalı"\nassert a.get("esik") == "1000", "Değerler metin olarak kalmalı: \'1000\'"\nassert a.get("baglanti") == "host=db;port=5432", "Değerin içindeki = korunmalı: split(\'=\', 1) kullan"\nassert len(a) == 3, "Yorumlar (girintili olanlar dahil) ve boş satırlar atlanmalı; 3 anahtar bekleniyor, gelen: " + str(list(a))\n',
         hints: [
           'İki ayrı kontrol: satır boş mu, satır "#" ile mi başlıyor (strip SONRASI)?',
           'split("=", 1) en fazla bir kez böler, iki parça döner.',

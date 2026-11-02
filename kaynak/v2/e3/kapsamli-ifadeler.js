@@ -1,4 +1,4 @@
-/* PythonPatika — uzantı: kapsamli-ifadeler (Derinleş) */
+/* Kesit Python — uzantı: kapsamli-ifadeler (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

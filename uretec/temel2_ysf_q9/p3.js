@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Program kapanınca değişkenler silinir. Anadolu Market'in sipariş listesi, Anadolu Bank'ın günlük işlem dökümü ise kalıcı olmalı: diske yazılır, yarın yeniden okunur, başka programlara verilir. İş hayatında verinin büyük bölümü hâlâ düz metin ve CSV dosyalarında dolaşır. Bu derste önce bellekte küçük dosyalar oluşturup okuyacağız; aynı kod bilgisayarındaki gerçek dosyalarda da çalışır.</p>
+<p>Program kapanınca değişkenler silinir. Anadolu Market'in sipariş listesi, Ilgaz Bank'ın günlük işlem dökümü ise kalıcı olmalı: diske yazılır, yarın yeniden okunur, başka programlara verilir. İş hayatında verinin büyük bölümü hâlâ düz metin ve CSV dosyalarında dolaşır. Bu derste önce bellekte küçük dosyalar oluşturup okuyacağız; aynı kod bilgisayarındaki gerçek dosyalarda da çalışır.</p>
 <div class="note"><b>Tarayıcıdaki dosyalar</b>Bu uygulama tarayıcıda çalıştığı için yazdığın dosyalar bellek içi bir dosya sisteminde oluşur; sayfayı yenileyince silinir. Kendi bilgisayarında aynı kod gerçek dosyalar üretir. Alıştırmalarda önce dosyayı kodla yazıp sonra okuyacağız.</div>
 
 <h2>open ve with: aç, kullan, kesin kapat</h2>
@@ -202,7 +202,7 @@ for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın gece çalışan rapor betiği, bir satırda tutar yerine "yok" yazdığı için saat 03:00'te çöktü ve sabah hiç rapor yoktu. Oysa o satırı atlayıp loga yazsa, kalan binlerce satır işlenirdi. Hata (error) kaçınılmazdır; mesele programın hatayı <b>nasıl karşıladığı</b>dır. Python'da hatalar <b>istisna</b> (exception) adlı nesnelerle temsil edilir ve yakalanabilir.</p>
+<p>Ilgaz Bank'ın gece çalışan rapor betiği, bir satırda tutar yerine "yok" yazdığı için saat 03:00'te çöktü ve sabah hiç rapor yoktu. Oysa o satırı atlayıp loga yazsa, kalan binlerce satır işlenirdi. Hata (error) kaçınılmazdır; mesele programın hatayı <b>nasıl karşıladığı</b>dır. Python'da hatalar <b>istisna</b> (exception) adlı nesnelerle temsil edilir ve yakalanabilir.</p>
 
 <h2>Hata mesajı (traceback) okuma</h2>
 <pre class="py">def ortalama(liste):
@@ -352,7 +352,7 @@ print(kayit.get("sehir", "bilinmiyor"))</pre>
       o: ['TypeError', 'ValueError', 'SyntaxError', 'Hata vermez, 12 döner'], a: 1,
       why: 'Argümanın türü doğrudur (metin) ama değeri tam sayı biçiminde değildir; bu ValueError\'dır. TypeError tür yanlış olduğunda (int([1])) çıkar.' },
     { t: 'code', id: 'hatalar-3',
-      q: '<p>Anadolu Bank havale kuralı: <code>havale(bakiye, tutar)</code> fonksiyonu tutar <b>0 veya negatifse</b> <code>ValueError("tutar pozitif olmalı")</code>, tutar <b>bakiyeden büyükse</b> <code>ValueError("yetersiz bakiye")</code> fırlatsın; aksi halde yeni bakiyeyi döndürsün. Mesajlar tam olarak böyle olsun.</p>',
+      q: '<p>Ilgaz Bank havale kuralı: <code>havale(bakiye, tutar)</code> fonksiyonu tutar <b>0 veya negatifse</b> <code>ValueError("tutar pozitif olmalı")</code>, tutar <b>bakiyeden büyükse</b> <code>ValueError("yetersiz bakiye")</code> fırlatsın; aksi halde yeni bakiyeyi döndürsün. Mesajlar tam olarak böyle olsun.</p>',
       start: 'def havale(bakiye, tutar):\n    pass\n',
       sol: 'def havale(bakiye, tutar):\n    if tutar <= 0:\n        raise ValueError("tutar pozitif olmalı")\n    if tutar > bakiye:\n        raise ValueError("yetersiz bakiye")\n    return bakiye - tutar\n',
       tests: 'assert havale(1000, 300) == 700, "1000 - 300 = 700 dönmeli"\nassert havale(500, 500) == 0, "bakiyenin tamamı gönderilebilmeli"\nfor kotu, mesaj in [(0, "tutar pozitif olmalı"), (-5, "tutar pozitif olmalı"), (5000, "yetersiz bakiye")]:\n    try:\n        havale(1000, kotu)\n    except ValueError as e:\n        assert str(e) == mesaj, f"tutar={kotu} için mesaj \'{mesaj}\' olmalı, gelen: {e}"\n    else:\n        raise AssertionError(f"tutar={kotu} için ValueError fırlatılmalı")\n',

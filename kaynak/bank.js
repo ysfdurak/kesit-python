@@ -36,7 +36,7 @@ L.push(
 
   { id: 'b-004', lv: 'temel', topic: 'Değişkenler ve Türler', diff: 2, kind: 'tamamla',
     title: 'Para birimi dönüşümü',
-    q: '<p>Anadolu Bank\'ta dolar-lira dönüşümü yapan <code>tl_karsiligi(dolar, kur)</code> fonksiyonundaki boşluğu tamamla. Sonuç tam sayı kuruşa (ör. 12.345 TL → 1234 kuruş) <b>aşağı yuvarlanarak</b> döndürülmeli.</p>',
+    q: '<p>Ilgaz Bank\'ta dolar-lira dönüşümü yapan <code>tl_karsiligi(dolar, kur)</code> fonksiyonundaki boşluğu tamamla. Sonuç tam sayı kuruşa (ör. 12.345 TL → 1234 kuruş) <b>aşağı yuvarlanarak</b> döndürülmeli.</p>',
     start: 'def tl_karsiligi(dolar, kur):\n    tl = dolar * kur\n    kurus = # ... buraya ...\n    return kurus\n',
     sol: 'def tl_karsiligi(dolar, kur):\n    tl = dolar * kur\n    kurus = int(tl * 100)\n    return kurus\n',
     tests: 'assert tl_karsiligi(10, 32.5) == 32500, "10 dolar * 32.5 = 32500 kuruş olmalı"\nassert tl_karsiligi(1, 32.123) == 3212, "aşağı yuvarlama: 3212 kuruş olmalı"\nassert isinstance(tl_karsiligi(2, 30), int), "sonuç int olmalı"\n',
@@ -77,7 +77,7 @@ L.push(
 
   { id: 'b-008', lv: 'temel', topic: 'Metinler', diff: 2, kind: 'yaz',
     title: 'Kart numarasını maskele',
-    q: '<p>Anadolu Bank ekranlarında kart numarasının yalnızca son 4 hanesi görünmeli. <code>maskele(kart)</code> fonksiyonunu yaz: 16 haneli metni al, ilk 12 haneyi <code>*</code> yap, son 4 haneyi bırak. Örnek: <code>"1234567812345678"</code> → <code>"************5678"</code>.</p>',
+    q: '<p>Ilgaz Bank ekranlarında kart numarasının yalnızca son 4 hanesi görünmeli. <code>maskele(kart)</code> fonksiyonunu yaz: 16 haneli metni al, ilk 12 haneyi <code>*</code> yap, son 4 haneyi bırak. Örnek: <code>"1234567812345678"</code> → <code>"************5678"</code>.</p>',
     start: 'def maskele(kart):\n    # buraya yaz\n    pass\n',
     sol: 'def maskele(kart):\n    return "*" * (len(kart) - 4) + kart[-4:]\n',
     tests: 'assert maskele("1234567812345678") == "************5678", "ilk 12 hane * olmalı"\nassert maskele("00001111") == "****1111", "8 haneli girişte de son 4 kalmalı"\n',
@@ -229,7 +229,7 @@ L.push(
 
   { id: 'b-023', lv: 'temel', topic: 'Sözlükler', diff: 3, kind: 'yaz',
     title: 'İç içe sözlükte toplam bakiye',
-    q: '<p>Anadolu Bank müşteri verisi iç içe sözlük: <code>{"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}</code>. <code>toplam_bakiye(musteriler)</code> fonksiyonunu yaz: her müşterinin tüm hesaplarının toplamını <code>{"ali": 600, "ayşe": 50}</code> biçiminde döndürsün.</p>',
+    q: '<p>Ilgaz Bank müşteri verisi iç içe sözlük: <code>{"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}</code>. <code>toplam_bakiye(musteriler)</code> fonksiyonunu yaz: her müşterinin tüm hesaplarının toplamını <code>{"ali": 600, "ayşe": 50}</code> biçiminde döndürsün.</p>',
     start: 'def toplam_bakiye(musteriler):\n    # buraya yaz\n    pass\n',
     sol: 'def toplam_bakiye(musteriler):\n    return {ad: sum(hesaplar.values()) for ad, hesaplar in musteriler.items()}\n',
     tests: 'm = {"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}\nassert toplam_bakiye(m) == {"ali": 600, "ayşe": 50}, "ali 600, ayşe 50 olmalı"\nassert toplam_bakiye({"x": {}}) == {"x": 0}, "hesabı olmayan müşteri 0"\n',
@@ -270,7 +270,7 @@ L.push(
 
   { id: 'b-027', lv: 'temel', topic: 'Koşullar', diff: 2, kind: 'yaz',
     title: 'Kredi ön onay',
-    q: '<p>Anadolu Bank kredi ön onayı: <code>on_onay(yas, gelir, kredi_notu)</code> → yaş 18-70 arası (dahil) <b>ve</b> gelir en az 15000 <b>ve</b> kredi notu en az 1300 ise <code>"ONAY"</code>; yaş uygun değilse <code>"YAS"</code>; yaş uygun ama gelir yetersizse <code>"GELIR"</code>; ikisi de uygun ama not düşükse <code>"NOT"</code> döndür.</p>',
+    q: '<p>Ilgaz Bank kredi ön onayı: <code>on_onay(yas, gelir, kredi_notu)</code> → yaş 18-70 arası (dahil) <b>ve</b> gelir en az 15000 <b>ve</b> kredi notu en az 1300 ise <code>"ONAY"</code>; yaş uygun değilse <code>"YAS"</code>; yaş uygun ama gelir yetersizse <code>"GELIR"</code>; ikisi de uygun ama not düşükse <code>"NOT"</code> döndür.</p>',
     start: 'def on_onay(yas, gelir, kredi_notu):\n    # buraya yaz\n    pass\n',
     sol: 'def on_onay(yas, gelir, kredi_notu):\n    if not (18 <= yas <= 70):\n        return "YAS"\n    if gelir < 15000:\n        return "GELIR"\n    if kredi_notu < 1300:\n        return "NOT"\n    return "ONAY"\n',
     tests: 'assert on_onay(30, 20000, 1500) == "ONAY", "uygun başvuru ONAY"\nassert on_onay(17, 20000, 1500) == "YAS", "17 yaş YAS"\nassert on_onay(71, 20000, 1500) == "YAS", "71 yaş YAS"\nassert on_onay(30, 10000, 1500) == "GELIR", "düşük gelir GELIR"\nassert on_onay(30, 20000, 1000) == "NOT", "düşük not NOT"\nassert on_onay(18, 15000, 1300) == "ONAY", "sınır değerler ONAY"\n',
@@ -311,7 +311,7 @@ L.push(
 
   { id: 'b-031', lv: 'temel', topic: 'Döngüler', diff: 2, kind: 'yaz',
     title: 'İlk negatif bakiye',
-    q: '<p>Anadolu Bank hesap hareketleri listesi: <code>[100, -30, -80, 50]</code>. Başlangıç bakiyesi 0. <code>ilk_eksi(hareketler)</code> fonksiyonunu yaz: bakiyenin ilk kez negatife düştüğü hareketin indeksini döndürsün; hiç düşmüyorsa <code>-1</code>. Negatife düşünce döngüyü <code>break</code> ile bitir.</p>',
+    q: '<p>Ilgaz Bank hesap hareketleri listesi: <code>[100, -30, -80, 50]</code>. Başlangıç bakiyesi 0. <code>ilk_eksi(hareketler)</code> fonksiyonunu yaz: bakiyenin ilk kez negatife düştüğü hareketin indeksini döndürsün; hiç düşmüyorsa <code>-1</code>. Negatife düşünce döngüyü <code>break</code> ile bitir.</p>',
     start: 'def ilk_eksi(hareketler):\n    # buraya yaz\n    pass\n',
     sol: 'def ilk_eksi(hareketler):\n    bakiye = 0\n    for i, h in enumerate(hareketler):\n        bakiye += h\n        if bakiye < 0:\n            return i\n    return -1\n',
     tests: 'assert ilk_eksi([100, -30, -80, 50]) == 2, "bakiye 2. indekste -10 olur"\nassert ilk_eksi([10, 20]) == -1, "hiç negatif olmazsa -1"\nassert ilk_eksi([-5]) == 0, "ilk hareket negatife düşürürse 0"\nassert ilk_eksi([]) == -1, "boş liste -1"\n',
@@ -341,7 +341,7 @@ L.push(
 
   { id: 'b-034', lv: 'temel', topic: 'Döngüler', diff: 3, kind: 'yaz',
     title: 'Bileşik faiz: kaç yıl?',
-    q: '<p>Anadolu Bank: <code>kac_yil(anapara, oran, hedef)</code> fonksiyonunu yaz. Her yıl bakiye <code>oran</code> yüzde artar (ör. 10 → %10). Bakiyenin <code>hedef</code>e ulaşması ya da geçmesi için gereken tam yıl sayısını <code>while</code> ile hesapla. Başlangıçta zaten hedefe ulaşmışsa 0 döndür.</p>',
+    q: '<p>Ilgaz Bank: <code>kac_yil(anapara, oran, hedef)</code> fonksiyonunu yaz. Her yıl bakiye <code>oran</code> yüzde artar (ör. 10 → %10). Bakiyenin <code>hedef</code>e ulaşması ya da geçmesi için gereken tam yıl sayısını <code>while</code> ile hesapla. Başlangıçta zaten hedefe ulaşmışsa 0 döndür.</p>',
     start: 'def kac_yil(anapara, oran, hedef):\n    # buraya yaz\n    pass\n',
     sol: 'def kac_yil(anapara, oran, hedef):\n    yil = 0\n    bakiye = anapara\n    while bakiye < hedef:\n        bakiye *= 1 + oran / 100\n        yil += 1\n    return yil\n',
     tests: 'assert kac_yil(1000, 10, 1300) == 3, "1000 -> 1331 üçüncü yılda hedefi geçer"\nassert kac_yil(1000, 10, 1000) == 0, "zaten hedefte: 0 yıl"\nassert kac_yil(100, 100, 800) == 3, "her yıl ikiye katlanır: 3 yıl"\n',
@@ -443,7 +443,7 @@ L.push(
 
   { id: 'b-044', lv: 'temel', topic: 'Dosya ve Hata', diff: 2, kind: 'tamamla',
     title: 'Kendi istisnanı fırlat',
-    q: '<p>Anadolu Bank para çekme: <code>para_cek(bakiye, tutar)</code> tutar bakiyeden büyükse <code>ValueError("Yetersiz bakiye")</code> fırlatsın, aksi halde yeni bakiyeyi döndürsün. Boşluğu tamamla.</p>',
+    q: '<p>Ilgaz Bank para çekme: <code>para_cek(bakiye, tutar)</code> tutar bakiyeden büyükse <code>ValueError("Yetersiz bakiye")</code> fırlatsın, aksi halde yeni bakiyeyi döndürsün. Boşluğu tamamla.</p>',
     start: 'def para_cek(bakiye, tutar):\n    if tutar > bakiye:\n        # ... buraya ...\n    return bakiye - tutar\n',
     sol: 'def para_cek(bakiye, tutar):\n    if tutar > bakiye:\n        raise ValueError("Yetersiz bakiye")\n    return bakiye - tutar\n',
     tests: 'assert para_cek(100, 30) == 70, "100 - 30 = 70"\ntry:\n    para_cek(10, 50)\n    assert False, "ValueError fırlatılmalıydı"\nexcept ValueError as e:\n    assert str(e) == "Yetersiz bakiye", "hata mesajı \\"Yetersiz bakiye\\" olmalı"\n',
@@ -747,7 +747,7 @@ L.push(
   /* --- Tarih-Saat --- */
   { id: 'b-073', lv: 'orta', topic: 'Tarih-Saat', diff: 1, kind: 'yaz',
     title: 'Vade tarihi',
-    q: '<p>Anadolu Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
+    q: '<p>Ilgaz Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
     start: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    # buraya yaz\n    pass\n',
     sol: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    d = date.fromisoformat(baslangic) + timedelta(days=gun)\n    return d.isoformat()\n',
     tests: 'assert vade_tarihi("2026-01-30", 3) == "2026-02-02", "ay geçişi doğru olmalı"\nassert vade_tarihi("2024-02-28", 1) == "2024-02-29", "artık yıl 29 Şubat"\nassert vade_tarihi("2026-12-31", 1) == "2027-01-01", "yıl geçişi"\n',
@@ -788,7 +788,7 @@ L.push(
 
   { id: 'b-077', lv: 'orta', topic: 'Regex', diff: 2, kind: 'yaz',
     title: 'Log satırını ayrıştır',
-    q: '<p>Anadolu Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
+    q: '<p>Ilgaz Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
     start: 'import re\n\ndef log_ayristir(satir):\n    # buraya yaz\n    pass\n',
     sol: 'import re\n\nDESEN = re.compile(r"^(?P<tarih>\\d{4}-\\d{2}-\\d{2}) (?P<saat>\\d{2}:\\d{2}:\\d{2}) \\[(?P<seviye>[A-Z]+)\\] (?P<mesaj>.*)$")\n\ndef log_ayristir(satir):\n    m = DESEN.match(satir)\n    return m.groupdict() if m else None\n',
     tests: 'r = log_ayristir("2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı")\nassert r == {"tarih": "2026-03-15", "saat": "14:02:11", "seviye": "ERROR", "mesaj": "Hesap TR12 bulunamadı"}, "alanlar doğru ayrışmalı"\nassert log_ayristir("bozuk satır") is None, "eşleşmeyen satır None"\n',

@@ -835,7 +835,7 @@ assert sehir_musterileri(_c, "Ka'ş") == 0, "kesme işaretli girdi çökmemeli"
   'why': 'Parametreli sorguda değer SQL\'in parçası olmaz; veritabanı onu her zaman veri olarak görür. Bu hem enjeksiyonu hem de tırnak hatalarını kökten çözer. Kendi kaçış fonksiyonunu yazmak çözüm değildir.'})
 
 ex.append({'t': 'code', 'stage': 'Hata avı', 'kind': 'bug', 'id': 'postgresql-python-10', 'diff': 2,
-  'q': '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın <code>havale(con, kimden, kime, tutar)</code> fonksiyonu önce gönderenden düşüyor, sonra alıcıya ekliyor. Alıcı hesap numarası yanlış yazıldığında para gönderenden düşüyor ama hiçbir hesaba geçmiyor: toplam bakiye azalıyor! Fonksiyon alıcı yoksa ya da bakiye yetmiyorsa <code>ValueError</code> fırlatmalı ve <b>hiçbir</b> bakiye değişmemeli; başarıda <code>True</code> döndürmeli.</p>',
+  'q': '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın <code>havale(con, kimden, kime, tutar)</code> fonksiyonu önce gönderenden düşüyor, sonra alıcıya ekliyor. Alıcı hesap numarası yanlış yazıldığında para gönderenden düşüyor ama hiçbir hesaba geçmiyor: toplam bakiye azalıyor! Fonksiyon alıcı yoksa ya da bakiye yetmiyorsa <code>ValueError</code> fırlatmalı ve <b>hiçbir</b> bakiye değişmemeli; başarıda <code>True</code> döndürmeli.</p>',
   'start': ded('''
 import sqlite3
 

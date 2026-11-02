@@ -34,4 +34,4 @@ words = len(re.sub(r'<[^>]+>', ' ', L['body']).split())
 print('body kelime:', words, 'ex:', len(L['ex']), 'pre.py:', L['body'].count('<pre class="py">'))
 print(Counter(e['stage'] for e in L['ex']))
 with open(out, 'w') as f:
-    f.write('/* PythonPatika v2 — ' + L['id'] + ' */\n(function (W) {\n\'use strict\';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n' + val(L, 0) + '\n);\n})(window);\n')
+    f.write('/* Kesit Python v2 — ' + L['id'] + ' */\n(function (W) {\n\'use strict\';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n' + val(L, 0) + '\n);\n})(window);\n')

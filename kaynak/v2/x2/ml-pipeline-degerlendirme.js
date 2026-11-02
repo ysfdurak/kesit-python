@@ -1,4 +1,4 @@
-/* PythonPatika — 'ml-pipeline-degerlendirme' dersi uzantısı: açıklanabilirlik (PDP/ICE, permutation importance), hata dilimi, adalet metrikleri ve arama bütçesi (AUDIT Ekle-5, Ekle-6) */
+/* Kesit Python — 'ml-pipeline-degerlendirme' dersi uzantısı: açıklanabilirlik (PDP/ICE, permutation importance), hata dilimi, adalet metrikleri ve arama bütçesi (AUDIT Ekle-5, Ekle-6) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

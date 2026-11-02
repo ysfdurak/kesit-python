@@ -65,7 +65,7 @@ def main():
         lines.append('  }')
         parts.append('\n'.join(lines))
     title = exts[0].get('title') or ', '.join("'" + x['id'] + "'" for x in exts)
-    js = ("/* PythonPatika — " + ', '.join("'" + x['id'] + "'" for x in exts) + " uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */\n"
+    js = ("/* Kesit Python — " + ', '.join("'" + x['id'] + "'" for x in exts) + " uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */\n"
           "(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n" + ',\n'.join(parts) + "\n);\n})(window);\n")
     open(fname, 'w', encoding='utf-8').write(js)
     print('yazıldı:', fname)

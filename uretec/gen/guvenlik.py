@@ -10,7 +10,7 @@ LESSON = {
  'KVKK kapsamındaki kişisel veriyi maskeleme, takma adlandırma ve genelleme ile koruyabilirim.'],
 'body': r'''
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın internet şubesinde tek bir parametresiz SQL sorgusu, saldırganın tüm müşteri tablosunu okumasına yeter. Anadolu Market'in yorum alanında kaçırılmamış tek bir HTML çıktısı, başka müşterilerin oturum çerezlerini çalan bir betiğe dönüşebilir. Güvenlik "sonra bakarız" denilecek bir katman değildir; her fonksiyonda verdiğin küçük kararların toplamıdır. Bu derste saldırıyı önce <b>kendi gözünle görecek</b> (sqlite3 ve saf Python ile, tamamen yerel ve zararsız), sonra doğru kalıpla kapatacaksın.</p>
+<p>Ilgaz Bank'ın internet şubesinde tek bir parametresiz SQL sorgusu, saldırganın tüm müşteri tablosunu okumasına yeter. Anadolu Market'in yorum alanında kaçırılmamış tek bir HTML çıktısı, başka müşterilerin oturum çerezlerini çalan bir betiğe dönüşebilir. Güvenlik "sonra bakarız" denilecek bir katman değildir; her fonksiyonda verdiğin küçük kararların toplamıdır. Bu derste saldırıyı önce <b>kendi gözünle görecek</b> (sqlite3 ve saf Python ile, tamamen yerel ve zararsız), sonra doğru kalıpla kapatacaksın.</p>
 <div class="warn"><b>Etik çizgi</b>Buradaki teknikleri yalnız kendi kodunda, kendi test ortamında ya da yazılı izin aldığın sistemlerde dene. İzinsiz sisteme saldırı denemesi Türkiye'de de suçtur (TCK 243-245).</div>
 
 <h2>OWASP Top 10: haritayı tanı</h2>
@@ -581,7 +581,7 @@ assert "compare_digest" in __source__, "hmac.compare_digest kullan"
   'hints': ['İmzaya hem oturum kimliğini hem zamanı kat; böylece ikisi de değiştirilemez.', 'split ve int dönüşümünü try içine al; None.split AttributeError verir.', 'Süre kontrolü: 0 <= simdi - zaman <= omur'],
   'why': 'Token oturuma bağlandığı için başka bir kullanıcının token\'ı işe yaramaz; zaman damgası imzanın içinde olduğundan saldırgan süreyi uzatamaz. Django\'nun CSRF ve parola sıfırlama token\'ları da benzer HMAC tabanlı tasarım kullanır.'},
  {'id': 'web-guvenlik-9', 't': 'code', 'stage': 'Hata avı', 'kind': 'bug', 'diff': 2,
-  'q': '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın <code>giris(db, kullanici, parola_ozeti)</code> fonksiyonu kullanıcı adı ve parola özeti eşleşirse kullanıcının <code>id</code>\'sini, eşleşmezse <code>None</code> döndürmeli. Sızma testinde kullanıcı adı alanına <code>admin\' --</code> yazılarak parolasız giriş yapıldı. Sorguyu güvenli hale getir.</p>',
+  'q': '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın <code>giris(db, kullanici, parola_ozeti)</code> fonksiyonu kullanıcı adı ve parola özeti eşleşirse kullanıcının <code>id</code>\'sini, eşleşmezse <code>None</code> döndürmeli. Sızma testinde kullanıcı adı alanına <code>admin\' --</code> yazılarak parolasız giriş yapıldı. Sorguyu güvenli hale getir.</p>',
   'start': r'''import sqlite3
 
 def giris(db, kullanici, parola_ozeti):
@@ -611,7 +611,7 @@ assert giris(db, "o\'neil", "c3d4") == 2, "adında kesme işareti olan meşru ku
   'q': '<p>Hatayı bul ve düzelt. Bir stajyerin yazdığı parola saklama kodu testlerden geçiyor ama güvenlik incelemesinde üç sorun bulundu: tuz tüm kullanıcılar için aynı, özet tek tur SHA-256 (çok hızlı), karşılaştırma <code>==</code> ile yapılıyor. <code>kayit_olustur(parola)</code> ve <code>dogrula(parola, kayit)</code> fonksiyonlarının <b>arayüzünü koruyarak</b> düzelt: kayıt <code>{"tuz": hex, "ozet": hex, "tur": int}</code> sözlüğü olsun; her kayıtta <code>secrets</code> ile 16 baytlık farklı tuz, en az 10000 turluk <code>pbkdf2_hmac</code> ve <code>hmac.compare_digest</code> kullan.</p>',
   'start': r'''import hashlib
 
-TUZ = "anadolu_bank"
+TUZ = "ilgaz_bank"
 
 def kayit_olustur(parola):
     ozet = hashlib.sha256((TUZ + parola).encode()).hexdigest()
@@ -728,7 +728,7 @@ assert log_temizle("telefon 05321234567") == "telefon ***********", "11 haneli h
   'hints': ['Her kural için ayrı derlenmiş regex; sırayla uygula.', 'Kart için (?<!\\d)(?:\\d[ -]?){12,18}\\d(?!\\d) kalıbı boşluk/tire içeren 13-19 rakamı yakalar; eşleşmeden rakamları re.sub(r"\\D", "", ...) ile çıkar.', 'TC kuralını kart kuralından önce uygula ki bitişik 11 rakam karta dönüşmesin; ya da tersi için sınırları dikkatle kur.'],
   'why': 'Gizli bilgi maskelemesi log toplayıcıya gönderilmeden önce, uygulamanın içinde yapılmalıdır; log sistemleri genellikle geniş bir ekibe açıktır. Temkinli (fazla maskeleyen) kural, eksik maskeleyen kuraldan iyidir.'},
  {'id': 'web-guvenlik-13', 't': 'code', 'stage': 'Mini proje', 'diff': 3,
-  'q': '<p>Anadolu Bank için güvenli bir <code>KullaniciServisi(db)</code> sınıfı yaz. Tablo hazır: <code>kullanici(ad TEXT PRIMARY KEY, kayit TEXT, hatali INTEGER)</code>.</p><ul><li><code>kaydol(ad, parola)</code>: <code>ad</code> 3-20 karakter, yalnız küçük harf, rakam ve alt çizgi (<code>^[a-z0-9_]{3,20}$</code>); parola en az 10 karakter, en az bir harf ve bir rakam içermeli. Kural ihlalinde <code>ValueError</code>. Ad zaten varsa <code>ValueError("kayıtlı")</code>. Parolayı <code>pbkdf2_sha256$tur$tuz$ozet</code> biçiminde (tur = <code>self.tur</code>, varsayılan 5000) sakla.</li><li><code>giris(ad, parola)</code>: başarılıysa <code>True</code> ve hatalı sayacını sıfırlar; yanlış parolada sayacı artırıp <code>False</code>. Sayaç 3\'e ulaşmış hesap <b>kilitlidir</b>: doğru parolada bile <code>False</code>. Olmayan kullanıcıda <code>False</code>.</li><li><code>kilit_ac(ad)</code>: sayacı sıfırlar.</li></ul><p>Tüm SQL parametreli olsun; karşılaştırmada <code>hmac.compare_digest</code> kullan.</p>',
+  'q': '<p>Ilgaz Bank için güvenli bir <code>KullaniciServisi(db)</code> sınıfı yaz. Tablo hazır: <code>kullanici(ad TEXT PRIMARY KEY, kayit TEXT, hatali INTEGER)</code>.</p><ul><li><code>kaydol(ad, parola)</code>: <code>ad</code> 3-20 karakter, yalnız küçük harf, rakam ve alt çizgi (<code>^[a-z0-9_]{3,20}$</code>); parola en az 10 karakter, en az bir harf ve bir rakam içermeli. Kural ihlalinde <code>ValueError</code>. Ad zaten varsa <code>ValueError("kayıtlı")</code>. Parolayı <code>pbkdf2_sha256$tur$tuz$ozet</code> biçiminde (tur = <code>self.tur</code>, varsayılan 5000) sakla.</li><li><code>giris(ad, parola)</code>: başarılıysa <code>True</code> ve hatalı sayacını sıfırlar; yanlış parolada sayacı artırıp <code>False</code>. Sayaç 3\'e ulaşmış hesap <b>kilitlidir</b>: doğru parolada bile <code>False</code>. Olmayan kullanıcıda <code>False</code>.</li><li><code>kilit_ac(ad)</code>: sayacı sıfırlar.</li></ul><p>Tüm SQL parametreli olsun; karşılaştırmada <code>hmac.compare_digest</code> kullan.</p>',
   'start': r'''import sqlite3, hashlib, hmac, secrets, re
 
 def yeni_db():

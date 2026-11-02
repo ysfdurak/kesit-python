@@ -1,4 +1,4 @@
-/* PythonPatika — v2/i1: İleri görselleştirme: seaborn, plotly ve doğru grafik */
+/* Kesit Python — v2/i1: İleri görselleştirme: seaborn, plotly ve doğru grafik */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

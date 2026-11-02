@@ -162,7 +162,7 @@
   lv: 'orta',
   topic: 'İş sorusunu analize çevirme',
   kind: 'vaka',
-  q: 'Anadolu Bank pazarlama müdürü "Müşteriler neden bizi bırakıyor?" diye soruyor. Bu belirsiz soruyu analiz edilebilir hâle nasıl getirirsin?',
+  q: 'Ilgaz Bank pazarlama müdürü "Müşteriler neden bizi bırakıyor?" diye soruyor. Bu belirsiz soruyu analiz edilebilir hâle nasıl getirirsin?',
   a: '<p><b>1) Terki tanımla:</b> Bankada "terk" net değildir. Hesap kapatma mı, 90 gün işlem yapmama mı, maaş hesabını taşıma mı? İş birimiyle birlikte ölçülebilir bir tanım seçilir: "Son 90 günde hiç işlem yapmayan ve bakiyesi 100 TL altına inen bireysel müşteri."</p><p><b>2) Soruyu alt sorulara böl:</b> Terk oranı ne ve zamanla nasıl değişiyor? Hangi segmentlerde yüksek (yaş, ürün sayısı, kanal, şube)? Terkten önce hangi sinyaller var (şikâyet, ücret artışı, kart limit reddi)?</p><p><b>3) Hipotezler kur:</b> "Tek ürünlü müşteriler daha çok terk ediyor", "Hesap işletim ücretinin getirildiği aydan sonra terk arttı", "Mobil uygulamayı kullanmayanlar daha riskli".</p><p><b>4) Veri ve yöntem:</b> Müşteri-ay tablosu kur; kohort tutma eğrileri, segment karşılaştırmaları, gerekirse lojistik regresyonla risk faktörleri. Korelasyonu nedensellik gibi sunmamaya dikkat et.</p><p><b>5) Eyleme bağla:</b> Çıktı "şu 3 segment, şu sinyaller; önerimiz şu" biçiminde olmalı ve ölçülebilir bir eyleme dönüşmeli: riskli müşteriye ücret muafiyeti teklifini A/B testiyle denemek gibi.</p>',
   follow: ['Terk tanımın değişirse sonuçlar nasıl etkilenir?', 'Analizin başarısını nasıl ölçersin?', 'Paydaş beklentisini nasıl yönetirsin?'],
   flags: ['Tanım yapmadan doğrudan model kurmaya atlamak', 'Analizi bir eylem önerisine bağlamamak'],

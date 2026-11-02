@@ -119,7 +119,7 @@ def aksansiz(metin):
 
 print(aksansiz("Çağrı Şüküroğlu Gölbaşı"))
 print(unicodedata.name("ğ"))</pre>
-<div class="note"><b>Gerçek işte</b>Anadolu Bank müşteri eşleştirme ekibi, şubelerden gelen "İSMAİL ÖZTÜRK", "ismail ozturk" ve "Ismail Öztürk" kayıtlarının aynı kişi olup olmadığını bulmak zorunda. Kullandıkları "anahtar üretici" tam olarak bu dersin adımlarıdır: NFC normalleştirme, Türkçe kurallarıyla küçük harf, aksanları silme, fazla boşlukları teke indirme. Bu anahtar üzerinden yapılan eşleştirme, mükerrer müşteri kaydını ve bunun yol açtığı yanlış risk raporlarını büyük ölçüde azaltır. E-ticaret aramasında da aynı mantık çalışır: "cagri" yazan kullanıcı "Çağrı" ürününü bulmalıdır.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank müşteri eşleştirme ekibi, şubelerden gelen "İSMAİL ÖZTÜRK", "ismail ozturk" ve "Ismail Öztürk" kayıtlarının aynı kişi olup olmadığını bulmak zorunda. Kullandıkları "anahtar üretici" tam olarak bu dersin adımlarıdır: NFC normalleştirme, Türkçe kurallarıyla küçük harf, aksanları silme, fazla boşlukları teke indirme. Bu anahtar üzerinden yapılan eşleştirme, mükerrer müşteri kaydını ve bunun yol açtığı yanlış risk raporlarını büyük ölçüde azaltır. E-ticaret aramasında da aynı mantık çalışır: "cagri" yazan kullanıcı "Çağrı" ürününü bulmalıdır.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Karakter mi, kod noktası mı, grafem mi?</h3>

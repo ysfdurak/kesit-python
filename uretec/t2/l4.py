@@ -132,7 +132,7 @@ sehir = girilen_sehir.strip() or "İstanbul"
 gun = int(girilen_gun.strip() or "7")
 print(f"Rapor: {sehir}, {gun} gün")</pre>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank şubelerinde kullanılan eski bir terminal uygulaması, gişe görevlisinin girdiği tutarı <code>float(input())</code> ile okuyordu. "1.500" yazan görevli 1,5 TL'lik işlem yaptı; "1500,00" yazan ise ValueError ile ekranı kilitledi. Yeni sürümde girdi katmanı üç kurala bağlandı: Türkçe biçim ayrıştırıcı (binlik nokta, ondalık virgül), aralık kontrolü (0 &lt; tutar ≤ günlük limit) ve büyük tutarlarda "1.500,00 TL onaylıyor musunuz? (e/h)" teyidi. Aynı ilkeler web formlarında da geçerlidir: istemci tarafı kontrol yetmez, sunucu girdiyi her zaman yeniden doğrular.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank şubelerinde kullanılan eski bir terminal uygulaması, gişe görevlisinin girdiği tutarı <code>float(input())</code> ile okuyordu. "1.500" yazan görevli 1,5 TL'lik işlem yaptı; "1500,00" yazan ise ValueError ile ekranı kilitledi. Yeni sürümde girdi katmanı üç kurala bağlandı: Türkçe biçim ayrıştırıcı (binlik nokta, ondalık virgül), aralık kontrolü (0 &lt; tutar ≤ günlük limit) ve büyük tutarlarda "1.500,00 TL onaylıyor musunuz? (e/h)" teyidi. Aynı ilkeler web formlarında da geçerlidir: istemci tarafı kontrol yetmez, sunucu girdiyi her zaman yeniden doğrular.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Asla eval(input()) yazma</h3>

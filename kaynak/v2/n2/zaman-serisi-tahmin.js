@@ -1,4 +1,4 @@
-/* PythonPatika — ileri: zaman-serisi-tahmin */
+/* Kesit Python — ileri: zaman-serisi-tahmin */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

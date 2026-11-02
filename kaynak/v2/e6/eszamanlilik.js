@@ -1,4 +1,4 @@
-/* PythonPatika — 'eszamanlilik' dersi uzantısı (Derinleş) */
+/* Kesit Python — 'eszamanlilik' dersi uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

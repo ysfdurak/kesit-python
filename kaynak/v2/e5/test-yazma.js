@@ -1,4 +1,4 @@
-/* PythonPatika — test-yazma uzantısı (Derinleş) */
+/* Kesit Python — test-yazma uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -122,7 +122,7 @@ pytest -x --lf                                   # ilk hatada dur, son düşenle
 pytest --cov=src --cov-report=term-missing       # kapsam: hangi satırlar test edilmedi</pre>
 <p>Sık karşılaşılan sorunlar: <code>Ran 0 tests</code> görüyorsan dosya adı <code>test_</code> ile başlamıyor ya da <code>tests</code> klasöründe <code>__init__.py</code> yok (unittest discover için gerekebilir). <code>ModuleNotFoundError: No module named 'src'</code> alıyorsan paketi <code>pip install -e .</code> ile kur ya da testleri proje kökünden çalıştır. Kapsam (coverage) yüzdesi hedef değil, bir el fenerdir: %100 kapsam doğru assert'ler olmadan hiçbir şey kanıtlamaz.</p>
 <div class="tip"><b>Testini test et</b>Bir testin değerli olup olmadığını anlamanın en kısa yolu: koddaki bir koşulu bilerek boz (ör. <code>&lt;=</code> yerine <code>&lt;</code>) ve testin <b>kırmızıya döndüğünü</b> gör. Buna mutasyon testi denir; <code>mutmut</code> gibi araçlar bunu otomatik yapar. Bu dersteki bazı alıştırmalar da testini bozuk bir gerçeklemeye karşı koşturarak doğrular.</div>
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ta bir hata canlıya çıktığında ilk iş, hatayı yeniden üreten bir test yazmaktır (regression test); test kırmızıyken düzeltme yapılır, yeşile dönünce birleştirilir. Pull request'ler ancak tüm testler CI'da geçtiğinde ve değişen satırların kapsamı belirli bir eşiğin üzerinde olduğunda onaylanır. Dış servisler (SMS, ödeme, kur) testlerde her zaman spec'li mock ya da fake ile değiştirilir; test süitinin ağsız ve birkaç saniyede bitmesi hedeflenir.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ta bir hata canlıya çıktığında ilk iş, hatayı yeniden üreten bir test yazmaktır (regression test); test kırmızıyken düzeltme yapılır, yeşile dönünce birleştirilir. Pull request'ler ancak tüm testler CI'da geçtiğinde ve değişen satırların kapsamı belirli bir eşiğin üzerinde olduğunda onaylanır. Dış servisler (SMS, ödeme, kur) testlerde her zaman spec'li mock ya da fake ile değiştirilir; test süitinin ağsız ve birkaç saniyede bitmesi hedeflenir.</div>
 `,
   ex: [
     {

@@ -20,7 +20,7 @@ TRP = r'''def tr_para(x):
 
 EKSTRE_GEN = r'''import veri
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 def tr_para(x):
@@ -28,7 +28,7 @@ def tr_para(x):
 
 
 # pdfplumber'ın page.extract_text() çıktısını taklit eden ekstre metni
-satirlar = ["ANADOLU BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]
+satirlar = ["ILGAZ BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]
 for t in txns:
     if t["account_id"] == 100583 and t["txn_time"].startswith("2024-03"):
         g, s = t["txn_time"].split()
@@ -356,7 +356,7 @@ assert r2["tarih"] == "2024-11-05" and r2["toplam"] == 12480.0, "Başka faturada
     'why': "Etiket + çapa + dar karakter sınıfı, fatura ayıklamanın en sağlam üçlüsüdür. ISO tarih (YYYY-MM-DD) hem sıralanabilir hem de veritabanına doğrudan yazılabilir."})
 
 ex.append({'t': 'code', 'id': 'pdf-word-otomasyon-2', 'stage': 'Rehberli', 'diff': 2,
-    'q': "<p>Başlangıç kodu, Anadolu Bank'ın 100583 numaralı hesabının Mart 2024 ekstresini (<code>bank_txns</code> verisinden) pdfplumber çıktısı gibi metne döküyor. <code>ekstre_satirlari(metin)</code> fonksiyonunu yaz: başlık ve sayfa satırlarını atlayıp her işlem satırından <code>{\"tarih\": \"2024-03-03\", \"tur\": \"HAVALE_GIRIS\", \"tutar\": 3300.0}</code> sözlüğü üretsin. Sonra <code>ekstre_ozet(satirlar)</code>: <code>(toplam_giris, toplam_cikis, adet)</code> döndürsün (çıkış negatif, 2 basamak).</p>",
+    'q': "<p>Başlangıç kodu, Ilgaz Bank'ın 100583 numaralı hesabının Mart 2024 ekstresini (<code>bank_txns</code> verisinden) pdfplumber çıktısı gibi metne döküyor. <code>ekstre_satirlari(metin)</code> fonksiyonunu yaz: başlık ve sayfa satırlarını atlayıp her işlem satırından <code>{\"tarih\": \"2024-03-03\", \"tur\": \"HAVALE_GIRIS\", \"tutar\": 3300.0}</code> sözlüğü üretsin. Sonra <code>ekstre_ozet(satirlar)</code>: <code>(toplam_giris, toplam_cikis, adet)</code> döndürsün (çıkış negatif, 2 basamak).</p>",
     'guide': ["Önce <code>print(ekstre)</code> ile satır biçimini incele.", "Satır kalıbı: tarih, saat, tür, kanal ve tutar; aralarında bir ya da daha fazla boşluk var.", "<code>re.finditer(kalip, metin, re.M)</code> ile tüm eşleşmeleri gez, tarihi ISO'ya, tutarı float'a çevir.", "Özette pozitifleri ve negatifleri ayrı topla, <code>round(..., 2)</code> uygula."],
     'example': C(r'''
 import re
@@ -470,7 +470,7 @@ assert sozlesme_doldur(SABLON, tam)[1] == [], "Tüm alanlar verilince eksik list
     'why': "Eksik alanı sessizce boş bırakmak yerine listelemek, belgeyi göndermeden önce durdurma şansı verir. Toplu üretimde eksik listesi boş olmayan belge 'insan onayı' klasörüne gider."})
 
 ex.append({'t': 'code', 'id': 'pdf-word-otomasyon-4', 'stage': 'Rehberli', 'diff': 2,
-    'q': "<p>KVKK için müşteri adlarını maskele. <code>isim_maskele(ad_soyad)</code>: her kelimenin ilk harfi kalsın, kalan harfler <code>*</code> olsun (<code>\"İrem Çelik\"</code> → <code>\"İ*** Ç****\"</code>). Fazla boşluklar tek boşluğa insin. Ardından <code>maskeli_rapor(musteriler, sehir)</code>: <code>veri.kayitlar(\"anadolu_bank\", \"bank_customers\")</code> listesinden verilen şehirdeki <b>pazarlama izni olmayan</b> (<code>kvkk_consent == 0</code>) müşterileri <code>(customer_id, maskeli_ad)</code> listesi olarak döndürsün (kimliğe göre sıralı).</p>",
+    'q': "<p>KVKK için müşteri adlarını maskele. <code>isim_maskele(ad_soyad)</code>: her kelimenin ilk harfi kalsın, kalan harfler <code>*</code> olsun (<code>\"İrem Çelik\"</code> → <code>\"İ*** Ç****\"</code>). Fazla boşluklar tek boşluğa insin. Ardından <code>maskeli_rapor(musteriler, sehir)</code>: <code>veri.kayitlar(\"ilgaz_bank\", \"bank_customers\")</code> listesinden verilen şehirdeki <b>pazarlama izni olmayan</b> (<code>kvkk_consent == 0</code>) müşterileri <code>(customer_id, maskeli_ad)</code> listesi olarak döndürsün (kimliğe göre sıralı).</p>",
     'guide': ["<code>ad_soyad.split()</code> fazla boşlukları da temizler.", "Her kelime için <code>k[0] + \"*\" * (len(k) - 1)</code>.", "Kelimeleri <code>\" \".join(...)</code> ile birleştir.", "Raporda şehir ve izin koşuluyla süz, <code>isim_maskele</code> uygula, kimliğe göre sırala."],
     'example': C(r'''
 kart = "4543 1234 5678 9012"
@@ -480,7 +480,7 @@ print(" ".join(g if i in (0, len(gruplar) - 1) else "*" * len(g) for i, g in enu
     'start': C(r'''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def isim_maskele(ad_soyad):
@@ -496,7 +496,7 @@ def maskeli_rapor(musteriler, sehir):
     'sol': C(r'''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def isim_maskele(ad_soyad):
@@ -1060,7 +1060,7 @@ mistakes = [
 lesson = {
     'id': 'pdf-word-otomasyon', 'lv': 'orta', 'mod': 'Otomasyon ve Araçlar', 'min': 55,
     'title': 'PDF ve Word belgeleriyle otomasyon',
-    'sum': "PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve ekstre alanı ayıklamayı, string.Template, Jinja2 ve docxtpl ile şablon doldurmayı, toplu işlemde hata dayanıklılığını ve KVKK maskelemeyi Lezzet Kurye ve Anadolu Bank verisiyle öğrenirsin.",
+    'sum': "PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve ekstre alanı ayıklamayı, string.Template, Jinja2 ve docxtpl ile şablon doldurmayı, toplu işlemde hata dayanıklılığını ve KVKK maskelemeyi Lezzet Kurye ve Ilgaz Bank verisiyle öğrenirsin.",
     'needs': ['jinja2'],
     'goals': ["Dijital ve taranmış PDF'i ayırt edip pypdf, pdfplumber ya da OCR arasında doğru aracı seçebilirim.", "Fatura ve ekstre metninden regex ile alanları ayıklar, Türkçe sayı biçimini doğru çevirir ve aritmetik tutarlılığı denetleyebilirim.", "string.Template, Jinja2 ve docxtpl ile sözleşme, fatura ve teklif şablonlarını eksik alan denetimiyle doldurabilirim.", "Bir klasördeki yüzlerce belgeyi hata listesi tutarak, tek dosyada durmadan toplu işleyebilirim.", "Ad, T.C. kimlik numarası, telefon, e-posta ve IBAN'ı KVKK'ya uygun biçimde maskeleyebilirim."],
     'body': body.replace('${', '&#36;{'), 'ex': ex, 'faq': faq, 'mistakes': mistakes}

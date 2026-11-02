@@ -1,4 +1,4 @@
-/* PythonPatika — 'sqlite-python' dersi uzantısı: Pencere fonksiyonları ve CTE (gerçek veri setleri) */
+/* Kesit Python — 'sqlite-python' dersi uzantısı: Pencere fonksiyonları ve CTE (gerçek veri setleri) */
 // needs: sqlite3
 (function (W) {
 'use strict';
@@ -8,7 +8,7 @@ X.push(
     id: 'sqlite-python',
     min: 25,
     needs: ['sqlite3'],
-    html: `<h2>Derinleş: pencere fonksiyonları ve CTE ile analitik SQL</h2><p>Derste <code>GROUP BY</code> ile özet çıkarmayı gördün. GROUP BY satırları <b>daraltır</b>: 910 sipariş, kanal başına 3 satıra iner. Analist sorularının çoğu ise satırları koruyup yanına bir özet eklemeyi ister: "her siparişin, müşterinin kaçıncı siparişi olduğu", "her ayın bir önceki aya göre değişimi", "her şehirde en çok harcayan müşteri". Bunun aracı <b>pencere fonksiyonlarıdır</b> (window functions). Uzun sorguları okunur adımlara bölmek için de <b>CTE</b> (common table expression, <code>WITH ... AS</code>) kullanılır. SQLite 3.25'ten beri ikisini de destekler; tarayıcıdaki ve Python'la gelen sqlite3 bu sürümlerin çok üstündedir. Bu bölümde gerçek Anadolu Market verisini <code>veri.baglan</code> ile yükleyeceğiz. Konunun tam hâli SQLPatika'nın analitik SQL derslerindedir; burada Python tarafından nasıl kullanılacağına odaklanıyoruz.</p><h3>CTE: sorguyu adımlara bölmek</h3><p>Sipariş tutarı kalemlerden hesaplanır. Bunu her sorguda alt sorgu olarak tekrar yazmak yerine bir kez <code>sip</code> adlı CTE olarak tanımlarız; sonraki adımlar onu tablo gibi kullanır. Birden çok CTE virgülle zincirlenir ve her biri öncekileri görebilir.</p><pre class="py">import veri
+    html: `<h2>Derinleş: pencere fonksiyonları ve CTE ile analitik SQL</h2><p>Derste <code>GROUP BY</code> ile özet çıkarmayı gördün. GROUP BY satırları <b>daraltır</b>: 910 sipariş, kanal başına 3 satıra iner. Analist sorularının çoğu ise satırları koruyup yanına bir özet eklemeyi ister: "her siparişin, müşterinin kaçıncı siparişi olduğu", "her ayın bir önceki aya göre değişimi", "her şehirde en çok harcayan müşteri". Bunun aracı <b>pencere fonksiyonlarıdır</b> (window functions). Uzun sorguları okunur adımlara bölmek için de <b>CTE</b> (common table expression, <code>WITH ... AS</code>) kullanılır. SQLite 3.25'ten beri ikisini de destekler; tarayıcıdaki ve Python'la gelen sqlite3 bu sürümlerin çok üstündedir. Bu bölümde gerçek Anadolu Market verisini <code>veri.baglan</code> ile yükleyeceğiz. Konunun tam hâli Kesit SQL'in analitik SQL derslerindedir; burada Python tarafından nasıl kullanılacağına odaklanıyoruz.</p><h3>CTE: sorguyu adımlara bölmek</h3><p>Sipariş tutarı kalemlerden hesaplanır. Bunu her sorguda alt sorgu olarak tekrar yazmak yerine bir kez <code>sip</code> adlı CTE olarak tanımlarız; sonraki adımlar onu tablo gibi kullanır. Birden çok CTE virgülle zincirlenir ve her biri öncekileri görebilir.</p><pre class="py">import veri
 
 con = veri.baglan("anadolu_market", tablolar=["orders", "order_items", "customers", "products"])
 SQL = """

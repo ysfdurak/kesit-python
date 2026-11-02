@@ -1,4 +1,4 @@
-/* PythonPatika v2 — kimlik-yetki */
+/* Kesit Python v2 — kimlik-yetki */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

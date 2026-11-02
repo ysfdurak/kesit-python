@@ -279,7 +279,7 @@
   /* --- Tarih-Saat --- */
   { id: 'b-073', lv: 'orta', topic: 'Tarih-Saat', diff: 1, kind: 'yaz',
     title: 'Vade tarihi',
-    q: '<p>Anadolu Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
+    q: '<p>Ilgaz Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
     start: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    # buraya yaz\n    pass\n',
     sol: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    d = date.fromisoformat(baslangic) + timedelta(days=gun)\n    return d.isoformat()\n',
     tests: 'assert vade_tarihi("2026-01-30", 3) == "2026-02-02", "ay geçişi doğru olmalı"\nassert vade_tarihi("2024-02-28", 1) == "2024-02-29", "artık yıl 29 Şubat"\nassert vade_tarihi("2026-12-31", 1) == "2027-01-01", "yıl geçişi"\n',
@@ -320,7 +320,7 @@
 
   { id: 'b-077', lv: 'orta', topic: 'Regex', diff: 2, kind: 'yaz',
     title: 'Log satırını ayrıştır',
-    q: '<p>Anadolu Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
+    q: '<p>Ilgaz Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
     start: 'import re\n\ndef log_ayristir(satir):\n    # buraya yaz\n    pass\n',
     sol: 'import re\n\nDESEN = re.compile(r"^(?P<tarih>\\d{4}-\\d{2}-\\d{2}) (?P<saat>\\d{2}:\\d{2}:\\d{2}) \\[(?P<seviye>[A-Z]+)\\] (?P<mesaj>.*)$")\n\ndef log_ayristir(satir):\n    m = DESEN.match(satir)\n    return m.groupdict() if m else None\n',
     tests: 'r = log_ayristir("2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı")\nassert r == {"tarih": "2026-03-15", "saat": "14:02:11", "seviye": "ERROR", "mesaj": "Hesap TR12 bulunamadı"}, "alanlar doğru ayrışmalı"\nassert log_ayristir("bozuk satır") is None, "eşleşmeyen satır None"\n',

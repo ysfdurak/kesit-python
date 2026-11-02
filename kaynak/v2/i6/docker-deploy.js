@@ -1,4 +1,4 @@
-/* PythonPatika v2/i6 — Docker ve dağıtım */
+/* Kesit Python v2/i6 — Docker ve dağıtım */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — v2/n1: Veri rolleri mülakatı: SQL, pandas, istatistik ve vaka soruları */
+/* Kesit Python — v2/n1: Veri rolleri mülakatı: SQL, pandas, istatistik ve vaka soruları */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: ml-kumeleme (denetimsiz öğrenme) */
+/* Kesit Python — İleri: ml-kumeleme (denetimsiz öğrenme) */
 // needs: scikit-learn, numpy
 (function (W) {
 'use strict';
@@ -25,7 +25,7 @@ L.push(
 <ul>
 <li><b>Kümeleme</b> (clustering): benzer müşterileri, ürünleri, şubeleri gruplara ayırmak.</li>
 <li><b>Boyut indirgeme</b> (dimensionality reduction): 20 sütunu bilginin çoğunu koruyarak 2-3 sütuna sıkıştırmak (PCA).</li>
-<li><b>Anomali tespiti</b> (anomaly detection): Anadolu Bank'ta "bu işlem diğerlerine hiç benzemiyor" diyebilmek.</li>
+<li><b>Anomali tespiti</b> (anomaly detection): Ilgaz Bank'ta "bu işlem diğerlerine hiç benzemiyor" diyebilmek.</li>
 </ul>
 
 <h2>k-means nasıl çalışır?</h2>
@@ -178,7 +178,7 @@ for k in range(3):
 </table></div>
 
 <h2>Anomali tespiti: z-skoru ve IsolationForest</h2>
-<p>Anadolu Bank'ta bir müşterinin işlemleri genelde 200-800 TL arasındayken birden 45.000 TL'lik bir işlem görünürse incelenmelidir. En basit yöntem <b>z-skoru</b>: değerin ortalamadan kaç standart sapma uzakta olduğu, <code>z = (x - ortalama) / std</code>. |z| > 3 genelde aykırı sayılır. Tek değişkende hızlıdır ama aykırı değer ortalamayı ve std'yi kendisi de büyüttüğü için küçük örneklerde eşiği düşürmen gerekebilir.</p>
+<p>Ilgaz Bank'ta bir müşterinin işlemleri genelde 200-800 TL arasındayken birden 45.000 TL'lik bir işlem görünürse incelenmelidir. En basit yöntem <b>z-skoru</b>: değerin ortalamadan kaç standart sapma uzakta olduğu, <code>z = (x - ortalama) / std</code>. |z| > 3 genelde aykırı sayılır. Tek değişkende hızlıdır ama aykırı değer ortalamayı ve std'yi kendisi de büyüttüğü için küçük örneklerde eşiği düşürmen gerekebilir.</p>
 <p>Birden çok özellik birlikte önemliyse (tutar, saat, işlem sıklığı) <b>IsolationForest</b> kullanılır: rastgele bölmelerle her noktayı yalnız bırakmaya çalışır; aykırı noktalar çok az bölmeyle yalnız kalır. <code>predict</code> normal için <code>1</code>, anomali için <code>-1</code> döndürür.</p>
 <pre class="py">import numpy as np
 from sklearn.ensemble import IsolationForest
@@ -396,7 +396,7 @@ print("IsolationForest anomaliler:", tutarlar[tahmin == -1].tolist())</pre>
         stage: 'Hata avı',
         kind: 'bug',
         diff: 2,
-        q: '<p>Hatayı bul ve düzelt. <code>anomalileri_bul(tutarlar)</code> Anadolu Bank işlem tutarlarında IsolationForest ile anormal işlemlerin <b>indekslerini</b> döndürmeli. Ama rapora neredeyse tüm normal işlemler düşüyor.</p>',
+        q: '<p>Hatayı bul ve düzelt. <code>anomalileri_bul(tutarlar)</code> Ilgaz Bank işlem tutarlarında IsolationForest ile anormal işlemlerin <b>indekslerini</b> döndürmeli. Ama rapora neredeyse tüm normal işlemler düşüyor.</p>',
         start: 'import numpy as np\nfrom sklearn.ensemble import IsolationForest\n\ndef anomalileri_bul(tutarlar):\n    X = np.log1p(np.asarray(tutarlar, dtype=float)).reshape(-1, 1)\n    tahmin = IsolationForest(contamination=0.1, random_state=0).fit_predict(X)\n    return [i for i, t in enumerate(tahmin) if t == 1]\n',
         sol: 'import numpy as np\nfrom sklearn.ensemble import IsolationForest\n\ndef anomalileri_bul(tutarlar):\n    X = np.log1p(np.asarray(tutarlar, dtype=float)).reshape(-1, 1)\n    tahmin = IsolationForest(contamination=0.1, random_state=0).fit_predict(X)\n    return [i for i, t in enumerate(tahmin) if t == -1]\n',
         tests: 't = [320, 450, 280, 610, 390, 505, 85000, 350, 470, 300, 520, 410, 330, 480, 360, 440, 290, 530, 400, 6]\nr = anomalileri_bul(t)\nassert 6 in r, "85.000 TL\'lik işlem (indeks 6) anomali olmalı"\nassert len(r) <= 3, f"Yalnızca birkaç işlem anomali olmalı; {len(r)} tane geldi. predict hangi değeri anomali için döndürür?"\n',

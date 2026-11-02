@@ -1,4 +1,4 @@
-/* PythonPatika — Orta: Kapsam ve kapanışlar (closures) derinlemesine */
+/* Kesit Python — Orta: Kapsam ve kapanışlar (closures) derinlemesine */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -18,7 +18,7 @@ L.push({
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Anadolu Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
+<p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Ilgaz Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
 <p>Fonksiyonel araçlar dersinde kapanışla ilk kez tanıştın (sayaç ve komisyon hesaplayıcı yazdın). Bu derste perdenin arkasına geçiyoruz: Python bir adı nerede arar, iç fonksiyon dış değişkeni nasıl "hatırlar", hatırladığı şey değer mi yoksa değişkenin kendisi mi, ve bu farkın döngülerde neden can sıktığı. Bu bilgi dekoratörlerin, geri çağırma (callback) fonksiyonlarının ve PCAP sınavının 5.3 konusunun temelidir.</p>
 
 <h2>LEGB tekrar: bir ad nerede aranır?</h2>
@@ -156,7 +156,7 @@ ogrenci = indirim_kurali(0.15)
 for tutar in [300, 750]:
     print(tutar, hafta_sonu(tutar), ogrenci(tutar))
 print(hafta_sonu.__name__, ogrenci.__name__)</pre>
-<p>Anadolu Bank'ta kart başına günlük limit de aynı kalıptır; bu kez kapanış durumu <b>değiştirir</b>, bu yüzden <code>nonlocal</code> gerekir:</p>
+<p>Ilgaz Bank'ta kart başına günlük limit de aynı kalıptır; bu kez kapanış durumu <b>değiştirir</b>, bu yüzden <code>nonlocal</code> gerekir:</p>
 <pre class="py">def gunluk_limit(limit):
     kalan = limit
     def harca(tutar):
@@ -277,7 +277,7 @@ print(sehir_tarifesi("Ankara")(4))</pre>
       hints: ['Doğrulama iç fonksiyonda değil, fabrikanın gövdesinde olmalı.', 'if not 0 < oran < 1: raise ValueError(...)', 'İç fonksiyon: if tutar >= esik: return round(tutar * (1 - oran), 2) ve sonra return tutar'],
       why: 'Fabrika doğrulamayı bir kez yapar; hatalı kural sisteme hiç giremez. Üretilen fonksiyon oran ve esik değerlerini kapanıştan okur.' },
     { t: 'code', stage: 'Rehberli', id: 'kapanis-kapsam-3', diff: 2,
-      q: '<p>Anadolu Bank kart limiti: <code>harcama_limiti(gunluk_limit)</code> fabrikasını yaz. Dönen <code>harca(tutar)</code> fonksiyonu tutar kalan limiti aşmıyorsa kalan limitten düşüp <code>True</code>, aşıyorsa hiçbir şeyi değiştirmeden <code>False</code> döndürsün. Her kartın limiti birbirinden bağımsız olmalı.</p>',
+      q: '<p>Ilgaz Bank kart limiti: <code>harcama_limiti(gunluk_limit)</code> fabrikasını yaz. Dönen <code>harca(tutar)</code> fonksiyonu tutar kalan limiti aşmıyorsa kalan limitten düşüp <code>True</code>, aşıyorsa hiçbir şeyi değiştirmeden <code>False</code> döndürsün. Her kartın limiti birbirinden bağımsız olmalı.</p>',
       guide: ['Fabrikada kalan = gunluk_limit ile durumu başlat.', 'harca içinde kalan\'a yazacağın için nonlocal bildir.', 'tutar kalan\'dan büyükse False döndür.', 'Değilse kalan\'dan düş ve True döndür.'],
       example: 'def stok_takip(adet):\n    kalan = adet\n    def sat(n):\n        nonlocal kalan\n        if n > kalan:\n            return "yetersiz"\n        kalan -= n\n        return kalan\n    return sat\n\ns = stok_takip(5)\nprint(s(2), s(4), s(3))\n',
       start: 'def harcama_limiti(gunluk_limit):\n    kalan = gunluk_limit\n    def harca(tutar):\n        # TODO: kalan\'a yazabilmek için bildirim\n        # TODO: limit aşılıyorsa False\n        # TODO: değilse düş ve True\n        pass\n    return harca\n',
@@ -337,7 +337,7 @@ print(sehir_tarifesi("Ankara")(4))</pre>
       hints: ['İç fonksiyonda atama yapılan her ad yerel sayılır.', 'Tek satırda iki ad: nonlocal adet, toplam'],
       why: 'adet += 1 ve toplam = toplam + ... atama olduğu için iki ad da yerel sayılıyor ve okunmadan önce bağlanmamış oluyordu. nonlocal adet, toplam ile kapsayan fonksiyonun hücrelerine yazılır.' },
     { t: 'code', stage: 'Meydan okuma', id: 'kapanis-kapsam-11', diff: 3,
-      q: '<p>Anadolu Bank API\'sinde hız sınırlayıcı: <code>oran_sinirlayici(limit, pencere)</code> fabrikasını yaz. Dönen <code>izin(zaman)</code> fonksiyonu, saniye cinsinden <code>zaman</code> alır. Son <code>pencere</code> saniyedeki (yani <code>zaman - pencere</code> değerinden <b>büyük</b> zamanlı) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür (reddedilen istek kaydedilmez). Zaman geriye giderse (önceki çağrıdan küçükse) <code>ValueError</code> fırlat. Eski kayıtları silerek belleği sınırlı tut.</p>',
+      q: '<p>Ilgaz Bank API\'sinde hız sınırlayıcı: <code>oran_sinirlayici(limit, pencere)</code> fabrikasını yaz. Dönen <code>izin(zaman)</code> fonksiyonu, saniye cinsinden <code>zaman</code> alır. Son <code>pencere</code> saniyedeki (yani <code>zaman - pencere</code> değerinden <b>büyük</b> zamanlı) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür (reddedilen istek kaydedilmez). Zaman geriye giderse (önceki çağrıdan küçükse) <code>ValueError</code> fırlat. Eski kayıtları silerek belleği sınırlı tut.</p>',
       start: 'def oran_sinirlayici(limit, pencere):\n    pass\n',
       sol: 'from collections import deque\n\ndef oran_sinirlayici(limit, pencere):\n    kabul = deque()\n    son = None\n    def izin(zaman):\n        nonlocal son\n        if son is not None and zaman < son:\n            raise ValueError("zaman geriye gidemez")\n        son = zaman\n        while kabul and kabul[0] <= zaman - pencere:\n            kabul.popleft()\n        if len(kabul) < limit:\n            kabul.append(zaman)\n            return True\n        return False\n    izin.kayitlar = kabul\n    return izin\n\ni = oran_sinirlayici(2, 10)\nprint([i(t) for t in [0, 1, 2, 10, 11, 12]])\n',
       tests: 'i = oran_sinirlayici(2, 10)\nassert [i(t) for t in [0, 1, 2]] == [True, True, False], "10 sn içinde en fazla 2 istek"\nassert i(10) is True, "zaman 10\'da 0\'daki kayıt pencereden çıkar (0 <= 10 - 10)"\nassert i(11) is True, "1\'deki kayıt da çıktı"\nassert i(12) is False, "10 ve 11 hâlâ pencerede"\ntry:\n    i(5)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("zaman geriye giderse ValueError")\nj = oran_sinirlayici(1, 5)\nassert j(0) and not j(4) and j(5), "pencere sınırı: 0 <= 5 - 5 olduğu için 5\'te yeniden izin"\nk = oran_sinirlayici(3, 1)\nfor t in range(1000):\n    k(t)\nif hasattr(k, "kayitlar"):\n    assert len(k.kayitlar) <= 3, "eski kayıtlar silinmeli"\nelse:\n    hucreler = [h.cell_contents for h in k.__closure__ if isinstance(h.cell_contents, (list, __import__(\'collections\').deque))]\n    assert all(len(h) <= 3 for h in hucreler), "eski kayıtlar silinmeli; liste sınırsız büyümemeli"\n',

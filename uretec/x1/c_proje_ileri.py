@@ -46,7 +46,7 @@ def segment_ata(r, f):
 '''
 
 html = '<h2>Derinleş: projeyi gerçek veriye bağlamak</h2>' \
-'<p>Projenin ilk hâlinde RFM ve kohort fonksiyonlarını satır içi küçük verilerle kurdun. Bir portföy projesini gerçek kılan şey, aynı fonksiyonların <b>gerçek tablolarla</b> çalışması ve sonuçların başka bir sistemle <b>mutabakatının</b> (reconciliation) yapılmasıdır. Bu bölümde paketi <code>anadolu_market</code> setinin 910 sipariş ve 1.620 kalemine bağlayacak, sonuçları PBIPatika\'daki Power BI modeliyle (<code>kesit_bi</code>) karşılaştıracaksın. Aynı şirketin iki sistemi aynı soruya farklı cevap veriyorsa bunun nedenini bulmak, kıdemli analistin en değerli işidir.</p>' \
+'<p>Projenin ilk hâlinde RFM ve kohort fonksiyonlarını satır içi küçük verilerle kurdun. Bir portföy projesini gerçek kılan şey, aynı fonksiyonların <b>gerçek tablolarla</b> çalışması ve sonuçların başka bir sistemle <b>mutabakatının</b> (reconciliation) yapılmasıdır. Bu bölümde paketi <code>anadolu_market</code> setinin 910 sipariş ve 1.620 kalemine bağlayacak, sonuçları Kesit Power BI\'daki Power BI modeliyle (<code>kesit_bi</code>) karşılaştıracaksın. Aynı şirketin iki sistemi aynı soruya farklı cevap veriyorsa bunun nedenini bulmak, kıdemli analistin en değerli işidir.</p>' \
 '<div class="tbl-wrap"><table><tr><th>Kavram</th><th>Python paketi (anadolu_market)</th><th>Power BI modeli (kesit_bi)</th></tr>' \
 '<tr><td>Sipariş satırı</td><td><code>order_items</code> + <code>orders</code></td><td><code>Satislar</code> olgu tablosu (tanecik: kalem)</td></tr>' \
 '<tr><td>Durum</td><td>delivered / shipped / returned / cancelled</td><td>Teslim Edildi / Kargoda / İade / İptal</td></tr>' \
@@ -58,7 +58,7 @@ s = siparis_tablosu()
 print(len(s), "sipariş, toplam", round(s["tutar"].sum(), 2), "TL")
 print(s.groupby("status")["tutar"].sum().round(0).to_dict())
 ''') + \
-'<h3>2. RFM: puanlar ve PBIPatika segmentleri</h3><p>Her boyutu 1–5 arası puanla (beşte birlik dilimler, <code>pd.qcut</code>). Eşit değerler dilim sınırlarını çakıştırmasın diye önce <code>rank(method="first")</code> uygulanır. Recency\'de küçük değer iyidir, bu yüzden puan ters çevrilir. Segment adlarını kendin uydurmak yerine şirketin Power BI modelinde zaten tanımlı olan listeyi kullan: <code>kesit_bi.RFMSegmentleri</code> yedi segmenti, sırası, açıklaması ve önerilen eylemiyle birlikte tutar. Böylece Python raporu ile pano aynı dili konuşur.</p>' + py('''
+'<h3>2. RFM: puanlar ve Kesit Power BI segmentleri</h3><p>Her boyutu 1–5 arası puanla (beşte birlik dilimler, <code>pd.qcut</code>). Eşit değerler dilim sınırlarını çakıştırmasın diye önce <code>rank(method="first")</code> uygulanır. Recency\'de küçük değer iyidir, bu yüzden puan ters çevrilir. Segment adlarını kendin uydurmak yerine şirketin Power BI modelinde zaten tanımlı olan listeyi kullan: <code>kesit_bi.RFMSegmentleri</code> yedi segmenti, sırası, açıklaması ve önerilen eylemiyle birlikte tutar. Böylece Python raporu ile pano aynı dili konuşur.</p>' + py('''
 import veri
 
 print(veri.oku("kesit_bi", "RFMSegmentleri")[["Sira", "Segment", "Eylem"]].to_string(index=False))

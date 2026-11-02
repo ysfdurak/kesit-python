@@ -91,7 +91,7 @@ assert uygula([], yuvarla_99) == [], "Boş listede boş sonuç"
 
 dict(topic='Fonksiyonlar', diff=2, kind='yaz',
   title='Kredi taksiti hesaplayıcı',
-  q='<p>Anadolu Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
+  q='<p>Ilgaz Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
   start=r'''
 def aylik_taksit(anapara, aylik_faiz_yuzde, ay):
     # buraya yaz

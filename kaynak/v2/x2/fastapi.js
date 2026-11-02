@@ -1,4 +1,4 @@
-/* PythonPatika — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
+/* Kesit Python — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

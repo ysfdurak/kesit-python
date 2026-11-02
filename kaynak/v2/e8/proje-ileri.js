@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e8 uzantı: proje-ileri (teslim edilebilir proje katmanları) */
+/* Kesit Python — v2 e8 uzantı: proje-ileri (teslim edilebilir proje katmanları) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

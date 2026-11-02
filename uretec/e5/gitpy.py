@@ -14,7 +14,7 @@ html = (
     git --version
 
     git config --global user.name "Ayşe Yılmaz"
-    git config --global user.email "ayse@anadolubank.example"
+    git config --global user.email "ayse@ilgazbank.example"
     git config --global init.defaultBranch main
     git config --global pull.rebase true          # pull sırasında gereksiz merge commit'i olmasın
     git config --global core.autocrlf true        # yalnız Windows: depoda LF, diskte CRLF
@@ -22,7 +22,7 @@ html = (
     git config --list --show-origin               # hangi ayar nereden geliyor
 
     # GitHub/GitLab için SSH anahtarı (parola yerine)
-    ssh-keygen -t ed25519 -C "ayse@anadolubank.example"
+    ssh-keygen -t ed25519 -C "ayse@ilgazbank.example"
     cat ~/.ssh/id_ed25519.pub        # bu satırı GitHub > Settings > SSH keys'e yapıştır
     ssh -T git@github.com            # "Hi ayse! You've successfully authenticated"
 ''') +
@@ -125,7 +125,7 @@ html = (
             print("\\n".join("- " + x for x in maddeler))
 ''') +
 '<div class="tip"><b>README, LICENSE, CHANGELOG</b>İyi bir depoda kökte en az şunlar bulunur: ne işe yaradığını ve nasıl kurulup çalıştırılacağını anlatan <code>README.md</code>, kullanım hakkını belirten <code>LICENSE</code> (şirket içi kodda genellikle "tescilli"), sürüm farklarını anlatan <code>CHANGELOG.md</code>, örnek ayar <code>.env.example</code> ve satır sonu kuralı için <code>.gitattributes</code>.</div>\n'
-'<div class="note"><b>Gerçek işte</b>Anadolu Bank\'ta ana dal korumalıdır: doğrudan push yasaktır, her değişiklik PR ile gelir, en az bir onay ve yeşil CI gerekir, birleştirme "squash" ile tek commit\'e indirilir. Canlıda hata çıkınca önce <code>git revert</code> ile hızla geri dönülür, sonra kök neden ayrı bir dalda düzeltilir. Sürüm etiketleri ve CHANGELOG, Conventional Commits mesajlarından otomatik üretilir; bu yüzden commit mesajı kuralı PR kontrolünde denetlenir.</div>\n'
+'<div class="note"><b>Gerçek işte</b>Ilgaz Bank\'ta ana dal korumalıdır: doğrudan push yasaktır, her değişiklik PR ile gelir, en az bir onay ve yeşil CI gerekir, birleştirme "squash" ile tek commit\'e indirilir. Canlıda hata çıkınca önce <code>git revert</code> ile hızla geri dönülür, sonra kök neden ayrı bir dalda düzeltilir. Sürüm etiketleri ve CHANGELOG, Conventional Commits mesajlarından otomatik üretilir; bu yüzden commit mesajı kuralı PR kontrolünde denetlenir.</div>\n'
 )
 
 ex = [

@@ -1,4 +1,4 @@
-/* PythonPatika v2 — orkestrasyon */
+/* Kesit Python v2 — orkestrasyon */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -18,7 +18,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Veri boru hattı dersinde tek bir ETL betiği yazdın. Gerçek kurumda ise onlarca iş birbirine bağlıdır: Anadolu Market'te her gece 02:00'de siparişler çekilir, temizlenir, stok tablosu güncellenir, şehir raporu üretilir, yöneticilere e-posta gider. Anadolu Bank'ta gün sonu mutabakatı, tüm şubelerin işlem dosyaları gelmeden başlayamaz. Bu işleri "doğru sırada, doğru zamanda, hata olursa yeniden deneyerek ve kimse bakmasa da haber vererek" çalıştırma işine <b>orkestrasyon</b> (orchestration) denir. Bu derste önce temelleri (cron, DAG, idempotentlik) saf Python ile kuracak, sonra Airflow ve benzeri araçların bunları nasıl paketlediğini göreceksin.</p>
+<p>Veri boru hattı dersinde tek bir ETL betiği yazdın. Gerçek kurumda ise onlarca iş birbirine bağlıdır: Anadolu Market'te her gece 02:00'de siparişler çekilir, temizlenir, stok tablosu güncellenir, şehir raporu üretilir, yöneticilere e-posta gider. Ilgaz Bank'ta gün sonu mutabakatı, tüm şubelerin işlem dosyaları gelmeden başlayamaz. Bu işleri "doğru sırada, doğru zamanda, hata olursa yeniden deneyerek ve kimse bakmasa da haber vererek" çalıştırma işine <b>orkestrasyon</b> (orchestration) denir. Bu derste önce temelleri (cron, DAG, idempotentlik) saf Python ile kuracak, sonra Airflow ve benzeri araçların bunları nasıl paketlediğini göreceksin.</p>
 
 <h2>Cron: ne zaman çalışsın?</h2>
 <p>Cron, Unix sistemlerinin zamanlayıcısıdır; sözdizimi Airflow, Kubernetes CronJob, GitHub Actions ve bulut zamanlayıcılarında da kullanılır. Bir ifade beş alandan oluşur:</p>
@@ -370,7 +370,7 @@ calistir_ve_logla("rapor", lambda t: 1 / 0, "2025-03-01")</pre>
       stage: 'Hata avı',
       kind: 'bug',
       diff: 2,
-      q: '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın gün sonu işi <code>mutabakat_yukle(db, tarih, islemler)</code>, o günün işlemlerini <code>gun_sonu</code> tablosuna yazıyor. Airflow görevi zaman aşımından sonra yeniden denendiğinde toplamlar iki katına çıktı. Fonksiyonu <b>idempotent</b> yap: aynı tarih için tekrar çalıştırıldığında önceki yazdıklarının yerine geçsin. <code>islem_no</code> benzersizdir; tabloyu ya da imzayı değiştirmeden çöz.</p>',
+      q: '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın gün sonu işi <code>mutabakat_yukle(db, tarih, islemler)</code>, o günün işlemlerini <code>gun_sonu</code> tablosuna yazıyor. Airflow görevi zaman aşımından sonra yeniden denendiğinde toplamlar iki katına çıktı. Fonksiyonu <b>idempotent</b> yap: aynı tarih için tekrar çalıştırıldığında önceki yazdıklarının yerine geçsin. <code>islem_no</code> benzersizdir; tabloyu ya da imzayı değiştirmeden çöz.</p>',
       start: 'import sqlite3\n\ndef yeni_db():\n    db = sqlite3.connect(":memory:")\n    db.execute("CREATE TABLE gun_sonu (islem_no TEXT, tarih TEXT, tutar REAL)")\n    return db\n\ndef mutabakat_yukle(db, tarih, islemler):\n    with db:\n        for no, tutar in islemler:\n            db.execute("INSERT INTO gun_sonu VALUES (?, ?, ?)", (no, tarih, tutar))\n    return db.execute("SELECT SUM(tutar) FROM gun_sonu WHERE tarih = ?", (tarih,)).fetchone()[0]\n',
       sol: 'import sqlite3\n\ndef yeni_db():\n    db = sqlite3.connect(":memory:")\n    db.execute("CREATE TABLE gun_sonu (islem_no TEXT, tarih TEXT, tutar REAL)")\n    return db\n\ndef mutabakat_yukle(db, tarih, islemler):\n    with db:\n        db.execute("DELETE FROM gun_sonu WHERE tarih = ?", (tarih,))\n        for no, tutar in islemler:\n            db.execute("INSERT INTO gun_sonu VALUES (?, ?, ?)", (no, tarih, tutar))\n    return db.execute("SELECT SUM(tutar) FROM gun_sonu WHERE tarih = ?", (tarih,)).fetchone()[0]\n',
       tests: 'db = yeni_db()\nislemler = [("T1", 100.0), ("T2", 250.5)]\nassert mutabakat_yukle(db, "2025-03-01", islemler) == 350.5, "ilk çalışma toplamı"\nassert mutabakat_yukle(db, "2025-03-01", islemler) == 350.5, "yeniden deneme toplamı ikiye katlamamalı"\nmutabakat_yukle(db, "2025-03-02", [("T3", 75.0)])\nassert db.execute("SELECT COUNT(*) FROM gun_sonu").fetchone()[0] == 3, "toplam 3 satır olmalı (kopya yok, diğer gün korunur)"\nassert mutabakat_yukle(db, "2025-03-01", [("T1", 100.0)]) == 100.0, "düzeltilmiş veriyle yeniden çalıştırma eski satırları kaldırmalı"\n',

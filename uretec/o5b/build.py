@@ -39,7 +39,7 @@ def build(modname):
     L = m.LESSON
     for i, e in enumerate(L['ex']):
         if e['t'] == 'code' and 'id' not in e: e['id'] = f"{L['id']}-{i+1}"
-    js = f"/* PythonPatika — {L['title']} (v2/o5) */\n(function (W) {{\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n{emit(L, 0)}\n);\n}})(window);\n"
+    js = f"/* Kesit Python — {L['title']} (v2/o5) */\n(function (W) {{\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n{emit(L, 0)}\n);\n}})(window);\n"
     f = f"{OUT}/{L['id']}.js"
     open(f, 'w').write(js)
     return f, L

@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
+/* Kesit Python — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

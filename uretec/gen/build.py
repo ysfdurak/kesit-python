@@ -67,7 +67,7 @@ def build(modname, out):
         lines[-1] = lines[-1].rstrip(',')
         lines.append('  }')
         parts.append('\n'.join(lines))
-    body = "/* PythonPatika — veri seti görevleri: " + mod.TITLE + " */\n(function (W) {\n'use strict';\nconst B = W.PY_BANK = W.PY_BANK || [];\nB.push(\n" + ',\n'.join(parts) + "\n);\n})(window);\n"
+    body = "/* Kesit Python — veri seti görevleri: " + mod.TITLE + " */\n(function (W) {\n'use strict';\nconst B = W.PY_BANK = W.PY_BANK || [];\nB.push(\n" + ',\n'.join(parts) + "\n);\n})(window);\n"
     open(out, 'w', encoding='utf-8').write(body)
     from collections import Counter
     print(out, len(mod.TASKS), Counter(t['lv'] for t in mod.TASKS), Counter(t['kind'] for t in mod.TASKS))

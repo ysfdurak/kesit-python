@@ -272,7 +272,7 @@ assert b[0, 0] > 10, "Test satırı eğitim dağılımına göre çok uç; büy�
 
 dict(id='b-339', topic='scikit-learn', diff=2, kind='yaz', needs=['scikit-learn'],
   title='Sahtecilik modeli: precision, recall, F1',
-  q='<p>Anadolu Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
+  q='<p>Ilgaz Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
   start=r'''
 def metrikler(y_gercek, y_tahmin):
     pass

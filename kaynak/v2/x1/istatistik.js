@@ -1,4 +1,4 @@
-/* PythonPatika — 'istatistik' dersi uzantısı: A/B testi: SRM, z-testi, peeking ve CUPED (gerçek veri setleri) */
+/* Kesit Python — 'istatistik' dersi uzantısı: A/B testi: SRM, z-testi, peeking ve CUPED (gerçek veri setleri) */
 // needs: numpy, pandas, scipy
 (function (W) {
 'use strict';

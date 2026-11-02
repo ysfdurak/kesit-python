@@ -155,9 +155,9 @@ P.append(dict(
 P.append(dict(
     id='a-194', title='Döviz cinsine göre hesaplar', track=T, diff='Kolay',
     tags=['veri seti', 'filtreleme', 'sayma'], src='HackerRank "Word Order" sayma fikri, bankacılık verisiyle',
-    fn='para_birimi_dagilimi', ds='anadolu_bank',
-    statement='<p>Anadolu Bank hazine birimi, açık (aktif) hesapların döviz cinsine göre dağılımını istiyor. '
-              '<code>veri.kayitlar("anadolu_bank", "bank_accounts")</code> tablosunda <code>account_type</code> (vadesiz, vadeli, kredi_karti), '
+    fn='para_birimi_dagilimi', ds='ilgaz_bank',
+    statement='<p>Ilgaz Bank hazine birimi, açık (aktif) hesapların döviz cinsine göre dağılımını istiyor. '
+              '<code>veri.kayitlar("ilgaz_bank", "bank_accounts")</code> tablosunda <code>account_type</code> (vadesiz, vadeli, kredi_karti), '
               '<code>currency</code> (TRY, USD, EUR) ve <code>status</code> (aktif, kapali) sütunları var.</p>'
               '<p><code>para_birimi_dagilimi(hesap_turu)</code> fonksiyonu, türü <code>hesap_turu</code> olan <b>aktif</b> hesapları döviz cinsine göre saysın ve sözlük döndürsün.</p>',
     input='<p><code>hesap_turu</code>: hesap türü (str).</p>',
@@ -169,7 +169,7 @@ P.append(dict(
         import veri
 
         def para_birimi_dagilimi(hesap_turu):
-            hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+            hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
             # kodunu yaz
             pass
         ''',
@@ -177,7 +177,7 @@ P.append(dict(
         import veri
 
         def para_birimi_dagilimi(hesap_turu):
-            hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+            hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
             sayac = {}
             for h in hesaplar:
                 if h["account_type"] == hesap_turu and h["status"] == "aktif":
@@ -194,7 +194,7 @@ P.append(dict(
 P.append(dict(
     id='a-195', title='Ayın en çok harcanan kategorileri', track=T, diff='Orta',
     tags=['veri seti', 'tarih', 'gruplama', 'sıralama'], src='Kart harcama analizi; "top-N per period" mülakat kalıbı',
-    fn='aylik_harcama', ds='anadolu_bank',
+    fn='aylik_harcama', ds='ilgaz_bank',
     statement='<p>Pazarlama ekibi kart kampanyalarını planlarken her ayın en çok harcama yapılan sektörlerini görmek istiyor. '
               '<code>bank_txns</code> tablosunda <code>txn_time</code> (<code>"YYYY-MM-DD HH:MM:SS"</code>), <code>amount</code> (harcamalar <b>negatif</b>), '
               '<code>txn_type</code> ve <code>merchant_category</code> sütunları var.</p>'
@@ -209,7 +209,7 @@ P.append(dict(
         import veri
 
         def aylik_harcama(ay, n=3):
-            islemler = veri.kayitlar("anadolu_bank", "bank_txns")
+            islemler = veri.kayitlar("ilgaz_bank", "bank_txns")
             # kodunu yaz
             pass
         ''',
@@ -217,7 +217,7 @@ P.append(dict(
         import veri
         from collections import defaultdict
 
-        ISLEMLER = veri.kayitlar("anadolu_bank", "bank_txns")  # bir kez oku, her çağrıda yeniden kullan
+        ISLEMLER = veri.kayitlar("ilgaz_bank", "bank_txns")  # bir kez oku, her çağrıda yeniden kullan
 
         def aylik_harcama(ay, n=3):
             toplam = defaultdict(float)
@@ -239,7 +239,7 @@ P.append(dict(
 P.append(dict(
     id='a-196', title='Ani harcama alarmı', track=T, diff='Zor',
     tags=['veri seti', 'kayan pencere', 'iki işaretçi', 'dolandırıcılık'], src='LeetCode "sliding window" kalıbı, sahtecilik tespiti senaryosu',
-    fn='ani_harcama', ds='anadolu_bank',
+    fn='ani_harcama', ds='ilgaz_bank',
     statement='<p>Sahtecilik önleme ekibi basit bir kural istiyor: <b>aynı hesapta</b>, <code>dakika</code> dakikalık bir zaman penceresi içinde en az <code>adet</code> '
               'kart harcaması (<code>txn_type == "kart_harcama"</code>) varsa hesap alarma düşer. Pencere kapsayıcıdır: ilk ve son işlem arasındaki fark '
               '<code>dakika * 60</code> saniyeyi geçmemeli.</p>'
@@ -254,7 +254,7 @@ P.append(dict(
         from datetime import datetime
 
         def ani_harcama(dakika, adet):
-            islemler = veri.kayitlar("anadolu_bank", "bank_txns")
+            islemler = veri.kayitlar("ilgaz_bank", "bank_txns")
             # kodunu yaz
             pass
         ''',
@@ -270,7 +270,7 @@ P.append(dict(
             global _ZAMANLAR
             if _ZAMANLAR is None:
                 _ZAMANLAR = defaultdict(list)
-                for i in veri.kayitlar("anadolu_bank", "bank_txns"):
+                for i in veri.kayitlar("ilgaz_bank", "bank_txns"):
                     if i["txn_type"] == "kart_harcama":
                         t = datetime.fromisoformat(i["txn_time"]).timestamp()
                         _ZAMANLAR[i["account_id"]].append(t)

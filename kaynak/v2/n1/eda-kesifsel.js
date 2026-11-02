@@ -1,4 +1,4 @@
-/* PythonPatika — v2/n1: Keşifsel veri analizi (EDA): sorudan bulguya */
+/* Kesit Python — v2/n1: Keşifsel veri analizi (EDA): sorudan bulguya */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

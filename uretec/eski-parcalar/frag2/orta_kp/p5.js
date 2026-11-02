@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden Git?</h2>
-<p>Anadolu Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
+<p>Ilgaz Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
 <div class="note"><b>Bu derste Git komutları gösterilir</b>Tarayıcıda Git çalıştıramayız; komutları kendi bilgisayarında dene. Kod alıştırmaları Git ve proje yapısının Python tarafını işler: .gitignore kurallarını eşleştirmek, proje ağacını doğrulamak, ortam değişkeni okumak.</div>
 
 <h2>Temel akış: init, add, commit</h2>

@@ -1,5 +1,5 @@
   { id: 'pcep-pcap-deneme', title: 'PCEP/PCAP tarzı deneme sınavı', lv: 'orta', kind: 'quiz', min: 45, pass: 70,
-    desc: 'Python Institute PCEP ve PCAP sınavlarının formatına benzer 30 özgün çoktan seçmeli soru: "bu kodun çıktısı nedir", hata bulma, sözdizimi, operatör önceliği, dilimleme, kapsam, istisna hiyerarşisi ve sınıflar. Sorular PythonPatika tarafından yazılmıştır; gerçek sınav sorusu değildir ve sertifika sağlayıcısıyla bağlantısı yoktur. Geçme notu %70.',
+    desc: 'Python Institute PCEP ve PCAP sınavlarının formatına benzer 30 özgün çoktan seçmeli soru: "bu kodun çıktısı nedir", hata bulma, sözdizimi, operatör önceliği, dilimleme, kapsam, istisna hiyerarşisi ve sınıflar. Sorular Kesit Python tarafından yazılmıştır; gerçek sınav sorusu değildir ve sertifika sağlayıcısıyla bağlantısı yoktur. Geçme notu %70.',
     qs: [
       { t: 'mc', topic: 'Operatör Önceliği', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">print(2 + 3 * 2 ** 2)</pre>',
         o: ['20', '14', '100', '16'], a: 1,
@@ -25,7 +25,7 @@
       { t: 'mc', topic: 'Değişkenler ve Türler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">print(bool(""), bool("False"), bool(0.0), bool([0]))</pre>',
         o: ['False False False True', 'False True False True', 'False False True True', 'True True False True'], a: 1,
         why: 'Boş metin ve 0.0 falsy; "False" boş olmayan bir metindir (True); [0] tek elemanlı liste de True.' },
-      { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "PythonPatika"\nprint(s[::-1][:3], s[6:], s[-3:-1])</pre>',
+      { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "Kesit Python"\nprint(s[::-1][:3], s[6:], s[-3:-1])</pre>',
         o: ['aki Patika ik', 'aki Patika ka', 'akitaP Patika ik', 'Pyt Python ik'], a: 0,
         why: '[::-1] ters çevirir ("akitaPnohtyP"), ilk 3: "aki". s[6:] "Patika". s[-3:-1] sondan 3. ve 2. karakterler: "ik".' },
       { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">L = [0, 1, 2, 3, 4, 5]\nprint(L[1:5:2], L[::3], L[10:])</pre>',

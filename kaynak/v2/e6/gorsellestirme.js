@@ -1,4 +1,4 @@
-/* PythonPatika — 'gorsellestirme' dersi uzantısı (Derinleş) */
+/* Kesit Python — 'gorsellestirme' dersi uzantısı (Derinleş) */
 // needs: matplotlib, numpy
 (function (W) {
 'use strict';

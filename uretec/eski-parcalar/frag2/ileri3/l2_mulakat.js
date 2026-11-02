@@ -167,7 +167,7 @@ print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
 </ol></div>
 
 <h2>Sistem tasarımı için Python</h2>
-<p>Üst düzey pozisyonlarda "Anadolu Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
+<p>Üst düzey pozisyonlarda "Ilgaz Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Soruyu kalıba indirgeme pratiği</h3>

@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası: ileri görevler (b-311 … b-320) */
+/* Kesit Python — pratik bankası: ileri görevler (b-311 … b-320) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -86,7 +86,7 @@ B.push(
     kind: 'tamamla',
     needs: ['numpy'],
     title: 'np.select ile müşteri segmenti',
-    q: '<p>Anadolu Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
+    q: '<p>Ilgaz Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
     start: 'import numpy as np\n\ndef segment(harcama):\n    h = np.asarray(harcama)\n    kosullar = [h >= 5000, ___]\n    secenekler = ["altın", "gümüş"]\n    return np.select(kosullar, secenekler, default=___)\n',
     sol: 'import numpy as np\n\ndef segment(harcama):\n    h = np.asarray(harcama)\n    kosullar = [h >= 5000, h >= 1000]\n    secenekler = ["altın", "gümüş"]\n    return np.select(kosullar, secenekler, default="bronz")\n',
     tests: 'r = segment([7200, 5000, 4999, 1000, 999, 0])\nassert r.tolist() == ["altın", "altın", "gümüş", "gümüş", "bronz", "bronz"], "Sınırlar dahil: 5000 altın, 1000 gümüş, 999 bronz"\nassert segment([300]).tolist() == ["bronz"], "Hiçbir koşul tutmazsa default değer (bronz) kullanılır"\n',

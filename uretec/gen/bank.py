@@ -1,7 +1,7 @@
 from common import write
 
-DS = 'anadolu_bank'
-TOPIC = 'Veri seti: Anadolu Bank'
+DS = 'ilgaz_bank'
+TOPIC = 'Veri seti: Ilgaz Bank'
 T = []
 
 
@@ -14,7 +14,7 @@ def add(**k):
 # ---------------------------------------------------------------- TEMEL
 add(id='b-431', lv='temel', diff=1, kind='rehberli', title='Aktif hesapların türlere dağılımı',
     q='<p><b>Ürün yönetimi ekibi soruyor:</b> "Şu an açık olan hesapların kaçı vadesiz, kaçı vadeli, kaçı kredi kartı?"</p>'
-      '<p><code>aktif_hesap_turleri(hesaplar)</code> fonksiyonunu yaz. <code>hesaplar</code> = <code>veri.kayitlar("anadolu_bank", "bank_accounts")</code>. '
+      '<p><code>aktif_hesap_turleri(hesaplar)</code> fonksiyonunu yaz. <code>hesaplar</code> = <code>veri.kayitlar("ilgaz_bank", "bank_accounts")</code>. '
       'Yalnız <code>status == "aktif"</code> olan hesapları say; <code>{account_type: sayı}</code> sözlüğü döndür.</p>',
     guide=['Boş bir sayaç sözlüğü oluştur.', 'Her hesapta önce durumu kontrol et; aktif değilse <code>continue</code> ile geç.',
            'Aktifse <code>account_type</code> anahtarını 1 artır.', 'Sözlüğü döndür.'],
@@ -31,7 +31,7 @@ print(sayac)
     start='''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
 
 
 def aktif_hesap_turleri(hesaplar):
@@ -45,7 +45,7 @@ def aktif_hesap_turleri(hesaplar):
     sol='''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
 
 
 def aktif_hesap_turleri(hesaplar):
@@ -73,12 +73,12 @@ assert aktif_hesap_turleri([{"status": "kapali", "account_type": "vadeli"}]) == 
 
 add(id='b-432', lv='temel', diff=1, kind='yaz', title='Segment başına pazarlama izni oranı',
     q='<p><b>KVKK uyum ekibi ve pazarlama soruyor:</b> "Hangi segmentte müşterilerin yüzde kaçı pazarlama iletisi almaya izin verdi?"</p>'
-      '<p><code>izin_orani(musteriler)</code> fonksiyonunu yaz (<code>veri.kayitlar("anadolu_bank", "bank_customers")</code>). '
+      '<p><code>izin_orani(musteriler)</code> fonksiyonunu yaz (<code>veri.kayitlar("ilgaz_bank", "bank_customers")</code>). '
       '<code>kvkk_consent</code> 1 ise izin var. Dönüş: <code>{segment: yüzde}</code>, 1 ondalık.</p>',
     start='''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def izin_orani(musteriler):
@@ -87,7 +87,7 @@ def izin_orani(musteriler):
     sol='''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def izin_orani(musteriler):
@@ -131,8 +131,8 @@ print([ad[s["kat"]] for s in satislar])
     start='''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
-subeler = veri.kayitlar("anadolu_bank", "bank_branches")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
+subeler = veri.kayitlar("ilgaz_bank", "bank_branches")
 
 
 def sube_yuku(musteriler, subeler):
@@ -146,8 +146,8 @@ def sube_yuku(musteriler, subeler):
     sol='''
 import veri
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
-subeler = veri.kayitlar("anadolu_bank", "bank_branches")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
+subeler = veri.kayitlar("ilgaz_bank", "bank_branches")
 
 
 def sube_yuku(musteriler, subeler):
@@ -182,7 +182,7 @@ add(id='b-434', lv='temel', diff=1, kind='bug', title='Kart limiti ortalaması �
     start='''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
 
 
 def ortalama_limit(hesaplar):
@@ -194,7 +194,7 @@ def ortalama_limit(hesaplar):
     sol='''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
 
 
 def ortalama_limit(hesaplar):
@@ -225,13 +225,13 @@ assert ortalama_limit([{"account_type": "vadesiz", "credit_limit": None}]) == 0.
 
 add(id='b-435', lv='temel', diff=1, kind='yaz', title='ATM\'lerin en yoğun saatleri',
     q='<p><b>Nakit yönetimi ekibi soruyor:</b> "ATM\'lere para yüklemesini hangi saatlerden önce yapmalıyız? En yoğun saatleri bilmek istiyoruz."</p>'
-      '<p><code>yogun_saatler(islemler, n=3)</code> fonksiyonunu yaz. <code>islemler</code> = <code>veri.kayitlar("anadolu_bank", "bank_txns")</code> (42 bin satır). '
+      '<p><code>yogun_saatler(islemler, n=3)</code> fonksiyonunu yaz. <code>islemler</code> = <code>veri.kayitlar("ilgaz_bank", "bank_txns")</code> (42 bin satır). '
       'Yalnız <code>txn_type == "atm"</code> işlemleri al; <code>txn_time</code> metni <code>"2024-01-01 07:05:28"</code> biçiminde, saati (0–23, tam sayı) çıkar. '
       'Dönüş: işlem sayısına göre azalan (eşitlikte saate göre artan) ilk <code>n</code> <code>(saat, adet)</code> demeti.</p>',
     start='''
 import veri
 
-islemler = veri.kayitlar("anadolu_bank", "bank_txns")
+islemler = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 def yogun_saatler(islemler, n=3):
@@ -240,7 +240,7 @@ def yogun_saatler(islemler, n=3):
     sol='''
 import veri
 
-islemler = veri.kayitlar("anadolu_bank", "bank_txns")
+islemler = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 def yogun_saatler(islemler, n=3):
@@ -280,7 +280,7 @@ add(id='b-436', lv='temel', diff=1, kind='tamamla', title='Yüksek riskli müşt
 import veri
 from collections import Counter
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def riskli_sehirler(musteriler, esik=8):
@@ -291,7 +291,7 @@ def riskli_sehirler(musteriler, esik=8):
 import veri
 from collections import Counter
 
-musteriler = veri.kayitlar("anadolu_bank", "bank_customers")
+musteriler = veri.kayitlar("ilgaz_bank", "bank_customers")
 
 
 def riskli_sehirler(musteriler, esik=8):
@@ -317,7 +317,7 @@ assert sum(n for _, n in riskli_sehirler(musteriler, 10)) == @N10@, "esik=10 ike
 # ---------------------------------------------------------------- ORTA
 add(id='b-437', lv='orta', diff=2, kind='rehberli', needs=['pandas'], title='Kart harcamalarının kategori payları',
     q='<p><b>Kart pazarlama ekibi soruyor:</b> "Müşterilerimiz kartla en çok nereye harcıyor? Kampanya ortaklarını buna göre seçeceğiz."</p>'
-      '<p><code>harcama_paylari(txns)</code> fonksiyonunu yaz (<code>veri.oku("anadolu_bank", "bank_txns")</code>). Yalnız <code>kart_harcama</code> işlemleri; '
+      '<p><code>harcama_paylari(txns)</code> fonksiyonunu yaz (<code>veri.oku("ilgaz_bank", "bank_txns")</code>). Yalnız <code>kart_harcama</code> işlemleri; '
       'tutarlar eksi işaretli, <b>mutlak değer</b> al. <code>merchant_category</code> başına toplamın genel toplama oranı (%), 1 ondalık, azalan bir <b>Series</b> döndür.</p>',
     guide=['<code>txn_type == "kart_harcama"</code> satırlarını süz.', '<code>amount</code> sütununun mutlak değerini al (<code>.abs()</code>).',
            'Kategoriye göre topla; toplamı genel toplama böl, 100 ile çarp.', 'Yuvarla ve azalan sırala.'],
@@ -332,7 +332,7 @@ print((g / g.sum() * 100).round(1))
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def harcama_paylari(txns):
@@ -346,7 +346,7 @@ def harcama_paylari(txns):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def harcama_paylari(txns):
@@ -376,12 +376,12 @@ for k, v in @R@.items():
 
 add(id='b-438', lv='orta', diff=2, kind='yaz', needs=['sqlite3'], title='Kanal başına işlem özeti (SQL)',
     q='<p><b>Dijital bankacılık müdürü soruyor:</b> "İşlemlerin ne kadarı mobilden, ne kadarı şubeden geliyor ve ortalama işlem tutarları nasıl?"</p>'
-      '<p><code>con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code> ile yalnız işlem tablosunu yükle. <code>kanal_ozeti(con)</code> fonksiyonu '
+      '<p><code>con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code> ile yalnız işlem tablosunu yükle. <code>kanal_ozeti(con)</code> fonksiyonu '
       '<code>(channel, islem_sayisi, ortalama_mutlak_tutar)</code> demetlerini döndürsün; ortalama SQL içinde <code>ROUND(..., 2)</code>; işlem sayısına göre azalan.</p>',
     start='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def kanal_ozeti(con):
@@ -390,7 +390,7 @@ def kanal_ozeti(con):
     sol='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def kanal_ozeti(con):
@@ -422,7 +422,7 @@ assert sum(x[1] for x in r) == 42284, "Toplam işlem sayısı 42284"
 
 add(id='b-439', lv='orta', diff=2, kind='rehberli', needs=['sqlite3'], title='Her ay maaş alan hesap sayısı',
     q='<p><b>Maaş müşterisi ekibi soruyor:</b> "Maaşını bankamıza yatıran hesap sayısı ay ay artıyor mu?"</p>'
-      '<p><code>maas_hesaplari(con)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code>). '
+      '<p><code>maas_hesaplari(con)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code>). '
       '<code>txn_type = \'maas\'</code> olan işlemlerde her ay için <b>benzersiz</b> hesap sayısını bul. Dönüş: <code>("YYYY-MM", hesap_sayisi)</code> listesi, aya göre artan.</p>',
     guide=['Önce maaş işlemlerini süz (<code>WHERE</code>).', 'Ay için <code>substr(txn_time, 1, 7)</code> ya da <code>strftime(\'%Y-%m\', txn_time)</code>.',
            'Aynı hesaba ayda iki maaş yatabilir; <code>COUNT(DISTINCT account_id)</code> kullan.', 'Aya göre grupla ve sırala.'],
@@ -437,7 +437,7 @@ print(con.execute("SELECT gun, COUNT(*), COUNT(DISTINCT kart) FROM giris GROUP B
     start='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def maas_hesaplari(con):
@@ -453,7 +453,7 @@ def maas_hesaplari(con):
     sol='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def maas_hesaplari(con):
@@ -492,7 +492,7 @@ add(id='b-440', lv='orta', diff=2, kind='bug', needs=['pandas'], title='Net akı
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def en_cok_net_giris(txns, n=3):
@@ -503,7 +503,7 @@ def en_cok_net_giris(txns, n=3):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def en_cok_net_giris(txns, n=3):
@@ -535,7 +535,7 @@ add(id='b-441', lv='orta', diff=2, kind='yaz', needs=['pandas'], title='Yaş gru
 import veri
 import pandas as pd
 
-musteriler = veri.oku("anadolu_bank", "bank_customers")
+musteriler = veri.oku("ilgaz_bank", "bank_customers")
 
 
 def yas_risk(musteriler):
@@ -545,7 +545,7 @@ def yas_risk(musteriler):
 import veri
 import pandas as pd
 
-musteriler = veri.oku("anadolu_bank", "bank_customers")
+musteriler = veri.oku("ilgaz_bank", "bank_customers")
 
 
 def yas_risk(musteriler):
@@ -578,7 +578,7 @@ add(id='b-442', lv='orta', diff=2, kind='tamamla', needs=['pandas'], title='Kapa
 import veri
 import pandas as pd
 
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def hesap_omru(hesaplar):
@@ -592,7 +592,7 @@ def hesap_omru(hesaplar):
 import veri
 import pandas as pd
 
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def hesap_omru(hesaplar):
@@ -621,12 +621,12 @@ assert hesap_omru(k) == (20.0, 20.0), "10 ve 30 gün → ortalama 20, medyan 20;
 
 add(id='b-443', lv='orta', diff=2, kind='yaz', needs=['sqlite3'], title='Şube başına kart limiti (üç tablo JOIN)',
     q='<p><b>Bölge müdürlüğü soruyor:</b> "Her şubenin müşterilerine toplam ne kadar kart limiti tanımlamışız?"</p>'
-      '<p><code>sube_limitleri(con)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])</code>). '
+      '<p><code>sube_limitleri(con)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])</code>). '
       'Yalnız <b>aktif kredi kartı</b> hesapları. Dönüş: <code>(sube_adi, kart_sayisi, toplam_limit)</code> demetleri; toplam limite göre azalan, eşitlikte şube adına göre.</p>',
     start='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])
 
 
 def sube_limitleri(con):
@@ -635,7 +635,7 @@ def sube_limitleri(con):
     sol='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])
 
 
 def sube_limitleri(con):
@@ -691,8 +691,8 @@ print(g)
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def nakit_akisi(txns, hesaplar):
@@ -708,8 +708,8 @@ def nakit_akisi(txns, hesaplar):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def nakit_akisi(txns, hesaplar):
@@ -750,16 +750,16 @@ assert (r["cikis"] >= 0).all(), "cikis pozitif (mutlak) olmalı"
 
 add(id='b-445', lv='ileri', diff=3, kind='yaz', needs=['pandas'], title='Döviz faizinin TL karşılığı (merge_asof)',
     q='<p><b>Muhasebe ekibi soruyor:</b> "2024\'te USD ve EUR vadeli hesaplara ödediğimiz faizin TL karşılığı ne kadar?"</p>'
-      '<p><code>faiz_tl(txns, hesaplar, kur)</code> fonksiyonunu yaz. <code>kur</code> = <code>veri.oku("anadolu_bank", "bank_fx")</code>; yalnız <b>iş günleri</b> için kur var. '
+      '<p><code>faiz_tl(txns, hesaplar, kur)</code> fonksiyonunu yaz. <code>kur</code> = <code>veri.oku("ilgaz_bank", "bank_fx")</code>; yalnız <b>iş günleri</b> için kur var. '
       'Her <code>faiz</code> işlemini, işlem tarihindeki ya da <b>ondan önceki son</b> iş gününün kuruyla çevir (hafta sonu işlemi cuma kuru alır). '
       'Dönüş: <code>{"EUR": tl_toplam, "USD": tl_toplam}</code>, 2 ondalık. İpucu: <code>pd.merge_asof(..., by="currency", direction="backward")</code>.</p>',
     start='''
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
-kur = veri.oku("anadolu_bank", "bank_fx")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
+kur = veri.oku("ilgaz_bank", "bank_fx")
 
 
 def faiz_tl(txns, hesaplar, kur):
@@ -769,9 +769,9 @@ def faiz_tl(txns, hesaplar, kur):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
-kur = veri.oku("anadolu_bank", "bank_fx")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
+kur = veri.oku("ilgaz_bank", "bank_fx")
 
 
 def faiz_tl(txns, hesaplar, kur):
@@ -808,14 +808,14 @@ assert faiz_tl(tx, hs, fx) == {"USD": 650.0}, "Cumartesi işlemi cuma kuru (32),
 
 add(id='b-446', lv='ileri', diff=3, kind='yaz', needs=['sqlite3'], title='Peş peşe hızlı işlemler (LAG)',
     q='<p><b>Dolandırıcılık önleme ekibi soruyor:</b> "Aynı hesapta bir önceki işlemden çok kısa süre sonra yapılan işlemler kaç tane? Kural motoruna eşik koyacağız."</p>'
-      '<p><code>hizli_islemler(con, saniye)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code>). '
+      '<p><code>hizli_islemler(con, saniye)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code>). '
       'Her işlem için aynı hesaptaki <b>bir önceki</b> işlemle arasındaki süreyi saniye cinsinden bul (<code>LAG</code> pencere fonksiyonu; saniye için '
       '<code>CAST(strftime(\'%s\', txn_time) AS INTEGER)</code>). Süresi <code>saniye</code> değerinden <b>kısa</b> olan işlemlerin '
       '<code>(islem_sayisi, farkli_hesap_sayisi)</code> demetini döndür.</p>',
     start='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def hizli_islemler(con, saniye):
@@ -824,7 +824,7 @@ def hizli_islemler(con, saniye):
     sol='''
 import veri
 
-con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])
+con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])
 
 
 def hizli_islemler(con, saniye):
@@ -869,8 +869,8 @@ add(id='b-447', lv='ileri', diff=3, kind='bug', needs=['pandas'], title='Pasif h
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):
@@ -885,8 +885,8 @@ def pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
-hesaplar = veri.oku("anadolu_bank", "bank_accounts")
+txns = veri.oku("ilgaz_bank", "bank_txns")
+hesaplar = veri.oku("ilgaz_bank", "bank_accounts")
 
 
 def pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):
@@ -937,7 +937,7 @@ print((pd.crosstab(df["sinif"], df["sonuc"], normalize="index") * 100).round(1))
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def tur_kanal_payi(txns):
@@ -949,7 +949,7 @@ def tur_kanal_payi(txns):
 import veri
 import pandas as pd
 
-txns = veri.oku("anadolu_bank", "bank_txns")
+txns = veri.oku("ilgaz_bank", "bank_txns")
 
 
 def tur_kanal_payi(txns):
@@ -983,4 +983,4 @@ if __name__ == '__main__':
         t.pop('calc_extra', None)
         if t['id'] == 'b-443':
             t['calc']['N'] = 'sum(x[1] for x in sube_limitleri(con))'
-    write('/home/claude/py/v3/d1/ds_bank.js', 'PythonPatika — veri seti görevleri: Anadolu Bank (b-431 … b-448)', T)
+    write('/home/claude/py/v3/d1/ds_bank.js', 'Kesit Python — veri seti görevleri: Ilgaz Bank (b-431 … b-448)', T)

@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e8 uzantı: mulakat-hazirlik (15 ek algoritma görevi) */
+/* Kesit Python — v2 e8 uzantı: mulakat-hazirlik (15 ek algoritma görevi) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

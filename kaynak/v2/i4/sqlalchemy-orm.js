@@ -1,4 +1,4 @@
-/* PythonPatika v2 — sqlalchemy-orm */
+/* Kesit Python v2 — sqlalchemy-orm */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -14,7 +14,7 @@ L.push(
 <h2>Neden önemli?</h2>
 <p>sqlite3 ile Python dersinde veritabanına doğrudan SQL metni gönderdin. Küçük betiklerde bu yeterlidir. Ama gerçek bir uygulamada onlarca tablo, yüzlerce sorgu, farklı veritabanları (geliştirmede SQLite, üretimde PostgreSQL) ve iş nesneleri (müşteri, sipariş, hesap) vardır. Her sorgunun sonucunu elle sözlüğe çevirmek, her tabloda aynı INSERT kalıbını tekrar yazmak, bağlantıları ve transaction'ları doğru yönetmek zorlaşır.</p>
 <p><b>SQLAlchemy</b>, Python dünyasının en yaygın veritabanı araç takımıdır. İki katmanı vardır: <b>Core</b> (SQL'i Python ifadeleriyle kuran, veritabanından bağımsız katman) ve <b>ORM</b> (Object Relational Mapper: tablo satırlarını Python nesnelerine eşleyen katman). Flask, FastAPI, Airflow ve pandas (<code>read_sql</code>) gibi araçların hepsi SQLAlchemy ile konuşur. Bu derste 2.0 sürümünün modern API'sini kullanacağız; eski <code>session.query(...)</code> tarzını da yerinde göreceksin.</p>
-<div class="tip"><b>SQLPatika'ya köprü</b>SQLPatika'da öğrendiğin SELECT, WHERE, JOIN, GROUP BY ve transaction kavramlarının hepsi burada aynen geçerli. SQLAlchemy SQL'i bilmeyi gereksiz kılmaz; tersine, ORM'in ürettiği SQL'i okuyabilen geliştirici performans sorunlarını çok daha hızlı çözer.</div>
+<div class="tip"><b>Kesit SQL'e köprü</b>Kesit SQL'de öğrendiğin SELECT, WHERE, JOIN, GROUP BY ve transaction kavramlarının hepsi burada aynen geçerli. SQLAlchemy SQL'i bilmeyi gereksiz kılmaz; tersine, ORM'in ürettiği SQL'i okuyabilen geliştirici performans sorunlarını çok daha hızlı çözer.</div>
 
 <div class="tbl-wrap"><table>
 <tr><th>Katman</th><th>Ne yapar?</th><th>Örnek</th></tr>
@@ -242,7 +242,7 @@ print("joinedload  :", rapor(joinedload(Musteri.siparisler))[1], "sorgu")</pre>
 <p><code>joinedload</code> bire-çok ilişkide JOIN yüzünden her müşteriyi sipariş sayısı kadar satırda döndürür; bu yüzden 2.0'da sonucu <code>.unique()</code> ile tekilleştirmen zorunludur. <code>selectinload</code>'da böyle bir gereklilik yoktur; koleksiyonlar için çoğu zaman onu tercih etmen bundandır.</p>
 
 <h2>Transaction: ya hep ya hiç</h2>
-<p>Session her zaman bir transaction içindedir. <code>commit()</code> kalıcı yapar, <code>rollback()</code> geri alır. <code>with Session(engine) as s, s.begin():</code> kalıbı blok başarıyla biterse commit, istisna olursa rollback yapar. Anadolu Bank'ta havale gibi birden çok satırı değiştiren işlemler mutlaka tek transaction'da olmalı.</p>
+<p>Session her zaman bir transaction içindedir. <code>commit()</code> kalıcı yapar, <code>rollback()</code> geri alır. <code>with Session(engine) as s, s.begin():</code> kalıbı blok başarıyla biterse commit, istisna olursa rollback yapar. Ilgaz Bank'ta havale gibi birden çok satırı değiştiren işlemler mutlaka tek transaction'da olmalı.</p>
 <pre class="py">from sqlalchemy import create_engine, select, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
@@ -433,7 +433,7 @@ def downgrade():
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank. <code>Hesap</code> modeli hazır. <code>havale(engine, gonderen, alici, tutar)</code> fonksiyonunu yaz. Kendi session\'ını ve transaction\'ını açsın (<code>with Session(engine) as s, s.begin():</code>).</p><ul><li><code>tutar &lt;= 0</code> ise <code>ValueError</code></li><li>Hesaplardan biri yoksa <code>LookupError</code></li><li>Gönderenin bakiyesi yetmiyorsa <code>ValueError</code></li></ul><p>Hata durumunda <b>hiçbir</b> bakiye değişmemeli. Başarılıysa gönderenin yeni bakiyesini döndürsün.</p>',
+      q: '<p>Ilgaz Bank. <code>Hesap</code> modeli hazır. <code>havale(engine, gonderen, alici, tutar)</code> fonksiyonunu yaz. Kendi session\'ını ve transaction\'ını açsın (<code>with Session(engine) as s, s.begin():</code>).</p><ul><li><code>tutar &lt;= 0</code> ise <code>ValueError</code></li><li>Hesaplardan biri yoksa <code>LookupError</code></li><li>Gönderenin bakiyesi yetmiyorsa <code>ValueError</code></li></ul><p>Hata durumunda <b>hiçbir</b> bakiye değişmemeli. Başarılıysa gönderenin yeni bakiyesini döndürsün.</p>',
       start: 'from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session\n\n\nclass Base(DeclarativeBase):\n    pass\n\n\nclass Hesap(Base):\n    __tablename__ = "hesap"\n    no: Mapped[str] = mapped_column(primary_key=True)\n    bakiye: Mapped[float]\n\n\ndef havale(engine, gonderen, alici, tutar):\n    pass\n',
       sol: 'from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session\n\n\nclass Base(DeclarativeBase):\n    pass\n\n\nclass Hesap(Base):\n    __tablename__ = "hesap"\n    no: Mapped[str] = mapped_column(primary_key=True)\n    bakiye: Mapped[float]\n\n\ndef havale(engine, gonderen, alici, tutar):\n    if tutar <= 0:\n        raise ValueError("Tutar pozitif olmalı")\n    with Session(engine) as s, s.begin():\n        g = s.get(Hesap, gonderen)\n        a = s.get(Hesap, alici)\n        if g is None or a is None:\n            raise LookupError("Hesap bulunamadı")\n        a.bakiye += tutar\n        g.bakiye -= tutar\n        if g.bakiye < 0:\n            raise ValueError("Yetersiz bakiye")\n        return g.bakiye\n',
       tests: 'from sqlalchemy import create_engine, select\nengine = create_engine("sqlite+pysqlite:///:memory:")\nBase.metadata.create_all(engine)\nwith Session(engine) as s, s.begin():\n    s.add_all([Hesap(no="TR-1", bakiye=1000.0), Hesap(no="TR-2", bakiye=50.0)])\ndef bakiyeler():\n    with Session(engine) as s:\n        return {h.no: h.bakiye for h in s.scalars(select(Hesap))}\nassert havale(engine, "TR-1", "TR-2", 300) == 700.0, "başarılı havalede gönderenin yeni bakiyesi döner"\nassert bakiyeler() == {"TR-1": 700.0, "TR-2": 350.0}, "havale commit edilmiş olmalı"\nfor args, hata in [(("TR-2", "TR-1", 5000), ValueError), (("TR-1", "TR-9", 10), LookupError), (("TR-1", "TR-2", 0), ValueError)]:\n    try:\n        havale(engine, *args)\n        assert False, f"{args} için {hata.__name__} beklenir"\n    except hata:\n        pass\nassert bakiyeler() == {"TR-1": 700.0, "TR-2": 350.0}, "hatalı havaleler hiçbir bakiyeyi değiştirmemeli (rollback)"\n',
@@ -484,7 +484,7 @@ def downgrade():
   ],
   faq: [
     { q: 'ORM öğrenince SQL bilmeme gerek kalır mı?',
-      a: 'Hayır. ORM SQL üretir; yavaş bir sayfayı düzeltmek, doğru indeksi seçmek ya da karmaşık bir raporu yazmak için üretilen SQL\'i okuyabilmen gerekir. SQLPatika\'da öğrendiklerin burada doğrudan işe yarar. create_engine(..., echo=True) ile üretilen her SQL\'i günlükte görebilirsin.' },
+      a: 'Hayır. ORM SQL üretir; yavaş bir sayfayı düzeltmek, doğru indeksi seçmek ya da karmaşık bir raporu yazmak için üretilen SQL\'i okuyabilmen gerekir. Kesit SQL\'de öğrendiklerin burada doğrudan işe yarar. create_engine(..., echo=True) ile üretilen her SQL\'i günlükte görebilirsin.' },
     { q: 'session.query() ile select() arasındaki fark ne?',
       a: 'session.query() 1.x döneminin API\'sidir ve hâlâ çalışır ama "eski" (legacy) kabul edilir. 2.0 stilinde aynı select() ifadesi hem Core\'da hem ORM\'de kullanılır, tip denetleyicileriyle daha iyi çalışır. Yeni kodda select() kullan; eski projelerde query() göreceğini bil.' },
     { q: 'SQLite ile geliştirip PostgreSQL\'e geçmek sorun çıkarır mı?',

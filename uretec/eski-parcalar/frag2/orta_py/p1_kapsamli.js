@@ -1,4 +1,4 @@
-/* PythonPatika — Orta 1: Pythonic Kod (kapsamli-ifadeler … dekoratorler) */
+/* Kesit Python — Orta 1: Pythonic Kod (kapsamli-ifadeler … dekoratorler) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

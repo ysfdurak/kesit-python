@@ -5,9 +5,9 @@ YUKLE = '''import veri
 import numpy as np
 import pandas as pd
 
-A = veri.oku("anadolu_bank", "bank_accounts", parse_dates=["opened_date", "closed_date"])
-C = veri.oku("anadolu_bank", "bank_customers", parse_dates=["joined_date"])
-TX = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"],
+A = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date", "closed_date"])
+C = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["joined_date"])
+TX = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"],
               parse_dates=["txn_time"]).merge(A[["account_id", "customer_id"]], on="account_id")
 '''
 ETIKET = '''
@@ -60,7 +60,7 @@ def psi(beklenen, gercek, kutu=10):
 SAY = 'SAYISAL = ["islem_90", "islem_30", "maas_90", "son_islem_gun", "ivme", "risk_score", "kidem_yil"]\nKATEGORIK = ["segment"]\n'
 
 html = '<h2>Derinleş: sentetik veriden gerçek bankaya</h2>' \
-'<p>Projenin ilk hâlinde churn verisini kendin ürettin; etiketi de sen yazdığın için model doğal olarak iyi çıktı. Gerçek işte etiket hazır gelmez, onu <b>tanımlarsın</b>. Bu bölümde aynı hattı <code>anadolu_bank</code> setiyle kuracağız: <code>bank_accounts</code> (849 hesap, <code>closed_date</code> kapanış tarihi), <code>bank_customers</code> (500 müşteri) ve <code>bank_txns</code> (2024 yılına ait 42.284 işlem). Sonuçlar sentetik veridekinden çok daha mütevazı çıkacak ve bu bir başarısızlık değil, gerçekçiliğin kendisi.</p>' \
+'<p>Projenin ilk hâlinde churn verisini kendin ürettin; etiketi de sen yazdığın için model doğal olarak iyi çıktı. Gerçek işte etiket hazır gelmez, onu <b>tanımlarsın</b>. Bu bölümde aynı hattı <code>ilgaz_bank</code> setiyle kuracağız: <code>bank_accounts</code> (849 hesap, <code>closed_date</code> kapanış tarihi), <code>bank_customers</code> (500 müşteri) ve <code>bank_txns</code> (2024 yılına ait 42.284 işlem). Sonuçlar sentetik veridekinden çok daha mütevazı çıkacak ve bu bir başarısızlık değil, gerçekçiliğin kendisi.</p>' \
 '<h3>1. Etiketi tanımlamak: anlık görüntü ve ufuk</h3><p>Manifestte <code>closed_date</code> "Kapanış tarihi (açıksa boş)" olarak tanımlı ve <code>status = "kapali"</code> ile birebir örtüşüyor. 2024 boyunca 42 müşteri 43 hesap kapatmış. Churn tanımımız: <b>kesim tarihinde (snapshot) en az bir açık hesabı olan müşteri, sonraki 60 gün içinde herhangi bir hesabını kapatırsa churn = 1</b>. Kesim tarihi, modelin canlıda skor üreteceği günü taklit eder: o güne kadar olan her şey özellik, sonrası etikettir.</p>' + py(YUKLE + ETIKET + '''
 for sn in ["2024-04-01", "2024-07-01", "2024-10-01"]:
     e = etiket_tablosu(sn)
@@ -82,7 +82,7 @@ from fastapi import FastAPI
 from pydantic import BaseModel
 
 model = joblib.load("churn_model.joblib")
-app = FastAPI(title="Anadolu Bank churn")
+app = FastAPI(title="Ilgaz Bank churn")
 
 class Musteri(BaseModel):
     islem_90: float
@@ -185,4 +185,4 @@ mistakes = [
  dict(bad='t = TX[TX["txn_time"] >= snap - pd.Timedelta(days=90)]', good='t = TX[(TX["txn_time"] >= snap - pd.Timedelta(days=90)) & (TX["txn_time"] < snap)]', why='Üst sınır olmadan kesimden sonraki işlemler özelliğe sızar; testte parlak, canlıda çöken model üretir.'),
 ]
 
-emit('proje-ml', dict(id='proje-ml', min=45, needs=['pandas', 'numpy', 'scikit-learn'], html=html, ex=ex, faq=faq, mistakes=mistakes), 'Anadolu Bank gerçek verisiyle churn, servisleme ve PSI izleme')
+emit('proje-ml', dict(id='proje-ml', min=45, needs=['pandas', 'numpy', 'scikit-learn'], html=html, ex=ex, faq=faq, mistakes=mistakes), 'Ilgaz Bank gerçek verisiyle churn, servisleme ve PSI izleme')

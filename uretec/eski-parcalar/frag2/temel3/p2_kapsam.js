@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Bir isim nerede görünür?</h2>
-<p>Anadolu Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
+<p>Ilgaz Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
 <pre class="py">komisyon_orani = 0.002          # global (modül düzeyi)
 
 def komisyon(tutar):
@@ -40,7 +40,7 @@ except NameError as e:
 <tr><td>Built-in</td><td>Python'ın kendisi</td><td><code>print</code>, <code>len</code>, <code>sum</code></td></tr>
 </table></div>
 <pre class="py">def rapor_hazirla(hesaplar):
-    baslik = "Anadolu Bank Günlük Özet"     # enclosing
+    baslik = "Ilgaz Bank Günlük Özet"     # enclosing
 
     def satir(ad, bakiye):
         return baslik[:12] + " | " + ad + ": " + str(bakiye)   # baslik dıştan okunur
@@ -98,7 +98,7 @@ print(type(rastgele_tam(1, 6)))</pre>
     return round(anapara * yillik_oran * ay / 12, 2)
 
 def main():
-    print("Anadolu Bank mevduat hesabı")
+    print("Ilgaz Bank mevduat hesabı")
     print("6 ay, 50.000 TL, %40:", faiz_hesapla(50000, 0.40, 6))
 
 print("__name__ değeri:", __name__)

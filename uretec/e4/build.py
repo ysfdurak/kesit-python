@@ -41,7 +41,7 @@ def main():
         elif '-v' in sys.argv:
             print(f'--- blok {i} ---\n{p.stdout}')
     words = len(re.sub(r'<[^>]+>', ' ', htm).split())
-    out = [f'/* PythonPatika — v2 e4 uzantı: {lid} */', '(function (W) {', "'use strict';",
+    out = [f'/* Kesit Python — v2 e4 uzantı: {lid} */', '(function (W) {', "'use strict';",
            'const X = W.PY_EXT = W.PY_EXT || [];', 'X.push({', f'  id: {js_str(lid)},', f'  min: {E["min"]},',
            '  html: `' + htm.strip().replace('\\', '\\\\') + '\n`,', '  ex: [']
     exs = []

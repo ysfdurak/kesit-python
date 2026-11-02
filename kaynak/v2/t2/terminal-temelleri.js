@@ -1,4 +1,4 @@
-/* PythonPatika v2/t2 — Terminal ve komut satırı */
+/* Kesit Python v2/t2 — Terminal ve komut satırı */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -160,7 +160,7 @@ os.environ["ANADOLU_ORTAM"] = "test"     # yalnız bu süreç ve alt süreçleri
 print("Yeni değer:", os.environ["ANADOLU_ORTAM"])</pre>
 <div class="warn"><b>Parolayı koda yazma</b>Veritabanı parolası, API anahtarı gibi sırlar kod dosyasına değil ortam değişkenine (ya da gizli kasa/vault aracına) konur. Kod Git'e gider; ortam değişkeni gitmez. <code>os.environ["SIFRE"]</code> değişken yoksa KeyError verir, <code>.get()</code> ise None ya da varsayılanı döndürür.</div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın gün sonu mutabakat betiği şöyle çağrılır: <code>python -m mutabakat 2026-10-27 --sube 0412 &gt; mutabakat.csv 2&gt; mutabakat.log</code>. Zamanlayıcı her gece bu komutu koşturur; veritabanı adresi <code>BANKA_DB_URL</code> ortam değişkeninden gelir. Betik çıkış kodu 0 dönerse CSV muhasebeye gider; 1 dönerse nöbetçi geliştiriciye otomatik bildirim düşer ve log dosyası incelenir. Hiç kimse ekrana bakmaz; her şeyi çıkış kodu, stdout ve stderr anlatır.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın gün sonu mutabakat betiği şöyle çağrılır: <code>python -m mutabakat 2026-10-27 --sube 0412 &gt; mutabakat.csv 2&gt; mutabakat.log</code>. Zamanlayıcı her gece bu komutu koşturur; veritabanı adresi <code>BANKA_DB_URL</code> ortam değişkeninden gelir. Betik çıkış kodu 0 dönerse CSV muhasebeye gider; 1 dönerse nöbetçi geliştiriciye otomatik bildirim düşer ve log dosyası incelenir. Hiç kimse ekrana bakmaz; her şeyi çıkış kodu, stdout ve stderr anlatır.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Test edilebilir komut satırı kalıbı</h3>

@@ -1,4 +1,4 @@
-/* PythonPatika — 'degiskenler' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'degiskenler' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

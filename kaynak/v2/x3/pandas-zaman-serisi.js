@@ -1,4 +1,4 @@
-/* PythonPatika — 'pandas-zaman-serisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'pandas-zaman-serisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

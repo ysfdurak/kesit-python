@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e7 uzantı (Derinleş): bellek-ic-yapi */
+/* Kesit Python — v2 e7 uzantı (Derinleş): bellek-ic-yapi */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

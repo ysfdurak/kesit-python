@@ -1,4 +1,4 @@
-/* PythonPatika — Bitirme: proje-ai (Python ile yapay zekâ asistanı) */
+/* Kesit Python — Bitirme: proje-ai (Python ile yapay zekâ asistanı) */
 // needs: scikit-learn, pydantic, sqlite3
 (function (W) {
 'use strict';

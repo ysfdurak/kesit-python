@@ -6,11 +6,11 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.compose import ColumnTransformer
 from sklearn.pipeline import make_pipeline
 from sklearn.metrics import roc_auc_score, average_precision_score
-A=veri.oku('anadolu_bank','bank_accounts',parse_dates=['opened_date','closed_date'])
-C=veri.oku('anadolu_bank','bank_customers',parse_dates=['joined_date'])
-TX=veri.oku('anadolu_bank','bank_txns',usecols=['account_id','txn_time','amount','txn_type'],parse_dates=['txn_time'])
+A=veri.oku('ilgaz_bank','bank_accounts',parse_dates=['opened_date','closed_date'])
+C=veri.oku('ilgaz_bank','bank_customers',parse_dates=['joined_date'])
+TX=veri.oku('ilgaz_bank','bank_txns',usecols=['account_id','txn_time','amount','txn_type'],parse_dates=['txn_time'])
 TX=TX.merge(A[['account_id','customer_id','currency']],on='account_id')
-FX=veri.oku('anadolu_bank','bank_fx',parse_dates=['rate_date'])
+FX=veri.oku('ilgaz_bank','bank_fx',parse_dates=['rate_date'])
 def etiket(snap, ufuk=60):
     s=pd.Timestamp(snap); acik=A[(A.opened_date<=s)&(A.closed_date.isna()|(A.closed_date>s))]
     kap=acik[(acik.closed_date>s)&(acik.closed_date<=s+pd.Timedelta(days=ufuk))]

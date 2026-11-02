@@ -1,4 +1,4 @@
-/* PythonPatika v2 — gozlemlenebilirlik */
+/* Kesit Python v2 — gozlemlenebilirlik */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

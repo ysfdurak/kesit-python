@@ -1,4 +1,4 @@
-/* PythonPatika v2/i6 — Bitirme projesi: Sipariş API */
+/* Kesit Python v2/i6 — Bitirme projesi: Sipariş API */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

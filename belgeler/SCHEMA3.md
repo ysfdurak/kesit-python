@@ -1,22 +1,22 @@
-# PythonPatika — SÜRÜM 3 şemaları (Arena, Mülakat, Sık hatalar, Veri seti görevleri)
+# Kesit Python — SÜRÜM 3 şemaları (Arena, Mülakat, Sık hatalar, Veri seti görevleri)
 
 Genel kurallar SCHEMA.md ve AGENT_PROMPT2.md ile aynı: her dosya bağımsız IIFE, `node --check` geçer; tek tırnaklı JS stringleri (\n, \'),
 HTML içinde Python kodunda `&lt; &gt; &amp;`. Her dosyayı yazınca doğrula: `python3 /home/claude/py/tools/verify.py <dosya>` (FAIL=0).
 Doğrulamayı scratchpad içinde boş bir alt klasörden çalıştır. Türkçe, sade, "sen" dili.
 
 ## Ortak veri setleri (`veri` modülü) — tarayıcıda ve doğrulamada hazır
-SQLPatika ve PBIPatika ile aynı kurgusal veriler. İçeriğe bakmak için:
+Kesit SQL ve Kesit Power BI ile aynı kurgusal veriler. İçeriğe bakmak için:
 `PP_VERI=/home/claude/py/data python3 -c "import sys; sys.path.insert(0,'/home/claude/py/tools/pylib'); import veri; veri.liste(); veri.tablolar('anadolu_market')"`
 Şema ayrıntısı: /home/claude/py/data/manifest.json (sütun açıklamaları dahil).
 ```python
 import veri
-veri.kayitlar("anadolu_bank", "bank_accounts")   # list[dict], sayılar dönüştürülmüş, boşlar None (pandas GEREKMEZ)
+veri.kayitlar("ilgaz_bank", "bank_accounts")   # list[dict], sayılar dönüştürülmüş, boşlar None (pandas GEREKMEZ)
 veri.oku("anadolu_market", "orders")             # pandas DataFrame (needs: ['pandas'] ekle)
 veri.baglan("kanat_havayollari")                 # bellek içi sqlite3 bağlantısı (needs: ['sqlite3'] ekle)
 veri.baglan("pedal_izmir", tablolar=["bk_trips", "bk_stations"])  # büyük sette yalnız gerekenler
 veri.yol("pusula_ik", "ik_employees")            # CSV yolu
 ```
-Setler: anadolu_market (e-ticaret, 10 tablo), anadolu_bank (5), pusula_ik (11, İK), lezzet_kurye (7, yemek teslimat),
+Setler: anadolu_market (e-ticaret, 10 tablo), ilgaz_bank (5), pusula_ik (11, İK), lezzet_kurye (7, yemek teslimat),
 kanat_havayollari (7), pedal_izmir (6, ~117 bin yolculuk), kesit_bi (27, Power BI yıldız şeması: Satislar, Urunler, Musteriler, Tarih...),
 kirli_veri (4 dağınık tablo: bayi, hedef, urun, musteri — Türkçe sayı biçimi, başlık satırı, boşluklar).
 Veri setinin adı kodda geçmeli (tarayıcı yalnız adı geçen seti indirir). Testlerde beklenen değerleri gerçekten hesaplayıp yaz (önce kendin çalıştır).

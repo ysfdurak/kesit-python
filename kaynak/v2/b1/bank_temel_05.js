@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-151 … b-160 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-151 … b-160 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -10,7 +10,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Mükerrer işlem numaraları',
-    q: '<p>Anadolu Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
+    q: '<p>Ilgaz Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
     start: 'def mukerrerler(islem_nolari):\n    # buraya yaz\n    pass\n',
     sol: 'def mukerrerler(islem_nolari):\n    gorulen = set()\n    tekrar = set()\n    for no in islem_nolari:\n        if no in gorulen:\n            tekrar.add(no)\n        else:\n            gorulen.add(no)\n    return sorted(tekrar)\n',
     tests: 'assert mukerrerler([501, 502, 501, 503, 502, 501]) == [501, 502], "501 ve 502 tekrar ediyor; her biri bir kez, sıralı"\nassert mukerrerler([1, 2, 3]) == [], "Tekrar yoksa boş liste"\nassert mukerrerler([]) == [], "Boş liste için boş sonuç"\nassert mukerrerler([9, 9]) == [9], "İki kez geçen tek numara"\nassert ".count(" not in __source__, "count() kullanmadan, görülenler kümesiyle çöz"\n',
@@ -42,7 +42,7 @@ B.push(
     diff: 2,
     kind: 'tamamla',
     title: 'Yetki kontrolü',
-    q: '<p>Anadolu Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
+    q: '<p>Ilgaz Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
     start: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.___(kullanici)\n    eksikler = sorted(gerekli ___ kullanici)\n    return izinli_mi, eksikler\n',
     sol: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.issubset(kullanici)\n    eksikler = sorted(gerekli - kullanici)\n    return izinli_mi, eksikler\n',
     tests: 'assert yetki_kontrol({"oku", "yaz", "onayla"}, {"oku", "onayla"}) == (True, []), "Tüm gerekli yetkiler var: (True, [])"\nassert yetki_kontrol({"oku"}, {"oku", "yaz", "sil"}) == (False, ["sil", "yaz"]), "Eksikler sıralı liste: [\\"sil\\", \\"yaz\\"]"\nassert yetki_kontrol(set(), set()) == (True, []), "Hiç yetki gerekmiyorsa izin var"\n',

@@ -45,7 +45,7 @@ print("Müşteri \\"Kahve Makinesi\\" ürününü iade etti.")
 '<div class="warn"><b>Windows yolunda gizli kaçış</b><code>"C:\\raporlar\\nisan"</code> yazarsan <code>\\n</code> bir satır sonuna, <code>\\r</code> da satır başı karakterine dönüşür ve yol bozulur. Windows yollarını ya <code>r"..."</code> ham metinle ya da düz eğik çizgiyle (<code>"C:/raporlar/nisan"</code>) yaz; Python ikisini de anlar.</div>'
 '<p>Üç tırnaklı metin, makbuz ya da e-posta şablonu gibi uzun metinler için rahattır:</p>'
 + P('''
-fis = """ANADOLU BANK
+fis = """ILGAZ BANK
 Şube: Konak
 İşlem: Para yatırma
 Tutar: 2750 TL"""
@@ -62,7 +62,7 @@ print("Satır sayısı:", fis.count("\\n") + 1)
 '<li><b>Ana akış:</b> Girdi al → hesapla → çıktı ver.</li>'
 '</ol></div>'
 + P('''
-"""Anadolu Bank şube makbuzu: tutar ve komisyondan net tutarı yazar."""
+"""Ilgaz Bank şube makbuzu: tutar ve komisyondan net tutarı yazar."""
 import sys
 
 KOMISYON = 5          # TL, şube yönetmeliği gereği sabit
@@ -132,7 +132,7 @@ ex = [
          hint='input çağrıları girdileri sırayla alır: ilk input adeti, ikincisi fiyatı okumalı.',
          why='Girdi sırası programdaki input sırasını belirler. Ara toplam iki girdiye, KDV ara toplama bağlıdır; print hepsini kullandığı için en sonda gelir.'),
     dict(t='code', stage='Rehberli', diff=1,
-         q='<p>Anadolu Bank makbuzunu yazdır. Çıktı tam olarak şöyle olmalı (ilk satırdaki tarih tek print ile, <code>sep</code> kullanılarak; ikinci satır <code>end</code> ile iki ayrı print\'ten oluşmalı):</p><pre class="out">14.03.2025\nTutar: 2750 TL\n==========</pre>',
+         q='<p>Ilgaz Bank makbuzunu yazdır. Çıktı tam olarak şöyle olmalı (ilk satırdaki tarih tek print ile, <code>sep</code> kullanılarak; ikinci satır <code>end</code> ile iki ayrı print\'ten oluşmalı):</p><pre class="out">14.03.2025\nTutar: 2750 TL\n==========</pre>',
          guide=['İlk print\'e "14", "03", "2025" değerlerini ver ve sep="." ekle.', 'İkinci satırın ilk parçası: print("Tutar:", end=" ") — satır sonu yerine boşluk koyar.', 'Ardından print(2750, "TL") aynı satıra devam eder.', 'Son satırda "=" * 10 ile çizgi çek.'],
          example='print("09", "30", sep=":")\nprint("Durum:", end=" ")\nprint("açık")\n',
          start='# TODO: tarihi sep ile yazdır\nprint("14", "03", "2025")\n# TODO: tutarı end kullanarak iki print ile yazdır\n# TODO: çizgiyi çek\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — 'metinler' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'metinler' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -39,7 +39,7 @@ print(dosya.lower().endswith((".csv", ".xlsx")))
 print("2025-03-14".replace("-", "/", 1))
 mesaj = ("Sayın müşterimiz, siparişiniz "
          "kargoya verilmiştir.")
-print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık düzenlemeleri, kart numarası, IBAN, T.C. kimlik numarası gibi verilerin loglarda ve ekranlarda açık görünmemesini ister. Bu yüzden Anadolu Bank'ın her uygulamasında bir "maskeleme" fonksiyonu bulunur: kart numarasının yalnız son dört hanesi gösterilir (<code>**** **** **** 9012</code>), IBAN dörder hanelik gruplara ayrılarak okunur hâle getirilir. Bu fonksiyonlar tamamen bu bölümdeki araçlarla, dilimleme, <code>replace</code>, <code>rjust</code> ve <code>join</code> ile yazılır. Maskelemeyi veriyi loga yazmadan <b>önce</b> yapmak gerekir; sonradan log dosyasını temizlemek çok daha zordur.</div>`,
+print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık düzenlemeleri, kart numarası, IBAN, T.C. kimlik numarası gibi verilerin loglarda ve ekranlarda açık görünmemesini ister. Bu yüzden Ilgaz Bank'ın her uygulamasında bir "maskeleme" fonksiyonu bulunur: kart numarasının yalnız son dört hanesi gösterilir (<code>**** **** **** 9012</code>), IBAN dörder hanelik gruplara ayrılarak okunur hâle getirilir. Bu fonksiyonlar tamamen bu bölümdeki araçlarla, dilimleme, <code>replace</code>, <code>rjust</code> ve <code>join</code> ile yazılır. Maskelemeyi veriyi loga yazmadan <b>önce</b> yapmak gerekir; sonradan log dosyasını temizlemek çok daha zordur.</div>`,
     ex: [
       {
         t: 'mc',

@@ -1,11 +1,11 @@
-/* PythonPatika — 'seaborn-plotly' dersi uzantısı: panoya geçiş: KPI, Streamlit/Dash gösterimi, pano tasarımı, veri hikâyesi, tek dosyalık HTML rapor (AUDIT Ekle-3) */
+/* Kesit Python — 'seaborn-plotly' dersi uzantısı: panoya geçiş: KPI, Streamlit/Dash gösterimi, pano tasarımı, veri hikâyesi, tek dosyalık HTML rapor (AUDIT Ekle-3) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
 X.push(
   { id: 'seaborn-plotly',
     min: 28,
-    html: `<h2>Derinleş: grafikten panoya ve rapora</h2><p>Tek grafik bir soruyu cevaplar; <b>pano</b> (dashboard) ise bir ekibin her sabah baktığı soruları tek ekranda toplar. Bu bölümde Python'la pano kurmanın iki popüler yolunu (Streamlit ve Dash), iyi pano tasarımının ilkelerini, veri hikâyesinin akışını ve e-postayla gönderilebilen <b>tek dosyalık HTML rapor</b> üretmeyi göreceksin. Rakamlar PBIPatika'nın <code>kesit_bi.Satislar</code> tablosundan (1620 satış satırı) geliyor; aynı panoyu orada Power BI ile kuruyorsun.</p><h3>Önce rakamlar: KPI hesabı</h3><pre class="py">import veri
+    html: `<h2>Derinleş: grafikten panoya ve rapora</h2><p>Tek grafik bir soruyu cevaplar; <b>pano</b> (dashboard) ise bir ekibin her sabah baktığı soruları tek ekranda toplar. Bu bölümde Python'la pano kurmanın iki popüler yolunu (Streamlit ve Dash), iyi pano tasarımının ilkelerini, veri hikâyesinin akışını ve e-postayla gönderilebilen <b>tek dosyalık HTML rapor</b> üretmeyi göreceksin. Rakamlar Kesit Power BI'ın <code>kesit_bi.Satislar</code> tablosundan (1620 satış satırı) geliyor; aynı panoyu orada Power BI ile kuruyorsun.</p><h3>Önce rakamlar: KPI hesabı</h3><pre class="py">import veri
 import pandas as pd
 
 s = veri.oku("kesit_bi", "Satislar")

@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Lezzet Kurye (b-499 … b-516) */
+/* Kesit Python — veri seti görevleri: Lezzet Kurye (b-499 … b-516) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

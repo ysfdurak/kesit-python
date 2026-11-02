@@ -1,4 +1,4 @@
-/* PythonPatika — 'yapay-zeka-ile-kod' dersi uzantısı: ajanlı kodlama iş akışı, kurallar dosyası, MCP, ajan PR inceleme kontrol listesi (AUDIT Ekle-10) */
+/* Kesit Python — 'yapay-zeka-ile-kod' dersi uzantısı: ajanlı kodlama iş akışı, kurallar dosyası, MCP, ajan PR inceleme kontrol listesi (AUDIT Ekle-10) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

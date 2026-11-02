@@ -72,7 +72,7 @@ P.append(dict(
     id='a-033', title='Şifre karakter denetimi', track=T, diff='Kolay',
     tags=['isalnum', 'isdigit', 'any'], src='HackerRank Python: String Validators benzeri',
     mode='stdin',
-    statement='<p>Anadolu Bank internet şubesi şifre ekranı, girilen şifre hakkında beş bilgi gösteriyor. Şifrede en az bir tane:</p>'
+    statement='<p>Ilgaz Bank internet şubesi şifre ekranı, girilen şifre hakkında beş bilgi gösteriyor. Şifrede en az bir tane:</p>'
               '<ol><li>harf ya da rakam var mı</li><li>harf var mı</li><li>rakam var mı</li><li>küçük harf var mı</li><li>büyük harf var mı</li></ol>'
               '<p>Her şifre için bu beş cevabı <code>True</code>/<code>False</code> olarak tek satırda, boşlukla ayırarak yazdır. Türkçe harfler (ç, Ğ, ı...) de harf sayılır.</p>',
     input='<p>İlk satırda <code>N</code>, sonraki <code>N</code> satırda birer şifre (boşluk içerebilir).</p>',
@@ -494,7 +494,7 @@ P.append(dict(
     id='a-045', title='Dağınık tutar sütununu topla', track=T, diff='Orta',
     tags=['ayrıştırma', 'Türkçe sayı biçimi', 'kuruş'], src='Veri temizleme: yerel sayı biçimi (kirli veri) problemi',
     mode='stdin',
-    statement='<p>Anadolu Bank\'a bayilerden gelen Excel dökümünde tutarlar Türkçe biçimde ve dağınık: binlik ayracı nokta, ondalık ayracı virgül (<code>1.234,5</code>); başta/sonda boşluk ve isteğe bağlı <code>TL</code> eki olabilir; eksi işaretli değerler (iade) de var. Ondalık kısım en fazla 2 basamak.</p>'
+    statement='<p>Ilgaz Bank\'a bayilerden gelen Excel dökümünde tutarlar Türkçe biçimde ve dağınık: binlik ayracı nokta, ondalık ayracı virgül (<code>1.234,5</code>); başta/sonda boşluk ve isteğe bağlı <code>TL</code> eki olabilir; eksi işaretli değerler (iade) de var. Ondalık kısım en fazla 2 basamak.</p>'
               '<p>Tüm tutarları <b>kuruş hassasiyetiyle</b> topla ve sonucu aynı Türkçe biçimde yaz: binlik ayracı nokta, tam iki ondalık basamak, negatifse başta <code>-</code>.</p>',
     input='<p>İlk satırda <code>N</code>, sonraki <code>N</code> satırda birer tutar.</p>',
     output='<p>Toplam, ör. <code>1.234.567,80</code>.</p>',
@@ -542,7 +542,7 @@ P.append(dict(
     id='a-046', title='IBAN doğrulama', track=T, diff='Orta',
     tags=['mod 97', 'metin temizleme', 'doğrulama'], src='ISO 13616 IBAN kontrol algoritması',
     mode='func', fn='gecerli_iban_mi',
-    statement='<p>Anadolu Bank havale formunda girilen Türk IBAN\'larını göndermeden önce doğruluyor. <code>gecerli_iban_mi(iban)</code> şu kurallara göre True/False döndürsün:</p>'
+    statement='<p>Ilgaz Bank havale formunda girilen Türk IBAN\'larını göndermeden önce doğruluyor. <code>gecerli_iban_mi(iban)</code> şu kurallara göre True/False döndürsün:</p>'
               '<ol><li>Boşlukları sil, harfleri büyüt.</li><li>Uzunluk tam <b>26</b> ve <code>TR</code> ile başlamalı; geri kalan 24 karakter rakam olmalı.</li>'
               '<li>İlk 4 karakteri sona taşı; harfleri sayıya çevir (A=10, B=11, …, Z=35; yani T=29, R=27).</li><li>Ortaya çıkan büyük sayının 97\'ye bölümünden kalan <b>1</b> olmalı.</li></ol>',
     input='<p>str</p>',
@@ -591,7 +591,7 @@ P.append(dict(
     id='a-047', title='Tekrarsız en uzun şifre parçası', track=T, diff='Zor',
     tags=['kayan pencere', 'sözlük', 'iki işaretçi'], src='Longest Substring Without Repeating Characters (LeetCode 3) benzeri',
     mode='stdin',
-    statement='<p>Anadolu Bank güvenlik ekibi, kullanıcıların oluşturduğu uzun anahtar dizilerinde <b>hiçbir karakteri tekrar etmeyen</b> en uzun ardışık parçayı arıyor.</p>'
+    statement='<p>Ilgaz Bank güvenlik ekibi, kullanıcıların oluşturduğu uzun anahtar dizilerinde <b>hiçbir karakteri tekrar etmeyen</b> en uzun ardışık parçayı arıyor.</p>'
               '<p>Bu parçanın uzunluğunu ve kendisini yazdır. Aynı uzunlukta birden çok parça varsa <b>en solda</b> başlayanı seç. Büyük/küçük harf farklı karakterdir.</p>',
     input='<p>Tek satır metin (boşluk içermez).</p>',
     output='<p>İki satır: uzunluk ve parça.</p>',
@@ -680,7 +680,7 @@ P.append(dict(
     id='a-049', title='Çek tutarını yazıya çevir', track=T, diff='Zor',
     tags=['özyineleme', 'üçlü gruplar', 'Türkçe'], src='Integer to English Words (LeetCode 273) Türkçe uyarlaması',
     mode='func', fn='sayi_yaziya',
-    statement='<p>Anadolu Bank çek ve dekontlarda tutarı yazıyla da basıyor. <code>sayi_yaziya(n)</code> 0 ≤ n ≤ 999.999.999.999 aralığındaki tam sayıyı Türkçe yazıya çevirsin. Kurallar:</p>'
+    statement='<p>Ilgaz Bank çek ve dekontlarda tutarı yazıyla da basıyor. <code>sayi_yaziya(n)</code> 0 ≤ n ≤ 999.999.999.999 aralığındaki tam sayıyı Türkçe yazıya çevirsin. Kurallar:</p>'
               '<ul><li>Kelimeler küçük harf ve aralarında <b>tek boşluk</b>.</li><li>0 → <code>sıfır</code>.</li>'
               '<li><b>yüz</b> ve <b>bin</b> önünde "bir" söylenmez: 100 → <code>yüz</code>, 1000 → <code>bin</code>, 1100 → <code>bin yüz</code>. Ama <code>bir milyon</code>, <code>bir milyar</code>.</li></ul>',
     input='<p>int</p>',

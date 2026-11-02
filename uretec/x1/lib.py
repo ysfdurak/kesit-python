@@ -60,7 +60,7 @@ def emit(lesson_id, ext, desc):
     ext['needs'] = needs
     order = ['id', 'min', 'needs', 'html', 'ex', 'faq', 'mistakes']
     obj = {k: ext[k] for k in order if k in ext}
-    s = ('/* PythonPatika — \'' + lesson_id + '\' dersi uzantısı: ' + desc + ' (gerçek veri setleri) */\n'
+    s = ('/* Kesit Python — \'' + lesson_id + '\' dersi uzantısı: ' + desc + ' (gerçek veri setleri) */\n'
          + '// needs: ' + ', '.join(needs) + '\n'
          + "(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  "
          + val(obj, 1) + '\n);\n})(window);\n')

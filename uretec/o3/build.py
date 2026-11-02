@@ -1,4 +1,4 @@
-"""Ders tanımı (python modülü, LESSON dict) -> PythonPatika JS dosyası.
+"""Ders tanımı (python modülü, LESSON dict) -> Kesit Python JS dosyası.
 Kullanım: python3 build.py ders.py cikti.js"""
 import sys, re, html, subprocess, importlib.util, textwrap, json
 
@@ -46,7 +46,7 @@ def main():
         if 'lines' in e: e['lines'] = [x for x in e['lines']]
     for mm in L.get('mistakes', []):
         for k in ('bad', 'good'): mm[k] = textwrap.dedent(mm[k]).strip('\n')
-    js = "/* PythonPatika — v2 o3: " + L['title'] + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n" + emit(L, 0) + "\n);\n})(window);\n"
+    js = "/* Kesit Python — v2 o3: " + L['title'] + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n" + emit(L, 0) + "\n);\n})(window);\n"
     open(out, 'w').write(js)
     # body denetimi
     body = L['body']

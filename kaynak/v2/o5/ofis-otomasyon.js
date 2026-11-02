@@ -1,4 +1,4 @@
-/* PythonPatika — Ofis ve iş akışı otomasyonu (v2/o5) */
+/* Kesit Python — Ofis ve iş akışı otomasyonu (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -362,7 +362,7 @@ print("eklenen:", eklenen, "| silinen:", silinen, "| değişen:", degisen)</pre>
         'ekler.items() üzerinde dönüp add_attachment(icerik, subtype="csv", filename=ad) çağır.',
         'Mesajı döndür.'
       ],
-      example: 'from email.message import EmailMessage\n\nm = EmailMessage()\nm["From"] = "ik@anadolubank.com.tr"\nm["To"] = "personel@anadolubank.com.tr"\nm["Subject"] = "Bordro"\nm.set_content("Bordronuz ektedir.")\nm.add_attachment("ad,net\\nAyşe,42000\\n", subtype="csv", filename="bordro.csv")\nprint(m["Subject"], [p.get_filename() for p in m.iter_attachments()])\n',
+      example: 'from email.message import EmailMessage\n\nm = EmailMessage()\nm["From"] = "ik@ilgazbank.com.tr"\nm["To"] = "personel@ilgazbank.com.tr"\nm["Subject"] = "Bordro"\nm.set_content("Bordronuz ektedir.")\nm.add_attachment("ad,net\\nAyşe,42000\\n", subtype="csv", filename="bordro.csv")\nprint(m["Subject"], [p.get_filename() for p in m.iter_attachments()])\n',
       start: 'from email.message import EmailMessage\n\ndef rapor_epostasi(alicilar, konu, govde, ekler):\n    msg = EmailMessage()\n    # TODO: From, To ve Subject başlıklarını ata\n    # TODO: düz metin gövdeyi ekle\n    # TODO: her CSV ekini ekle\n    return msg\n',
       sol: 'from email.message import EmailMessage\n\ndef rapor_epostasi(alicilar, konu, govde, ekler):\n    msg = EmailMessage()\n    msg["From"] = "rapor@anadolumarket.com.tr"\n    msg["To"] = ", ".join(alicilar)\n    msg["Subject"] = konu\n    msg.set_content(govde)\n    for ad, icerik in ekler.items():\n        msg.add_attachment(icerik, subtype="csv", filename=ad)\n    return msg\n',
       tests: 'm = rapor_epostasi(["mudur@anadolumarket.com.tr", "finans@anadolumarket.com.tr"], "Haftalık özet", "Rapor ektedir.", {"ozet.csv": "magaza,ciro\\nKadıköy,100\\n", "iade.csv": "urun,adet\\nÇay,2\\n"})\nassert m["From"] == "rapor@anadolumarket.com.tr", "Gönderen adresi rapor@anadolumarket.com.tr olmalı"\nassert m["To"] == "mudur@anadolumarket.com.tr, finans@anadolumarket.com.tr", "Alıcılar virgül ve boşlukla birleşmeli"\nassert m["Subject"] == "Haftalık özet"\nassert m.get_body(("plain",)).get_content().strip() == "Rapor ektedir.", "Düz metin gövde set_content ile eklenmeli"\nekler = {p.get_filename(): p.get_content() for p in m.iter_attachments()}\nassert set(ekler) == {"ozet.csv", "iade.csv"}, f"İki ek bekleniyordu, gelen: {list(ekler)}"\nassert "Kadıköy" in ekler["ozet.csv"], "Ek içeriği korunmalı"\nassert [p.get_content_type() for p in m.iter_attachments()] == ["text/csv", "text/csv"], "Ekler text/csv olmalı"\nbos = rapor_epostasi(["a@b.com"], "Ek yok", "Merhaba", {})\nassert bos.get_content_type() == "text/plain", "Ek yoksa mesaj tek parçalı kalmalı"\n',

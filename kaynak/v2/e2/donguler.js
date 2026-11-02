@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: donguler */
+/* Kesit Python v2 — uzantı: donguler */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -176,7 +176,7 @@ print("\\n".join(["no;sehir"] + satirlar))</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank taksit planı: <code>taksit_plani(tutar, ay)</code> fonksiyonunu yaz. Her taksit <code>round(tutar / ay, 2)</code> olsun; ama yuvarlama farkı kaybolmasın diye <b>son taksit</b> kalan tutarı alsın (<code>tutar - ilk taksitlerin toplamı</code>, 2 ondalığa yuvarlanmış). <code>ay</code> taksitlik liste döndür. Taksitlerin toplamı (yuvarlanmış) tutara eşit olmalı.</p>',
+      q: '<p>Ilgaz Bank taksit planı: <code>taksit_plani(tutar, ay)</code> fonksiyonunu yaz. Her taksit <code>round(tutar / ay, 2)</code> olsun; ama yuvarlama farkı kaybolmasın diye <b>son taksit</b> kalan tutarı alsın (<code>tutar - ilk taksitlerin toplamı</code>, 2 ondalığa yuvarlanmış). <code>ay</code> taksitlik liste döndür. Taksitlerin toplamı (yuvarlanmış) tutara eşit olmalı.</p>',
       start: 'def taksit_plani(tutar, ay):\n    pass\n',
       sol: 'def taksit_plani(tutar, ay):\n    taksit = round(tutar / ay, 2)\n    plan = []\n    for _ in range(ay - 1):\n        plan.append(taksit)\n    plan.append(round(tutar - taksit * (ay - 1), 2))\n    return plan\n',
       tests: 'p = taksit_plani(1000, 3)\nassert p == [333.33, 333.33, 333.34], f"son taksit 1 kuruş farkı almalı; gelen {p}"\nassert round(sum(p), 2) == 1000, "taksitlerin toplamı tutara eşit olmalı"\nassert taksit_plani(1200, 12) == [100.0] * 12, "tam bölünen tutar"\nassert taksit_plani(99.99, 1) == [99.99], "tek taksit"\nq = taksit_plani(100, 6)\nassert len(q) == 6 and round(sum(q), 2) == 100, f"6 taksit, toplam 100; gelen {q}"\n',

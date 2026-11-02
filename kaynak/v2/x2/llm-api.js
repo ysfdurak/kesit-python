@@ -1,4 +1,4 @@
-/* PythonPatika — 'llm-api' dersi uzantısı: yerel modeller, Protocol ile sağlayıcıdan bağımsız istemci, SSE ve model yönlendirme (AUDIT Ekle-9) */
+/* Kesit Python — 'llm-api' dersi uzantısı: yerel modeller, Protocol ile sağlayıcıdan bağımsız istemci, SSE ve model yönlendirme (AUDIT Ekle-9) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -75,7 +75,7 @@ async def akis(soru: str):
                 yield sse({"parca": parca})
         yield sse("[DONE]", olay="bitti")
     return StreamingResponse(uret(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})</pre><h3>Model yönlendirme: küçük model, büyük model</h3><p>Şikâyet kategorisi seçmek gibi basit işler küçük ve ucuz modelle, uzun belge analizi ya da kod yazma gibi işler büyük modelle yapılır. Yönlendirici (router) basit kurallarla başlar: istemin uzunluğu, görev türü, istenen çıktı (JSON şeması) ve kullanıcının planı. Bir adım ötesi <b>kademeli</b> (cascade) yaklaşımdır: önce küçük model denenir, cevap doğrulamayı geçmezse (JSON bozuk, güven düşük) büyük modele gidilir. Her iki durumda da hangi isteğin hangi modele gittiğini ve maliyetini logla; yönlendirme kurallarını bu verilerle ayarlarsın.</p><div class="note"><b>Gerçek işte</b>Anadolu Bank gibi düzenlemeye tabi kurumlarda yaygın mimari şudur: kişisel veri içeren istekler kurum içindeki yerel modele, kişisel veri içermeyen genel istekler bulut modeline gider; tüm çağrılar tek bir iç "LLM ağ geçidi" (gateway) servisinden geçer. Ağ geçidi anahtarları saklar, hız sınırı ve bütçe uygular, istekleri maskeler ve loglar. Bu bölümdeki Protocol, SSE ve yönlendirici, o ağ geçidinin küçük bir modelidir.</div>`,
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})</pre><h3>Model yönlendirme: küçük model, büyük model</h3><p>Şikâyet kategorisi seçmek gibi basit işler küçük ve ucuz modelle, uzun belge analizi ya da kod yazma gibi işler büyük modelle yapılır. Yönlendirici (router) basit kurallarla başlar: istemin uzunluğu, görev türü, istenen çıktı (JSON şeması) ve kullanıcının planı. Bir adım ötesi <b>kademeli</b> (cascade) yaklaşımdır: önce küçük model denenir, cevap doğrulamayı geçmezse (JSON bozuk, güven düşük) büyük modele gidilir. Her iki durumda da hangi isteğin hangi modele gittiğini ve maliyetini logla; yönlendirme kurallarını bu verilerle ayarlarsın.</p><div class="note"><b>Gerçek işte</b>Ilgaz Bank gibi düzenlemeye tabi kurumlarda yaygın mimari şudur: kişisel veri içeren istekler kurum içindeki yerel modele, kişisel veri içermeyen genel istekler bulut modeline gider; tüm çağrılar tek bir iç "LLM ağ geçidi" (gateway) servisinden geçer. Ağ geçidi anahtarları saklar, hız sınırı ve bütçe uygular, istekleri maskeler ve loglar. Bu bölümdeki Protocol, SSE ve yönlendirici, o ağ geçidinin küçük bir modelidir.</div>`,
     ex: [
       { t: 'mc',
         stage: 'Isınma',

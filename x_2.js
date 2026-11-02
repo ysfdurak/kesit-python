@@ -1,4 +1,4 @@
-/* PythonPatika — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
+/* Kesit Python — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -219,7 +219,7 @@ async def siparis(sid: int, oturum: Oturum):
     ] }
 );
 })(window);
-/* PythonPatika — 'flask' dersi uzantısı: HTMX ile kısmi güncelleme, temel form, fetch ile JSON, SSR ve SPA farkı (AUDIT Ekle-12) */
+/* Kesit Python — 'flask' dersi uzantısı: HTMX ile kısmi güncelleme, temel form, fetch ile JSON, SSR ve SPA farkı (AUDIT Ekle-12) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -377,7 +377,7 @@ def sepet_api():
     ] }
 );
 })(window);
-/* PythonPatika — 'llm-api' dersi uzantısı: yerel modeller, Protocol ile sağlayıcıdan bağımsız istemci, SSE ve model yönlendirme (AUDIT Ekle-9) */
+/* Kesit Python — 'llm-api' dersi uzantısı: yerel modeller, Protocol ile sağlayıcıdan bağımsız istemci, SSE ve model yönlendirme (AUDIT Ekle-9) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -454,7 +454,7 @@ async def akis(soru: str):
                 yield sse({"parca": parca})
         yield sse("[DONE]", olay="bitti")
     return StreamingResponse(uret(), media_type="text/event-stream",
-                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})</pre><h3>Model yönlendirme: küçük model, büyük model</h3><p>Şikâyet kategorisi seçmek gibi basit işler küçük ve ucuz modelle, uzun belge analizi ya da kod yazma gibi işler büyük modelle yapılır. Yönlendirici (router) basit kurallarla başlar: istemin uzunluğu, görev türü, istenen çıktı (JSON şeması) ve kullanıcının planı. Bir adım ötesi <b>kademeli</b> (cascade) yaklaşımdır: önce küçük model denenir, cevap doğrulamayı geçmezse (JSON bozuk, güven düşük) büyük modele gidilir. Her iki durumda da hangi isteğin hangi modele gittiğini ve maliyetini logla; yönlendirme kurallarını bu verilerle ayarlarsın.</p><div class="note"><b>Gerçek işte</b>Anadolu Bank gibi düzenlemeye tabi kurumlarda yaygın mimari şudur: kişisel veri içeren istekler kurum içindeki yerel modele, kişisel veri içermeyen genel istekler bulut modeline gider; tüm çağrılar tek bir iç "LLM ağ geçidi" (gateway) servisinden geçer. Ağ geçidi anahtarları saklar, hız sınırı ve bütçe uygular, istekleri maskeler ve loglar. Bu bölümdeki Protocol, SSE ve yönlendirici, o ağ geçidinin küçük bir modelidir.</div>`,
+                             headers={"Cache-Control": "no-cache", "X-Accel-Buffering": "no"})</pre><h3>Model yönlendirme: küçük model, büyük model</h3><p>Şikâyet kategorisi seçmek gibi basit işler küçük ve ucuz modelle, uzun belge analizi ya da kod yazma gibi işler büyük modelle yapılır. Yönlendirici (router) basit kurallarla başlar: istemin uzunluğu, görev türü, istenen çıktı (JSON şeması) ve kullanıcının planı. Bir adım ötesi <b>kademeli</b> (cascade) yaklaşımdır: önce küçük model denenir, cevap doğrulamayı geçmezse (JSON bozuk, güven düşük) büyük modele gidilir. Her iki durumda da hangi isteğin hangi modele gittiğini ve maliyetini logla; yönlendirme kurallarını bu verilerle ayarlarsın.</p><div class="note"><b>Gerçek işte</b>Ilgaz Bank gibi düzenlemeye tabi kurumlarda yaygın mimari şudur: kişisel veri içeren istekler kurum içindeki yerel modele, kişisel veri içermeyen genel istekler bulut modeline gider; tüm çağrılar tek bir iç "LLM ağ geçidi" (gateway) servisinden geçer. Ağ geçidi anahtarları saklar, hız sınırı ve bütçe uygular, istekleri maskeler ve loglar. Bu bölümdeki Protocol, SSE ve yönlendirici, o ağ geçidinin küçük bir modelidir.</div>`,
     ex: [
       { t: 'mc',
         stage: 'Isınma',
@@ -564,7 +564,7 @@ async def akis(soru: str):
     ] }
 );
 })(window);
-/* PythonPatika — 'ml-kumeleme' dersi uzantısı: market sepeti analizi ve öğe benzerliği önerisi (AUDIT Ekle-7) */
+/* Kesit Python — 'ml-kumeleme' dersi uzantısı: market sepeti analizi ve öğe benzerliği önerisi (AUDIT Ekle-7) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -724,7 +724,7 @@ for pid, s in enler.items():
     ] }
 );
 })(window);
-/* PythonPatika — 'ml-pipeline-degerlendirme' dersi uzantısı: açıklanabilirlik (PDP/ICE, permutation importance), hata dilimi, adalet metrikleri ve arama bütçesi (AUDIT Ekle-5, Ekle-6) */
+/* Kesit Python — 'ml-pipeline-degerlendirme' dersi uzantısı: açıklanabilirlik (PDP/ICE, permutation importance), hata dilimi, adalet metrikleri ve arama bütçesi (AUDIT Ekle-5, Ekle-6) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -918,7 +918,7 @@ print(calisma.best_params)</pre><p><b>Erken durdurma</b> (early stopping) ise te
     ] }
 );
 })(window);
-/* PythonPatika — 'ml-regresyon-siniflandirma' dersi uzantısı: HistGradientBoosting ayarları, kategorik destek ve XGBoost/LightGBM eşlemesi (AUDIT Ekle-8) */
+/* Kesit Python — 'ml-regresyon-siniflandirma' dersi uzantısı: HistGradientBoosting ayarları, kategorik destek ve XGBoost/LightGBM eşlemesi (AUDIT Ekle-8) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -1093,14 +1093,14 @@ print(lgbm.best_iteration_)</pre><div class="warn"><b>Erken durdurmada test sız
     ] }
 );
 })(window);
-/* PythonPatika — 'seaborn-plotly' dersi uzantısı: panoya geçiş: KPI, Streamlit/Dash gösterimi, pano tasarımı, veri hikâyesi, tek dosyalık HTML rapor (AUDIT Ekle-3) */
+/* Kesit Python — 'seaborn-plotly' dersi uzantısı: panoya geçiş: KPI, Streamlit/Dash gösterimi, pano tasarımı, veri hikâyesi, tek dosyalık HTML rapor (AUDIT Ekle-3) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
 X.push(
   { id: 'seaborn-plotly',
     min: 28,
-    html: `<h2>Derinleş: grafikten panoya ve rapora</h2><p>Tek grafik bir soruyu cevaplar; <b>pano</b> (dashboard) ise bir ekibin her sabah baktığı soruları tek ekranda toplar. Bu bölümde Python'la pano kurmanın iki popüler yolunu (Streamlit ve Dash), iyi pano tasarımının ilkelerini, veri hikâyesinin akışını ve e-postayla gönderilebilen <b>tek dosyalık HTML rapor</b> üretmeyi göreceksin. Rakamlar PBIPatika'nın <code>kesit_bi.Satislar</code> tablosundan (1620 satış satırı) geliyor; aynı panoyu orada Power BI ile kuruyorsun.</p><h3>Önce rakamlar: KPI hesabı</h3><pre class="py">import veri
+    html: `<h2>Derinleş: grafikten panoya ve rapora</h2><p>Tek grafik bir soruyu cevaplar; <b>pano</b> (dashboard) ise bir ekibin her sabah baktığı soruları tek ekranda toplar. Bu bölümde Python'la pano kurmanın iki popüler yolunu (Streamlit ve Dash), iyi pano tasarımının ilkelerini, veri hikâyesinin akışını ve e-postayla gönderilebilen <b>tek dosyalık HTML rapor</b> üretmeyi göreceksin. Rakamlar Kesit Power BI'ın <code>kesit_bi.Satislar</code> tablosundan (1620 satış satırı) geliyor; aynı panoyu orada Power BI ile kuruyorsun.</p><h3>Önce rakamlar: KPI hesabı</h3><pre class="py">import veri
 import pandas as pd
 
 s = veri.oku("kesit_bi", "Satislar")
@@ -1279,7 +1279,7 @@ print(len(rapor), "karakter; görsel gömülü:", "data:image/png;base64," in ra
     ] }
 );
 })(window);
-/* PythonPatika — 'yapay-zeka-ile-kod' dersi uzantısı: ajanlı kodlama iş akışı, kurallar dosyası, MCP, ajan PR inceleme kontrol listesi (AUDIT Ekle-10) */
+/* Kesit Python — 'yapay-zeka-ile-kod' dersi uzantısı: ajanlı kodlama iş akışı, kurallar dosyası, MCP, ajan PR inceleme kontrol listesi (AUDIT Ekle-10) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -1415,7 +1415,7 @@ print(list(TopologicalSorter(gorevler).static_order()))</pre><h3>Kurallar dosyas
     ] }
 );
 })(window);
-/* PythonPatika — 'docker-deploy' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'docker-deploy' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -1692,7 +1692,7 @@ for c in dep["spec"]["template"]["spec"]["containers"]:
   }
 );
 })(window);
-/* PythonPatika — 'git-proje-yapisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'git-proje-yapisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -1726,7 +1726,7 @@ X.push(
 Yönetim hangi şehirlerde büyümeye yatırım yapılacağını soruyor.
 
 ## Veri
-- Kaynak: PythonPatika "anadolu_market" kurgusal veri seti (10 tablo, 6.236 satır)
+- Kaynak: Kesit Python "anadolu_market" kurgusal veri seti (10 tablo, 6.236 satır)
 - Dönem: 2022-06 – 2024-12
 
 ## Yöntem
@@ -1777,7 +1777,7 @@ for sehir, n, ciro in satirlar:
 <li>Depo sayfasında "About" kısmına tek cümlelik açıklama ve konular (topics: <code>python</code>, <code>pandas</code>, <code>data-analysis</code>) ekle; profilinde en iyi 4-6 depoyu sabitle (pin).</li>
 <li>Rapor HTML'ini GitHub Pages ile yayınla (Settings → Pages → <code>main</code>/<code>docs</code>); README'den bağlantı ver.</li>
 </ol></div>
-<div class="note"><b>Gerçek işte</b>İşe alımcılar çok sayıda "Titanic" ve "Iris" deposu görür. Seni ayıran; gerçekçi bir iş sorusu, koddan üretilen ve tekrar edilebilen sonuçlar, temiz klasör yapısı, testler ve tek komutla çalışan kurulumdur. PythonPatika, SQLPatika ve PBIPatika'daki aynı veri setleriyle yaptığın SQL, Python ve Power BI analizlerini tek bir portföy hikâyesinde birleştirebilirsin.</div>`,
+<div class="note"><b>Gerçek işte</b>İşe alımcılar çok sayıda "Titanic" ve "Iris" deposu görür. Seni ayıran; gerçekçi bir iş sorusu, koddan üretilen ve tekrar edilebilen sonuçlar, temiz klasör yapısı, testler ve tek komutla çalışan kurulumdur. Kesit Python, Kesit SQL ve Kesit Power BI'daki aynı veri setleriyle yaptığın SQL, Python ve Power BI analizlerini tek bir portföy hikâyesinde birleştirebilirsin.</div>`,
     ex: [
       {
         t: 'mc',
@@ -1899,7 +1899,7 @@ for sehir, n, ciro in satirlar:
   }
 );
 })(window);
-/* PythonPatika — 'jupyter-colab' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'jupyter-colab' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -2100,7 +2100,7 @@ for sehir in ["İzmir", "Ankara"]:          # papermill döngüsünün karşıl�
   }
 );
 })(window);
-/* PythonPatika — 'kalite-ci' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'kalite-ci' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -2310,10 +2310,10 @@ print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti 
         stage: 'Meydan okuma',
         diff: 3,
         needs: ['pandas'],
-        q: '<p>Dilim (segment) bazında kalite kapısı. Genel başarı iyi görünse de bir müşteri segmentinde model çökebilir. <code>dilim_kapisi(df, esik=0.05)</code> yaz: <code>df</code> sütunları <code>segment</code>, <code>y</code> (gerçek 0/1), <code>temel</code> ve <code>aday</code> (tahmin 0/1). Her segment için doğruluğu (accuracy) hesapla; adayın doğruluğu temelinkinden <code>esik</code>\'ten <b>fazla</b> düşen segmentlerin adlarını sıralı liste olarak döndür. Gerçek veri: Anadolu Bank müşterilerinin <code>segment</code> sütunu.</p>',
+        q: '<p>Dilim (segment) bazında kalite kapısı. Genel başarı iyi görünse de bir müşteri segmentinde model çökebilir. <code>dilim_kapisi(df, esik=0.05)</code> yaz: <code>df</code> sütunları <code>segment</code>, <code>y</code> (gerçek 0/1), <code>temel</code> ve <code>aday</code> (tahmin 0/1). Her segment için doğruluğu (accuracy) hesapla; adayın doğruluğu temelinkinden <code>esik</code>\'ten <b>fazla</b> düşen segmentlerin adlarını sıralı liste olarak döndür. Gerçek veri: Ilgaz Bank müşterilerinin <code>segment</code> sütunu.</p>',
         start: 'import pandas as pd\n\ndef dilim_kapisi(df, esik=0.05):\n    return []\n',
         sol: 'import pandas as pd\n\ndef dilim_kapisi(df, esik=0.05):\n    d = df.assign(t_dogru=(df["temel"] == df["y"]).astype(float),\n                  a_dogru=(df["aday"] == df["y"]).astype(float))\n    ozet = d.groupby("segment")[["t_dogru", "a_dogru"]].mean()\n    kotu = ozet[ozet["a_dogru"] < ozet["t_dogru"] - esik]\n    return sorted(kotu.index.tolist())\n',
-        tests: 'import veri\nimport numpy as np\nm = veri.oku("anadolu_bank", "bank_customers")\nrng = np.random.default_rng(3)\ny = (m["risk_score"] > m["risk_score"].median()).astype(int).to_numpy()\ntemel = np.where(rng.random(len(m)) < 0.85, y, 1 - y)\naday = temel.copy()\nsegs = m["segment"].to_numpy()\nhedef = sorted(set(segs))[0]\nbozuk = (segs == hedef) & (rng.random(len(m)) < 0.3)\naday[bozuk] = 1 - y[bozuk]\ndf = pd.DataFrame({"segment": segs, "y": y, "temel": temel, "aday": aday})\ngenel_t = (df.temel == df.y).mean(); genel_a = (df.aday == df.y).mean()\nsonuc = dilim_kapisi(df)\nassert sonuc == [hedef], f"Yalnız {hedef!r} segmenti yakalanmalı, gelen {sonuc}"\nassert dilim_kapisi(df.assign(aday=df.temel)) == [], "Aday temel ile aynıysa hiçbir segment düşmez"\nassert dilim_kapisi(df, esik=0.5) == [], "Çok gevşek eşikte hiçbir segment takılmamalı"\n',
+        tests: 'import veri\nimport numpy as np\nm = veri.oku("ilgaz_bank", "bank_customers")\nrng = np.random.default_rng(3)\ny = (m["risk_score"] > m["risk_score"].median()).astype(int).to_numpy()\ntemel = np.where(rng.random(len(m)) < 0.85, y, 1 - y)\naday = temel.copy()\nsegs = m["segment"].to_numpy()\nhedef = sorted(set(segs))[0]\nbozuk = (segs == hedef) & (rng.random(len(m)) < 0.3)\naday[bozuk] = 1 - y[bozuk]\ndf = pd.DataFrame({"segment": segs, "y": y, "temel": temel, "aday": aday})\ngenel_t = (df.temel == df.y).mean(); genel_a = (df.aday == df.y).mean()\nsonuc = dilim_kapisi(df)\nassert sonuc == [hedef], f"Yalnız {hedef!r} segmenti yakalanmalı, gelen {sonuc}"\nassert dilim_kapisi(df.assign(aday=df.temel)) == [], "Aday temel ile aynıysa hiçbir segment düşmez"\nassert dilim_kapisi(df, esik=0.5) == [], "Çok gevşek eşikte hiçbir segment takılmamalı"\n',
         hints: ['Önce her satır için temel ve adayın doğru olup olmadığını 0/1 sütun olarak ekle.', 'groupby("segment") ile iki sütunun ortalaması segment doğruluğudur.', 'ozet[ozet.a_dogru < ozet.t_dogru - esik].index'],
         why: 'Ortalama, küçük bir segmentteki çöküşü gizler; genel doğruluk birkaç puan düşer ama o segmentteki müşteriler için model işe yaramaz hâle gelir. Olgun ML hatlarında kalite kapısı hem genel hem dilim bazında kural içerir (ml-pipeline-degerlendirme dersindeki hata dilimi analizi).'
       }
@@ -2331,7 +2331,7 @@ print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti 
   }
 );
 })(window);
-/* PythonPatika — 'mulakat-hazirlik' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'mulakat-hazirlik' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -2510,7 +2510,7 @@ print(supheliler(akis))</pre>
   }
 );
 })(window);
-/* PythonPatika — 'ofis-otomasyon' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'ofis-otomasyon' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -2701,7 +2701,7 @@ schtasks /run /tn "AnadoluRapor"                   # şimdi dene</pre>
   }
 );
 })(window);
-/* PythonPatika — 'orkestrasyon' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'orkestrasyon' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -2933,7 +2933,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
   }
 );
 })(window);
-/* PythonPatika — 'pandas-zaman-serisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'pandas-zaman-serisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -3113,7 +3113,7 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
   }
 );
 })(window);
-/* PythonPatika — 'polars-duckdb' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'polars-duckdb' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -3315,7 +3315,7 @@ WHERE ay = '2024-07';</pre>
   }
 );
 })(window);
-/* PythonPatika — 'proje-api' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'proje-api' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -3549,7 +3549,7 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
   }
 );
 })(window);
-/* PythonPatika — 'sqlalchemy-orm' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'sqlalchemy-orm' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -3793,7 +3793,7 @@ async def tablolari_kur():
   }
 );
 })(window);
-/* PythonPatika — 'terminal-temelleri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'terminal-temelleri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -4004,7 +4004,7 @@ chown app:app /srv/market -R</pre>
   }
 );
 })(window);
-/* PythonPatika — 'test-ileri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'test-ileri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -4230,7 +4230,7 @@ class Musteri(HttpUser):
   }
 );
 })(window);
-/* PythonPatika — 'veri-boru-hatti' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'veri-boru-hatti' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -4390,7 +4390,7 @@ quality:
         q: '<p>Pandera benzeri küçük bir şema doğrulayıcı yaz: <code>sema_dogrula(kayit, sema)</code> hata mesajlarının listesini döndürsün. <code>sema</code> sözlüğü alan → kurallar eşlemesidir. Her alanda kuralları şu sırayla dene ve <b>ilk</b> ihlalde o alanı bırak:</p><ol><li><code>zorunlu: True</code> ve değer None ya da yalnız boşluksa → <code>"&lt;alan&gt;: boş"</code> (zorunlu değilse ve boşsa diğer kuralları atla)</li><li><code>tur</code> (<code>"str"</code>, <code>"int"</code>, <code>"sayi"</code>: int ya da float; bool sayılmaz) uymazsa → <code>"&lt;alan&gt;: tür"</code></li><li><code>desen</code>: <code>re.fullmatch</code> uymazsa → <code>"&lt;alan&gt;: desen"</code></li><li><code>kume</code>: değer kümede değilse → <code>"&lt;alan&gt;: küme"</code></li></ol><p>Gerçek veri: <code>kirli_veri.bayi</code> tablosunun ilk iki satırı başlıktır; testler kalan 10 satırı doğrular.</p>',
         start: 'import re\n\ndef sema_dogrula(kayit, sema):\n    pass\n',
         sol: 'import re\n\ndef _tur_uyar(v, tur):\n    if tur == "str":\n        return isinstance(v, str)\n    if tur == "int":\n        return isinstance(v, int) and not isinstance(v, bool)\n    if tur == "sayi":\n        return isinstance(v, (int, float)) and not isinstance(v, bool)\n    return True\n\ndef sema_dogrula(kayit, sema):\n    hatalar = []\n    for alan, k in sema.items():\n        v = kayit.get(alan)\n        if v is None or (isinstance(v, str) and v.strip() == ""):\n            if k.get("zorunlu"):\n                hatalar.append(f"{alan}: boş")\n            continue\n        if "tur" in k and not _tur_uyar(v, k["tur"]):\n            hatalar.append(f"{alan}: tür")\n        elif "desen" in k and not re.fullmatch(k["desen"], str(v)):\n            hatalar.append(f"{alan}: desen")\n        elif "kume" in k and v not in k["kume"]:\n            hatalar.append(f"{alan}: küme")\n    return hatalar\n',
-        tests: 'import veri\nSEMA = {"Column1": {"zorunlu": True, "tur": "str"},\n        "Column3": {"zorunlu": True, "desen": r"\\d{2}\\.\\d{2}\\.\\d{4}"},\n        "Column4": {"zorunlu": True, "tur": "sayi"},\n        "Column5": {"kume": {"yeni", "kasa kapalı"}}}\nbayi = veri.kayitlar("kirli_veri", "bayi")[2:]\nsonuc = [sema_dogrula(s, SEMA) for s in bayi]\nassert sonuc[0] == ["Column4: tür"], f"Merkez Bayi tutarı \'1.250,50\' metin; sayı değil: {sonuc[0]}"\nassert sonuc[1] == [], "Kızılay Bayi (980) geçerli"\nassert sonuc[2] == ["Column4: tür"], "Alsancak Bayi tutarı \'-\'"\nassert sonuc[3] == ["Column1: boş", "Column3: boş", "Column4: boş"], f"Boş satır üç zorunlu alanı ihlal eder: {sonuc[3]}"\nassert sonuc[8] == ["Column3: desen", "Column4: tür"], f"Selçuklu Bayi: tarih \'bilinmiyor\', tutar metin: {sonuc[8]}"\nassert sum(1 for h in sonuc if not h) == 3, "10 satırdan yalnız 3\'ü şemaya uyar"\nassert sema_dogrula({"a": True}, {"a": {"tur": "int"}}) == ["a: tür"], "bool int sayılmamalı"\nassert sema_dogrula({"a": "x"}, {"a": {"kume": {"y"}}}) == ["a: küme"], "küme kuralı"\n',
+        tests: 'import veri\nSEMA = {"Column1": {"zorunlu": True, "tur": "str"},\n        "Column3": {"zorunlu": True, "desen": r"\\d{2}\\.\\d{2}\\.\\d{4}"},\n        "Column4": {"zorunlu": True, "tur": "sayi"},\n        "Column5": {"kume": {"yeni", "kasa kapalı"}}}\nbayi = veri.kayitlar("kirli_veri", "bayi")[2:]\nsonuc = [sema_dogrula(s, SEMA) for s in bayi]\nassert sonuc[0] == ["Column4: tür"], f"Merkez Bayi tutarı \'1.250,50\' metin; sayı değil: {sonuc[0]}"\nassert sonuc[1] == [], "Kızılay Bayi (980) geçerli"\nassert sonuc[2] == ["Column4: tür"], "Alsancak Bayi tutarı \'-\'"\nassert sonuc[3] == ["Column1: boş", "Column3: boş", "Column4: boş"], f"Boş satır üç zorunlu alanı ihlal eder: {sonuc[3]}"\nassert sonuc[8] == ["Column3: desen", "Column4: tür"], f"Selçuklu Bayi: tarih \'bilinmiyor\', tutar metin: {sonuc[8]}"\nassert sum(1 for h in sonuc if not h) == 2, "10 satırdan yalnız 2\'ü şemaya uyar"\nassert sema_dogrula({"a": True}, {"a": {"tur": "int"}}) == ["a: tür"], "bool int sayılmamalı"\nassert sema_dogrula({"a": "x"}, {"a": {"kume": {"y"}}}) == ["a: küme"], "küme kuralı"\n',
         hints: [
           'Alan başına bir if/elif zinciri kur; ilk ihlal sonrası elif\'ler çalışmaz.',
           'Boşluk kontrolünü en başta yap; zorunlu değilse continue ile diğer kurallara geçme.',
@@ -4453,7 +4453,7 @@ quality:
   }
 );
 })(window);
-/* PythonPatika — 'web-guvenlik' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'web-guvenlik' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -4629,7 +4629,7 @@ for u in ["https://cdn.anadolu.example/a.png", "http://169.254.169.254/latest/me
   }
 );
 })(window);
-/* PythonPatika — 'web-scraping' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'web-scraping' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

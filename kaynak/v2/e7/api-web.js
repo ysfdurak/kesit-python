@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e7 uzantı (Derinleş): api-web */
+/* Kesit Python — v2 e7 uzantı (Derinleş): api-web */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

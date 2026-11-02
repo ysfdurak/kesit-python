@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e8 uzantı: kalite-ci (karmaşıklık, güvenlik, ileri CI) */
+/* Kesit Python — v2 e8 uzantı: kalite-ci (karmaşıklık, güvenlik, ileri CI) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

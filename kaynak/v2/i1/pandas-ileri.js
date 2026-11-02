@@ -1,4 +1,4 @@
-/* PythonPatika — v2/i1: İleri pandas: şekil, pencere ve zincir */
+/* Kesit Python — v2/i1: İleri pandas: şekil, pencere ve zincir */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

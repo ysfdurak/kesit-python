@@ -1,4 +1,4 @@
-/* PythonPatika — 'pandas-zaman-serisi' dersi uzantısı: Bisiklet yolculuklarıyla zaman serisi (gerçek veri setleri) */
+/* Kesit Python — 'pandas-zaman-serisi' dersi uzantısı: Bisiklet yolculuklarıyla zaman serisi (gerçek veri setleri) */
 // needs: pandas
 (function (W) {
 'use strict';

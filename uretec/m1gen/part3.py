@@ -187,7 +187,7 @@ dict(roles=['genel'], lv='temel', topic='Liste çarpımı tuzağı', kind='kod-o
      tip='Çıktıyı verdikten sonra "is" kontrolüyle aynı nesne olduğunu kanıtla; açıklaman somutlaşır.'),
 
 dict(roles=['genel'], lv='temel', topic='Kayan nokta ve Decimal', kind='kod-okuma',
-     q='Anadolu Bank\'ta faiz hesabında kuruş farkı çıkıyor. Çıktı nedir, parayı nasıl tutmalıyız?',
+     q='Ilgaz Bank\'ta faiz hesabında kuruş farkı çıkıyor. Çıktı nedir, parayı nasıl tutmalıyız?',
      code='from decimal import Decimal, ROUND_HALF_UP\nprint(0.1 + 0.2 == 0.3)\nprint(0.1 + 0.2)\nprint(round(2.675, 2))\nd = Decimal("2.675").quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)\nprint(d)\nprint(Decimal("0.1") + Decimal("0.2") == Decimal("0.3"))\nprint(Decimal(0.1))\n',
      out='False\n0.30000000000000004\n2.67\n2.68\nTrue\n0.1000000000000000055511151231257827021181583404541015625',
      a='<p>' + c('float') + ', IEEE 754 standardında <b>ikili (binary)</b> kayan nokta sayısıdır. 0.1 gibi ondalık kesirler ikili sistemde tam ifade edilemez (1/3\'ün ondalıkta 0.333… olması gibi). Bu yüzden ' + c('0.1 + 0.2') + ' tam 0.3 değildir.</p>'

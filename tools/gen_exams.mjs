@@ -53,5 +53,5 @@ for (const p of window.PY_PATHS) {
     desc: KIND[p.id] + ' rolü için ' + qs.length + ' soruluk karma sınav: ' + (qs.length - codes.length) + ' test sorusu ve ' + codes.length + ' kodlama görevi (her biri 5 puan). Sorular ' + p.name + ' patikasındaki derslerden seçilir; patikayı bitirdiğini ölçmek için gir.',
     qs });
 }
-process.stdout.write('/* PythonPatika — patika (rol) sınavları: doğrulanmış ders alıştırmalarından derlendi (tools/gen_exams.mjs) */\n(function (W) {\n\'use strict\';\nconst E = W.PY_EXAMS = W.PY_EXAMS || [];\nE.push(\n' + out.map(x => '  ' + JSON.stringify(x)).join(',\n') + '\n);\n})(window);\n');
+process.stdout.write('/* Kesit Python — patika (rol) sınavları: doğrulanmış ders alıştırmalarından derlendi (tools/gen_exams.mjs) */\n(function (W) {\n\'use strict\';\nconst E = W.PY_EXAMS = W.PY_EXAMS || [];\nE.push(\n' + out.map(x => '  ' + JSON.stringify(x)).join(',\n') + '\n);\n})(window);\n');
 console.error(out.map(x => x.id + ': ' + x.qs.length + ' (' + x.qs.filter(q => q.t === 'code').length + ' kod)').join('\n'));

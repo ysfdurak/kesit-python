@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: rag-uygulamasi (Uçtan uca RAG uygulaması) */
+/* Kesit Python — İleri: rag-uygulamasi (Uçtan uca RAG uygulaması) */
 // needs: scikit-learn, numpy
 (function (W) {
 'use strict';

@@ -3,10 +3,10 @@ sys.path.insert(0, '/tmp/claude-0/-home-claude/6c066959-3fcb-54bb-bdf1-c8ae148df
 from jsgen import emit, stats
 
 body = r'''<h2>Model, ona verdiğin özellik kadar iyidir</h2>
-<p>Anadolu Bank pazarlama ekibi şunu soruyor: "Hangi müşteriler yılın ikinci yarısında kartıyla çok harcayacak? Onlara özel taksit kampanyası sunalım." Elinde müşteri tablosu (yaş, segment, risk puanı) ve 42 bin satırlık işlem tablosu var. Yalnız demografik sütunlarla kurulan model neredeyse yazı tura atmak kadar başarılı (ROC-AUC 0.53). Aynı işlem tablosundan üretilen birkaç akıllı sütunla skor 0.81'e çıkıyor. Modeli değiştirmedik; <b>özellik mühendisliği</b> (feature engineering) yaptık: ham veriyi, modelin öğrenebileceği biçime dönüştürdük.</p>
+<p>Ilgaz Bank pazarlama ekibi şunu soruyor: "Hangi müşteriler yılın ikinci yarısında kartıyla çok harcayacak? Onlara özel taksit kampanyası sunalım." Elinde müşteri tablosu (yaş, segment, risk puanı) ve 42 bin satırlık işlem tablosu var. Yalnız demografik sütunlarla kurulan model neredeyse yazı tura atmak kadar başarılı (ROC-AUC 0.53). Aynı işlem tablosundan üretilen birkaç akıllı sütunla skor 0.81'e çıkıyor. Modeli değiştirmedik; <b>özellik mühendisliği</b> (feature engineering) yaptık: ham veriyi, modelin öğrenebileceği biçime dönüştürdük.</p>
 <p>Bu derste <code>ml-pipeline-degerlendirme</code> dersinde gördüğün ölçekleme ve one-hot kodlamanın ötesine geçeceksin: tarih, oran, grup istatistiği, gecikme (lag), hedef kodlama, binning, eksiklik göstergesi ve özellik seçimi. Hepsinin ortak kuralı tek: <b>tahmin anında bilinmeyen hiçbir bilgi özelliğe sızmamalı.</b></p>
 <div class="tbl-wrap"><table>
-<tr><th>Özellik ailesi</th><th>Örnek (Anadolu Bank)</th><th>Ne zaman işe yarar?</th><th>Tuzak</th></tr>
+<tr><th>Özellik ailesi</th><th>Örnek (Ilgaz Bank)</th><th>Ne zaman işe yarar?</th><th>Tuzak</th></tr>
 <tr><td>Tarih ve saat</td><td>işlem saati, hafta sonu, ay</td><td>Davranış zamana bağlıysa</td><td>Saat 23 ile 0'ı uzak sanmak</td></tr>
 <tr><td>Oran, fark, etkileşim</td><td>kart harcaması / maaş</td><td>İlişki göreliyse</td><td>Sıfıra bölme</td></tr>
 <tr><td>Dönüşüm (log, Box-Cox)</td><td>log(1 + kart toplamı)</td><td>Çarpık, uzun kuyruklu dağılım</td><td>Negatif değerin logu</td></tr>
@@ -21,7 +21,7 @@ body = r'''<h2>Model, ona verdiğin özellik kadar iyidir</h2>
 <pre class="py">import numpy as np
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns",
+islem = veri.oku("ilgaz_bank", "bank_txns",
                  usecols=["account_id", "txn_time", "amount", "txn_type"],
                  parse_dates=["txn_time"])
 df = islem.copy()
@@ -42,8 +42,8 @@ print("Hafta sonu payı:", round(df["haftasonu"].mean(), 3))
 import numpy as np
 import veri
 
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-islem = veri.oku("anadolu_bank", "bank_txns",
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+islem = veri.oku("ilgaz_bank", "bank_txns",
                  usecols=["account_id", "txn_time", "amount", "txn_type"],
                  parse_dates=["txn_time"])
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
@@ -100,7 +100,7 @@ print("lag1 ile hedef korelasyonu:", round(tablo["lag1"].corr(tablo["hedef"]), 3
 <pre class="py">from sklearn.model_selection import KFold
 import numpy as np
 
-musteri = veri.oku("anadolu_bank", "bank_customers")
+musteri = veri.oku("ilgaz_bank", "bank_customers")
 y = (musteri["risk_score"] &gt;= 8).astype(int)          # örnek hedef: yüksek risk
 sehir = musteri["city"]
 
@@ -119,8 +119,8 @@ print(pd.DataFrame({"sehir": sehir, "kod": kod.round(3)}).drop_duplicates("sehir
 <div class="note"><b>Hazır araç</b>scikit-learn 1.3 ile gelen <code>sklearn.preprocessing.TargetEncoder</code> aynı fikri uygular: <code>fit_transform</code> eğitimde katlar dışı kodlar, <code>transform</code> testte tüm eğitim istatistiğini kullanır. Pipeline içine koyarsan çapraz doğrulamada da doğru çalışır. Elle yazmayı bilmek, mülakatta "neden sızdırır?" sorusunu cevaplamanı sağlar.</div>
 
 <h2>Binning ve eksiklik göstergesi</h2>
-<p>Bazen ilişki eşiklidir: "hesabı 1 yıldan yeni olanlar farklı davranır." <code>pd.cut</code> sabit sınırlarla, <code>pd.qcut</code> eşit dolu kovalarla gruplar. Kova sınırlarını <b>eğitim verisinden</b> ya da iş kuralından seç; testten değil. Boşluk da bilgi taşır: Anadolu Bank'ta <code>credit_limit</code> yalnız kredi kartında doludur; vadesiz hesapta boş olması "kart değil" demektir. Boşluğu doldurmadan önce <code>limit_eksik</code> bayrağını üret; <code>SimpleImputer(add_indicator=True)</code> bunu Pipeline içinde otomatik yapar.</p>
-<pre class="py">hesap = veri.oku("anadolu_bank", "bank_accounts", parse_dates=["opened_date"])
+<p>Bazen ilişki eşiklidir: "hesabı 1 yıldan yeni olanlar farklı davranır." <code>pd.cut</code> sabit sınırlarla, <code>pd.qcut</code> eşit dolu kovalarla gruplar. Kova sınırlarını <b>eğitim verisinden</b> ya da iş kuralından seç; testten değil. Boşluk da bilgi taşır: Ilgaz Bank'ta <code>credit_limit</code> yalnız kredi kartında doludur; vadesiz hesapta boş olması "kart değil" demektir. Boşluğu doldurmadan önce <code>limit_eksik</code> bayrağını üret; <code>SimpleImputer(add_indicator=True)</code> bunu Pipeline içinde otomatik yapar.</p>
+<pre class="py">hesap = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date"])
 h = hesap.copy()
 h["limit_eksik"] = h["credit_limit"].isna().astype(int)
 h["limit"] = h["credit_limit"].fillna(0)
@@ -239,7 +239,7 @@ ex.append(dict(t='order', stage='Kodu oku',
 
 # ---------------- Rehberli
 ex.append(dict(t='code', stage='Rehberli', id='ozellik-muhendisligi-1', diff=1, needs=['pandas'],
-    q='<p><b>Anadolu Bank dolandırıcılık ekibi</b> işlemlerin zaman desenini modele vermek istiyor. <code>tarih_ozellikleri(df)</code> fonksiyonunu yaz: <code>txn_time</code> (datetime) sütunlu tablonun <b>kopyasına</b> şu sütunları eklesin ve kopyayı döndürsün:</p><ul><li><code>saat</code>: 0–23</li><li><code>gun</code>: haftanın günü (0 = Pazartesi)</li><li><code>haftasonu</code>: Cumartesi/Pazar ise 1, değilse 0 (int)</li><li><code>saat_sin</code>, <code>saat_cos</code>: <code>sin/cos(2π·saat/24)</code>, 4 basamağa yuvarlanmış</li></ul><p>Veri: <code>veri.oku("anadolu_bank", "bank_txns", ...)</code> (start kodunda hazır).</p>',
+    q='<p><b>Ilgaz Bank dolandırıcılık ekibi</b> işlemlerin zaman desenini modele vermek istiyor. <code>tarih_ozellikleri(df)</code> fonksiyonunu yaz: <code>txn_time</code> (datetime) sütunlu tablonun <b>kopyasına</b> şu sütunları eklesin ve kopyayı döndürsün:</p><ul><li><code>saat</code>: 0–23</li><li><code>gun</code>: haftanın günü (0 = Pazartesi)</li><li><code>haftasonu</code>: Cumartesi/Pazar ise 1, değilse 0 (int)</li><li><code>saat_sin</code>, <code>saat_cos</code>: <code>sin/cos(2π·saat/24)</code>, 4 basamağa yuvarlanmış</li></ul><p>Veri: <code>veri.oku("ilgaz_bank", "bank_txns", ...)</code> (start kodunda hazır).</p>',
     guide=['df.copy() ile kopya al; orijinali değiştirme.', '.dt.hour ve .dt.dayofweek ile saat ve günü çıkar.', 'haftasonu: (gun &gt;= 5).astype(int).', 'np.sin / np.cos ile döngüsel kodla, .round(4) uygula.', 'Kopyayı döndür.'],
     example=r'''import numpy as np
 import pandas as pd
@@ -252,7 +252,7 @@ print(np.sin(2 * np.pi * ay / 12).round(3).tolist())
     start=r'''import numpy as np
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])
 
 
 def tarih_ozellikleri(df):
@@ -265,7 +265,7 @@ def tarih_ozellikleri(df):
     sol=r'''import numpy as np
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])
 
 
 def tarih_ozellikleri(df):
@@ -307,8 +307,8 @@ print(pd.DataFrame({"adet": g.size(), "toplam": g["tutar"].sum(), "recency": (ke
     start=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
 KESIM = pd.Timestamp("2024-07-01")
 
 
@@ -322,8 +322,8 @@ def musteri_ozet(islem, hesap, kesim):
     sol=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
 KESIM = pd.Timestamp("2024-07-01")
 
 
@@ -369,7 +369,7 @@ print(s)
     start=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount"], parse_dates=["txn_time"])
 
 
 def gecmis_ozellikler(df):
@@ -381,7 +381,7 @@ def gecmis_ozellikler(df):
     sol=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount"], parse_dates=["txn_time"])
 
 
 def gecmis_ozellikler(df):
@@ -407,7 +407,7 @@ assert gr["gecmis_ort"].isna().sum() == 778, f"Gerçek veride her hesabın ilk i
     why='Hesabın "normal"inden sapma dolandırıcılık tespitinde en güçlü sinyallerden biridir. shift(1) olmadan ortalama işlemin kendisini içerir (sızıntı), transform("mean") ise geleceği de içerir. Sıralamayı fonksiyonun içinde yapmak, çağıranın sırasız veri vermesine karşı güvencedir.'))
 
 ex.append(dict(t='code', stage='Rehberli', id='ozellik-muhendisligi-4', diff=2, needs=['pandas'],
-    q='<p><code>frekans_kodla(egitim, test)</code> fonksiyonunu yaz: iki pandas Series (kategori) alsın, frekansları <b>yalnız eğitimden</b> öğrensin (oran, <code>normalize=True</code>) ve <code>(egitim_kod, test_kod)</code> ikilisini döndürsün. Eğitimde görülmeyen kategori 0.0 almalı. Değerleri 4 basamağa yuvarla.</p><p>Gerçek veri: Anadolu Bank müşterilerinden <code>customer_id &lt;= 350</code> eğitim, gerisi test; sütun <code>city</code>.</p>',
+    q='<p><code>frekans_kodla(egitim, test)</code> fonksiyonunu yaz: iki pandas Series (kategori) alsın, frekansları <b>yalnız eğitimden</b> öğrensin (oran, <code>normalize=True</code>) ve <code>(egitim_kod, test_kod)</code> ikilisini döndürsün. Eğitimde görülmeyen kategori 0.0 almalı. Değerleri 4 basamağa yuvarla.</p><p>Gerçek veri: Ilgaz Bank müşterilerinden <code>customer_id &lt;= 350</code> eğitim, gerisi test; sütun <code>city</code>.</p>',
     guide=['egitim.value_counts(normalize=True) ile oranları sözlük gibi kullan.', 'Her iki seriyi de .map(frek) ile çevir.', 'Testteki bilinmeyenler NaN olur: fillna(0.0).', '.round(4) ve ikiliyi döndür.'],
     example=r'''import pandas as pd
 
@@ -419,7 +419,7 @@ print(pd.Series(["market", "oyuncak"]).map(f).fillna(0.0).tolist())
     start=r'''import pandas as pd
 import veri
 
-musteri = veri.oku("anadolu_bank", "bank_customers")
+musteri = veri.oku("ilgaz_bank", "bank_customers")
 egt = musteri[musteri["customer_id"] <= 350]["city"]
 tst = musteri[musteri["customer_id"] > 350]["city"]
 
@@ -432,7 +432,7 @@ def frekans_kodla(egitim, test):
     sol=r'''import pandas as pd
 import veri
 
-musteri = veri.oku("anadolu_bank", "bank_customers")
+musteri = veri.oku("ilgaz_bank", "bank_customers")
 egt = musteri[musteri["customer_id"] <= 350]["city"]
 tst = musteri[musteri["customer_id"] > 350]["city"]
 
@@ -463,7 +463,7 @@ ex.append(dict(t='code', stage='Kendin yaz', id='ozellik-muhendisligi-5', diff=2
     start=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
 
 
 def aylik_genis(islem):
@@ -476,7 +476,7 @@ def lag_tablosu(genis, ay):
     sol=r'''import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
 
 
 def aylik_genis(islem):
@@ -554,7 +554,7 @@ i = [j for j in dog if k.iloc[j] == "a"][0]
 assert abs(r[i] - bek) < 1e-4, f"İlk kattaki bir 'a' satırı {bek} olmalı (yalnız eğitim kısmının istatistiği + yumuşatma); gelen {r[i]}"
 tam = y.groupby(k).mean()
 assert not np.allclose(r, k.map(tam).to_numpy()), "Sonuç tüm veriyle hesaplanan ortalamaya eşit çıktı: katlar dışı hesaplamadın"
-musteri = veri.oku("anadolu_bank", "bank_customers")
+musteri = veri.oku("ilgaz_bank", "bank_customers")
 yy = (musteri["risk_score"] >= 8).astype(int)
 rr = hedef_kodla_oof(musteri["city"], yy)
 assert abs(rr.mean() - 0.2823) < 0.002, f"Gerçek veride ortalama kod ~0.2823 olmalı; gelen {rr.mean():.4f}"
@@ -568,7 +568,7 @@ ex.append(dict(t='code', stage='Kendin yaz', id='ozellik-muhendisligi-7', diff=2
     start=r'''import pandas as pd
 import veri
 
-hesap = veri.oku("anadolu_bank", "bank_accounts", parse_dates=["opened_date"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date"])
 REF = pd.Timestamp("2025-01-01")
 
 
@@ -578,7 +578,7 @@ def hesap_ozellikleri(hesap, referans):
     sol=r'''import pandas as pd
 import veri
 
-hesap = veri.oku("anadolu_bank", "bank_accounts", parse_dates=["opened_date"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date"])
 REF = pd.Timestamp("2025-01-01")
 
 
@@ -671,12 +671,12 @@ assert r[6] == 5.0, "B hesabının ikinci işlemi yalnız 5'i görmeli"
     why='rolling(3) o satırı da içerir; 1000 TL\'lik şüpheli işlemin "geçmiş ortalaması" kendini içerince sapma küçülür ve model gerçek dünyada göremeyeceği bilgiyle eğitilir. shift(1) pencereyi bir adım geriye iter. Bu, zaman sıralı özelliklerde en sık görülen sızıntıdır.'))
 
 ex.append(dict(t='code', stage='Hata avı', id='ozellik-muhendisligi-10', diff=2, kind='bug', needs=['pandas'],
-    q='<p><b>Hatayı bul ve düzelt.</b> <code>log_tutar(df)</code> uzun kuyruklu <code>amount</code> sütununu sıkıştırıp <code>log_amount</code> sütunu eklemeli. Ama Anadolu Bank işlemlerinde çıkışlar negatif ve sıfır tutarlar da var; kod boş değerler ve <code>-inf</code> üretiyor. Hem negatif hem pozitif tutarlarda çalışan, işareti koruyan <b>işaretli log</b> kullan: <code>sign(x) · log(1 + |x|)</code>. Sonucu 4 basamağa yuvarla; orijinal tabloyu değiştirme.</p>',
+    q='<p><b>Hatayı bul ve düzelt.</b> <code>log_tutar(df)</code> uzun kuyruklu <code>amount</code> sütununu sıkıştırıp <code>log_amount</code> sütunu eklemeli. Ama Ilgaz Bank işlemlerinde çıkışlar negatif ve sıfır tutarlar da var; kod boş değerler ve <code>-inf</code> üretiyor. Hem negatif hem pozitif tutarlarda çalışan, işareti koruyan <b>işaretli log</b> kullan: <code>sign(x) · log(1 + |x|)</code>. Sonucu 4 basamağa yuvarla; orijinal tabloyu değiştirme.</p>',
     start=r'''import numpy as np
 import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["txn_id", "amount"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "amount"])
 
 
 def log_tutar(df):
@@ -687,7 +687,7 @@ def log_tutar(df):
 import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["txn_id", "amount"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "amount"])
 
 
 def log_tutar(df):
@@ -797,7 +797,7 @@ assert abs(r[0][1] - round(float(ref.max()), 4)) < 1e-9, "Doğrulama setinde, ve
 
 # ---------------- Mini proje
 ex.append(dict(t='code', stage='Mini proje', id='ozellik-muhendisligi-13', diff=3, needs=['pandas'],
-    q='<p><b>Anadolu Bank: ikinci yarıda kim çok harcayacak?</b> Start kodu veriyi okur, <b>1 Temmuz 2024</b> kesimine göre hedefi (<code>y</code>: Temmuz–Aralık kart harcaması medyanın üstünde mi) ve demografik taban tabloyu (<code>taban</code>: risk_score, segment, yas, kidem_gun) hazırlar; <code>auc_olc(tablo, sutunlar)</code> 5 katlı çapraz doğrulamayla ROC-AUC verir.</p><p><code>ozellik_ekle(taban, once, hesap)</code> fonksiyonunu yaz. <code>once</code>, kesimden önceki işlemlerdir (customer_id ekli). Tabanın <b>kopyasına</b> şu sütunları ekle (hepsi müşteri düzeyinde, boşlar 0):</p><ul><li><code>kart_adet</code>: kart harcaması işlem sayısı</li><li><code>log_kart</code>: <code>log1p</code>(kart harcaması toplamının mutlak değeri)</li><li><code>son90_kart</code>: kesimden önceki son 90 günde (<code>txn_time &gt;= kesim - 90 gün</code>) kart harcaması toplamının mutlak değeri</li><li><code>kart_hesap</code>: müşterinin <code>kredi_karti</code> türündeki hesap sayısı (<code>hesap</code> tablosundan)</li></ul><p>Sonra <code>rapor()</code> yaz: <code>{"demografik": auc, "muhendislik": auc}</code> sözlüğü döndürsün (3 basamak); demografik = taban sütunları, mühendislik = taban + dört yeni sütun.</p>',
+    q='<p><b>Ilgaz Bank: ikinci yarıda kim çok harcayacak?</b> Start kodu veriyi okur, <b>1 Temmuz 2024</b> kesimine göre hedefi (<code>y</code>: Temmuz–Aralık kart harcaması medyanın üstünde mi) ve demografik taban tabloyu (<code>taban</code>: risk_score, segment, yas, kidem_gun) hazırlar; <code>auc_olc(tablo, sutunlar)</code> 5 katlı çapraz doğrulamayla ROC-AUC verir.</p><p><code>ozellik_ekle(taban, once, hesap)</code> fonksiyonunu yaz. <code>once</code>, kesimden önceki işlemlerdir (customer_id ekli). Tabanın <b>kopyasına</b> şu sütunları ekle (hepsi müşteri düzeyinde, boşlar 0):</p><ul><li><code>kart_adet</code>: kart harcaması işlem sayısı</li><li><code>log_kart</code>: <code>log1p</code>(kart harcaması toplamının mutlak değeri)</li><li><code>son90_kart</code>: kesimden önceki son 90 günde (<code>txn_time &gt;= kesim - 90 gün</code>) kart harcaması toplamının mutlak değeri</li><li><code>kart_hesap</code>: müşterinin <code>kredi_karti</code> türündeki hesap sayısı (<code>hesap</code> tablosundan)</li></ul><p>Sonra <code>rapor()</code> yaz: <code>{"demografik": auc, "muhendislik": auc}</code> sözlüğü döndürsün (3 basamak); demografik = taban sütunları, mühendislik = taban + dört yeni sütun.</p>',
     start=r'''import numpy as np
 import pandas as pd
 import veri
@@ -807,9 +807,9 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers", parse_dates=["birth_date", "joined_date"]).set_index("customer_id")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["birth_date", "joined_date"]).set_index("customer_id")
 KESIM = pd.Timestamp("2024-07-01")
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
 once, sonra = d[d["txn_time"] < KESIM], d[d["txn_time"] >= KESIM]
@@ -850,9 +850,9 @@ from sklearn.model_selection import StratifiedKFold, cross_val_score
 from sklearn.pipeline import make_pipeline
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers", parse_dates=["birth_date", "joined_date"]).set_index("customer_id")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["birth_date", "joined_date"]).set_index("customer_id")
 KESIM = pd.Timestamp("2024-07-01")
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
 once, sonra = d[d["txn_time"] < KESIM], d[d["txn_time"] >= KESIM]
@@ -916,7 +916,7 @@ lesson = dict(
     id='ozellik-muhendisligi', lv='ileri', mod='Makine Öğrenmesi', min=60,
     needs=['pandas', 'numpy', 'scikit-learn'],
     title='Özellik mühendisliği: ham veriden modele hazır özelliğe',
-    sum='Tarih ve döngüsel saat, oran ve log dönüşümleri, sızıntısız grup istatistikleri, lag/rolling, frekans ve katlar dışı hedef kodlama, binning, eksiklik bayrağı, özellik seçimi ve özel dönüştürücüyle Pipeline; Anadolu Bank verisiyle mini proje.',
+    sum='Tarih ve döngüsel saat, oran ve log dönüşümleri, sızıntısız grup istatistikleri, lag/rolling, frekans ve katlar dışı hedef kodlama, binning, eksiklik bayrağı, özellik seçimi ve özel dönüştürücüyle Pipeline; Ilgaz Bank verisiyle mini proje.',
     goals=['Tarih, oran, log ve etkileşim özelliklerini üretip ne zaman işe yaradığını açıklayabilirim',
            'Grup istatistiklerini ve lag/rolling özelliklerini yalnız geçmişi kullanarak (sızıntısız) hesaplayabilirim',
            'Yüksek kardinaliteli kategorileri frekans ve katlar dışı hedef kodlamayla sayıya çevirebilirim',

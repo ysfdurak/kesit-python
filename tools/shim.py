@@ -1,4 +1,4 @@
-# --- PythonPatika tarayıcı uyumluluk katmanı (Pyodide) ---
+# --- Kesit Python tarayıcı uyumluluk katmanı (Pyodide) ---
 import sys
 if sys.platform == "emscripten":
     import asyncio, asyncio.events, time as _t, threading, concurrent.futures as _cf

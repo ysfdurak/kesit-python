@@ -3,7 +3,7 @@
     sum: 'Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker\'a kısa bakış.',
     goals: ['pyproject.toml ve src düzeniyle kurulabilir paket iskeleti kurabilirim', 'argparse ile alt komutlu, test edilebilir bir CLI yazabilirim', 'Entry point ile paketimi terminal komutu olarak sunabilirim', 'Semantik sürümlemeyi uygular ve sürümleri karşılaştırabilirim', 'wheel/sdist üretimi, editable kurulum ve Docker imajının temel mantığını açıklayabilirim'],
     body: `<h2>Neden önemli?</h2>
-<p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Anadolu Bank\'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide\'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
+<p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Ilgaz Bank\'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide\'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
 
 <h2>pyproject.toml ve src düzeni</h2>
 <p><code>pyproject.toml</code>, paketin tek yapılandırma dosyasıdır: ad, sürüm, bağımlılıklar, derleme aracı ve araç ayarları (ruff, mypy, pytest). <b>src düzeni</b> (src layout) paketi <code>src/paket_adi/</code> altına koyar; böylece testler kurulmamış kaynak klasörü yerine kurulu paketi içe aktarır ve "yerelde çalışıyor, kurulunca çalışmıyor" hatası erken yakalanır.</p>
@@ -15,7 +15,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "anadolu-skor"
 version = "1.2.0"
-description = "Anadolu Bank kredi skoru araçları"
+description = "Ilgaz Bank kredi skoru araçları"
 requires-python = "&gt;=3.11"
 dependencies = ["httpx&gt;=0.27", "pydantic&gt;=2"]
 

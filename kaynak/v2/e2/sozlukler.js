@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: sozlukler */
+/* Kesit Python v2 — uzantı: sozlukler */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -215,7 +215,7 @@ print(gruplar)</pre>
       t: 'code',
       stage: 'Meydan okuma',
       diff: 3,
-      q: '<p>Anadolu Bank mobil uygulama oturum günlüğü: <code>oturum_sureleri(olaylar)</code> fonksiyonunu yaz. <code>olaylar</code>, zaman sırasına dizilmiş <code>(kullanici, olay, dakika)</code> demetleridir; <code>olay</code> <code>"giris"</code> ya da <code>"cikis"</code>. Her kullanıcının toplam oturum süresini (çıkış dakikası − giriş dakikası) sözlük olarak döndür. Kurallar:</p><ul><li>Girişi olmayan çıkış yok sayılır.</li><li>Açıkken gelen ikinci giriş, öncekinin yerine geçer (önceki oturum sayılmaz).</li><li>Sonunda kapanmamış oturumlar sayılmaz.</li><li>Hiç tamamlanmış oturumu olmayan kullanıcı sonuçta yer almaz.</li></ul>',
+      q: '<p>Ilgaz Bank mobil uygulama oturum günlüğü: <code>oturum_sureleri(olaylar)</code> fonksiyonunu yaz. <code>olaylar</code>, zaman sırasına dizilmiş <code>(kullanici, olay, dakika)</code> demetleridir; <code>olay</code> <code>"giris"</code> ya da <code>"cikis"</code>. Her kullanıcının toplam oturum süresini (çıkış dakikası − giriş dakikası) sözlük olarak döndür. Kurallar:</p><ul><li>Girişi olmayan çıkış yok sayılır.</li><li>Açıkken gelen ikinci giriş, öncekinin yerine geçer (önceki oturum sayılmaz).</li><li>Sonunda kapanmamış oturumlar sayılmaz.</li><li>Hiç tamamlanmış oturumu olmayan kullanıcı sonuçta yer almaz.</li></ul>',
       start: 'def oturum_sureleri(olaylar):\n    pass\n',
       sol: 'def oturum_sureleri(olaylar):\n    acik = {}\n    toplam = {}\n    for kullanici, olay, dakika in olaylar:\n        if olay == "giris":\n            acik[kullanici] = dakika\n        elif olay == "cikis":\n            bas = acik.pop(kullanici, None)\n            if bas is not None:\n                toplam[kullanici] = toplam.get(kullanici, 0) + dakika - bas\n    return toplam\n',
       tests: 'o = [("ayse", "giris", 0), ("can", "giris", 5), ("ayse", "cikis", 12), ("can", "cikis", 9), ("ayse", "giris", 20), ("ayse", "cikis", 23)]\nassert oturum_sureleri(o) == {"ayse": 15, "can": 4}, f"ayşe 12 + 3, can 4; gelen {oturum_sureleri(o)}"\nassert oturum_sureleri([("x", "cikis", 5)]) == {}, "girişsiz çıkış yok sayılır"\nassert oturum_sureleri([("x", "giris", 0), ("x", "giris", 10), ("x", "cikis", 14)]) == {"x": 4}, "ikinci giriş öncekinin yerine geçer"\nassert oturum_sureleri([("x", "giris", 0), ("x", "cikis", 4), ("x", "cikis", 9)]) == {"x": 4}, "ikinci çıkışın açık oturumu yok"\nassert oturum_sureleri([("x", "giris", 0)]) == {}, "kapanmamış oturum sayılmaz"\nassert oturum_sureleri([("x", "giris", 7), ("x", "cikis", 7)]) == {"x": 0}, "0 dakikalık oturum da tamamlanmış sayılır"\n',

@@ -14,7 +14,7 @@ LESSON = {
 ],
 'body': r'''
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
+<p>Ilgaz Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
 <p><b>Yapılandırma</b> (configuration, kısaca config), kod değişmeden programın davranışını değiştiren her şeydir. Bu derste yaygın beş biçimi okumayı, ortamları katmanlı birleştirmeyi, ayarı doğrulamayı ve sırları güvenle yönetmeyi öğreneceksin. JSON'un temelini <b>JSON ve CSV</b> dersinde, <code>tomllib</code>'e ilk bakışı <b>Sanal ortam ve paket yönetimi</b> dersinde gördün; burada hepsini yapılandırma gözüyle birleştiriyoruz.</p>
 
 <h2>Biçimleri tanı</h2>
@@ -35,7 +35,7 @@ metin = """
 uygulama: kredi-servisi
 surum: "1.4"
 veritabani:
-  host: db.anadolubank.local
+  host: db.ilgazbank.local
   port: 5432
 subeler: [Ankara, İzmir, Bursa]
 eposta_gonder: true
@@ -62,7 +62,7 @@ ad = "kredi-servisi"
 baslangic = 2026-01-15
 
 [veritabani]
-host = "db.anadolubank.local"
+host = "db.ilgazbank.local"
 port = 5432
 
 [[sube]]
@@ -223,7 +223,7 @@ for anahtar, deger in ayar.items():
 'ex': [
 # ---------------- Isınma
 {'t': 'mc', 'stage': 'Isınma',
- 'q': 'Anadolu Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
+ 'q': 'Ilgaz Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
  'o': ['Kodda bir sabit olarak, örn. DB_PAROLA = "..."', 'Depoya giren ayar.yaml dosyasında', 'Ortam değişkeninde ya da sır yöneticisinde', 'README dosyasında, ekip bulabilsin diye'], 'a': 2,
  'why': 'Sırlar ortamdan (ortam değişkeni, sır yöneticisi) gelmelidir. Koda ya da depodaki bir dosyaya yazılan parola, git geçmişinde sonsuza kadar kalır ve depoya erişen herkes görür.'},
 {'t': 'mc', 'stage': 'Isınma',
@@ -428,7 +428,7 @@ def env_ayristir(metin):
 ''',
  'tests': r'''
 _m = """
-# Anadolu Bank kredi servisi
+# Ilgaz Bank kredi servisi
 APP_ENV=dev
 export DB_URL = postgresql://kredi:x@localhost:5432/kredi?ssl=1
 
@@ -771,7 +771,7 @@ except ValueError:
  'why': 'Ortam değişkenleri düz ve metin olduğu için ad kuralıyla yol, mevcut değerle tip çıkarılır. Bilinmeyen anahtarda hata vermek, ANADOLU_DB__HSOT gibi bir yazım hatasının sessizce yok sayılıp prod\'un localhost\'a bağlanmasını önler.'},
 # ---------------- Mini proje
 {'t': 'code', 'stage': 'Mini proje', 'id': 'yapilandirma-11', 'diff': 3,
- 'q': '<p><b>Ayar yükleyici:</b> Anadolu Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
+ 'q': '<p><b>Ayar yükleyici:</b> Ilgaz Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
  'start': r'''
 import copy
 import yaml

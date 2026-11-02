@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-131 … b-140 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-131 … b-140 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -10,7 +10,7 @@ B.push(
     diff: 2,
     kind: 'bug',
     title: 'Telefon numarası temizlenmiyor',
-    q: '<p>Kodda bir hata var, bul ve düzelt. Anadolu Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
+    q: '<p>Kodda bir hata var, bul ve düzelt. Ilgaz Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
     start: 'def telefon_temizle(tel):\n    tel.replace(" ", "")\n    tel.replace("-", "")\n    tel.replace("(", "")\n    tel.replace(")", "")\n    return tel\n',
     sol: 'def telefon_temizle(tel):\n    tel = tel.replace(" ", "")\n    tel = tel.replace("-", "")\n    tel = tel.replace("(", "")\n    tel = tel.replace(")", "")\n    return tel\n',
     tests: 'assert telefon_temizle("0532 123-45-67") == "05321234567", "Boşluk ve tireler silinmeli: 05321234567"\nassert telefon_temizle("(0212) 555 00 11") == "02125550011", "Parantezler de silinmeli"\nassert telefon_temizle("05001112233") == "05001112233", "Zaten temiz numara aynı kalmalı"\n',
@@ -112,7 +112,7 @@ B.push(
     diff: 1,
     kind: 'yaz',
     title: 'Taksit hesaplayan program',
-    q: '<p>Anadolu Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
+    q: '<p>Ilgaz Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
     start: '# buraya yaz\n',
     sol: 'tutar = float(input("Tutar: "))\ntaksit = int(input("Taksit sayısı: "))\nif taksit > 3:\n    tutar = tutar * 1.05\nprint(f"Toplam: {tutar:.2f} TL")\nprint(f"Aylık taksit: {tutar / taksit:.2f} TL")\n',
     expect: 'Tutar: 12000\nTaksit sayısı: 6\nToplam: 12600.00 TL\nAylık taksit: 2100.00 TL\n',

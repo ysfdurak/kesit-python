@@ -53,7 +53,7 @@ T.append(dict(
 T.append(dict(
     id='b-233', topic='Dekoratörler', diff=2, kind='rehberli',
     title='Rol kontrolü yapan dekoratör',
-    q='<p>Anadolu Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
+    q='<p>Ilgaz Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
     guide=['En dış fonksiyon <code>yetki_gerekli(rol)</code> parametreyi alır ve bir dekoratör döndürür.',
            'Ortadaki <code>dekorator(fn)</code> sarıcıyı döndürür; sarıcının üstüne <code>@functools.wraps(fn)</code> koy.',
            'Sarıcı <code>(kullanici, *args, **kwargs)</code> alsın; <code>rol not in kullanici["roller"]</code> ise <code>PermissionError</code>.',

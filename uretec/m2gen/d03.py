@@ -102,7 +102,7 @@ I(['bilimci', 'ml'], 'ileri', 'kavram', 'Veri sızıntısı',
   'Veri sızıntısı (data leakage) türlerini örneklerle açıkla. Bir modelde sızıntıdan nasıl şüphelenirsin?',
   '<p><b>Tanım:</b> Modelin eğitimde, tahmin anında gerçekte erişemeyeceği bir bilgiye erişmesi. Sonuç: test metrikleri olağanüstü, canlı performans hayal kırıklığı.</p>'
   '<p><b>Türler:</b></p><ul>'
-  '<li><b>Hedef sızıntısı:</b> Özellik, hedefin sonucu olarak oluşur. Anadolu Bank temerrüt modelinde "yasal takip başlatıldı mı" özelliği; temerrütten <i>sonra</i> doldurulur.</li>'
+  '<li><b>Hedef sızıntısı:</b> Özellik, hedefin sonucu olarak oluşur. Ilgaz Bank temerrüt modelinde "yasal takip başlatıldı mı" özelliği; temerrütten <i>sonra</i> doldurulur.</li>'
   '<li><b>Zamansal sızıntı:</b> Rastgele bölmede gelecekteki kayıtlar eğitime girer; ya da "müşterinin toplam sipariş sayısı" tahmin tarihinden sonraki siparişleri de sayar.</li>'
   '<li><b>Ön işlem sızıntısı:</b> Ölçekleme, eksik doldurma, hedef kodlama ya da özellik seçimi bölmeden önce tüm veriyle yapılır.</li>'
   '<li><b>Grup sızıntısı:</b> Aynı müşterinin satırları hem eğitimde hem testte; model kişiyi ezberler.</li>'
@@ -114,7 +114,7 @@ I(['bilimci', 'ml'], 'ileri', 'kavram', 'Veri sızıntısı',
   'Türleri sıraladıktan sonra kendi yaşadığın ya da duyduğun bir sızıntı hikâyesi anlat; çok akılda kalıcıdır.'),
 
 I(['bilimci', 'analist'], 'orta', 'vaka', 'Dengesiz veri',
-  'Anadolu Bank\'ta bir stajyer kredi temerrüt modeli kurmuş ve "%99 doğruluk" raporluyor. Temerrüt oranı %1. Ne düşünürsün, ne yaparsın?',
+  'Ilgaz Bank\'ta bir stajyer kredi temerrüt modeli kurmuş ve "%99 doğruluk" raporluyor. Temerrüt oranı %1. Ne düşünürsün, ne yaparsın?',
   '<p><b>1) İlk tespit:</b> Temerrüt oranı %1 ise "kimse temerrüde düşmez" diyen boş bir model de %99 doğruluk alır. Doğruluk (accuracy) dengesiz veride anlamsızdır. Modelin herhangi bir temerrüdü yakalayıp yakalamadığını bilmiyoruz.</p>'
   '<p><b>2) Doğru metrikler:</b> Karışıklık matrisi; temerrüt sınıfı için <b>recall</b> (gerçek temerrütlerin yüzde kaçını yakaladık) ve <b>precision</b> (alarm verdiklerimizin yüzde kaçı gerçekten temerrüt). Eşikten bağımsız özet için PR-AUC; ROC-AUC dengesiz veride iyimser görünebilir.</p>'
   '<p><b>3) İş maliyetine bağla:</b> Kaçırılan bir temerrüt bankaya ortalama 40.000 TL, yanlış reddedilen iyi müşteri 3.000 TL kâr kaybı olabilir. Eşik bu maliyet oranına göre seçilir; varsayılan 0,5 eşiği neredeyse hiç doğru değildir.</p>'

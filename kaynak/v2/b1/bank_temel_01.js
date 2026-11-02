@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-111 … b-120 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-111 … b-120 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -92,7 +92,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Kuruş hassasiyetinde toplam',
-    q: '<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Anadolu Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
+    q: '<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Ilgaz Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
     start: 'def kurus_topla(fiyatlar):\n    # buraya yaz\n    pass\n',
     sol: 'def kurus_topla(fiyatlar):\n    toplam = 0\n    for f in fiyatlar:\n        if "." in f:\n            lira, kurus = f.split(".")\n            kurus = kurus.ljust(2, "0")\n        else:\n            lira, kurus = f, "0"\n        toplam += int(lira) * 100 + int(kurus)\n    return toplam\n',
     tests: 'assert kurus_topla(["0.10", "0.20"]) == 30, "0.10 + 0.20 tam 30 kuruş olmalı (float hatası yok)"\nassert kurus_topla(["19.90", "5.05", "100"]) == 12495, "19.90 + 5.05 + 100 = 124.95 TL = 12495 kuruş"\nassert kurus_topla(["7.5"]) == 750, "\\"7.5\\" 7 lira 50 kuruştur: 750"\nassert kurus_topla([]) == 0, "Boş liste için toplam 0 olmalı"\nassert "float(" not in __source__, "Bu görevde float() kullanmadan çözmelisin"\n',
@@ -140,7 +140,7 @@ B.push(
     diff: 2,
     t: 'predict',
     title: 'Negatif sayılarda // ve %',
-    q: '<p>Anadolu Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
+    q: '<p>Ilgaz Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
     code: 'print(-7 // 2, -7 % 2)\nprint(7 // -2, 7 % -2)\n',
     o: ['-3 -1\n-3 1', '-4 1\n-4 -1', '-3 1\n-3 -1', '-4 -1\n-4 1'],
     a: 1,

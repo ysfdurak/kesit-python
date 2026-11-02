@@ -1,4 +1,4 @@
-"""Ders nesnesini PythonPatika JS dosyasına yazar (tek tırnaklı stringler, body template literal)."""
+"""Ders nesnesini Kesit Python JS dosyasına yazar (tek tırnaklı stringler, body template literal)."""
 import re
 
 KEY_ORDER = ['id', 'lv', 'mod', 'min', 'title', 'sum', 'goals', 'body', 'ex', 'faq', 'mistakes',
@@ -47,7 +47,7 @@ def ser(v, ind=1, key=None):
 
 
 def emit(lesson, path, note=''):
-    out = ['/* PythonPatika — v2 o2: ' + lesson['id'] + (' — ' + note if note else '') + ' */',
+    out = ['/* Kesit Python — v2 o2: ' + lesson['id'] + (' — ' + note if note else '') + ' */',
            '(function (W) {', "'use strict';", 'const L = W.PY_LESSONS = W.PY_LESSONS || [];',
            'L.push(', ser(lesson, 0), ');', '})(window);', '']
     open(path, 'w', encoding='utf-8').write('\n'.join(out))

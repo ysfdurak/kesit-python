@@ -125,7 +125,7 @@ class KullaniciYanit(BaseModel):
     id: int
     eposta: str
 
-db_kaydi = {"id": 7, "eposta": "ayse@anadolubank.com.tr", "sifre_hash": "pbkdf2$9f...", "rol": "admin"}
+db_kaydi = {"id": 7, "eposta": "ayse@ilgazbank.com.tr", "sifre_hash": "pbkdf2$9f...", "rol": "admin"}
 print(KullaniciYanit.model_validate(db_kaydi).model_dump())
 print(KullaniciYanit.model_json_schema()["required"])
 ''') + '''
@@ -323,7 +323,7 @@ gunicorn main:app -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000
 <tr><td>Tipik kullanım</td><td>İç araçlar, HTML panelleri, küçük servisler</td><td>JSON API, mikroservis, ML model sunumu</td><td>Büyük içerik siteleri, yönetim ağırlıklı ürünler</td></tr>
 </table></div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın kredi ön değerlendirme servisi FastAPI ile yazılmış. Mobil uygulama ekibi API'yi <code>/docs</code> sayfasından keşfediyor ve OpenAPI belgesinden otomatik istemci üretiyor; sözleşme değişince derleme hatası alıyorlar. Başvuru gövdesi pydantic modeliyle doğrulanıyor (TC kimlik no biçimi, gelir pozitif, vade 3-36 ay); hatalı başvurular iş mantığına hiç ulaşmıyor. Skor servisi, kara liste ve gelir doğrulama sorguları <code>asyncio.gather</code> ile paralel atılıyor. Testlerde <code>dependency_overrides</code> ile dış servisler sahte sürümlerle değiştiriliyor ve tüm test paketi saniyeler içinde koşuyor.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kredi ön değerlendirme servisi FastAPI ile yazılmış. Mobil uygulama ekibi API'yi <code>/docs</code> sayfasından keşfediyor ve OpenAPI belgesinden otomatik istemci üretiyor; sözleşme değişince derleme hatası alıyorlar. Başvuru gövdesi pydantic modeliyle doğrulanıyor (TC kimlik no biçimi, gelir pozitif, vade 3-36 ay); hatalı başvurular iş mantığına hiç ulaşmıyor. Skor servisi, kara liste ve gelir doğrulama sorguları <code>asyncio.gather</code> ile paralel atılıyor. Testlerde <code>dependency_overrides</code> ile dış servisler sahte sürümlerle değiştiriliyor ve tüm test paketi saniyeler içinde koşuyor.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>ASGI ve Starlette</h3>
@@ -785,12 +785,12 @@ def kayit_ol(govde, db):
        tests=r'''import hashlib
 from pydantic import ValidationError
 db = {}
-r = kayit_ol({"eposta": "Ayse@AnadoluBank.com.tr", "sifre": "Guclu-Sifre1", "ad": "Ayşe"}, db)
-assert r == {"id": 1, "eposta": "ayse@anadolubank.com.tr", "ad": "Ayşe"}, f"yanıt yalnız id, eposta, ad içermeli: {r}"
-assert db["ayse@anadolubank.com.tr"]["sifre_hash"] == hashlib.sha256(b"anadoluGuclu-Sifre1").hexdigest(), "şifre tuzlu sha256 ile saklanmalı"
+r = kayit_ol({"eposta": "Ayse@IlgazBank.com.tr", "sifre": "Guclu-Sifre1", "ad": "Ayşe"}, db)
+assert r == {"id": 1, "eposta": "ayse@ilgazbank.com.tr", "ad": "Ayşe"}, f"yanıt yalnız id, eposta, ad içermeli: {r}"
+assert db["ayse@ilgazbank.com.tr"]["sifre_hash"] == hashlib.sha256(b"anadoluGuclu-Sifre1").hexdigest(), "şifre tuzlu sha256 ile saklanmalı"
 assert "Guclu-Sifre1" not in str(db), "düz şifre hiçbir yerde saklanmamalı"
 try:
-    kayit_ol({"eposta": "AYSE@anadolubank.com.tr", "sifre": "baskaSifre9", "ad": "Ayşe Y"}, db)
+    kayit_ol({"eposta": "AYSE@ilgazbank.com.tr", "sifre": "baskaSifre9", "ad": "Ayşe Y"}, db)
     assert False, "aynı e-posta (büyük/küçük harf farkıyla) 409 vermeli"
 except HTTPException as e:
     assert e.status_code == 409, "çakışma 409"

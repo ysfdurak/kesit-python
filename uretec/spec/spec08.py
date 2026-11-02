@@ -149,7 +149,7 @@ assert kumulatif([10, -3, 0]) == [10, 7, 7], "İade (negatif) günleri toplamı 
 
 dict(topic='Döngüler', diff=2, kind='rehberli',
   title='İlk mükerrer işlemi yakala',
-  q='<p>Anadolu Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
+  q='<p>Ilgaz Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
   guide=['Görülen numaralar için boş bir küme oluştur.', 'Akışta sırayla dolaş.', 'Numara kümede varsa hemen döndür (döngü biter).', 'Yoksa kümeye ekle; döngü biterse None döndür.'],
   example=r'''
 # Benzer teknik: ilk geçersiz kaydı bulup durmak

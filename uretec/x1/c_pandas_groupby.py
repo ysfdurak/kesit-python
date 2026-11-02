@@ -65,7 +65,7 @@ siparissiz = d.loc[d["_merge"] == "left_only", "customer_id"].nunique()
 print("hiç sipariş vermeyen:", siparissiz)
 print("müşteri başına sipariş:", round(len(o) / c["customer_id"].nunique(), 2))
 ''') + \
-'<div class="note"><b>Gerçek işte</b>Bir panoda "Ortalama sepet 841 TL" ile "Ortalama sepet 1.489 TL" yan yana durabilir; ikisi de aynı veriden, farklı taneciklerden hesaplanmıştır. Kıdemli analistler her metriğin yanına tanımını yazar: "AOV = teslim edilmiş siparişlerde, sipariş başına indirimli ciro". SQLPatika\'da aynı soruyu <code>GROUP BY order_id</code> alt sorgusuyla çözmüştün; PBIPatika\'da ise <code>AVERAGEX(VALUES(Satislar[SiparisNo]), ...)</code> aynı iki adımlı mantıktır.</div>'
+'<div class="note"><b>Gerçek işte</b>Bir panoda "Ortalama sepet 841 TL" ile "Ortalama sepet 1.489 TL" yan yana durabilir; ikisi de aynı veriden, farklı taneciklerden hesaplanmıştır. Kıdemli analistler her metriğin yanına tanımını yazar: "AOV = teslim edilmiş siparişlerde, sipariş başına indirimli ciro". Kesit SQL\'de aynı soruyu <code>GROUP BY order_id</code> alt sorgusuyla çözmüştün; Kesit Power BI\'da ise <code>AVERAGEX(VALUES(Satislar[SiparisNo]), ...)</code> aynı iki adımlı mantıktır.</div>'
 
 ex = [
  dict(t='predict', stage='Kodu oku', q='Siparişler kalemlerle birleştiriliyor. Bu kod ne yazdırır?', needs=['pandas'],

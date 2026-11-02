@@ -133,7 +133,7 @@
   topic: 'Sayılar ve kayan nokta',
   lv: 'orta',
   title: 'Parayı float ile toplamak',
-  bad: '# Anadolu Bank: 10 adet 0.10 TL komisyon\ntoplam = 0\nfor _ in range(10):\n    toplam += 0.10\nprint(toplam)\nprint(toplam == 1.0)\n',
+  bad: '# Ilgaz Bank: 10 adet 0.10 TL komisyon\ntoplam = 0\nfor _ in range(10):\n    toplam += 0.10\nprint(toplam)\nprint(toplam == 1.0)\n',
   bad_out: '0.9999999999999999\nFalse',
   good: 'from decimal import Decimal\ntoplam = Decimal(\'0\')\nfor _ in range(10):\n    toplam += Decimal(\'0.10\')\nprint(toplam)\nprint(toplam == Decimal(\'1.00\'))\n',
   good_out: '1.00\nTrue',

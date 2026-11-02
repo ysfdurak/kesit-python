@@ -65,7 +65,7 @@ def hafta_gunu(tarih):
 probs.append(dict(
     id='a-083', title='Fatura son ödeme günü', track=T, diff='Kolay', tags=['timedelta', 'hafta sonu', 'strftime'],
     src='İş günü kaydırma kuralı (bankacılık vade hesabı)', mode='stdin',
-    statement=P('Anadolu Bank kredi kartı ekstresinde son ödeme tarihi, kesim tarihinden <b>n gün</b> sonradır. Bu tarih cumartesi ya da pazara denk gelirse <b>sonraki pazartesiye</b> kaydırılır.',
+    statement=P('Ilgaz Bank kredi kartı ekstresinde son ödeme tarihi, kesim tarihinden <b>n gün</b> sonradır. Bu tarih cumartesi ya da pazara denk gelirse <b>sonraki pazartesiye</b> kaydırılır.',
                 'Her ekstre için son ödeme tarihini `GG.AA.YYYY Gün` biçiminde yaz (gün adları: Pazartesi, Salı, Çarşamba, Perşembe, Cuma).'),
     input='İlk satırda `q`; sonra her satırda `GG.AA.YYYY n`.',
     output='Her satırda tarih ve Türkçe gün adı.',
@@ -424,7 +424,7 @@ print('HATALI', ' '.join(map(str, hatali)) if hatali else 'YOK')
 probs.append(dict(
     id='a-092', title='Ödeme hata hiyerarşisi', track=H, diff='Orta', tags=['özel istisna', 'kalıtım', 'raise'],
     src='Custom exception hierarchy (gerçek ödeme servisleri)', mode='func', fn='odeme_yap',
-    statement=P('Anadolu Bank\'ın mobil ödeme servisi için hata sınıfları tasarla. Çağıran taraf ister tüm ödeme hatalarını tek seferde (`except OdemeHatasi`), ister türüne göre ayrı ayrı yakalayabilmeli.',
+    statement=P('Ilgaz Bank\'ın mobil ödeme servisi için hata sınıfları tasarla. Çağıran taraf ister tüm ödeme hatalarını tek seferde (`except OdemeHatasi`), ister türüne göre ayrı ayrı yakalayabilmeli.',
                 '<ul><li>`OdemeHatasi(Exception)` — temel sınıf.</li><li>`BakiyeYetersiz(OdemeHatasi)` — `eksik` özniteliği taşır; mesajı `\'Bakiye yetersiz: 150.00 TL eksik\'` biçiminde.</li><li>`LimitAsildi(OdemeHatasi)` — `kalan_limit` özniteliği taşır; mesajı `\'Günlük limit aşıldı: kalan 200.00 TL\'`.</li></ul>',
                 '`odeme_yap(bakiye, tutar, gunluk_limit, bugun_harcanan)` yeni bakiyeyi döndürür. Kontrol sırası: tutar ≤ 0 ise `ValueError`; sonra limit (`bugun_harcanan + tutar &gt; gunluk_limit` → `LimitAsildi`); sonra bakiye (`tutar &gt; bakiye` → `BakiyeYetersiz`). Tutarlar 2 ondalığa yuvarlanmış olarak saklansın.'),
     constraints='',
@@ -575,7 +575,7 @@ def yeniden_dene(islem, deneme=3):
 probs.append(dict(
     id='a-095', title='Geri alınabilir para transferi', track=H, diff='Zor', tags=['context manager', '__exit__', 'rollback'],
     src='Veritabanı işlem (transaction) kalıbı', mode='func', fn='Hareket',
-    statement=P('Anadolu Bank\'ın hesaplar arası transfer modülünde birden çok aktarım ya hep birlikte gerçekleşmeli ya da hiçbiri (atomiklik). Bunu bir <b>bağlam yöneticisi</b> (context manager) ile yapacaksın:',
+    statement=P('Ilgaz Bank\'ın hesaplar arası transfer modülünde birden çok aktarım ya hep birlikte gerçekleşmeli ya da hiçbiri (atomiklik). Bunu bir <b>bağlam yöneticisi</b> (context manager) ile yapacaksın:',
                 '```\nwith Hareket(hesaplar) as h:\n    h.aktar(\'A\', \'B\', 100)\n    h.aktar(\'B\', \'C\', 50)\n```',
                 '<ul><li>`Hareket(hesaplar)`: `hesaplar` bir sözlük (`{\'A\': 500, ...}`), <b>yerinde</b> değiştirilir.</li><li>`aktar(kaynak, hedef, tutar)`: tutar ≤ 0 → `ValueError`; hesap yoksa `KeyError`; bakiye yetmezse `IslemIptal` (kendi istisna sınıfın).</li><li>Blok içinde <b>herhangi</b> bir hata olursa sözlük bloğa girildiği andaki hâline döner (aynı sözlük nesnesi kalır).</li><li>Hata `IslemIptal` ise <b>bastırılır</b> (with bloğundan sonra program devam eder); diğer hatalar geri alma sonrası yukarı iletilir.</li><li>`h.yapilan` o ana kadar başarılı aktarım sayısını tutar.</li></ul>'),
     constraints='',
@@ -671,7 +671,7 @@ class Urun:
 probs.append(dict(
     id='a-097', title='Kapsüllenmiş banka hesabı', track=S, diff='Kolay', tags=['property', 'kapsülleme', 'ValueError'],
     src='OOP temel: kapsülleme (encapsulation)', mode='func', fn='Hesap',
-    statement=P('Anadolu Bank için `Hesap` sınıfı yaz. Bakiye dışarıdan doğrudan değiştirilememeli; yalnız metotlarla değişmeli.',
+    statement=P('Ilgaz Bank için `Hesap` sınıfı yaz. Bakiye dışarıdan doğrudan değiştirilememeli; yalnız metotlarla değişmeli.',
                 '<ul><li>`Hesap(sahip, bakiye=0)` — başlangıç bakiyesi negatifse `ValueError`.</li><li>`bakiye` — salt okunur <b>property</b>; `h.bakiye = 5` yazmak `AttributeError` vermeli.</li><li>`yatir(tutar)` ve `cek(tutar)` — yeni bakiyeyi döndürür. Tutar ≤ 0 ise `ValueError`; çekilecek tutar bakiyeden büyükse `ValueError`.</li><li>`hareketler` — `(\'yatir\', tutar)` / `(\'cek\', tutar)` demetlerinin listesi (yalnız başarılı işlemler).</li></ul>'),
     constraints='',
     samples=[("h = Hesap('Ayşe', 100)\nh.yatir(50)\nh.cek(30)\n(h.bakiye, h.hareketler)", '')],
@@ -820,7 +820,7 @@ class Sepet:
 probs.append(dict(
     id='a-100', title='Kuruş hassasiyetli Para sınıfı', track=S, diff='Orta', tags=['operatör aşırı yükleme', 'total_ordering', '__hash__'],
     src='Money pattern (Martin Fowler) / Python veri modeli', mode='func', fn='Para',
-    statement=P('Float ile para hesabı `0.1 + 0.2 = 0.30000000000000004` hatası verir. Anadolu Bank için tutarı içeride <b>tam sayı kuruş</b> olarak tutan bir `Para` sınıfı yaz:',
+    statement=P('Float ile para hesabı `0.1 + 0.2 = 0.30000000000000004` hatası verir. Ilgaz Bank için tutarı içeride <b>tam sayı kuruş</b> olarak tutan bir `Para` sınıfı yaz:',
                 '<ul><li>`Para(tutar, birim=\'TL\')` → `self.kurus = round(tutar * 100)`.</li><li>`+` ve `-`: aynı birimde yeni `Para`; farklı birimde `ValueError`. `sum(liste)` çalışsın diye `0 + para` da desteklensin (`__radd__`).</li><li>`*` ve sağdan çarpma: sayı ile çarpar, kuruşa yuvarlar (`round`).</li><li>`==`: birim ve kuruş aynıysa eşit; `Para` olmayanla karşılaştırma `False`.</li><li>`&lt;`, `&lt;=`, `&gt;`, `&gt;=`: aynı birimde; farklıysa `ValueError` (`functools.total_ordering` kullanabilirsin).</li><li>Sözlük anahtarı / kümede kullanılabilsin (`__hash__`).</li><li>`str` → `\'1.234,50 TL\'` (binlik nokta, ondalık virgül, negatifte başta `-`); `repr` → `\"Para(\'1234.50\', \'TL\')\"`.</li></ul>'),
     constraints='',
     samples=[('str(Para(0.1) + Para(0.2))', 'Kuruşla çalıştığı için tam 0,30.'), ("str(sum([Para(1000), Para(234.5), Para(0.05)]))", '')],

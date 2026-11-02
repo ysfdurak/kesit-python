@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Anadolu Market (b-411 … b-430) */
+/* Kesit Python — veri seti görevleri: Anadolu Market (b-411 … b-430) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e4 uzantı: kalitim-polimorfizm */
+/* Kesit Python — v2 e4 uzantı: kalitim-polimorfizm */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

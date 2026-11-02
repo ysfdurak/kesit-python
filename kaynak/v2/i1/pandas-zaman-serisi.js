@@ -1,4 +1,4 @@
-/* PythonPatika — v2/i1: Zaman serisi analizi */
+/* Kesit Python — v2/i1: Zaman serisi analizi */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -10,7 +10,7 @@ L.push(
     min: 55,
     needs: ['pandas', 'numpy', 'statsmodels'],
     title: 'Zaman serisi analizi',
-    sum: 'to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling("7D"), eksik günleri doldurma, saat dilimi, iş günü ve mevsimsellik; Anadolu Market ve Anadolu Bank verisiyle.',
+    sum: 'to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling("7D"), eksik günleri doldurma, saat dilimi, iş günü ve mevsimsellik; Anadolu Market ve Ilgaz Bank verisiyle.',
     goals: [
       'Metin tarihleri format ve errors="coerce" ile güvenle datetime\'a çevirebilirim',
       'DatetimeIndex ile dilimleyip resample ile günlük/haftalık/aylık özet çıkarabilirim',
@@ -19,7 +19,7 @@ L.push(
       'UTC zamanları İstanbul saatine çevirip iş günü ve haftanın günü etkisini hesaplayabilirim'
     ],
     body: `<h2>Zaman, verinin en önemli sütunu</h2>
-<p>Anadolu Market'in yönetimi "bu ay geçen aydan iyi mi?", "kampanya haftasında satış gerçekten arttı mı, yoksa her ayın ilk haftası zaten böyle mi?" diye sorar. Anadolu Bank'ın operasyon ekibi ATM işlemlerinin saatlik yoğunluğuna, risk ekibi gece yarısı yapılan olağandışı işlemlere bakar. Bu soruların hepsinde satırların bir <b>zaman damgası</b> vardır ve cevap, zamanı doğru işlemekten geçer.</p>
+<p>Anadolu Market'in yönetimi "bu ay geçen aydan iyi mi?", "kampanya haftasında satış gerçekten arttı mı, yoksa her ayın ilk haftası zaten böyle mi?" diye sorar. Ilgaz Bank'ın operasyon ekibi ATM işlemlerinin saatlik yoğunluğuna, risk ekibi gece yarısı yapılan olağandışı işlemlere bakar. Bu soruların hepsinde satırların bir <b>zaman damgası</b> vardır ve cevap, zamanı doğru işlemekten geçer.</p>
 <p><b>groupby</b> dersinde <code>resample</code>'a kısaca, <b>ileri pandas</b> dersinde <code>rolling</code>'e değindin. Bu ders zaman serisi (time series) analizinin tamamını kurar: metni tarihe çevirmek, tarih index'iyle dilimlemek, kovalara toplamak, önceki dönemle kıyaslamak, eksik günleri doldurmak, saat dilimi, iş günü ve mevsimsellik.</p>
 
 <h2>Metni tarihe çevirmek: to_datetime</h2>
@@ -317,7 +317,7 @@ print("trend başı-sonu:", round(ayrisim.trend.dropna().iloc[0], 1), "→", rou
         id: 'pandas-zaman-serisi-13',
         stage: 'Kendin yaz',
         diff: 2,
-        q: '<p><code>yerel_saat(df)</code> fonksiyonu <code>zaman_utc</code> sütununda saat dilimi olmayan UTC zamanları (datetime) bulunan Anadolu Bank işlem tablosuna iki sütun eklesin: <code>yerel</code> (Europe/Istanbul saat dilimli zaman) ve <code>saat</code> (İstanbul saatiyle saat, tam sayı). Yeni DataFrame döndür.</p>',
+        q: '<p><code>yerel_saat(df)</code> fonksiyonu <code>zaman_utc</code> sütununda saat dilimi olmayan UTC zamanları (datetime) bulunan Ilgaz Bank işlem tablosuna iki sütun eklesin: <code>yerel</code> (Europe/Istanbul saat dilimli zaman) ve <code>saat</code> (İstanbul saatiyle saat, tam sayı). Yeni DataFrame döndür.</p>',
         start: 'import pandas as pd\n\ndef yerel_saat(df):\n    pass\n',
         sol: 'import pandas as pd\n\ndef yerel_saat(df):\n    y = df.copy()\n    y["yerel"] = y["zaman_utc"].dt.tz_localize("UTC").dt.tz_convert("Europe/Istanbul")\n    y["saat"] = y["yerel"].dt.hour\n    return y\n',
         tests: 'import pandas as pd\nd = pd.DataFrame({"zaman_utc": pd.to_datetime(["2024-03-01 21:30", "2024-03-02 06:10", "2024-07-15 22:59"]), "tutar": [100, 200, 300]})\nr = yerel_saat(d)\nassert str(r["yerel"].dt.tz) == "Europe/Istanbul", "yerel sütunu Europe/Istanbul dilimli olmalı"\nassert r["saat"].tolist() == [0, 9, 1], "UTC+3: 21:30 → 00:30, 06:10 → 09:10, 22:59 → 01:59"\nassert str(r["yerel"].iloc[0].date()) == "2024-03-02", "21:30 UTC İstanbul\'da ertesi gündür"\nassert "yerel" not in d.columns, "Orijinal df değişmemeli"\n',
@@ -369,7 +369,7 @@ print("trend başı-sonu:", round(ayrisim.trend.dropna().iloc[0], 1), "→", rou
         id: 'pandas-zaman-serisi-18',
         stage: 'Mini proje',
         diff: 3,
-        q: '<p>Anadolu Bank günlük işlem raporu. <code>gunluk_rapor(islem)</code> fonksiyonu <code>zaman</code> (datetime, İstanbul saati, dilimsiz) ve <code>tutar</code> sütunlu işlem tablosundan, index\'i ilk günden son güne <b>her günü</b> içeren bir DataFrame döndürsün. Sütunlar:</p><ul><li><code>adet</code>: o günkü işlem sayısı (işlem yoksa 0),</li><li><code>toplam</code>: o günkü tutar toplamı (yoksa 0),</li><li><code>ort7</code>: <code>toplam</code>\'ın son 7 takvim günü ortalaması, 2 basamak,</li><li><code>hafta_sonu</code>: Cumartesi/Pazar ise True.</li></ul>',
+        q: '<p>Ilgaz Bank günlük işlem raporu. <code>gunluk_rapor(islem)</code> fonksiyonu <code>zaman</code> (datetime, İstanbul saati, dilimsiz) ve <code>tutar</code> sütunlu işlem tablosundan, index\'i ilk günden son güne <b>her günü</b> içeren bir DataFrame döndürsün. Sütunlar:</p><ul><li><code>adet</code>: o günkü işlem sayısı (işlem yoksa 0),</li><li><code>toplam</code>: o günkü tutar toplamı (yoksa 0),</li><li><code>ort7</code>: <code>toplam</code>\'ın son 7 takvim günü ortalaması, 2 basamak,</li><li><code>hafta_sonu</code>: Cumartesi/Pazar ise True.</li></ul>',
         start: 'import pandas as pd\n\ndef gunluk_rapor(islem):\n    pass\n',
         sol: 'import pandas as pd\n\ndef gunluk_rapor(islem):\n    g = islem.set_index("zaman").sort_index()["tutar"].resample("D")\n    r = pd.DataFrame({"adet": g.count(), "toplam": g.sum()})\n    r["ort7"] = r["toplam"].rolling("7D").mean().round(2)\n    r["hafta_sonu"] = r.index.dayofweek >= 5\n    return r\n',
         tests: 'import pandas as pd\nd = pd.DataFrame({\n    "zaman": pd.to_datetime(["2024-03-01 09:00", "2024-03-01 15:30", "2024-03-03 11:00", "2024-03-04 10:00", "2024-03-08 17:45", "2024-03-02 12:00"]),\n    "tutar": [100.0, 300.0, 50.0, 700.0, 140.0, 0.0],\n})\nr = gunluk_rapor(d)\nassert list(r.columns) == ["adet", "toplam", "ort7", "hafta_sonu"], "Sütunlar: adet, toplam, ort7, hafta_sonu"\nassert len(r) == 8, "1-8 Mart: 8 gün"\nassert r["adet"].tolist() == [2, 1, 1, 1, 0, 0, 0, 1], "adet: işlem yoksa 0; 2 Mart\'taki 0 TL\'lik işlem de sayılır"\nassert r["toplam"].tolist() == [400.0, 0.0, 50.0, 700.0, 0.0, 0.0, 0.0, 140.0], "günlük toplamlar yanlış"\nassert r["ort7"].tolist()[:2] == [400.0, 200.0], "ort7 ilk günler: 400, (400+0)/2"\nassert r["ort7"].iloc[-1] == 127.14, "8 Mart: 2-8 Mart (0+50+700+0+0+0+140)/7 = 127.14"\nassert r["hafta_sonu"].tolist() == [False, True, True, False, False, False, False, False], "2 ve 3 Mart 2024 hafta sonu"\n',

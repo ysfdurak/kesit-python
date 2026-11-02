@@ -1,4 +1,4 @@
-/* PythonPatika — 'python-nedir' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'python-nedir' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -175,7 +175,7 @@ print(keyword.kwlist[:6])            # listenin ilk birkaç elemanı</pre><div c
         id: 'python-nedir-x12',
         stage: 'Meydan okuma',
         diff: 3,
-        q: '<p>Anadolu Bank\'ın şube ekranına üç satırlık bir bilgi kartı basılacak. Kural: kodda <b>yalnızca bir tane</b> <code>print</code> çağrısı olabilir. Çıktı tam olarak şöyle olmalı:</p><pre class="out">Şube: Konak\nSıradaki: 42\nTahmini bekleme: 18 dk</pre><p>Bekleme süresini Python hesaplasın: önünde 6 kişi var ve kişi başı işlem 3 dakika.</p>',
+        q: '<p>Ilgaz Bank\'ın şube ekranına üç satırlık bir bilgi kartı basılacak. Kural: kodda <b>yalnızca bir tane</b> <code>print</code> çağrısı olabilir. Çıktı tam olarak şöyle olmalı:</p><pre class="out">Şube: Konak\nSıradaki: 42\nTahmini bekleme: 18 dk</pre><p>Bekleme süresini Python hesaplasın: önünde 6 kişi var ve kişi başı işlem 3 dakika.</p>',
         sol: 'print("Şube: Konak", "Sıradaki: 42", "Tahmini bekleme: " + str(6 * 3) + " dk", sep="\\n")\n',
         tests: 'assert __source__.count("print(") == 1, "Kodda yalnızca bir print çağrısı olmalı"\nassert "6 * 3" in __source__ or "6*3" in __source__, "Bekleme süresini 6 * 3 ile hesaplat"\n',
         expect: 'Şube: Konak\nSıradaki: 42\nTahmini bekleme: 18 dk\n',

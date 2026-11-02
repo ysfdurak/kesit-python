@@ -35,7 +35,7 @@ for s in STRATEJILER:
 <div class="tip"><b>Kalıp gerekmeyen durum</b>Strateji, "davranışı parametre olarak geçir" demektir. Python\'da bu zaten <code>sorted(key=...)</code>, <code>map</code>, dekoratör ile her gün yaptığın şeydir. Stratejinin durumu (state) ve birden fazla metodu varsa o zaman sınıf (ya da Protocol) düşün.</div>
 
 <h2>Fabrika ve kayıt (registry)</h2>
-<p>Fabrika (factory), "hangi sınıfın üretileceğini" çağıran koddan gizler. Anadolu Bank\'ta rapor türüne göre farklı dışa aktarıcı üretmek gibi. Python\'da en temiz biçim: bir sözlükte sınıfları tut, <code>__init_subclass__</code> ya da dekoratörle otomatik kaydet. Sınıflar zaten çağrılabilir olduğu için ayrı bir "Creator" hiyerarşisine gerek kalmaz.</p>
+<p>Fabrika (factory), "hangi sınıfın üretileceğini" çağıran koddan gizler. Ilgaz Bank\'ta rapor türüne göre farklı dışa aktarıcı üretmek gibi. Python\'da en temiz biçim: bir sözlükte sınıfları tut, <code>__init_subclass__</code> ya da dekoratörle otomatik kaydet. Sınıflar zaten çağrılabilir olduğu için ayrı bir "Creator" hiyerarşisine gerek kalmaz.</p>
 <pre class="py">import json, csv, io
 
 KAYIT: dict[str, type] = {}
@@ -147,7 +147,7 @@ print(siparisi_tamamla(OdemeAdaptoru(EskiOdemeKutuphanesi()), 0))
 </pre>
 
 <h2>Komut: işlemi nesne yapmak</h2>
-<p>Komut (command) kalıbında her işlem; çalıştırılabilen ve geri alınabilen bir nesnedir. Geri al/yinele, işlem kuyruğu, denetim kaydı (audit log) için kullanılır. Anadolu Bank\'ta hesap hareketlerini komut olarak modellemek, hatalı bir toplu işlemi tersine çevirmeyi mümkün kılar.</p>
+<p>Komut (command) kalıbında her işlem; çalıştırılabilen ve geri alınabilen bir nesnedir. Geri al/yinele, işlem kuyruğu, denetim kaydı (audit log) için kullanılır. Ilgaz Bank\'ta hesap hareketlerini komut olarak modellemek, hatalı bir toplu işlemi tersine çevirmeyi mümkün kılar.</p>
 <pre class="py">from dataclasses import dataclass, field
 
 @dataclass
@@ -229,7 +229,7 @@ p.geri_al(); print('yatırma geri alındı:', h)
         o: ['Daha az bellek kullanımı', 'Nesne üretimini gizlemek', 'İşlemleri geri alınabilir ve kuyruklanabilir nesneler yapmak', 'Arayüz uyumsuzluğunu gidermek'],
         a: 2, why: 'Komut, her işlemi uygula/geri_al metotlu bir nesne yapar; böylece geçmiş tutma, geri alma, kuyruk ve denetim kaydı kolaylaşır. Üretimi gizlemek fabrika, uyumsuzluk adaptör konusudur.' },
       { t: 'code', id: 'tasarim-kaliplari-6',
-        q: '<p>Anadolu Bank için komut kalıbı. <code>CekKomutu(hesaplar, hesap, tutar)</code> dataclass\'ı: <code>uygula()</code> bakiye yetersizse <code>ValueError</code> fırlatıp hiçbir şey değiştirmesin, yeterliyse düşsün; <code>geri_al()</code> tutarı geri eklesin. <code>Islemci</code> sınıfı: <code>calistir(komut)</code> uygula\'yı çağırıp başarılıysa geçmişe eklesin (hata fırlarsa geçmişe eklemeden hatayı yeniden fırlatsın), <code>geri_al()</code> son komutu geri alsın ve döndürsün (geçmiş boşsa None), <code>gecmis</code> listesi dışarıdan okunabilsin.</p>',
+        q: '<p>Ilgaz Bank için komut kalıbı. <code>CekKomutu(hesaplar, hesap, tutar)</code> dataclass\'ı: <code>uygula()</code> bakiye yetersizse <code>ValueError</code> fırlatıp hiçbir şey değiştirmesin, yeterliyse düşsün; <code>geri_al()</code> tutarı geri eklesin. <code>Islemci</code> sınıfı: <code>calistir(komut)</code> uygula\'yı çağırıp başarılıysa geçmişe eklesin (hata fırlarsa geçmişe eklemeden hatayı yeniden fırlatsın), <code>geri_al()</code> son komutu geri alsın ve döndürsün (geçmiş boşsa None), <code>gecmis</code> listesi dışarıdan okunabilsin.</p>',
         start: 'from dataclasses import dataclass, field\n\n@dataclass\nclass CekKomutu:\n    hesaplar: dict\n    hesap: str\n    tutar: float\n    # uygula, geri_al\n\n@dataclass\nclass Islemci:\n    gecmis: list = field(default_factory=list)\n    # calistir, geri_al\n',
         sol: 'from dataclasses import dataclass, field\n\n@dataclass\nclass CekKomutu:\n    hesaplar: dict\n    hesap: str\n    tutar: float\n\n    def uygula(self):\n        if self.hesaplar[self.hesap] < self.tutar:\n            raise ValueError(\'yetersiz bakiye\')\n        self.hesaplar[self.hesap] -= self.tutar\n\n    def geri_al(self):\n        self.hesaplar[self.hesap] += self.tutar\n\n@dataclass\nclass Islemci:\n    gecmis: list = field(default_factory=list)\n\n    def calistir(self, komut):\n        komut.uygula()\n        self.gecmis.append(komut)\n\n    def geri_al(self):\n        if not self.gecmis:\n            return None\n        k = self.gecmis.pop()\n        k.geri_al()\n        return k\n',
         tests: 'h = {\'TR01\': 100.0}\np = Islemci()\np.calistir(CekKomutu(h, \'TR01\', 30))\nassert h[\'TR01\'] == 70 and len(p.gecmis) == 1, "Çekim bakiyeyi düşürmeli ve geçmişe girmeli"\ntry:\n    p.calistir(CekKomutu(h, \'TR01\', 500))\n    assert False, "Yetersiz bakiye ValueError vermeli"\nexcept ValueError:\n    pass\nassert h[\'TR01\'] == 70 and len(p.gecmis) == 1, "Başarısız komut bakiye ve geçmişi değiştirmemeli"\nk = p.geri_al()\nassert isinstance(k, CekKomutu) and h[\'TR01\'] == 100, "geri_al son komutu tersine çevirmeli"\nassert p.geri_al() is None, "Boş geçmişte None dönmeli"\n',

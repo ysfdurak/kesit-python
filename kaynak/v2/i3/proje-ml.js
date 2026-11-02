@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: proje-ml (bitirme projesi 2, churn tahmini) */
+/* Kesit Python — İleri: proje-ml (bitirme projesi 2, churn tahmini) */
 // needs: scikit-learn, pandas
 (function (W) {
 'use strict';
@@ -9,7 +9,7 @@ L.push(
     mod: 'Bitirme',
     min: 90,
     needs: ['scikit-learn', 'pandas'],
-    title: 'Bitirme projesi 2: Anadolu Bank müşteri kaybı (churn) tahmini',
+    title: 'Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini',
     sum: 'Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer\'lı pipeline\'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre eşik seçer, modeli açıklar, f-string ile yönetim raporu yazar ve modeli BytesIO ile kaydedip yüklersin.',
     goals: [
       'Tekrarlanabilir sentetik veri üretip pandas ile churn oranlarını gruplara göre keşfedebilirim.',
@@ -19,8 +19,8 @@ L.push(
       'Modeli pickle ve BytesIO ile kaydedip yükleyebilir, görülmemiş kategorilere dayanıklı hâle getirebilirim.'
     ],
     body: `
-<h2>Proje: Anadolu Bank müşteri kaybı tahmini</h2>
-<p>Anadolu Bank'ın bireysel bankacılık ekibi her ay bazı müşterilerin hesabını kapatıp başka bankaya geçtiğini görüyor. Yeni müşteri kazanmak, mevcut müşteriyi tutmaktan çok daha pahalı. Soru şu: <b>"Önümüzdeki dönemde hangi müşteriler ayrılmaya (churn) yakın, kime tutundurma teklifi yapalım?"</b> Bu bitirme projesinde makine öğrenmesi derslerinde (<code>ml-giris</code>, <code>ml-regresyon-siniflandirma</code>, <code>ml-pipeline-degerlendirme</code>) öğrendiğin her şeyi tek bir iş problemi etrafında birleştireceksin: veri, keşif, özellik mühendisliği, pipeline, çapraz doğrulama, eşik seçimi, açıklama, rapor ve model dosyası.</p>
+<h2>Proje: Ilgaz Bank müşteri kaybı tahmini</h2>
+<p>Ilgaz Bank'ın bireysel bankacılık ekibi her ay bazı müşterilerin hesabını kapatıp başka bankaya geçtiğini görüyor. Yeni müşteri kazanmak, mevcut müşteriyi tutmaktan çok daha pahalı. Soru şu: <b>"Önümüzdeki dönemde hangi müşteriler ayrılmaya (churn) yakın, kime tutundurma teklifi yapalım?"</b> Bu bitirme projesinde makine öğrenmesi derslerinde (<code>ml-giris</code>, <code>ml-regresyon-siniflandirma</code>, <code>ml-pipeline-degerlendirme</code>) öğrendiğin her şeyi tek bir iş problemi etrafında birleştireceksin: veri, keşif, özellik mühendisliği, pipeline, çapraz doğrulama, eşik seçimi, açıklama, rapor ve model dosyası.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Adım</th><th>Soru</th><th>Araç</th><th>Çıktı</th></tr>
 <tr><td>1. Veri</td><td>Elimizde ne var?</td><td>numpy <code>default_rng(seed)</code></td><td><code>veri_uret</code></td></tr>
@@ -330,7 +330,7 @@ ilk3 = [adlar[i] for i in sira[:3]]
 print("özellik önemi:", {adlar[i]: round(float(katsayi[i]), 2) for i in sira[:5]})
 
 rapor = (
-    f"ANADOLU BANK | Müşteri kaybı modeli raporu\\n"
+    f"ILGAZ BANK | Müşteri kaybı modeli raporu\\n"
     f"Test müşteri sayısı: {len(y_te)} (gerçek churn oranı %{100 * y_te.mean():.1f})\\n"
     f"ROC AUC: {roc_auc_score(y_te, olas):.3f}\\n"
     f"Seçilen eşik: {esik:.2f} -&gt; teklif gönderilecek: {int((olas &gt;= esik).sum())} müşteri\\n"
@@ -537,10 +537,10 @@ print(rapor)</pre>
         id: 'proje-ml-12',
         stage: 'Mini proje',
         diff: 2,
-        q: '<p>Yönetim raporu. <code>is_raporu(s)</code>: <code>s</code> sözlüğünde <code>musteri</code> (int), <code>churn_orani</code> (0-1), <code>auc</code>, <code>esik</code>, <code>teklif</code> (int), <code>model_maliyet</code>, <code>bos_maliyet</code> (int TL), <code>ozellikler</code> (ad listesi) var. Tam olarak şu biçimde çok satırlı metin döndür (sayılar binlik ayırıcı olarak nokta kullanır):</p><pre class="out">ANADOLU BANK - Müşteri Kaybı Raporu\nİncelenen müşteri: 250 (churn %24.8)\nModel kalitesi (ROC AUC): 0.812\nEşik 0.15 ile 112 müşteriye teklif önerilir.\nMaliyet: 31.400 TL (modelsiz 93.000 TL)\nTasarruf: 61.600 TL (%66.2)\nBaşlıca nedenler: sikayet_sayisi, mobil_aktif, urun_sayisi</pre><p>Tasarruf yüzdesi bos_maliyet\'e göre; bos_maliyet 0 ise yüzde 0.0.</p>',
+        q: '<p>Yönetim raporu. <code>is_raporu(s)</code>: <code>s</code> sözlüğünde <code>musteri</code> (int), <code>churn_orani</code> (0-1), <code>auc</code>, <code>esik</code>, <code>teklif</code> (int), <code>model_maliyet</code>, <code>bos_maliyet</code> (int TL), <code>ozellikler</code> (ad listesi) var. Tam olarak şu biçimde çok satırlı metin döndür (sayılar binlik ayırıcı olarak nokta kullanır):</p><pre class="out">ILGAZ BANK - Müşteri Kaybı Raporu\nİncelenen müşteri: 250 (churn %24.8)\nModel kalitesi (ROC AUC): 0.812\nEşik 0.15 ile 112 müşteriye teklif önerilir.\nMaliyet: 31.400 TL (modelsiz 93.000 TL)\nTasarruf: 61.600 TL (%66.2)\nBaşlıca nedenler: sikayet_sayisi, mobil_aktif, urun_sayisi</pre><p>Tasarruf yüzdesi bos_maliyet\'e göre; bos_maliyet 0 ise yüzde 0.0.</p>',
         start: 'def is_raporu(s):\n    pass\n',
-        sol: 'def tl(x):\n    return f"{x:,}".replace(",", ".")\n\ndef is_raporu(s):\n    tasarruf = s["bos_maliyet"] - s["model_maliyet"]\n    yuzde = 100 * tasarruf / s["bos_maliyet"] if s["bos_maliyet"] else 0.0\n    return "\\n".join([\n        "ANADOLU BANK - Müşteri Kaybı Raporu",\n        f"İncelenen müşteri: {s[\'musteri\']} (churn %{100 * s[\'churn_orani\']:.1f})",\n        f"Model kalitesi (ROC AUC): {s[\'auc\']:.3f}",\n        f"Eşik {s[\'esik\']:.2f} ile {s[\'teklif\']} müşteriye teklif önerilir.",\n        f"Maliyet: {tl(s[\'model_maliyet\'])} TL (modelsiz {tl(s[\'bos_maliyet\'])} TL)",\n        f"Tasarruf: {tl(tasarruf)} TL (%{yuzde:.1f})",\n        f"Başlıca nedenler: {\', \'.join(s[\'ozellikler\'])}",\n    ])\n',
-        tests: 's = {"musteri": 250, "churn_orani": 0.248, "auc": 0.81234, "esik": 0.15, "teklif": 112, "model_maliyet": 31400, "bos_maliyet": 93000, "ozellikler": ["sikayet_sayisi", "mobil_aktif", "urun_sayisi"]}\nbek = "ANADOLU BANK - Müşteri Kaybı Raporu\\nİncelenen müşteri: 250 (churn %24.8)\\nModel kalitesi (ROC AUC): 0.812\\nEşik 0.15 ile 112 müşteriye teklif önerilir.\\nMaliyet: 31.400 TL (modelsiz 93.000 TL)\\nTasarruf: 61.600 TL (%66.2)\\nBaşlıca nedenler: sikayet_sayisi, mobil_aktif, urun_sayisi"\nr = is_raporu(s)\nassert r == bek, f"Rapor farklı:\\n{r}"\ns2 = dict(s, model_maliyet=0, bos_maliyet=0, musteri=1250000)\nr2 = is_raporu(s2)\nassert "İncelenen müşteri: 1250000" in r2 and "Tasarruf: 0 TL (%0.0)" in r2, "bos_maliyet 0 iken sıfıra bölme olmamalı"\n',
+        sol: 'def tl(x):\n    return f"{x:,}".replace(",", ".")\n\ndef is_raporu(s):\n    tasarruf = s["bos_maliyet"] - s["model_maliyet"]\n    yuzde = 100 * tasarruf / s["bos_maliyet"] if s["bos_maliyet"] else 0.0\n    return "\\n".join([\n        "ILGAZ BANK - Müşteri Kaybı Raporu",\n        f"İncelenen müşteri: {s[\'musteri\']} (churn %{100 * s[\'churn_orani\']:.1f})",\n        f"Model kalitesi (ROC AUC): {s[\'auc\']:.3f}",\n        f"Eşik {s[\'esik\']:.2f} ile {s[\'teklif\']} müşteriye teklif önerilir.",\n        f"Maliyet: {tl(s[\'model_maliyet\'])} TL (modelsiz {tl(s[\'bos_maliyet\'])} TL)",\n        f"Tasarruf: {tl(tasarruf)} TL (%{yuzde:.1f})",\n        f"Başlıca nedenler: {\', \'.join(s[\'ozellikler\'])}",\n    ])\n',
+        tests: 's = {"musteri": 250, "churn_orani": 0.248, "auc": 0.81234, "esik": 0.15, "teklif": 112, "model_maliyet": 31400, "bos_maliyet": 93000, "ozellikler": ["sikayet_sayisi", "mobil_aktif", "urun_sayisi"]}\nbek = "ILGAZ BANK - Müşteri Kaybı Raporu\\nİncelenen müşteri: 250 (churn %24.8)\\nModel kalitesi (ROC AUC): 0.812\\nEşik 0.15 ile 112 müşteriye teklif önerilir.\\nMaliyet: 31.400 TL (modelsiz 93.000 TL)\\nTasarruf: 61.600 TL (%66.2)\\nBaşlıca nedenler: sikayet_sayisi, mobil_aktif, urun_sayisi"\nr = is_raporu(s)\nassert r == bek, f"Rapor farklı:\\n{r}"\ns2 = dict(s, model_maliyet=0, bos_maliyet=0, musteri=1250000)\nr2 = is_raporu(s2)\nassert "İncelenen müşteri: 1250000" in r2 and "Tasarruf: 0 TL (%0.0)" in r2, "bos_maliyet 0 iken sıfıra bölme olmamalı"\n',
         hints: ['Binlik ayırıcı: f"{x:,}" virgül koyar; .replace(",", ".") ile Türkçe biçime çevir.', 'Satırları listede toplayıp "\\n".join ile birleştir; sondaki boşluk/yeni satır olmasın.'],
         why: 'Rapor, modelin değerini yöneticinin diline (müşteri, lira, yüzde, neden) çevirir. Biçim fonksiyonlarını (tl) ayırmak, aynı biçimi tüm raporlarda tutarlı kılar.' },
       { t: 'code',

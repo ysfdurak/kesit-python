@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
+<p>Ilgaz Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
 
 <h2>for döngüsünün perde arkası: iter ve next</h2>
 <p>Bir listeyi <code>for</code> ile gezdiğinde Python iki şey yapar: önce <code>iter(liste)</code> ile bir yineleyici alır, sonra bitene kadar <code>next(yineleyici)</code> çağırır. Bittiğini anlamanın yolu <code>StopIteration</code> istisnasıdır.</p>
@@ -43,7 +43,7 @@ while True:
 <div class="note"><b>next'in ikinci parametresi</b><code>next(it, None)</code> yazarsan tükendiğinde istisna yerine <code>None</code> döner. "İlk eşleşen öğe ya da yok" sorularında çok kullanışlıdır: <code>next((s for s in siparisler if s["no"] == 103), None)</code>.</div>
 
 <h2>Kendi yineleyici sınıfın: __iter__ ve __next__</h2>
-<p>Bir sınıf iki metot tanımlarsa yineleyici olur: <code>__iter__</code> kendisini döndürür, <code>__next__</code> sıradaki öğeyi döndürür ya da <code>StopIteration</code> fırlatır. Örnek: Anadolu Bank'ta bir hesaba günlük faiz işleyen, verilen gün kadar bakiye üreten sayaç.</p>
+<p>Bir sınıf iki metot tanımlarsa yineleyici olur: <code>__iter__</code> kendisini döndürür, <code>__next__</code> sıradaki öğeyi döndürür ya da <code>StopIteration</code> fırlatır. Örnek: Ilgaz Bank'ta bir hesaba günlük faiz işleyen, verilen gün kadar bakiye üreten sayaç.</p>
 <pre class="py">class FaizAkisi:
     """Her gün bakiyeye günlük faiz ekler; gun_sayisi kadar bakiye üretir."""
 
@@ -105,7 +105,7 @@ print(next(u, "son"))</pre>
 </table></div>
 
 <h2>Büyük log akışını satır satır işleme</h2>
-<p>Asıl güç üreteçleri <b>zincirlemekte</b> ortaya çıkar. Her üreteç tek bir iş yapar ve sonucunu bir sonrakine akıtır; hiçbir aşamada tüm veri bellekte olmaz. Anadolu Bank'ın işlem günlüğünden "HATA" satırlarını ayıklayıp tutarlarını toplayalım. Burada log'u bir metin olarak üretiyoruz; gerçekte dosya satırlarını gezersin ve dosya nesnesi de zaten tembel bir yineleyicidir.</p>
+<p>Asıl güç üreteçleri <b>zincirlemekte</b> ortaya çıkar. Her üreteç tek bir iş yapar ve sonucunu bir sonrakine akıtır; hiçbir aşamada tüm veri bellekte olmaz. Ilgaz Bank'ın işlem günlüğünden "HATA" satırlarını ayıklayıp tutarlarını toplayalım. Burada log'u bir metin olarak üretiyoruz; gerçekte dosya satırlarını gezersin ve dosya nesnesi de zaten tembel bir yineleyicidir.</p>
 <pre class="py">LOG = """2024-03-01 09:12 OK EFT 500
 2024-03-01 09:15 HATA Havale 1200
 2024-03-01 09:20 OK Kart 90

@@ -1,4 +1,4 @@
-/* PythonPatika — ileri: dbt-elt */
+/* Kesit Python — ileri: dbt-elt */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — v2/i1: İstatistik ve hipotez testi */
+/* Kesit Python — v2/i1: İstatistik ve hipotez testi */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -61,7 +61,7 @@ print("siparişlerin %95'i kaç saatte teslim:", round(teslim.ppf(0.95), 1))
 print("tam 2 iade:", round(stats.binom.pmf(2, 10, 0.10), 4))
 print("en az 1 iade:", round(1 - stats.binom.pmf(0, 10, 0.10), 4))
 
-# Anadolu Bank çağrı merkezi: saatte ortalama 2.5 şikâyet (Poisson)
+# Ilgaz Bank çağrı merkezi: saatte ortalama 2.5 şikâyet (Poisson)
 print("bir saatte 4'ten fazla şikâyet:", round(stats.poisson.sf(4, 2.5), 4))</pre>
 <div class="tip"><b>cdf mi sf mi?</b>Kesikli dağılımlarda (binom, Poisson) "en az k" için <code>sf(k - 1)</code>, "k'dan fazla" için <code>sf(k)</code> yaz. Bir eksik/fazla yazılan k, en sık yapılan olasılık hatasıdır.</div>
 
@@ -318,7 +318,7 @@ print("tahmin:", model.predict(pd.DataFrame({"reklam": [30], "indirim": [10]})).
         id: 'istatistik-14',
         stage: 'Kendin yaz',
         diff: 2,
-        q: '<p>İki operasyon sorusu için iki fonksiyon yaz (sonuçlar 4 basamak, Python float):</p><ul><li><code>cagri_asimi(ortalama, kapasite)</code>: Anadolu Bank çağrı merkezine saatte ortalama <code>ortalama</code> çağrı geliyor (Poisson). Bir saatte gelen çağrının <code>kapasite</code>\'yi <b>aşma</b> (kapasiteden fazla olma) olasılığı.</li><li><code>en_az_iade(n, oran, k)</code>: <code>n</code> siparişte iade olasılığı <code>oran</code> (binom). <b>En az</b> <code>k</code> iade gelme olasılığı.</li></ul>',
+        q: '<p>İki operasyon sorusu için iki fonksiyon yaz (sonuçlar 4 basamak, Python float):</p><ul><li><code>cagri_asimi(ortalama, kapasite)</code>: Ilgaz Bank çağrı merkezine saatte ortalama <code>ortalama</code> çağrı geliyor (Poisson). Bir saatte gelen çağrının <code>kapasite</code>\'yi <b>aşma</b> (kapasiteden fazla olma) olasılığı.</li><li><code>en_az_iade(n, oran, k)</code>: <code>n</code> siparişte iade olasılığı <code>oran</code> (binom). <b>En az</b> <code>k</code> iade gelme olasılığı.</li></ul>',
         start: 'from scipy import stats\n\ndef cagri_asimi(ortalama, kapasite):\n    pass\n\ndef en_az_iade(n, oran, k):\n    pass\n',
         sol: 'from scipy import stats\n\ndef cagri_asimi(ortalama, kapasite):\n    return round(float(stats.poisson.sf(kapasite, ortalama)), 4)\n\ndef en_az_iade(n, oran, k):\n    return round(float(stats.binom.sf(k - 1, n, oran)), 4)\n',
         tests: 'assert cagri_asimi(2.5, 4) == 0.1088, "Poisson(2.5): 4\'ten fazla = sf(4) = 0.1088"\nassert cagri_asimi(10, 10) == 0.417, "Poisson(10): 10\'dan fazla = 0.417"\nassert en_az_iade(10, 0.1, 1) == 0.6513, "En az 1 iade = 1 - P(0) = 0.6513"\nassert en_az_iade(20, 0.1, 3) == 0.3231, "En az 3 iade = sf(2) = 0.3231; sf(3) yazarsan \'3\'ten fazla\'yı hesaplarsın"\nassert type(cagri_asimi(2.5, 4)) is float, "Python float dönmeli"\n',

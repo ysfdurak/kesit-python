@@ -1,4 +1,4 @@
-/* PythonPatika — Temel 1: Başlangıç ve Veri Türleri (python-nedir … sozlukler) */
+/* Kesit Python — Temel 1: Başlangıç ve Veri Türleri (python-nedir … sozlukler) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -157,7 +157,7 @@ print("Kalan stok:", 250 - 31)</pre>
   ],
   body: `
 <h2>Neden kurulumu önemsiyoruz?</h2>
-<p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Anadolu Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
+<p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Ilgaz Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
 
 <h2>1. Python'ı kurmak</h2>
 <p>Resmî kaynak <b>python.org</b>. İndirme sayfasından işletim sistemine uygun Python 3.12 kurulumunu al.</p>
@@ -298,7 +298,7 @@ print("Uygulama:", platform.python_implementation())</pre>
   ],
   body: `
 <h2>Küçük ama gerçek bir program</h2>
-<p>Bir program, birbiri ardına çalışan satırlardan oluşur. Bu derste üç temel yapı taşını öğreneceksin: ekrana yazmak (<code>print</code>), kodu açıklamak (yorum) ve dışarıdan veri almak (<code>input</code>). Sonunda da her programcının günlük ekmeği olan hata mesajını okumayı. Senaryo: Anadolu Bank'ın şubesinde çalışan bir görevli, müşterinin adını ve hesaba yatırdığı tutarı alıp bir makbuz yazdıran küçük bir program istiyor.</p>
+<p>Bir program, birbiri ardına çalışan satırlardan oluşur. Bu derste üç temel yapı taşını öğreneceksin: ekrana yazmak (<code>print</code>), kodu açıklamak (yorum) ve dışarıdan veri almak (<code>input</code>). Sonunda da her programcının günlük ekmeği olan hata mesajını okumayı. Senaryo: Ilgaz Bank'ın şubesinde çalışan bir görevli, müşterinin adını ve hesaba yatırdığı tutarı alıp bir makbuz yazdıran küçük bir program istiyor.</p>
 
 <h2>print'i daha iyi tanımak</h2>
 <p><code>print</code> birden fazla değeri virgülle alır, aralarına boşluk koyar ve sonunda satır atlar. İki küçük ayar bunu değiştirir: <code>sep</code> (separator, ayraç) değerlerin arasına, <code>end</code> ise satırın sonuna ne konacağını belirler.</p>
@@ -313,7 +313,7 @@ print("-" * 20)</pre>
 <h2>Yorumlar: kendine ve ekibine not</h2>
 <p><code>#</code> işaretinden satır sonuna kadar olan her şey yorumdur (comment); Python onu görmezden gelir. Yorum, "ne" yaptığını değil "neden" yaptığını anlatmalı. Kod zaten ne yaptığını gösterir.</p>
 <pre class="py"># Makbuz başlığı; şube yöneticisi bu biçimi istedi
-print("ANADOLU BANK - MAKBUZ")
+print("ILGAZ BANK - MAKBUZ")
 tutar = 1500  # TL cinsinden, kuruş yok
 print("Yatırılan:", tutar)
 # print("Bu satır çalışmaz, yorum hâline getirildi")</pre>
@@ -358,9 +358,9 @@ print("KDV dahil:", ara_toplam * 1.2)</pre>
 <p>İki dönüşüme dikkat et: adet tam sayı olduğundan <code>int</code>, fiyat ondalıklı olabileceğinden <code>float</code>. Yanlış seçersen ya hata alırsın ("3.5" int olmaz) ya da gereksiz ondalık görürsün. Girdiyi hangi türe çevireceğine, o değeri ne için kullanacağına bakarak karar ver.</p>
 
 <h2>Hepsini birleştirelim</h2>
-<pre class="py"># Anadolu Bank şube makbuzu
+<pre class="py"># Ilgaz Bank şube makbuzu
 print("=" * 28)
-print("ANADOLU BANK - MAKBUZ")
+print("ILGAZ BANK - MAKBUZ")
 print("=" * 28)
 musteri = "Mehmet Kaya"
 tutar = 2750
@@ -395,7 +395,7 @@ print("=" * 28)</pre>
       o: ['42 tam sayısı', '"42" metni', '42.0 ondalıklı sayısı', 'Kullanıcının yazdığına göre tür değişir'], a: 1,
       why: 'input her zaman metin (str) döndürür. Sayı olarak kullanmak için int() ya da float() ile çevirmen gerekir.' },
     { t: 'code', id: 'ilk-program-2',
-      q: '<p>Anadolu Bank görevlisi iki tutar girecek. İki <code>input()</code> ile değerleri al, <code>int()</code> ile sayıya çevir ve toplamlarını <code>toplam</code> değişkenine koy; sonra yazdır. Test girdileri sırasıyla <code>1500</code> ve <code>250</code>.</p>',
+      q: '<p>Ilgaz Bank görevlisi iki tutar girecek. İki <code>input()</code> ile değerleri al, <code>int()</code> ile sayıya çevir ve toplamlarını <code>toplam</code> değişkenine koy; sonra yazdır. Test girdileri sırasıyla <code>1500</code> ve <code>250</code>.</p>',
       start: 'ilk = input("İlk tutar: ")\nikinci = input("İkinci tutar: ")\n# sayıya çevir ve topla\n',
       sol: 'ilk = input("İlk tutar: ")\nikinci = input("İkinci tutar: ")\ntoplam = int(ilk) + int(ikinci)\nprint("Toplam:", toplam)\n',
       tests: 'assert toplam == 1750, "toplam 1750 olmalı; girdileri int ile çevirdin mi?"\nassert isinstance(toplam, int), "toplam bir tam sayı (int) olmalı"\n',
@@ -607,7 +607,7 @@ print(type(deger), deger is None)</pre>
   mod: 'Veri Türleri',
   min: 22,
   title: 'Sayılar ve işlemler',
-  sum: 'Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Anadolu Bank faiz hesabı üzerinden öğrenirsin.',
+  sum: 'Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin.',
   goals: [
     'Dört işlem, //, % ve ** operatörlerini doğru öncelikle kullanabilirim.',
     'Tam bölme ve kalan ile gerçek iş problemlerini (taksit, sayfa, paketleme) çözebilirim.',
@@ -617,7 +617,7 @@ print(type(deger), deger is None)</pre>
   ],
   body: `
 <h2>Sayılar neden bu kadar önemli?</h2>
-<p>Anadolu Bank'ta bir mevduat hesabının faizi, Anadolu Market'te bir sepetin indirimli tutarı, bir kargonun kaç kutuya sığacağı... Hepsi sayı işlemi. Python'ın aritmetiği hesap makinesine benzer ama birkaç yerde sürpriz yapar: bölme hep ondalıklı sonuç verir, ondalıklı sayılar bazen "yanlış" görünür ve yuvarlama sandığın gibi çalışmaz. Bu derste bu sürprizlerin hepsini önceden göreceksin.</p>
+<p>Ilgaz Bank'ta bir mevduat hesabının faizi, Anadolu Market'te bir sepetin indirimli tutarı, bir kargonun kaç kutuya sığacağı... Hepsi sayı işlemi. Python'ın aritmetiği hesap makinesine benzer ama birkaç yerde sürpriz yapar: bölme hep ondalıklı sonuç verir, ondalıklı sayılar bazen "yanlış" görünür ve yuvarlama sandığın gibi çalışmaz. Bu derste bu sürprizlerin hepsini önceden göreceksin.</p>
 
 <h2>Temel operatörler</h2>
 <pre class="py">bakiye = 10000
@@ -685,7 +685,7 @@ print(abs(-350), max(3, 9, 4), min(3, 9, 4))
 print(pow(2, 10), 10 ** 3)</pre>
 <p><code>abs</code>, <code>max</code>, <code>min</code>, <code>pow</code> ve <code>round</code> hazır (built-in) fonksiyonlardır, içe aktarmaya gerek yoktur. Kutu problemine geri dönersen: <code>math.ceil(250 / 12)</code> tek satırda "gereken kutu" sayısını verir.</p>
 
-<h2>Anadolu Bank faiz hesabı</h2>
+<h2>Ilgaz Bank faiz hesabı</h2>
 <p>Bir müşteri 50.000 TL'yi yıllık %30 faizle 3 yıl vadeli hesaba yatırıyor. Basit faizde her yıl ana para üzerinden faiz işler; bileşik faizde (compound interest) faiz de faiz kazanır. Formül: bileşik tutar = anapara × (1 + oran) üzeri yıl.</p>
 <pre class="py">anapara = 50_000
 oran = 0.30
@@ -729,7 +729,7 @@ print("Fark:", round(bilesik - basit, 2))</pre>
       o: ['True, çünkü matematiksel olarak eşittir', 'False, çünkü ondalık sayılar ikilik tabanda tam saklanamaz', 'Hata verir', 'True, çünkü Python karşılaştırmadan önce iki sayıyı da yuvarlar'], a: 1,
       why: '0.1 ve 0.2 ikilik tabanda sonsuz basamaklıdır; toplamları 0.30000000000000004 olur ve 0.3 ile eşit değildir. Karşılaştırmada tolerans ya da round kullanılır.' },
     { t: 'code', id: 'sayilar-islemler-3',
-      q: '<p>Anadolu Bank için <code>bilesik_faiz(anapara, oran, yil)</code> fonksiyonu yaz. Bileşik faizle vade sonundaki tutarı hesaplayıp <b>2 basamağa yuvarlanmış</b> olarak döndürsün. Formül: anapara × (1 + oran) ** yil. Örnek: <code>bilesik_faiz(50000, 0.30, 3)</code> → <code>109850.0</code>.</p>',
+      q: '<p>Ilgaz Bank için <code>bilesik_faiz(anapara, oran, yil)</code> fonksiyonu yaz. Bileşik faizle vade sonundaki tutarı hesaplayıp <b>2 basamağa yuvarlanmış</b> olarak döndürsün. Formül: anapara × (1 + oran) ** yil. Örnek: <code>bilesik_faiz(50000, 0.30, 3)</code> → <code>109850.0</code>.</p>',
       start: 'def bilesik_faiz(anapara, oran, yil):\n    pass\n',
       sol: 'def bilesik_faiz(anapara, oran, yil):\n    tutar = anapara * (1 + oran) ** yil\n    return round(tutar, 2)\n',
       tests: 'assert abs(bilesik_faiz(50000, 0.30, 3) - 109850.0) < 1e-6, "50000, %30, 3 yıl -> 109850.0"\nassert abs(bilesik_faiz(1000, 0.10, 2) - 1210.0) < 1e-6, "1000, %10, 2 yıl -> 1210.0"\nassert abs(bilesik_faiz(1000, 0.0, 5) - 1000.0) < 1e-6, "oran 0 ise tutar değişmez"\n',
@@ -1151,7 +1151,7 @@ print(onayli is gercek_yedek)</pre>
 
 <h2>Demet: değişmez liste</h2>
 <p>Demet, parantezle yazılan ve oluşturulduktan sonra <b>değiştirilemeyen</b> sıralı bir koleksiyondur. İndeks, dilim, <code>len</code>, <code>in</code> hepsi listeyle aynı çalışır; sadece ekleme, silme ve atama yoktur.</p>
-<pre class="py">sube = ("Anadolu Bank Konak", 38.4189, 27.1287)
+<pre class="py">sube = ("Ilgaz Bank Konak", 38.4189, 27.1287)
 print(sube[0])
 print(sube[1:])
 print(len(sube), "Konak" in sube[0])
@@ -1212,7 +1212,7 @@ print(tuple("abc"))</pre>
 <p>Demetin yalnızca iki metodu vardır: <code>count</code> ve <code>index</code>. Daha fazlasına ihtiyaç duyuyorsan muhtemelen liste istiyorsundur; bu da demetin sana verdiği bir sinyal.</p>
 
 <h2>Küme işlemleri</h2>
-<p>Anadolu Bank'ta iki müşteri grubu var: kredi kartı olanlar ve mevduat hesabı olanlar. Pazarlama ekibi şunu soruyor: hangileri ikisine de sahip, hangileri yalnızca kredi kartına sahip, toplam kaç farklı müşteri var?</p>
+<p>Ilgaz Bank'ta iki müşteri grubu var: kredi kartı olanlar ve mevduat hesabı olanlar. Pazarlama ekibi şunu soruyor: hangileri ikisine de sahip, hangileri yalnızca kredi kartına sahip, toplam kaç farklı müşteri var?</p>
 <pre class="py">kredi_karti = {"M-101", "M-102", "M-103", "M-104"}
 mevduat = {"M-103", "M-104", "M-105"}
 print("Her ikisi:", kredi_karti &amp; mevduat)       # kesişim
@@ -1271,7 +1271,7 @@ print({"M-103"} &lt;= mevduat)                       # alt küme mi?</pre>
       hints: ['set() tekrarları kaldırır.', 'sorted(set(...)) sıralı liste verir.'],
       why: 'set benzersizleştirir, sorted hem sıralar hem de kümeyi listeye çevirir.' },
     { t: 'code', id: 'demet-kume-3',
-      q: '<p>Anadolu Bank müşteri grupları: <code>kredi_karti = {"M-101", "M-102", "M-103", "M-104"}</code> ve <code>mevduat = {"M-103", "M-104", "M-105"}</code>. Üç küme hesapla: <code>her_ikisi</code> (kesişim), <code>sadece_kart</code> (kartı olup mevduatı olmayanlar) ve <code>tum_musteriler</code> (birleşim).</p>',
+      q: '<p>Ilgaz Bank müşteri grupları: <code>kredi_karti = {"M-101", "M-102", "M-103", "M-104"}</code> ve <code>mevduat = {"M-103", "M-104", "M-105"}</code>. Üç küme hesapla: <code>her_ikisi</code> (kesişim), <code>sadece_kart</code> (kartı olup mevduatı olmayanlar) ve <code>tum_musteriler</code> (birleşim).</p>',
       start: 'kredi_karti = {"M-101", "M-102", "M-103", "M-104"}\nmevduat = {"M-103", "M-104", "M-105"}\n# her_ikisi, sadece_kart, tum_musteriler\n',
       sol: 'kredi_karti = {"M-101", "M-102", "M-103", "M-104"}\nmevduat = {"M-103", "M-104", "M-105"}\nher_ikisi = kredi_karti & mevduat\nsadece_kart = kredi_karti - mevduat\ntum_musteriler = kredi_karti | mevduat\nprint(sorted(her_ikisi), sorted(sadece_kart), len(tum_musteriler))\n',
       tests: 'assert her_ikisi == {"M-103", "M-104"}, "her_ikisi kesişim olmalı"\nassert sadece_kart == {"M-101", "M-102"}, "sadece_kart fark olmalı"\nassert tum_musteriler == {"M-101", "M-102", "M-103", "M-104", "M-105"}, "tum_musteriler birleşim olmalı"\n',
@@ -1321,7 +1321,7 @@ print({"M-103"} &lt;= mevduat)                       # alt küme mi?</pre>
   ],
   body: `
 <h2>İsimle erişmek</h2>
-<p>Listeler dersinde bir siparişi <code>["AM-101", "İzmir", 1499.9]</code> diye tutmuştun. Üç ay sonra <code>siparis[2]</code> gördüğünde bunun tutar olduğunu hatırlayacak mısın? <b>Sözlük</b> (dictionary, dict) her değere bir <b>anahtar</b> (key) verir: <code>siparis["tutar"]</code>. Anadolu Market'in müşteri kaydı, Anadolu Bank'ın hesap bilgisi, bir API'den dönen yanıt: iş dünyasındaki verinin büyük kısmı bu biçimdedir.</p>
+<p>Listeler dersinde bir siparişi <code>["AM-101", "İzmir", 1499.9]</code> diye tutmuştun. Üç ay sonra <code>siparis[2]</code> gördüğünde bunun tutar olduğunu hatırlayacak mısın? <b>Sözlük</b> (dictionary, dict) her değere bir <b>anahtar</b> (key) verir: <code>siparis["tutar"]</code>. Anadolu Market'in müşteri kaydı, Ilgaz Bank'ın hesap bilgisi, bir API'den dönen yanıt: iş dünyasındaki verinin büyük kısmı bu biçimdedir.</p>
 <pre class="py">musteri = {
     "no": "M-101",
     "ad": "Ayşe Yılmaz",
@@ -1495,7 +1495,7 @@ print("En çok:", max(sayim, key=sayim.get))</pre>
 }
 );
 })(window);
-/* PythonPatika — Temel seviye 2. bölüm: Akış Kontrolü, Fonksiyonlar ve Modüller, Dosya ve Hata, Bitirme */
+/* Kesit Python — Temel seviye 2. bölüm: Akış Kontrolü, Fonksiyonlar ve Modüller, Dosya ve Hata, Bitirme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -1513,11 +1513,11 @@ L.push(
     'Karşılaştırma (==, !=, <, >=) ve mantık (and, or, not) operatörlerini doğru öncelikle birleştirebilirim.',
     'Hangi değerlerin "doğru", hangilerinin "yanlış" sayıldığını (truthiness) açıklayabilirim.',
     'İç içe koşulları erken dönüş (early return) ile düzleştirip okunur kod yazabilirim.',
-    'Anadolu Bank kredi uygunluk kuralı gibi bir iş kuralını koda dökebilirim.'
+    'Ilgaz Bank kredi uygunluk kuralı gibi bir iş kuralını koda dökebilirim.'
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Şimdiye kadar yazdığın programlar yukarıdan aşağıya, hiç sapmadan çalıştı. Oysa gerçek iş kuralları hep "eğer ... ise" diye başlar: <i>Eğer sepet tutarı 500 TL'yi geçerse kargo bedava. Eğer başvuranın yaşı 18'in altındaysa krediyi reddet. Eğer stok sıfırsa "tükendi" yaz.</i> Anadolu Bank'ta bir kredi uzmanının her gün uyguladığı kuralı Python'a öğretmek için koşul (condition) yapısına ihtiyacın var.</p>
+<p>Şimdiye kadar yazdığın programlar yukarıdan aşağıya, hiç sapmadan çalıştı. Oysa gerçek iş kuralları hep "eğer ... ise" diye başlar: <i>Eğer sepet tutarı 500 TL'yi geçerse kargo bedava. Eğer başvuranın yaşı 18'in altındaysa krediyi reddet. Eğer stok sıfırsa "tükendi" yaz.</i> Ilgaz Bank'ta bir kredi uzmanının her gün uyguladığı kuralı Python'a öğretmek için koşul (condition) yapısına ihtiyacın var.</p>
 
 <h2>if, elif, else</h2>
 <p>Python'da bir blok yalnızca koşul <code>True</code> olduğunda çalışır. Blok girintiyle (4 boşluk) belirlenir; süslü parantez yok.</p>
@@ -1590,7 +1590,7 @@ print(bool(0), bool("0"), bool([]), bool([0]))</pre>
 <h2>İç içe koşul ve erken dönüş</h2>
 <p>Koşul içine koşul yazabilirsin ama girinti derinleştikçe kod zorlaşır. Fonksiyon içindeysen (bir sonraki modülde ayrıntısıyla göreceksin) olumsuz durumları başta eleyip <code>return</code> ile çıkmak, kodu düz ve okunur tutar. Buna <b>erken dönüş</b> (early return) ya da "guard clause" denir.</p>
 <pre class="py">def kredi_karari(yas, gelir, kredi_notu, kara_listede):
-    """Anadolu Bank bireysel kredi ön değerlendirme kuralı."""
+    """Ilgaz Bank bireysel kredi ön değerlendirme kuralı."""
     if kara_listede:
         return "RED: kara liste"
     if yas &lt; 18:
@@ -1637,7 +1637,7 @@ match durum:
       o: ['<code>"0"</code>', '<code>[]</code>', '<code>-1</code>', '<code>[None]</code>'], a: 1,
       why: 'Boş liste falsy sayılır. "0" boş olmayan bir metindir, -1 sıfır olmayan bir sayıdır, [None] bir elemanlı (dolu) bir listedir; üçü de truthy.' },
     { t: 'code', id: 'kosullar-1',
-      q: '<p>Anadolu Bank ön değerlendirme kuralı: <code>kredi_uygun(yas, gelir, kredi_notu)</code> fonksiyonunu yaz. Başvuran <b>18 yaş ve üzeri</b>, aylık geliri <b>en az 25000</b> ve kredi notu <b>en az 600</b> ise <code>True</code>, aksi halde <code>False</code> döndürsün.</p>',
+      q: '<p>Ilgaz Bank ön değerlendirme kuralı: <code>kredi_uygun(yas, gelir, kredi_notu)</code> fonksiyonunu yaz. Başvuran <b>18 yaş ve üzeri</b>, aylık geliri <b>en az 25000</b> ve kredi notu <b>en az 600</b> ise <code>True</code>, aksi halde <code>False</code> döndürsün.</p>',
       start: 'def kredi_uygun(yas, gelir, kredi_notu):\n    # üç şartı and ile birleştir\n    pass\n',
       sol: 'def kredi_uygun(yas, gelir, kredi_notu):\n    return yas >= 18 and gelir >= 25000 and kredi_notu >= 600\n',
       tests: 'assert kredi_uygun(30, 40000, 700) is True, "30 yaş, 40000 gelir, 700 not uygun olmalı"\nassert kredi_uygun(17, 40000, 700) is False, "17 yaş uygun olmamalı"\nassert kredi_uygun(30, 24999, 700) is False, "24999 gelir uygun olmamalı"\nassert kredi_uygun(30, 40000, 599) is False, "599 kredi notu uygun olmamalı"\nassert kredi_uygun(18, 25000, 600) is True, "sınır değerler (18, 25000, 600) uygun olmalı"\n',
@@ -1661,7 +1661,7 @@ match durum:
       o: ['False', 'True', 'SyntaxError', 'None'], a: 1,
       why: 'not, or\'dan önce işlenir: (not True) or True = False or True = True. Öncelik sırası: not > and > or.' },
     { t: 'code', id: 'kosullar-4',
-      q: '<p>Anadolu Bank ATM kuralı: <code>para_cekme(bakiye, tutar, kart_aktif)</code> fonksiyonu <b>erken dönüş</b> kalıbıyla şu metinlerden birini döndürsün: kart aktif değilse <code>"RED: kart pasif"</code>; tutar 0 veya negatifse <code>"RED: geçersiz tutar"</code>; tutar bakiyeden büyükse <code>"RED: yetersiz bakiye"</code>; aksi halde <code>"ONAY"</code>.</p>',
+      q: '<p>Ilgaz Bank ATM kuralı: <code>para_cekme(bakiye, tutar, kart_aktif)</code> fonksiyonu <b>erken dönüş</b> kalıbıyla şu metinlerden birini döndürsün: kart aktif değilse <code>"RED: kart pasif"</code>; tutar 0 veya negatifse <code>"RED: geçersiz tutar"</code>; tutar bakiyeden büyükse <code>"RED: yetersiz bakiye"</code>; aksi halde <code>"ONAY"</code>.</p>',
       start: 'def para_cekme(bakiye, tutar, kart_aktif):\n    # olumsuz durumları sırayla ele, en sonda "ONAY" döndür\n    pass\n',
       sol: 'def para_cekme(bakiye, tutar, kart_aktif):\n    if not kart_aktif:\n        return "RED: kart pasif"\n    if tutar <= 0:\n        return "RED: geçersiz tutar"\n    if tutar > bakiye:\n        return "RED: yetersiz bakiye"\n    return "ONAY"\n',
       tests: 'assert para_cekme(1000, 200, True) == "ONAY", "1000 bakiye, 200 tutar, aktif kart ONAY olmalı"\nassert para_cekme(1000, 200, False) == "RED: kart pasif", "pasif kart reddedilmeli"\nassert para_cekme(1000, 0, True) == "RED: geçersiz tutar", "0 tutar geçersiz olmalı"\nassert para_cekme(1000, -50, True) == "RED: geçersiz tutar", "negatif tutar geçersiz olmalı"\nassert para_cekme(100, 200, True) == "RED: yetersiz bakiye", "bakiyeden büyük tutar reddedilmeli"\nassert para_cekme(200, 200, True) == "ONAY", "bakiyeye eşit tutar çekilebilmeli"\n',
@@ -1880,7 +1880,7 @@ print(max(siparisler, key=lambda s: s[1]))</pre>
 }
 );
 })(window);
-/* PythonPatika — Temel 3: Fonksiyonlar ve Modüller (fonksiyonlar, kapsam-moduller, string-bicimleme) */
+/* Kesit Python — Temel 3: Fonksiyonlar ve Modüller (fonksiyonlar, kapsam-moduller, string-bicimleme) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2083,7 +2083,7 @@ print(sepete_ekle_dogru("Çay"))</pre>
   ],
   body: `
 <h2>Bir isim nerede görünür?</h2>
-<p>Anadolu Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
+<p>Ilgaz Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
 <pre class="py">komisyon_orani = 0.002          # global (modül düzeyi)
 
 def komisyon(tutar):
@@ -2108,7 +2108,7 @@ except NameError as e:
 <tr><td>Built-in</td><td>Python'ın kendisi</td><td><code>print</code>, <code>len</code>, <code>sum</code></td></tr>
 </table></div>
 <pre class="py">def rapor_hazirla(hesaplar):
-    baslik = "Anadolu Bank Günlük Özet"     # enclosing
+    baslik = "Ilgaz Bank Günlük Özet"     # enclosing
 
     def satir(ad, bakiye):
         return baslik[:12] + " | " + ad + ": " + str(bakiye)   # baslik dıştan okunur
@@ -2166,7 +2166,7 @@ print(type(rastgele_tam(1, 6)))</pre>
     return round(anapara * yillik_oran * ay / 12, 2)
 
 def main():
-    print("Anadolu Bank mevduat hesabı")
+    print("Ilgaz Bank mevduat hesabı")
     print("6 ay, 50.000 TL, %40:", faiz_hesapla(50000, 0.40, 6))
 
 print("__name__ değeri:", __name__)
@@ -2271,7 +2271,7 @@ print(random.sample(range(1000, 2000), 3))</pre>
   mod: 'Fonksiyonlar ve Modüller',
   min: 28,
   title: 'Metin biçimlendirme ve rapor üretme',
-  sum: 'f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Anadolu Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.',
+  sum: 'f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.',
   goals: [
     'f-string içinde hizalama (<, >, ^), genişlik ve dolgu karakteri kullanabilirim.',
     'Sayıları binlik ayırıcı, sabit ondalık ve yüzde olarak biçimlendirebilirim.',
@@ -2281,7 +2281,7 @@ print(random.sample(range(1000, 2000), 3))</pre>
   ],
   body: `
 <h2>Neden biçimlendirme?</h2>
-<p>Anadolu Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
+<p>Ilgaz Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
 
 <h2>f-string hatırlatma ve biçim belirteci</h2>
 <p><code>f"..."</code> içinde <code>{ifade}</code> yazarsın; Python ifadeyi hesaplayıp metne gömer. İki nokta ile belirteç eklersin: <code>{deger:belirtec}</code>. Belirtecin genel sırası şöyledir: <b>dolgu</b> + <b>hizalama</b> + <b>genişlik</b> + <b>binlik</b> + <b>.ondalık</b> + <b>tür</b>. Her parça isteğe bağlıdır.</p>
@@ -2338,7 +2338,7 @@ print("{0} - {1} - {0}".format("A", "B"))</pre>
 <pre class="py">musteri = "Ayşe Yılmaz"
 hesap_no = "TR33 0006 1005 1978 6457 8413 26"
 bakiye = 12500.5
-baslik = f"""{'ANADOLU BANK':^40}
+baslik = f"""{'ILGAZ BANK':^40}
 {'Hesap Özeti':^40}
 {'=' * 40}
 Müşteri : {musteri}
@@ -2470,7 +2470,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Program kapanınca değişkenler silinir. Anadolu Market'in sipariş listesi, Anadolu Bank'ın günlük işlem dökümü ise kalıcı olmalı: diske yazılır, yarın yeniden okunur, başka programlara verilir. İş hayatında verinin büyük bölümü hâlâ düz metin ve CSV dosyalarında dolaşır. Bu derste önce bellekte küçük dosyalar oluşturup okuyacağız; aynı kod bilgisayarındaki gerçek dosyalarda da çalışır.</p>
+<p>Program kapanınca değişkenler silinir. Anadolu Market'in sipariş listesi, Ilgaz Bank'ın günlük işlem dökümü ise kalıcı olmalı: diske yazılır, yarın yeniden okunur, başka programlara verilir. İş hayatında verinin büyük bölümü hâlâ düz metin ve CSV dosyalarında dolaşır. Bu derste önce bellekte küçük dosyalar oluşturup okuyacağız; aynı kod bilgisayarındaki gerçek dosyalarda da çalışır.</p>
 <div class="note"><b>Tarayıcıdaki dosyalar</b>Bu uygulama tarayıcıda çalıştığı için yazdığın dosyalar bellek içi bir dosya sisteminde oluşur; sayfayı yenileyince silinir. Kendi bilgisayarında aynı kod gerçek dosyalar üretir. Alıştırmalarda önce dosyayı kodla yazıp sonra okuyacağız.</div>
 
 <h2>open ve with: aç, kullan, kesin kapat</h2>
@@ -2657,7 +2657,7 @@ for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın gece çalışan rapor betiği, bir satırda tutar yerine "yok" yazdığı için saat 03:00'te çöktü ve sabah hiç rapor yoktu. Oysa o satırı atlayıp loga yazsa, kalan binlerce satır işlenirdi. Hata (error) kaçınılmazdır; mesele programın hatayı <b>nasıl karşıladığı</b>dır. Python'da hatalar <b>istisna</b> (exception) adlı nesnelerle temsil edilir ve yakalanabilir.</p>
+<p>Ilgaz Bank'ın gece çalışan rapor betiği, bir satırda tutar yerine "yok" yazdığı için saat 03:00'te çöktü ve sabah hiç rapor yoktu. Oysa o satırı atlayıp loga yazsa, kalan binlerce satır işlenirdi. Hata (error) kaçınılmazdır; mesele programın hatayı <b>nasıl karşıladığı</b>dır. Python'da hatalar <b>istisna</b> (exception) adlı nesnelerle temsil edilir ve yakalanabilir.</p>
 
 <h2>Hata mesajı (traceback) okuma</h2>
 <pre class="py">def ortalama(liste):
@@ -2807,7 +2807,7 @@ print(kayit.get("sehir", "bilinmiyor"))</pre>
       o: ['TypeError', 'ValueError', 'SyntaxError', 'Hata vermez, 12 döner'], a: 1,
       why: 'Argümanın türü doğrudur (metin) ama değeri tam sayı biçiminde değildir; bu ValueError\'dır. TypeError tür yanlış olduğunda (int([1])) çıkar.' },
     { t: 'code', id: 'hatalar-3',
-      q: '<p>Anadolu Bank havale kuralı: <code>havale(bakiye, tutar)</code> fonksiyonu tutar <b>0 veya negatifse</b> <code>ValueError("tutar pozitif olmalı")</code>, tutar <b>bakiyeden büyükse</b> <code>ValueError("yetersiz bakiye")</code> fırlatsın; aksi halde yeni bakiyeyi döndürsün. Mesajlar tam olarak böyle olsun.</p>',
+      q: '<p>Ilgaz Bank havale kuralı: <code>havale(bakiye, tutar)</code> fonksiyonu tutar <b>0 veya negatifse</b> <code>ValueError("tutar pozitif olmalı")</code>, tutar <b>bakiyeden büyükse</b> <code>ValueError("yetersiz bakiye")</code> fırlatsın; aksi halde yeni bakiyeyi döndürsün. Mesajlar tam olarak böyle olsun.</p>',
       start: 'def havale(bakiye, tutar):\n    pass\n',
       sol: 'def havale(bakiye, tutar):\n    if tutar <= 0:\n        raise ValueError("tutar pozitif olmalı")\n    if tutar > bakiye:\n        raise ValueError("yetersiz bakiye")\n    return bakiye - tutar\n',
       tests: 'assert havale(1000, 300) == 700, "1000 - 300 = 700 dönmeli"\nassert havale(500, 500) == 0, "bakiyenin tamamı gönderilebilmeli"\nfor kotu, mesaj in [(0, "tutar pozitif olmalı"), (-5, "tutar pozitif olmalı"), (5000, "yetersiz bakiye")]:\n    try:\n        havale(1000, kotu)\n    except ValueError as e:\n        assert str(e) == mesaj, f"tutar={kotu} için mesaj \'{mesaj}\' olmalı, gelen: {e}"\n    else:\n        raise AssertionError(f"tutar={kotu} için ValueError fırlatılmalı")\n',

@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: kosullar */
+/* Kesit Python v2 — uzantı: kosullar */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -137,7 +137,7 @@ if (n := len(sepet)) &gt; 3:
       t: 'code',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank taksit takibi: <code>taksit_durumu(odendi)</code> fonksiyonunu yaz. <code>odendi</code>, her taksit için True/False içeren listedir. Liste boşsa <code>"taksit yok"</code>, hepsi ödendiyse <code>"kapandı"</code>, en az biri ödendiyse <code>"devam ediyor"</code>, hiçbiri ödenmediyse <code>"başlamadı"</code> döndür. <code>all</code> ve <code>any</code> kullan.</p>',
+      q: '<p>Ilgaz Bank taksit takibi: <code>taksit_durumu(odendi)</code> fonksiyonunu yaz. <code>odendi</code>, her taksit için True/False içeren listedir. Liste boşsa <code>"taksit yok"</code>, hepsi ödendiyse <code>"kapandı"</code>, en az biri ödendiyse <code>"devam ediyor"</code>, hiçbiri ödenmediyse <code>"başlamadı"</code> döndür. <code>all</code> ve <code>any</code> kullan.</p>',
       guide: ['Önce boş listeyi kontrol et (all([]) True döner!).', 'all(odendi) True ise "kapandı".', 'Değilse any(odendi) True ise "devam ediyor".', 'Kalan durum: "başlamadı".'],
       example: 'kontroller = [True, True, False]\nif all(kontroller):\n    print("hepsi tamam")\nelif any(kontroller):\n    print("bazıları tamam")\nelse:\n    print("hiçbiri")\n',
       start: 'def taksit_durumu(odendi):\n    # TODO: boş liste kontrolü\n    # TODO: all / any ile karar ver\n    return "başlamadı"\n',

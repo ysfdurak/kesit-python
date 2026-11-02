@@ -85,7 +85,7 @@ def write(lesson_id, minutes, html, ex, faq, mistakes):
                 d[k] = e[k]
         ex2.append(d)
     body = '{\n    id: ' + jsq(lesson_id) + ',\n    min: ' + str(minutes) + ',\n    html: ' + tmpl(html) + ',\n    ex: ' + js(ex2, 4) + ',\n    faq: ' + js(faq, 4) + ',\n    mistakes: ' + js(mistakes, 4) + '\n  }'
-    src = ("/* PythonPatika — '" + lesson_id + "' dersi uzantısı (Derinleş + ek alıştırmalar) */\n"
+    src = ("/* Kesit Python — '" + lesson_id + "' dersi uzantısı (Derinleş + ek alıştırmalar) */\n"
            "(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  " + body + "\n);\n})(window);\n")
     path = OUT + lesson_id + '.js'
     open(path, 'w', encoding='utf-8').write(src)

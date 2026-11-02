@@ -1,4 +1,4 @@
-"""t4: PythonPatika ders nesnesini tek IIFE'li JS dosyasına yazar."""
+"""t4: Kesit Python ders nesnesini tek IIFE'li JS dosyasına yazar."""
 import html, re, sys, subprocess, tempfile
 
 KEY_ORDER = ['id', 'lv', 'mod', 'min', 'title', 'sum', 'goals', 'body', 'ex', 'faq', 'mistakes']
@@ -60,7 +60,7 @@ def emit(lesson, path, note=''):
                 e[k] = e[k].strip('\n') + '\n'
         if 'expect' in e:
             e['expect'] = e['expect'].strip('\n') + '\n'
-    js = ("/* PythonPatika — " + note + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n"
+    js = ("/* Kesit Python — " + note + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n"
           + ser(lesson, 0) + "\n);\n})(window);\n")
     open(path, 'w', encoding='utf-8').write(js)
     b = lesson['body']

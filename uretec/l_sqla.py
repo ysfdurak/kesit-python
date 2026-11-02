@@ -41,7 +41,7 @@ body = '''
 <h2>Neden önemli?</h2>
 <p>sqlite3 ile Python dersinde veritabanına doğrudan SQL metni gönderdin. Küçük betiklerde bu yeterlidir. Ama gerçek bir uygulamada onlarca tablo, yüzlerce sorgu, farklı veritabanları (geliştirmede SQLite, üretimde PostgreSQL) ve iş nesneleri (müşteri, sipariş, hesap) vardır. Her sorgunun sonucunu elle sözlüğe çevirmek, her tabloda aynı INSERT kalıbını tekrar yazmak, bağlantıları ve transaction'ları doğru yönetmek zorlaşır.</p>
 <p><b>SQLAlchemy</b>, Python dünyasının en yaygın veritabanı araç takımıdır. İki katmanı vardır: <b>Core</b> (SQL'i Python ifadeleriyle kuran, veritabanından bağımsız katman) ve <b>ORM</b> (Object Relational Mapper: tablo satırlarını Python nesnelerine eşleyen katman). Flask, FastAPI, Airflow ve pandas (<code>read_sql</code>) gibi araçların hepsi SQLAlchemy ile konuşur. Bu derste 2.0 sürümünün modern API'sini kullanacağız; eski <code>session.query(...)</code> tarzını da yerinde göreceksin.</p>
-<div class="tip"><b>SQLPatika'ya köprü</b>SQLPatika'da öğrendiğin SELECT, WHERE, JOIN, GROUP BY ve transaction kavramlarının hepsi burada aynen geçerli. SQLAlchemy SQL'i bilmeyi gereksiz kılmaz; tersine, ORM'in ürettiği SQL'i okuyabilen geliştirici performans sorunlarını çok daha hızlı çözer.</div>
+<div class="tip"><b>Kesit SQL'e köprü</b>Kesit SQL'de öğrendiğin SELECT, WHERE, JOIN, GROUP BY ve transaction kavramlarının hepsi burada aynen geçerli. SQLAlchemy SQL'i bilmeyi gereksiz kılmaz; tersine, ORM'in ürettiği SQL'i okuyabilen geliştirici performans sorunlarını çok daha hızlı çözer.</div>
 
 <div class="tbl-wrap"><table>
 <tr><th>Katman</th><th>Ne yapar?</th><th>Örnek</th></tr>
@@ -195,7 +195,7 @@ print("joinedload  :", rapor(joinedload(Musteri.siparisler))[1], "sorgu")
 <p><code>joinedload</code> bire-çok ilişkide JOIN yüzünden her müşteriyi sipariş sayısı kadar satırda döndürür; bu yüzden 2.0'da sonucu <code>.unique()</code> ile tekilleştirmen zorunludur. <code>selectinload</code>'da böyle bir gereklilik yoktur; koleksiyonlar için çoğu zaman onu tercih etmen bundandır.</p>
 
 <h2>Transaction: ya hep ya hiç</h2>
-<p>Session her zaman bir transaction içindedir. <code>commit()</code> kalıcı yapar, <code>rollback()</code> geri alır. <code>with Session(engine) as s, s.begin():</code> kalıbı blok başarıyla biterse commit, istisna olursa rollback yapar. Anadolu Bank'ta havale gibi birden çok satırı değiştiren işlemler mutlaka tek transaction'da olmalı.</p>
+<p>Session her zaman bir transaction içindedir. <code>commit()</code> kalıcı yapar, <code>rollback()</code> geri alır. <code>with Session(engine) as s, s.begin():</code> kalıbı blok başarıyla biterse commit, istisna olursa rollback yapar. Ilgaz Bank'ta havale gibi birden çok satırı değiştiren işlemler mutlaka tek transaction'da olmalı.</p>
 ''' + PY(r'''
 from sqlalchemy import create_engine, select, CheckConstraint
 from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
@@ -707,7 +707,7 @@ assert len(sorgu) == 1 and "GROUP BY" in sorgu[0], "rapor tek bir GROUP BY sorgu
        hints=['Birden çok sütun seçerken session.execute(select(a, b, c)) satır demetleri verir.', 'Siparişi olmayan müşterileri dışarıda bırakmak için iç birleşim (join) yeterli: .join(Siparis, Siparis.musteri_id == Musteri.id)', 'func.count(Siparis.id) ve func.sum(Siparis.tutar); sıralama: .order_by(func.sum(Siparis.tutar).desc())'],
        why='Toplama işini veritabanına bırakmak, binlerce nesneyi Python\'a taşıyıp döngüde toplamaktan çok daha hızlıdır. Rapor sorgularında ORM nesnesi yerine sütun seçmek tipik ve doğru kullanımdır.'),
   dict(id='sqlalchemy-orm-7', t='code', stage='Kendin yaz', diff=2,
-       q='<p>Anadolu Bank. <code>Hesap</code> modeli hazır. <code>havale(engine, gonderen, alici, tutar)</code> fonksiyonunu yaz. Kendi session\'ını ve transaction\'ını açsın (<code>with Session(engine) as s, s.begin():</code>).</p><ul><li><code>tutar &lt;= 0</code> ise <code>ValueError</code></li><li>Hesaplardan biri yoksa <code>LookupError</code></li><li>Gönderenin bakiyesi yetmiyorsa <code>ValueError</code></li></ul><p>Hata durumunda <b>hiçbir</b> bakiye değişmemeli. Başarılıysa gönderenin yeni bakiyesini döndürsün.</p>',
+       q='<p>Ilgaz Bank. <code>Hesap</code> modeli hazır. <code>havale(engine, gonderen, alici, tutar)</code> fonksiyonunu yaz. Kendi session\'ını ve transaction\'ını açsın (<code>with Session(engine) as s, s.begin():</code>).</p><ul><li><code>tutar &lt;= 0</code> ise <code>ValueError</code></li><li>Hesaplardan biri yoksa <code>LookupError</code></li><li>Gönderenin bakiyesi yetmiyorsa <code>ValueError</code></li></ul><p>Hata durumunda <b>hiçbir</b> bakiye değişmemeli. Başarılıysa gönderenin yeni bakiyesini döndürsün.</p>',
        start=r'''from sqlalchemy.orm import DeclarativeBase, Mapped, mapped_column, Session
 
 
@@ -1004,7 +1004,7 @@ L = dict(
   goals=['Engine kurar, text() ve bağlı parametrelerle güvenli SQL çalıştırabilirim.', 'Core ile Table, select, insert ve GROUP BY sorgularını Python ifadesiyle yazabilirim.', 'DeclarativeBase, Mapped, mapped_column ve relationship ile bire-çok modeller tanımlayabilirim.', 'Session ile CRUD yapar, transaction\'ı begin/commit/rollback ile yönetirim.', 'N+1 problemini sorgu sayarak teşhis eder, selectinload/joinedload ile çözerim.'],
   body=body, ex=ex,
   faq=[
-    dict(q='ORM öğrenince SQL bilmeme gerek kalır mı?', a='Hayır. ORM SQL üretir; yavaş bir sayfayı düzeltmek, doğru indeksi seçmek ya da karmaşık bir raporu yazmak için üretilen SQL\'i okuyabilmen gerekir. SQLPatika\'da öğrendiklerin burada doğrudan işe yarar. create_engine(..., echo=True) ile üretilen her SQL\'i günlükte görebilirsin.'),
+    dict(q='ORM öğrenince SQL bilmeme gerek kalır mı?', a='Hayır. ORM SQL üretir; yavaş bir sayfayı düzeltmek, doğru indeksi seçmek ya da karmaşık bir raporu yazmak için üretilen SQL\'i okuyabilmen gerekir. Kesit SQL\'de öğrendiklerin burada doğrudan işe yarar. create_engine(..., echo=True) ile üretilen her SQL\'i günlükte görebilirsin.'),
     dict(q='session.query() ile select() arasındaki fark ne?', a='session.query() 1.x döneminin API\'sidir ve hâlâ çalışır ama "eski" (legacy) kabul edilir. 2.0 stilinde aynı select() ifadesi hem Core\'da hem ORM\'de kullanılır, tip denetleyicileriyle daha iyi çalışır. Yeni kodda select() kullan; eski projelerde query() göreceğini bil.'),
     dict(q='SQLite ile geliştirip PostgreSQL\'e geçmek sorun çıkarır mı?', a='Basit CRUD\'da genelde çıkarmaz, ama tarih/saat türleri, büyük-küçük harf duyarlılığı, eşzamanlı yazma ve JSON gibi özelliklerde farklar vardır. Testlerini üretimdekiyle aynı veritabanında (ör. Docker ile PostgreSQL) da çalıştırmak en güvenli yoldur.'),
     dict(q='Flask-SQLAlchemy ile SQLAlchemy aynı şey mi?', a='Flask-SQLAlchemy, SQLAlchemy\'yi Flask uygulamasına bağlayan ince bir katmandır: yapılandırmadan engine kurar, istek başına session yönetir, db.Model taban sınıfını sağlar. Altta çalışan yine bu derste öğrendiğin SQLAlchemy\'dir.'),

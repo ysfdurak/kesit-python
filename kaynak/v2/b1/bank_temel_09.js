@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-191 … b-200 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-191 … b-200 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -46,7 +46,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Kredi taksiti hesaplayıcı',
-    q: '<p>Anadolu Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
+    q: '<p>Ilgaz Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
     start: 'def aylik_taksit(anapara, aylik_faiz_yuzde, ay):\n    # buraya yaz\n    pass\n',
     sol: 'def aylik_taksit(anapara, aylik_faiz_yuzde, ay):\n    """Eşit taksitli kredinin aylık taksitini döndürür."""\n    r = aylik_faiz_yuzde / 100\n    if r == 0:\n        return round(anapara / ay, 2)\n    return round(anapara * r / (1 - (1 + r) ** (-ay)), 2)\n',
     tests: 'assert aylik_taksit(120000, 0, 12) == 10000.0, "Faizsiz: 120000 / 12 = 10000.0"\nassert aylik_taksit(100000, 3, 12) == 10046.21, "100000 TL, aylık %3, 12 ay → 10046.21"\nassert aylik_taksit(50000, 2, 24) == 2643.55, "50000 TL, aylık %2, 24 ay → 2643.55"\nassert aylik_taksit.__doc__, "Fonksiyonun bir docstring\\\'i olmalı"\n',

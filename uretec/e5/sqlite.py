@@ -4,7 +4,7 @@ from h import py, pc, d
 
 html = (
 '<h2>Derinleş: sqlite3 ile gerçek uygulama kalıpları</h2>\n'
-'<p>Tablo kurmayı, parametreli sorguyu ve transaction\'ı öğrendin. Gerçek bir stok ya da müşteri uygulamasında ise şu sorular gelir: "Eklediğim satırın id\'si ne?", "Ürün varsa stoğu artır, yoksa ekle", "Kaç satır güncellendi?", "Sipariş silinmiş müşteriye bağlı kalmasın", "Liste uzunluğu belli olmayan IN sorgusu nasıl yazılır?", "Sorgu neden yavaş?". Bu bölüm bunları yanıtlar. SQL dilinin kendisi (JOIN, GROUP BY, pencere fonksiyonları) için SQLPatika\'ya; ORM için <i>sqlalchemy-orm</i>, DataFrame\'e okumak için <i>pandas-giris</i> dersine bakabilirsin.</p>\n'
+'<p>Tablo kurmayı, parametreli sorguyu ve transaction\'ı öğrendin. Gerçek bir stok ya da müşteri uygulamasında ise şu sorular gelir: "Eklediğim satırın id\'si ne?", "Ürün varsa stoğu artır, yoksa ekle", "Kaç satır güncellendi?", "Sipariş silinmiş müşteriye bağlı kalmasın", "Liste uzunluğu belli olmayan IN sorgusu nasıl yazılır?", "Sorgu neden yavaş?". Bu bölüm bunları yanıtlar. SQL dilinin kendisi (JOIN, GROUP BY, pencere fonksiyonları) için Kesit SQL\'ya; ORM için <i>sqlalchemy-orm</i>, DataFrame\'e okumak için <i>pandas-giris</i> dersine bakabilirsin.</p>\n'
 
 '<h3>İmlecin verdiği bilgiler: lastrowid, rowcount, fetchmany</h3>\n'
 + py('''

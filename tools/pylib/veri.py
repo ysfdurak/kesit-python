@@ -1,15 +1,15 @@
-"""PythonPatika veri setleri (SQLPatika ve PBIPatika ile ortak, tamamen kurgusal).
+"""Kesit Python veri setleri (Kesit SQL ve Kesit Power BI ile ortak, tamamen kurgusal).
 
 Kullanım:
     import veri
     veri.liste()                                  # veri setlerini listeler
     veri.tablolar("anadolu_market")               # bir setin tablolarını ve satır sayılarını yazar
     df = veri.oku("anadolu_market", "orders")     # pandas DataFrame
-    kayitlar = veri.kayitlar("anadolu_bank", "bank_accounts")   # pandas'sız: sözlük listesi
+    kayitlar = veri.kayitlar("ilgaz_bank", "bank_accounts")   # pandas'sız: sözlük listesi
     con = veri.baglan("anadolu_market")           # tüm tabloları içeren bellek içi SQLite bağlantısı
     yol = veri.yol("pedal_izmir", "bk_trips")     # CSV dosyasının yolu (pd.read_csv(yol) ile de okunur)
 """
-import csv, json, os
+import csv, json, os, re
 
 KOK = os.environ.get("PP_VERI", "/data")
 _MAN = None
@@ -70,13 +70,21 @@ def _cevir(v):
         return v
 
 
+def _cevir_kirli(v):
+    """Kirli veride "1.430" Türkçe binlik yazımdır: 1,43'e dönmesin, metin kalsın."""
+    if re.fullmatch(r"\d{1,3}(\.\d{3})+", v):
+        return v
+    return _cevir(v)
+
+
 def kayitlar(set_adi, tablo, cevir=True):
     """Tabloyu sözlük listesi olarak okur (pandas gerekmez). cevir=True ise sayılar int/float, boşlar None olur."""
     with open(yol(set_adi, tablo), encoding="utf-8", newline="") as f:
         r = csv.DictReader(f)
         if not cevir:
             return list(r)
-        return [{k: _cevir(v) for k, v in row.items()} for row in r]
+        c = _cevir_kirli if set_adi == "kirli_veri" else _cevir
+        return [{k: c(v) for k, v in row.items()} for row in r]
 
 
 def oku(set_adi, tablo, **kw):
@@ -97,15 +105,16 @@ def baglan(set_adi, tablolar=None):
     import sqlite3
     _kontrol(set_adi)
     con = sqlite3.connect(":memory:")
+    c = _cevir_kirli if set_adi == "kirli_veri" else _cevir
     for t, info in _manifest()[set_adi]["tables"].items():
         if tablolar and t not in tablolar:
             continue
-        cols = [c[0] for c in info["cols"]]
+        cols = [k[0] for k in info["cols"]]
         con.execute(f'CREATE TABLE "{t}" (' + ", ".join(f'"{c}"' for c in cols) + ")")
         with open(yol(set_adi, t), encoding="utf-8", newline="") as f:
             r = csv.reader(f)
             next(r)
             con.executemany(f'INSERT INTO "{t}" VALUES (' + ", ".join("?" * len(cols)) + ")",
-                            ([_cevir(v) for v in row] for row in r))
+                            ([c(v) for v in row] for row in r))
     con.commit()
     return con

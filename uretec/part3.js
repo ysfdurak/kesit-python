@@ -198,7 +198,7 @@ print(onayli is gercek_yedek)</pre>
 
 <h2>Demet: değişmez liste</h2>
 <p>Demet, parantezle yazılan ve oluşturulduktan sonra <b>değiştirilemeyen</b> sıralı bir koleksiyondur. İndeks, dilim, <code>len</code>, <code>in</code> hepsi listeyle aynı çalışır; sadece ekleme, silme ve atama yoktur.</p>
-<pre class="py">sube = ("Anadolu Bank Konak", 38.4189, 27.1287)
+<pre class="py">sube = ("Ilgaz Bank Konak", 38.4189, 27.1287)
 print(sube[0])
 print(sube[1:])
 print(len(sube), "Konak" in sube[0])
@@ -248,7 +248,7 @@ bos = set()                        # {} boş sözlük olur, dikkat</pre>
 <div class="warn"><b>Küme elemanları değişmez olmalı</b>Kümeye sayı, metin ve demet koyabilirsin ama liste ya da sözlük koyamazsın; <code>{[1, 2]}</code> TypeError verir. Sebep: küme elemanları için karma (hash) hesaplar ve değişebilen nesnelerin karması tutarlı olmaz.</div>
 
 <h2>Küme işlemleri</h2>
-<p>Anadolu Bank'ta iki müşteri grubu var: kredi kartı olanlar ve mevduat hesabı olanlar. Pazarlama ekibi şunu soruyor: hangileri ikisine de sahip, hangileri yalnızca kredi kartına sahip, toplam kaç farklı müşteri var?</p>
+<p>Ilgaz Bank'ta iki müşteri grubu var: kredi kartı olanlar ve mevduat hesabı olanlar. Pazarlama ekibi şunu soruyor: hangileri ikisine de sahip, hangileri yalnızca kredi kartına sahip, toplam kaç farklı müşteri var?</p>
 <pre class="py">kredi_karti = {"M-101", "M-102", "M-103", "M-104"}
 mevduat = {"M-103", "M-104", "M-105"}
 print("Her ikisi:", kredi_karti &amp; mevduat)       # kesişim
@@ -307,7 +307,7 @@ print({"M-103"} &lt;= mevduat)                       # alt küme mi?</pre>
       hints: ['set() tekrarları kaldırır.', 'sorted(set(...)) sıralı liste verir.'],
       why: 'set benzersizleştirir, sorted hem sıralar hem de kümeyi listeye çevirir.' },
     { t: 'code', id: 'demet-kume-3',
-      q: '<p>Anadolu Bank müşteri grupları: <code>kredi_karti = {"M-101", "M-102", "M-103", "M-104"}</code> ve <code>mevduat = {"M-103", "M-104", "M-105"}</code>. Üç küme hesapla: <code>her_ikisi</code> (kesişim), <code>sadece_kart</code> (kartı olup mevduatı olmayanlar) ve <code>tum_musteriler</code> (birleşim).</p>',
+      q: '<p>Ilgaz Bank müşteri grupları: <code>kredi_karti = {"M-101", "M-102", "M-103", "M-104"}</code> ve <code>mevduat = {"M-103", "M-104", "M-105"}</code>. Üç küme hesapla: <code>her_ikisi</code> (kesişim), <code>sadece_kart</code> (kartı olup mevduatı olmayanlar) ve <code>tum_musteriler</code> (birleşim).</p>',
       start: 'kredi_karti = {"M-101", "M-102", "M-103", "M-104"}\nmevduat = {"M-103", "M-104", "M-105"}\n# her_ikisi, sadece_kart, tum_musteriler\n',
       sol: 'kredi_karti = {"M-101", "M-102", "M-103", "M-104"}\nmevduat = {"M-103", "M-104", "M-105"}\nher_ikisi = kredi_karti & mevduat\nsadece_kart = kredi_karti - mevduat\ntum_musteriler = kredi_karti | mevduat\nprint(sorted(her_ikisi), sorted(sadece_kart), len(tum_musteriler))\n',
       tests: 'assert her_ikisi == {"M-103", "M-104"}, "her_ikisi kesişim olmalı"\nassert sadece_kart == {"M-101", "M-102"}, "sadece_kart fark olmalı"\nassert tum_musteriler == {"M-101", "M-102", "M-103", "M-104", "M-105"}, "tum_musteriler birleşim olmalı"\n',
@@ -357,7 +357,7 @@ print({"M-103"} &lt;= mevduat)                       # alt küme mi?</pre>
   ],
   body: `
 <h2>İsimle erişmek</h2>
-<p>Listeler dersinde bir siparişi <code>["AM-101", "İzmir", 1499.9]</code> diye tutmuştun. Üç ay sonra <code>siparis[2]</code> gördüğünde bunun tutar olduğunu hatırlayacak mısın? <b>Sözlük</b> (dictionary, dict) her değere bir <b>anahtar</b> (key) verir: <code>siparis["tutar"]</code>. Anadolu Market'in müşteri kaydı, Anadolu Bank'ın hesap bilgisi, bir API'den dönen yanıt: iş dünyasındaki verinin büyük kısmı bu biçimdedir.</p>
+<p>Listeler dersinde bir siparişi <code>["AM-101", "İzmir", 1499.9]</code> diye tutmuştun. Üç ay sonra <code>siparis[2]</code> gördüğünde bunun tutar olduğunu hatırlayacak mısın? <b>Sözlük</b> (dictionary, dict) her değere bir <b>anahtar</b> (key) verir: <code>siparis["tutar"]</code>. Anadolu Market'in müşteri kaydı, Ilgaz Bank'ın hesap bilgisi, bir API'den dönen yanıt: iş dünyasındaki verinin büyük kısmı bu biçimdedir.</p>
 <pre class="py">musteri = {
     "no": "M-101",
     "ad": "Ayşe Yılmaz",

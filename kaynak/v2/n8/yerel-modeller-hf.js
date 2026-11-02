@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: yerel-modeller-hf (Hugging Face ve yerel modeller) */
+/* Kesit Python — İleri: yerel-modeller-hf (Hugging Face ve yerel modeller) */
 // needs: scikit-learn, numpy
 (function (W) {
 'use strict';

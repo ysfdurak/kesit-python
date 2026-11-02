@@ -1,9 +1,9 @@
 exec(open('../h.py').read())
 import time; T0=time.time()
-A=veri.oku('anadolu_bank','bank_accounts',parse_dates=['opened_date','closed_date'])
-C=veri.oku('anadolu_bank','bank_customers',parse_dates=['joined_date'])
-TX=veri.oku('anadolu_bank','bank_txns',usecols=['account_id','txn_time','amount','txn_type'],parse_dates=['txn_time'])
-FX=veri.oku('anadolu_bank','bank_fx',parse_dates=['rate_date'])
+A=veri.oku('ilgaz_bank','bank_accounts',parse_dates=['opened_date','closed_date'])
+C=veri.oku('ilgaz_bank','bank_customers',parse_dates=['joined_date'])
+TX=veri.oku('ilgaz_bank','bank_txns',usecols=['account_id','txn_time','amount','txn_type'],parse_dates=['txn_time'])
+FX=veri.oku('ilgaz_bank','bank_fx',parse_dates=['rate_date'])
 print('read',time.time()-T0); print(FX.head(), FX.currency.unique(), A.currency.value_counts().to_dict())
 def etiket(snap, ufuk=60):
     s=pd.Timestamp(snap); acik=A[(A.opened_date<=s)&(A.closed_date.isna()|(A.closed_date>s))]

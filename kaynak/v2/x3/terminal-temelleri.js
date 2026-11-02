@@ -1,4 +1,4 @@
-/* PythonPatika — 'terminal-temelleri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'terminal-temelleri' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

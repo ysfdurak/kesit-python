@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Kanat Havayolları (b-517 … b-533) */
+/* Kesit Python — veri seti görevleri: Kanat Havayolları (b-517 … b-533) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

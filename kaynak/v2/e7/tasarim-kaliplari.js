@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e7 uzantı (Derinleş): tasarim-kaliplari */
+/* Kesit Python — v2 e7 uzantı (Derinleş): tasarim-kaliplari */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -155,7 +155,7 @@ print(depo.veri)
         'servis = Maskeli(Sms())',
         'print(servis.gonder("Şifre 1234"))'
       ], expect: 'SMS[Şifre ****]\n', hint: 'Önce sarılacak sınıf, sonra sarmalayıcı, sonra ikisini birleştiren nesne.', why: 'Maskeli aynı gonder arayüzünü sunar ve işi içteki nesneye devreder; istemci farkı görmez. Sarmalayıcılar üst üste dizilebilir.' },
-    { t: 'code', stage: 'Rehberli', id: 'tasarim-kaliplari-x1', diff: 2, q: '<p>Anadolu Bank kredi başvurusu için durum makinesi kur. <code>Basvuru</code> sınıfı <code>durum</code> ("alindi" ile başlar) ve <code>gecmis</code> (durum listesi, "alindi" ile başlar) tutsun. <code>olay(ad)</code> metodu modül düzeyindeki <code>GECISLER</code> sözlüğüne göre geçiş yapsın; geçersiz olayda <code>ValueError</code> fırlatsın ve durumu değiştirmesin. <code>bitti</code> özelliği (property) durum <code>"onay"</code> ya da <code>"red"</code> ise True dönsün. Geçişler: alindi --incele--> inceleme; inceleme --onayla--> onay; inceleme --reddet--> red; inceleme --belge_iste--> belge_bekleniyor; belge_bekleniyor --belge_geldi--> inceleme.</p>', guide: [
+    { t: 'code', stage: 'Rehberli', id: 'tasarim-kaliplari-x1', diff: 2, q: '<p>Ilgaz Bank kredi başvurusu için durum makinesi kur. <code>Basvuru</code> sınıfı <code>durum</code> ("alindi" ile başlar) ve <code>gecmis</code> (durum listesi, "alindi" ile başlar) tutsun. <code>olay(ad)</code> metodu modül düzeyindeki <code>GECISLER</code> sözlüğüne göre geçiş yapsın; geçersiz olayda <code>ValueError</code> fırlatsın ve durumu değiştirmesin. <code>bitti</code> özelliği (property) durum <code>"onay"</code> ya da <code>"red"</code> ise True dönsün. Geçişler: alindi --incele--> inceleme; inceleme --onayla--> onay; inceleme --reddet--> red; inceleme --belge_iste--> belge_bekleniyor; belge_bekleniyor --belge_geldi--> inceleme.</p>', guide: [
         'GECISLER sözlüğünü durum → {olay: hedef} biçiminde doldur.',
         '__init__ içinde durum ve gecmis alanlarını kur.',
         'olay(ad): GECISLER.get(self.durum, {}).get(ad) ile hedefi bul; None ise ValueError.',

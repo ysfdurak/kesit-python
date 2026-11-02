@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası: ileri görevler (b-381 … b-390) */
+/* Kesit Python — pratik bankası: ileri görevler (b-381 … b-390) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

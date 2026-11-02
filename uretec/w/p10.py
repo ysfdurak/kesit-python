@@ -7,9 +7,9 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.model_selection import train_test_split
 from sklearn.metrics import roc_auc_score
 t=time.time()
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers").set_index("customer_id")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers").set_index("customer_id")
 K = pd.Timestamp("2024-07-01")
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
 once, sonra = d[d.txn_time < K], d[d.txn_time >= K]

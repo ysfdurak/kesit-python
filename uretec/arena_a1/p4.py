@@ -49,7 +49,7 @@ P.append(dict(
     id='a-052', title='İki şubenin farklı müşterileri', track=T, diff='Kolay',
     tags=['set', 'simetrik fark', 'sıralama'], src='HackerRank Python: Symmetric Difference benzeri',
     mode='stdin',
-    statement='<p>Anadolu Bank Konak ve Bornova şubeleri müşteri listelerini karşılaştırıyor. Pazarlama ekibi <b>yalnız tek bir şubede</b> hesabı olan müşterilere çapraz satış kampanyası yapacak.</p>'
+    statement='<p>Ilgaz Bank Konak ve Bornova şubeleri müşteri listelerini karşılaştırıyor. Pazarlama ekibi <b>yalnız tek bir şubede</b> hesabı olan müşterilere çapraz satış kampanyası yapacak.</p>'
               '<p>Önce bu müşterilerin sayısını, sonra numaralarını küçükten büyüğe yazdır. Listelerde aynı numara birden çok kez geçebilir.</p>',
     input='<p>İlk satırda Konak müşteri sayısı ve ikinci satırda numaraları; üçüncü satırda Bornova sayısı ve dördüncü satırda numaraları.</p>',
     output='<p>İlk satırda sayı, sonra her numara ayrı satırda.</p>',
@@ -269,7 +269,7 @@ P.append(dict(
     id='a-058', title='Mutabakat için iki işlem', track=T, diff='Orta',
     tags=['dict', 'iki toplam', 'tek geçiş'], src='Two Sum (LeetCode 1) benzeri',
     mode='stdin',
-    statement='<p>Anadolu Bank mutabakat ekibi bir müşterinin ekstresinde toplamı tam olarak <code>H</code> olan <b>iki farklı</b> işlem arıyor (aynı işlem iki kez kullanılamaz, ama aynı tutarlı iki ayrı işlem kullanılabilir).</p>'
+    statement='<p>Ilgaz Bank mutabakat ekibi bir müşterinin ekstresinde toplamı tam olarak <code>H</code> olan <b>iki farklı</b> işlem arıyor (aynı işlem iki kez kullanılamaz, ama aynı tutarlı iki ayrı işlem kullanılabilir).</p>'
               '<p>Birden çok çift varsa <b>ikinci indeksi en küçük</b> olanı, o da eşitse <b>birinci indeksi en küçük</b> olanı seç. 1 tabanlı indeksleri yazdır; çift yoksa <code>YOK</code>.</p>',
     input='<p>İlk satırda <code>N H</code>, ikinci satırda <code>N</code> tutar (negatif olabilir: iade).</p>',
     output='<p><code>i j</code> (i &lt; j) ya da <code>YOK</code>.</p>',

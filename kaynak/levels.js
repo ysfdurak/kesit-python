@@ -1,4 +1,4 @@
-/* PythonPatika — 3 seviye: Temel, Orta, İleri; ders sırası ve modüller */
+/* Kesit Python — 3 seviye: Temel, Orta, İleri; ders sırası ve modüller */
 (function (W) {
 'use strict';
 W.PY_TIER = v => { const s = String(v == null ? '' : v); if (s === 'temel' || /^A[12]?$/.test(s)) return 'temel'; if (s === 'orta' || /^B[12]?$/.test(s)) return 'orta'; if (s === 'ileri' || /^C[12]?$/.test(s)) return 'ileri'; return s; };

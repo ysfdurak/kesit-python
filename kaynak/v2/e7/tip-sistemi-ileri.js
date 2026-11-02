@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e7 uzantı (Derinleş): tip-sistemi-ileri */
+/* Kesit Python — v2 e7 uzantı (Derinleş): tip-sistemi-ileri */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

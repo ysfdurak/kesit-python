@@ -1,4 +1,4 @@
-/* PythonPatika v2 — ic-ice-veri */
+/* Kesit Python v2 — ic-ice-veri */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

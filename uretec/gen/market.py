@@ -1183,4 +1183,4 @@ assert birlikte_alinanlar(k2, u2) == [(("Bardak", "Çay"), 2)], "Aynı üründen
     tags=['combinations', 'Counter', 'sepet analizi'], min=10)
 
 if __name__ == '__main__':
-    write('/home/claude/py/v3/d1/ds_market.js', 'PythonPatika — veri seti görevleri: Anadolu Market (b-411 … b-430)', T)
+    write('/home/claude/py/v3/d1/ds_market.js', 'Kesit Python — veri seti görevleri: Anadolu Market (b-411 … b-430)', T)

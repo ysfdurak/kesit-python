@@ -393,8 +393,8 @@ P.append(dict(
 P.append(dict(
     id='a-240', title='Şehrin şubeleri ve müşterileri', track=S, diff='Kolay', needs=NS,
     tags=['sqlite3', 'JOIN', 'LEFT JOIN', 'parametre'], src='SQL JOIN + parametreli sorgu',
-    fn='sube_musterileri', ds='anadolu_bank',
-    statement='<p>Anadolu Bank bölge müdürü kendi şehrindeki şubelerin müşteri sayılarını görmek istiyor. <code>bank_branches</code>: <code>branch_id, name, city</code>; '
+    fn='sube_musterileri', ds='ilgaz_bank',
+    statement='<p>Ilgaz Bank bölge müdürü kendi şehrindeki şubelerin müşteri sayılarını görmek istiyor. <code>bank_branches</code>: <code>branch_id, name, city</code>; '
               '<code>bank_customers</code>: <code>customer_id, branch_id, …</code></p>'
               '<p><code>sube_musterileri(sehir)</code>: şehri <code>sehir</code> olan şubeleri ve her birine bağlı müşteri sayısını SQL ile getir. Müşterisi olmayan şube de 0 ile görünmeli. '
               'Müşteri sayısına göre azalan, eşitlikte şube adına göre artan sırada <code>[(şube_adı, sayı), ...]</code> döndür. Şehri <code>?</code> parametresiyle ver.</p>',
@@ -407,7 +407,7 @@ P.append(dict(
         import veri
 
         def sube_musterileri(sehir):
-            con = veri.baglan("anadolu_bank", tablolar=["bank_branches", "bank_customers"])
+            con = veri.baglan("ilgaz_bank", tablolar=["bank_branches", "bank_customers"])
             # kodunu yaz
             pass
         ''',
@@ -415,7 +415,7 @@ P.append(dict(
         import veri
 
         def sube_musterileri(sehir):
-            con = veri.baglan("anadolu_bank", tablolar=["bank_branches", "bank_customers"])
+            con = veri.baglan("ilgaz_bank", tablolar=["bank_branches", "bank_customers"])
             sorgu = """
                 SELECT b.name, COUNT(c.customer_id) AS adet
                 FROM bank_branches b
@@ -672,8 +672,8 @@ P.append(dict(
 P.append(dict(
     id='a-246', title='Aylık net para akışı', track=S, diff='Orta', needs=NS,
     tags=['sqlite3', 'substr', 'JOIN', 'max/min'], src='Nakit akışı raporu: SQL ile aylık toplama, Python ile seçim',
-    fn='net_akis', ds='anadolu_bank',
-    statement='<p>Anadolu Bank hazine ekibi, hesap türü bazında aylık net para akışını (giren + çıkan, <code>amount</code> işaretli) izliyor. '
+    fn='net_akis', ds='ilgaz_bank',
+    statement='<p>Ilgaz Bank hazine ekibi, hesap türü bazında aylık net para akışını (giren + çıkan, <code>amount</code> işaretli) izliyor. '
               '<code>bank_txns</code> (<code>account_id, txn_time, amount</code>) ve <code>bank_accounts</code> (<code>account_id, account_type</code>) tablolarını kullan.</p>'
               '<p><code>net_akis(hesap_turu)</code>: SQL ile <code>account_type = hesap_turu</code> olan hesapların işlemlerini ay (<code>"YYYY-MM"</code>) bazında topla. '
               'Python ile en yüksek ve en düşük net akışlı ayı bul: <code>(en_iyi_ay, tutar, en_kotu_ay, tutar)</code>; tutarlar 2 ondalık. Hesap türü yoksa <code>None</code>.</p>',
@@ -686,7 +686,7 @@ P.append(dict(
         import veri
 
         def net_akis(hesap_turu):
-            con = veri.baglan("anadolu_bank", tablolar=["bank_txns", "bank_accounts"])
+            con = veri.baglan("ilgaz_bank", tablolar=["bank_txns", "bank_accounts"])
             # kodunu yaz
             pass
         ''',
@@ -694,7 +694,7 @@ P.append(dict(
         import veri
 
         def net_akis(hesap_turu):
-            con = veri.baglan("anadolu_bank", tablolar=["bank_txns", "bank_accounts"])
+            con = veri.baglan("ilgaz_bank", tablolar=["bank_txns", "bank_accounts"])
             sorgu = """
                 SELECT substr(t.txn_time, 1, 7) AS ay, SUM(t.amount) AS net
                 FROM bank_txns t

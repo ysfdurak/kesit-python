@@ -10,7 +10,7 @@ LESSON = {
  'Akışı log ve metriklerle gözlemlenebilir hale getiririm.'],
 'body': r'''
 <h2>Neden önemli?</h2>
-<p>Veri boru hattı dersinde tek bir ETL betiği yazdın. Gerçek kurumda ise onlarca iş birbirine bağlıdır: Anadolu Market'te her gece 02:00'de siparişler çekilir, temizlenir, stok tablosu güncellenir, şehir raporu üretilir, yöneticilere e-posta gider. Anadolu Bank'ta gün sonu mutabakatı, tüm şubelerin işlem dosyaları gelmeden başlayamaz. Bu işleri "doğru sırada, doğru zamanda, hata olursa yeniden deneyerek ve kimse bakmasa da haber vererek" çalıştırma işine <b>orkestrasyon</b> (orchestration) denir. Bu derste önce temelleri (cron, DAG, idempotentlik) saf Python ile kuracak, sonra Airflow ve benzeri araçların bunları nasıl paketlediğini göreceksin.</p>
+<p>Veri boru hattı dersinde tek bir ETL betiği yazdın. Gerçek kurumda ise onlarca iş birbirine bağlıdır: Anadolu Market'te her gece 02:00'de siparişler çekilir, temizlenir, stok tablosu güncellenir, şehir raporu üretilir, yöneticilere e-posta gider. Ilgaz Bank'ta gün sonu mutabakatı, tüm şubelerin işlem dosyaları gelmeden başlayamaz. Bu işleri "doğru sırada, doğru zamanda, hata olursa yeniden deneyerek ve kimse bakmasa da haber vererek" çalıştırma işine <b>orkestrasyon</b> (orchestration) denir. Bu derste önce temelleri (cron, DAG, idempotentlik) saf Python ile kuracak, sonra Airflow ve benzeri araçların bunları nasıl paketlediğini göreceksin.</p>
 
 <h2>Cron: ne zaman çalışsın?</h2>
 <p>Cron, Unix sistemlerinin zamanlayıcısıdır; sözdizimi Airflow, Kubernetes CronJob, GitHub Actions ve bulut zamanlayıcılarında da kullanılır. Bir ifade beş alandan oluşur:</p>
@@ -592,7 +592,7 @@ assert gorev_metrikleri([]) == {}, "boş günlük"
   'hints': ['Önce görev adına göre grupla (setdefault), sonra her grubu ayrı hesapla.', 'Başarısız çalışmaların süresi (ör. 30 sn zaman aşımı) ortalamayı bozar; yalnız başarılıları kullan.', 'Alarm: satirlar[-1] < ortalama(satirlar[:-1]) / 2'],
   'why': 'Başarılı ama neredeyse boş çalışan bir görev (1000 yerine 40 satır), başarısız bir görevden daha tehlikelidir çünkü kimse fark etmez. Satır sayısı gibi hacim metrikleri ve basit eşikler sessiz veri sorunlarını yakalar.'},
  {'id': 'orkestrasyon-8', 't': 'code', 'stage': 'Hata avı', 'kind': 'bug', 'diff': 2,
-  'q': '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın gün sonu işi <code>mutabakat_yukle(db, tarih, islemler)</code>, o günün işlemlerini <code>gun_sonu</code> tablosuna yazıyor. Airflow görevi zaman aşımından sonra yeniden denendiğinde toplamlar iki katına çıktı. Fonksiyonu <b>idempotent</b> yap: aynı tarih için tekrar çalıştırıldığında önceki yazdıklarının yerine geçsin. <code>islem_no</code> benzersizdir; tabloyu ya da imzayı değiştirmeden çöz.</p>',
+  'q': '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın gün sonu işi <code>mutabakat_yukle(db, tarih, islemler)</code>, o günün işlemlerini <code>gun_sonu</code> tablosuna yazıyor. Airflow görevi zaman aşımından sonra yeniden denendiğinde toplamlar iki katına çıktı. Fonksiyonu <b>idempotent</b> yap: aynı tarih için tekrar çalıştırıldığında önceki yazdıklarının yerine geçsin. <code>islem_no</code> benzersizdir; tabloyu ya da imzayı değiştirmeden çöz.</p>',
   'start': r'''import sqlite3
 
 def yeni_db():

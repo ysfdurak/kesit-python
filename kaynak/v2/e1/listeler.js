@@ -1,4 +1,4 @@
-/* PythonPatika — 'listeler' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'listeler' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

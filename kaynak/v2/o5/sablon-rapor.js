@@ -1,4 +1,4 @@
-/* PythonPatika — Şablonla rapor üretme: string.Template ve Jinja2 (v2/o5) */
+/* Kesit Python — Şablonla rapor üretme: string.Template ve Jinja2 (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -281,7 +281,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 1,
-      q: '<p>Anadolu Bank fatura hatırlatma SMS\'leri. <code>hatirlatmalar(musteriler)</code> fonksiyonunu tamamla. Her müşteri sözlüğü için <code>SABLON.substitute</code> ile mesaj üret. <code>tutar</code> 2 ondalıkla yazılsın (<code>f"{tutar:.2f}"</code>). Gerekli alanı (<code>ad</code>, <code>tarih</code>, <code>tutar</code>) eksik olan müşteriyi atla ve adını (yoksa <code>"?"</code>) <code>eksikler</code> listesine ekle. <code>(mesajlar, eksikler)</code> döndür.</p>',
+      q: '<p>Ilgaz Bank fatura hatırlatma SMS\'leri. <code>hatirlatmalar(musteriler)</code> fonksiyonunu tamamla. Her müşteri sözlüğü için <code>SABLON.substitute</code> ile mesaj üret. <code>tutar</code> 2 ondalıkla yazılsın (<code>f"{tutar:.2f}"</code>). Gerekli alanı (<code>ad</code>, <code>tarih</code>, <code>tutar</code>) eksik olan müşteriyi atla ve adını (yoksa <code>"?"</code>) <code>eksikler</code> listesine ekle. <code>(mesajlar, eksikler)</code> döndür.</p>',
       guide: [
         'Her müşteri için try bloğu aç.',
         'substitute\'a ad, tarih ve biçimlenmiş tutarı ver: m["tutar"] eksikse burada da KeyError oluşur.',

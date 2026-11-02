@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: fonksiyonlar */
+/* Kesit Python v2 — uzantı: fonksiyonlar */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

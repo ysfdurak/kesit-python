@@ -2,7 +2,7 @@ START = 151
 TASKS = [
 dict(topic='Demet ve Küme', diff=2, kind='yaz',
   title='Mükerrer işlem numaraları',
-  q='<p>Anadolu Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
+  q='<p>Ilgaz Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
   start=r'''
 def mukerrerler(islem_nolari):
     # buraya yaz
@@ -59,7 +59,7 @@ assert rota_uzunlugu([]) == 0, "Boş rotada yol 0"
 
 dict(topic='Demet ve Küme', diff=2, kind='tamamla',
   title='Yetki kontrolü',
-  q='<p>Anadolu Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
+  q='<p>Ilgaz Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
   start=r'''
 def yetki_kontrol(kullanici, gerekli):
     izinli_mi = gerekli.___(kullanici)

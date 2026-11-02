@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Fonksiyonel, Kapanışlar (b-221…b-230) */
+/* Kesit Python — pratik bankası (orta): Fonksiyonel, Kapanışlar (b-221…b-230) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -135,7 +135,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'API hız sınırlayıcı',
-    q: '<p>Anadolu Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
+    q: '<p>Ilgaz Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
     guide: ['Dış fonksiyonda kabul edilen isteklerin zamanlarını tutacak bir <code>deque</code> oluştur.', 'İç <code>izin(zaman)</code> fonksiyonunda önce pencere dışında kalan eski zamanları baştan at (<code>popleft</code>).', 'Kalan sayı <code>limit</code>\'ten küçükse zamanı ekle ve <code>True</code> döndür; değilse <code>False</code>.', 'Dış fonksiyon iç fonksiyonu döndürsün. Deque\'yi yalnızca değiştirdiğin (yeniden atamadığın) için <code>nonlocal</code> gerekmez.'],
     example: 'from collections import deque\n# Kapanışın içinde değişebilir bir kap tutmak\ndef kayit_tutucu(kapasite):\n    son = deque()\n    def ekle(x):\n        son.append(x)\n        if len(son) > kapasite:\n            son.popleft()\n        return list(son)\n    return ekle\n\nk = kayit_tutucu(2)\nk("a"); k("b")\nprint(k("c"))   # [\'b\', \'c\']\n',
     start: 'from collections import deque\n\ndef hiz_siniri(limit, pencere):\n    # TODO 1: kabul edilen zamanlar için deque\n    def izin(zaman):\n        # TODO 2: pencere dışındaki eski kayıtları at\n        # TODO 3: yer varsa kaydet ve True, yoksa False\n        return True\n    return izin\n',

@@ -109,7 +109,7 @@ def emit(problems, fname, header):
             if k in p:
                 lines.append(f'  {k}: {jsval(p[k], "  ")}')
         parts.append('{\n' + ',\n'.join(lines) + '\n}')
-    s = f"/* PythonPatika — v3/a3: {header} */\n(function (W) {{ 'use strict'; const A = W.PY_ARENA = W.PY_ARENA || []; A.push(\n" + ',\n'.join(parts) + '\n); })(window);\n'
+    s = f"/* Kesit Python — v3/a3: {header} */\n(function (W) {{ 'use strict'; const A = W.PY_ARENA = W.PY_ARENA || []; A.push(\n" + ',\n'.join(parts) + '\n); })(window);\n'
     open(OUTDIR + fname, 'w').write(s)
 
 

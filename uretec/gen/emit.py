@@ -39,7 +39,7 @@ ORDER = ['id', 'lv', 'mod', 'min', 'needs', 'title', 'sum', 'goals']
 def write(path, lesson, comment):
     L = dict(lesson)
     body = L.pop('body'); ex = L.pop('ex'); faq = L.pop('faq'); mis = L.pop('mistakes')
-    out = ['/* PythonPatika — ' + comment + ' */']
+    out = ['/* Kesit Python — ' + comment + ' */']
     if L.get('needs'):
         out.append('// needs: ' + ', '.join(L['needs']))
     out += ["(function (W) {", "'use strict';", "const L = W.PY_LESSONS = W.PY_LESSONS || [];", "L.push(", "  {"]

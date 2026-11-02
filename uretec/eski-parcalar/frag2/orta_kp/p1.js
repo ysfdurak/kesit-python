@@ -78,7 +78,7 @@ print(type(b.limit).__name__)</pre>
 <div class="note"><b>sys ne işe yarar?</b><code>sys.argv</code> dışında <code>sys.exit(1)</code> ile betiği hata koduyla bitirir, <code>sys.version</code> ile sürümü okur, <code>sys.path</code> ile modül arama yollarını görürsün. Betiğin "başarısız" bittiğini zamanlayıcıya bildirmenin yolu sıfır dışı bir çıkış kodudur.</div>
 
 <h2>Para hesabı: neden float değil, Decimal?</h2>
-<p>Anadolu Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
+<p>Ilgaz Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
 <pre class="py">from decimal import Decimal, ROUND_HALF_UP
 from fractions import Fraction
 
@@ -155,7 +155,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
       o: ['Python toplama işleminde yuvarlama hatası yapar', 'İkili tabanda 0.1 ve 0.2 tam temsil edilemez', '== işleci float için çalışmaz', 'Sonuç 0.30000000000000004 olduğu için Python onu metne çevirir'],
       a: 1,
       why: 'Float sayılar ikili (binary) kesirlerle saklanır; 0.1 ve 0.2 sonsuz ikili kesir olduğu için en yakın değere yuvarlanır ve toplam 0.3 olmaz. Decimal onluk tabanda çalıştığı için bu sorunu yaşamaz.' },
@@ -192,7 +192,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
       hints: ['statistics.mean, statistics.median, statistics.stdev', 'stdev tek elemanda hata verir; len kontrolü yap.'],
       why: 'stdev örneklem sapmasıdır (n-1 ile böler); pstdev ise popülasyon sapması. Tek elemanlı listede stdev StatisticsError fırlatır, bu yüzden korunur.' },
 
-    { t: 'mc', q: 'Anadolu Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
+    { t: 'mc', q: 'Ilgaz Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
       o: ['random.randint(100000, 999999)', 'hashlib.sha256(b"token").hexdigest()', 'secrets.token_urlsafe(32)', 'random.choice(string.ascii_letters)'],
       a: 2,
       why: 'secrets modülü kriptografik olarak güvenli rastgelelik üretir; random tahmin edilebilirdir. hashlib ise rastgele değer üretmez, verilen girdinin özetini alır; sabit girdiyle her zaman aynı sonucu verir.' },

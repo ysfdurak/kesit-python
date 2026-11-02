@@ -164,7 +164,7 @@ T.append(dict(
 T.append(dict(
     id='b-265', topic='Tarih-Saat', diff=2, kind='rehberli',
     title='Taksit tarihi: ay ekleme',
-    q='<p>Anadolu Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
+    q='<p>Ilgaz Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
     guide=['Tarihi <code>date.fromisoformat</code> ile ayrıştır.',
            'Toplam ay sayısını hesapla: <code>toplam = d.year * 12 + (d.month - 1) + n</code>; yıl = <code>toplam // 12</code>, ay = <code>toplam % 12 + 1</code>.',
            '<code>calendar.monthrange(yil, ay)[1]</code> o ayın gün sayısını verir.',

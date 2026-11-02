@@ -18,7 +18,7 @@ def clean(k, v):
     return v
 spec = runpy.run_path(sys.argv[1])
 start = spec['START']; tasks = spec['TASKS']
-out = ['/* PythonPatika — pratik bankası, temel (sürüm 2): b-%03d … b-%03d */' % (start, start + len(tasks) - 1), '(function (W) {', "'use strict';", 'const B = W.PY_BANK = W.PY_BANK || [];', 'B.push(']
+out = ['/* Kesit Python — pratik bankası, temel (sürüm 2): b-%03d … b-%03d */' % (start, start + len(tasks) - 1), '(function (W) {', "'use strict';", 'const B = W.PY_BANK = W.PY_BANK || [];', 'B.push(']
 items = []
 for i, t in enumerate(tasks):
     t = dict(t); t['id'] = 'b-%03d' % (start + i); t['lv'] = 'temel'

@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: demet-kume */
+/* Kesit Python v2 — uzantı: demet-kume */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -164,7 +164,7 @@ print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank kampanya ekibi SMS listesi hazırlıyor. <code>hedef_kitle(tum, haric_listeler)</code> fonksiyonunu yaz: <code>tum</code> müşteri numarası listesidir (tekrar içerebilir); <code>haric_listeler</code> ise listelerin listesidir (kara liste, izin vermeyenler, son 7 günde SMS alanlar...). <code>tum</code> içinden hariç listelerin <b>herhangi birinde</b> geçenleri çıkar ve kalanları <b>sıralı liste</b> olarak döndür. Kümeyi yerinde güncelle (<code>-=</code> ya da <code>difference_update</code>).</p>',
+      q: '<p>Ilgaz Bank kampanya ekibi SMS listesi hazırlıyor. <code>hedef_kitle(tum, haric_listeler)</code> fonksiyonunu yaz: <code>tum</code> müşteri numarası listesidir (tekrar içerebilir); <code>haric_listeler</code> ise listelerin listesidir (kara liste, izin vermeyenler, son 7 günde SMS alanlar...). <code>tum</code> içinden hariç listelerin <b>herhangi birinde</b> geçenleri çıkar ve kalanları <b>sıralı liste</b> olarak döndür. Kümeyi yerinde güncelle (<code>-=</code> ya da <code>difference_update</code>).</p>',
       guide: ['tum listesini kümeye çevir.', 'haric_listeler içindeki her liste için kümeden o listedekileri çıkar.', 'Çıkarma işlemini yerinde yap: kume -= set(liste) ya da kume.difference_update(liste).', 'sorted ile sıralı liste döndür.'],
       example: 'stok = {"A1", "A2", "A3", "A4"}\nsatilanlar = [["A1"], ["A3", "A9"]]\nfor parti in satilanlar:\n    stok.difference_update(parti)\nprint(sorted(stok))\n',
       start: 'def hedef_kitle(tum, haric_listeler):\n    kume = set(tum)\n    # TODO: her hariç listeyi kümeden çıkar\n    return sorted(kume)\n',
@@ -186,7 +186,7 @@ print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank üç ürünün müşteri numaralarını kümeler halinde veriyor. <code>urun_dagilimi(kart, mevduat, kredi)</code> fonksiyonunu yaz ve bir demet döndür: <code>(uc_urunlu, tek_urunlu)</code>. <code>uc_urunlu</code> üç kümede de olan müşteri <b>sayısı</b>; <code>tek_urunlu</code> yalnızca <b>tek bir</b> kümede olan müşterilerin sıralı listesi.</p>',
+      q: '<p>Ilgaz Bank üç ürünün müşteri numaralarını kümeler halinde veriyor. <code>urun_dagilimi(kart, mevduat, kredi)</code> fonksiyonunu yaz ve bir demet döndür: <code>(uc_urunlu, tek_urunlu)</code>. <code>uc_urunlu</code> üç kümede de olan müşteri <b>sayısı</b>; <code>tek_urunlu</code> yalnızca <b>tek bir</b> kümede olan müşterilerin sıralı listesi.</p>',
       start: 'def urun_dagilimi(kart, mevduat, kredi):\n    pass\n',
       sol: 'def urun_dagilimi(kart, mevduat, kredi):\n    uc = kart & mevduat & kredi\n    iki_ve_ustu = (kart & mevduat) | (kart & kredi) | (mevduat & kredi)\n    tek = (kart | mevduat | kredi) - iki_ve_ustu\n    return (len(uc), sorted(tek))\n',
       tests: 'k = {1, 2, 3, 4}\nm = {2, 3, 5}\nc = {3, 4, 6}\nr = urun_dagilimi(k, m, c)\nassert r[0] == 1, f"yalnız 3 numaralı müşteri üç üründe; gelen {r[0]}"\nassert r[1] == [1, 5, 6], f"tek üründe olanlar 1, 5, 6 olmalı; gelen {r[1]} (dikkat: k ^ m ^ c üç üründekileri de verir)"\nassert urun_dagilimi(set(), set(), set()) == (0, []), "boş kümeler"\nassert urun_dagilimi({1}, {1}, {1}) == (1, []), "hepsi üç üründeyse tek ürünlü yok"\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — v2 e8 uzantı: paketleme-dagitim (PyPI yayımlama) */
+/* Kesit Python — v2 e8 uzantı: paketleme-dagitim (PyPI yayımlama) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -29,7 +29,7 @@ build-backend = "hatchling.build"
 [project]
 name = "anadolu-skor"
 dynamic = ["version"]
-description = "Anadolu Bank kredi skoru araçları"
+description = "Ilgaz Bank kredi skoru araçları"
 readme = "README.md"
 license = "MIT"
 requires-python = "&gt;=3.11"

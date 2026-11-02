@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: nlp-metin (metin işleme ve NLP) */
+/* Kesit Python — İleri: nlp-metin (metin işleme ve NLP) */
 // needs: scikit-learn
 (function (W) {
 'use strict';
@@ -20,7 +20,7 @@ L.push(
     ],
     body: `
 <h2>Metin de veridir</h2>
-<p>Anadolu Market'e her gün yüzlerce ürün yorumu, Anadolu Bank'ın çağrı merkezine yüzlerce şikayet kaydı geliyor. Bunlar sayı değil metin; ama "hangi konuda en çok şikayet var", "bu yorum olumlu mu", "bu şikayete benzeyen eski kayıtlar hangileri" soruları tamamen sayısal işlemlerle cevaplanır. Doğal dil işleme (Natural Language Processing, NLP) metni modelin anlayacağı sayılara çevirme ve sonra o sayılarla çalışma sanatıdır.</p>
+<p>Anadolu Market'e her gün yüzlerce ürün yorumu, Ilgaz Bank'ın çağrı merkezine yüzlerce şikayet kaydı geliyor. Bunlar sayı değil metin; ama "hangi konuda en çok şikayet var", "bu yorum olumlu mu", "bu şikayete benzeyen eski kayıtlar hangileri" soruları tamamen sayısal işlemlerle cevaplanır. Doğal dil işleme (Natural Language Processing, NLP) metni modelin anlayacağı sayılara çevirme ve sonra o sayılarla çalışma sanatıdır.</p>
 <p>Bu dersin akışı tipik bir NLP projesinin akışıdır: <b>temizle → parçala → say → vektöre çevir → benzerlik/sınıflandırma</b>. Sonunda modern yaklaşıma (embeddings ve transformer'lar) kavramsal bir bakış atacağız.</p>
 
 <h2>Türkçe metni temizlemek: küçük harf tuzağı</h2>
@@ -98,7 +98,7 @@ print({k: v for k, v in agirlik.items() if v &gt; 0})</pre>
 </table></div>
 
 <h2>Kosinüs benzerliği: benzer şikayeti bulmak</h2>
-<p>Anadolu Bank'ta yeni bir şikayet geldiğinde temsilci "bunun benzeri daha önce nasıl çözülmüştü" diye bakmak ister. İki TF-IDF vektörü arasındaki <b>kosinüs benzerliği</b> (cosine similarity) aralarındaki açının kosinüsüdür: 1 aynı yön (çok benzer), 0 hiç ortak kelime yok.</p>
+<p>Ilgaz Bank'ta yeni bir şikayet geldiğinde temsilci "bunun benzeri daha önce nasıl çözülmüştü" diye bakmak ister. İki TF-IDF vektörü arasındaki <b>kosinüs benzerliği</b> (cosine similarity) aralarındaki açının kosinüsüdür: 1 aynı yön (çok benzer), 0 hiç ortak kelime yok.</p>
 <pre class="py">from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -403,7 +403,7 @@ print(siniflandirici("Kargo çok geç geldi, hiç memnun değilim"))</pre>
         id: 'nlp-metin-13',
         stage: 'Mini proje',
         diff: 3,
-        q: '<p>Anadolu Bank şikayet yönlendirici. <code>sikayet_yonlendir(egitim, yeni_metinler, esik=0.5)</code>:</p><ol><li><code>egitim</code>: <code>(metin, departman)</code> çiftleri. Metinleri önce <code>kisisel_maskele</code> (11 haneli sayıları <code>[TCKN]</code> yap) ve Türkçe küçük harf ile hazırla.</li><li><code>TfidfVectorizer</code> + <code>LogisticRegression(C=10)</code> Pipeline\'ı eğit.</li><li>Her yeni metin için sözlük üret: <code>{"metin": maskelenmiş_metin, "departman": tahmin, "guven": en_yüksek_olasılık (2 basamak)}</code>. Güven <code>esik</code>\'ten küçükse departman <code>"İnsan incelemesi"</code> olsun.</li></ol>',
+        q: '<p>Ilgaz Bank şikayet yönlendirici. <code>sikayet_yonlendir(egitim, yeni_metinler, esik=0.5)</code>:</p><ol><li><code>egitim</code>: <code>(metin, departman)</code> çiftleri. Metinleri önce <code>kisisel_maskele</code> (11 haneli sayıları <code>[TCKN]</code> yap) ve Türkçe küçük harf ile hazırla.</li><li><code>TfidfVectorizer</code> + <code>LogisticRegression(C=10)</code> Pipeline\'ı eğit.</li><li>Her yeni metin için sözlük üret: <code>{"metin": maskelenmiş_metin, "departman": tahmin, "guven": en_yüksek_olasılık (2 basamak)}</code>. Güven <code>esik</code>\'ten küçükse departman <code>"İnsan incelemesi"</code> olsun.</li></ol>',
         start: 'import re\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\n\ndef sikayet_yonlendir(egitim, yeni_metinler, esik=0.5):\n    pass\n',
         sol: 'import re\nfrom sklearn.pipeline import make_pipeline\nfrom sklearn.feature_extraction.text import TfidfVectorizer\nfrom sklearn.linear_model import LogisticRegression\n\ndef tr_kucuk(s):\n    return s.replace("I", "ı").replace("İ", "i").lower()\n\ndef kisisel_maskele(metin):\n    return re.sub(r"(?<!\\d)\\d{11}(?!\\d)", "[TCKN]", metin)\n\ndef sikayet_yonlendir(egitim, yeni_metinler, esik=0.5):\n    X = [kisisel_maskele(m) for m, _ in egitim]\n    y = [d for _, d in egitim]\n    model = make_pipeline(TfidfVectorizer(preprocessor=tr_kucuk), LogisticRegression(C=10)).fit(X, y)\n    temiz = [kisisel_maskele(m) for m in yeni_metinler]\n    sonuc = []\n    for metin, olas in zip(temiz, model.predict_proba(temiz)):\n        guven = round(float(olas.max()), 2)\n        dep = model.classes_[olas.argmax()] if guven >= esik else "İnsan incelemesi"\n        sonuc.append({"metin": metin, "departman": str(dep), "guven": guven})\n    return sonuc\n',
         tests: 'E = [("Kartım ATM\'de yutuldu", "Kart"), ("Kart limitim düşürülmüş", "Kart"), ("Kartım bloke oldu", "Kart"),\n     ("Kredi faizim çok yüksek", "Kredi"), ("Kredi başvurum reddedildi", "Kredi"), ("Konut kredisi taksiti yanlış", "Kredi"),\n     ("Mobil uygulama açılmıyor", "Dijital"), ("İnternet şubesi şifre hatası", "Dijital"), ("Uygulama sürekli donuyor", "Dijital")]\nr = sikayet_yonlendir(E, ["KARTIM yine bloke oldu, TC 12345678901", "Kredi faizi yüksek", "Merhaba"], esik=0.45)\nassert [x["departman"] for x in r[:2]] == ["Kart", "Kredi"], f"İlk iki şikayet doğru departmana gitmeli: {r}"\nassert "[TCKN]" in r[0]["metin"] and "12345678901" not in r[0]["metin"], "TC kimlik no maskelenmeli"\nassert r[2]["departman"] == "İnsan incelemesi", f"Hiç bilinen kelime içermeyen metin düşük güvenle insana gitmeli: {r[2]}"\nassert all(0 <= x["guven"] <= 1 and isinstance(x["guven"], float) for x in r), "Güven 0-1 arası float"\n',

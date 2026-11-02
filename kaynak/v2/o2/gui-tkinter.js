@@ -1,4 +1,4 @@
-/* PythonPatika — v2 o2: gui-tkinter */
+/* Kesit Python — v2 o2: gui-tkinter */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

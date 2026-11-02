@@ -1,4 +1,4 @@
-/* PythonPatika — 'pandas-giris' dersi uzantısı: Ders veri setleri (gerçek veri setleri) */
+/* Kesit Python — 'pandas-giris' dersi uzantısı: Ders veri setleri (gerçek veri setleri) */
 // needs: pandas, sqlite3
 (function (W) {
 'use strict';
@@ -8,12 +8,12 @@ X.push(
     id: 'pandas-giris',
     min: 20,
     needs: ['pandas', 'sqlite3'],
-    html: `<h2>Derinleş: ders veri setleri (veri modülü)</h2><p>Şimdiye kadar tabloları elle, küçük sözlüklerden kurduk. Gerçek işte ise veri hazır gelir: binlerce satırlık sipariş dökümü, on binlerce banka hareketi. PythonPatika bunun için tarayıcıda hazır bekleyen ortak <b>veri setleri</b> sunar. Bunlar SQLPatika ve PBIPatika'da kullandığın kurgusal şirketlerin aynısıdır: Anadolu Market'te SQL ile yazdığın sorguyu burada pandas ile tekrar kurabilir, sonuçları karşılaştırabilirsin. Tüm veriler kurgusaldır; gerçek kişi ya da kuruma ait değildir.</p><h3>Hangi setler var?</h3><div class="tbl-wrap"><table><tr><th>Set</th><th>Konu</th><th>Öne çıkan tablolar</th></tr><tr><td><code>anadolu_market</code></td><td>E-ticaret</td><td>customers (150), orders (910), order_items (1.620), products, ab_test, raw_signups</td></tr><tr><td><code>anadolu_bank</code></td><td>Bankacılık</td><td>bank_customers (500), bank_accounts (849), bank_txns (~42 bin)</td></tr><tr><td><code>pusula_ik</code></td><td>İnsan kaynakları</td><td>çalışanlar, maaşlar, izinler, performans</td></tr><tr><td><code>lezzet_kurye</code></td><td>Yemek teslimat</td><td>lk_orders, lk_couriers, lk_ratings</td></tr><tr><td><code>kanat_havayollari</code></td><td>Havayolu</td><td>hv_flights, hv_delays, hv_bookings</td></tr><tr><td><code>pedal_izmir</code></td><td>Bisiklet paylaşımı</td><td>bk_trips (~117 bin), bk_stations, bk_weather</td></tr><tr><td><code>kesit_bi</code></td><td>Power BI yıldız şeması</td><td>Satislar, Urunler, Musteriler, Tarih, RFMSegmentleri</td></tr><tr><td><code>kirli_veri</code></td><td>Temizlik pratiği</td><td>bayi, hedef, urun, musteri (dağınık Excel çıktıları)</td></tr></table></div><p>Listeyi ve bir setin tablolarını kodla görmek için:</p><pre class="py">import veri
+    html: `<h2>Derinleş: ders veri setleri (veri modülü)</h2><p>Şimdiye kadar tabloları elle, küçük sözlüklerden kurduk. Gerçek işte ise veri hazır gelir: binlerce satırlık sipariş dökümü, on binlerce banka hareketi. Kesit Python bunun için tarayıcıda hazır bekleyen ortak <b>veri setleri</b> sunar. Bunlar Kesit SQL ve Kesit Power BI'da kullandığın kurgusal şirketlerin aynısıdır: Anadolu Market'te SQL ile yazdığın sorguyu burada pandas ile tekrar kurabilir, sonuçları karşılaştırabilirsin. Tüm veriler kurgusaldır; gerçek kişi ya da kuruma ait değildir.</p><h3>Hangi setler var?</h3><div class="tbl-wrap"><table><tr><th>Set</th><th>Konu</th><th>Öne çıkan tablolar</th></tr><tr><td><code>anadolu_market</code></td><td>E-ticaret</td><td>customers (150), orders (910), order_items (1.620), products, ab_test, raw_signups</td></tr><tr><td><code>ilgaz_bank</code></td><td>Bankacılık</td><td>bank_customers (500), bank_accounts (849), bank_txns (~42 bin)</td></tr><tr><td><code>pusula_ik</code></td><td>İnsan kaynakları</td><td>çalışanlar, maaşlar, izinler, performans</td></tr><tr><td><code>lezzet_kurye</code></td><td>Yemek teslimat</td><td>lk_orders, lk_couriers, lk_ratings</td></tr><tr><td><code>kanat_havayollari</code></td><td>Havayolu</td><td>hv_flights, hv_delays, hv_bookings</td></tr><tr><td><code>pedal_izmir</code></td><td>Bisiklet paylaşımı</td><td>bk_trips (~117 bin), bk_stations, bk_weather</td></tr><tr><td><code>kesit_bi</code></td><td>Power BI yıldız şeması</td><td>Satislar, Urunler, Musteriler, Tarih, RFMSegmentleri</td></tr><tr><td><code>kirli_veri</code></td><td>Temizlik pratiği</td><td>bayi, hedef, urun, musteri (dağınık Excel çıktıları)</td></tr></table></div><p>Listeyi ve bir setin tablolarını kodla görmek için:</p><pre class="py">import veri
 
 veri.liste()                        # tüm setler, tablo ve satır sayıları
 veri.tablolar("anadolu_market")     # tablolar ve sütunları
 print(veri.sutunlar("anadolu_market", "orders"))
-</pre><div class="note"><b>Set adı kodda geçmeli</b>Tarayıcı yalnız kodunda adı geçen veri setini indirir. Set adını bir değişkende birleştirerek (ör. <code>"anadolu_" + "market"</code>) üretirsen dosya yüklenmez; adı her zaman açıkça yaz.</div><h3>Okumanın dört yolu</h3><div class="tbl-wrap"><table><tr><th>Fonksiyon</th><th>Ne döndürür</th><th>Ne zaman</th></tr><tr><td><code>veri.oku(set, tablo, **kw)</code></td><td>pandas DataFrame</td><td>Analizin çoğu. Ek argümanlar <code>pd.read_csv</code>'ye geçer: <code>parse_dates</code>, <code>usecols</code>, <code>dtype</code>.</td></tr><tr><td><code>veri.kayitlar(set, tablo)</code></td><td><code>list[dict]</code>; sayılar int/float, boşlar <code>None</code></td><td>pandas gerekmeyen saf Python görevleri</td></tr><tr><td><code>veri.baglan(set, tablolar=[...])</code></td><td>Bellek içi <code>sqlite3</code> bağlantısı</td><td>SQL yazmak, SQLPatika sorgularını Python'dan çalıştırmak</td></tr><tr><td><code>veri.yol(set, tablo)</code></td><td>CSV dosyasının yolu</td><td><code>pd.read_csv</code>, <code>csv</code> modülü, polars ya da DuckDB ile kendin okumak</td></tr></table></div><pre class="py">import veri
+</pre><div class="note"><b>Set adı kodda geçmeli</b>Tarayıcı yalnız kodunda adı geçen veri setini indirir. Set adını bir değişkende birleştirerek (ör. <code>"anadolu_" + "market"</code>) üretirsen dosya yüklenmez; adı her zaman açıkça yaz.</div><h3>Okumanın dört yolu</h3><div class="tbl-wrap"><table><tr><th>Fonksiyon</th><th>Ne döndürür</th><th>Ne zaman</th></tr><tr><td><code>veri.oku(set, tablo, **kw)</code></td><td>pandas DataFrame</td><td>Analizin çoğu. Ek argümanlar <code>pd.read_csv</code>'ye geçer: <code>parse_dates</code>, <code>usecols</code>, <code>dtype</code>.</td></tr><tr><td><code>veri.kayitlar(set, tablo)</code></td><td><code>list[dict]</code>; sayılar int/float, boşlar <code>None</code></td><td>pandas gerekmeyen saf Python görevleri</td></tr><tr><td><code>veri.baglan(set, tablolar=[...])</code></td><td>Bellek içi <code>sqlite3</code> bağlantısı</td><td>SQL yazmak, Kesit SQL sorgularını Python'dan çalıştırmak</td></tr><tr><td><code>veri.yol(set, tablo)</code></td><td>CSV dosyasının yolu</td><td><code>pd.read_csv</code>, <code>csv</code> modülü, polars ya da DuckDB ile kendin okumak</td></tr></table></div><pre class="py">import veri
 import pandas as pd
 
 siparis = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
@@ -22,11 +22,11 @@ print(siparis["order_date"].min().date(), siparis["order_date"].max().date())
 print(siparis["channel"].value_counts().to_dict())
 </pre><p>CSV dosyalarında tarih metin olarak saklanır. <code>parse_dates</code> vermezsen <code>order_date</code> sütunu metin kalır ve <code>.dt</code> erişimcisi hata verir. Bu, gerçek veride en sık karşılaşacağın ilk hatadır.</p><pre class="py">import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")
 kapali = [h for h in hesaplar if h["closed_date"] is not None]
 print(len(hesaplar), "hesap,", len(kapali), "kapalı")
 print(hesaplar[0]["account_type"], hesaplar[0]["credit_limit"])   # vadesiz None
-</pre><h3>SQL ile pandas yan yana</h3><p><code>veri.baglan</code> seti bellekteki bir SQLite veritabanına yükler. SQLPatika'da yazdığın sorgu aynen çalışır; sonucu <code>pd.read_sql_query</code> ile DataFrame'e alıp pandas'la devam edebilirsin. Büyük setlerde (pedal_izmir, anadolu_bank) <code>tablolar=[...]</code> ile yalnız gereken tabloları yükle; hem bellek hem süre kazanırsın.</p><pre class="py">import veri
+</pre><h3>SQL ile pandas yan yana</h3><p><code>veri.baglan</code> seti bellekteki bir SQLite veritabanına yükler. Kesit SQL'de yazdığın sorgu aynen çalışır; sonucu <code>pd.read_sql_query</code> ile DataFrame'e alıp pandas'la devam edebilirsin. Büyük setlerde (pedal_izmir, ilgaz_bank) <code>tablolar=[...]</code> ile yalnız gereken tabloları yükle; hem bellek hem süre kazanırsın.</p><pre class="py">import veri
 import pandas as pd
 
 con = veri.baglan("anadolu_market", tablolar=["orders", "customers"])
@@ -62,7 +62,7 @@ con.close()
         t: 'predict',
         stage: 'Kodu oku',
         q: 'pandas\'sız okuma. Bu kod ne yazdırır?',
-        code: 'import veri\nhesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")\nilk = hesaplar[0]\nprint(type(hesaplar).__name__, len(hesaplar))\nprint(ilk["account_id"] + 1, ilk["closed_date"])\n',
+        code: 'import veri\nhesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")\nilk = hesaplar[0]\nprint(type(hesaplar).__name__, len(hesaplar))\nprint(ilk["account_id"] + 1, ilk["closed_date"])\n',
         o: ['list 849\n100002 None', 'DataFrame 849\n100002 NaN', 'list 849\n100002 ', 'list 850\n100002 None'],
         a: 0,
         why: 'kayitlar sözlük listesi döndürür ve sayıları int/float\'a çevirir; bu yüzden account_id + 1 çalışır. Boş hücreler None olur (pandas\'taki NaN değil).'
@@ -113,10 +113,10 @@ con.close()
         stage: 'Kendin yaz',
         diff: 2,
         needs: ['pandas'],
-        q: '<p><code>eksik_rapor(set_adi, tablo)</code> fonksiyonu verilen tabloyu <code>veri.oku</code> ile okusun ve yalnızca <b>eksik değeri olan</b> sütunlar için <code>{sütun: eksik_sayısı}</code> sözlüğü döndürsün (değerler <code>int</code>, tablodaki sütun sırasıyla). Testler <code>anadolu_market/customers</code> ve <code>anadolu_bank/bank_accounts</code> tablolarıyla çağırır.</p>',
+        q: '<p><code>eksik_rapor(set_adi, tablo)</code> fonksiyonu verilen tabloyu <code>veri.oku</code> ile okusun ve yalnızca <b>eksik değeri olan</b> sütunlar için <code>{sütun: eksik_sayısı}</code> sözlüğü döndürsün (değerler <code>int</code>, tablodaki sütun sırasıyla). Testler <code>anadolu_market/customers</code> ve <code>ilgaz_bank/bank_accounts</code> tablolarıyla çağırır.</p>',
         start: 'import veri\n\ndef eksik_rapor(set_adi, tablo):\n    pass\n\nprint(eksik_rapor("anadolu_market", "customers"))\n',
-        sol: 'import veri\n\ndef eksik_rapor(set_adi, tablo):\n    df = veri.oku(set_adi, tablo)\n    eksik = df.isna().sum()\n    return {k: int(v) for k, v in eksik.items() if v > 0}\n\nprint(eksik_rapor("anadolu_market", "customers"))\nprint(eksik_rapor("anadolu_bank", "bank_accounts"))\n',
-        tests: 'assert eksik_rapor("anadolu_market", "customers") == {"city": 7, "email": 11}, "customers tablosunda city 7, email 11 eksik olmalı"\nr = eksik_rapor("anadolu_bank", "bank_accounts")\nassert r == {"closed_date": 806, "credit_limit": 637}, f"bank_accounts için beklenmeyen sonuç: {r}"\nassert all(type(v) is int for v in r.values()), "Değerler Python int olmalı"\n',
+        sol: 'import veri\n\ndef eksik_rapor(set_adi, tablo):\n    df = veri.oku(set_adi, tablo)\n    eksik = df.isna().sum()\n    return {k: int(v) for k, v in eksik.items() if v > 0}\n\nprint(eksik_rapor("anadolu_market", "customers"))\nprint(eksik_rapor("ilgaz_bank", "bank_accounts"))\n',
+        tests: 'assert eksik_rapor("anadolu_market", "customers") == {"city": 7, "email": 11}, "customers tablosunda city 7, email 11 eksik olmalı"\nr = eksik_rapor("ilgaz_bank", "bank_accounts")\nassert r == {"closed_date": 806, "credit_limit": 637}, f"bank_accounts için beklenmeyen sonuç: {r}"\nassert all(type(v) is int for v in r.values()), "Değerler Python int olmalı"\n',
         hints: ['isna() her hücre için True/False verir; sum() sütun başına True sayar.', 'Sözlük kurarken yalnızca 0\'dan büyükleri al.'],
         why: 'bank_accounts\'ta closed_date açık hesaplarda, credit_limit kredi kartı dışındaki hesaplarda boştur. Bu eksiklik hata değil, anlamlıdır: yorumlarken sütun açıklamasına (manifest) bak.'
       },
@@ -164,7 +164,7 @@ con.close()
     faq: [
       {
         q: 'veri modülünü kendi bilgisayarımda nasıl kullanırım?',
-        a: 'Modül yalnızca PythonPatika içindedir. Kendi bilgisayarında aynı tabloları CSV olarak indirip <code>pd.read_csv("orders.csv")</code> ile okursun; kodun geri kalanı değişmez. SQLite için <code>df.to_sql("orders", con)</code> ile tabloyu bir bağlantıya yazabilirsin.'
+        a: 'Modül yalnızca Kesit Python içindedir. Kendi bilgisayarında aynı tabloları CSV olarak indirip <code>pd.read_csv("orders.csv")</code> ile okursun; kodun geri kalanı değişmez. SQLite için <code>df.to_sql("orders", con)</code> ile tabloyu bir bağlantıya yazabilirsin.'
       },
       {
         q: 'Büyük tabloları (bk_trips, bank_txns) okumak yavaş, ne yapmalıyım?',

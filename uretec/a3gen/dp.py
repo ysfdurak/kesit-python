@@ -182,7 +182,7 @@ P.append(dict(
     id='a-169', title='En az banknotla para üstü', track=T, diff='Orta',
     tags=['para üstü', 'sınırsız sırt çantası', '1B DP'], src='LeetCode 322 Coin Change benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın yeni ATM\'si, kasasında K farklı banknot/madeni para değeri bulunduruyor (her birinden sınırsız sayıda). Müşteri A TL çekmek istediğinde ATM <b>en az sayıda</b> parça vermeli.</p>
+        <p>Ilgaz Bank\'ın yeni ATM\'si, kasasında K farklı banknot/madeni para değeri bulunduruyor (her birinden sınırsız sayıda). Müşteri A TL çekmek istediğinde ATM <b>en az sayıda</b> parça vermeli.</p>
         <p>A tutarını tam olarak oluşturan en az parça sayısını yaz; mümkün değilse <code>-1</code> yaz. A = 0 için cevap 0.</p>'''),
     input='<p>İlk satırda K ve A. İkinci satırda K farklı değer.</p>',
     output='<p>En az parça sayısı ya da −1.</p>',
@@ -755,7 +755,7 @@ P.append(dict(
     id='a-178', title='SMS doğrulama kodunu çözme yolları', track=T, diff='Orta',
     tags=['1B DP', 'sayma', 'mod'], src='LeetCode 91 Decode Ways benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın eski bir SMS sistemi harfleri sayıya çevirerek gönderiyor: A → 1, B → 2, ..., Z → 26. Ayraç olmadığı için "12" hem "AB" hem "L" olabilir. Güvenlik ekibi, gelen rakam dizisinin <b>kaç farklı harf dizisine</b> çözülebileceğini merak ediyor.</p>
+        <p>Ilgaz Bank\'ın eski bir SMS sistemi harfleri sayıya çevirerek gönderiyor: A → 1, B → 2, ..., Z → 26. Ayraç olmadığı için "12" hem "AB" hem "L" olabilir. Güvenlik ekibi, gelen rakam dizisinin <b>kaç farklı harf dizisine</b> çözülebileceğini merak ediyor.</p>
         <p>Çözüm sayısını 10^9+7\'ye göre kalan olarak yaz. "0" tek başına bir harf değildir; "05" gibi başında sıfır olan iki basamaklı kod da geçersizdir. Hiç çözüm yoksa 0 yaz.</p>'''),
     input='<p>Tek satırda rakam dizisi.</p>',
     output='<p>Çözüm sayısı mod 10^9+7.</p>',

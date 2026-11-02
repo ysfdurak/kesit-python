@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Pedal İzmir (b-534 … b-550) */
+/* Kesit Python — veri seti görevleri: Pedal İzmir (b-534 … b-550) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

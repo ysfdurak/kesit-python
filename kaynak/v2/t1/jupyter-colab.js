@@ -1,4 +1,4 @@
-/* PythonPatika — v2/t1: jupyter-colab */
+/* Kesit Python — v2/t1: jupyter-colab */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

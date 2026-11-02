@@ -38,7 +38,7 @@ def emit(lesson, path):
             parts.append('  body: `\n' + body_js.strip('\n') + '\n`')
         else:
             parts.append('  ' + k + ': ' + js_val(v, 1))
-    out = ("/* PythonPatika v2 — " + lesson['id'] + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n{\n"
+    out = ("/* Kesit Python v2 — " + lesson['id'] + " */\n(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n{\n"
            + ',\n'.join(parts) + "\n}\n);\n})(window);\n")
     with open(path, 'w', encoding='utf-8') as f:
         f.write(out)

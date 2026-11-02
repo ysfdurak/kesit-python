@@ -25,7 +25,7 @@ import veri
 from email.message import EmailMessage
 from email import message_from_bytes, policy
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 def rapor_epostasi(gun):
@@ -36,8 +36,8 @@ def rapor_epostasi(gun):
         if t["txn_time"].startswith(gun):
             yazici.writerow([t["txn_id"], t["amount"], t["channel"]])
     m = EmailMessage()
-    m["From"] = "Kadıköy Şubesi <kadikoy@anadolubank.example>"
-    m["To"] = "operasyon@anadolubank.example"
+    m["From"] = "Kadıköy Şubesi <kadikoy@ilgazbank.example>"
+    m["To"] = "operasyon@ilgazbank.example"
     m["Subject"] = f"Günlük işlem raporu {gun}"
     m.set_content("Merhaba,\nGünlük işlem dökümü ektedir.")
     m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",
@@ -130,7 +130,7 @@ from email import message_from_bytes, policy
 with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
     imap.login(os.environ["MAIL_KULLANICI"], os.environ["MAIL_UYGULAMA_SIFRESI"])
     imap.select("INBOX")
-    durum, veri = imap.search(None, '(UNSEEN FROM "kadikoy@anadolubank.example" SINCE 01-Oct-2024)')
+    durum, veri = imap.search(None, '(UNSEEN FROM "kadikoy@ilgazbank.example" SINCE 01-Oct-2024)')
     for num in veri[0].split():
         durum, parca = imap.fetch(num, "(RFC822)")
         ileti = message_from_bytes(parca[0][1], policy=policy.default)
@@ -139,7 +139,7 @@ with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
                 isle(ek.get_content())                     # metin ya da bayt
         imap.store(num, "+FLAGS", "\\Seen")               # işlendi olarak işaretle
 ''')
-body += '<p>Aşağıdaki kod Anadolu Bank\'ın 15 Mart 2024 işlemlerinden ekli bir CSV içeren gerçek bir e-posta üretiyor, bayta çeviriyor (IMAP\'ten böyle gelir) ve geri ayrıştırıyor:</p>\n'
+body += '<p>Aşağıdaki kod Ilgaz Bank\'ın 15 Mart 2024 işlemlerinden ekli bir CSV içeren gerçek bir e-posta üretiyor, bayta çeviriyor (IMAP\'ten böyle gelir) ve geri ayrıştırıyor:</p>\n'
 body += PY(EPOSTA_GEN + r'''
 
 ham = rapor_epostasi("2024-03-15")
@@ -384,7 +384,7 @@ assert upsert_satirlar(ws2, [["X", 1], ["X", 1]])["eklenen"] == 1, "Aynı listed
     'why': "Tek okuma + bellekte harita, kotayı korur ve betiği idempotent yapar. Gerçek gspread'de satır güncellemesi <code>ws.update(f\"A{no}\", [metin])</code> ile yapılır; çok değişiklik varsa hepsi tek <code>batch_update</code> çağrısında gönderilir."})
 
 ex.append({'t': 'code', 'id': 'entegrasyon-saas-2', 'stage': 'Rehberli', 'diff': 2,
-    'q': "<p>Başlangıç kodu, Anadolu Bank Kadıköy şubesinin gönderdiği günlük rapor e-postasını (ekinde <code>bank_txns</code> verisinden o günün işlemleri CSV olarak) <b>ham bayt</b> hâlinde üretiyor; IMAP'ten de böyle gelir. <code>eposta_ozet(ham)</code> fonksiyonunu yaz; şu sözlüğü döndürsün:</p><ul><li><code>konu</code>: Subject</li><li><code>gonderen</code>: gönderenin e-posta adresi (yalnız adres)</li><li><code>ekler</code>: ek dosya adları listesi</li><li><code>satir</code>: CSV ekindeki veri satırı sayısı</li><li><code>toplam</code>: <code>amount</code> sütununun toplamı (2 basamak)</li></ul>",
+    'q': "<p>Başlangıç kodu, Ilgaz Bank Kadıköy şubesinin gönderdiği günlük rapor e-postasını (ekinde <code>bank_txns</code> verisinden o günün işlemleri CSV olarak) <b>ham bayt</b> hâlinde üretiyor; IMAP'ten de böyle gelir. <code>eposta_ozet(ham)</code> fonksiyonunu yaz; şu sözlüğü döndürsün:</p><ul><li><code>konu</code>: Subject</li><li><code>gonderen</code>: gönderenin e-posta adresi (yalnız adres)</li><li><code>ekler</code>: ek dosya adları listesi</li><li><code>satir</code>: CSV ekindeki veri satırı sayısı</li><li><code>toplam</code>: <code>amount</code> sütununun toplamı (2 basamak)</li></ul>",
     'guide': ["<code>message_from_bytes(ham, policy=policy.default)</code> ile ayrıştır.", "Gönderen adresi: <code>ileti[\"from\"].addresses[0].addr_spec</code>.", "<code>ileti.iter_attachments()</code> ile ekleri gez; <code>get_filename()</code> ve <code>get_content()</code> kullan.", "CSV metnini <code>csv.DictReader(io.StringIO(...))</code> ile oku, satırları say ve tutarları topla."],
     'example': C(r'''
 from email.message import EmailMessage
@@ -430,7 +430,7 @@ def eposta_ozet(ham):
 
 print(eposta_ozet(ham))
 '''),
-    'tests': 'r = eposta_ozet(ham)\nassert r == {"konu": "Günlük işlem raporu 2024-03-15", "gonderen": "kadikoy@anadolubank.example", "ekler": ["islemler_2024-03-15.csv"], "satir": 151, "toplam": 77044.94}, "Özet tutmuyor: " + str(r)\nr2 = eposta_ozet(rapor_epostasi("2024-03-14"))\nassert (r2["satir"], r2["toplam"]) == (129, -20446.46), "14 Mart: 129 satır, -20446.46; gelen " + str((r2["satir"], r2["toplam"]))\n',
+    'tests': 'r = eposta_ozet(ham)\nassert r == {"konu": "Günlük işlem raporu 2024-03-15", "gonderen": "kadikoy@ilgazbank.example", "ekler": ["islemler_2024-03-15.csv"], "satir": 151, "toplam": 77044.94}, "Özet tutmuyor: " + str(r)\nr2 = eposta_ozet(rapor_epostasi("2024-03-14"))\nassert (r2["satir"], r2["toplam"]) == (129, -20446.46), "14 Mart: 129 satır, -20446.46; gelen " + str((r2["satir"], r2["toplam"]))\n',
     'hints': ["Adres nesnesi: <code>ileti[\"from\"].addresses[0]</code>; <code>.addr_spec</code> yalnız adresi, <code>.display_name</code> görünen adı verir.", "text/csv ekin <code>get_content()</code>'i metin (str) döndürür.", "Tutarlar CSV'den metin gelir: <code>float(s[\"amount\"])</code>."],
     'why': "IMAP yalnız ham baytı getirir; başlık çözme, MIME parçalarını gezme ve ek kodlamasını (base64) açma işi email modülündedir. Aynı fonksiyon, gerçek posta kutusundan gelen iletiyle değişmeden çalışır: test edilebilir entegrasyonun sırrı ağ kısmını incecik tutmaktır."})
 
@@ -689,10 +689,10 @@ def imap_kriteri(kimden=None, konu=None, sonra=None, okunmamis=False):
     return "(" + " ".join(parcalar) + ")" if parcalar else "ALL"
 
 
-print(imap_kriteri("kadikoy@anadolubank.example", sonra=date(2024, 10, 1), okunmamis=True))
+print(imap_kriteri("kadikoy@ilgazbank.example", sonra=date(2024, 10, 1), okunmamis=True))
 '''),
     'tests': C(r'''
-assert imap_kriteri("kadikoy@anadolubank.example", sonra=date(2024, 10, 1), okunmamis=True) == '(UNSEEN FROM "kadikoy@anadolubank.example" SINCE 01-Oct-2024)', "Örnek ölçüt tutmuyor"
+assert imap_kriteri("kadikoy@ilgazbank.example", sonra=date(2024, 10, 1), okunmamis=True) == '(UNSEEN FROM "kadikoy@ilgazbank.example" SINCE 01-Oct-2024)', "Örnek ölçüt tutmuyor"
 assert imap_kriteri(konu="Günlük rapor") == '(SUBJECT "Günlük rapor")', "Yalnız konu"
 assert imap_kriteri(sonra=date(2025, 3, 9)) == "(SINCE 09-Mar-2025)", "Gün iki haneli, ay İngilizce"
 assert imap_kriteri() == "ALL", "Ölçüt yoksa ALL"
@@ -707,7 +707,7 @@ ex.append({'t': 'code', 'id': 'entegrasyon-saas-8', 'stage': 'Kendin yaz', 'diff
 import re
 
 pdfli = EmailMessage()
-pdfli["From"] = "kadikoy@anadolubank.example"
+pdfli["From"] = "kadikoy@ilgazbank.example"
 pdfli["Subject"] = "Sözleşme"
 pdfli.set_content("ekte")
 pdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")
@@ -722,7 +722,7 @@ def gunluk_toplamlar(epostalar):
 import re
 
 pdfli = EmailMessage()
-pdfli["From"] = "kadikoy@anadolubank.example"
+pdfli["From"] = "kadikoy@ilgazbank.example"
 pdfli["Subject"] = "Sözleşme"
 pdfli.set_content("ekte")
 pdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")

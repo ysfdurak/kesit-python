@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""PythonPatika içerik doğrulayıcı.
+"""Kesit Python içerik doğrulayıcı.
 Tüm alıştırmaları gerçek CPython ile denetler:
   code    : sol + tests çalışır, expect varsa çıktı birebir eşleşir; start testleri GEÇMEMELİ (görev boş olmasın)
   predict : code çalıştırılır; çıktı o[a] ile birebir aynı olmalı (raises: true ise hata adı o[a] olmalı)

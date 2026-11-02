@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden test yazarız?</h2>
-<p>Anadolu Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
+<p>Ilgaz Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
 
 <h2>unittest ile ilk test sınıfı</h2>
 <p>Python'ın standart test çerçevesi <code>unittest</code>'tir. Kural basit: <code>unittest.TestCase</code>'den türeyen bir sınıf yazarsın, adı <code>test_</code> ile başlayan her metot bir testtir, içinde <code>self.assert...</code> metotlarıyla beklentini belirtirsin. Normalde testleri terminalden <code>python -m unittest</code> ile koşarsın; burada tarayıcıda olduğumuz için paketi (suite) elle yükleyip <code>TextTestRunner</code> ile çalıştıracağız. Çıktıyı <code>io.StringIO</code>'ya yönlendirmek, test raporunun program çıktısına karışmasını önler.</p>
@@ -23,7 +23,7 @@
 import unittest
 
 def komisyon(tutar: float, kanal: str) -&gt; float:
-    """Anadolu Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
+    """Ilgaz Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
     if tutar &lt;= 0:
         raise ValueError("tutar pozitif olmalı")
     if kanal == "mobil":
@@ -190,7 +190,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
       o: ['self.assertEqual(faiz(1000, 0.03), 30)', 'self.assertTrue(faiz(1000, 0.03) == 30.0)', 'self.assertAlmostEqual(faiz(1000, 0.03), 30.0)', 'self.assertIs(faiz(1000, 0.03), 30.0)'],
       a: 2,
       why: 'Float sonuçlar yuvarlama farkı taşıyabilir; assertAlmostEqual 7 basamağa kadar yakınlığı kabul eder. assertEqual ve assertTrue tam eşitlik ister, assertIs ise kimlik (aynı nesne) karşılaştırır ve float için yanlıştır.' },
@@ -217,7 +217,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
       why: 'unittest, çalıştırılan testleri bellekten düşürmek için suite\'i run sonrasında boşaltır. Test adlarını ya da sayısını kaydetmek istiyorsan run çağrısından önce topla.' },
 
     { t: 'code', id: 'test-yazma-3',
-      q: '<p>Anadolu Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
+      q: '<p>Ilgaz Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
       start: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    pass\n',
       sol: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    def test_gece(self):\n        with patch.object(IslemKurali, "saat", return_value=2):\n            self.assertTrue(IslemKurali().gece_mi())\n\n    def test_gunduz(self):\n        with patch.object(IslemKurali, "saat", return_value=14):\n            self.assertFalse(IslemKurali().gece_mi())\n',
       tests: 'import io\nimport unittest\nfrom unittest.mock import patch\nsuite = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\nadlar = {t.id().split(".")[-1] for t in suite}\nassert {"test_gece", "test_gunduz"} <= adlar, "test_gece ve test_gunduz metotları olmalı"\n# Testler gerçek saatten bağımsız olmalı: datetime.now sabitlenince de geçmeli\nimport datetime as _dt\nclass _SahteDT(_dt.datetime):\n    _saat = 12\n    @classmethod\n    def now(cls, tz=None):\n        return _dt.datetime(2024, 1, 1, cls._saat, 0, 0)\nfor sabit in (3, 12, 23):\n    _SahteDT._saat = sabit\n    globals()["datetime"] = _SahteDT\n    s2 = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\n    r = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(s2)\n    globals()["datetime"] = _dt.datetime\n    assert r.wasSuccessful(), f"saat {sabit} iken bile testler geçmeli (patch.object kullanılmalı)"\nsonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)\nassert sonuc.testsRun >= 2 and sonuc.wasSuccessful(), "Tüm testler geçmeli"\n',

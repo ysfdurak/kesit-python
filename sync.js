@@ -1,4 +1,4 @@
-/* PythonPatika — bulut eşitleme (isteğe bağlı).
+/* Kesit Python — bulut eşitleme (isteğe bağlı).
    claude.ai'da oturum açmış ve bu sayfaya yazma izni olan kişilerde ilerleme, kişiye özel ve gizli
    data/users/<id>/progress belgesinde de tutulur; başka cihazda açınca en yeni olan kullanılır.
    Bağlantı yoksa ya da izin yoksa ilerleme yalnızca tarayıcıda kalır; Profil'den dosya yedeği alınabilir. */

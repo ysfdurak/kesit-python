@@ -1,4 +1,4 @@
-/* PythonPatika — Orta 3: Standart Kütüphane (devam), Kalite ve Proje, Bitirme (standart-kutuphane … proje-orta) */
+/* Kesit Python — Orta 3: Standart Kütüphane (devam), Kalite ve Proje, Bitirme (standart-kutuphane … proje-orta) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -83,7 +83,7 @@ print(type(b.limit).__name__)</pre>
 <div class="note"><b>sys ne işe yarar?</b><code>sys.argv</code> dışında <code>sys.exit(1)</code> ile betiği hata koduyla bitirir, <code>sys.version</code> ile sürümü okur, <code>sys.path</code> ile modül arama yollarını görürsün. Betiğin "başarısız" bittiğini zamanlayıcıya bildirmenin yolu sıfır dışı bir çıkış kodudur.</div>
 
 <h2>Para hesabı: neden float değil, Decimal?</h2>
-<p>Anadolu Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
+<p>Ilgaz Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
 <pre class="py">from decimal import Decimal, ROUND_HALF_UP
 from fractions import Fraction
 
@@ -160,7 +160,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta faiz hesabı yazıyorsun. <code>0.1 + 0.2 == 0.3</code> ifadesi float ile neden <code>False</code> döner?',
       o: ['Python toplama işleminde yuvarlama hatası yapar', 'İkili tabanda 0.1 ve 0.2 tam temsil edilemez', '== işleci float için çalışmaz', 'Sonuç 0.30000000000000004 olduğu için Python onu metne çevirir'],
       a: 1,
       why: 'Float sayılar ikili (binary) kesirlerle saklanır; 0.1 ve 0.2 sonsuz ikili kesir olduğu için en yakın değere yuvarlanır ve toplam 0.3 olmaz. Decimal onluk tabanda çalıştığı için bu sorunu yaşamaz.' },
@@ -197,7 +197,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
       hints: ['statistics.mean, statistics.median, statistics.stdev', 'stdev tek elemanda hata verir; len kontrolü yap.'],
       why: 'stdev örneklem sapmasıdır (n-1 ile böler); pstdev ise popülasyon sapması. Tek elemanlı listede stdev StatisticsError fırlatır, bu yüzden korunur.' },
 
-    { t: 'mc', q: 'Anadolu Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
+    { t: 'mc', q: 'Ilgaz Bank müşterisine şifre sıfırlama bağlantısı için tek kullanımlık bir token üreteceksin. Hangisi doğru seçimdir?',
       o: ['random.randint(100000, 999999)', 'hashlib.sha256(b"token").hexdigest()', 'secrets.token_urlsafe(32)', 'random.choice(string.ascii_letters)'],
       a: 2,
       why: 'secrets modülü kriptografik olarak güvenli rastgelelik üretir; random tahmin edilebilirdir. hashlib ise rastgele değer üretmez, verilen girdinin özetini alır; sabit girdiyle her zaman aynı sonucu verir.' },
@@ -246,7 +246,7 @@ print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "g
   body: `
 <h2>Neden SQLite?</h2>
 <p>SQLite, tek bir dosyada (ya da bellekte) yaşayan, sunucu gerektirmeyen bir ilişkisel veritabanıdır (relational database). Python ile birlikte gelen <code>sqlite3</code> modülü sayesinde kurulum yapmadan SQL yazabilirsin. Anadolu Market'te bir analist için tipik kullanım şu: binlerce satırlık sipariş CSV'sini bir SQLite tablosuna yükle, SQL ile grupla ve filtrele, sonucu Python ile raporla. Masaüstü uygulamaları, mobil uygulamalar ve tarayıcılar da yerel verisini SQLite'ta tutar; yani öğrendiğin şey oyuncak değil, dünyanın en yaygın veritabanı motoru.</p>
-<p>SQLPatika'da SQL'in kendisini öğrendin. Bu derste sorulan soru farklı: <b>Python, SQL ile nasıl konuşur?</b> Üç kavram yeter: bağlantı (connection), imleç (cursor) ve transaction.</p>
+<p>Kesit SQL'de SQL'in kendisini öğrendin. Bu derste sorulan soru farklı: <b>Python, SQL ile nasıl konuşur?</b> Üç kavram yeter: bağlantı (connection), imleç (cursor) ve transaction.</p>
 
 <h2>Bağlantı, tablo, ekleme, sorgu</h2>
 <p><code>sqlite3.connect(":memory:")</code> yalnızca RAM'de yaşayan bir veritabanı açar; program bitince kaybolur. Derste ve testte idealdir. Dosya istersen <code>connect("market.db")</code> yazarsın. <code>execute</code> bir SQL cümlesi çalıştırır, <code>fetchall</code> sonuç satırlarını demet listesi olarak getirir.</p>
@@ -319,7 +319,7 @@ print(json.dumps([dict(r) for r in con.execute("SELECT id, sehir FROM siparis WH
 <p>GROUP BY, SUM ve ORDER BY işini SQL yaptı; Python yalnızca sonucu dolaştı. Bu iş bölümü dersin sonundaki "köprü" bölümünün özeti.</p>
 
 <h2>Transaction: commit, rollback, bağlam yöneticisi</h2>
-<p>Anadolu Bank'ta bir havale iki UPDATE'tir: gönderenden düş, alıcıya ekle. İlki olup ikincisi olmazsa para buharlaşır. Transaction (işlem bütünlüğü) tam bunu çözer: bir grup değişiklik ya hep birlikte kalıcı olur (<code>commit</code>) ya da hep birlikte geri alınır (<code>rollback</code>). sqlite3'te bağlantı nesnesi <code>with</code> ile kullanılınca blok hatasız biterse otomatik commit, istisna çıkarsa otomatik rollback yapar. Dikkat: <code>with con:</code> bağlantıyı <b>kapatmaz</b>, yalnızca transaction'ı yönetir.</p>
+<p>Ilgaz Bank'ta bir havale iki UPDATE'tir: gönderenden düş, alıcıya ekle. İlki olup ikincisi olmazsa para buharlaşır. Transaction (işlem bütünlüğü) tam bunu çözer: bir grup değişiklik ya hep birlikte kalıcı olur (<code>commit</code>) ya da hep birlikte geri alınır (<code>rollback</code>). sqlite3'te bağlantı nesnesi <code>with</code> ile kullanılınca blok hatasız biterse otomatik commit, istisna çıkarsa otomatik rollback yapar. Dikkat: <code>with con:</code> bağlantıyı <b>kapatmaz</b>, yalnızca transaction'ı yönetir.</p>
 <pre class="py">import sqlite3
 
 con = sqlite3.connect(":memory:")
@@ -347,7 +347,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
 <div class="tip"><b>Bağlantıyı kapatmayı unutma</b>Dosya tabanlı veritabanında işin bitince <code>con.close()</code> çağır; en temizi bağlantıyı <code>contextlib.closing(sqlite3.connect(...))</code> ile açmak ya da sınıfına <code>__enter__/__exit__</code> yazmaktır. Bellek içi veritabanında kapatma, veriyi de siler.</div>
 <div class="note"><b>Tür eşlemesi</b>SQLite'ın INTEGER, REAL, TEXT, BLOB türleri sırasıyla int, float, str, bytes olarak gelir. Tarih tipi yoktur: tarihleri ISO metni ("2024-03-15") olarak sakla, karşılaştırma yine doğru çalışır. NULL ise Python'da None olur.</div>
 
-<h2>SQLPatika'ya köprü: SQL ne yapar, Python ne yapar?</h2>
+<h2>Kesit SQL'e köprü: SQL ne yapar, Python ne yapar?</h2>
 <p>İki araç rakip değil, iş arkadaşı. Küme işlemleri (filtre, gruplama, birleştirme, sıralama) veritabanı motorunun uzmanlık alanıdır; milyon satırda Python döngüsünden kat kat hızlıdır ve veriyi belleğe taşımaz. Python ise SQL'in beceremediği yerde devreye girer: karmaşık iş kuralları, dış sistemlerle konuşma, rapor biçimleme, test.</p>
 <div class="tbl-wrap"><table>
 <tr><th>İş</th><th>SQL'e bırak</th><th>Python'a bırak</th></tr>
@@ -388,7 +388,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
       why: 'Gruplama ve sıralama SQL\'de yapılır; AS ile verilen takma adlar Row üzerinden doğrudan sözlük anahtarı olur.' },
 
     { t: 'code', id: 'sqlite-python-3',
-      q: '<p>Anadolu Bank için <code>havale(con, gonderen, alici, tutar)</code> fonksiyonunu yaz. <code>hesap(no TEXT PRIMARY KEY, bakiye REAL CHECK (bakiye &gt;= 0))</code> tablosu hazır gelir. Fonksiyon <code>with con:</code> bloğu içinde gönderenin bakiyesini düşüp alıcınınkini artırsın. Blok başarılı biterse <code>True</code> döndürsün; <code>sqlite3.IntegrityError</code> çıkarsa (bakiye eksiye düşerse) istisnayı yakalayıp <code>False</code> döndürsün. Başarısız havalede hiçbir bakiye değişmemeli.</p>',
+      q: '<p>Ilgaz Bank için <code>havale(con, gonderen, alici, tutar)</code> fonksiyonunu yaz. <code>hesap(no TEXT PRIMARY KEY, bakiye REAL CHECK (bakiye &gt;= 0))</code> tablosu hazır gelir. Fonksiyon <code>with con:</code> bloğu içinde gönderenin bakiyesini düşüp alıcınınkini artırsın. Blok başarılı biterse <code>True</code> döndürsün; <code>sqlite3.IntegrityError</code> çıkarsa (bakiye eksiye düşerse) istisnayı yakalayıp <code>False</code> döndürsün. Başarısız havalede hiçbir bakiye değişmemeli.</p>',
       start: 'import sqlite3\n\ndef havale(con, gonderen, alici, tutar):\n    pass\n',
       sol: 'import sqlite3\n\ndef havale(con, gonderen, alici, tutar):\n    try:\n        with con:\n            con.execute("UPDATE hesap SET bakiye = bakiye - ? WHERE no = ?", (tutar, gonderen))\n            con.execute("UPDATE hesap SET bakiye = bakiye + ? WHERE no = ?", (tutar, alici))\n        return True\n    except sqlite3.IntegrityError:\n        return False\n',
       tests: 'import sqlite3\ncon = sqlite3.connect(":memory:")\ncon.execute("CREATE TABLE hesap (no TEXT PRIMARY KEY, bakiye REAL NOT NULL CHECK (bakiye >= 0))")\ncon.executemany("INSERT INTO hesap VALUES (?, ?)", [("TR01", 1000.0), ("TR02", 200.0)])\ncon.commit()\ndef bak(): return dict(con.execute("SELECT no, bakiye FROM hesap").fetchall())\nassert havale(con, "TR01", "TR02", 300.0) is True, "Yeterli bakiyede True dönmeli"\nassert bak() == {"TR01": 700.0, "TR02": 500.0}, "300 havale sonrası TR01=700, TR02=500 olmalı"\nassert havale(con, "TR01", "TR02", 5000.0) is False, "Yetersiz bakiyede False dönmeli"\nassert bak() == {"TR01": 700.0, "TR02": 500.0}, "Başarısız havalede bakiyeler değişmemeli (rollback)"\nassert havale(con, "TR02", "TR01", 500.0) is True, "Tam bakiye kadar havale geçerli"\nassert bak() == {"TR01": 1200.0, "TR02": 0.0}, "Son durum TR01=1200, TR02=0"\n',
@@ -443,7 +443,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
   ],
   body: `
 <h2>Neden test yazarız?</h2>
-<p>Anadolu Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
+<p>Ilgaz Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
 
 <h2>unittest ile ilk test sınıfı</h2>
 <p>Python'ın standart test çerçevesi <code>unittest</code>'tir. Kural basit: <code>unittest.TestCase</code>'den türeyen bir sınıf yazarsın, adı <code>test_</code> ile başlayan her metot bir testtir, içinde <code>self.assert...</code> metotlarıyla beklentini belirtirsin. Normalde testleri terminalden <code>python -m unittest</code> ile koşarsın; burada tarayıcıda olduğumuz için paketi (suite) elle yükleyip <code>TextTestRunner</code> ile çalıştıracağız. Çıktıyı <code>io.StringIO</code>'ya yönlendirmek, test raporunun program çıktısına karışmasını önler.</p>
@@ -451,7 +451,7 @@ print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
 import unittest
 
 def komisyon(tutar: float, kanal: str) -&gt; float:
-    """Anadolu Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
+    """Ilgaz Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
     if tutar &lt;= 0:
         raise ValueError("tutar pozitif olmalı")
     if kanal == "mobil":
@@ -618,7 +618,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
 </section>
 `,
   ex: [
-    { t: 'mc', q: 'Anadolu Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
+    { t: 'mc', q: 'Ilgaz Bank\'ta <code>faiz(1000, 0.03)</code> fonksiyonunun <code>30.0</code> döndürmesini bekliyorsun; sonuç float. Hangi assert en uygundur?',
       o: ['self.assertEqual(faiz(1000, 0.03), 30)', 'self.assertTrue(faiz(1000, 0.03) == 30.0)', 'self.assertAlmostEqual(faiz(1000, 0.03), 30.0)', 'self.assertIs(faiz(1000, 0.03), 30.0)'],
       a: 2,
       why: 'Float sonuçlar yuvarlama farkı taşıyabilir; assertAlmostEqual 7 basamağa kadar yakınlığı kabul eder. assertEqual ve assertTrue tam eşitlik ister, assertIs ise kimlik (aynı nesne) karşılaştırır ve float için yanlıştır.' },
@@ -645,7 +645,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
       why: 'unittest, çalıştırılan testleri bellekten düşürmek için suite\'i run sonrasında boşaltır. Test adlarını ya da sayısını kaydetmek istiyorsan run çağrısından önce topla.' },
 
     { t: 'code', id: 'test-yazma-3',
-      q: '<p>Anadolu Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
+      q: '<p>Ilgaz Bank şüpheli işlem kuralı: <code>IslemKurali.gece_mi()</code>, <code>self.saat()</code> 23 ve üzeri ya da 6\'dan küçükse True döner. <code>GeceTest(unittest.TestCase)</code> sınıfını yaz; <code>unittest.mock.patch.object(IslemKurali, "saat", return_value=...)</code> kullanarak iki test metodu oluştur: <code>test_gece</code> (saat 2 iken <code>IslemKurali().gece_mi()</code> True) ve <code>test_gunduz</code> (saat 14 iken False). Testler gerçek saate bağımlı olmamalı.</p>',
       start: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    pass\n',
       sol: 'import unittest\nfrom datetime import datetime\nfrom unittest.mock import patch\n\nclass IslemKurali:\n    def saat(self):\n        return datetime.now().hour\n\n    def gece_mi(self):\n        s = self.saat()\n        return s >= 23 or s < 6\n\nclass GeceTest(unittest.TestCase):\n    def test_gece(self):\n        with patch.object(IslemKurali, "saat", return_value=2):\n            self.assertTrue(IslemKurali().gece_mi())\n\n    def test_gunduz(self):\n        with patch.object(IslemKurali, "saat", return_value=14):\n            self.assertFalse(IslemKurali().gece_mi())\n',
       tests: 'import io\nimport unittest\nfrom unittest.mock import patch\nsuite = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\nadlar = {t.id().split(".")[-1] for t in suite}\nassert {"test_gece", "test_gunduz"} <= adlar, "test_gece ve test_gunduz metotları olmalı"\n# Testler gerçek saatten bağımsız olmalı: datetime.now sabitlenince de geçmeli\nimport datetime as _dt\nclass _SahteDT(_dt.datetime):\n    _saat = 12\n    @classmethod\n    def now(cls, tz=None):\n        return _dt.datetime(2024, 1, 1, cls._saat, 0, 0)\nfor sabit in (3, 12, 23):\n    _SahteDT._saat = sabit\n    globals()["datetime"] = _SahteDT\n    s2 = unittest.defaultTestLoader.loadTestsFromTestCase(GeceTest)\n    r = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(s2)\n    globals()["datetime"] = _dt.datetime\n    assert r.wasSuccessful(), f"saat {sabit} iken bile testler geçmeli (patch.object kullanılmalı)"\nsonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)\nassert sonuc.testsRun >= 2 and sonuc.wasSuccessful(), "Tüm testler geçmeli"\n',
@@ -827,7 +827,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Tekrarlanabilir ortam: kurumsal pratik</h3>
 <p>Kurumsal projelerde iki dosya birlikte yaşar: <code>pyproject.toml</code> geniş aralıklarla "ne istiyoruz"u söyler (<code>pandas&gt;=2.2,&lt;3</code>), kilit dosyası (<code>uv.lock</code>, <code>poetry.lock</code> ya da <code>pip freeze</code> çıktısı) "bugün tam olarak ne kuruldu"yu. Geliştirici esnek aralıkla çalışır, sunucu ve CI kilit dosyasıyla kurar; böylece "testler geçti ama üretimde patladı" sürprizi kalkar. Kilit dosyasını Git'e koyarsın; <code>.venv</code>'i koymazsın.</p>
-<p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Anadolu Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
+<p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Ilgaz Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
 </section>
 `,
   ex: [
@@ -908,7 +908,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
   ],
   body: `
 <h2>Neden Git?</h2>
-<p>Anadolu Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
+<p>Ilgaz Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
 <div class="note"><b>Bu derste Git komutları gösterilir</b>Tarayıcıda Git çalıştıramayız; komutları kendi bilgisayarında dene. Kod alıştırmaları Git ve proje yapısının Python tarafını işler: .gitignore kurallarını eşleştirmek, proje ağacını doğrulamak, ortam değişkeni okumak.</div>
 
 <h2>Temel akış: init, add, commit</h2>
@@ -1124,7 +1124,7 @@ except RuntimeError as e:
   lv: 'orta',
   mod: 'Bitirme',
   min: 60,
-  title: 'Orta bitirme projesi: Anadolu Bank işlem analizi',
+  title: 'Orta bitirme projesi: Ilgaz Bank işlem analizi',
   sum: 'Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem kuralı, JSON rapor ve unittest ile doğrulama.',
   goals: [
     'dataclass ile alan tipleri belirli bir Transaction modeli kurup CSV metninden nesne listesi üretebilirim.',
@@ -1135,7 +1135,7 @@ except RuntimeError as e:
   ],
   body: `
 <h2>Proje tanımı</h2>
-<p>Anadolu Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
+<p>Ilgaz Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
 <p>Bu ders diğerlerinden farklı: yeni kavram öğretmez, öğrendiklerini birleştirir. Alıştırmalar birbirini tamamlayan altı parçadır; her parçada bir önceki parçanın fonksiyonu hazır gelir. Aşağıda her parçanın kuramı ve örnek çıktısı var; alıştırmalarda kendi sürümünü yazacaksın.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Parça</th><th>Ne yapar</th><th>Kullandığın dersler</th></tr>

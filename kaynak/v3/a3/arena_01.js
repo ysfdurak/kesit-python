@@ -1,4 +1,4 @@
-/* PythonPatika — v3/a3: Algoritmalar (a-121…a-145) */
+/* Kesit Python — v3/a3: Algoritmalar (a-121…a-145) */
 (function (W) { 'use strict'; const A = W.PY_ARENA = W.PY_ARENA || []; A.push(
 {
   id: 'a-121',
@@ -196,7 +196,7 @@
   tags: ['iki işaretçi', 'sıralama'],
   src: 'LeetCode 15 3Sum benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank denetim ekibi, toplamı tam sıfır olan üç hesap hareketi (örneğin +500, −200, −300) bulduğunda bunları "dengeleyici üçlü" olarak işaretliyor. Aynı tutar değerlerinden oluşan üçlüler tek sayılır: {−1, 0, 1} hangi indekslerden gelirse gelsin bir kez sayılır.</p>\n<p>Farklı indekslerdeki üç hareketten oluşan, toplamı 0 olan <b>farklı değer üçlülerinin</b> sayısını yazdır.</p>',
+  statement: '<p>Ilgaz Bank denetim ekibi, toplamı tam sıfır olan üç hesap hareketi (örneğin +500, −200, −300) bulduğunda bunları "dengeleyici üçlü" olarak işaretliyor. Aynı tutar değerlerinden oluşan üçlüler tek sayılır: {−1, 0, 1} hangi indekslerden gelirse gelsin bir kez sayılır.</p>\n<p>Farklı indekslerdeki üç hareketten oluşan, toplamı 0 olan <b>farklı değer üçlülerinin</b> sayısını yazdır.</p>',
   input: '<p>İlk satırda N. İkinci satırda N tam sayı (hareket tutarları).</p>',
   output: '<p>Farklı üçlü sayısı.</p>',
   constraints: '3 ≤ N ≤ 1500, |tutar| ≤ 10^5',
@@ -296,7 +296,7 @@
   tags: ['önek toplamı', 'sözlük'],
   src: 'LeetCode 560 Subarray Sum Equals K benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank\'ın risk ekibi, bir müşterinin günlük bakiye değişimlerini (yatırma pozitif, çekme negatif) inceliyor. Toplam değişimi tam olarak K olan <b>ardışık gün dönemlerinin</b> sayısı şüpheli örüntü göstergesi sayılıyor.</p>\n<p>Toplamı K olan ardışık alt dizi (en az 1 gün) sayısını yazdır.</p>',
+  statement: '<p>Ilgaz Bank\'ın risk ekibi, bir müşterinin günlük bakiye değişimlerini (yatırma pozitif, çekme negatif) inceliyor. Toplam değişimi tam olarak K olan <b>ardışık gün dönemlerinin</b> sayısı şüpheli örüntü göstergesi sayılıyor.</p>\n<p>Toplamı K olan ardışık alt dizi (en az 1 gün) sayısını yazdır.</p>',
   input: '<p>İlk satırda N ve K. İkinci satırda N tam sayı.</p>',
   output: '<p>Dönem sayısı.</p>',
   constraints: '1 ≤ N ≤ 2·10^5, |değer| ≤ 1000, |K| ≤ 10^8',
@@ -727,7 +727,7 @@
   tags: ['bit işlemleri', 'sayma'],
   src: 'LeetCode 477 Total Hamming Distance benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank\'ın iç sistemlerinde her kullanıcının yetkileri 30 bitlik bir maske ile tutuluyor (her bit bir yetki). Güvenlik ekibi, yetki dağılımının ne kadar çeşitli olduğunu ölçmek için tüm kullanıcı çiftleri arasındaki <b>Hamming mesafelerinin</b> (farklı bit sayısı) toplamını istiyor.</p>\n<p>Σ<sub>i&lt;j</sub> popcount(m<sub>i</sub> XOR m<sub>j</sub>) değerini yazdır.</p>',
+  statement: '<p>Ilgaz Bank\'ın iç sistemlerinde her kullanıcının yetkileri 30 bitlik bir maske ile tutuluyor (her bit bir yetki). Güvenlik ekibi, yetki dağılımının ne kadar çeşitli olduğunu ölçmek için tüm kullanıcı çiftleri arasındaki <b>Hamming mesafelerinin</b> (farklı bit sayısı) toplamını istiyor.</p>\n<p>Σ<sub>i&lt;j</sub> popcount(m<sub>i</sub> XOR m<sub>j</sub>) değerini yazdır.</p>',
   input: '<p>İlk satırda N. İkinci satırda N maske (onluk tabanda).</p>',
   output: '<p>Toplam mesafe.</p>',
   constraints: '1 ≤ N ≤ 10^5, 0 ≤ maske &lt; 2^30',

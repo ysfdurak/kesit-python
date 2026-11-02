@@ -1,4 +1,4 @@
-/* PythonPatika — İleri 3: Üretime Hazırlık ve Bitirme (kalite-ci, mulakat-hazirlik, proje-ileri) */
+/* Kesit Python — İleri 3: Üretime Hazırlık ve Bitirme (kalite-ci, mulakat-hazirlik, proje-ileri) */
 // needs: pandas
 (function (W) {
 'use strict';
@@ -21,7 +21,7 @@ L.push(
   ],
   body: `
 <h2>Neden kalite otomasyonu?</h2>
-<p>Anadolu Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
+<p>Ilgaz Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
 <p>Üretime hazır bir Python projesinde kalite zinciri dört halkadan oluşur: biçimlendirici (formatter) kodu tek stile getirir, linter şüpheli kalıpları yakalar, tip denetleyici (type checker) sözleşmeleri doğrular, test koşucusu davranışı kanıtlar. pre-commit bu zinciri yerelde, CI (continuous integration, sürekli tümleştirme) sunucuda çalıştırır.</p>
 
 <h2>Biçim ve lint: ruff, black, isort</h2>
@@ -448,7 +448,7 @@ print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
 </ol></div>
 
 <h2>Sistem tasarımı için Python</h2>
-<p>Üst düzey pozisyonlarda "Anadolu Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
+<p>Üst düzey pozisyonlarda "Ilgaz Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Soruyu kalıba indirgeme pratiği</h3>

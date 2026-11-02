@@ -232,7 +232,7 @@ for tutar in ['0.5', '1.5', '2.5', '3.5']:
 
 (S, 'orta', 'Parayı float ile toplamak',
 '''\
-# Anadolu Bank: 10 adet 0.10 TL komisyon
+# Ilgaz Bank: 10 adet 0.10 TL komisyon
 toplam = 0
 for _ in range(10):
     toplam += 0.10

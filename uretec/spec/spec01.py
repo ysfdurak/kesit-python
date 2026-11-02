@@ -105,7 +105,7 @@ assert isinstance(ucretli_agirlik(30, 20, 10, 1.5), int), "Sonuç int olmalı (m
 
 dict(topic='Değişkenler ve Türler', diff=3, kind='yaz',
   title='Kuruş hassasiyetinde toplam',
-  q='<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Anadolu Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
+  q='<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Ilgaz Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
   start=r'''
 def kurus_topla(fiyatlar):
     # buraya yaz
@@ -177,7 +177,7 @@ print(-2 ** 2)
 
 dict(topic='Operatörler', diff=2, t='predict',
   title='Negatif sayılarda // ve %',
-  q='<p>Anadolu Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
+  q='<p>Ilgaz Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
   code=r'''
 print(-7 // 2, -7 % 2)
 print(7 // -2, 7 % -2)

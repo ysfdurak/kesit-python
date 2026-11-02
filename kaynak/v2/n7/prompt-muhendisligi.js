@@ -1,4 +1,4 @@
-/* PythonPatika — Orta: prompt-muhendisligi (istem mühendisliği ve yapılandırılmış çıktı) */
+/* Kesit Python — Orta: prompt-muhendisligi (istem mühendisliği ve yapılandırılmış çıktı) */
 // needs: pydantic, jinja2, numpy
 (function (W) {
 'use strict';

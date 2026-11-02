@@ -48,7 +48,7 @@ def ser(v, key=None, ind=4):
 def emit(ext, aciklama, fname=None):
     path = os.path.join(OUT, (fname or ext['id']) + '.js')
     body = ser(ext, None, 2)
-    js = f"/* PythonPatika — '{ext['id']}' dersi uzantısı: {aciklama} */\n(function (W) {{\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  {body}\n);\n}})(window);\n"
+    js = f"/* Kesit Python — '{ext['id']}' dersi uzantısı: {aciklama} */\n(function (W) {{\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n  {body}\n);\n}})(window);\n"
     os.makedirs(OUT, exist_ok=True)
     with open(path, 'w', encoding='utf-8') as f:
         f.write(js)

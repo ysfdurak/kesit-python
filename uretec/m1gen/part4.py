@@ -158,7 +158,7 @@ dict(roles=['backend'], lv='ileri', topic='N+1 ölçümü', kind='kod-okuma',
 
 dict(roles=['backend'], lv='temel', topic='ACID', kind='kavram',
      q='Veritabanı transaction\'larında ACID ne anlama gelir? Her harfi bir bankacılık örneğiyle açıkla.',
-     a='<p>Anadolu Bank\'ta Ayşe\'nin hesabından Mehmet\'e 500 TL havale düşünelim: bir hesaptan düş, diğerine ekle.</p>'
+     a='<p>Ilgaz Bank\'ta Ayşe\'nin hesabından Mehmet\'e 500 TL havale düşünelim: bir hesaptan düş, diğerine ekle.</p>'
        '<ul><li><b>A — Atomicity (Bölünmezlik):</b> Transaction ya tamamen gerçekleşir ya da hiç gerçekleşmez. Para düşüldükten sonra sunucu çökerse işlem geri alınır (rollback); para "havada kaybolmaz".</li>'
        '<li><b>C — Consistency (Tutarlılık):</b> Transaction veritabanını bir geçerli durumdan diğerine taşır; kısıtlar (' + c('CHECK bakiye >= 0') + ', yabancı anahtarlar, benzersizlik) asla ihlal edilmez. Bakiyesi yetersizse işlem reddedilir.</li>'
        '<li><b>I — Isolation (Yalıtım):</b> Eşzamanlı transaction\'lar birbirinin ara durumlarını görmez. Havale yarıdayken çalışan bir bakiye raporu, paranın düşülüp henüz eklenmediği anı görmemelidir. Yalıtımın derecesi izolasyon seviyesiyle ayarlanır.</li>'
@@ -183,7 +183,7 @@ dict(roles=['backend'], lv='ileri', topic='İzolasyon seviyeleri', kind='kavram'
      tip='Anomalileri önce tanımla, seviyeleri sonra onlara göre sırala; ezber listeden çok daha ikna edici olur.'),
 
 dict(roles=['backend'], lv='orta', topic='Transaction ve rollback', kind='kod-okuma',
-     q='Anadolu Bank havale fonksiyonu ' + '<code>with conn:</code> kullanıyor. İkinci havale neden iptal oluyor ve son bakiyeler nedir?',
+     q='Ilgaz Bank havale fonksiyonu ' + '<code>with conn:</code> kullanıyor. İkinci havale neden iptal oluyor ve son bakiyeler nedir?',
      code='import sqlite3\nconn = sqlite3.connect(":memory:")\nconn.execute("CREATE TABLE hesap(iban TEXT PRIMARY KEY, bakiye INT CHECK (bakiye >= 0))")\nconn.executemany("INSERT INTO hesap VALUES (?, ?)", [("TR01", 1000), ("TR02", 200)])\nconn.commit()\n\ndef havale(kaynak, hedef, tutar):\n    try:\n        with conn:\n            conn.execute("UPDATE hesap SET bakiye = bakiye + ? WHERE iban = ?", (tutar, hedef))\n            conn.execute("UPDATE hesap SET bakiye = bakiye - ? WHERE iban = ?", (tutar, kaynak))\n        return "tamam"\n    except sqlite3.IntegrityError:\n        return "iptal"\n\nprint(havale("TR01", "TR02", 300))\nprint(havale("TR02", "TR01", 900))\nprint(conn.execute("SELECT iban, bakiye FROM hesap ORDER BY iban").fetchall())\n',
      out="tamam\niptal\n[('TR01', 700), ('TR02', 500)]",
      a='<p><b>1. havale:</b> TR02\'ye 300 eklenir (500), TR01\'den 300 düşülür (700). Blok hatasız biter; ' + c('with conn:') + ' çıkışta <b>commit</b> yapar.</p>'

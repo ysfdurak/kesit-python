@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
+<p>Ilgaz Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
 
 <h2>Fonksiyonu saran fonksiyon</h2>
 <p>Dekoratör mekanizmasını önce elle kur. Bir fonksiyon alan, içinde onu çağıran yeni bir fonksiyon tanımlayan ve bu yeni fonksiyonu döndüren bir fonksiyon yaz.</p>

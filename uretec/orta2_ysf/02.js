@@ -11,7 +11,7 @@
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
+<p>Ilgaz Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
 
 <h2>Üç temel tip</h2>
 <div class="tbl-wrap"><table>
@@ -164,7 +164,7 @@ for s in son_hafta:
         o: ['UTC varsayılır', 'TypeError fırlatılır', 'Sonuç None olur', 'Yerel saat varsayılır'], a: 1,
         why: 'Python naive ve aware nesneleri karşılaştırmaya ya da çıkarmaya izin vermez; TypeError verir. Varsayım yapmaz.' },
       { t: 'code', id: 'tarih-saat-1',
-        q: '<p>Anadolu Bank kredi sistemi için <code>vade_tarihi(baslangic: str, gun: int) -> str</code> fonksiyonunu yaz. <code>baslangic</code> "GG.AA.YYYY" biçiminde metin, <code>gun</code> eklenecek gün sayısıdır. Sonucu yine "GG.AA.YYYY" biçiminde döndür.</p>',
+        q: '<p>Ilgaz Bank kredi sistemi için <code>vade_tarihi(baslangic: str, gun: int) -> str</code> fonksiyonunu yaz. <code>baslangic</code> "GG.AA.YYYY" biçiminde metin, <code>gun</code> eklenecek gün sayısıdır. Sonucu yine "GG.AA.YYYY" biçiminde döndür.</p>',
         start: 'from datetime import datetime, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    # buraya yaz\n    pass\n',
         sol: 'from datetime import datetime, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    d = datetime.strptime(baslangic, "%d.%m.%Y")\n    return (d + timedelta(days=gun)).strftime("%d.%m.%Y")\n',
         tests: 'assert vade_tarihi("15.03.2026", 30) == "14.04.2026", "15.03.2026 + 30 gün = 14.04.2026"\nassert vade_tarihi("25.12.2025", 10) == "04.01.2026", "Yıl geçişi doğru olmalı"\nassert vade_tarihi("28.02.2024", 1) == "29.02.2024", "Artık yıl dikkate alınmalı"\nassert vade_tarihi("01.01.2026", 0) == "01.01.2026", "0 gün aynı tarihi vermeli"\n',

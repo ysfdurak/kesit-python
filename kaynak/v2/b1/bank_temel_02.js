@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-121 … b-130 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-121 … b-130 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

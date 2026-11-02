@@ -1,4 +1,4 @@
-/* PythonPatika — Hata ayıklama (debugging) — temel / Dosya ve Hata */
+/* Kesit Python — Hata ayıklama (debugging) — temel / Dosya ve Hata */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

@@ -132,7 +132,7 @@ assert o["Mert"] is None, "Notu olmayan öğrenci için None (sıfıra bölme ol
 
 dict(topic='İç İçe Veri', diff=3, kind='yaz',
   title='Yol ile güvenli erişim',
-  q='<p>Anadolu Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
+  q='<p>Ilgaz Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
   start=r'''
 def guvenli_al(veri, yol, varsayilan=None):
     # buraya yaz

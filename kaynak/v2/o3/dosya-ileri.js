@@ -1,4 +1,4 @@
-/* PythonPatika — v2 o3: İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma */
+/* Kesit Python — v2 o3: İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -329,7 +329,7 @@ with tempfile.TemporaryDirectory() as d:
       stage: 'Rehberli',
       id: 'dosya-ileri-1',
       diff: 1,
-      q: '<p>Anadolu Bank\'ın belge sistemine yüklenen dosyaların uzantısına güvenilmiyor; türü dosyanın ilk baytlarından (sihirli sayı, magic number) anlamak gerekiyor. <code>dosya_turu(yol)</code> fonksiyonunu yaz: dosyayı <b>ikili modda</b> açsın, ilk 4 baytı okusun ve şunu döndürsün:</p><ul><li><code>b"%PDF"</code> ile başlıyorsa <code>"pdf"</code></li><li><code>b"PK\\x03\\x04"</code> ile başlıyorsa <code>"zip"</code></li><li><code>b"\\x89PNG"</code> ile başlıyorsa <code>"png"</code></li><li>aksi hâlde <code>"bilinmiyor"</code></li></ul>',
+      q: '<p>Ilgaz Bank\'ın belge sistemine yüklenen dosyaların uzantısına güvenilmiyor; türü dosyanın ilk baytlarından (sihirli sayı, magic number) anlamak gerekiyor. <code>dosya_turu(yol)</code> fonksiyonunu yaz: dosyayı <b>ikili modda</b> açsın, ilk 4 baytı okusun ve şunu döndürsün:</p><ul><li><code>b"%PDF"</code> ile başlıyorsa <code>"pdf"</code></li><li><code>b"PK\\x03\\x04"</code> ile başlıyorsa <code>"zip"</code></li><li><code>b"\\x89PNG"</code> ile başlıyorsa <code>"png"</code></li><li>aksi hâlde <code>"bilinmiyor"</code></li></ul>',
       guide: ['Dosyayı "rb" moduyla with bloğunda aç.', 'f.read(4) ile yalnızca ilk 4 baytı oku (tüm dosyayı değil).', 'Okunan baytları b"..." ile başlayan imzalarla karşılaştır (str ile değil).', 'Hiçbiri tutmazsa "bilinmiyor" döndür.'],
       example: 'import io\nf = io.BytesIO(b"GIF89a...")\nbas = f.read(3)\nprint(bas, bas == b"GIF", bas == "GIF")\n',
       start: 'def dosya_turu(yol):\n    # TODO: dosyayı ikili modda aç ve ilk 4 baytı oku\n    # TODO: imzalarla karşılaştır\n    return "bilinmiyor"\n',
@@ -343,7 +343,7 @@ with tempfile.TemporaryDirectory() as d:
       stage: 'Rehberli',
       id: 'dosya-ileri-2',
       diff: 2,
-      q: '<p>Anadolu Bank\'ın günlük işlem arşivi gigabaytlarca olabilir; dosyanın değişmediğini kanıtlamak için SHA-256 özetini <b>belleğe tamamını almadan</b> hesaplamalısın. <code>parcali_ozet(yol, parca=65536)</code> fonksiyonunu yaz: dosyayı ikili modda <code>parca</code> baytlık parçalar hâlinde okusun, her parçayı <code>hashlib.sha256</code> nesnesine eklesin ve <code>(ozet_hex, parca_sayisi)</code> demetini döndürsün. Boş dosyada parça sayısı 0\'dır.</p>',
+      q: '<p>Ilgaz Bank\'ın günlük işlem arşivi gigabaytlarca olabilir; dosyanın değişmediğini kanıtlamak için SHA-256 özetini <b>belleğe tamamını almadan</b> hesaplamalısın. <code>parcali_ozet(yol, parca=65536)</code> fonksiyonunu yaz: dosyayı ikili modda <code>parca</code> baytlık parçalar hâlinde okusun, her parçayı <code>hashlib.sha256</code> nesnesine eklesin ve <code>(ozet_hex, parca_sayisi)</code> demetini döndürsün. Boş dosyada parça sayısı 0\'dır.</p>',
       guide: ['hashlib.sha256() ile boş bir özet nesnesi oluştur ve sayacı 0 yap.', 'Dosyayı "rb" ile aç.', 'while parca_veri := f.read(parca): döngüsüyle oku; boş bytes gelince döngü biter.', 'Her parçada ozet.update(...) çağır ve sayacı artır.', '(ozet.hexdigest(), sayac) döndür.'],
       example: 'import hashlib, io\nf = io.StringIO("a-b-c-d-e")\nparcalar = []\nwhile p := f.read(4):\n    parcalar.append(p)\nprint(parcalar)\nh = hashlib.sha256()\nh.update(b"ab"); h.update(b"c")\nprint(h.hexdigest() == hashlib.sha256(b"abc").hexdigest())\n',
       start: 'import hashlib\n\ndef parcali_ozet(yol, parca=65536):\n    ozet = hashlib.sha256()\n    sayac = 0\n    # TODO: dosyayı ikili modda aç\n    # TODO: parça parça oku, ozet.update ile ekle, sayacı artır\n    return ozet.hexdigest(), sayac\n',

@@ -493,7 +493,7 @@ for s, b in [(0, 3), (1, 0), (-1, 5)]:
   'hints': ['Sayfa 1\'den başlıyorsa başlangıç indeksi (sayfa - 1) * boyut olur.', 'Python dilimi son indeksi dahil etmez: kayitlar[bas:bas + boyut]; -1 ve +1 düzeltmelerine gerek yok.'],
   'why': 'Bir eksik/bir fazla (off-by-one) hatası, 0 ve 1 tabanlı numaralandırma karışınca ortaya çıkar ve kod hata vermeden yanlış sonuç üretir. "Tüm sayfaların birleşimi orijinal liste olmalı" gibi bir özellik testi bu sınıf hatayı garanti yakalar.'},
  {'id': 'yapay-zeka-ile-kod-9', 't': 'code', 'stage': 'Hata avı', 'kind': 'bug', 'diff': 2,
-  'q': '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın taksit planı fonksiyonu <code>taksitlendir(tutar, ay)</code> metin olarak verilen tutarı (<code>"1000.00"</code>) eşit taksitlere bölüp <code>Decimal</code> listesi döndürmeli. Her taksit kuruşa (2 ondalık) yuvarlanmalı ve <b>taksitlerin toplamı tutara kuruşu kuruşuna eşit olmalı</b>: yuvarlama farkı son taksite eklenir. Asistanın kodu float kullanıyor ve toplam tutmuyor.</p>',
+  'q': '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın taksit planı fonksiyonu <code>taksitlendir(tutar, ay)</code> metin olarak verilen tutarı (<code>"1000.00"</code>) eşit taksitlere bölüp <code>Decimal</code> listesi döndürmeli. Her taksit kuruşa (2 ondalık) yuvarlanmalı ve <b>taksitlerin toplamı tutara kuruşu kuruşuna eşit olmalı</b>: yuvarlama farkı son taksite eklenir. Asistanın kodu float kullanıyor ve toplam tutmuyor.</p>',
   'start': r'''from decimal import Decimal
 
 def taksitlendir(tutar, ay):

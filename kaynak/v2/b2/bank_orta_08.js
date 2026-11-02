@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Dosya İşlemleri, SQLite, Veri Yapıları (b-281…b-290) */
+/* Kesit Python — pratik bankası (orta): Dosya İşlemleri, SQLite, Veri Yapıları (b-281…b-290) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

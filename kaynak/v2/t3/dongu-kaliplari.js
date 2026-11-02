@@ -1,4 +1,4 @@
-/* PythonPatika v2 — dongu-kaliplari */
+/* Kesit Python v2 — dongu-kaliplari */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -28,7 +28,7 @@ L.push(
 
 <h2>Sayaç ve biriktirici: tek geçişte birden fazla sonuç</h2>
 <p>Bu ikisini zaten biliyorsun. Burada kazanman gereken alışkanlık: aynı veriyi birkaç kez gezmek yerine <b>tek geçişte</b> birden fazla sayaç ve biriktirici tutmak.</p>
-<pre class="py">islemler = [1200, -350, 4800, -90, -1500, 600, 0, 75]   # Anadolu Bank hesap hareketleri
+<pre class="py">islemler = [1200, -350, 4800, -90, -1500, 600, 0, 75]   # Ilgaz Bank hesap hareketleri
 
 giris_toplam = 0
 cikis_toplam = 0
@@ -154,7 +154,7 @@ for i in range(len(fiyatlar)):
 <p>İç içe döngüde iş sayısı çarpılır: 1000 elemanlı listede tüm çiftler yaklaşık yarım milyon karşılaştırmadır. Bu, Uzmanlaş bölümündeki karmaşıklık konusunun girişidir.</p>
 
 <h2>while: koşula kadar tekrar</h2>
-<p>Kaç tur süreceğini <b>önceden bilmediğin</b> durumlarda <code>while</code> kullanırsın. Anadolu Bank'ın klasik müşteri sorusu: "Hesabımda 10.000 TL var, aylık %3 faiz alırsam 15.000 TL'ye kaç ayda ulaşırım?"</p>
+<p>Kaç tur süreceğini <b>önceden bilmediğin</b> durumlarda <code>while</code> kullanırsın. Ilgaz Bank'ın klasik müşteri sorusu: "Hesabımda 10.000 TL var, aylık %3 faiz alırsam 15.000 TL'ye kaç ayda ulaşırım?"</p>
 <pre class="py">bakiye = 10_000
 aylik_faiz = 0.03
 hedef = 15_000
@@ -305,7 +305,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank birikim simülatörü: <code>kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0)</code> fonksiyonunu while ile yaz. Her ay önce faiz eklenir (<code>bakiye *= 1 + aylik_faiz</code>), sonra <code>aylik_ek</code> yatırılır. Bakiyenin <code>hedef</code>\'e ulaştığı (<code>&gt;=</code>) ay sayısını döndür. Başta zaten hedefteyse 0 döndür. Hedefe 1200 ayda (100 yıl) ulaşılamıyorsa <code>None</code> döndür.</p>',
+      q: '<p>Ilgaz Bank birikim simülatörü: <code>kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0)</code> fonksiyonunu while ile yaz. Her ay önce faiz eklenir (<code>bakiye *= 1 + aylik_faiz</code>), sonra <code>aylik_ek</code> yatırılır. Bakiyenin <code>hedef</code>\'e ulaştığı (<code>&gt;=</code>) ay sayısını döndür. Başta zaten hedefteyse 0 döndür. Hedefe 1200 ayda (100 yıl) ulaşılamıyorsa <code>None</code> döndür.</p>',
       start: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    pass\n',
       sol: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    ay = 0\n    while bakiye < hedef:\n        if ay >= 1200:\n            return None\n        bakiye *= 1 + aylik_faiz\n        bakiye += aylik_ek\n        ay += 1\n    return ay\n',
       tests: 'assert kac_ay(10000, 0.03, 15000) == 14, "10000 TL %3 ile 14. ayda 15000\'i geçer"\nassert kac_ay(1000, 0.0, 2000, 250) == 4, "faizsiz, ayda 250 ek ile 4 ay"\nassert kac_ay(5000, 0.05, 5000) == 0, "zaten hedefteyse 0 ay"\nassert kac_ay(1000, 0.0, 2000) is None, "faiz ve ek yoksa hedefe ulaşılamaz: None (sonsuz döngü olmamalı)"\nassert kac_ay(1000, 0.01, 1100, 0) == 10, "1000 × 1.01^10 ≈ 1104.6"\n',

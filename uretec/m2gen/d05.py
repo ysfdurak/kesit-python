@@ -30,7 +30,7 @@ I(['ml', 'bilimci'], 'orta', 'kavram', 'Zaman ve grup bazlı doğrulama',
   'Zaman serisi ve aynı varlığa ait çok sayıda satır içeren verilerde çapraz doğrulama nasıl yapılmalı?',
   '<p><b>Zaman serisi:</b> Gerçek hayatta model geçmişle eğitilip geleceği tahmin eder. Rastgele katlarda gelecek günler eğitime girer ve model "geleceği görür". Doğrusu <b>ileriye kayan doğrulama</b> (walk-forward): Ocak–Haziran ile eğit, Temmuz\'u doğrula; Ocak–Temmuz ile eğit, Ağustos\'u doğrula... scikit-learn\'de <code>TimeSeriesSplit</code>.</p>'
   '<p>Ek ayrıntılar: Hedef gelecekteki bir pencereyse (ör. "sonraki 7 günde satın alır mı"), eğitim ile doğrulama arasına pencere uzunluğu kadar <b>boşluk</b> (gap) bırakılır; yoksa etiketler örtüşür. Eğitim penceresi genişleyen mi kayan mı olacak, veride kalıcı değişiklik olup olmadığına göre seçilir.</p>'
-  '<p><b>Gruplu veri:</b> Anadolu Bank\'ta bir müşterinin 24 aylık kaydı varsa, rastgele bölmede aynı müşteri hem eğitimde hem doğrulamada yer alır; model kişiye özgü örüntüleri ezberler ve skor şişer. Canlıda ise çoğunlukla <b>yeni</b> müşteriler için tahmin yapılacaksa <code>GroupKFold(groups=musteri_id)</code> kullanılır.</p>'
+  '<p><b>Gruplu veri:</b> Ilgaz Bank\'ta bir müşterinin 24 aylık kaydı varsa, rastgele bölmede aynı müşteri hem eğitimde hem doğrulamada yer alır; model kişiye özgü örüntüleri ezberler ve skor şişer. Canlıda ise çoğunlukla <b>yeni</b> müşteriler için tahmin yapılacaksa <code>GroupKFold(groups=musteri_id)</code> kullanılır.</p>'
   '<p><b>Genel ilke:</b> Doğrulama bölmesi, modelin canlıda karşılaşacağı durumu taklit etmelidir. "Canlıda kimin için, hangi tarihte tahmin yapacağım?" sorusunun cevabı bölme stratejisini belirler.</p>',
   ['Hem zaman hem grup yapısı varsa ne yaparsın?', 'Gap (boşluk) uzunluğunu nasıl seçersin?'],
   ['Zamana bağlı veride KFold(shuffle=True) kullanmak', 'Aynı müşterinin satırlarının iki tarafa düşmesini sorun görmemek'],
@@ -61,7 +61,7 @@ print(int((~maske).sum()), int(maske.sum()), len(np.intersect1d(musteri[~maske],
 I(['ml', 'bilimci'], 'orta', 'kavram', 'Veri ve kavram kayması',
   'Veri kayması (data drift) ile kavram kayması (concept drift) arasındaki fark nedir? Her birine örnek ver.',
   '<p><b>Veri kayması (covariate shift):</b> Girdi özelliklerinin dağılımı P(X) değişir, ama girdi ile hedef arasındaki ilişki aynı kalır. Örnek: Anadolu Market yeni bir şehirde açıldı; müşterilerin yaş ve sepet dağılımı farklı. Model bu bölgede eğitimde az gördüğü veriyle çalışır ve hatası artabilir.</p>'
-  '<p><b>Kavram kayması:</b> Girdi ile hedef arasındaki ilişki P(y | X) değişir. Örnek: Anadolu Bank dolandırıcılık modelinde, dolandırıcılar yöntem değiştirdi; eskiden şüpheli olan desenler artık masum, yeni desenler şüpheli. Ya da pandemi döneminde gece yarısı market siparişlerinin anlamı tamamen değişti.</p>'
+  '<p><b>Kavram kayması:</b> Girdi ile hedef arasındaki ilişki P(y | X) değişir. Örnek: Ilgaz Bank dolandırıcılık modelinde, dolandırıcılar yöntem değiştirdi; eskiden şüpheli olan desenler artık masum, yeni desenler şüpheli. Ya da pandemi döneminde gece yarısı market siparişlerinin anlamı tamamen değişti.</p>'
   '<p><b>Etiket kayması (prior shift):</b> Hedef sınıfın oranı P(y) değişir; ör. ekonomik kriz döneminde temerrüt oranının %2\'den %5\'e çıkması.</p>'
   '<p><b>Tespit farkı:</b> Veri kayması etiket beklemeden, girdi dağılımlarını eğitimle karşılaştırarak (PSI, KS testi) tespit edilebilir. Kavram kayması ise genelde ancak gerçek etiketler geldiğinde performans düşüşü olarak görülür; etiketler gecikmeli geliyorsa (kredi temerrüdü aylar sonra belli olur) bu ciddi bir kör noktadır.</p>'
   '<p><b>Müdahale:</b> Veri kaymasında yeni bölgenin verisini ekleyip yeniden eğitmek genelde yeterlidir. Kavram kaymasında eski veriye daha az ağırlık vermek, daha sık yeniden eğitim ya da özellikleri yeniden tasarlamak gerekir.</p>',
@@ -106,7 +106,7 @@ I(['ml', 'muhendis'], 'temel', 'kavram', 'Toplu ve çevrim içi tahmin',
   '<p><b>Toplu tahmin:</b> Model belirli aralıklarla (ör. her gece) çalışır, tüm varlıklar için tahmin üretir ve sonuçları bir tabloya yazar. Uygulamalar sonucu tablodan okur.</p>'
   '<ul><li>Artıları: Basit altyapı, büyük hacimde verimli, gecikme sorunu yok, hata olursa yeniden çalıştırılabilir.</li>'
   '<li>Eksileri: Tahminler bayatlar; gün içinde olan bir değişikliği yansıtmaz; tahmin edilmeyecek varlıklar için de hesaplama yapılır.</li>'
-  '<li>Örnek: Anadolu Bank\'ın her gece hesapladığı müşteri terk riski skorları; Pusula İK\'nın haftalık ayrılma risk listesi.</li></ul>'
+  '<li>Örnek: Ilgaz Bank\'ın her gece hesapladığı müşteri terk riski skorları; Pusula İK\'nın haftalık ayrılma risk listesi.</li></ul>'
   '<p><b>Çevrim içi tahmin:</b> Model bir API arkasında çalışır, istek geldiği anda o andaki verilerle tahmin üretir.</p>'
   '<ul><li>Artıları: Taze bağlam (o anki sepet, konum, saat).</li>'
   '<li>Eksileri: Düşük gecikme gerekir (ör. &lt; 100 ms), özelliklerin anlık sunulması gerekir (özellik deposu), ölçekleme, izleme ve yedek planı daha karmaşıktır.</li>'
@@ -193,7 +193,7 @@ I(['ml', 'bilimci'], 'orta', 'vaka', 'Vaka: performans düşüşü teşhisi',
   'Teşhis sorularında "önce en ucuz ve en olası kontroller" sırasını vurgula.'),
 
 I(['ml', 'bilimci'], 'ileri', 'vaka', 'Vaka: gecikmeli etiketler',
-  'Anadolu Bank\'ın kart dolandırıcılığı modelinde gerçek etiketler (müşteri itirazı) ortalama 45 gün sonra geliyor. Modelin bozulduğunu nasıl erken anlarsın ve yeniden eğitimi nasıl kurgularsın?',
+  'Ilgaz Bank\'ın kart dolandırıcılığı modelinde gerçek etiketler (müşteri itirazı) ortalama 45 gün sonra geliyor. Modelin bozulduğunu nasıl erken anlarsın ve yeniden eğitimi nasıl kurgularsın?',
   '<p><b>Sorun:</b> Performans metriği (precision/recall) ancak 45 gün sonra hesaplanabilir; bu sürede model bozulduysa ciddi kayıp oluşur.</p>'
   '<p><b>1) Vekil (proxy) sinyaller:</b></p><ul>'
   '<li><b>Girdi kayması:</b> İşlem tutarı, ülke, işyeri kategorisi, cihaz dağılımlarında PSI.</li>'

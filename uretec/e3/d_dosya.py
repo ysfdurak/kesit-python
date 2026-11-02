@@ -270,7 +270,7 @@ def ayar_oku(yol):
     return ayarlar
 ''',
      tests=r'''
-metin = "# Anadolu Bank rapor ayarları\nsube = Kadıköy\n\n   # eski: sube=Ankara\nesik=1000\nbaglanti = host=db;port=5432\n"
+metin = "# Ilgaz Bank rapor ayarları\nsube = Kadıköy\n\n   # eski: sube=Ankara\nesik=1000\nbaglanti = host=db;port=5432\n"
 open("x2_ayar.cfg", "w", encoding="utf-8").write(metin)
 a = ayar_oku("x2_ayar.cfg")
 assert isinstance(a, dict), "Sözlük döndürmelisin"

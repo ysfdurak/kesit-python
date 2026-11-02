@@ -174,7 +174,7 @@
   lv: 'temel',
   topic: 'Kayan nokta ve Decimal',
   kind: 'kod-okuma',
-  q: 'Anadolu Bank\'ta faiz hesabında kuruş farkı çıkıyor. Çıktı nedir, parayı nasıl tutmalıyız?',
+  q: 'Ilgaz Bank\'ta faiz hesabında kuruş farkı çıkıyor. Çıktı nedir, parayı nasıl tutmalıyız?',
   a: '<p><code>float</code>, IEEE 754 standardında <b>ikili (binary)</b> kayan nokta sayısıdır. 0.1 gibi ondalık kesirler ikili sistemde tam ifade edilemez (1/3\'ün ondalıkta 0.333… olması gibi). Bu yüzden <code>0.1 + 0.2</code> tam 0.3 değildir.</p><p><code>round(2.675, 2)</code> 2.68 değil 2.67 verir. Bunun iki nedeni var: 2.675 bellekte aslında 2.67499999… olarak tutulur ve Python\'un <code>round</code>\'u ayrıca "bankacı yuvarlaması" (yarımı çifte yuvarla) kullanır.</p><p><b>Para için doğru yol:</b></p><ul><li><code>Decimal</code>\'i mutlaka <b>string\'ten</b> oluştur. Son satırın gösterdiği gibi <code>Decimal(0.1)</code> float\'ın hatasını olduğu gibi taşır.</li><li>Yuvarlamayı açıkça <code>quantize</code> ve mevzuata uygun bir kip (<code>ROUND_HALF_UP</code>) ile yap.</li><li>Alternatif: tutarları tamsayı kuruş olarak sakla.</li><li>Veritabanında <code>NUMERIC(18, 2)</code> kullan, <code>FLOAT</code> değil.</li></ul><p>Float\'ları karşılaştırırken <code>math.isclose(a, b)</code> kullan. Bilimsel hesaplarda float doğru araçtır; para ve muhasebede değildir.</p>',
   code: 'from decimal import Decimal, ROUND_HALF_UP\nprint(0.1 + 0.2 == 0.3)\nprint(0.1 + 0.2)\nprint(round(2.675, 2))\nd = Decimal("2.675").quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)\nprint(d)\nprint(Decimal("0.1") + Decimal("0.2") == Decimal("0.3"))\nprint(Decimal(0.1))\n',
   out: 'False\n0.30000000000000004\n2.67\n2.68\nTrue\n0.1000000000000000055511151231257827021181583404541015625',

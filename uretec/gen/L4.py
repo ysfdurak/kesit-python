@@ -6,9 +6,9 @@ BANK = r'''import numpy as np
 import pandas as pd
 import veri
 
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers").set_index("customer_id")
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers").set_index("customer_id")
 KESIM = pd.Timestamp("2024-07-01")
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
 once, sonra = d[d["txn_time"] < KESIM], d[d["txn_time"] >= KESIM]
@@ -26,7 +26,7 @@ X = tablo.to_numpy(dtype=float)
 
 body = r'''<h2>Sinir ağı: katman katman öğrenen bir fonksiyon</h2>
 <p>Bir el yazısı rakam görüntüsü 64 pikselden oluşur. Hangi pikselin hangi rakamı işaret ettiğini kural olarak yazamazsın; bir lojistik regresyon da pikselleri tek tek ağırlıklandırmakla sınırlı kalır. <b>Sinir ağı</b> (neural network) ise ara katmanlarda kendi özelliklerini öğrenir: ilk katman kenarları, sonraki katman kenarlardan oluşan şekilleri. Bu, görüntü, ses ve metinde derin öğrenmeyi (deep learning) vazgeçilmez yapan özelliktir.</p>
-<p>Bu derste sinir ağını önce <b>numpy ile sıfırdan</b> kuracaksın (ileri yayılım, kayıp, geri yayılım, gradyan inişi), sonra scikit-learn'ün <code>MLPClassifier</code>'ı ile Anadolu Bank verisinde ağaç modelleriyle karşılaştıracak, en sonda PyTorch kodunu okuyacaksın. <code>ml-giris</code> ve <code>ml-pipeline-degerlendirme</code> derslerindeki bölme, ölçekleme ve sızıntı kuralları burada da aynen geçerli.</p>
+<p>Bu derste sinir ağını önce <b>numpy ile sıfırdan</b> kuracaksın (ileri yayılım, kayıp, geri yayılım, gradyan inişi), sonra scikit-learn'ün <code>MLPClassifier</code>'ı ile Ilgaz Bank verisinde ağaç modelleriyle karşılaştıracak, en sonda PyTorch kodunu okuyacaksın. <code>ml-giris</code> ve <code>ml-pipeline-degerlendirme</code> derslerindeki bölme, ölçekleme ve sızıntı kuralları burada da aynen geçerli.</p>
 
 <h2>Nöron, katman, aktivasyon</h2>
 <p>Bir <b>nöron</b> girdilerin ağırlıklı toplamını alır, bir sapma (bias) ekler ve sonucu bir <b>aktivasyon fonksiyonundan</b> geçirir: <code>a = f(w·x + b)</code>. Bir <b>katman</b> aynı girdiye bakan nöronlar kümesidir ve matris çarpımıyla tek satırda hesaplanır: <code>A = f(X @ W + b)</code>. X'in şekli (örnek, girdi), W'nin (girdi, nöron), çıktınınki (örnek, nöron).</p>
@@ -144,7 +144,7 @@ mlp = make_pipeline(StandardScaler(), MLPClassifier(hidden_layer_sizes=(64,), ma
 mlp.fit(Xa, ya)
 print("rakam doğruluğu:", round(mlp.score(Xb, yb), 3), " epoch:", mlp[-1].n_iter_)
 </pre>
-<p>Anadolu Bank'ın "ikinci yarıda kim çok harcayacak?" tablosunda (<code>ozellik-muhendisligi</code> dersindeki özellikler) ise tek gizli katmanlı MLP ile <code>HistGradientBoostingClassifier</code> neredeyse aynı AUC'yi (≈0.82) veriyor; boosting ölçekleme istemez, daha hızlı eğitilir ve ayarı daha az hassastır. Mini projede bunu kendin ölçeceksin.</p>
+<p>Ilgaz Bank'ın "ikinci yarıda kim çok harcayacak?" tablosunda (<code>ozellik-muhendisligi</code> dersindeki özellikler) ise tek gizli katmanlı MLP ile <code>HistGradientBoostingClassifier</code> neredeyse aynı AUC'yi (≈0.82) veriyor; boosting ölçekleme istemez, daha hızlı eğitilir ve ayarı daha az hassastır. Mini projede bunu kendin ölçeceksin.</p>
 
 <h2>PyTorch: tensör, nn.Module, eğitim döngüsü, DataLoader</h2>
 <p>Gerçek derin öğrenme projelerinde PyTorch kullanılır: GPU üzerinde hesap yapar ve gradyanları <b>otomatik türev</b> (autograd) ile kendisi bulur. Elle yazdığın geri yayılımı <code>loss.backward()</code> tek satırda yapar. PyTorch tarayıcıda çalışmaz; kodu oku ve kendi bilgisayarında dene.</p>
@@ -221,7 +221,7 @@ ex.append(dict(t='mc', stage='Isınma',
     a=0,
     why='Büyük adımlar minimumun üzerinden atlayıp sapar; ağırlıklar büyür, exp taşar ve nan oluşur. Önce öğrenme oranını düşür, girdileri ölçekle. Daha uzun eğitmek ya da büyütmek sorunu büyütür.'))
 ex.append(dict(t='mc', stage='Isınma',
-    q='Anadolu Bank 50 bin müşterilik bir tabloyla (yaş, segment, işlem özetleri) churn tahmini yapacak. Hangi başlangıç en makuldür?',
+    q='Ilgaz Bank 50 bin müşterilik bir tabloyla (yaş, segment, işlem özetleri) churn tahmini yapacak. Hangi başlangıç en makuldür?',
     o=['Sıfırdan eğitilen derin bir transformer modeli; en yeni mimari en iyi sonucu verir', 'Önceden eğitilmiş bir görüntü modeliyle transfer öğrenme', 'Gradient boosting ile güçlü bir temel çizgi, gerekirse MLP ile karşılaştırma', 'Tek gizli katmanlı bir ağ; tablo verisinde başka model türleri işe yaramaz'],
     a=2,
     why='Tablo verisinde gradient boosting çoğu zaman en iyi ya da eşit sonucu, daha az ayar ve daha hızlı eğitimle verir. Derin öğrenme yapısız veride (görüntü, metin, ses) öne çıkar. Karşılaştırma aynı doğrulama düzeninde yapılmalıdır.'))
@@ -593,7 +593,7 @@ assert r[2][1] < r[8][1] < r[64][1], "Kapasite arttıkça test doğruluğu artma
     why='2 nöronlu darboğaz 10 sınıfı taşıyacak kadar bilgi geçiremez: hem eğitim hem test düşük (eksik öğrenme). 64 nöron eğitimi ezberler ama ölçeklenmiş piksellerle test de çok iyidir. Eğitim ve test doğruluğunu yan yana raporlamak aşırı/eksik öğrenmeyi tek bakışta gösterir.'))
 
 ex.append(dict(t='code', stage='Kendin yaz', id='derin-ogrenme-giris-8', diff=2, needs=['pandas'],
-    q='<p><b>Ölçekleme şart mı?</b> Start kodu Anadolu Bank\'ın "ikinci yarıda çok harcayacak mı?" tablosunu (<code>X</code>, <code>y</code>; özellikler: risk puanı, işlem sayısı, kart adedi, log kart toplamı, kart hesabı sayısı) hazırlar. <code>olcek_etkisi(X, y)</code> yaz: veriyi <code>test_size=0.3, random_state=0, stratify=y</code> ile böl; <code>MLPClassifier(hidden_layer_sizes=(16,), max_iter=2000, random_state=0)</code> modelini bir kez ölçeksiz, bir kez <code>StandardScaler</code> pipeline\'ı ile eğit. <code>{"olceksiz": auc, "olcekli": auc}</code> döndür (test ROC-AUC, 3 basamak).</p>',
+    q='<p><b>Ölçekleme şart mı?</b> Start kodu Ilgaz Bank\'ın "ikinci yarıda çok harcayacak mı?" tablosunu (<code>X</code>, <code>y</code>; özellikler: risk puanı, işlem sayısı, kart adedi, log kart toplamı, kart hesabı sayısı) hazırlar. <code>olcek_etkisi(X, y)</code> yaz: veriyi <code>test_size=0.3, random_state=0, stratify=y</code> ile böl; <code>MLPClassifier(hidden_layer_sizes=(16,), max_iter=2000, random_state=0)</code> modelini bir kez ölçeksiz, bir kez <code>StandardScaler</code> pipeline\'ı ile eğit. <code>{"olceksiz": auc, "olcekli": auc}</code> döndür (test ROC-AUC, 3 basamak).</p>',
     start=BANK + r'''import warnings
 from sklearn.metrics import roc_auc_score
 from sklearn.model_selection import train_test_split
@@ -823,7 +823,7 @@ assert gradyan_kontrol(lambda v: 5.0, np.zeros(2), np.zeros(2)) == 0.0, "Her iki
     why='Gradyan kontrolü, elle yazılmış geri yayılımın tek güvenilir testidir; göreli fark 1e-7 civarındaysa kod doğrudur, 1e-2 ise bir yerde hata vardır. w\'yu yerinde değiştirip geri almak bellek kopyasından kaçınır ama geri almayı unutmak sonraki ölçümleri bozar. PyTorch\'ta torch.autograd.gradcheck aynı işi yapar.'))
 
 ex.append(dict(t='code', stage='Mini proje', id='derin-ogrenme-giris-13', diff=3, needs=['pandas'],
-    q='<p><b>Anadolu Bank: MLP mi, gradient boosting mi?</b> Start kodu müşteri tablosunu (<code>X</code>, <code>y</code>) hazırlar. <code>karsilastir(X, y)</code> fonksiyonunu yaz: veriyi <code>test_size=0.3, random_state=0, stratify=y</code> ile böl ve dört modeli eğitip test ROC-AUC\'lerini (3 basamak) sözlük olarak döndür:</p><ul><li><code>"lojistik"</code>: <code>StandardScaler</code> + <code>LogisticRegression(max_iter=1000)</code></li><li><code>"mlp"</code>: <code>StandardScaler</code> + <code>MLPClassifier(hidden_layer_sizes=(16,), alpha=1e-2, max_iter=2000, random_state=0)</code></li><li><code>"mlp_derin"</code>: aynısı, <code>hidden_layer_sizes=(32, 16)</code>, <code>alpha=1.0</code></li><li><code>"hgb"</code>: <code>HistGradientBoostingClassifier(random_state=0)</code> (ölçeksiz)</li></ul><p>Ayrıca <code>"en_iyi"</code> anahtarına AUC\'si en yüksek modelin adını yaz (eşitlikte sözlükte önce gelen).</p>',
+    q='<p><b>Ilgaz Bank: MLP mi, gradient boosting mi?</b> Start kodu müşteri tablosunu (<code>X</code>, <code>y</code>) hazırlar. <code>karsilastir(X, y)</code> fonksiyonunu yaz: veriyi <code>test_size=0.3, random_state=0, stratify=y</code> ile böl ve dört modeli eğitip test ROC-AUC\'lerini (3 basamak) sözlük olarak döndür:</p><ul><li><code>"lojistik"</code>: <code>StandardScaler</code> + <code>LogisticRegression(max_iter=1000)</code></li><li><code>"mlp"</code>: <code>StandardScaler</code> + <code>MLPClassifier(hidden_layer_sizes=(16,), alpha=1e-2, max_iter=2000, random_state=0)</code></li><li><code>"mlp_derin"</code>: aynısı, <code>hidden_layer_sizes=(32, 16)</code>, <code>alpha=1.0</code></li><li><code>"hgb"</code>: <code>HistGradientBoostingClassifier(random_state=0)</code> (ölçeksiz)</li></ul><p>Ayrıca <code>"en_iyi"</code> anahtarına AUC\'si en yüksek modelin adını yaz (eşitlikte sözlükte önce gelen).</p>',
     start=BANK + r'''import warnings
 from sklearn.ensemble import HistGradientBoostingClassifier
 from sklearn.linear_model import LogisticRegression

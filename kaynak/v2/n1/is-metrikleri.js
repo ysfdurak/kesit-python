@@ -1,4 +1,4 @@
-/* PythonPatika — v2/n1: İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV */
+/* Kesit Python — v2/n1: İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -20,7 +20,7 @@ L.push(
     ],
     body: `<h2>Metrik, analistin ürünüdür</h2>
 <p>Yönetim "ciro neden düştü?", pazarlama "kampanya işe yaradı mı?", finans "bir müşteri bize ne kadar kazandırıyor?" diye sorar. Bu soruların hepsi bir <b>metrik</b> (metric) ve onun doğru hesaplanmış, doğru karşılaştırılmış bir değeri ister. pandas ile gruplamayı, istatistik dersinde A/B testini gördün. Bu ders analitik ekiplerin her gün kullandığı kalıpları toplar: KPI ağacı, huni, kohort ve tutundurma, LTV, dönem karşılaştırmaları, köprü analizi, Pareto ve en sık metrik tuzakları.</p>
-<p>Veri: Anadolu Market <code>orders</code>, <code>order_items</code>, <code>products</code> ve <code>web_events</code> (Ekim–Kasım 2024 site olayları); ayrıca PBIPatika'daki <code>kesit_bi</code> yıldız şemasının <code>Satislar</code> tablosu. Ciro tanımı bu derste de aynı: net = <code>quantity × unit_price × (1 − discount)</code>, yalnız <code>delivered</code> ve <code>shipped</code> siparişler.</p>
+<p>Veri: Anadolu Market <code>orders</code>, <code>order_items</code>, <code>products</code> ve <code>web_events</code> (Ekim–Kasım 2024 site olayları); ayrıca Kesit Power BI'daki <code>kesit_bi</code> yıldız şemasının <code>Satislar</code> tablosu. Ciro tanımı bu derste de aynı: net = <code>quantity × unit_price × (1 − discount)</code>, yalnız <code>delivered</code> ve <code>shipped</code> siparişler.</p>
 
 <h2>1. KPI ağacı ve metrik sözleşmesi</h2>
 <p>Ciro tek başına "neden" söylemez. Onu çarpanlarına ayırınca hangi kolun hareket ettiği görünür:</p>

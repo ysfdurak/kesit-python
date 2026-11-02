@@ -2,7 +2,7 @@ START = 131
 TASKS = [
 dict(topic='Metinler', diff=2, kind='bug',
   title='Telefon numarası temizlenmiyor',
-  q='<p>Kodda bir hata var, bul ve düzelt. Anadolu Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
+  q='<p>Kodda bir hata var, bul ve düzelt. Ilgaz Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
   start=r'''
 def telefon_temizle(tel):
     tel.replace(" ", "")
@@ -157,7 +157,7 @@ assert normalize_ara("cagri") == normalize_ara("ÇAĞRI"), "Aynı ad farklı yaz
 
 dict(topic='Unicode ve Girdi', diff=1, kind='yaz',
   title='Taksit hesaplayan program',
-  q='<p>Anadolu Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
+  q='<p>Ilgaz Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
   stdin=['12000', '6'],
   start=r'''
 # buraya yaz

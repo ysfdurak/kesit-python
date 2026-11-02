@@ -1,4 +1,4 @@
-/* PythonPatika — Bitirme projesi: haftalık satış raporu otomasyonu (v2/o5) */
+/* Kesit Python — Bitirme projesi: haftalık satış raporu otomasyonu (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

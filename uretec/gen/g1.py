@@ -28,7 +28,7 @@ build-backend = "hatchling.build"
 [project]
 name = "anadolu-skor"
 dynamic = ["version"]
-description = "Anadolu Bank kredi skoru araçları"
+description = "Ilgaz Bank kredi skoru araçları"
 readme = "README.md"
 license = "MIT"
 requires-python = "&gt;=3.11"

@@ -1,4 +1,4 @@
-/* PythonPatika — uzantı: fonksiyonel (Derinleş) */
+/* Kesit Python — uzantı: fonksiyonel (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

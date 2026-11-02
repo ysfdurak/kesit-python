@@ -1,4 +1,4 @@
-/* PythonPatika v2 — redis-kuyruk */
+/* Kesit Python v2 — redis-kuyruk */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

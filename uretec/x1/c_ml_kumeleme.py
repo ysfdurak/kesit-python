@@ -52,7 +52,7 @@ print(pd.crosstab(r["kume"], r.join(seg)["segment"]))
 '</table></div>' \
 '<p>Çapraz tablo ilginç bir şey söylüyor: CRM\'deki "Premium" etiketli müşterilerin bir kısmı davranış olarak "Kayıp riski" kümesinde. Etiket kayıt anındaki sözleşmeyi, küme ise <b>bugünkü davranışı</b> anlatır. Bu farkı bulmak, kümelemenin iş değerinin ta kendisidir.</p>' \
 '<div class="warn"><b>Küme numarası bir ad değildir</b>k-means\'in verdiği 0, 1, 2 numaraları sürümden sürüme ya da veri değiştikçe yer değiştirebilir. Raporda numaraya değil, profile göre ad ver (ör. "monetary ortalaması en yüksek küme = Şampiyonlar") ve bunu kodla yap.</div>' \
-'<div class="note"><b>Gerçek işte</b>Segmentasyon modeli genellikle ayda bir yeniden çalıştırılır ve her müşterinin kümesi CRM\'e bir alan olarak yazılır. Ölçekleyici ve model aynı tarihte birlikte kaydedilir; aksi hâlde yeni ay verisini eski ölçeğe göre dönüştürüp yanlış kümeye atarsın. PBIPatika\'daki <code>kesit_bi.RFMSegmentleri</code> tablosu, kural tabanlı RFM\'in Power BI tarafındaki karşılığıdır; bitirme projesinde (proje-ileri) ikisini karşılaştıracaksın.</div>'
+'<div class="note"><b>Gerçek işte</b>Segmentasyon modeli genellikle ayda bir yeniden çalıştırılır ve her müşterinin kümesi CRM\'e bir alan olarak yazılır. Ölçekleyici ve model aynı tarihte birlikte kaydedilir; aksi hâlde yeni ay verisini eski ölçeğe göre dönüştürüp yanlış kümeye atarsın. Kesit Power BI\'daki <code>kesit_bi.RFMSegmentleri</code> tablosu, kural tabanlı RFM\'in Power BI tarafındaki karşılığıdır; bitirme projesinde (proje-ileri) ikisini karşılaştıracaksın.</div>'
 
 ex = [
  dict(t='predict', stage='Kodu oku', q='Gerçek RFM tablosu kuruluyor (<code>rfm_tablosu</code> dersteki gibi). Bu kod ne yazdırır?', needs=['pandas'],

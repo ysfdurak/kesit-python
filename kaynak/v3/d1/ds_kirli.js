@@ -1,4 +1,4 @@
-/* PythonPatika — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480) */
+/* Kesit Python — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

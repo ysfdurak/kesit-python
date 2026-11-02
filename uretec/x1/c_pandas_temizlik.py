@@ -2,7 +2,7 @@ import sys; sys.path.insert(0, '/tmp/claude-0/-home-claude/6c066959-3fcb-54bb-bd
 from lib import *
 
 html = '<h2>Derinleş: gerçek kirli veriyle temizlik</h2>' \
-'<p>Derste temizlik tekniklerini küçük, elle kurulmuş tablolarla gördün. Şimdi aynı teknikleri gerçek dağınıklıkta deneyelim. İki kaynak kullanacağız: <code>kirli_veri</code> seti (PBIPatika\'daki Power Query derslerinin kaynak dosyaları: elle doldurulmuş Excel sayfaları ve CRM dökümü) ve <code>anadolu_market</code> setindeki <code>raw_signups</code> tablosu (web formundan gelen 52 ham kayıt). Power Query\'de tıklayarak yaptığın her adımın pandas karşılığını burada kodla kuracaksın.</p>' \
+'<p>Derste temizlik tekniklerini küçük, elle kurulmuş tablolarla gördün. Şimdi aynı teknikleri gerçek dağınıklıkta deneyelim. İki kaynak kullanacağız: <code>kirli_veri</code> seti (Kesit Power BI\'daki Power Query derslerinin kaynak dosyaları: elle doldurulmuş Excel sayfaları ve CRM dökümü) ve <code>anadolu_market</code> setindeki <code>raw_signups</code> tablosu (web formundan gelen 52 ham kayıt). Power Query\'de tıklayarak yaptığın her adımın pandas karşılığını burada kodla kuracaksın.</p>' \
 '<div class="tbl-wrap"><table><tr><th>Tablo</th><th>Sorunlar</th><th>pandas çaresi</th></tr>' \
 '<tr><td><code>kirli_veri/bayi</code></td><td>Üstte rapor başlığı, boş satır, yinelenen satır, " istanbul " gibi boşluklu şehir, "1.250,50" ve "-" tutarları, "bilinmiyor" tarihi</td><td><code>skiprows</code>, <code>dropna(how="all")</code>, <code>drop_duplicates</code>, <code>.str.strip</code>, <code>to_numeric(errors="coerce")</code></td></tr>' \
 '<tr><td><code>kirli_veri/hedef</code></td><td>Aylar ayrı sütunlarda (geniş tablo)</td><td><code>melt</code></td></tr>' \

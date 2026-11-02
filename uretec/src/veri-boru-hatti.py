@@ -199,7 +199,7 @@ assert sonuc[1] == [], "Kızılay Bayi (980) geçerli"
 assert sonuc[2] == ["Column4: tür"], "Alsancak Bayi tutarı '-'"
 assert sonuc[3] == ["Column1: boş", "Column3: boş", "Column4: boş"], f"Boş satır üç zorunlu alanı ihlal eder: {sonuc[3]}"
 assert sonuc[8] == ["Column3: desen", "Column4: tür"], f"Selçuklu Bayi: tarih 'bilinmiyor', tutar metin: {sonuc[8]}"
-assert sum(1 for h in sonuc if not h) == 3, "10 satırdan yalnız 3'ü şemaya uyar"
+assert sum(1 for h in sonuc if not h) == 2, "10 satırdan yalnız 2'ü şemaya uyar"
 assert sema_dogrula({"a": True}, {"a": {"tur": "int"}}) == ["a: tür"], "bool int sayılmamalı"
 assert sema_dogrula({"a": "x"}, {"a": {"kume": {"y"}}}) == ["a: küme"], "küme kuralı"
 ''',

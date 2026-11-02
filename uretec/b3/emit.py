@@ -8,7 +8,7 @@ def js(v):
     return "'" + s + "'"
 def emit(n):
     spec = importlib.util.spec_from_file_location('m', f't{n:02d}.py'); m = importlib.util.module_from_spec(spec); spec.loader.exec_module(m)
-    out = [f'/* PythonPatika — pratik bankası: ileri görevler ({m.T[0]["id"]} … {m.T[-1]["id"]}) */', '(function (W) {', "'use strict';", 'const B = W.PY_BANK = W.PY_BANK || [];', 'B.push(']
+    out = [f'/* Kesit Python — pratik bankası: ileri görevler ({m.T[0]["id"]} … {m.T[-1]["id"]}) */', '(function (W) {', "'use strict';", 'const B = W.PY_BANK = W.PY_BANK || [];', 'B.push(']
     items = []
     for t in m.T:
         t = dict(t); t.setdefault('lv', 'ileri')

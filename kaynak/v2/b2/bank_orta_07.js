@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Regex, JSON/CSV/YAML, Dosya İşlemleri (b-271…b-280) */
+/* Kesit Python — pratik bankası (orta): Regex, JSON/CSV/YAML, Dosya İşlemleri (b-271…b-280) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -29,7 +29,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Şifre politikası: ileriye bakış',
-    q: '<p>Anadolu Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
+    q: '<p>Ilgaz Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
     guide: ['Her "en az bir" kuralı ayrı bir ileriye bakış olur: <code>(?=.*[A-Z])</code> gibi; bunlar karakter tüketmez.', 'Rakam için <code>(?=.*\\d)</code>, özel karakter için <code>(?=.*[!@#$%*.-])</code>.', 'Uzunluk ve boşluk yasağını tüketen kısım halleder: <code>\\S{8,}</code>.', 'Hepsini birleştirip <code>re.fullmatch(desen, s) is not None</code> döndür.'],
     example: 'import re\n# İleriye bakış: "ileride şu var mı?" diye bakar ama konumu ilerletmez\ndesen = r"(?=.*[aeıioöuü])\\w{3,}"   # en az bir sesli harf, en az 3 harf\nfor k in ["kitap", "krt", "ab"]:\n    print(k, bool(re.fullmatch(desen, k)))\n',
     start: 'import re\n\ndef sifre_gecerli(s):\n    # TODO 1: büyük harf, rakam, özel karakter için üç lookahead\n    # TODO 2: boşluksuz en az 8 karakter\n    desen = r".{8,}"\n    return re.fullmatch(desen, s) is not None\n',

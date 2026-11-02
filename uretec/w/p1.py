@@ -1,9 +1,9 @@
 import sys; sys.path.insert(0,'/home/claude/py/tools/pylib'); import veri, pandas as pd, numpy as np, time
 t=time.time()
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
 print('read', time.time()-t)
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers")
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers")
 KESIM = pd.Timestamp("2024-07-01")
 def musteri_ozet(islem, hesap, kesim):
     d = islem[islem["txn_time"] < kesim].merge(hesap[["account_id", "customer_id"]], on="account_id")

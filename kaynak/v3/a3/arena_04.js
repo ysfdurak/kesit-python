@@ -1,4 +1,4 @@
-/* PythonPatika — v3/a3: Graf (a-179…a-190) */
+/* Kesit Python — v3/a3: Graf (a-179…a-190) */
 (function (W) { 'use strict'; const A = W.PY_ARENA = W.PY_ARENA || []; A.push(
 {
   id: 'a-179',
@@ -267,7 +267,7 @@
   tags: ['MST', 'Kruskal', 'union-find'],
   src: 'HackerRank Kruskal (MST): Really Special Subtree / LeetCode 1584 benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank, N şubesini özel fiber hatla birbirine bağlayacak. M aday hattın her birinin döşeme maliyeti biliniyor (hatlar iki yönlü). Amaç: tüm şubelerin (doğrudan ya da dolaylı) birbirine ulaşabildiği, <b>toplam maliyeti en düşük</b> hat kümesini seçmek.</p>\n<p>Bu en düşük toplam maliyeti yaz. Tüm şubeleri bağlamak mümkün değilse <code>-1</code> yaz.</p>',
+  statement: '<p>Ilgaz Bank, N şubesini özel fiber hatla birbirine bağlayacak. M aday hattın her birinin döşeme maliyeti biliniyor (hatlar iki yönlü). Amaç: tüm şubelerin (doğrudan ya da dolaylı) birbirine ulaşabildiği, <b>toplam maliyeti en düşük</b> hat kümesini seçmek.</p>\n<p>Bu en düşük toplam maliyeti yaz. Tüm şubeleri bağlamak mümkün değilse <code>-1</code> yaz.</p>',
   input: '<p>İlk satırda N ve M. Sonraki M satırda <code>a b maliyet</code>.</p>',
   output: '<p>En düşük toplam maliyet ya da −1.</p>',
   constraints: '1 ≤ N ≤ 10^5, 0 ≤ M ≤ 2·10^5, 1 ≤ maliyet ≤ 10^6',

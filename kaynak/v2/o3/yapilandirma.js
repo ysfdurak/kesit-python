@@ -1,4 +1,4 @@
-/* PythonPatika — v2 o3: Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri */
+/* Kesit Python — v2 o3: Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -19,7 +19,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
+<p>Ilgaz Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
 <p><b>Yapılandırma</b> (configuration, kısaca config), kod değişmeden programın davranışını değiştiren her şeydir. Bu derste yaygın beş biçimi okumayı, ortamları katmanlı birleştirmeyi, ayarı doğrulamayı ve sırları güvenle yönetmeyi öğreneceksin. JSON'un temelini <b>JSON ve CSV</b> dersinde, <code>tomllib</code>'e ilk bakışı <b>Sanal ortam ve paket yönetimi</b> dersinde gördün; burada hepsini yapılandırma gözüyle birleştiriyoruz.</p>
 
 <h2>Biçimleri tanı</h2>
@@ -40,7 +40,7 @@ metin = """
 uygulama: kredi-servisi
 surum: "1.4"
 veritabani:
-  host: db.anadolubank.local
+  host: db.ilgazbank.local
   port: 5432
 subeler: [Ankara, İzmir, Bursa]
 eposta_gonder: true
@@ -67,7 +67,7 @@ ad = "kredi-servisi"
 baslangic = 2026-01-15
 
 [veritabani]
-host = "db.anadolubank.local"
+host = "db.ilgazbank.local"
 port = 5432
 
 [[sube]]
@@ -229,7 +229,7 @@ for anahtar, deger in ayar.items():
     {
       t: 'mc',
       stage: 'Isınma',
-      q: 'Anadolu Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
+      q: 'Ilgaz Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
       o: [
         'Kodda bir sabit olarak, örn. DB_PAROLA = "..."',
         'Depoya giren ayar.yaml dosyasında',
@@ -359,7 +359,7 @@ for anahtar, deger in ayar.items():
       example: 'satir = "URL = https://x.com/?a=1&b=2"\nanahtar, _, deger = satir.partition("=")\nprint(repr(anahtar.strip()), repr(deger.strip()))\nprint("\'abc\'"[1:-1], "export X=1".removeprefix("export "))\n',
       start: 'def env_ayristir(metin):\n    sonuc = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        # TODO: boş, yorum ve = içermeyen satırları atla\n        # TODO: export önekini at, ilk = işaretinden böl\n        # TODO: tırnakları soy ve sözlüğe ekle\n    return sonuc\n',
       sol: 'def env_ayristir(metin):\n    sonuc = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        if not satir or satir.startswith("#") or "=" not in satir:\n            continue\n        satir = satir.removeprefix("export ")\n        anahtar, _, deger = satir.partition("=")\n        anahtar, deger = anahtar.strip(), deger.strip()\n        if len(deger) >= 2 and deger[0] == deger[-1] and deger[0] in "\\"\'":\n            deger = deger[1:-1]\n        sonuc[anahtar] = deger\n    return sonuc\n',
-      tests: '_m = """\n# Anadolu Bank kredi servisi\nAPP_ENV=dev\nexport DB_URL = postgresql://kredi:x@localhost:5432/kredi?ssl=1\n\nDB_PAROLA="gizli = parola"\nAPI_TOKEN=\'tok_123\'\nBOS=\nbozuk satir\n"""\n_s = env_ayristir(_m)\nassert _s.get("APP_ENV") == "dev", "basit KEY=VALUE okunmalı"\nassert _s.get("DB_URL") == "postgresql://kredi:x@localhost:5432/kredi?ssl=1", "export öneki atılmalı, değer ilk = işaretinden sonra bütün kalmalı"\nassert _s.get("DB_PAROLA") == "gizli = parola", "çift tırnak soyulmalı, içerideki = korunmalı"\nassert _s.get("API_TOKEN") == "tok_123", "tek tırnak soyulmalı"\nassert _s.get("BOS") == "", "boş değer boş metin olmalı"\nassert len(_s) == 5, f"yorum ve bozuk satır atlanmalı, 5 anahtar bekleniyordu: {list(_s)}"\n',
+      tests: '_m = """\n# Ilgaz Bank kredi servisi\nAPP_ENV=dev\nexport DB_URL = postgresql://kredi:x@localhost:5432/kredi?ssl=1\n\nDB_PAROLA="gizli = parola"\nAPI_TOKEN=\'tok_123\'\nBOS=\nbozuk satir\n"""\n_s = env_ayristir(_m)\nassert _s.get("APP_ENV") == "dev", "basit KEY=VALUE okunmalı"\nassert _s.get("DB_URL") == "postgresql://kredi:x@localhost:5432/kredi?ssl=1", "export öneki atılmalı, değer ilk = işaretinden sonra bütün kalmalı"\nassert _s.get("DB_PAROLA") == "gizli = parola", "çift tırnak soyulmalı, içerideki = korunmalı"\nassert _s.get("API_TOKEN") == "tok_123", "tek tırnak soyulmalı"\nassert _s.get("BOS") == "", "boş değer boş metin olmalı"\nassert len(_s) == 5, f"yorum ve bozuk satır atlanmalı, 5 anahtar bekleniyordu: {list(_s)}"\n',
       hints: ['satir.partition("=") yalnızca ilk = işaretinden böler ve (önce, "=", sonra) döndürür.', 'Tırnak kontrolü: deger[0] == deger[-1] and deger[0] in "\\"\'"', 'Sırayla: atla → removeprefix → partition → strip → tırnak soy → ekle.'],
       why: 'partition ilk ayraçta böldüğü için URL ve parola gibi = içeren değerler bozulmaz. Tırnak soyma yalnız iki uç aynı tırnaksa yapılır; böylece içinde tırnak geçen değerler yanlışlıkla kırpılmaz.'
     },
@@ -458,7 +458,7 @@ for anahtar, deger in ayar.items():
       stage: 'Mini proje',
       id: 'yapilandirma-11',
       diff: 3,
-      q: '<p><b>Ayar yükleyici:</b> Anadolu Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
+      q: '<p><b>Ayar yükleyici:</b> Ilgaz Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
       start: 'import copy\nimport yaml\n\ndef ayarlari_yukle(yaml_metni, ortam):\n    pass\n',
       sol: 'import copy\nimport yaml\n\ndef _birlestir(temel, ust):\n    sonuc = copy.deepcopy(temel)\n    for k, v in (ust or {}).items():\n        if isinstance(v, dict) and isinstance(sonuc.get(k), dict):\n            sonuc[k] = _birlestir(sonuc[k], v)\n        else:\n            sonuc[k] = copy.deepcopy(v)\n    return sonuc\n\ndef _parola_var(veri):\n    if isinstance(veri, dict):\n        return any(k == "parola" or _parola_var(v) for k, v in veri.items())\n    if isinstance(veri, list):\n        return any(_parola_var(x) for x in veri)\n    return False\n\ndef ayarlari_yukle(yaml_metni, ortam):\n    veri = yaml.safe_load(yaml_metni) or {}\n    ad = ortam.get("APP_ENV", "dev")\n    ortamlar = veri.get("ortamlar") or {}\n    if ad not in ortamlar:\n        raise ValueError(f"Bilinmeyen ortam: {ad}")\n    ayar = _birlestir(veri.get("varsayilan") or {}, ortamlar[ad])\n    hatalar = []\n    db = ayar.get("db") if isinstance(ayar.get("db"), dict) else {}\n    if not isinstance(db.get("host"), str) or not db.get("host"):\n        hatalar.append("db.host eksik")\n    port = db.get("port")\n    if not (isinstance(port, int) and not isinstance(port, bool) and 1 <= port <= 65535):\n        hatalar.append("db.port geçersiz")\n    limit = ayar.get("gunluk_limit")\n    if not (isinstance(limit, (int, float)) and not isinstance(limit, bool) and limit > 0):\n        hatalar.append("gunluk_limit pozitif olmalı")\n    if ad == "prod" and ayar.get("debug") is True:\n        hatalar.append("prod ortamında debug açık olamaz")\n    if _parola_var(veri):\n        hatalar.append("sır dosyada olmamalı")\n    if not ortam.get("KREDI_DB_PAROLA"):\n        hatalar.append("KREDI_DB_PAROLA eksik")\n    if hatalar:\n        raise ValueError("; ".join(hatalar))\n    ayar.setdefault("db", {})["parola"] = ortam["KREDI_DB_PAROLA"]\n    return ayar\n',
       tests: '_Y = """\nvarsayilan:\n  db: {host: localhost, port: 5432}\n  gunluk_limit: 250000\n  debug: true\nortamlar:\n  dev: {}\n  prod:\n    db: {host: prod-db}\n    debug: false\n"""\n_a = ayarlari_yukle(_Y, {"KREDI_DB_PAROLA": "dev-pw"})\nassert _a == {"db": {"host": "localhost", "port": 5432, "parola": "dev-pw"}, "gunluk_limit": 250000, "debug": True}, f"dev ayarı yanlış: {_a}"\n_p = ayarlari_yukle(_Y, {"APP_ENV": "prod", "KREDI_DB_PAROLA": "pw"})\nassert _p["db"]["host"] == "prod-db" and _p["debug"] is False and _p["db"]["port"] == 5432, "prod iç içe birleşmeli"\n_B = """\nvarsayilan:\n  db: {port: true, parola: "123"}\n  gunluk_limit: -5\n  debug: true\nortamlar:\n  prod: {}\n"""\ntry:\n    ayarlari_yukle(_B, {"APP_ENV": "prod"})\n    assert False, "hatalı ayar için ValueError bekleniyordu"\nexcept ValueError as e:\n    assert str(e) == "db.host eksik; db.port geçersiz; gunluk_limit pozitif olmalı; prod ortamında debug açık olamaz; sır dosyada olmamalı; KREDI_DB_PAROLA eksik", f"tüm hatalar sırasıyla toplanmalı, gelen: {e}"\n_G = "varsayilan:\\n  db: {host: h, port: 1}\\n  gunluk_limit: 1\\n  entegrasyon: [{ad: pos, parola: x}]\\nortamlar:\\n  dev:\\n"\ntry:\n    ayarlari_yukle(_G, {"KREDI_DB_PAROLA": "x"})\n    assert False, "listedeki parola da yakalanmalı"\nexcept ValueError as e:\n    assert str(e) == "sır dosyada olmamalı", f"gelen: {e}"\ntry:\n    ayarlari_yukle(_Y, {"APP_ENV": "staging", "KREDI_DB_PAROLA": "x"})\n    assert False, "bilinmeyen ortam"\nexcept ValueError as e:\n    assert "staging" in str(e)\n',

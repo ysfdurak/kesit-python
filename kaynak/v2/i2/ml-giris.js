@@ -1,4 +1,4 @@
-/* PythonPatika — ileri: ml-giris */
+/* Kesit Python — ileri: ml-giris */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -19,7 +19,7 @@ L.push({
   ],
   body: `
 <h2>Kural yazmak yerine kuralı öğrenmek</h2>
-<p>Anadolu Bank'ın kredi biriminde yıllardır şöyle kurallar yazılır: "Geliri 30 bin TL'nin altındaysa ve son bir yılda iki gecikmesi varsa reddet." Kurallar çoğaldıkça birbirine çarpar, yeni bir müşteri profili geldiğinde kimse hangi kuralı güncelleyeceğini bilemez. <b>Makine öğrenmesi</b> (machine learning, ML) bu işi tersine çevirir: kuralı sen yazmazsın, geçmiş örneklerden (geçmiş başvurular ve sonuçları) bir algoritma kuralı kendisi <b>öğrenir</b>. Sen veriyi hazırlar, doğru soruyu sorar ve öğrenilen modelin gerçekten işe yarayıp yaramadığını <b>ölçersin</b>.</p>
+<p>Ilgaz Bank'ın kredi biriminde yıllardır şöyle kurallar yazılır: "Geliri 30 bin TL'nin altındaysa ve son bir yılda iki gecikmesi varsa reddet." Kurallar çoğaldıkça birbirine çarpar, yeni bir müşteri profili geldiğinde kimse hangi kuralı güncelleyeceğini bilemez. <b>Makine öğrenmesi</b> (machine learning, ML) bu işi tersine çevirir: kuralı sen yazmazsın, geçmiş örneklerden (geçmiş başvurular ve sonuçları) bir algoritma kuralı kendisi <b>öğrenir</b>. Sen veriyi hazırlar, doğru soruyu sorar ve öğrenilen modelin gerçekten işe yarayıp yaramadığını <b>ölçersin</b>.</p>
 <p>Bu derste ML'in temel sözlüğünü, scikit-learn kütüphanesinin ortak arayüzünü, ilk üç modelini ve en önemlisi bir modeli <b>dürüstçe değerlendirmeyi</b> öğreneceksin. numpy dizilerini (<i>numpy</i> dersi) ve pandas DataFrame'lerini (<i>pandas-giris</i>) bildiğini varsayıyoruz; ortalama, varyans gibi kavramlar <i>istatistik</i> dersinden tanıdık gelecek.</p>
 
 <h2>Öğrenme türleri</h2>

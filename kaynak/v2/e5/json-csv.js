@@ -1,4 +1,4 @@
-/* PythonPatika — json-csv uzantısı (Derinleş) */
+/* Kesit Python — json-csv uzantısı (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -97,7 +97,7 @@ print(c.getvalue())</pre>
 <pre class="code">python -m json.tool siparis.json            # girintili göster, geçersizse hata konumu
 python -m json.tool --sort-keys a.json &gt; b.json
 python -m json.tool --json-lines log.jsonl  # her satırı ayrı doğrula</pre>
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın entegrasyon ekibi dış kurumlardan gelen CSV'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın entegrasyon ekibi dış kurumlardan gelen CSV'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>
 `,
   ex: [
     {
@@ -185,7 +185,7 @@ python -m json.tool --json-lines log.jsonl  # her satırı ayrı doğrula</pre>
       stage: 'Rehberli',
       id: 'json-csv-x3',
       diff: 2,
-      q: '<p>Anadolu Bank API yanıtını okuyan <code>yanit_coz(metin)</code> fonksiyonunu yaz. <code>json.loads</code>\'u <code>object_hook</code> ile kullan: adı <code>_tarih</code> ile biten ve değeri metin olan her alan <code>date.fromisoformat</code> ile <code>date</code>\'e çevrilsin. İç içe nesneler de çevrilmeli. Ayrıca ondalıklı sayılar <code>Decimal</code> olsun (<code>parse_float</code>).</p>',
+      q: '<p>Ilgaz Bank API yanıtını okuyan <code>yanit_coz(metin)</code> fonksiyonunu yaz. <code>json.loads</code>\'u <code>object_hook</code> ile kullan: adı <code>_tarih</code> ile biten ve değeri metin olan her alan <code>date.fromisoformat</code> ile <code>date</code>\'e çevrilsin. İç içe nesneler de çevrilmeli. Ayrıca ondalıklı sayılar <code>Decimal</code> olsun (<code>parse_float</code>).</p>',
       guide: ['Bir yardımcı fonksiyon yaz: sözlük alır, değiştirilmiş sözlüğü DÖNDÜRÜR.', 'Sözlüğün öğelerinde dön; anahtar endswith("_tarih") ve değer str ise çevir.', 'json.loads(metin, object_hook=..., parse_float=Decimal) çağır.', 'object_hook iç nesnelere de otomatik uygulanır; ekstra özyineleme gerekmez.'],
       example: 'import json\n# Benzer teknik: anahtarı "_tl" ile bitenleri kuruşa çevir\ndef kurus(n):\n    return {k: round(v * 100) if k.endswith("_tl") else v for k, v in n.items()}\nprint(json.loads(\'{"fiyat_tl": 12.5, "ad": "x"}\', object_hook=kurus))\n',
       start: 'import json\nfrom datetime import date\nfrom decimal import Decimal\n\ndef _hook(nesne):\n    # TODO: _tarih ile biten metin alanları date\'e çevir\n    return nesne\n\ndef yanit_coz(metin):\n    # TODO: object_hook ve parse_float ver\n    return json.loads(metin)\n',

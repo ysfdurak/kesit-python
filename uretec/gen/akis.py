@@ -1,9 +1,9 @@
 from lib import *
 
-TX = 'import veri\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n'
+TX = 'import veri\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n'
 
 body = '''<h2>Neden önemli? Gece 02:09'daki 80 bin liralık harcama</h2>
-<p>Anadolu Bank'ın işlem tablosunda (<code>bank_txns</code>) gece yarısından sonra internetten yapılmış, 45 ile 94 bin lira arasında kart harcamaları var. Bunları ertesi sabah toplu (batch) raporda görmek, dolandırıcılık ekibi için "çok geç" demektir: kart çoktan boşalmıştır. Bu derste olaylar <b>geldiği anda</b> işlenir: işlem gerçekleşir, mesaj bir kuyruğa yazılır, saniyeler içinde bir tüketici onu okur, kuralı uygular, dakikalık sayacı günceller ve gerekirse alarm üretir. Bu dünyanın merkezinde Apache Kafka vardır; bankacılık, e-ticaret, lojistik ve oyun şirketlerinin çoğu olay akışlarını Kafka ya da benzeri bir sistemle taşır.</p>
+<p>Ilgaz Bank'ın işlem tablosunda (<code>bank_txns</code>) gece yarısından sonra internetten yapılmış, 45 ile 94 bin lira arasında kart harcamaları var. Bunları ertesi sabah toplu (batch) raporda görmek, dolandırıcılık ekibi için "çok geç" demektir: kart çoktan boşalmıştır. Bu derste olaylar <b>geldiği anda</b> işlenir: işlem gerçekleşir, mesaj bir kuyruğa yazılır, saniyeler içinde bir tüketici onu okur, kuralı uygular, dakikalık sayacı günceller ve gerekirse alarm üretir. Bu dünyanın merkezinde Apache Kafka vardır; bankacılık, e-ticaret, lojistik ve oyun şirketlerinin çoğu olay akışlarını Kafka ya da benzeri bir sistemle taşır.</p>
 <p>Kafka bir küme ve ağ ister, tarayıcıda çalışmaz. Gerçek kodu <code>&lt;pre class="code"&gt;</code> kutularında göreceksin; kavramları ise <b>bellek içi bir log</b> ve <code>asyncio.Queue</code> ile kendin kuracaksın: topic, partition, offset, tüketici grubu, teslim garantileri, pencereleme ve watermark. <b>orkestrasyon</b> dersinde zamanlanmış toplu işleri, <b>async</b> dersinde kuyruk ve işçi havuzunu gördün; burada ikisini birleştirip sürekli akan veriye geçiyoruz.</p>
 
 <h2>Toplu, mikro-toplu ve akış; olay zamanı ile işlem zamanı</h2>
@@ -21,7 +21,7 @@ body = '''<h2>Neden önemli? Gece 02:09'daki 80 bin liralık harcama</h2>
 body += PY('''
 import veri
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 class Konu:
@@ -173,7 +173,7 @@ body += '''<p>"d" olayı sırasız gelmesine rağmen 30 saniyelik tolerans için
 <p>Üretici mesaja yeni bir alan eklediğinde eski tüketiciler kırılmamalıdır. Bu yüzden kurumsal Kafka kurulumlarında mesajlar JSON yerine şemalı bir biçimle (<b>Avro</b>, Protobuf) yazılır ve şemalar bir <b>şema kayıt defterinde</b> (Schema Registry) sürümlenir. Kayıt defteri yeni şemayı kaydetmeden önce uyumluluğu denetler: <b>geriye uyumlu</b> (backward) değişiklikte yeni şemayla eski veri okunabilir; bunun için eklenen her alanın varsayılan değeri olmalıdır.</p>
 '''
 body += CODE('''
-{"type": "record", "name": "Txn", "namespace": "anadolubank",
+{"type": "record", "name": "Txn", "namespace": "ilgazbank",
  "fields": [
    {"name": "txn_id", "type": "long"},
    {"name": "account_id", "type": "long"},
@@ -830,7 +830,7 @@ ex.append({'t': 'code', 'id': 'akis-isleme-12', 'stage': 'Meydan okuma', 'diff':
     'start': C('''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")[:4]
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")[:4]
 
 
 def cdc_uygula(olaylar):
@@ -839,7 +839,7 @@ def cdc_uygula(olaylar):
     'sol': C('''
 import veri
 
-hesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")[:4]
+hesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")[:4]
 
 
 def cdc_uygula(olaylar):
@@ -885,7 +885,7 @@ assert t2 == {}, "Olaylar lsn sırasıyla uygulanmalı: önce oluştur (1), sonr
 
 # Mini proje
 ex.append({'t': 'code', 'id': 'akis-isleme-13', 'stage': 'Mini proje', 'diff': 3,
-    'q': '<p><b>Anadolu Bank dakikalık şüpheli işlem sayacı.</b> Uçtan uca akış hattını kur:</p><ol><li><code>uret(txns, n)</code>: işlemleri <code>account_id % n</code> partition\'larına yaz; <code>n</code> listeden oluşan log döndür.</li><li><code>supheli_mi(t)</code>: tutar <code>-20000</code> ya da daha düşükse <b>veya</b> saat (txn_time\'ın 11-13. karakterleri) <code>"06"</code>\'dan küçük ve tutar negatifse <code>True</code>.</li><li><code>tuket(log, offsetler, sayac)</code>: her partition\'ı <code>offsetler[p]</code>\'den (yoksa 0) sonuna kadar oku; şüpheli işlemleri olay zamanının dakikasına (<code>txn_time[:16]</code>) göre <code>sayac</code>\'ta say; her partition\'ın offset\'ini sona taşı (commit). Yeni sayılan şüpheli adedini döndür.</li><li><code>alarmlar(sayac, esik)</code>: adedi eşik ve üstünde olan dakikaları sıralı liste olarak döndür.</li></ol>',
+    'q': '<p><b>Ilgaz Bank dakikalık şüpheli işlem sayacı.</b> Uçtan uca akış hattını kur:</p><ol><li><code>uret(txns, n)</code>: işlemleri <code>account_id % n</code> partition\'larına yaz; <code>n</code> listeden oluşan log döndür.</li><li><code>supheli_mi(t)</code>: tutar <code>-20000</code> ya da daha düşükse <b>veya</b> saat (txn_time\'ın 11-13. karakterleri) <code>"06"</code>\'dan küçük ve tutar negatifse <code>True</code>.</li><li><code>tuket(log, offsetler, sayac)</code>: her partition\'ı <code>offsetler[p]</code>\'den (yoksa 0) sonuna kadar oku; şüpheli işlemleri olay zamanının dakikasına (<code>txn_time[:16]</code>) göre <code>sayac</code>\'ta say; her partition\'ın offset\'ini sona taşı (commit). Yeni sayılan şüpheli adedini döndür.</li><li><code>alarmlar(sayac, esik)</code>: adedi eşik ve üstünde olan dakikaları sıralı liste olarak döndür.</li></ol>',
     'start': C(TX + '''
 
 
@@ -962,7 +962,7 @@ mistakes = [
 lesson = {
     'id': 'akis-isleme', 'lv': 'ileri', 'mod': 'Üretime Hazırlık', 'min': 60,
     'title': 'Akış işleme ve mesaj kuyrukları: Kafka kavramları',
-    'sum': 'Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka\'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent tüketiciyi, tumbling/sliding/session pencereleri, watermark\'ı, şema evrimini ve CDC\'yi bellek içi log ve asyncio.Queue ile kurar; Anadolu Bank işlem akışında dakikalık şüpheli işlem sayacı yazarsın.',
+    'sum': 'Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka\'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent tüketiciyi, tumbling/sliding/session pencereleri, watermark\'ı, şema evrimini ve CDC\'yi bellek içi log ve asyncio.Queue ile kurar; Ilgaz Bank işlem akışında dakikalık şüpheli işlem sayacı yazarsın.',
     'goals': ['Toplu, mikro-toplu ve akış işlemeyi; olay zamanı ile işlem zamanını ayırt edebilirim.', 'Topic, partition, offset, tüketici grubu ve commit kavramlarını bellek içi bir log ile modelleyebilirim.', 'En çok bir, en az bir ve tam bir kez teslimatı açıklar, idempotent tüketici yazabilirim.', 'Tumbling, kayan ve oturum pencerelerini; geç gelen veri için watermark\'ı uygulayabilirim.', 'Şema uyumluluğu, CDC olaylarını uygulama ve Kafka/RabbitMQ/Redis Streams seçimi hakkında karar verebilirim.'],
     'body': body, 'ex': ex, 'faq': faq, 'mistakes': mistakes}
 

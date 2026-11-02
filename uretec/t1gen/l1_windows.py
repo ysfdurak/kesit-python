@@ -248,7 +248,7 @@ EX = [
 
   # ---------- Rehberli ----------
   { 't': 'code', 'stage': 'Rehberli', 'id': 'kurulum-windows-1', 'diff': 1,
-    'q': '<p>Anadolu Bank\'ın rapor betiği en az Python 3.10 istiyor (match ifadesi kullanıyor). <code>surum_kontrol(surum, en_az=(3, 10))</code> fonksiyonunu yaz. <code>surum</code>, <code>(3, 12, 4)</code> gibi üç sayılık bir demettir (sys.version_info[:3] de böyle bir demet verir).</p><ul><li>Sürüm yeterliyse <code>"Uygun: 3.12.4"</code> döndür.</li><li>Yeterli değilse <code>"Eski sürüm: 3.9.18 (en az 3.10 gerekli)"</code> döndür.</li></ul>',
+    'q': '<p>Ilgaz Bank\'ın rapor betiği en az Python 3.10 istiyor (match ifadesi kullanıyor). <code>surum_kontrol(surum, en_az=(3, 10))</code> fonksiyonunu yaz. <code>surum</code>, <code>(3, 12, 4)</code> gibi üç sayılık bir demettir (sys.version_info[:3] de böyle bir demet verir).</p><ul><li>Sürüm yeterliyse <code>"Uygun: 3.12.4"</code> döndür.</li><li>Yeterli değilse <code>"Eski sürüm: 3.9.18 (en az 3.10 gerekli)"</code> döndür.</li></ul>',
     'guide': ['Demetteki sayıları noktayla birleştirip "3.12.4" metnini üret (map(str, ...) ve ".".join).',
               'en_az demetini de aynı yolla "3.10" metnine çevir.',
               'Karşılaştırmayı metinlerle değil demetlerle yap: surum &gt;= en_az.',

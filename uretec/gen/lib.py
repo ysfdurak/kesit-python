@@ -41,7 +41,7 @@ def C(s):
 
 def write(path, title, lesson):
     body = lesson.pop('body')
-    out = ['/* PythonPatika v2/n6 — ' + title + ' */', '(function (W) {', "'use strict';",
+    out = ['/* Kesit Python v2/n6 — ' + title + ' */', '(function (W) {', "'use strict';",
            'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push({']
     keys = list(lesson.keys())
     lines = []

@@ -459,7 +459,7 @@ def personel_sirala(calisanlar):
 probs.append(dict(
     id='a-109', title='Çağrı sayan dekoratör', track=F, diff='Orta', tags=['dekoratör', 'functools.wraps', 'öznitelik'],
     src='Decorator temel kalıbı (Real Python: Primer on Decorators benzeri)', mode='func', fn='sayac',
-    statement=P('Anadolu Bank\'ın API katmanında hangi fonksiyonun kaç kez çağrıldığını izlemek istiyorsun. `@sayac` dekoratörünü yaz:',
+    statement=P('Ilgaz Bank\'ın API katmanında hangi fonksiyonun kaç kez çağrıldığını izlemek istiyorsun. `@sayac` dekoratörünü yaz:',
                 '<ul><li>Süslenen fonksiyon aynı argümanlarla (konumsal ve isimli) aynı sonucu döndürmeli.</li><li>Sarmalayıcının `cagri` özniteliği o ana kadarki çağrı sayısını tutmalı (hata fırlatan çağrılar da sayılır).</li><li>`sifirla()` özniteliği sayacı 0 yapmalı.</li><li>`__name__` ve `__doc__` korunmalı (`functools.wraps`).</li><li>Her süslenen fonksiyonun sayacı ayrı olmalı.</li></ul>'),
     constraints='',
     setup='''
@@ -879,7 +879,7 @@ print('EN_YAVAS', *(en_yavas if en_yavas else ('YOK',)))
 probs.append(dict(
     id='a-119', title='IBAN doğrulama ve biçimleme', track=R, diff='Zor', tags=['regex', 'mod 97', 'ISO 13616'],
     src='IBAN doğrulama (ISO 13616 mod-97 algoritması)', mode='func', fn='iban_dogrula',
-    statement=P('Anadolu Bank\'ın havale ekranında IBAN alanı yazarken denetlenecek. Türkiye IBAN\'ı 26 karakterdir:',
+    statement=P('Ilgaz Bank\'ın havale ekranında IBAN alanı yazarken denetlenecek. Türkiye IBAN\'ı 26 karakterdir:',
                 '`TR` + 2 kontrol hanesi + 5 hane banka kodu + 1 hane rezerv (<b>0</b> olmalı) + 16 hane hesap numarası.',
                 'Doğrulama adımları (ISO 13616):',
                 '<ol><li>Tüm boşlukları sil, büyük harfe çevir. Biçim `TR` + 24 rakam olmalı ve rezerv hanesi (11. karakter) `0` olmalı.</li><li>İlk 4 karakteri sona taşı.</li><li>Her harfi sayıya çevir: A = 10, B = 11, … Z = 35.</li><li>Ortaya çıkan sayının 97\'ye bölümünden kalan <b>1</b> ise IBAN geçerlidir.</li></ol>',

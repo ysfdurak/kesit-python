@@ -90,7 +90,7 @@ assert hareketli_ortalama([4, 8], 5) == [], "n uzunluktan büyükse boş liste d
 
 dict(topic='Listeler', diff=2, kind='yaz',
   title='Sayfalama (pagination)',
-  q='<p>Anadolu Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
+  q='<p>Ilgaz Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
   start=r'''
 def sayfa_getir(kayitlar, sayfa, boyut):
     # buraya yaz

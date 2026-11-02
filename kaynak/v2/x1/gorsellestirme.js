@@ -1,4 +1,4 @@
-/* PythonPatika — 'gorsellestirme' dersi uzantısı: Kanat Havayolları dakiklik panosu (gerçek veri setleri) */
+/* Kesit Python — 'gorsellestirme' dersi uzantısı: Kanat Havayolları dakiklik panosu (gerçek veri setleri) */
 // needs: matplotlib, pandas
 (function (W) {
 'use strict';

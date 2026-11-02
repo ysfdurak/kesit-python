@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası: ileri görevler (b-321 … b-330) */
+/* Kesit Python — pratik bankası: ileri görevler (b-321 … b-330) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -124,7 +124,7 @@ B.push(
     kind: 'yaz',
     needs: ['pandas'],
     title: 'İşlem anındaki geçerli kur (merge_asof)',
-    q: '<p>Anadolu Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
+    q: '<p>Ilgaz Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
     start: 'import pandas as pd\n\ndef try_cevir(islemler, kurlar):\n    pass\n',
     sol: 'import pandas as pd\n\ndef try_cevir(islemler, kurlar):\n    i = islemler.assign(zaman=pd.to_datetime(islemler["zaman"]), _sira=range(len(islemler)))\n    k = kurlar.assign(zaman=pd.to_datetime(kurlar["zaman"]))\n    m = pd.merge_asof(i.sort_values("zaman"), k.sort_values("zaman"), on="zaman", direction="backward")\n    m = m.sort_values("_sira")\n    return (m["tutar_usd"] * m["kur"]).round(2).tolist()\n',
     tests: 'kurlar = pd.DataFrame({"zaman": ["2026-04-01 09:00", "2026-04-01 12:00", "2026-04-01 15:30"],\n                       "kur": [38.10, 38.25, 38.40]})\nislemler = pd.DataFrame({"zaman": ["2026-04-01 16:00", "2026-04-01 09:30", "2026-04-01 12:00", "2026-04-01 11:59"],\n                         "tutar_usd": [100, 10, 20, 1000]})\nr = try_cevir(islemler, kurlar)\nassert len(r) == 4, "Her işlem için bir sonuç"\nassert r == [3840.0, 381.0, 765.0, 38100.0], f"Beklenen [3840.0, 381.0, 765.0, 38100.0] (orijinal sırada); gelen {r}. 12:00 işlemi 12:00 kurunu (dahil) kullanır, 11:59 ise 09:00 kurunu"\n',

@@ -24,7 +24,7 @@ def write(lesson, path):
     body = lesson['body']
     assert '`' not in body and '${' not in body, 'body backtick/${'
     body = body.replace('\\', '\\\\')
-    out = ['/* PythonPatika — ileri: ' + lesson['id'] + ' */', '(function (W) {', "'use strict';",
+    out = ['/* Kesit Python — ileri: ' + lesson['id'] + ' */', '(function (W) {', "'use strict';",
            'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push({']
     items = []
     for k, v in lesson.items():

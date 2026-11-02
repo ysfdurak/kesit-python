@@ -41,7 +41,7 @@ def main(path, out):
     print('kelime:', len(text.split()), 'pre.py:', len(re.findall(r'<pre class="py">', body)), 'ex:', len(L['ex']))
     from collections import Counter
     print('aşama:', dict(Counter(e.get('stage') for e in L['ex'])), 'tür:', dict(Counter(e['t'] for e in L['ex'])))
-    lines = ["/* PythonPatika v2 — " + L['id'] + " */", "(function (W) {", "'use strict';", "const L = W.PY_LESSONS = W.PY_LESSONS || [];", "L.push(", "{ "]
+    lines = ["/* Kesit Python v2 — " + L['id'] + " */", "(function (W) {", "'use strict';", "const L = W.PY_LESSONS = W.PY_LESSONS || [];", "L.push(", "{ "]
     parts = []
     for k in keyorder(L):
         if k == 'body': parts.append('body: `\n' + body.strip('\n') + '\n`')

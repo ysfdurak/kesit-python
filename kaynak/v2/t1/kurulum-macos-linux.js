@@ -1,4 +1,4 @@
-/* PythonPatika — v2/t1: kurulum-macos-linux */
+/* Kesit Python — v2/t1: kurulum-macos-linux */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

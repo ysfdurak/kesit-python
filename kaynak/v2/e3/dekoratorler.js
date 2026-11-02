@@ -1,4 +1,4 @@
-/* PythonPatika — uzantı: dekoratorler (Derinleş) */
+/* Kesit Python — uzantı: dekoratorler (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -213,7 +213,7 @@ print("yakalandı:", tampon.getvalue().strip())
         id: 'dekoratorler-x1',
         stage: 'Rehberli',
         diff: 2,
-        q: '<p>Anadolu Bank işlem motoru için bir kayıt dekoratörü yaz. <code>ISLEMLER</code> adında boş bir sözlük ve parametreli <code>islem(tur)</code> dekoratörü tanımla:</p><ul><li><code>@islem("havale")</code> ile işaretlenen fonksiyon <code>ISLEMLER["havale"]</code> altına kaydedilsin ve <b>sarılmadan, aynen</b> döndürülsün.</li><li>Aynı tür ikinci kez kaydedilmeye çalışılırsa <code>ValueError(f"{tur} zaten kayıtlı")</code> fırlatılsın.</li></ul><p>Sonra <code>calistir(tur, *args)</code>: kayıtlı fonksiyonu argümanlarla çağırıp sonucunu döndürsün; tür kayıtlı değilse <code>KeyError</code> kendiliğinden fırlasın.</p>',
+        q: '<p>Ilgaz Bank işlem motoru için bir kayıt dekoratörü yaz. <code>ISLEMLER</code> adında boş bir sözlük ve parametreli <code>islem(tur)</code> dekoratörü tanımla:</p><ul><li><code>@islem("havale")</code> ile işaretlenen fonksiyon <code>ISLEMLER["havale"]</code> altına kaydedilsin ve <b>sarılmadan, aynen</b> döndürülsün.</li><li>Aynı tür ikinci kez kaydedilmeye çalışılırsa <code>ValueError(f"{tur} zaten kayıtlı")</code> fırlatılsın.</li></ul><p>Sonra <code>calistir(tur, *args)</code>: kayıtlı fonksiyonu argümanlarla çağırıp sonucunu döndürsün; tür kayıtlı değilse <code>KeyError</code> kendiliğinden fırlasın.</p>',
         guide: [
           'ISLEMLER = {} ile başla.',
           'islem(tur) iç bir kaydet(fonk) fonksiyonu döndürsün (iki katman yeter, sarıcı yok).',

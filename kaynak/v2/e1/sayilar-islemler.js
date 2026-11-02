@@ -1,4 +1,4 @@
-/* PythonPatika — 'sayilar-islemler' dersi uzantısı (Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'sayilar-islemler' dersi uzantısı (Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -135,7 +135,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         id: 'sayilar-islemler-x8',
         stage: 'Rehberli',
         diff: 2,
-        q: '<p>Anadolu Bank için eşit taksitli kredi ödemesini hesaplayan <code>aylik_taksit(anapara, yillik_oran, ay)</code> fonksiyonunu yaz. Formül (r = aylık oran = yıllık oran / 12):</p><pre class="out">taksit = anapara × r / (1 − (1 + r) ** −ay)</pre><p>Sonucu 2 basamağa yuvarla. Oran 0 ise taksit <code>anapara / ay</code> olsun (formül sıfıra bölerdi). Örnek: <code>aylik_taksit(100000, 0.36, 12)</code> → <code>10046.21</code>.</p>',
+        q: '<p>Ilgaz Bank için eşit taksitli kredi ödemesini hesaplayan <code>aylik_taksit(anapara, yillik_oran, ay)</code> fonksiyonunu yaz. Formül (r = aylık oran = yıllık oran / 12):</p><pre class="out">taksit = anapara × r / (1 − (1 + r) ** −ay)</pre><p>Sonucu 2 basamağa yuvarla. Oran 0 ise taksit <code>anapara / ay</code> olsun (formül sıfıra bölerdi). Örnek: <code>aylik_taksit(100000, 0.36, 12)</code> → <code>10046.21</code>.</p>',
         guide: ['Aylık oranı hesapla: r = yillik_oran / 12.', 'r == 0 ise round(anapara / ay, 2) döndür.', 'Formülü yaz; üs için ** ve negatif üs (-ay) kullan.', 'Sonucu round(..., 2) ile yuvarla.'],
         example: 'anapara, r, n = 50000, 0.02, 6\nbuyume = (1 + r) ** n\nprint(round(anapara * buyume, 2))\nprint(round((1 + r) ** -n, 6))\n',
         start: 'def aylik_taksit(anapara, yillik_oran, ay):\n    r = yillik_oran / 12\n    # TODO: faizsiz durum\n    # TODO: eşit taksit formülü\n    return round(anapara / ay, 2)\n',

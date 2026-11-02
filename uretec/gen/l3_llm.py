@@ -19,7 +19,7 @@ SAHTE = '''class SahteLLM:
 
 body = f'''
 <h2>Kendi kodundan bir dil modeline soru sormak</h2>
-<p>Anadolu Market müşteri hizmetleri her gün aynı soruları cevaplıyor: "Siparişim nerede?", "İade nasıl yapılır?". Anadolu Bank\'ın operasyon ekibi ise yüzlerce şikayeti okuyup özetliyor. Büyük dil modelleri (Large Language Model, LLM) bu işleri hızlandırabilir; ama ürün içinde kullanmak sohbet ekranında soru sormaktan farklıdır. Kodun modele <b>API</b> üzerinden istek gönderir, cevabı ayrıştırır, doğrular, hata olursa yeniden dener, maliyeti izler ve kişisel veriyi korur. Bu ders o mühendislik katmanını öğretir.</p>
+<p>Anadolu Market müşteri hizmetleri her gün aynı soruları cevaplıyor: "Siparişim nerede?", "İade nasıl yapılır?". Ilgaz Bank\'ın operasyon ekibi ise yüzlerce şikayeti okuyup özetliyor. Büyük dil modelleri (Large Language Model, LLM) bu işleri hızlandırabilir; ama ürün içinde kullanmak sohbet ekranında soru sormaktan farklıdır. Kodun modele <b>API</b> üzerinden istek gönderir, cevabı ayrıştırır, doğrular, hata olursa yeniden dener, maliyeti izler ve kişisel veriyi korur. Bu ders o mühendislik katmanını öğretir.</p>
 <div class="note"><b>Tarayıcıda ağ yok</b>Bu sayfadaki çalıştırılabilir kutular gerçek bir API\'ye bağlanmaz. Gerçek SDK kodunu gri kutularda gösteriyoruz; alıştırmalarda ise aynı arayüzü taklit eden bir <code>SahteLLM</code> sınıfı kullanıyoruz. Böylece istemci mantığını (mesaj kurma, ayrıştırma, yeniden deneme, RAG) ağsız ve ücretsiz test edersin. Bu, gerçek projelerde de birim testlerinin yazılma biçimidir.</div>
 
 <h2>Sohbet API\'sinin kavramları</h2>
@@ -229,7 +229,7 @@ print(f"günlük tahmini: {gunluk:.2f} | aylık: {gunluk * 30:.2f}")
 """)}
 
 <h2>Basit RAG: belgelerinle cevap ver</h2>
-<p>Model, Anadolu Bank\'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
+<p>Model, Ilgaz Bank\'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
 {py(r"""
 from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity

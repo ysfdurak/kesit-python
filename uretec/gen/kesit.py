@@ -1052,4 +1052,4 @@ assert "RANK" in __source__.upper(), "RANK pencere fonksiyonunu kullan"
     tags=['RANK', 'CASE WHEN', 'karne'], min=10)
 
 if __name__ == '__main__':
-    write('/home/claude/py/v3/d1/ds_kesit.js', 'PythonPatika — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465)', T)
+    write('/home/claude/py/v3/d1/ds_kesit.js', 'Kesit Python — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465)', T)

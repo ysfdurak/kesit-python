@@ -5,9 +5,9 @@ from sklearn.preprocessing import StandardScaler, OneHotEncoder
 from sklearn.linear_model import LogisticRegression
 from sklearn.model_selection import cross_val_score, StratifiedKFold
 t=time.time()
-islem = veri.oku("anadolu_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
-hesap = veri.oku("anadolu_bank", "bank_accounts")
-musteri = veri.oku("anadolu_bank", "bank_customers", parse_dates=["birth_date", "joined_date"])
+islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"], parse_dates=["txn_time"])
+hesap = veri.oku("ilgaz_bank", "bank_accounts")
+musteri = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["birth_date", "joined_date"])
 KESIM = pd.Timestamp("2024-07-01")
 d = islem.merge(hesap[["account_id", "customer_id"]], on="account_id")
 once = d[d.txn_time < KESIM]; sonra = d[d.txn_time >= KESIM]

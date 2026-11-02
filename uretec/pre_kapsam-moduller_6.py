@@ -1,5 +1,5 @@
 def rapor_hazirla(hesaplar):
-    baslik = "Anadolu Bank Günlük Özet"     # enclosing
+    baslik = "Ilgaz Bank Günlük Özet"     # enclosing
 
     def satir(ad, bakiye):
         return baslik[:12] + " | " + ad + ": " + str(bakiye)   # baslik dıştan okunur

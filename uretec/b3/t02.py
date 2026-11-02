@@ -197,7 +197,7 @@ assert son_siparis(df2) == 8, "Yıl değişimi: 01.01.2026 daha yeni"
 
 dict(id='b-327', topic='pandas Zaman Serisi', diff=3, kind='yaz', needs=['pandas'],
   title='İşlem anındaki geçerli kur (merge_asof)',
-  q='<p>Anadolu Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
+  q='<p>Ilgaz Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
   start=r'''
 import pandas as pd
 

@@ -1,4 +1,4 @@
-/* PythonPatika — v2/o4: Komut satırı araçları (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: Komut satırı araçları (orta / Otomasyon ve Araçlar) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

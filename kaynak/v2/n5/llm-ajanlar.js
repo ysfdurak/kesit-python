@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: llm-ajanlar (LLM ajanları) */
+/* Kesit Python — İleri: llm-ajanlar (LLM ajanları) */
 // needs: pydantic, sqlite3
 (function (W) {
 'use strict';

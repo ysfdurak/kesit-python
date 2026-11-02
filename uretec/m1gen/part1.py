@@ -152,7 +152,7 @@ dict(roles=['genel'], lv='orta', topic='functools.wraps', kind='kod-okuma',
      tip='Kısa cevap: "wraps meta veriyi taşır ve __wrapped__ ekler." Ardından FastAPI/pytest gibi gerçek bir etki söyle.'),
 
 dict(roles=['genel'], lv='ileri', topic='Parametreli dekoratör', kind='kod-okuma',
-     q='Anadolu Bank\'ın dış servis çağrıları için yazılmış bu yeniden deneme dekoratörünün çıktısı nedir?',
+     q='Ilgaz Bank\'ın dış servis çağrıları için yazılmış bu yeniden deneme dekoratörünün çıktısı nedir?',
      code='import functools\n\ndef tekrar_dene(kez):\n    def dekorator(f):\n        @functools.wraps(f)\n        def sarici(*args, **kwargs):\n            for deneme in range(1, kez + 1):\n                try:\n                    return f(*args, **kwargs)\n                except ConnectionError as e:\n                    print(f"deneme {deneme}: {e}")\n            raise RuntimeError("servis yanıt vermedi")\n        return sarici\n    return dekorator\n\ncagri = {"n": 0}\n\n@tekrar_dene(kez=3)\ndef kur_getir():\n    cagri["n"] += 1\n    if cagri["n"] < 3:\n        raise ConnectionError("zaman aşımı")\n    return 32.75\n\nprint(kur_getir())\nprint(cagri["n"])\n',
      out='deneme 1: zaman aşımı\ndeneme 2: zaman aşımı\n32.75\n3',
      a='<p>Parametreli bir dekoratör <b>üç katmanlıdır</b>: ' + c('tekrar_dene(kez=3)') + ' önce çağrılır ve asıl dekoratörü döndürür; bu dekoratör ' + c('kur_getir') + '\'i alıp ' + c('sarici') + '\'yı döndürür. Yani ' + c('@tekrar_dene(kez=3)') + ' şuna denktir: ' + c('kur_getir = tekrar_dene(kez=3)(kur_getir)') + '. ' + c('kez') + ' değeri closure ile sarıcıda yaşamaya devam eder.</p>'

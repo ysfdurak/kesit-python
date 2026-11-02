@@ -1,4 +1,4 @@
-/* PythonPatika — 'pandas-giris' dersi uzantısı (Derinleş) */
+/* Kesit Python — 'pandas-giris' dersi uzantısı (Derinleş) */
 // needs: pandas
 (function (W) {
 'use strict';

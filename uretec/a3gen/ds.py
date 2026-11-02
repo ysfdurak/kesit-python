@@ -42,7 +42,7 @@ P.append(dict(
     id='a-146', title='Fatura şablonunda parantez dengesi', track=T, diff='Kolay',
     tags=['yığın', 'stack'], src='LeetCode 20 Valid Parentheses benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın fatura şablon motoru, alanları <code>( )</code>, <code>[ ]</code> ve <code>{ }</code> ile iç içe gruplayarak tanımlıyor. Bir şablonun geçerli sayılması için her açılan parantez <b>aynı türden</b> bir kapanışla, <b>doğru sırada</b> kapanmalı.</p>
+        <p>Ilgaz Bank\'ın fatura şablon motoru, alanları <code>( )</code>, <code>[ ]</code> ve <code>{ }</code> ile iç içe gruplayarak tanımlıyor. Bir şablonun geçerli sayılması için her açılan parantez <b>aynı türden</b> bir kapanışla, <b>doğru sırada</b> kapanmalı.</p>
         <p>Her şablon için geçerliyse <code>EVET</code>, değilse <code>HAYIR</code> yaz.</p>'''),
     input='<p>İlk satırda Q. Sonraki Q satırın her biri yalnız <code>()[]{}</code> karakterlerinden oluşan boş olmayan bir metin.</p>',
     output='<p>Her satır için <code>EVET</code> ya da <code>HAYIR</code>.</p>',
@@ -317,7 +317,7 @@ P.append(dict(
     id='a-150', title='Kasada anlık en düşük tutar', track=T, diff='Orta',
     tags=['yığın', 'tasarım'], src='LeetCode 155 Min Stack benzeri',
     statement=D('''
-        <p>Anadolu Bank şubesindeki kasa, yatırılan zarfları üst üste koyuyor (son konan ilk alınır). Şube müdürü her an yığındaki <b>en düşük tutarlı</b> zarfı da bilmek istiyor. Komutlar:</p>
+        <p>Ilgaz Bank şubesindeki kasa, yatırılan zarfları üst üste koyuyor (son konan ilk alınır). Şube müdürü her an yığındaki <b>en düşük tutarlı</b> zarfı da bilmek istiyor. Komutlar:</p>
         <ul><li><code>KOY x</code>: x tutarlı zarfı tepeye koy.</li>
         <li><code>AL</code>: tepedeki zarfı çıkar (yığın boşsa <code>BOS</code> yaz, aksi hâlde bir şey yazma).</li>
         <li><code>TEPE</code>: tepedeki tutarı yaz (boşsa <code>BOS</code>).</li>
@@ -967,7 +967,7 @@ P.append(dict(
     id='a-160', title='Aynı müşterinin dağınık kayıtları', track=T, diff='Orta',
     tags=['union-find', 'hash'], src='LeetCode 721 Accounts Merge benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın eski sistemlerinden gelen N müşteri kaydının her birinde bir veya daha fazla e-posta adresi var. İki kayıt <b>en az bir ortak e-posta</b> içeriyorsa aynı kişiye aittir; bu ilişki geçişlidir (A ile B, B ile C ortaksa üçü de aynı kişi).</p>
+        <p>Ilgaz Bank\'ın eski sistemlerinden gelen N müşteri kaydının her birinde bir veya daha fazla e-posta adresi var. İki kayıt <b>en az bir ortak e-posta</b> içeriyorsa aynı kişiye aittir; bu ilişki geçişlidir (A ile B, B ile C ortaksa üçü de aynı kişi).</p>
         <p>Kaç farklı kişi olduğunu ve her kişinin <b>farklı e-posta sayısını</b> büyükten küçüğe yaz.</p>'''),
     input='<p>İlk satırda N. Sonraki N satırın her biri: <code>m e1 e2 ... em</code> (e-posta sayısı ve adresler).</p>',
     output='<p>İlk satırda kişi sayısı, ikinci satırda e-posta sayıları (azalan).</p>',
@@ -1133,7 +1133,7 @@ P.append(dict(
     id='a-162', title='Yetki kodları arasında en büyük XOR', track=T, diff='Zor',
     tags=['trie', 'bit işlemleri', 'açgözlü'], src='LeetCode 421 Maximum XOR of Two Numbers benzeri',
     statement=D('''
-        <p>Anadolu Bank güvenlik ekibi, iki kullanıcının 30 bitlik yetki kodları ne kadar "zıt" diye ölçmek için kodların XOR\'unu kullanıyor. Denetim raporu için tüm kullanıcı çiftleri arasındaki <b>en büyük XOR</b> değeri gerekiyor.</p>
+        <p>Ilgaz Bank güvenlik ekibi, iki kullanıcının 30 bitlik yetki kodları ne kadar "zıt" diye ölçmek için kodların XOR\'unu kullanıyor. Denetim raporu için tüm kullanıcı çiftleri arasındaki <b>en büyük XOR</b> değeri gerekiyor.</p>
         <p>max(a<sub>i</sub> XOR a<sub>j</sub>) değerini yazdır (i ≠ j).</p>'''),
     input='<p>İlk satırda N. İkinci satırda N kod.</p>',
     output='<p>En büyük XOR.</p>',
@@ -1193,7 +1193,7 @@ P.append(dict(
     id='a-163', title='Kur servisi için LRU önbellek', track=T, diff='Orta',
     tags=['LRU', 'OrderedDict', 'tasarım'], src='LeetCode 146 LRU Cache benzeri',
     statement=D('''
-        <p>Anadolu Bank\'ın döviz kuru servisi yavaş olduğu için sonuçlar C kapasiteli bir önbellekte tutuluyor. Önbellek dolduğunda <b>en uzun süredir kullanılmayan</b> (Least Recently Used) kayıt atılıyor. İşlemler:</p>
+        <p>Ilgaz Bank\'ın döviz kuru servisi yavaş olduğu için sonuçlar C kapasiteli bir önbellekte tutuluyor. Önbellek dolduğunda <b>en uzun süredir kullanılmayan</b> (Least Recently Used) kayıt atılıyor. İşlemler:</p>
         <ul><li><code>GET k</code>: k anahtarının değerini yaz ve onu "en son kullanılan" yap; yoksa <code>-1</code> yaz.</li>
         <li><code>PUT k v</code>: k\'nin değerini v yap (varsa güncelle) ve en son kullanılan yap. Yeni anahtar eklenirken önbellek doluysa önce LRU kaydı at.</li></ul>'''),
     input='<p>İlk satırda C ve Q. Sonraki Q satırda birer işlem.</p>',

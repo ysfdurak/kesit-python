@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Dataclass ve Tip, Hata Tasarımı ve Logging, collections/itertools (b-251…b-260) */
+/* Kesit Python — pratik bankası (orta): Dataclass ve Tip, Hata Tasarımı ve Logging, collections/itertools (b-251…b-260) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -63,7 +63,7 @@ B.push(
     t: 'order',
     kind: 'order',
     title: 'Ödeme hataları hiyerarşisi',
-    q: '<p>Anadolu Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
+    q: '<p>Ilgaz Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
     lines: ['class OdemeHatasi(Exception):', '    kod = "ODEME"', 'class YetersizBakiye(OdemeHatasi):', '    def __init__(self, eksik):', '        super().__init__(f"{eksik} TL eksik")', 'try:', '    raise YetersizBakiye(30)', 'except OdemeHatasi as e:', '    print(type(e).__name__, e.kod, e)'],
     tests: 'assert "kod" in vars(OdemeHatasi), "kod özniteliği ata sınıfta (OdemeHatasi) tanımlanmalı"\nassert "__init__" in vars(YetersizBakiye), "mesajı kuran __init__ alt sınıfta olmalı"\n',
     expect: 'YetersizBakiye ODEME 30 TL eksik\n',

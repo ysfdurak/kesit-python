@@ -1,4 +1,4 @@
-/* PythonPatika — 'flask' dersi uzantısı: HTMX ile kısmi güncelleme, temel form, fetch ile JSON, SSR ve SPA farkı (AUDIT Ekle-12) */
+/* Kesit Python — 'flask' dersi uzantısı: HTMX ile kısmi güncelleme, temel form, fetch ile JSON, SSR ve SPA farkı (AUDIT Ekle-12) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

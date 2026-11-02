@@ -1,4 +1,4 @@
-/* PythonPatika — Orta: pytest ile test */
+/* Kesit Python — Orta: pytest ile test */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -18,7 +18,7 @@ L.push({
   ],
   body: `
 <h2>Neden pytest?</h2>
-<p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Anadolu Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
+<p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Ilgaz Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
 <p>Ama asıl ders şudur: <b>iyi test, bozuk kodda başarısız olan testtir.</b> Her zaman yeşil yanan bir test güven vermez, sadece süs olur. Bu dersin alıştırmalarında yazdığın testler önce doğru koda, sonra kasıtlı bozulmuş sürümlere karşı çalıştırılacak; bozuk sürümleri yakalayamayan test "geçmiş" sayılmayacak.</p>
 <div class="note"><b>Tarayıcıda pytest</b>pytest bir komut satırı aracıdır: dosyaları tarar, testleri toplar ve raporlar. Tarayıcıda dosya taraması yerine test fonksiyonlarını doğrudan çağıracağız; <code>pytest.raises</code>, <code>pytest.approx</code>, <code>pytest.fixture</code> ve <code>pytest.mark</code> ise gerçek pytest modülünden gelir. Komut satırı örnekleri kendi bilgisayarında çalıştırman içindir.</div>
 
@@ -296,7 +296,7 @@ except ConnectionError:
       hints: ['Testin bir bozuk sürümü yakalaması için o hatanın ortaya çıktığı bir girdi gerekir.', 'Yuvarlama hatası yalnızca küsuratlı sonuçta görünür: 9.99 * 1.2 = 11.988.', 'assert kdv_ekle(200, oran=0.10) == 220.0'],
       why: 'Her bozuk sürüm farklı bir girdide ortaya çıkar: yuvarlama küsuratlı tutarda, oran hatası farklı oranda. İyi test seti, olası hata türlerinin her biri için en az bir durum içerir.' },
     { t: 'code', stage: 'Rehberli', id: 'pytest-2', diff: 2,
-      q: '<p>Anadolu Bank <code>para_cek(bakiye, tutar)</code> fonksiyonu hazır: tutar 0 ya da negatifse <code>ValueError</code> ("negatif" kelimesi geçen mesajla), bakiyeden büyükse <code>YetersizBakiye</code> fırlatır. <code>test_para_cek_hatalar()</code> testini <code>pytest.raises</code> ile yaz: negatif tutar, <b>sıfır</b> tutar ve bakiyeyi aşan tutar durumlarını dene; ValueError için <code>match="negatif"</code> kullan. Ayrıca geçerli bir çekimin sonucunu da doğrula.</p>',
+      q: '<p>Ilgaz Bank <code>para_cek(bakiye, tutar)</code> fonksiyonu hazır: tutar 0 ya da negatifse <code>ValueError</code> ("negatif" kelimesi geçen mesajla), bakiyeden büyükse <code>YetersizBakiye</code> fırlatır. <code>test_para_cek_hatalar()</code> testini <code>pytest.raises</code> ile yaz: negatif tutar, <b>sıfır</b> tutar ve bakiyeyi aşan tutar durumlarını dene; ValueError için <code>match="negatif"</code> kullan. Ayrıca geçerli bir çekimin sonucunu da doğrula.</p>',
       guide: ['import pytest yaz.', 'Her hata durumu için ayrı bir with pytest.raises(...) bloğu aç; blokta yalnızca tek çağrı olsun.', 'Negatif ve sıfır tutar için ValueError, match="negatif".', 'Aşan tutar için YetersizBakiye; geçerli çekim için düz assert.'],
       example: 'import pytest\n\ndef yas_dogrula(yas):\n    if yas < 18:\n        raise ValueError("yaş 18 altında")\n    return True\n\ndef test_yas():\n    with pytest.raises(ValueError, match="18"):\n        yas_dogrula(16)\n    assert yas_dogrula(30) is True\n\ntest_yas()\nprint("geçti")\n',
       start: 'import pytest\n\nclass YetersizBakiye(Exception):\n    pass\n\ndef para_cek(bakiye, tutar):\n    if tutar <= 0:\n        raise ValueError("tutar negatif ya da sıfır olamaz")\n    if tutar > bakiye:\n        raise YetersizBakiye(f"bakiye {bakiye} TL, istenen {tutar} TL")\n    return bakiye - tutar\n\ndef test_para_cek_hatalar():\n    # TODO: negatif tutar -> ValueError (match="negatif")\n    # TODO: sıfır tutar -> ValueError\n    # TODO: bakiyeyi aşan tutar -> YetersizBakiye\n    # TODO: geçerli çekim sonucu\n    pass\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — ileri: bulut-temelleri */
+/* Kesit Python — ileri: bulut-temelleri */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

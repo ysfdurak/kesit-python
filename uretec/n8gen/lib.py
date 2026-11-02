@@ -40,7 +40,7 @@ def emit(path, header, lesson, needs_comment):
             parts.append('    body: ' + tl(body))
         else:
             parts.append(f'    {k}: ' + val(v, 4))
-    out = (f'/* PythonPatika — {header} */\n'
+    out = (f'/* Kesit Python — {header} */\n'
            + (f'// needs: {needs_comment}\n' if needs_comment else '')
            + "(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n  {\n"
            + ',\n'.join(parts) + '\n  }\n);\n})(window);\n')

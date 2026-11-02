@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası: ileri görevler (b-331 … b-340) */
+/* Kesit Python — pratik bankası: ileri görevler (b-331 … b-340) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -158,7 +158,7 @@ B.push(
     kind: 'yaz',
     needs: ['scikit-learn'],
     title: 'Sahtecilik modeli: precision, recall, F1',
-    q: '<p>Anadolu Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
+    q: '<p>Ilgaz Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
     start: 'def metrikler(y_gercek, y_tahmin):\n    pass\n',
     sol: 'def metrikler(y_gercek, y_tahmin):\n    tp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 1)\n    fp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 0 and t == 1)\n    fn = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 0)\n    p = tp / (tp + fp) if tp + fp else 0.0\n    r = tp / (tp + fn) if tp + fn else 0.0\n    f1 = 2 * p * r / (p + r) if p + r else 0.0\n    return {"precision": round(p, 3), "recall": round(r, 3), "f1": round(f1, 3)}\n',
     tests: 'from sklearn.metrics import precision_score, recall_score, f1_score\ng = [0, 0, 1, 1, 0, 1, 0, 0, 1, 0]\nt = [0, 1, 1, 0, 0, 1, 0, 0, 1, 1]\nm = metrikler(g, t)\nassert m["precision"] == round(precision_score(g, t), 3) == 0.6, f"precision = TP/(TP+FP) = 3/5 = 0.6; gelen {m[\'precision\']}"\nassert m["recall"] == round(recall_score(g, t), 3) == 0.75, f"recall = TP/(TP+FN) = 3/4 = 0.75; gelen {m[\'recall\']}"\nassert m["f1"] == round(f1_score(g, t), 3), f"f1 = 2PR/(P+R) ≈ 0.667; gelen {m[\'f1\']}"\nz = metrikler([0, 0, 1], [0, 0, 0])\nassert z == {"precision": 0.0, "recall": 0.0, "f1": 0.0}, "Hiç pozitif tahmin yoksa sıfıra bölme yerine 0.0"\nassert "sklearn" not in __source__, "Metrikleri kendin hesapla"\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — Temiz kod ve PEP 8 — temel / Dosya ve Hata */
+/* Kesit Python — Temiz kod ve PEP 8 — temel / Dosya ve Hata */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -18,7 +18,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Anadolu Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
+<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Ilgaz Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
 <p>Python topluluğunun ortak stil kılavuzu <b>PEP 8</b>'dir (Python Enhancement Proposal 8). Kuralların çoğu zevk meselesi gibi görünür ama asıl amaç tutarlılıktır: herkes aynı biçimde yazınca göz biçime değil içeriğe odaklanır. Değişken adlandırmanın temellerini "Değişkenler" dersinde gördün; burada bütün bir programa bakıyoruz.</p>
 
 <h2>Adlandırma kuralları</h2>
@@ -349,7 +349,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p><b>Erken dönüşle yeniden yaz.</b> Anadolu Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
+      q: '<p><b>Erken dönüşle yeniden yaz.</b> Ilgaz Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
       start: 'def kredi_on_onay(yas, aylik_gelir, borc_orani):\n    if yas >= 18:\n        if aylik_gelir >= 20000:\n            if borc_orani <= 0.5:\n                return "ön onay"\n            else:\n                return "red: borç"\n        else:\n            return "red: gelir"\n    else:\n        return "red: yaş"\n',
       sol: 'def kredi_on_onay(yas, aylik_gelir, borc_orani):\n    if yas < 18:\n        return "red: yaş"\n    if aylik_gelir < 20000:\n        return "red: gelir"\n    if borc_orani > 0.5:\n        return "red: borç"\n    return "ön onay"\n',
       tests: 'import ast\nassert kredi_on_onay(17, 50000, 0.1) == "red: yaş", "17 yaş reddedilmeli"\nassert kredi_on_onay(30, 15000, 0.1) == "red: gelir", "Düşük gelir reddedilmeli"\nassert kredi_on_onay(30, 40000, 0.7) == "red: borç", "Yüksek borç oranı reddedilmeli"\nassert kredi_on_onay(18, 20000, 0.5) == "ön onay", "Sınır değerler (18, 20000, 0.5) onaylanmalı"\nassert kredi_on_onay(16, 1000, 0.9) == "red: yaş", "Kurallar sırayla denetlenmeli: önce yaş"\n_fn = [d for d in ast.walk(ast.parse(__source__)) if isinstance(d, ast.FunctionDef) and d.name == "kredi_on_onay"][0]\n_ifler = [d for d in ast.walk(_fn) if isinstance(d, ast.If)]\nassert all(not d.orelse for d in _ifler), "else/elif kullanma: geçersiz durumu return ile erkenden ele"\nassert all(d in _fn.body for d in _ifler), "İç içe if olmamalı; her if fonksiyon gövdesinin doğrudan içinde olmalı"\n',

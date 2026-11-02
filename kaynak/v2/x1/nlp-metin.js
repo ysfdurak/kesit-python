@@ -1,4 +1,4 @@
-/* PythonPatika — 'nlp-metin' dersi uzantısı: Lezzet Kurye yorumlarıyla metin analizi (gerçek veri setleri) */
+/* Kesit Python — 'nlp-metin' dersi uzantısı: Lezzet Kurye yorumlarıyla metin analizi (gerçek veri setleri) */
 // needs: pandas, scikit-learn
 (function (W) {
 'use strict';

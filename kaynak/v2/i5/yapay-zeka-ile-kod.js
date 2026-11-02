@@ -1,4 +1,4 @@
-/* PythonPatika v2 — yapay-zeka-ile-kod */
+/* Kesit Python v2 — yapay-zeka-ile-kod */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -292,7 +292,7 @@ print("hatalar:", hatalar)</pre>
       stage: 'Hata avı',
       kind: 'bug',
       diff: 2,
-      q: '<p>Hatayı bul ve düzelt. Anadolu Bank\'ın taksit planı fonksiyonu <code>taksitlendir(tutar, ay)</code> metin olarak verilen tutarı (<code>"1000.00"</code>) eşit taksitlere bölüp <code>Decimal</code> listesi döndürmeli. Her taksit kuruşa (2 ondalık) yuvarlanmalı ve <b>taksitlerin toplamı tutara kuruşu kuruşuna eşit olmalı</b>: yuvarlama farkı son taksite eklenir. Asistanın kodu float kullanıyor ve toplam tutmuyor.</p>',
+      q: '<p>Hatayı bul ve düzelt. Ilgaz Bank\'ın taksit planı fonksiyonu <code>taksitlendir(tutar, ay)</code> metin olarak verilen tutarı (<code>"1000.00"</code>) eşit taksitlere bölüp <code>Decimal</code> listesi döndürmeli. Her taksit kuruşa (2 ondalık) yuvarlanmalı ve <b>taksitlerin toplamı tutara kuruşu kuruşuna eşit olmalı</b>: yuvarlama farkı son taksite eklenir. Asistanın kodu float kullanıyor ve toplam tutmuyor.</p>',
       start: 'from decimal import Decimal\n\ndef taksitlendir(tutar, ay):\n    taksit = round(float(tutar) / ay, 2)\n    return [Decimal(taksit)] * ay\n',
       sol: 'from decimal import Decimal, ROUND_HALF_UP\n\ndef taksitlendir(tutar, ay):\n    toplam = Decimal(tutar)\n    taksit = (toplam / ay).quantize(Decimal("0.01"), rounding=ROUND_HALF_UP)\n    plan = [taksit] * (ay - 1)\n    plan.append(toplam - taksit * (ay - 1))\n    return plan\n',
       tests: 'from decimal import Decimal\np = taksitlendir("1000.00", 3)\nassert p == [Decimal("333.33"), Decimal("333.33"), Decimal("333.34")], f"1000/3 planı 333.33, 333.33, 333.34 olmalı; gelen {p}"\nassert sum(p) == Decimal("1000.00"), "taksitlerin toplamı tutara eşit olmalı"\np2 = taksitlendir("100.00", 6)\nassert sum(p2) == Decimal("100.00") and p2[0] == Decimal("16.67") and p2[-1] == Decimal("16.65"), f"100/6 planı hatalı: {p2}"\nassert taksitlendir("250.00", 1) == [Decimal("250.00")], "tek taksit tutarın kendisi"\nassert all(isinstance(x, Decimal) and x.as_tuple().exponent == -2 for x in taksitlendir("99.99", 4)), "her taksit 2 ondalıklı Decimal olmalı"\n',

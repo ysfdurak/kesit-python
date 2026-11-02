@@ -1,4 +1,4 @@
-/* PythonPatika — 'numpy' dersi uzantısı (Derinleş) */
+/* Kesit Python — 'numpy' dersi uzantısı (Derinleş) */
 // needs: numpy
 (function (W) {
 'use strict';

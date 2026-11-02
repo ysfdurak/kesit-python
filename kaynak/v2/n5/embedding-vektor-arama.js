@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: embedding-vektor-arama (Embedding ve vektör arama) */
+/* Kesit Python — İleri: embedding-vektor-arama (Embedding ve vektör arama) */
 // needs: numpy
 (function (W) {
 'use strict';

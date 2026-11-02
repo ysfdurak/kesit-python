@@ -1,4 +1,4 @@
-/* PythonPatika — Temel 3: Fonksiyonlar ve Modüller (fonksiyonlar, kapsam-moduller, string-bicimleme) */
+/* Kesit Python — Temel 3: Fonksiyonlar ve Modüller (fonksiyonlar, kapsam-moduller, string-bicimleme) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -201,7 +201,7 @@ print(sepete_ekle_dogru("Çay"))</pre>
   ],
   body: `
 <h2>Bir isim nerede görünür?</h2>
-<p>Anadolu Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
+<p>Ilgaz Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
 <pre class="py">komisyon_orani = 0.002          # global (modül düzeyi)
 
 def komisyon(tutar):
@@ -226,7 +226,7 @@ except NameError as e:
 <tr><td>Built-in</td><td>Python'ın kendisi</td><td><code>print</code>, <code>len</code>, <code>sum</code></td></tr>
 </table></div>
 <pre class="py">def rapor_hazirla(hesaplar):
-    baslik = "Anadolu Bank Günlük Özet"     # enclosing
+    baslik = "Ilgaz Bank Günlük Özet"     # enclosing
 
     def satir(ad, bakiye):
         return baslik[:12] + " | " + ad + ": " + str(bakiye)   # baslik dıştan okunur
@@ -284,7 +284,7 @@ print(type(rastgele_tam(1, 6)))</pre>
     return round(anapara * yillik_oran * ay / 12, 2)
 
 def main():
-    print("Anadolu Bank mevduat hesabı")
+    print("Ilgaz Bank mevduat hesabı")
     print("6 ay, 50.000 TL, %40:", faiz_hesapla(50000, 0.40, 6))
 
 print("__name__ değeri:", __name__)
@@ -389,7 +389,7 @@ print(random.sample(range(1000, 2000), 3))</pre>
   mod: 'Fonksiyonlar ve Modüller',
   min: 28,
   title: 'Metin biçimlendirme ve rapor üretme',
-  sum: 'f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Anadolu Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.',
+  sum: 'f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.',
   goals: [
     'f-string içinde hizalama (<, >, ^), genişlik ve dolgu karakteri kullanabilirim.',
     'Sayıları binlik ayırıcı, sabit ondalık ve yüzde olarak biçimlendirebilirim.',
@@ -399,7 +399,7 @@ print(random.sample(range(1000, 2000), 3))</pre>
   ],
   body: `
 <h2>Neden biçimlendirme?</h2>
-<p>Anadolu Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
+<p>Ilgaz Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
 
 <h2>f-string hatırlatma ve biçim belirteci</h2>
 <p><code>f"..."</code> içinde <code>{ifade}</code> yazarsın; Python ifadeyi hesaplayıp metne gömer. İki nokta ile belirteç eklersin: <code>{deger:belirtec}</code>. Belirtecin genel sırası şöyledir: <b>dolgu</b> + <b>hizalama</b> + <b>genişlik</b> + <b>binlik</b> + <b>.ondalık</b> + <b>tür</b>. Her parça isteğe bağlıdır.</p>
@@ -456,7 +456,7 @@ print("{0} - {1} - {0}".format("A", "B"))</pre>
 <pre class="py">musteri = "Ayşe Yılmaz"
 hesap_no = "TR33 0006 1005 1978 6457 8413 26"
 bakiye = 12500.5
-baslik = f"""{'ANADOLU BANK':^40}
+baslik = f"""{'ILGAZ BANK':^40}
 {'Hesap Özeti':^40}
 {'=' * 40}
 Müşteri : {musteri}

@@ -155,7 +155,7 @@ print(type(deger), deger is None)</pre>
   mod: 'Veri Türleri',
   min: 22,
   title: 'Sayılar ve işlemler',
-  sum: 'Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Anadolu Bank faiz hesabı üzerinden öğrenirsin.',
+  sum: 'Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin.',
   goals: [
     'Dört işlem, //, % ve ** operatörlerini doğru öncelikle kullanabilirim.',
     'Tam bölme ve kalan ile gerçek iş problemlerini (taksit, sayfa, paketleme) çözebilirim.',
@@ -165,7 +165,7 @@ print(type(deger), deger is None)</pre>
   ],
   body: `
 <h2>Sayılar neden bu kadar önemli?</h2>
-<p>Anadolu Bank'ta bir mevduat hesabının faizi, Anadolu Market'te bir sepetin indirimli tutarı, bir kargonun kaç kutuya sığacağı... Hepsi sayı işlemi. Python'ın aritmetiği hesap makinesine benzer ama birkaç yerde sürpriz yapar: bölme hep ondalıklı sonuç verir, ondalıklı sayılar bazen "yanlış" görünür ve yuvarlama sandığın gibi çalışmaz. Bu derste bu sürprizlerin hepsini önceden göreceksin.</p>
+<p>Ilgaz Bank'ta bir mevduat hesabının faizi, Anadolu Market'te bir sepetin indirimli tutarı, bir kargonun kaç kutuya sığacağı... Hepsi sayı işlemi. Python'ın aritmetiği hesap makinesine benzer ama birkaç yerde sürpriz yapar: bölme hep ondalıklı sonuç verir, ondalıklı sayılar bazen "yanlış" görünür ve yuvarlama sandığın gibi çalışmaz. Bu derste bu sürprizlerin hepsini önceden göreceksin.</p>
 
 <h2>Temel operatörler</h2>
 <pre class="py">bakiye = 10000
@@ -223,7 +223,7 @@ print(abs(-350), max(3, 9, 4), min(3, 9, 4))
 print(pow(2, 10), 10 ** 3)</pre>
 <p><code>abs</code>, <code>max</code>, <code>min</code>, <code>pow</code> ve <code>round</code> hazır (built-in) fonksiyonlardır, içe aktarmaya gerek yoktur. Kutu problemine geri dönersen: <code>math.ceil(250 / 12)</code> tek satırda "gereken kutu" sayısını verir.</p>
 
-<h2>Anadolu Bank faiz hesabı</h2>
+<h2>Ilgaz Bank faiz hesabı</h2>
 <p>Bir müşteri 50.000 TL'yi yıllık %30 faizle 3 yıl vadeli hesaba yatırıyor. Basit faizde her yıl ana para üzerinden faiz işler; bileşik faizde (compound interest) faiz de faiz kazanır. Formül: bileşik tutar = anapara × (1 + oran) üzeri yıl.</p>
 <pre class="py">anapara = 50_000
 oran = 0.30
@@ -267,7 +267,7 @@ print("Fark:", round(bilesik - basit, 2))</pre>
       o: ['True, çünkü matematiksel olarak eşittir', 'False, çünkü ondalık sayılar ikilik tabanda tam saklanamaz', 'Hata verir', 'True, çünkü Python otomatik yuvarlar'], a: 1,
       why: '0.1 ve 0.2 ikilik tabanda sonsuz basamaklıdır; toplamları 0.30000000000000004 olur ve 0.3 ile eşit değildir. Karşılaştırmada tolerans ya da round kullanılır.' },
     { t: 'code', id: 'sayilar-islemler-3',
-      q: '<p>Anadolu Bank için <code>bilesik_faiz(anapara, oran, yil)</code> fonksiyonu yaz. Bileşik faizle vade sonundaki tutarı hesaplayıp <b>2 basamağa yuvarlanmış</b> olarak döndürsün. Formül: anapara × (1 + oran) ** yil. Örnek: <code>bilesik_faiz(50000, 0.30, 3)</code> → <code>109850.0</code>.</p>',
+      q: '<p>Ilgaz Bank için <code>bilesik_faiz(anapara, oran, yil)</code> fonksiyonu yaz. Bileşik faizle vade sonundaki tutarı hesaplayıp <b>2 basamağa yuvarlanmış</b> olarak döndürsün. Formül: anapara × (1 + oran) ** yil. Örnek: <code>bilesik_faiz(50000, 0.30, 3)</code> → <code>109850.0</code>.</p>',
       start: 'def bilesik_faiz(anapara, oran, yil):\n    pass\n',
       sol: 'def bilesik_faiz(anapara, oran, yil):\n    tutar = anapara * (1 + oran) ** yil\n    return round(tutar, 2)\n',
       tests: 'assert abs(bilesik_faiz(50000, 0.30, 3) - 109850.0) < 1e-6, "50000, %30, 3 yıl -> 109850.0"\nassert abs(bilesik_faiz(1000, 0.10, 2) - 1210.0) < 1e-6, "1000, %10, 2 yıl -> 1210.0"\nassert abs(bilesik_faiz(1000, 0.0, 5) - 1000.0) < 1e-6, "oran 0 ise tutar değişmez"\n',

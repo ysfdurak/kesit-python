@@ -1,4 +1,4 @@
-"""Ders nesnesini PythonPatika JS dosyasına çevirir (tek tırnaklı stringler, body template literal)."""
+"""Ders nesnesini Kesit Python JS dosyasına çevirir (tek tırnaklı stringler, body template literal)."""
 import html
 
 def P(code):
@@ -46,7 +46,7 @@ def obj(d, ind):
     return '{\n' + ',\n'.join(parts) + '\n' + pad + '}'
 
 def write(path, header, needs_comment, lesson):
-    out = '/* PythonPatika — ' + header + ' */\n'
+    out = '/* Kesit Python — ' + header + ' */\n'
     if needs_comment:
         out += '// needs: ' + needs_comment + '\n'
     out += "(function (W) {\n'use strict';\nconst L = W.PY_LESSONS = W.PY_LESSONS || [];\nL.push(\n  " + obj(lesson, 2) + '\n);\n})(window);\n'

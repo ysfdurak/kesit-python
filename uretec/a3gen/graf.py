@@ -701,7 +701,7 @@ P.append(dict(
     id='a-187', title='Şubeleri birbirine bağlayan en ucuz fiber ağ', track=T, diff='Zor',
     tags=['MST', 'Kruskal', 'union-find'], src='HackerRank Kruskal (MST): Really Special Subtree / LeetCode 1584 benzeri',
     statement=D('''
-        <p>Anadolu Bank, N şubesini özel fiber hatla birbirine bağlayacak. M aday hattın her birinin döşeme maliyeti biliniyor (hatlar iki yönlü). Amaç: tüm şubelerin (doğrudan ya da dolaylı) birbirine ulaşabildiği, <b>toplam maliyeti en düşük</b> hat kümesini seçmek.</p>
+        <p>Ilgaz Bank, N şubesini özel fiber hatla birbirine bağlayacak. M aday hattın her birinin döşeme maliyeti biliniyor (hatlar iki yönlü). Amaç: tüm şubelerin (doğrudan ya da dolaylı) birbirine ulaşabildiği, <b>toplam maliyeti en düşük</b> hat kümesini seçmek.</p>
         <p>Bu en düşük toplam maliyeti yaz. Tüm şubeleri bağlamak mümkün değilse <code>-1</code> yaz.</p>'''),
     input='<p>İlk satırda N ve M. Sonraki M satırda <code>a b maliyet</code>.</p>',
     output='<p>En düşük toplam maliyet ya da −1.</p>',

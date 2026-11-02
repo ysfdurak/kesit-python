@@ -1,4 +1,4 @@
-/* PythonPatika — 'pandas-temizlik' dersi uzantısı (Derinleş) */
+/* Kesit Python — 'pandas-temizlik' dersi uzantısı (Derinleş) */
 // needs: pandas
 (function (W) {
 'use strict';

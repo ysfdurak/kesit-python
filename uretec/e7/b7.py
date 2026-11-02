@@ -44,7 +44,7 @@ def build(path):
             if p.returncode: bad += 1; print(f"EXAMPLE {e.get('id')} HATA:\n{p.stderr[-600:]}")
     parts = [f"  id: {js(E['id'])}", f"  min: {E['min']}", '  html: `\n' + h.replace('\\', '\\\\').strip() + '\n`']
     for k in ('ex', 'faq', 'mistakes'): parts.append(f'  {k}: ' + js(E[k], 2))
-    src = (f"/* PythonPatika — v2 e7 uzantı (Derinleş): {E['id']} */\n(function (W) {{\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n{{\n" + ',\n'.join(parts) + '\n}\n);\n})(window);\n')
+    src = (f"/* Kesit Python — v2 e7 uzantı (Derinleş): {E['id']} */\n(function (W) {{\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push(\n{{\n" + ',\n'.join(parts) + '\n}\n);\n})(window);\n')
     out = OUT + E['id'] + '.js'; open(out, 'w').write(src)
     st = {}
     for e in E['ex']: st[e.get('stage')] = st.get(e.get('stage'), 0) + 1

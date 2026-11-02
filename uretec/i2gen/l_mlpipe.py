@@ -6,7 +6,7 @@ import pandas as pd
 
 
 def churn_verisi(n=600, seed=1):
-    """Anadolu Bank kurgusal müşteri kaybı (churn) verisi; eksik değerler içerir."""
+    """Ilgaz Bank kurgusal müşteri kaybı (churn) verisi; eksik değerler içerir."""
     rng = np.random.default_rng(seed)
     yas = rng.integers(18, 75, n).astype(float)
     bakiye = rng.gamma(2, 15000, n)
@@ -47,8 +47,8 @@ def on_isleyici(sayisal, kategorik):
 
 body = f'''
 <h2>Model kodunun %80'i model değildir</h2>
-<p>Önceki iki derste veriler hep tertemiz sayılardı. Gerçekte Anadolu Bank'ın müşteri tablosunda yaş bazen boş, şehir metin, segment kategorik, bakiye 100 TL ile 2 milyon TL arasında değişiyor. Modeller metni anlamaz, boş hücrede durur, ölçek farkından etkilenir. Bu yüzden her projede bir <b>ön işleme</b> (preprocessing) katmanı vardır: eksik doldurma, ölçekleme, kategorik kodlama. Bu derste bu adımları scikit-learn'ün <b>Pipeline</b> ve <b>ColumnTransformer</b> yapılarıyla tek bir nesneye bağlamayı, modeli <b>çapraz doğrulamayla</b> dürüstçe ölçmeyi, hiperparametreleri <b>sistematik</b> aramayı, modeli <b>kaydetmeyi</b> ve sonuçları bir <b>model kartıyla</b> raporlamayı öğreneceksin.</p>
-<p>Senaryo: Anadolu Bank, önümüzdeki üç ayda hesabını kapatacak (churn) müşterileri önceden bulup elde tutma kampanyası yapmak istiyor. Veri kurgusaldır ve tohumla üretilir.</p>
+<p>Önceki iki derste veriler hep tertemiz sayılardı. Gerçekte Ilgaz Bank'ın müşteri tablosunda yaş bazen boş, şehir metin, segment kategorik, bakiye 100 TL ile 2 milyon TL arasında değişiyor. Modeller metni anlamaz, boş hücrede durur, ölçek farkından etkilenir. Bu yüzden her projede bir <b>ön işleme</b> (preprocessing) katmanı vardır: eksik doldurma, ölçekleme, kategorik kodlama. Bu derste bu adımları scikit-learn'ün <b>Pipeline</b> ve <b>ColumnTransformer</b> yapılarıyla tek bir nesneye bağlamayı, modeli <b>çapraz doğrulamayla</b> dürüstçe ölçmeyi, hiperparametreleri <b>sistematik</b> aramayı, modeli <b>kaydetmeyi</b> ve sonuçları bir <b>model kartıyla</b> raporlamayı öğreneceksin.</p>
+<p>Senaryo: Ilgaz Bank, önümüzdeki üç ayda hesabını kapatacak (churn) müşterileri önceden bulup elde tutma kampanyası yapmak istiyor. Veri kurgusaldır ve tohumla üretilir.</p>
 {PY(CHURN + '''
 X, y = churn_verisi()
 print(X.shape, "kayıp oranı:", round(y.mean(), 3))

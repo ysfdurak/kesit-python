@@ -215,7 +215,7 @@ except Exception as e:
 '''),
 
 I(['analist'], 'orta', 'vaka', 'İş sorusunu analize çevirme',
-  'Anadolu Bank pazarlama müdürü "Müşteriler neden bizi bırakıyor?" diye soruyor. Bu belirsiz soruyu analiz edilebilir hâle nasıl getirirsin?',
+  'Ilgaz Bank pazarlama müdürü "Müşteriler neden bizi bırakıyor?" diye soruyor. Bu belirsiz soruyu analiz edilebilir hâle nasıl getirirsin?',
   '<p><b>1) Terki tanımla:</b> Bankada "terk" net değildir. Hesap kapatma mı, 90 gün işlem yapmama mı, maaş hesabını taşıma mı? İş birimiyle birlikte ölçülebilir bir tanım seçilir: "Son 90 günde hiç işlem yapmayan ve bakiyesi 100 TL altına inen bireysel müşteri."</p>'
   '<p><b>2) Soruyu alt sorulara böl:</b> Terk oranı ne ve zamanla nasıl değişiyor? Hangi segmentlerde yüksek (yaş, ürün sayısı, kanal, şube)? Terkten önce hangi sinyaller var (şikâyet, ücret artışı, kart limit reddi)?</p>'
   '<p><b>3) Hipotezler kur:</b> "Tek ürünlü müşteriler daha çok terk ediyor", "Hesap işletim ücretinin getirildiği aydan sonra terk arttı", "Mobil uygulamayı kullanmayanlar daha riskli".</p>'

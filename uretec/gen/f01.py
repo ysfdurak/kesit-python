@@ -168,7 +168,7 @@ T.append(dict(
 T.append(dict(
     id='b-217', topic='Üreteçler', diff=2, t='order',
     title='Hatalı satırları atlayan ayrıştırıcı',
-    q='<p>Anadolu Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
+    q='<p>Ilgaz Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
     lines=['def ayristir(kaynak):',
            '    for s in kaynak:',
            '        hesap, tutar = s.split(";")',

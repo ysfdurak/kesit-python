@@ -1,4 +1,4 @@
-/* PythonPatika — v2/o4: Excel otomasyonu (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: Excel otomasyonu (orta / Otomasyon ve Araçlar) */
 // needs: pandas
 (function (W) {
 'use strict';
@@ -287,7 +287,7 @@ print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
       hints: ['İki iç içe enumerate döngüsü gerekir; ikisine de start=1 ver.', 'Adres: f"{sutun_harfi(c)}{r}"', 'if deger is not None: sayfa[adres] = deger (0 ve "" geçerli değerlerdir, "if deger" yazma).'],
       why: 'Hücre sözlüğü, openpyxl\'in iç modelinin sade bir kopyasıdır. None kontrolünü "is not None" ile yapmak 0 gibi geçerli değerleri kaybetmeni önler.' },
     { t: 'code', stage: 'Rehberli', id: 'excel-otomasyon-3', diff: 2,
-      q: '<p>Anadolu Bank\'tan gelen Excel\'de tarih sütunu seri numarası olarak geldi. <code>excel_tarih(seri)</code> fonksiyonunu yaz: Excel seri numarasını (<code>int</code>, <code>float</code> ya da <code>"45000"</code> gibi metin) <code>datetime.date</code> nesnesine çevirsin; başlangıç <code>date(1899, 12, 30)</code>. Ondalık kısım saati gösterir, at (<code>45000.75</code> → aynı gün). Ayrıca <code>tarih_metni(seri)</code> sonucu <code>"GG.AA.YYYY"</code> biçiminde döndürsün. Negatif seri için <code>ValueError</code>.</p>',
+      q: '<p>Ilgaz Bank\'tan gelen Excel\'de tarih sütunu seri numarası olarak geldi. <code>excel_tarih(seri)</code> fonksiyonunu yaz: Excel seri numarasını (<code>int</code>, <code>float</code> ya da <code>"45000"</code> gibi metin) <code>datetime.date</code> nesnesine çevirsin; başlangıç <code>date(1899, 12, 30)</code>. Ondalık kısım saati gösterir, at (<code>45000.75</code> → aynı gün). Ayrıca <code>tarih_metni(seri)</code> sonucu <code>"GG.AA.YYYY"</code> biçiminde döndürsün. Negatif seri için <code>ValueError</code>.</p>',
       guide: ['Gelen değeri float\'a çevir (metin de gelebilir).', 'Negatifse ValueError fırlat.', 'date(1899, 12, 30) + timedelta(days=int(seri)) ile günü bul.', 'tarih_metni içinde excel_tarih sonucunu strftime("%d.%m.%Y") ile biçimle.'],
       example: '# Benzer teknik: UNIX zaman damgasından gün\nfrom datetime import date, timedelta\nbaslangic = date(1970, 1, 1)\nprint(baslangic + timedelta(days=20000))\nprint((baslangic + timedelta(days=20000)).strftime("%d.%m.%Y"))\n',
       start: 'from datetime import date, timedelta\n\ndef excel_tarih(seri):\n    # TODO: float\'a çevir, negatifse ValueError\n    # TODO: 1899-12-30 + gün sayısı\n    pass\n\ndef tarih_metni(seri):\n    # TODO: GG.AA.YYYY\n    pass\n',

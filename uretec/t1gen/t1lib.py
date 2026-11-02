@@ -1,4 +1,4 @@
-"""t1: Ders sözlüğünü PythonPatika JS dosyasına çevirir ve body örneklerini çalıştırır."""
+"""t1: Ders sözlüğünü Kesit Python JS dosyasına çevirir ve body örneklerini çalıştırır."""
 import re, subprocess, sys, os
 
 HERE = os.path.dirname(os.path.abspath(__file__))
@@ -61,7 +61,7 @@ def words(body):
 def emit(lesson, path):
     n = run_examples(lesson['body'])
     body = prep_body(lesson['body'])
-    out = ['/* PythonPatika — v2/t1: ' + lesson['id'] + ' */', '(function (W) {', "'use strict';",
+    out = ['/* Kesit Python — v2/t1: ' + lesson['id'] + ' */', '(function (W) {', "'use strict';",
            'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push(', '{']
     for k in ['id', 'lv', 'mod', 'min', 'title', 'sum', 'goals']: out.append(f'  {k}: {js(lesson[k], 1)},')
     out.append('  body: `\n' + body.replace('\\', '\\\\') + '\n`,')

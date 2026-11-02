@@ -1,4 +1,4 @@
-/* PythonPatika — v3/a3: Veri yapıları (a-146…a-165) */
+/* Kesit Python — v3/a3: Veri yapıları (a-146…a-165) */
 (function (W) { 'use strict'; const A = W.PY_ARENA = W.PY_ARENA || []; A.push(
 {
   id: 'a-146',
@@ -9,7 +9,7 @@
   tags: ['yığın', 'stack'],
   src: 'LeetCode 20 Valid Parentheses benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank\'ın fatura şablon motoru, alanları <code>( )</code>, <code>[ ]</code> ve <code>{ }</code> ile iç içe gruplayarak tanımlıyor. Bir şablonun geçerli sayılması için her açılan parantez <b>aynı türden</b> bir kapanışla, <b>doğru sırada</b> kapanmalı.</p>\n<p>Her şablon için geçerliyse <code>EVET</code>, değilse <code>HAYIR</code> yaz.</p>',
+  statement: '<p>Ilgaz Bank\'ın fatura şablon motoru, alanları <code>( )</code>, <code>[ ]</code> ve <code>{ }</code> ile iç içe gruplayarak tanımlıyor. Bir şablonun geçerli sayılması için her açılan parantez <b>aynı türden</b> bir kapanışla, <b>doğru sırada</b> kapanmalı.</p>\n<p>Her şablon için geçerliyse <code>EVET</code>, değilse <code>HAYIR</code> yaz.</p>',
   input: '<p>İlk satırda Q. Sonraki Q satırın her biri yalnız <code>()[]{}</code> karakterlerinden oluşan boş olmayan bir metin.</p>',
   output: '<p>Her satır için <code>EVET</code> ya da <code>HAYIR</code>.</p>',
   constraints: '1 ≤ Q ≤ 10, her metin ≤ 2·10^5 karakter',
@@ -130,7 +130,7 @@
   tags: ['yığın', 'tasarım'],
   src: 'LeetCode 155 Min Stack benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank şubesindeki kasa, yatırılan zarfları üst üste koyuyor (son konan ilk alınır). Şube müdürü her an yığındaki <b>en düşük tutarlı</b> zarfı da bilmek istiyor. Komutlar:</p>\n<ul><li><code>KOY x</code>: x tutarlı zarfı tepeye koy.</li>\n<li><code>AL</code>: tepedeki zarfı çıkar (yığın boşsa <code>BOS</code> yaz, aksi hâlde bir şey yazma).</li>\n<li><code>TEPE</code>: tepedeki tutarı yaz (boşsa <code>BOS</code>).</li>\n<li><code>MIN</code>: yığındaki en küçük tutarı yaz (boşsa <code>BOS</code>).</li></ul>',
+  statement: '<p>Ilgaz Bank şubesindeki kasa, yatırılan zarfları üst üste koyuyor (son konan ilk alınır). Şube müdürü her an yığındaki <b>en düşük tutarlı</b> zarfı da bilmek istiyor. Komutlar:</p>\n<ul><li><code>KOY x</code>: x tutarlı zarfı tepeye koy.</li>\n<li><code>AL</code>: tepedeki zarfı çıkar (yığın boşsa <code>BOS</code> yaz, aksi hâlde bir şey yazma).</li>\n<li><code>TEPE</code>: tepedeki tutarı yaz (boşsa <code>BOS</code>).</li>\n<li><code>MIN</code>: yığındaki en küçük tutarı yaz (boşsa <code>BOS</code>).</li></ul>',
   input: '<p>İlk satırda Q, sonraki Q satırda birer komut.</p>',
   output: '<p>Çıktı üreten her komut için bir satır.</p>',
   constraints: '1 ≤ Q ≤ 2·10^5, −10^9 ≤ x ≤ 10^9',
@@ -431,7 +431,7 @@
   tags: ['union-find', 'hash'],
   src: 'LeetCode 721 Accounts Merge benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank\'ın eski sistemlerinden gelen N müşteri kaydının her birinde bir veya daha fazla e-posta adresi var. İki kayıt <b>en az bir ortak e-posta</b> içeriyorsa aynı kişiye aittir; bu ilişki geçişlidir (A ile B, B ile C ortaksa üçü de aynı kişi).</p>\n<p>Kaç farklı kişi olduğunu ve her kişinin <b>farklı e-posta sayısını</b> büyükten küçüğe yaz.</p>',
+  statement: '<p>Ilgaz Bank\'ın eski sistemlerinden gelen N müşteri kaydının her birinde bir veya daha fazla e-posta adresi var. İki kayıt <b>en az bir ortak e-posta</b> içeriyorsa aynı kişiye aittir; bu ilişki geçişlidir (A ile B, B ile C ortaksa üçü de aynı kişi).</p>\n<p>Kaç farklı kişi olduğunu ve her kişinin <b>farklı e-posta sayısını</b> büyükten küçüğe yaz.</p>',
   input: '<p>İlk satırda N. Sonraki N satırın her biri: <code>m e1 e2 ... em</code> (e-posta sayısı ve adresler).</p>',
   output: '<p>İlk satırda kişi sayısı, ikinci satırda e-posta sayıları (azalan).</p>',
   constraints: '1 ≤ N ≤ 5·10^4, 1 ≤ m ≤ 10, toplam e-posta ≤ 2·10^5',
@@ -490,7 +490,7 @@
   tags: ['trie', 'bit işlemleri', 'açgözlü'],
   src: 'LeetCode 421 Maximum XOR of Two Numbers benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank güvenlik ekibi, iki kullanıcının 30 bitlik yetki kodları ne kadar "zıt" diye ölçmek için kodların XOR\'unu kullanıyor. Denetim raporu için tüm kullanıcı çiftleri arasındaki <b>en büyük XOR</b> değeri gerekiyor.</p>\n<p>max(a<sub>i</sub> XOR a<sub>j</sub>) değerini yazdır (i ≠ j).</p>',
+  statement: '<p>Ilgaz Bank güvenlik ekibi, iki kullanıcının 30 bitlik yetki kodları ne kadar "zıt" diye ölçmek için kodların XOR\'unu kullanıyor. Denetim raporu için tüm kullanıcı çiftleri arasındaki <b>en büyük XOR</b> değeri gerekiyor.</p>\n<p>max(a<sub>i</sub> XOR a<sub>j</sub>) değerini yazdır (i ≠ j).</p>',
   input: '<p>İlk satırda N. İkinci satırda N kod.</p>',
   output: '<p>En büyük XOR.</p>',
   constraints: '2 ≤ N ≤ 5·10^4, 0 ≤ kod &lt; 2^30',
@@ -520,7 +520,7 @@
   tags: ['LRU', 'OrderedDict', 'tasarım'],
   src: 'LeetCode 146 LRU Cache benzeri',
   mode: 'stdin',
-  statement: '<p>Anadolu Bank\'ın döviz kuru servisi yavaş olduğu için sonuçlar C kapasiteli bir önbellekte tutuluyor. Önbellek dolduğunda <b>en uzun süredir kullanılmayan</b> (Least Recently Used) kayıt atılıyor. İşlemler:</p>\n<ul><li><code>GET k</code>: k anahtarının değerini yaz ve onu "en son kullanılan" yap; yoksa <code>-1</code> yaz.</li>\n<li><code>PUT k v</code>: k\'nin değerini v yap (varsa güncelle) ve en son kullanılan yap. Yeni anahtar eklenirken önbellek doluysa önce LRU kaydı at.</li></ul>',
+  statement: '<p>Ilgaz Bank\'ın döviz kuru servisi yavaş olduğu için sonuçlar C kapasiteli bir önbellekte tutuluyor. Önbellek dolduğunda <b>en uzun süredir kullanılmayan</b> (Least Recently Used) kayıt atılıyor. İşlemler:</p>\n<ul><li><code>GET k</code>: k anahtarının değerini yaz ve onu "en son kullanılan" yap; yoksa <code>-1</code> yaz.</li>\n<li><code>PUT k v</code>: k\'nin değerini v yap (varsa güncelle) ve en son kullanılan yap. Yeni anahtar eklenirken önbellek doluysa önce LRU kaydı at.</li></ul>',
   input: '<p>İlk satırda C ve Q. Sonraki Q satırda birer işlem.</p>',
   output: '<p>Her GET için bir satır.</p>',
   constraints: '1 ≤ C ≤ 10^5, 1 ≤ Q ≤ 2·10^5, 0 ≤ k, v ≤ 10^9',

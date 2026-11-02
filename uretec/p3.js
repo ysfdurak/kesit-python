@@ -186,7 +186,7 @@ print("işçi başına:", {ad: sum(1 for a, _ in islenen if a == ad) for ad in (
     sum: 'timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy\'a geçiş.',
     goals: ['timeit ve cProfile ile darboğazı ölçerek bulabilirim', 'Big-O ile algoritmanın ölçeklenmesini tahmin edebilirim', 'Doğru veri yapısıyla (set/dict) aramayı hızlandırabilirim', 'Üreteç ve lru_cache ile bellek ve zaman kazanabilirim', 'Ne zaman numpy\'a geçmem gerektiğini bilirim'],
     body: `<h2>Önce ölç, sonra düzelt</h2>
-<p>Anadolu Bank\'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5\'lik kodu düzelt, gerisine dokunma.</p>
+<p>Ilgaz Bank\'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5\'lik kodu düzelt, gerisine dokunma.</p>
 
 <h2>timeit: küçük parçayı ölç</h2>
 <p><code>timeit</code> bir ifadeyi çok kez çalıştırıp toplam süreyi verir; çöp toplayıcıyı kapatır, en küçük gürültüyle ölçer. İki alternatifi karşılaştırmak için idealdir.</p>
@@ -379,7 +379,7 @@ print(f"python: {timeit.timeit(kdv_python, number=3):.3f} s  numpy: {timeit.time
     sum: 'Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode.',
     goals: ['Değişkenin nesneye referans olduğunu id/is ile gösterebilirim', 'Referans sayımı ve çöp toplayıcının ne zaman devreye girdiğini açıklayabilirim', 'Sığ ve derin kopya farkını bilip doğru olanı seçebilirim', 'Interning ve is tuzağını tanırım', '__slots__ ve getsizeof ile bellek kullanımını küçültüp ölçebilirim'],
     body: `<h2>Neden iç yapı?</h2>
-<p>Anadolu Bank\'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python\'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
+<p>Ilgaz Bank\'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python\'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
 
 <h2>Her şey nesne, değişken bir etiket</h2>
 <p>Python\'da <code>a = [1, 2]</code> demek, bellekte bir liste nesnesi yaratıp <code>a</code> adını ona bağlamaktır. <code>b = a</code> ikinci bir ad bağlar, yeni nesne yaratmaz. <code>id()</code> nesnenin kimliğini (CPython\'da adresi) verir; <code>is</code> "aynı nesne mi", <code>==</code> "aynı değer mi" sorar.</p>

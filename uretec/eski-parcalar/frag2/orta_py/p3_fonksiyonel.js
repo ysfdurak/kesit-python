@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Anadolu Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
+<p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Ilgaz Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
 
 <h2>Fonksiyon bir değerdir</h2>
 <pre class="py">def kdv_ekle(tutar):
@@ -123,7 +123,7 @@ print(all(b["ad"] for b in basvurular))   # boş ad yok mu?
 print(any([]), all([]))                     # boş kaynakta: False, True</pre>
 
 <h2>Closure: ayarını içinde taşıyan fonksiyon</h2>
-<p>Bir fonksiyon, içinde tanımlanan başka bir fonksiyonu döndürürse, içteki fonksiyon dıştakinin değişkenlerini "hatırlar". Bu yapıya closure (kapanış) denir. Anadolu Bank'ta her şubenin komisyon oranı farklı olsun: tek bir fabrika (factory) fonksiyonundan şubeye özel hesaplayıcılar üretirsin.</p>
+<p>Bir fonksiyon, içinde tanımlanan başka bir fonksiyonu döndürürse, içteki fonksiyon dıştakinin değişkenlerini "hatırlar". Bu yapıya closure (kapanış) denir. Ilgaz Bank'ta her şubenin komisyon oranı farklı olsun: tek bir fabrika (factory) fonksiyonundan şubeye özel hesaplayıcılar üretirsin.</p>
 <pre class="py">def komisyon_hesaplayici(oran, asgari):
     def hesapla(tutar):
         return max(round(tutar * oran, 2), asgari)

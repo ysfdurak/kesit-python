@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Veri Yapıları, Algoritmalar (b-291…b-300) */
+/* Kesit Python — pratik bankası (orta): Veri Yapıları, Algoritmalar (b-291…b-300) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

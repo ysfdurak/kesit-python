@@ -1,4 +1,4 @@
-/* PythonPatika — 'git-proje-yapisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
+/* Kesit Python — 'git-proje-yapisi' uzantısı (AUDIT 12, Derinleş + ek alıştırmalar) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -32,7 +32,7 @@ X.push(
 Yönetim hangi şehirlerde büyümeye yatırım yapılacağını soruyor.
 
 ## Veri
-- Kaynak: PythonPatika "anadolu_market" kurgusal veri seti (10 tablo, 6.236 satır)
+- Kaynak: Kesit Python "anadolu_market" kurgusal veri seti (10 tablo, 6.236 satır)
 - Dönem: 2022-06 – 2024-12
 
 ## Yöntem
@@ -83,7 +83,7 @@ for sehir, n, ciro in satirlar:
 <li>Depo sayfasında "About" kısmına tek cümlelik açıklama ve konular (topics: <code>python</code>, <code>pandas</code>, <code>data-analysis</code>) ekle; profilinde en iyi 4-6 depoyu sabitle (pin).</li>
 <li>Rapor HTML'ini GitHub Pages ile yayınla (Settings → Pages → <code>main</code>/<code>docs</code>); README'den bağlantı ver.</li>
 </ol></div>
-<div class="note"><b>Gerçek işte</b>İşe alımcılar çok sayıda "Titanic" ve "Iris" deposu görür. Seni ayıran; gerçekçi bir iş sorusu, koddan üretilen ve tekrar edilebilen sonuçlar, temiz klasör yapısı, testler ve tek komutla çalışan kurulumdur. PythonPatika, SQLPatika ve PBIPatika'daki aynı veri setleriyle yaptığın SQL, Python ve Power BI analizlerini tek bir portföy hikâyesinde birleştirebilirsin.</div>`,
+<div class="note"><b>Gerçek işte</b>İşe alımcılar çok sayıda "Titanic" ve "Iris" deposu görür. Seni ayıran; gerçekçi bir iş sorusu, koddan üretilen ve tekrar edilebilen sonuçlar, temiz klasör yapısı, testler ve tek komutla çalışan kurulumdur. Kesit Python, Kesit SQL ve Kesit Power BI'daki aynı veri setleriyle yaptığın SQL, Python ve Power BI analizlerini tek bir portföy hikâyesinde birleştirebilirsin.</div>`,
     ex: [
       {
         t: 'mc',

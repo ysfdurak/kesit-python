@@ -4,7 +4,7 @@ from gen import PY, CODE, emit
 body = '''
 <h2>Neden önemli?</h2>
 <p>Metaprogramlama (metaprogramming), <b>kodu yöneten kod</b> yazmaktır: sınıfları çalışma anında üretmek, bir sınıf tanımlandığı anda onu bir kayda eklemek, öznitelik atamasını araya girip doğrulamak, bir fonksiyonun imzasını okuyup ona göre davranmak ya da bir Python dosyasını çalıştırmadan çözümlemek. Kulağa egzotik gelir ama her gün kullandığın kütüphanelerin hepsi bunun üzerine kuruludur: <code>@dataclass</code> sınıfına <code>__init__</code> yazar, Django ve SQLAlchemy modelleri sınıf gövdesindeki alanları toplayıp tabloya çevirir, pytest test fonksiyonlarının parametre adlarına bakıp fixture enjekte eder, FastAPI fonksiyon imzasından API şeması çıkarır.</p>
-<p>Bu dersin amacı sana "her şeyi metaclass ile yaz" demek değil; tam tersi. Hangi ihtiyaca <b>en basit</b> aracın yettiğini bilmeni istiyoruz. İleri OOP dersinde descriptor ve metaclass'a kısaca baktın, Dekoratörler dersinde fonksiyon saran fonksiyonları gördün. Burada hepsini bir araya getirip Anadolu Market ve Anadolu Bank için gerçekçi araçlar kuracağız.</p>
+<p>Bu dersin amacı sana "her şeyi metaclass ile yaz" demek değil; tam tersi. Hangi ihtiyaca <b>en basit</b> aracın yettiğini bilmeni istiyoruz. İleri OOP dersinde descriptor ve metaclass'a kısaca baktın, Dekoratörler dersinde fonksiyon saran fonksiyonları gördün. Burada hepsini bir araya getirip Anadolu Market ve Ilgaz Bank için gerçekçi araçlar kuracağız.</p>
 
 <h2>Her şey nesnedir</h2>
 <p>Python'da sayılar, metinler, fonksiyonlar, sınıflar ve modüller birer nesnedir (object). Fonksiyonu bir değişkene atayabilir, listeye koyabilir, ona öznitelik ekleyebilirsin. Sınıf da bir nesnedir ve onu üreten sınıfa <b>metaclass</b> denir; varsayılan metaclass <code>type</code>'tır.</p>
@@ -319,7 +319,7 @@ for kotu in ["__import__('os').getcwd()", "open('x.txt', 'w')"]:
 ''') + '''
 <div class="warn"><b>Kural</b>Dışarıdan gelen veriyi asla <code>eval</code>/<code>exec</code>'e verme. Sabit veri için <code>json.loads</code> ya da <code>ast.literal_eval</code>, formül için <code>ast</code> ile yalnız izin verilen düğümleri değerlendiren küçük bir yorumlayıcı (bu dersin meydan okuma görevi) kullan.</div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın kampanya ekibi faiz indirimi kurallarını bir yönetim panelinden formül olarak giriyor: <code>bakiye * 0.01 if segment == "premium" else 0</code>. İlk sürümde bu formüller <code>eval</code> ile çalıştırılıyordu; güvenlik denetiminde paneli kullanan biri sunucu dosyalarını okuyabildiği ortaya çıktı. Çözüm, <code>ast</code> ile yalnız sayı, izinli değişken adları ve aritmetik/karşılaştırma düğümlerini kabul eden bir değerlendiriciydi. Aynı ekip yeni kampanya türlerini <code>__init_subclass__</code> ile kaydedilen sınıflarla ekliyor; yeni tür eklemek merkezi koda dokunmayı gerektirmiyor.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kampanya ekibi faiz indirimi kurallarını bir yönetim panelinden formül olarak giriyor: <code>bakiye * 0.01 if segment == "premium" else 0</code>. İlk sürümde bu formüller <code>eval</code> ile çalıştırılıyordu; güvenlik denetiminde paneli kullanan biri sunucu dosyalarını okuyabildiği ortaya çıktı. Çözüm, <code>ast</code> ile yalnız sayı, izinli değişken adları ve aritmetik/karşılaştırma düğümlerini kabul eden bir değerlendiriciydi. Aynı ekip yeni kampanya türlerini <code>__init_subclass__</code> ile kaydedilen sınıflarla ekliyor; yeni tür eklemek merkezi koda dokunmayı gerektirmiyor.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Sınıf oluşturma sırası</h3>
@@ -737,7 +737,7 @@ assert "remove" not in str(r), "kod çalıştırılmamalı, yalnız ağaç okunm
        hints=['ast.parse(kaynak) ağacı verir; ast.walk(agac) tüm düğümleri tek tek gezer.', 'async def için ayrı düğüm türü vardır: ast.AsyncFunctionDef.', 'isinstance(dugum, (ast.FunctionDef, ast.AsyncFunctionDef)) ise rapor[dugum.name] = len(dugum.args.args)'],
        why='ast.walk, NodeVisitor yazmadan tüm ağacı gezmenin en kısa yoludur; sıra önemli değilse yeterlidir. Kodu çalıştırmadan analiz ettiğin için zararlı kod bile güvenle incelenir.'),
   dict(id='metaprogramlama-8', t='code', stage='Hata avı', kind='bug', diff=2,
-       q='<p>Anadolu Bank\'ın müşteri kayıtlarında <code>Metin</code> descriptor\'ı ad alanlarını boşluklardan temizleyip doğruluyor. Ama ikinci müşteri oluşturulunca birincinin adı da değişiyor. <b>Hatayı bul ve düzelt.</b> Davranış: boş ya da yalnız boşluktan oluşan metinde <code>ValueError</code>, aksi hâlde kırpılmış metin saklanır.</p>',
+       q='<p>Ilgaz Bank\'ın müşteri kayıtlarında <code>Metin</code> descriptor\'ı ad alanlarını boşluklardan temizleyip doğruluyor. Ama ikinci müşteri oluşturulunca birincinin adı da değişiyor. <b>Hatayı bul ve düzelt.</b> Davranış: boş ya da yalnız boşluktan oluşan metinde <code>ValueError</code>, aksi hâlde kırpılmış metin saklanır.</p>',
        start=r'''class Metin:
     def __set_name__(self, sahip, ad):
         self.ad = ad

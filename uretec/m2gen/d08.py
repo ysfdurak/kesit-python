@@ -4,7 +4,7 @@ ITEMS = [
 I(['ai', 'backend'], 'temel', 'kavram', 'LLM API temelleri',
   'Bir LLM API\'sini Python\'dan çağırırken token, sistem istemi (system prompt), temperature ve max_tokens kavramları ne anlama gelir?',
   '<p><b>Token:</b> Modelin işlediği metin birimi; kelime parçaları. Türkçe gibi eklemeli dillerde bir kelime çoğu zaman birkaç token\'dır. Hem <b>maliyet</b> (girdi ve çıktı token\'ları ayrı fiyatlanır) hem de <b>bağlam penceresi</b> sınırı token cinsinden ölçülür.</p>'
-  '<p><b>Mesajlar ve sistem istemi:</b> Çoğu API konuşmayı rol etiketli mesaj listesi olarak alır. Sistem istemi modelin rolünü, kurallarını ve çıktı biçimini belirler ("Anadolu Bank müşteri asistanısın; yalnız verilen belgelere dayanarak cevap ver"). Kullanıcı mesajları ve önceki asistan cevapları bunu izler. API durumsuzdur: konuşma geçmişini her istekte <b>sen</b> gönderirsin.</p>'
+  '<p><b>Mesajlar ve sistem istemi:</b> Çoğu API konuşmayı rol etiketli mesaj listesi olarak alır. Sistem istemi modelin rolünü, kurallarını ve çıktı biçimini belirler ("Ilgaz Bank müşteri asistanısın; yalnız verilen belgelere dayanarak cevap ver"). Kullanıcı mesajları ve önceki asistan cevapları bunu izler. API durumsuzdur: konuşma geçmişini her istekte <b>sen</b> gönderirsin.</p>'
   '<p><b>temperature:</b> Çıktının rastgeleliğini ayarlar. Düşük değer (0–0,3) daha tutarlı ve tekrarlanabilir cevaplar verir; sınıflandırma ve veri çıkarma için uygundur. Yüksek değer yaratıcı metin için daha çeşitli sonuç üretir. Düşük temperature bile tam deterministiklik garantilemez.</p>'
   '<p><b>max_tokens:</b> Üretilecek en fazla çıktı token sayısı. Maliyet ve gecikme için üst sınırdır; çok düşük tutulursa cevap yarıda kesilir. Yanıttaki durma nedeni (ör. uzunluk sınırına ulaşıldı) kontrol edilmelidir.</p>'
   '<p><b>Üretim için ek konular:</b> API anahtarını koda yazmamak (ortam değişkeni ya da gizli anahtar yöneticisi), hız sınırı ve geçici hatalar için üstel geri çekilmeli yeniden deneme, zaman aşımı, kullanımın (token) loglanması.</p>',
@@ -189,7 +189,7 @@ print(round(r1, 2), round(r3, 2), round(mrr, 2))
 '''),
 
 I(['ai', 'backend'], 'orta', 'vaka', 'Vaka: yanlış bilgi veren asistan',
-  'Anadolu Bank\'ın müşteri asistanı bir müşteriye ihtiyaç kredisi faiz oranını %2,49 yerine %1,99 olarak söylemiş ve şikâyet gelmiş. Ne yaparsın?',
+  'Ilgaz Bank\'ın müşteri asistanı bir müşteriye ihtiyaç kredisi faiz oranını %2,49 yerine %1,99 olarak söylemiş ve şikâyet gelmiş. Ne yaparsın?',
   '<p><b>1) Acil önlem:</b> Faiz, ücret ve oran gibi bağlayıcı sayısal bilgilerin asistan tarafından serbestçe üretilmesini geçici olarak durdur; bu sorulara resmî oran sayfasına yönlendirme ya da canlı temsilci aktarımı. Müşteri şikâyetini ilgili birimle (uyum, hukuk) birlikte yönet.</p>'
   '<p><b>2) Kök nedeni bul:</b> Konuşma kaydını ve o anda getirilen belge parçalarını incele:</p><ul>'
   '<li>Getirilen parça <b>eski</b> bir kampanya duyurusu muydu (%1,99 geçen yılın oranı)? → İndekste güncel olmayan belge, sürüm/tarih meta verisi eksik.</li>'

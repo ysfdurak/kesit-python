@@ -245,7 +245,7 @@ P.append(dict(
     id='a-027', title='İki şubenin sıralı listesini birleştir', track=T, diff='Orta',
     tags=['iki işaretçi', 'liste', 'birleştirme'], src='Merge Two Sorted Lists (LeetCode 88/21) benzeri',
     mode='func', fn='sirali_birlestir',
-    statement='<p>Anadolu Bank\'ın iki şubesi gün sonu işlemlerini tutara göre <b>artan sıralı</b> gönderiyor. Merkez bunları tek bir sıralı listede birleştirmek istiyor.</p>'
+    statement='<p>Ilgaz Bank\'ın iki şubesi gün sonu işlemlerini tutara göre <b>artan sıralı</b> gönderiyor. Merkez bunları tek bir sıralı listede birleştirmek istiyor.</p>'
               '<p><code>sirali_birlestir(a, b)</code> yeni bir sıralı liste döndürsün. <b><code>sort</code>/<code>sorted</code>/<code>heapq</code> kullanmadan</b> O(n+m)\'de çöz; eşit değerlerde önce <code>a</code>\'dakiler gelsin.</p>',
     input='<p>İki sıralı list.</p>',
     output='<p>list</p>',
@@ -288,7 +288,7 @@ P.append(dict(
     id='a-029', title='En kârlı dönem', track=T, diff='Zor',
     tags=['Kadane', 'dinamik', 'liste'], src='Maximum Subarray (Kadane algoritması) benzeri',
     mode='stdin',
-    statement='<p>Anadolu Bank bir yatırım fonunun <code>N</code> günlük net kâr/zararını inceliyor. <b>Ardışık</b> günlerden oluşan ve toplam kârı en büyük olan dönemi bulmak istiyor (dönem en az 1 gün).</p>'
+    statement='<p>Ilgaz Bank bir yatırım fonunun <code>N</code> günlük net kâr/zararını inceliyor. <b>Ardışık</b> günlerden oluşan ve toplam kârı en büyük olan dönemi bulmak istiyor (dönem en az 1 gün).</p>'
               '<p>En büyük toplamı ve dönemin 1 tabanlı başlangıç ve bitiş gününü yazdır. Birden fazla dönem aynı toplamı veriyorsa <b>en erken başlayanı</b>, o da eşitse <b>en kısa</b> olanı seç.</p>',
     input='<p>İlk satırda <code>N</code>, ikinci satırda <code>N</code> tam sayı.</p>',
     output='<p>Tek satırda <code>toplam bas bit</code>.</p>',

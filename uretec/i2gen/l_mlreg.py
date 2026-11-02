@@ -5,7 +5,7 @@ KREDI = '''import numpy as np
 
 
 def kredi_verisi(n=2000, seed=0):
-    """Anadolu Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""
+    """Ilgaz Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""
     rng = np.random.default_rng(seed)
     gelir = rng.normal(35, 12, n).clip(8, None)
     borc_orani = rng.uniform(0, 0.9, n)
@@ -28,13 +28,13 @@ def sepet_verisi(n=500, seed=42):
     sepet = 40 + 35 * urun + 60 * uye - 25 * kampanya + rng.normal(0, 30, n)
     return np.column_stack([urun, uye, kampanya, mesafe]), sepet
 '''
-KREDI_T = KREDI.replace('"""Anadolu Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""\n    ', '')
+KREDI_T = KREDI.replace('"""Ilgaz Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""\n    ', '')
 SEPET_T = SEPET.replace('"""Anadolu Market kurgusal sepet verisi: ürün adedi, üye mi, kampanya, mesafe (km)."""\n    ', '')
 BOL = '\nfrom sklearn.model_selection import train_test_split as _tts\n_X, _y = kredi_verisi()\n_a, _b, _c, _d = _tts(_X, _y, test_size=0.25, random_state=0, stratify=_y)\n'
 
 body = f'''
 <h2>İki iş sorusu, iki problem türü</h2>
-<p><i>ml-giris</i> dersinde ML'in iskeletini kurdun: bölme, fit, predict, metrik. Şimdi iki gerçekçi soruyu derinlemesine çözeceğiz. <b>Anadolu Market</b> "bir müşterinin sepet tutarı ne olacak?" diye soruyor; bu bir <b>regresyon</b> (sayısal hedef). <b>Anadolu Bank</b> ise "bu kredi başvurusu temerrüde düşer mi?" diye soruyor; bu bir <b>sınıflandırma</b> (kategorik hedef). İkisinde de model kurmak işin yarısıdır; diğer yarısı modelin <b>ne söylediğini yorumlamak</b> ve iş kararına (kampanya bütçesi, kredi onayı) çevirmektir.</p>
+<p><i>ml-giris</i> dersinde ML'in iskeletini kurdun: bölme, fit, predict, metrik. Şimdi iki gerçekçi soruyu derinlemesine çözeceğiz. <b>Anadolu Market</b> "bir müşterinin sepet tutarı ne olacak?" diye soruyor; bu bir <b>regresyon</b> (sayısal hedef). <b>Ilgaz Bank</b> ise "bu kredi başvurusu temerrüde düşer mi?" diye soruyor; bu bir <b>sınıflandırma</b> (kategorik hedef). İkisinde de model kurmak işin yarısıdır; diğer yarısı modelin <b>ne söylediğini yorumlamak</b> ve iş kararına (kampanya bütçesi, kredi onayı) çevirmektir.</p>
 <p>Örnek veriler kurgusaldır ve <code>numpy.random.default_rng(seed)</code> ile üretilir; aynı tohumla her çalıştırmada aynı tablo gelir. Gerçek projede bunlar veri ambarından gelir, ama yöntem aynıdır.</p>
 {PY(SEPET + '''
 X, y = sepet_verisi()
@@ -327,7 +327,7 @@ ex.append({'t': 'code', 'stage': 'Hata avı', 'kind': 'bug', 'id': 'ml-regresyon
   'why': '[:, 0] "ödeme" olasılığıdır; çoğu müşteri ödediği için bu değer yüksektir ve neredeyse herkes eşiği geçer. Sütunu classes_ üzerinden bulmak, etiketler farklı sıralandığında bile doğru sütunu seçmeyi garanti eder.'})
 # Meydan okuma
 ex.append({'t': 'code', 'stage': 'Meydan okuma', 'id': 'ml-regresyon-siniflandirma-10', 'diff': 3,
-  'q': '<p>Anadolu Bank\'ta kaçırılan bir temerrüt (FN) ortalama <code>fn_maliyet</code> TL, yanlış reddedilen iyi müşteri (FP) <code>fp_maliyet</code> TL kayba yol açıyor. <code>maliyet_esigi(y_gercek, risk, fn_maliyet, fp_maliyet)</code> fonksiyonu yaz: aday eşikler 0.05, 0.10, ..., 0.95 olsun (<code>np.round(np.arange(0.05, 0.96, 0.05), 2)</code>); her eşikte toplam maliyeti (<code>FN × fn_maliyet + FP × fp_maliyet</code>) hesapla; en düşük maliyetli eşiği ve maliyeti <code>(esik, maliyet)</code> olarak döndür. Eşitlikte <b>büyük eşik</b> seçilsin (daha az müşteri reddedilir). Eşik <code>float</code>, maliyet <code>int</code> olsun.</p>',
+  'q': '<p>Ilgaz Bank\'ta kaçırılan bir temerrüt (FN) ortalama <code>fn_maliyet</code> TL, yanlış reddedilen iyi müşteri (FP) <code>fp_maliyet</code> TL kayba yol açıyor. <code>maliyet_esigi(y_gercek, risk, fn_maliyet, fp_maliyet)</code> fonksiyonu yaz: aday eşikler 0.05, 0.10, ..., 0.95 olsun (<code>np.round(np.arange(0.05, 0.96, 0.05), 2)</code>); her eşikte toplam maliyeti (<code>FN × fn_maliyet + FP × fp_maliyet</code>) hesapla; en düşük maliyetli eşiği ve maliyeti <code>(esik, maliyet)</code> olarak döndür. Eşitlikte <b>büyük eşik</b> seçilsin (daha az müşteri reddedilir). Eşik <code>float</code>, maliyet <code>int</code> olsun.</p>',
   'start': 'import numpy as np\n\n\ndef maliyet_esigi(y_gercek, risk, fn_maliyet, fp_maliyet):\n    pass\n',
   'sol': 'import numpy as np\n\n\ndef maliyet_esigi(y_gercek, risk, fn_maliyet, fp_maliyet):\n    y = np.asarray(y_gercek)\n    r = np.asarray(risk)\n    en_iyi = None\n    for e in np.round(np.arange(0.05, 0.96, 0.05), 2):\n        tahmin = r >= e\n        fn = int(np.sum((y == 1) & ~tahmin))\n        fp = int(np.sum((y == 0) & tahmin))\n        maliyet = fn * fn_maliyet + fp * fp_maliyet\n        if en_iyi is None or maliyet <= en_iyi[1]:\n            en_iyi = (float(e), int(maliyet))\n    return en_iyi\n',
   'tests': '_g = [0, 0, 0, 0, 1, 1, 1, 1]\n_r = [0.1, 0.3, 0.6, 0.2, 0.9, 0.55, 0.4, 0.8]\n_s = maliyet_esigi(_g, _r, 10000, 1000)\nassert _s == (0.4, 1000), f"FN pahalıyken 0.4 eşiği tüm temerrütleri yakalar, yalnız 1 FP: (0.4, 1000); gelen {_s}"\n_s2 = maliyet_esigi(_g, _r, 1000, 10000)\nassert _s2 == (0.8, 2000), f"FP pahalıyken eşik yükselir: 0.65-0.80 arası eşikler 2000 maliyetlidir, eşitlikte en büyüğü (0.8) seçilir; gelen {_s2}"\nassert isinstance(_s[0], float) and type(_s[1]) is int, "eşik float, maliyet int olmalı"\n_s3 = maliyet_esigi([0, 0, 0], [0.2, 0.5, 0.9], 5000, 100)\nassert _s3 == (0.95, 0), "hiç temerrüt yoksa en büyük eşik (0.95) sıfır maliyetle seçilir"\n',

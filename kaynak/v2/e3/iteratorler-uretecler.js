@@ -1,4 +1,4 @@
-/* PythonPatika — uzantı: iteratorler-uretecler (Derinleş) */
+/* Kesit Python — uzantı: iteratorler-uretecler (Derinleş) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

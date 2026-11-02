@@ -4,7 +4,7 @@ from jsgen import emit
 
 BODY = r'''
 <h2>Neden önemli?</h2>
-<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Anadolu Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
+<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Ilgaz Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
 <p>Python topluluğunun ortak stil kılavuzu <b>PEP 8</b>'dir (Python Enhancement Proposal 8). Kuralların çoğu zevk meselesi gibi görünür ama asıl amaç tutarlılıktır: herkes aynı biçimde yazınca göz biçime değil içeriğe odaklanır. Değişken adlandırmanın temellerini "Değişkenler" dersinde gördün; burada bütün bir programa bakıyoruz.</p>
 
 <h2>Adlandırma kuralları</h2>
@@ -475,7 +475,7 @@ assert all(v in (0, 1) for v in _sayilar), "kargo_ucreti içinde sihirli sayı k
 
 # ---------- Kendin yaz ----------
 A({'t': 'code', 'stage': 'Kendin yaz', 'id': 'kod-stili-k1', 'diff': 2,
-   'q': '<p><b>Erken dönüşle yeniden yaz.</b> Anadolu Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
+   'q': '<p><b>Erken dönüşle yeniden yaz.</b> Ilgaz Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
    'start': '''
 def kredi_on_onay(yas, aylik_gelir, borc_orani):
     if yas >= 18:

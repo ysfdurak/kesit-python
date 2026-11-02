@@ -115,7 +115,7 @@ P.append(dict(
     id='a-006', title='Fatura numarası rakamları', track=T, diff='Kolay',
     tags=['metin', 'döngü', 'int dönüşümü'], src='Klasik basamak toplamı alıştırması',
     mode='stdin',
-    statement='<p>Anadolu Bank fatura numaralarında kontrol için iki değer kullanılıyor: rakamların <b>toplamı</b> ve <b>çift rakam</b> sayısı (0 da çifttir).</p>'
+    statement='<p>Ilgaz Bank fatura numaralarında kontrol için iki değer kullanılıyor: rakamların <b>toplamı</b> ve <b>çift rakam</b> sayısı (0 da çifttir).</p>'
               '<p>Çok uzun bir numara veriliyor; bu iki değeri yazdır.</p>',
     input='<p>Tek satırda yalnız rakamlardan oluşan bir dizgi (baştaki sıfırlar olabilir).</p>',
     output='<p>Tek satırda <code>toplam cift_adedi</code>.</p>',
@@ -154,7 +154,7 @@ P.append(dict(
     id='a-008', title='Günlük bakiye takibi', track=T, diff='Kolay',
     tags=['döngü', 'birikimli toplam', 'min'], src='Klasik birikimli toplam alıştırması',
     mode='stdin',
-    statement='<p>Anadolu Bank bir esnaf hesabının <code>N</code> günlük net hareketini (para girişi pozitif, çıkışı negatif) tutuyor. Gün başı bakiyesi <code>B</code>.</p>'
+    statement='<p>Ilgaz Bank bir esnaf hesabının <code>N</code> günlük net hareketini (para girişi pozitif, çıkışı negatif) tutuyor. Gün başı bakiyesi <code>B</code>.</p>'
               '<p>Her günün hareketi bakiyeye eklendikten sonra; dönem sonu bakiyesini, dönem içindeki <b>en düşük</b> gün sonu bakiyesini ve bakiyenin <b>eksiye düştüğü</b> (0\'ın altında kaldığı) gün sayısını yazdır.</p>',
     input='<p>İlk satırda <code>B N</code>, ikinci satırda <code>N</code> tam sayı.</p>',
     output='<p>Tek satırda <code>son en_dusuk eksi_gun</code>.</p>',
@@ -174,7 +174,7 @@ P.append(dict(
     id='a-009', title='Taksit planı', track=T, diff='Orta',
     tags=['fonksiyon', 'divmod', 'liste'], src='Bankacılık taksitlendirme (kuruş dağıtma) problemi',
     mode='func', fn='taksit_plani',
-    statement='<p>Anadolu Bank kredi kartı alışverişini taksitlendiriyor. Tutar <b>kuruş</b> cinsinden tam sayı; taksitler de tam kuruş olmalı ve toplamları tutara <b>tam olarak</b> eşit olmalı.</p>'
+    statement='<p>Ilgaz Bank kredi kartı alışverişini taksitlendiriyor. Tutar <b>kuruş</b> cinsinden tam sayı; taksitler de tam kuruş olmalı ve toplamları tutara <b>tam olarak</b> eşit olmalı.</p>'
               '<p>Kural: taksitler mümkün olduğunca eşit olsun; artan kuruşlar <b>ilk</b> taksitlere birer birer dağıtılsın. <code>taksit_plani(tutar, ay)</code> taksitleri liste olarak döndürsün.</p>',
     input='<p><code>tutar</code> (int, kuruş), <code>ay</code> (int).</p>',
     output='<p><code>ay</code> uzunluğunda int listesi.</p>',
@@ -196,7 +196,7 @@ P.append(dict(
     id='a-010', title='Birikim hedefi', track=T, diff='Orta',
     tags=['while', 'simülasyon', 'tam sayı'], src='Bileşik faiz / while döngüsü alıştırması',
     mode='stdin',
-    statement='<p>Anadolu Bank\'ın birikim hesabında yıl sonunda bakiyeye <code>r</code>% faiz eklenir; faiz <b>kuruşa aşağı yuvarlanır</b> (bakiye kuruş cinsinden tam sayı). Müşteri <code>B</code> kuruşla başlıyor ve <code>H</code> kuruş hedefliyor.</p>'
+    statement='<p>Ilgaz Bank\'ın birikim hesabında yıl sonunda bakiyeye <code>r</code>% faiz eklenir; faiz <b>kuruşa aşağı yuvarlanır</b> (bakiye kuruş cinsinden tam sayı). Müşteri <code>B</code> kuruşla başlıyor ve <code>H</code> kuruş hedefliyor.</p>'
               '<p>Her soru için bakiyenin hedefe <b>ulaşması ya da geçmesi</b> için kaç yıl gerektiğini yazdır. Başta zaten ulaşılmışsa 0. Faiz hiç artış sağlamıyorsa (yıllık faiz 0 kuruşa yuvarlanıyorsa) ve hedefe ulaşılmamışsa <code>ASLA</code> yazdır.</p>',
     input='<p>İlk satırda <code>Q</code>. Sonraki <code>Q</code> satırda <code>B r H</code>.</p>',
     output='<p>Her soru için yıl sayısı ya da <code>ASLA</code>.</p>',

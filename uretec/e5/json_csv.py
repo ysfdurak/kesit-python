@@ -126,7 +126,7 @@ html = (
     python -m json.tool --sort-keys a.json > b.json
     python -m json.tool --json-lines log.jsonl  # her satırı ayrı doğrula
 ''') +
-'<div class="note"><b>Gerçek işte</b>Anadolu Bank\'ın entegrasyon ekibi dış kurumlardan gelen CSV\'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal\'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV\'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>\n'
+'<div class="note"><b>Gerçek işte</b>Ilgaz Bank\'ın entegrasyon ekibi dış kurumlardan gelen CSV\'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal\'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV\'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>\n'
 )
 
 ex = [
@@ -271,7 +271,7 @@ ex = [
        hints=['Önce noktaları sil, SONRA virgülü noktaya çevir; sıra ters olursa ondalık nokta da silinir.', 'Decimal(metin.strip().replace(".", "").replace(",", "."))', 'Döngüde: toplamlar[s] = toplamlar.get(s, Decimal("0")) + tr_sayi(k["tutar"])'],
        why='Türkçe yerel ayarda nokta binlik, virgül ondalık ayırıcıdır. Önce binlikleri silip sonra virgülü çevirmek doğru sırayı garanti eder; Decimal ise kuruş hassasiyetini korur.'),
   dict(t='code', stage='Rehberli', id='json-csv-x3', diff=2,
-       q='<p>Anadolu Bank API yanıtını okuyan <code>yanit_coz(metin)</code> fonksiyonunu yaz. <code>json.loads</code>\'u <code>object_hook</code> ile kullan: adı <code>_tarih</code> ile biten ve değeri metin olan her alan <code>date.fromisoformat</code> ile <code>date</code>\'e çevrilsin. İç içe nesneler de çevrilmeli. Ayrıca ondalıklı sayılar <code>Decimal</code> olsun (<code>parse_float</code>).</p>',
+       q='<p>Ilgaz Bank API yanıtını okuyan <code>yanit_coz(metin)</code> fonksiyonunu yaz. <code>json.loads</code>\'u <code>object_hook</code> ile kullan: adı <code>_tarih</code> ile biten ve değeri metin olan her alan <code>date.fromisoformat</code> ile <code>date</code>\'e çevrilsin. İç içe nesneler de çevrilmeli. Ayrıca ondalıklı sayılar <code>Decimal</code> olsun (<code>parse_float</code>).</p>',
        guide=['Bir yardımcı fonksiyon yaz: sözlük alır, değiştirilmiş sözlüğü DÖNDÜRÜR.', 'Sözlüğün öğelerinde dön; anahtar endswith("_tarih") ve değer str ise çevir.', 'json.loads(metin, object_hook=..., parse_float=Decimal) çağır.', 'object_hook iç nesnelere de otomatik uygulanır; ekstra özyineleme gerekmez.'],
        example=d('''
            import json

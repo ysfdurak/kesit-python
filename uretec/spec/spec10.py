@@ -2,7 +2,7 @@ START = 201
 TASKS = [
 dict(topic='Özyineleme', diff=3, kind='yaz',
   title='Özyinelemeli ikili arama',
-  q='<p>Anadolu Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
+  q='<p>Ilgaz Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
   start=r'''
 def ikili_ara(liste, hedef, bas=0, son=None):
     # buraya yaz
@@ -266,7 +266,7 @@ assert yas_al("") is None, "Boş metin → None"
 
 dict(topic='Dosya ve Hata', diff=1, kind='tamamla',
   title='İşlem günlüğüne satır ekle',
-  q='<p>Anadolu Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
+  q='<p>Ilgaz Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
   start=r'''
 def log_ekle(dosya_adi, mesaj):
     with open(dosya_adi, "___", encoding="utf-8") as f:

@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): OOP, Kalıtım ve MRO, Dataclass ve Tip (b-241…b-250) */
+/* Kesit Python — pratik bankası (orta): OOP, Kalıtım ve MRO, Dataclass ve Tip (b-241…b-250) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

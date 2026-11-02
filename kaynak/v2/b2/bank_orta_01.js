@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Comprehension, Üreteçler (b-211…b-220) */
+/* Kesit Python — pratik bankası (orta): Comprehension, Üreteçler (b-211…b-220) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -117,7 +117,7 @@ B.push(
     t: 'order',
     kind: 'order',
     title: 'Hatalı satırları atlayan ayrıştırıcı',
-    q: '<p>Anadolu Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
+    q: '<p>Ilgaz Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
     lines: ['def ayristir(kaynak):', '    for s in kaynak:', '        hesap, tutar = s.split(";")', '        if tutar.isdigit():', '            yield hesap, int(tutar)', 'gecerli = ayristir(["TR1;100", "TR2;abc", "TR3;250"])', 'print(sum(t for _, t in gecerli))'],
     expect: '350\n',
     hint: 'Üreteç önce tanımlanmalı; yield, koşulun içinde olmalı ki yalnızca geçerli satırlar üretilsin.',

@@ -55,7 +55,7 @@ T.append(dict(
 T.append(dict(
     id='b-272', topic='Regex', diff=2, kind='rehberli',
     title='Şifre politikası: ileriye bakış',
-    q='<p>Anadolu Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
+    q='<p>Ilgaz Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
     guide=['Her "en az bir" kuralı ayrı bir ileriye bakış olur: <code>(?=.*[A-Z])</code> gibi; bunlar karakter tüketmez.',
            'Rakam için <code>(?=.*\\d)</code>, özel karakter için <code>(?=.*[!@#$%*.-])</code>.',
            'Uzunluk ve boşluk yasağını tüketen kısım halleder: <code>\\S{8,}</code>.',

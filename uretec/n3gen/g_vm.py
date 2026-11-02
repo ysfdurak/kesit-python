@@ -5,7 +5,7 @@ from emit_n3 import write, ded, py, pc
 body = '''
 <h2>Neden veri modelleme?</h2>
 <p>Anadolu Market'in sipariş sistemi saniyede onlarca küçük işlem yapar: sepete ekle, stok düş, ödeme al. Bu sistemin tabloları hızlı ve tutarlı <b>yazmak</b> için tasarlanmıştır. Pazarlama müdürü ise şunu sorar: "2024'te bölge ve kategori bazında ciro nasıl değişti, hedefin ne kadarını tuttuk?" Bu soruyu sipariş sisteminin on tablosu üzerinden her seferinde yeniden JOIN'leyerek yanıtlamak hem yavaştır hem de her analist farklı bir tanım kullanır. Çözüm, analize uygun ikinci bir model kurmaktır: <b>veri ambarı</b> (data warehouse) ve onun en yaygın deseni olan <b>yıldız şema</b> (star schema).</p>
-<p>Bu derste iki dünyayı ayıracak, normalizasyonu ve bilinçli denormalizasyonu, Kimball yönteminin olgu (fact) ve boyut (dimension) kavramlarını, tanecik (grain) seçimini, ölçü türlerini, tarih boyutunu, vekil anahtarı ve yavaş değişen boyutları (SCD) öğreneceksin. Örnekler PBIPatika'daki <code>kesit_bi</code> modeli ve SQLPatika'daki <code>anadolu_market</code> verisiyle çalışır. SQL tarafını <i>sql-analitik</i>, yükleme tarafını <i>veri-boru-hatti</i> dersinde gördün.</p>
+<p>Bu derste iki dünyayı ayıracak, normalizasyonu ve bilinçli denormalizasyonu, Kimball yönteminin olgu (fact) ve boyut (dimension) kavramlarını, tanecik (grain) seçimini, ölçü türlerini, tarih boyutunu, vekil anahtarı ve yavaş değişen boyutları (SCD) öğreneceksin. Örnekler Kesit Power BI'daki <code>kesit_bi</code> modeli ve Kesit SQL'deki <code>anadolu_market</code> verisiyle çalışır. SQL tarafını <i>sql-analitik</i>, yükleme tarafını <i>veri-boru-hatti</i> dersinde gördün.</p>
 
 <h2>OLTP ile OLAP</h2>
 <div class="tbl-wrap"><table>
@@ -51,7 +51,7 @@ print(musteri, urun, siparis, kalem, sep="\\n")
 
 <h2>Yıldız ve kar tanesi: kesit_bi modelini okumak</h2>
 <p><b>Yıldız şemada</b> olgu tablosu ortada, her boyut tek bir JOIN uzaklığındadır. <b>Kar tanesi</b> (snowflake) şemada boyutlar da normalize edilir (ürün → kategori → departman); daha az tekrar, daha çok JOIN. Power BI ve çoğu ambar için önerilen yıldızdır.</p>
-<p>PBIPatika'daki <code>kesit_bi</code> modeli tipik bir yıldızdır: <code>Satislar</code> olgu tablosu (tanecik: <b>sipariş satırı</b>, <code>SatirNo</code> benzersiz), <code>Urunler</code>, <code>Musteriler</code>, <code>Tarih</code> boyutları. <code>Hedefler</code> ayrı bir olgu tablosudur ve taneciği farklıdır (<b>ay × kategori</b>). <code>StokGorunum</code> ise periyodik anlık görüntü (periodic snapshot) olgusudur: her ay sonu, her ürün için bir satır.</p>
+<p>Kesit Power BI'daki <code>kesit_bi</code> modeli tipik bir yıldızdır: <code>Satislar</code> olgu tablosu (tanecik: <b>sipariş satırı</b>, <code>SatirNo</code> benzersiz), <code>Urunler</code>, <code>Musteriler</code>, <code>Tarih</code> boyutları. <code>Hedefler</code> ayrı bir olgu tablosudur ve taneciği farklıdır (<b>ay × kategori</b>). <code>StokGorunum</code> ise periyodik anlık görüntü (periodic snapshot) olgusudur: her ay sonu, her ürün için bir satır.</p>
 ''' + py('''
 import veri
 
@@ -72,7 +72,7 @@ for satir in con.execute(sql):
 # tanecik kontrolü: SatirNo benzersiz mi?
 print(con.execute("SELECT COUNT(*), COUNT(DISTINCT SatirNo) FROM Satislar").fetchone())
 ''') + '''
-<p>Sorgunun şekline dikkat: tüm filtreler (yıl, segment) boyutlardan, toplanan değer olgudan gelir. Power BI'da aynı şeyi model görünümünde 1-çok (one-to-many) ilişkilerle, dilimleyicilerle (slicer) yaparsın; PBIPatika'daki modelin tam bu yapıda olmasının nedeni budur.</p>
+<p>Sorgunun şekline dikkat: tüm filtreler (yıl, segment) boyutlardan, toplanan değer olgudan gelir. Power BI'da aynı şeyi model görünümünde 1-çok (one-to-many) ilişkilerle, dilimleyicilerle (slicer) yaparsın; Kesit Power BI'daki modelin tam bu yapıda olmasının nedeni budur.</p>
 
 <h2>Tarih boyutu ve vekil anahtar</h2>
 <p>Tarih boyutu her ambarın ilk boyutudur: her gün için bir satır; yıl, çeyrek, ay adı, hafta sonu, tatil gibi sütunlar. Böylece "hafta sonu satışları" ya da "çeyrek bazında" sorgular tarih fonksiyonu yazmadan, basit bir filtreyle yapılır. Tarih boyutunu Python ile birkaç satırda üretebilirsin:</p>
@@ -125,7 +125,7 @@ for r in boyut:
 <p>SCD2'de olgu satırı, olay tarihinde geçerli olan sürümün <b>vekil anahtarını</b> taşır; böylece 2023 satışı Ankara'da, 2024 Temmuz satışı İzmir'de görünür. SCD2'nin SQL ve upsert ile yüklenmesini <i>veri-boru-hatti</i> dersinde, dbt snapshot ile otomatikleştirilmesini <i>dbt-elt</i> dersinde görürsün.</p>
 
 <h2>anadolu_market'ten yıldız şemaya</h2>
-<p>SQLPatika'daki <code>anadolu_market</code> bir OLTP modelidir: <code>orders</code> (başlık), <code>order_items</code> (kalem), <code>customers</code>, <code>products</code>. Bunu yıldıza çevirmek için: tanecik = sipariş kalemi; boyutlar = tarih, müşteri, ürün (+ kanal, durum gibi düşük kardinaliteli sütunlar olguda kalabilir); ölçüler = adet, brüt tutar, indirim, net tutar. DuckDB ile:</p>
+<p>Kesit SQL'deki <code>anadolu_market</code> bir OLTP modelidir: <code>orders</code> (başlık), <code>order_items</code> (kalem), <code>customers</code>, <code>products</code>. Bunu yıldıza çevirmek için: tanecik = sipariş kalemi; boyutlar = tarih, müşteri, ürün (+ kanal, durum gibi düşük kardinaliteli sütunlar olguda kalabilir); ölçüler = adet, brüt tutar, indirim, net tutar. DuckDB ile:</p>
 ''' + py('''
 import duckdb
 import veri
@@ -156,7 +156,7 @@ print(con.execute("""
     WHERE f.durum <> 'cancelled' GROUP BY 1 ORDER BY 2 DESC LIMIT 3
 """).fetchall())
 ''') + '''
-<p>Olgu tablosu 1620 satır, kalem tablosuyla aynı: tanecik korundu. Toplam net tutar <code>kesit_bi.Satislar</code>'ın tutar toplamıyla (1.346.189,85) bire bir aynı; PBIPatika modeli de tam olarak bu dönüşümle üretilmiştir.</p>
+<p>Olgu tablosu 1620 satır, kalem tablosuyla aynı: tanecik korundu. Toplam net tutar <code>kesit_bi.Satislar</code>'ın tutar toplamıyla (1.346.189,85) bire bir aynı; Kesit Power BI modeli de tam olarak bu dönüşümle üretilmiştir.</p>
 
 <h2>Data vault ve one-big-table</h2>
 <ul>
@@ -598,7 +598,7 @@ _r = yil_sonu_stok(_c)
 assert _r == {2022: 325, 2023: 309, 2024: 311}, f"yıl sonu stokları {{2022: 325, 2023: 309, 2024: 311}} olmalı (ayları toplamak 3541 gibi anlamsız sayılar verir), gelen {_r}"
 '''),
   'hints': ['Önce her yılın en son Tarih\'ini bul: MAX(Tarih) GROUP BY yıl.', 'Sonra yalnız o tarihlerdeki satırları topla.', 'Yıl: CAST(substr(Tarih, 1, 4) AS INTEGER)'],
-  'why': 'Stok ve bakiye gibi anlık görüntü ölçüleri zamanda "son değer" (ya da ortalama) ile özetlenir. Power BI\'da bunun karşılığı LASTDATE / LASTNONBLANK ile yazılan ölçülerdir; PBIPatika\'daki stok ölçüleri bu yüzden SUM değil dönem sonu mantığıyla kurulur.'})
+  'why': 'Stok ve bakiye gibi anlık görüntü ölçüleri zamanda "son değer" (ya da ortalama) ile özetlenir. Power BI\'da bunun karşılığı LASTDATE / LASTNONBLANK ile yazılan ölçülerdir; Kesit Power BI\'daki stok ölçüleri bu yüzden SUM değil dönem sonu mantığıyla kurulur.'})
 
 ex.append({'t': 'code', 'stage': 'Kendin yaz', 'id': 'veri-modelleme-7', 'diff': 2, 'needs': ['sqlite3'],
   'q': '<p>Farklı tanecikteki olguları karşılaştır (drill-across). <code>kesit_bi.Hedefler</code> <b>ay × kategori</b> düzeyinde (<code>Tarih</code> ayın ilk günü), <code>Satislar</code> ise satır düzeyindedir. <code>hedef_gerceklesme(con, yil)</code> yaz: verilen yılda her kategori için gerçekleşen ciroyu (Durum <code>\'İptal\'</code> ve <code>\'İade\'</code> hariç <code>Tutar</code> toplamı) ve hedef toplamını hesapla; <code>{kategori: oran}</code> döndür (oran = gerçekleşen / hedef, 3 basamak). Önce her iki olguyu <b>ortak taneciğe</b> (kategori) indir, sonra birleştir; ham satırları hedefle JOIN\'leme.</p>',
@@ -983,7 +983,7 @@ _bs = _c.execute("""SELECT SUM(i.quantity * i.unit_price * (1 - i.discount)) FRO
 assert abs(_r["bilinmeyen_sehir_cirosu"] - float(_bs)) < 0.05, f"Bilinmiyor şehir cirosu yanlış: {_r['bilinmeyen_sehir_cirosu']}"
 '''),
   'hints': ['Vekil anahtar: ROW_NUMBER() OVER (ORDER BY product_id)', 'Gün listesi: generate_series(MIN(order_date)::TIMESTAMP, MAX(order_date)::TIMESTAMP, INTERVAL 1 DAY) ve unnest; anahtar CAST(strftime(g, \'%Y%m%d\') AS INTEGER)', 'Olguda doğal anahtarlarla boyutlara JOIN\'leyip vekil anahtarları seç.'],
-  'why': 'Bu, ambar mühendisinin günlük işidir: tanecik seç, boyutları vekil anahtarla kur, olguyu boyutlara bağla, boşları "Bilinmiyor" yap ve sonucu kaynakla mutabakat et (satır sayısı ve ciro). PBIPatika\'daki kesit_bi modeli bu dönüşümün Power BI\'a yüklenmiş halidir.'})
+  'why': 'Bu, ambar mühendisinin günlük işidir: tanecik seç, boyutları vekil anahtarla kur, olguyu boyutlara bağla, boşları "Bilinmiyor" yap ve sonucu kaynakla mutabakat et (satır sayısı ve ciro). Kesit Power BI\'daki kesit_bi modeli bu dönüşümün Power BI\'a yüklenmiş halidir.'})
 
 lesson = {
   'id': 'veri-modelleme', 'lv': 'ileri', 'mod': 'Üretime Hazırlık', 'min': 60,
@@ -1002,7 +1002,7 @@ lesson = {
   'faq': [
     {'q': 'Yıldız şema mı, tek geniş tablo (OBT) mı?', 'a': 'Önce yıldız: boyutlar tekrar kullanılabilir, SCD ve tutarlı boyutlar mümkün olur. Belirli bir panonun hızı veya basitliği için yıldızın üstüne OBT üretmek iyi bir sunum katmanıdır; tek kaynak olarak OBT ise bakımı zorlaştırır.'},
     {'q': 'Her boyut SCD2 mi olmalı?', 'a': 'Hayır. Yalnız geçmişin doğru raporlanması gereken öznitelikler (bölge, segment, fiyat listesi) için. SCD2 boyutu büyütür ve sorguları karmaşıklaştırır; yazım düzeltmeleri gibi alanlar tip 1 kalmalıdır.'},
-    {'q': 'Power BI modeliyle bu dersin ilişkisi ne?', 'a': 'Power BI\'ın içindeki VertiPaq motoru yıldız şema için optimize edilmiştir. PBIPatika\'daki kesit_bi modeli; olgu tabloları (Satislar, Hedefler, StokGorunum) ve paylaşılan boyutlarla (Tarih, Urunler, Musteriler) kurulmuş bir yıldızdır. Burada tasarladığın modeli doğrudan Power BI\'a yükleyebilirsin.'},
+    {'q': 'Power BI modeliyle bu dersin ilişkisi ne?', 'a': 'Power BI\'ın içindeki VertiPaq motoru yıldız şema için optimize edilmiştir. Kesit Power BI\'daki kesit_bi modeli; olgu tabloları (Satislar, Hedefler, StokGorunum) ve paylaşılan boyutlarla (Tarih, Urunler, Musteriler) kurulmuş bir yıldızdır. Burada tasarladığın modeli doğrudan Power BI\'a yükleyebilirsin.'},
     {'q': 'Kar tanesi şema ne zaman mantıklı?', 'a': 'Çok büyük ve sık güncellenen alt hiyerarşiler (ör. on binlerce mağazayı paylaşan bölge/ülke tablosu) varsa ya da kaynak modeli ambar içinde ara katman olarak tutuyorsan. Raporlama katmanında genellikle düzleştirip yıldız yaparsın.'}
   ],
   'mistakes': [

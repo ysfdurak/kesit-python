@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-141 … b-150 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-141 … b-150 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -62,7 +62,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Sayfalama (pagination)',
-    q: '<p>Anadolu Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
+    q: '<p>Ilgaz Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
     start: 'def sayfa_getir(kayitlar, sayfa, boyut):\n    # buraya yaz\n    pass\n',
     sol: 'def sayfa_getir(kayitlar, sayfa, boyut):\n    if sayfa < 1:\n        return []\n    bas = (sayfa - 1) * boyut\n    return kayitlar[bas:bas + boyut]\n',
     tests: 'k = list(range(1, 24))\nassert sayfa_getir(k, 1, 10) == list(range(1, 11)), "1. sayfa 1..10 kayıtlarını vermeli"\nassert sayfa_getir(k, 3, 10) == [21, 22, 23], "Son sayfa eksik dolu olabilir: [21, 22, 23]"\nassert sayfa_getir(k, 4, 10) == [], "Kayıt kalmadıysa boş liste"\nassert sayfa_getir(k, 0, 10) == [], "Sayfa 0 geçersiz: boş liste (negatif dilim tuzağına dikkat)"\n',

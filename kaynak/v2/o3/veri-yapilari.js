@@ -1,4 +1,4 @@
-/* PythonPatika — v2 o3: Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf */
+/* Kesit Python — v2 o3: Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

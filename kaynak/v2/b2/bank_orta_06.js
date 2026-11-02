@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): collections/itertools, Tarih-Saat, Regex (b-261…b-270) */
+/* Kesit Python — pratik bankası (orta): collections/itertools, Tarih-Saat, Regex (b-261…b-270) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -81,7 +81,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Taksit tarihi: ay ekleme',
-    q: '<p>Anadolu Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
+    q: '<p>Ilgaz Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
     guide: ['Tarihi <code>date.fromisoformat</code> ile ayrıştır.', 'Toplam ay sayısını hesapla: <code>toplam = d.year * 12 + (d.month - 1) + n</code>; yıl = <code>toplam // 12</code>, ay = <code>toplam % 12 + 1</code>.', '<code>calendar.monthrange(yil, ay)[1]</code> o ayın gün sayısını verir.', 'Gün = <code>min(d.day, ayin_son_gunu)</code>; yeni tarihi oluşturup <code>isoformat()</code> döndür.'],
     example: 'import calendar\n# monthrange: (ayın ilk gününün haftanın günü, ayın gün sayısı)\nprint(calendar.monthrange(2024, 2))   # (3, 29)  artık yıl\nprint(calendar.monthrange(2026, 2))   # (6, 28)\n# yıl/ay taşmasını tek sayıyla çözmek\ntoplam = 2026 * 12 + (11 - 1) + 3     # Kasım + 3 ay\nprint(toplam // 12, toplam % 12 + 1)  # 2027 2\n',
     start: 'import calendar\nfrom datetime import date\n\ndef ay_ekle(tarih, n):\n    d = date.fromisoformat(tarih)\n    # TODO 1: yeni yıl ve ayı hesapla\n    # TODO 2: ayın son gününü bul\n    # TODO 3: günü sınırla, yeni tarihi döndür\n    return d.isoformat()\n',

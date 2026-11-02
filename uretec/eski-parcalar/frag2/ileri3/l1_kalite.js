@@ -15,7 +15,7 @@
   ],
   body: `
 <h2>Neden kalite otomasyonu?</h2>
-<p>Anadolu Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
+<p>Ilgaz Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
 <p>Üretime hazır bir Python projesinde kalite zinciri dört halkadan oluşur: biçimlendirici (formatter) kodu tek stile getirir, linter şüpheli kalıpları yakalar, tip denetleyici (type checker) sözleşmeleri doğrular, test koşucusu davranışı kanıtlar. pre-commit bu zinciri yerelde, CI (continuous integration, sürekli tümleştirme) sunucuda çalıştırır.</p>
 
 <h2>Biçim ve lint: ruff, black, isort</h2>

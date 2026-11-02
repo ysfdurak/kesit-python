@@ -1,4 +1,4 @@
-/* PythonPatika — 'ml-regresyon-siniflandirma' dersi uzantısı: HistGradientBoosting ayarları, kategorik destek ve XGBoost/LightGBM eşlemesi (AUDIT Ekle-8) */
+/* Kesit Python — 'ml-regresyon-siniflandirma' dersi uzantısı: HistGradientBoosting ayarları, kategorik destek ve XGBoost/LightGBM eşlemesi (AUDIT Ekle-8) */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];

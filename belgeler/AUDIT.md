@@ -1,4 +1,4 @@
-# PythonPatika: rol patikaları müfredat denetimi
+# Kesit Python: rol patikaları müfredat denetimi
 
 Tarih: 2 Kasım 2026 · Kapsam: `levels.js` (PY_ORDER, 111 ders), `paths.js` (10 patika), tüm ders gövdeleri ve alıştırmalar (`tools/show.py` ile çıkarıldı), `data/manifest.json` (8 veri seti)
 Yöntem: Her patika, o rolün kıdemli uzmanının gözüyle incelendi. İşe girmek ve ilk 6 ayda verimli olmak için gereken beceriler muadil programlar ve iş ilanlarıyla karşılaştırıldı. Konu kapsamı ders başlıkları üzerinden ve tüm ders metninde anahtar kelime taramasıyla doğrulandı. "Yalnız anılıyor" diye işaretlenen konular, derste bir iki cümleyle geçen ama alıştırması olmayan konulardır.
@@ -8,9 +8,9 @@ Yöntem: Her patika, o rolün kıdemli uzmanının gözüyle incelendi. İşe gi
 
 ## 0. Yönetici özeti: tüm patikaları kesen bulgular
 
-1. **8 veri seti hiçbir derste kullanılmıyor.** Ders metinlerinde ve alıştırmalarda `import veri`, `veri.oku`, `veri.baglan` sıfır kez geçiyor. `anadolu_bank`, `pusula_ik`, `lezzet_kurye`, `kanat_havayollari`, `pedal_izmir`, `kesit_bi` ve `kirli_veri` adları da hiçbir derste yok. `anadolu_market` yalnız `django-giris` ve `pytest` derslerinde, o da ad olarak geçiyor. Projeler (proje-ileri, proje-ml) bile satır içi küçük ya da sentetik veri üretiyor. En az emekle en çok değer bunu düzelterek kazanılır: ileri seviyedeki veri derslerinde ve bitirme projelerinde gerçek tablolar kullanılmalı (bkz. Ekle-1, Ekle-27…29).
-2. **4 ders hiçbir patikada yok:** `proje-orta` (Anadolu Bank işlem analizi, orta seviyenin en iyi projelerinden), `kurulum-araclar`, `kutuphane-turu`, `metaprogramlama`.
-3. **Veri rollerinde SQL derinliği eksik.** SQL, veri analisti ilanlarının bir numaralı becerisi ve Google, IBM, DataCamp programlarının hepsinde ayrı bir ders. PythonPatika'da yalnız `sqlite-python` var. Pencere fonksiyonları, CTE ve pandas ile SQL arasında çeviri kalıpları derste anılıyor ama alıştırması yok. Kardeş uygulama SQLPatika dili öğretiyor, ama "Python'dan SQL ile analiz" köprüsü kurulmamış.
+1. **8 veri seti hiçbir derste kullanılmıyor.** Ders metinlerinde ve alıştırmalarda `import veri`, `veri.oku`, `veri.baglan` sıfır kez geçiyor. `ilgaz_bank`, `pusula_ik`, `lezzet_kurye`, `kanat_havayollari`, `pedal_izmir`, `kesit_bi` ve `kirli_veri` adları da hiçbir derste yok. `anadolu_market` yalnız `django-giris` ve `pytest` derslerinde, o da ad olarak geçiyor. Projeler (proje-ileri, proje-ml) bile satır içi küçük ya da sentetik veri üretiyor. En az emekle en çok değer bunu düzelterek kazanılır: ileri seviyedeki veri derslerinde ve bitirme projelerinde gerçek tablolar kullanılmalı (bkz. Ekle-1, Ekle-27…29).
+2. **4 ders hiçbir patikada yok:** `proje-orta` (Ilgaz Bank işlem analizi, orta seviyenin en iyi projelerinden), `kurulum-araclar`, `kutuphane-turu`, `metaprogramlama`.
+3. **Veri rollerinde SQL derinliği eksik.** SQL, veri analisti ilanlarının bir numaralı becerisi ve Google, IBM, DataCamp programlarının hepsinde ayrı bir ders. Kesit Python'da yalnız `sqlite-python` var. Pencere fonksiyonları, CTE ve pandas ile SQL arasında çeviri kalıpları derste anılıyor ama alıştırması yok. Kardeş uygulama Kesit SQL dili öğretiyor, ama "Python'dan SQL ile analiz" köprüsü kurulmamış.
 4. **İleri konuların çoğu yalnız anılıyor.** MLflow, Celery/RQ, Kubernetes, Streamlit, ARIMA, XGBoost/LightGBM, dbt, Great Expectations/pandera, Playwright, OAuth2/JWT, Alembic, embedding ve vektör veritabanı derslerde bir iki cümleyle geçiyor. Hiçbirinin uygulamalı bölümü ya da alıştırması yok. Bunlar ilgili rollerin ilk 6 ayında doğrudan karşılaşılan konular.
 5. **Hiç olmayan konular:** feature engineering (ayrı ders olarak), SHAP/PDP, derin öğrenme (PyTorch veya numpy ile sinir ağı), MLOps izleme ve veri kayması, PostgreSQL'e özgü konular (psycopg, COPY, EXPLAIN), Redis/önbellek stratejileri, mesaj kuyruğu ve akış işleme (Kafka), bulut nesne depolama (S3/boto3), veri modelleme (yıldız şema, Kimball), gözlemlenebilirlik (metrik, iz, SLO), sistem tasarımı, ajanlar ve MCP, Google Sheets/IMAP/Teams entegrasyonu, PDF'ten tablo çıkarma, LeetCode'daki ağaç, trie, aralık ve 2B DP kalıpları, veri rolü mülakatı (SQL, pandas ve ürün metriği vaka soruları).
 6. **Patika tutarlılığı sorunları:**
@@ -64,7 +64,7 @@ Portföy: `kirli_veri` tablolarını (bayi, musteri, urun) saf Python ile temizl
 
 ### 2.2 Karşılık ve eksikler
 
-| Beceri | PythonPatika karşılığı | Durum | Öncelik |
+| Beceri | Kesit Python karşılığı | Durum | Öncelik |
 |---|---|---|---|
 | SQL | sqlite-python (pencere fonksiyonu yalnız anılıyor), polars-duckdb (DuckDB'ye SQL) | **Yüzeysel**: CTE, LAG/LEAD, ROW_NUMBER, tarih aralığı, pandas↔SQL çevirisi için alıştırma yok | **Kritik** |
 | pandas | pandas-giris/temizlik/groupby/ileri/zaman-serisi | Güçlü | – |
@@ -90,7 +90,7 @@ Portföy: `kirli_veri` tablolarını (bayi, musteri, urun) saf Python ile temizl
 2. **Huni ve A/B testi.** `web_events` ile huni dönüşüm oranları, `ab_test` ile SRM kontrolü, oran testi ve gelir farkı için bootstrap. Sonuç bir karar notu olarak yazılır.
 3. **Pusula İK işten ayrılma analizi.** `ik_employees` (term_date, term_reason), `ik_reviews`, `ik_survey` (eNPS), `ik_salaries`: departman ve kıdem bazında ayrılma oranı, ücret bandı konumu, eNPS ile ayrılma ilişkisi.
 4. **Kanat Havayolları zamanında kalkış (OTP) analizi.** `hv_flights` ve `hv_delays`: rötar nedeni Pareto, rota ve uçak bazında OTP, doluluk (pax/seats).
-5. **Kirli veri temizlik hattı.** `kirli_veri` → temiz tablo → `kesit_bi` yıldız şemasına uygun CSV (PBIPatika'ya köprü).
+5. **Kirli veri temizlik hattı.** `kirli_veri` → temiz tablo → `kesit_bi` yıldız şemasına uygun CSV (Kesit Power BI'a köprü).
 
 ---
 
@@ -126,7 +126,7 @@ SQL ile veri çekme (IBM DS: "Databases and SQL for Data Science"); EDA; istatis
 **Portföy:**
 1. **Pedal İzmir saatlik talep tahmini.** `bk_trips` saatlik toplanır, `bk_weather` ile birleştirilir; özellikler: saat, gün, kıyı istasyonu, yağış, sıcaklık. Önce naive ve seasonal-naive temel çizgisi, sonra ETS ve gradient boosting; TimeSeriesSplit ile geriye dönük test (backtest); istasyon düzeyinde yeniden dengeleme önerisi.
 2. **Pusula İK işten ayrılma (attrition) modeli.** `ik_employees` + `ik_reviews` + `ik_salaries` (bant içi konum, son zamdan geçen süre) + `ik_leaves` + `ik_survey`; zaman bazlı bölme; SHAP ile açıklama; adalet kontrolü (cinsiyet ve yaş grubu hata oranları).
-3. **Anadolu Bank anomali ve dolandırıcılık taraması.** `bank_txns`: hesap bazında z-skoru ve IsolationForest; merchant_category profili; `bank_fx` ile TL'ye çevirme.
+3. **Ilgaz Bank anomali ve dolandırıcılık taraması.** `bank_txns`: hesap bazında z-skoru ve IsolationForest; merchant_category profili; `bank_fx` ile TL'ye çevirme.
 4. **Lezzet Kurye yorum duygu analizi.** `lk_ratings.comment`: TF-IDF + lojistik regresyon; food_score'u zayıf etiket olarak kullanma.
 
 ---
@@ -155,7 +155,7 @@ DataCamp ML Engineer patikası şu sırayı izliyor: denetimli öğrenme, MLOps 
 
 ### 4.3 Düzeltme
 - (a) Yeni: `ozellik-muhendisligi`, `mlops-yasam-dongusu`, `derin-ogrenme-giris`, `zaman-serisi-tahmin`, `embedding-vektor-arama`, `bulut-temelleri`, `gozlemlenebilirlik`.
-- (b) Ekle: ml-pipeline → açıklanabilirlik ve Optuna (Ekle-5, Ekle-6); kalite-ci → CD ve model artefaktı (Ekle-15); proje-ml → gerçek `anadolu_bank` tabloları, servisleme ve izleme (Ekle-28).
+- (b) Ekle: ml-pipeline → açıklanabilirlik ve Optuna (Ekle-5, Ekle-6); kalite-ci → CD ve model artefaktı (Ekle-15); proje-ml → gerçek `ilgaz_bank` tabloları, servisleme ve izleme (Ekle-28).
 - (c) Patikaya ekle: `terminal-temelleri`, `git-proje-yapisi`, `test-yazma`, `pytest`, `logging`, `sqlite-python`, `pydantic-dogrulama`, `veri-boru-hatti`.
 - (c) **Sıra hatası:** `fastapi` (şu an docker-deploy'dan sonra) `docker-deploy`'dan önceye alınmalı. `llm-api` → `performans` geçişi de geriye sarıyor; performans, ML bloğundan önce gelmeli.
 - Önerilen son sıra: … `ml-kumeleme` → `zaman-serisi-tahmin` → `derin-ogrenme-giris` → `nlp-metin` → `embedding-vektor-arama` → `llm-api` → `fastapi` → `docker-deploy` → `mlops-yasam-dongusu` → `bulut-temelleri` → `kalite-ci` → `proje-ml`.
@@ -164,7 +164,7 @@ DataCamp ML Engineer patikası şu sırayı izliyor: denetimli öğrenme, MLOps 
 **Mülakat:** eğitim ile servisleme arasındaki çarpıklık (training-serving skew); toplu ve çevrim içi tahmin; model sürümleme; veri kayması ile kavram kayması farkı ve tespiti; yeniden eğitim stratejisi; özellik deposunun neden gerektiği; gecikme ve maliyet ödünleşimi; A/B testiyle model yayını (shadow, canary); ML sistem tasarımı ("kurye varış süresi tahmini servisini tasarla").
 **Portföy:**
 1. **Lezzet Kurye teslim süresi (ETA) servisi.** `lk_orders` (placed_at→delivered_at), `lk_restaurants`, `lk_couriers`, `lk_order_lines`: özellik hattı, HistGradientBoosting, MLflow benzeri deney kaydı (tarayıcıda JSON kayıt defteri), FastAPI `/predict`, Dockerfile, PSI ile haftalık kayma raporu.
-2. **Anadolu Bank churn modelini üretime almak.** proje-ml'i gerçek `bank_accounts` (closed_date → etiket) ve `bank_txns` özellikleriyle yeniden kurmak; model kartı ve toplu skorlama işi.
+2. **Ilgaz Bank churn modelini üretime almak.** proje-ml'i gerçek `bank_accounts` (closed_date → etiket) ve `bank_txns` özellikleriyle yeniden kurmak; model kartı ve toplu skorlama işi.
 3. **Pedal İzmir talep tahmini:** zaman serisi + gözlemlenebilirlik (tahmin hatası panosu).
 
 ---
@@ -203,7 +203,7 @@ roadmap.sh data-engineer şu başlıkları sayıyor: SQL ve algoritmalar, Git, L
 ### 5.4 Mülakat ve portföy
 **Mülakat:** OLTP ile OLAP farkı; yıldız ile kar tanesi şeması; SCD 1, 2 ve 3; ETL ile ELT farkı; idempotent ve artımlı yükleme (watermark); geç gelen veri; tam bir kez işleme (exactly-once) neden zor; partition ile bucket farkı; Spark'ta shuffle ve skew; Parquet neden sütunsal; veri kalitesi boyutları; DAG tasarımı ve backfill; pencere fonksiyonu ve tekilleştirme SQL'i (ROW_NUMBER ile son kaydı al).
 **Portföy:**
-1. **Anadolu Bank artımlı ETL.** `bank_txns` (42 bin satır) günlük parçalara bölünür → watermark ile artımlı yükleme → `bank_fx` ile TL'ye çevirme → SQLite ya da DuckDB'de günlük hesap özeti mart'ı; idempotentlik testi (iki kez çalıştır, aynı sonuç).
+1. **Ilgaz Bank artımlı ETL.** `bank_txns` (42 bin satır) günlük parçalara bölünür → watermark ile artımlı yükleme → `bank_fx` ile TL'ye çevirme → SQLite ya da DuckDB'de günlük hesap özeti mart'ı; idempotentlik testi (iki kez çalıştır, aynı sonuç).
 2. **Kanat Havayolları yıldız şeması.** `hv_flights` olgu tablosu; `hv_routes`, `hv_aircraft` ve `hv_airports` boyutları (tz_offset ile UTC normalizasyonu); dbt tarzı staging, intermediate ve mart katmanları ve testler (unique, not_null, relationships).
 3. **Pedal İzmir veri gölü.** `bk_trips` (117 bin satır) `yil=…/ay=…/` biçiminde bölümlü Parquet'e yazılır; DuckDB ile bölüm budamalı (partition pruning) sorgu; `bk_maintenance` ile SCD2 bisiklet durumu.
 4. **CDC ve upsert.** `anadolu_market.price_updates` ve `raw_signups`: fiyat değişikliğini SCD2 ürün boyutuna işleme, kirli kayıtları karantina tablosuna yazma.
@@ -436,7 +436,7 @@ ileri · Makine Öğrenmesi · ml-regresyon-siniflandirma'dan sonra · bilimci, 
 - Yüksek kardinaliteli kategorikler: frekans, hedef kodlama (CV içinde), OneHot'un sınırı
 - Binning; eksiklik göstergesi özellikleri
 - Özellik seçimi: varyans, korelasyon, model tabanlı, permutation
-- `FunctionTransformer` ve özel dönüştürücüyle Pipeline'a gömme; `anadolu_bank` ile mini proje
+- `FunctionTransformer` ve özel dönüştürücüyle Pipeline'a gömme; `ilgaz_bank` ile mini proje
 
 **6. `mlops-yasam-dongusu`: MLOps: deney takibi, model kaydı, servisleme ve izleme**
 ileri · Üretime Hazırlık · docker-deploy'dan sonra · ml, bilimci (İyi olur), ai · Tarayıcıda: JSON tabanlı mini kayıt defteri; MLflow gösterim
@@ -468,7 +468,7 @@ ileri · Üretime Hazırlık · veri-boru-hatti'ndan önce · muhendis, analist 
 - Tarih boyutu üretmek; vekil anahtar (surrogate key)
 - SCD tip 1, 2 ve 3 (veri-boru-hatti'ndaki SCD2'ye çapraz bağlantı)
 - `anadolu_market`'ten yıldız şemaya dönüşüm alıştırması
-- Data vault ve one-big-table'a kısa bakış; Power BI modeliyle ilişki (PBIPatika köprüsü)
+- Data vault ve one-big-table'a kısa bakış; Power BI modeliyle ilişki (Kesit Power BI köprüsü)
 
 **9. `dbt-elt`: ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler**
 ileri · Üretime Hazırlık · veri-boru-hatti'ndan sonra · muhendis, analist (İyi olur) · Tarayıcıda: DuckDB + jinja2 ile "mini-dbt"
@@ -661,7 +661,7 @@ orta · Otomasyon ve Araçlar · http-api'den sonra · otomasyon, ai · Tarayıc
 | 1 | `pandas-giris` (ve tüm ileri veri dersleri) | "Ders veri setleri" bölümü: `veri.liste()`, `veri.oku()`, `veri.baglan()`; ileri veri derslerinin her birinde gerçek tablolarla en az 2 alıştırma (pandas-temizlik → `kirli_veri`, `raw_signups`; pandas-groupby → `order_items`; pandas-zaman-serisi → `bk_trips`; gorsellestirme → `hv_flights`; istatistik → `ab_test`; ml-kumeleme → `customers` + `orders`; nlp-metin → `lk_ratings`) | **Kritik** | Tümü |
 | 2 | `istatistik` | A/B testinde SRM (örneklem oranı uyumsuzluğu) ki-kare kontrolü, sık bakma (peeking) sorunu ve sıralı test kavramı, CUPED ile varyans azaltma, oranlar için z-testi; `ab_test` tablosuyla | Önemli | analist, bilimci |
 | 3 | `seaborn-plotly` | "Panoya geçiş" bölümü: Streamlit ve Dash ile basit pano (gösterim), pano tasarım ilkeleri (KPI kartı, filtre, ayrıntıya inme), veri hikâyesi akışı (bağlam, gerilim, çözüm), tek dosyalık HTML rapor | Önemli | analist |
-| 4 | `excel-otomasyon` | Power BI ve Excel köprüsü: Power BI'da Python betik kaynağı ve Python görseli, Excel'de Python (`=PY`), Power BI'a yıldız şemalı CSV/Parquet hazırlama (`kesit_bi` ile), PBIPatika'ya bağlantı | Önemli | analist, otomasyon |
+| 4 | `excel-otomasyon` | Power BI ve Excel köprüsü: Power BI'da Python betik kaynağı ve Python görseli, Excel'de Python (`=PY`), Power BI'a yıldız şemalı CSV/Parquet hazırlama (`kesit_bi` ile), Kesit Power BI'a bağlantı | Önemli | analist, otomasyon |
 | 5 | `ml-pipeline-degerlendirme` | Model açıklanabilirliği: PDP ve ICE (`sklearn.inspection`), SHAP kavramı (gösterim), hata dilimi analizi (segment bazında hata), adalet metrikleri (grup bazında FPR/FNR), model kartına ekleme | Önemli | bilimci, ml |
 | 6 | `ml-pipeline-degerlendirme` | Bayesçi hiperparametre arama (Optuna gösterimi), HalvingGridSearchCV, erken durdurma; arama bütçesi | İyi olur | bilimci, ml |
 | 7 | `ml-kumeleme` | Market sepeti analizi (destek, güven, lift; saf pandas ile Apriori benzeri) ve öğe-öğe benzerliğiyle basit öneri; `order_items` ile | İyi olur | analist, bilimci |
@@ -685,7 +685,7 @@ orta · Otomasyon ve Araçlar · http-api'den sonra · otomasyon, ai · Tarayıc
 | 25 | `web-scraping` | Uygulamalı Playwright: bekleme stratejileri, giriş yapılan portalda oturumu saklama, ağ yanıtını yakalayıp gizli API'yi kullanma, dosya indirme | İyi olur | otomasyon |
 | 26 | `ofis-otomasyon` | Hata bildirimi (Teams webhook ve e-posta) ve çalışma özeti; Windows Görev Zamanlayıcı'da "kullanıcı oturum açmamışken çalıştır" ve kimlik bilgisi tuzakları | İyi olur | otomasyon |
 | 27 | `proje-ileri` | Satır içi veri yerine `veri.oku("anadolu_market", ...)` ile gerçek 910 sipariş ve 1620 satır; kohort ve RFM sonuçlarını `kesit_bi.RFMSegmentleri` ile karşılaştırma | **Kritik** | analist, bilimci, muhendis |
-| 28 | `proje-ml` | Sentetik veri yerine `anadolu_bank` (bank_accounts.closed_date → etiket; bank_txns'ten 90 günlük özellikler); FastAPI ile servisleme ve PSI ile izleme adımı | **Kritik** | bilimci, ml |
+| 28 | `proje-ml` | Sentetik veri yerine `ilgaz_bank` (bank_accounts.closed_date → etiket; bank_txns'ten 90 günlük özellikler); FastAPI ile servisleme ve PSI ile izleme adımı | **Kritik** | bilimci, ml |
 | 29 | `proje-api` | PostgreSQL + Alembic + Redis önbellek + arka plan işi (onay e-postası) ile docker compose; hız sınırı | Önemli | backend, web |
 | 30 | `jupyter-colab` / `git-proje-yapisi` | Notebook'tan rapora (nbconvert, Quarto, papermill parametreli rapor) ve portföy deposu (README şablonu, bulgu özeti, ekran görüntüsü, GitHub'da yayın) | Önemli | analist, bilimci, tümü |
 

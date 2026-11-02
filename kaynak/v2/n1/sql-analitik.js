@@ -1,4 +1,4 @@
-/* PythonPatika — v2/n1: Python'dan SQL ile analiz: CTE, pencere fonksiyonları ve pandas karşılıkları */
+/* Kesit Python — v2/n1: Python'dan SQL ile analiz: CTE, pencere fonksiyonları ve pandas karşılıkları */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

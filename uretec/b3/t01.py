@@ -129,7 +129,7 @@ assert not np.shares_memory(r, f), "Dönen dizi orijinalle belleği paylaşmamal
 
 dict(id='b-315', topic='numpy', diff=2, kind='tamamla', needs=['numpy'],
   title='np.select ile müşteri segmenti',
-  q='<p>Anadolu Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
+  q='<p>Ilgaz Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
   start=r'''
 import numpy as np
 

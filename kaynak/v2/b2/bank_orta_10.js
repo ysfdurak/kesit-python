@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası (orta): Test, Otomasyon (b-301…b-310) */
+/* Kesit Python — pratik bankası (orta): Test, Otomasyon (b-301…b-310) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası: ileri görevler (b-351 … b-360) */
+/* Kesit Python — pratik bankası: ileri görevler (b-351 … b-360) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -171,7 +171,7 @@ B.push(
     diff: 3,
     kind: 'rehberli',
     title: 'Havalede kilitlenmeyi (deadlock) önle',
-    q: '<p>Anadolu Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
+    q: '<p>Ilgaz Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
     guide: ['İki hesabı <code>no</code> değerine göre sırala: <code>ilk, ikinci = sorted([kaynak, hedef], key=lambda h: h.no)</code>.', 'İç içe iki <code>with</code> bloğuyla önce <code>ilk.kilit</code>, sonra <code>ikinci.kilit</code> al.', 'Kilitlerin içinde bakiye kontrolü yap; yetersizse <code>ValueError</code>.', 'Kaynaktan düş, hedefe ekle.'],
     example: 'import threading\n# Tutarlı kilit sırası: kaynak adlarına göre alfabetik\nkilitler = {"rapor": threading.Lock(), "arsiv": threading.Lock()}\ndef iki_kaynakla_calis(a, b):\n    for ad in sorted([a, b]):\n        print("kilit alınıyor:", ad)\niki_kaynakla_calis("rapor", "arsiv")\niki_kaynakla_calis("arsiv", "rapor")   # aynı sıra!\n',
     start: 'import threading\n\nclass Hesap:\n    def __init__(self, no, bakiye):\n        self.no = no\n        self.bakiye = bakiye\n        self.kilit = threading.Lock()\n\ndef havale(kaynak, hedef, tutar):\n    # TODO 1: hesapları no\'ya göre sırala\n    # TODO 2: kilitleri bu sırayla al (iç içe with)\n    # TODO 3: bakiye yetersizse ValueError\n    # TODO 4: aktarımı yap\n    with kaynak.kilit:\n        with hedef.kilit:\n            kaynak.bakiye -= tutar\n            hedef.bakiye += tutar\n',

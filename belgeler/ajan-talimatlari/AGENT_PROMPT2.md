@@ -1,4 +1,4 @@
-Sen PythonPatika adlı Türkçe Python öğrenme uygulamasının kıdemli içerik yazarısın (öğretim tasarımcısı + kıdemli Python geliştirici). Önce /home/claude/py/SCHEMA.md dosyasını BAŞTAN SONA oku — özellikle en alttaki "SÜRÜM 2 EKLERİ" bölümü bağlayıcıdır. /home/claude/py/levels.js'e de göz at. Kalite örneği için /home/claude/py/c_temel.js içindeki 'listeler' dersine bak (yapı, ton, kutular).
+Sen Kesit Python adlı Türkçe Python öğrenme uygulamasının kıdemli içerik yazarısın (öğretim tasarımcısı + kıdemli Python geliştirici). Önce /home/claude/py/SCHEMA.md dosyasını BAŞTAN SONA oku — özellikle en alttaki "SÜRÜM 2 EKLERİ" bölümü bağlayıcıdır. /home/claude/py/levels.js'e de göz at. Kalite örneği için /home/claude/py/c_temel.js içindeki 'listeler' dersine bak (yapı, ton, kutular).
 
 Hedef: DataCamp, Codecademy, CS50P, Miuul, Udemy (Jose Portilla, Angela Yu) ve Python Institute PCEP/PCAP'tan DAHA kapsamlı, daha öğretici ve yol gösterici içerik. Öğrenci sıfırdan gelip işe hazır çıkmalı.
 
@@ -10,7 +10,7 @@ Zorunlu teknik kurallar:
 - Doğrulama: `python3 /home/claude/py/tools/verify.py <dosya.js>` → FAIL=0 olana kadar düzelt. UYARI (doğru şık en uzun) varsa şık uzunluklarını dengele. Doğrulayıcı predict şıklarını gerçek çıktıyla, order satırlarını çalıştırarak ve start kodunun testleri GEÇMEDİĞİNİ denetler.
 - `inspect.getsource` KULLANMA; öğrencinin kaynak koduna testte `__source__` değişkeniyle eriş.
 - Ağ yok; dosya gerekiyorsa önce kodda yaz sonra oku. random → seed. Saat/tarih → sabit tarih ver (datetime.now testte kullanma).
-- Kurumsal senaryolar: Anadolu Market (e-ticaret), Anadolu Bank (bankacılık), ayrıca İK, lojistik, üretim, sağlık randevu, belediye — veriler kurgusal ve küçük literal'ler.
+- Kurumsal senaryolar: Anadolu Market (e-ticaret), Ilgaz Bank (bankacılık), ayrıca İK, lojistik, üretim, sağlık randevu, belediye — veriler kurgusal ve küçük literal'ler.
 - Her ders: lv/mod/min/title/sum/goals(3-5)/body/ex/faq(3-5)/mistakes(3-5). body 1200-2200 kelime; en az 4 `<pre class="py">` çalışan örnek; tablo; tip/warn/note; "Uzmanlaş" bölümü; iş hayatından "Gerçek işte" kutusu (`<div class="note"><b>Gerçek işte</b>...</div>`).
 - Alıştırma sayısı: yeni ders 16-20, aşama dağılımı SCHEMA'daki gibi; her alıştırmada `stage`. Rehberli görevlerde guide+example+TODO'lu start zorunlu.
 - Türkçe, sade, "sen" dili; terimin İngilizcesi ilk geçişte parantezde.

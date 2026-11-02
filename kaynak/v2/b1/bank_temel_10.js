@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-201 … b-210 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-201 … b-210 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -10,7 +10,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Özyinelemeli ikili arama',
-    q: '<p>Anadolu Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
+    q: '<p>Ilgaz Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
     start: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    # buraya yaz\n    pass\n',
     sol: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    if son is None:\n        son = len(liste) - 1\n    if bas > son:\n        return -1\n    orta = (bas + son) // 2\n    if liste[orta] == hedef:\n        return orta\n    if liste[orta] < hedef:\n        return ikili_ara(liste, hedef, orta + 1, son)\n    return ikili_ara(liste, hedef, bas, orta - 1)\n',
     tests: 'L = [102, 115, 230, 341, 456, 578, 690, 777]\nassert ikili_ara(L, 456) == 4, "456 dördüncü indekste"\nassert ikili_ara(L, 102) == 0, "İlk eleman: 0"\nassert ikili_ara(L, 777) == 7, "Son eleman: 7"\nassert ikili_ara(L, 500) == -1, "Olmayan değer: -1"\nassert ikili_ara([], 5) == -1, "Boş liste: -1"\nassert __source__.count("ikili_ara(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\n',
@@ -140,7 +140,7 @@ B.push(
     diff: 1,
     kind: 'tamamla',
     title: 'İşlem günlüğüne satır ekle',
-    q: '<p>Anadolu Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
+    q: '<p>Ilgaz Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
     start: 'def log_ekle(dosya_adi, mesaj):\n    with open(dosya_adi, "___", encoding="utf-8") as f:\n        f.write(mesaj + ___)\n    with open(dosya_adi, encoding="utf-8") as f:\n        return len(f.readlines())\n',
     sol: 'def log_ekle(dosya_adi, mesaj):\n    with open(dosya_adi, "a", encoding="utf-8") as f:\n        f.write(mesaj + "\\n")\n    with open(dosya_adi, encoding="utf-8") as f:\n        return len(f.readlines())\n',
     tests: 'with open("denetim.log", "w", encoding="utf-8") as f:\n    f.write("açılış\\n")\nassert log_ekle("denetim.log", "havale 500 TL") == 2, "Eski satır korunmalı, yeni satır eklenmeli: 2 satır"\nassert log_ekle("denetim.log", "EFT 1200 TL") == 3, "Bir ekleme daha: 3 satır"\nwith open("denetim.log", encoding="utf-8") as f:\n    assert f.read() == "açılış\\nhavale 500 TL\\nEFT 1200 TL\\n", "Satırlar sırayla, her biri \\\\n ile bitmeli"\n',

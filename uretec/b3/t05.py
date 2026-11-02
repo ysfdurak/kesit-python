@@ -379,7 +379,7 @@ print("hazır mı:", f.done())
 
 dict(id='b-360', topic='Eşzamanlılık', diff=3, kind='rehberli',
   title='Havalede kilitlenmeyi (deadlock) önle',
-  q='<p>Anadolu Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
+  q='<p>Ilgaz Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
   guide=['İki hesabı <code>no</code> değerine göre sırala: <code>ilk, ikinci = sorted([kaynak, hedef], key=lambda h: h.no)</code>.', 'İç içe iki <code>with</code> bloğuyla önce <code>ilk.kilit</code>, sonra <code>ikinci.kilit</code> al.', 'Kilitlerin içinde bakiye kontrolü yap; yetersizse <code>ValueError</code>.', 'Kaynaktan düş, hedefe ekle.'],
   example=r'''
 import threading

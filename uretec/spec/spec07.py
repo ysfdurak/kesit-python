@@ -93,7 +93,7 @@ assert su_faturasi(0) == 0, "Tüketim yoksa fatura 0"
 
 dict(topic='Koşullar', diff=2, kind='yaz',
   title='Şifre gücü',
-  q='<p>Anadolu Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
+  q='<p>Ilgaz Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
   start=r'''
 def sifre_gucu(sifre):
     # buraya yaz
@@ -247,7 +247,7 @@ assert durum_mesaji(7) == "Bilinmeyen durum: 7", "Tanımsız kod için mesajda k
 
 dict(topic='match-case', diff=2, kind='rehberli',
   title='Hesap hareketlerini işle',
-  q='<p>Anadolu Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
+  q='<p>Ilgaz Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
   guide=['bakiye = baslangic ile başla, hareketlerde dolaş.', 'case ("yatir", tutar): bakiye += tutar', 'Çekme ve transferi ayrı case\'lerde yaz; guard ile yeterlilik kontrolü yap: case ("cek", tutar) if tutar <= bakiye:', 'case _: pass ile diğerlerini atla.'],
   example=r'''
 # Benzer teknik: demet kalıbıyla stok hareketi

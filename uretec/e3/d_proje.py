@@ -32,7 +32,7 @@ def supheli_islemler(hareketler, esik):
 
 def banka_raporu(bakiyeler, supheli, hatali, tarih):
     yil, ay, gun = tarih.split("-")
-    satirlar = [f"ANADOLU BANK GÜN SONU - {gun}.{ay}.{yil}",
+    satirlar = [f"ILGAZ BANK GÜN SONU - {gun}.{ay}.{yil}",
                 f"Hesap sayısı  : {len(bakiyeler)}"]
     for hesap in sorted(bakiyeler):
         satirlar.append(f"  {hesap:<6}{bakiyeler[hesap]:>14,.2f} TL")
@@ -60,7 +60,7 @@ METIN = """id,tarih,hesap,tur,tutar
 
 EXT['html'] = r'''
 <h2>Derinleş: aynı iskeletle yeni projeler</h2>
-<p>Sipariş raporunu bitirdin. Asıl kazanım raporun kendisi değil, <b>iskelet</b>: oku → temizle → hesapla → sun → kaydet. İş hayatında karşına çıkacak küçük otomasyonların çoğu bu beş adımın farklı verilerle tekrarıdır. Bu bölümde iskeleti açıkça adlandırıyor, programı bilgisayarında çalışacak bir dosya düzenine sokuyor ve dört yeni proje varyasyonu veriyoruz. Alıştırmalarda bunlardan birini, <b>Anadolu Bank gün sonu raporunu</b>, adım adım rehberle sıfırdan inşa edeceksin.</p>
+<p>Sipariş raporunu bitirdin. Asıl kazanım raporun kendisi değil, <b>iskelet</b>: oku → temizle → hesapla → sun → kaydet. İş hayatında karşına çıkacak küçük otomasyonların çoğu bu beş adımın farklı verilerle tekrarıdır. Bu bölümde iskeleti açıkça adlandırıyor, programı bilgisayarında çalışacak bir dosya düzenine sokuyor ve dört yeni proje varyasyonu veriyoruz. Alıştırmalarda bunlardan birini, <b>Ilgaz Bank gün sonu raporunu</b>, adım adım rehberle sıfırdan inşa edeceksin.</p>
 
 <h3>Beş adımlık iskelet</h3>
 <div class="tbl-wrap"><table>
@@ -146,7 +146,7 @@ python test_rapor.py         # testler
 
 <h3>Dört varyasyon: kendine meydan oku</h3>
 <ol>
-<li><b>Anadolu Bank gün sonu</b> (alıştırmalarda rehberli): hareket CSV'sini oku, hesap bakiyelerini güncelle, eşiği aşan çekme/havaleleri işaretle, raporu yaz.</li>
+<li><b>Ilgaz Bank gün sonu</b> (alıştırmalarda rehberli): hareket CSV'sini oku, hesap bakiyelerini güncelle, eşiği aşan çekme/havaleleri işaretle, raporu yaz.</li>
 <li><b>Stok uyarı raporu</b>: ürün başına farklı kritik eşik, eşiği olmayana varsayılan eşik; kritik ürünleri adede göre sırala, tedarikçiye gönderilecek listeyi üret.</li>
 <li><b>İK mesai özeti</b>: çalışan, gün ve saat kayıtlarından kişi başı toplam saat ve günlük 9 saati aşan fazla mesai.</li>
 <li><b>Dönem karşılaştırma</b>: dünkü ve bugünkü şehir cirolarını karşılaştır, yüzde değişimi hesapla; dün satış olmayan şehirde yüzde yerine "yeni" yaz.</li>
@@ -234,7 +234,7 @@ dict(t='order', stage='Kodu oku', q='<p>main() ile yapılandırılmış küçük
      hint='Veri → temizle → hesapla → yazdır; main çağrısı en sonda ve koruma bloğunun içinde.',
      why='İskelet sırası: veri, temizleme (geçerli satırlar), hesap (toplam), sunum (print). __name__ koruması dosyanın en altında yer alır.'),
 dict(t='code', id='proje-temel-x1', stage='Rehberli', diff=2,
-     q='<p><b>Banka projesi, Adım 1: Oku ve temizle.</b> Anadolu Bank hareket dosyası şu biçimde: başlık <code>id,tarih,hesap,tur,tutar</code>; tur yalnız <code>yatirma</code>, <code>cekme</code>, <code>havale</code> olabilir.</p><p><code>hareketleri_oku(metin)</code> fonksiyonu <code>(hareketler, hatali)</code> döndürsün:</p><ul><li><code>hareketler</code>: her geçerli satır için <code>{"id": int, "tarih": str, "hesap": str, "tur": str, "tutar": float}</code></li><li><code>hatali</code>: alan sayısı 5 olmayan, tutarı/id\'si sayıya çevrilemeyen ya da türü bilinmeyen satır sayısı. Boş satırlar sayılmaz, atlanır.</li></ul>',
+     q='<p><b>Banka projesi, Adım 1: Oku ve temizle.</b> Ilgaz Bank hareket dosyası şu biçimde: başlık <code>id,tarih,hesap,tur,tutar</code>; tur yalnız <code>yatirma</code>, <code>cekme</code>, <code>havale</code> olabilir.</p><p><code>hareketleri_oku(metin)</code> fonksiyonu <code>(hareketler, hatali)</code> döndürsün:</p><ul><li><code>hareketler</code>: her geçerli satır için <code>{"id": int, "tarih": str, "hesap": str, "tur": str, "tutar": float}</code></li><li><code>hatali</code>: alan sayısı 5 olmayan, tutarı/id\'si sayıya çevrilemeyen ya da türü bilinmeyen satır sayısı. Boş satırlar sayılmaz, atlanır.</li></ul>',
      guide=['metin.strip().splitlines() ile satırlara böl, [1:] ile başlığı atla.', 'Boş satırı (strip sonrası) continue ile geç.', 'try içinde satırı virgülle 5 değişkene aç: alan sayısı yanlışsa açma işlemi ValueError verir.', 'Tür TURLER içinde değilse kendin raise ValueError yap.', 'Sözlüğü oluştururken int ve float çevirisi yap; except ValueError\'da hatali += 1.'],
      example=r'''
 # Farklı veri: personel satırları "ad,yas" → yanlış alan sayısı da ValueError verir
@@ -349,7 +349,7 @@ assert supheli_islemler(H, 10**9) == [], "Eşik çok yüksekse boş liste"
      hints=['İki koşul: h["tur"] != "yatirma" and h["tutar"] >= esik', 'list.sort(key=..., reverse=True) yerinde sıralar; sorted(...) yeni liste döndürür.', 'return [h["id"] for h in adaylar]'],
      why='Süz → sırala → seç: veri işlemenin en sık üçlüsü. Eşitlik (>=) iş kuralında açıkça belirtilmeli; tam eşikteki işlem de şüphelidir.'),
 dict(t='code', id='proje-temel-x4', stage='Rehberli', diff=2,
-     q='<p><b>Banka projesi, Adım 4: Rapor metni.</b> <code>banka_raporu(bakiyeler, supheli, hatali, tarih)</code> şu satırları <code>"\\n"</code> ile birleştirip döndürsün (tarih <code>"2026-10-27"</code> biçiminde gelir):</p><pre class="out">ANADOLU BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01        4,800.60 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 8)\nHatalı satır  : 1</pre><ul><li>Hesap satırları hesap adına göre alfabetik; biçim <code>f"  {hesap:&lt;6}{bakiye:&gt;14,.2f} TL"</code>.</li><li>Şüpheli liste boşsa satır <code>Şüpheli işlem : yok</code> olsun.</li></ul>',
+     q='<p><b>Banka projesi, Adım 4: Rapor metni.</b> <code>banka_raporu(bakiyeler, supheli, hatali, tarih)</code> şu satırları <code>"\\n"</code> ile birleştirip döndürsün (tarih <code>"2026-10-27"</code> biçiminde gelir):</p><pre class="out">ILGAZ BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01        4,800.60 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 8)\nHatalı satır  : 1</pre><ul><li>Hesap satırları hesap adına göre alfabetik; biçim <code>f"  {hesap:&lt;6}{bakiye:&gt;14,.2f} TL"</code>.</li><li>Şüpheli liste boşsa satır <code>Şüpheli işlem : yok</code> olsun.</li></ul>',
      guide=['tarih.split("-") ile yıl, ay, günü al ve başlığı gün.ay.yıl olarak kur.', 'Hesap sayısı satırını ekle.', 'sorted(bakiyeler) ile hesapları dolaş, verilen biçimle satır ekle.', 'Şüpheli satırı: liste doluysa sayı ve ", ".join ile id\'ler, boşsa "yok".', 'Hatalı satır sayısını ekle ve "\\n".join ile birleştir.'],
      example=r'''
 yil, ay, gun = "2026-01-05".split("-")
@@ -361,7 +361,7 @@ print(f"  {'TR9':<6}{-1234.5:>14,.2f} TL")
      start=r'''
 def banka_raporu(bakiyeler, supheli, hatali, tarih):
     yil, ay, gun = tarih.split("-")
-    satirlar = [f"ANADOLU BANK GÜN SONU - {gun}.{ay}.{yil}"]
+    satirlar = [f"ILGAZ BANK GÜN SONU - {gun}.{ay}.{yil}"]
     # TODO: "Hesap sayısı  : N"
     # TODO: alfabetik hesap satırları
     # TODO: şüpheli satırı (dolu / "yok")
@@ -371,13 +371,13 @@ def banka_raporu(bakiyeler, supheli, hatali, tarih):
      sol='\n' + 'def banka_raporu' + BANKA_HELPERS.split('def banka_raporu')[1],
      tests=r'''
 r = banka_raporu({"TR03": -300.0, "TR01": 4800.6, "TR02": 5000.0}, [3, 8], 1, "2026-10-27")
-beklenen = "ANADOLU BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01        4,800.60 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 8)\nHatalı satır  : 1"
+beklenen = "ILGAZ BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01        4,800.60 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 8)\nHatalı satır  : 1"
 r_s, b_s = r.splitlines(), beklenen.splitlines()
 assert len(r_s) == len(b_s), f"{len(b_s)} satır bekleniyordu, {len(r_s)} geldi"
 for i, (g, b) in enumerate(zip(r_s, b_s), 1):
     assert g == b, f"{i}. satır farklı:\n  beklenen: {b!r}\n  gelen   : {g!r}"
 r2 = banka_raporu({}, [], 0, "2026-01-05")
-assert r2.splitlines() == ["ANADOLU BANK GÜN SONU - 05.01.2026", "Hesap sayısı  : 0", "Şüpheli işlem : yok", "Hatalı satır  : 0"], "Boş günde de rapor üretilmeli: " + repr(r2)
+assert r2.splitlines() == ["ILGAZ BANK GÜN SONU - 05.01.2026", "Hesap sayısı  : 0", "Şüpheli işlem : yok", "Hatalı satır  : 0"], "Boş günde de rapor üretilmeli: " + repr(r2)
 ''',
      hints=['Satırları bir listeye ekle, en sonda tek seferde birleştir.', 'Şüpheli id\'leri metne çevirip birleştir: ", ".join(str(i) for i in supheli)', 'if supheli: satirlar.append(f"Şüpheli işlem : {len(supheli)} (" + ... + ")") else: satirlar.append("Şüpheli işlem : yok")'],
      why='Sunum fonksiyonu hesap yapmaz, hazır sonuçları biçimler. Boş durumun ("yok", 0 hesap) ayrıca test edilmesi, sipariş/hareket olmayan günde raporun çökmemesini garanti eder.'),
@@ -556,11 +556,11 @@ def gun_sonu(metin, acilis, esik, yol):
 ''',
      tests=BANKA_METIN_TEST + r'''
 r = gun_sonu(METIN, {"TR01": 1000.0, "TR02": 20000.0}, 9000, "x10_gun_sonu.txt")
-beklenen = "ANADOLU BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01       -4,200.50 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 6)\nHatalı satır  : 3"
+beklenen = "ILGAZ BANK GÜN SONU - 27.10.2026\nHesap sayısı  : 3\n  TR01       -4,200.50 TL\n  TR02        5,000.00 TL\n  TR03         -300.00 TL\nŞüpheli işlem : 2 (3, 6)\nHatalı satır  : 3"
 assert r == beklenen, "Rapor farklı. Beklenen:\n" + beklenen + "\nGelen:\n" + str(r)
 assert open("x10_gun_sonu.txt", encoding="utf-8").read() == beklenen + "\n", "Rapor dosyaya sonunda satır sonuyla yazılmalı"
 r2 = gun_sonu("id,tarih,hesap,tur,tutar\n9,x,TR1,iade,5\n", {}, 100, "x10_bos.txt")
-assert r2.splitlines()[0] == "ANADOLU BANK GÜN SONU - 00.00.0000", "Geçerli hareket yoksa tarih 0000-00-00 olmalı"
+assert r2.splitlines()[0] == "ILGAZ BANK GÜN SONU - 00.00.0000", "Geçerli hareket yoksa tarih 0000-00-00 olmalı"
 assert r2.splitlines()[-1] == "Hatalı satır  : 1"
 ''',
      hints=['Fonksiyonları sırayla çağır; her birinin çıktısı bir sonrakinin girdisi.', 'tarih = hareketler[0]["tarih"] if hareketler else "0000-00-00"', 'Dosyaya rapor + "\\n" yaz, sonra return rapor.'],

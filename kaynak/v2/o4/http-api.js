@@ -1,4 +1,4 @@
-/* PythonPatika — v2/o4: HTTP ve REST API istemcisi (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: HTTP ve REST API istemcisi (orta / Otomasyon ve Araçlar) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -18,7 +18,7 @@ L.push({
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Anadolu Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
+<p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Ilgaz Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
 <p>Önceki derste HTML kazımayı gördün; API ise verinin makine için hazırlanmış, kurallı halidir. API varsa kazımaya gerek yoktur. Sunucu tarafını (FastAPI ile uç nokta yazmayı) ileri seviyedeki "API ve web" dersinde göreceksin; burada istemci tarafındayız.</p>
 
 <h2>HTTP isteğinin anatomisi</h2>
@@ -262,7 +262,7 @@ print("Retry-After ile:", bekleme(0, retry_after="7"))</pre>
       example: '# Benzer teknik: sahte taşıyıcıyla ürün sorgusu\nimport httpx\ndef sunucu(istek):\n    return httpx.Response(200, json={"sku": istek.url.path.split("/")[-1], "stok": 4})\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.example")\nprint(c.get("/urunler/AM-5").json())\n',
       start: 'import httpx\n\ndef musteri_getir(client, musteri_id):\n    yanit = client.get(f"/musteriler/{musteri_id}")\n    # TODO: 404 ise None\n    # TODO: diğer hatalarda raise_for_status\n    # TODO: JSON döndür\n    pass\n',
       sol: 'import httpx\n\ndef musteri_getir(client, musteri_id):\n    yanit = client.get(f"/musteriler/{musteri_id}")\n    if yanit.status_code == 404:\n        return None\n    yanit.raise_for_status()\n    return yanit.json()\n',
-      tests: 'import httpx\ndef sunucu(istek):\n    no = istek.url.path.rsplit("/", 1)[-1]\n    if no == "7":\n        return httpx.Response(200, json={"id": 7, "ad": "Ayşe"})\n    if no == "500":\n        return httpx.Response(500)\n    if no == "403":\n        return httpx.Response(403)\n    return httpx.Response(404)\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.anadolubank.example")\nassert musteri_getir(c, 7) == {"id": 7, "ad": "Ayşe"}, "200\'de JSON sözlüğü dönmeli"\nassert musteri_getir(c, 99) is None, "404\'te None dönmeli"\nfor kod in (500, 403):\n    try:\n        musteri_getir(c, kod)\n        assert False, f"{kod} için HTTPStatusError bekleniyordu"\n    except httpx.HTTPStatusError:\n        pass\n',
+      tests: 'import httpx\ndef sunucu(istek):\n    no = istek.url.path.rsplit("/", 1)[-1]\n    if no == "7":\n        return httpx.Response(200, json={"id": 7, "ad": "Ayşe"})\n    if no == "500":\n        return httpx.Response(500)\n    if no == "403":\n        return httpx.Response(403)\n    return httpx.Response(404)\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.ilgazbank.example")\nassert musteri_getir(c, 7) == {"id": 7, "ad": "Ayşe"}, "200\'de JSON sözlüğü dönmeli"\nassert musteri_getir(c, 99) is None, "404\'te None dönmeli"\nfor kod in (500, 403):\n    try:\n        musteri_getir(c, kod)\n        assert False, f"{kod} için HTTPStatusError bekleniyordu"\n    except httpx.HTTPStatusError:\n        pass\n',
       hints: ['yanit.status_code ile durumu kontrol et.', '404 kontrolü raise_for_status\'tan ÖNCE olmalı, yoksa 404 de hata fırlatır.', 'if yanit.status_code == 404: return None'],
       why: '404\'ü "kayıt yok" olarak işlemek iş mantığında doğaldır; ama 403 ya da 500\'ü None\'a çevirmek bir yetki ya da sunucu sorununu "müşteri yok" diye gizler. Bu yüzden yalnızca beklenen durum özel işlenir, gerisi hata olarak yükselir.' },
     { t: 'code', stage: 'Kendin yaz', id: 'http-api-4', diff: 1,

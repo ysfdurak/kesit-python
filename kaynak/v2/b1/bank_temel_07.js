@@ -1,4 +1,4 @@
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-171 … b-180 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-171 … b-180 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -62,7 +62,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Şifre gücü',
-    q: '<p>Anadolu Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
+    q: '<p>Ilgaz Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
     start: 'def sifre_gucu(sifre):\n    # buraya yaz\n    pass\n',
     sol: 'def sifre_gucu(sifre):\n    puan = 0\n    if len(sifre) >= 8:\n        puan += 1\n    if any(c.isdigit() for c in sifre):\n        puan += 1\n    if any(c.isupper() for c in sifre):\n        puan += 1\n    if any(c.islower() for c in sifre):\n        puan += 1\n    if puan == 4:\n        return "güçlü"\n    elif puan == 3:\n        return "orta"\n    return "zayıf"\n',
     tests: 'assert sifre_gucu("Anadolu2026") == "güçlü", "Uzun, rakamlı, büyük ve küçük harfli: güçlü"\nassert sifre_gucu("anadolu2026") == "orta", "Büyük harf yok: 3 puan → orta"\nassert sifre_gucu("abc") == "zayıf", "Yalnızca küçük harf: 1 puan → zayıf"\nassert sifre_gucu("") == "zayıf", "Boş şifre: zayıf"\nassert sifre_gucu("Ab1") == "orta", "Kısa ama üç tür karakter: 3 puan → orta"\n',
@@ -144,7 +144,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Hesap hareketlerini işle',
-    q: '<p>Anadolu Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
+    q: '<p>Ilgaz Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
     start: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            # TODO: çekme (yeterliyse)\n            # TODO: transfer (yeterliyse)\n            # TODO: diğerleri\n    return bakiye\n',
     sol: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            case ("cek", tutar) if tutar <= bakiye:\n                bakiye -= tutar\n            case ("transfer", tutar, _) if tutar <= bakiye:\n                bakiye -= tutar\n            case _:\n                pass\n    return bakiye\n',
     tests: 'h = [("yatir", 500), ("cek", 200), ("transfer", 100, "TR99"), ("cek", 5000)]\nassert bakiye_hesapla(1000, h) == 1200, "1000 + 500 - 200 - 100 = 1200; 5000 çekme yetersiz bakiye nedeniyle atlanmalı"\nassert bakiye_hesapla(100, [("transfer", 150, "TR1")]) == 100, "Yetersiz bakiyede transfer atlanmalı"\nassert bakiye_hesapla(50, [("faiz",), ("yatir", 10, "fazla")]) == 50, "Tanınmayan biçimler yok sayılmalı"\nassert bakiye_hesapla(0, []) == 0, "Hareket yoksa bakiye değişmez"\n',

@@ -1,4 +1,4 @@
-/* PythonPatika — İleri: llm-degerlendirme (LLM uygulamalarını test etmek ve değerlendirmek) */
+/* Kesit Python — İleri: llm-degerlendirme (LLM uygulamalarını test etmek ve değerlendirmek) */
 // needs: numpy, pydantic
 (function (W) {
 'use strict';

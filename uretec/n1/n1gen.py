@@ -1,4 +1,4 @@
-"""n1: ders kaynaklarını (Python sözlüğü LESSON) PythonPatika JS dosyasına çevirir.
+"""n1: ders kaynaklarını (Python sözlüğü LESSON) Kesit Python JS dosyasına çevirir.
 Kullanım: python3 n1gen.py kaynak.py"""
 import html, re, runpy, sys
 
@@ -39,7 +39,7 @@ def main():
     body = esc_pre(L['body'].strip())
     assert '`' not in body and '${' not in body, 'body içinde backtick/${ var'
     body = body.replace('\\', '\\\\')
-    out = [f"/* PythonPatika — v2/n1: {L['title']} */", '(function (W) {', "'use strict';",
+    out = [f"/* Kesit Python — v2/n1: {L['title']} */", '(function (W) {', "'use strict';",
            'const L = W.PY_LESSONS = W.PY_LESSONS || [];', 'L.push(', '  {']
     for k in ['id', 'lv', 'mod', 'min', 'needs', 'title', 'sum', 'goals']:
         out.append(f'    {k}: {js(L[k], "    ")},')

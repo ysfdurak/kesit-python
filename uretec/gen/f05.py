@@ -110,7 +110,7 @@ T.append(dict(
 T.append(dict(
     id='b-254', topic='Hata Tasarımı ve Logging', diff=2, t='order',
     title='Ödeme hataları hiyerarşisi',
-    q='<p>Anadolu Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
+    q='<p>Ilgaz Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
     lines=['class OdemeHatasi(Exception):',
            '    kod = "ODEME"',
            'class YetersizBakiye(OdemeHatasi):',

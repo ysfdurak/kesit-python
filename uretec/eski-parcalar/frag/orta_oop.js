@@ -5,7 +5,7 @@ L.push(
 {
     id: 'siniflar-oop', lv: 'orta', mod: 'Nesne Yönelimli Programlama', min: 35,
     title: 'Sınıflar: veri ve davranışı bir arada tutmak',
-    sum: 'class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Anadolu Bank Hesap sınıfını kurarsın.',
+    sum: 'class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın.',
     goals: [
       'class ve __init__ ile nesne oluşturup self\'in ne olduğunu açıklayabilirim.',
       'Örnek niteliği ile sınıf niteliği arasındaki farkı gösterebilirim.',
@@ -15,7 +15,7 @@ L.push(
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank\'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
+<p>Ilgaz Bank\'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
 
 <h2>class, __init__ ve self</h2>
 <p><code>class</code> bir kalıp tanımlar; o kalıptan üretilen her nesneye <b>örnek</b> (instance) denir. <code>__init__</code> örnek oluşturulurken otomatik çalışan kurucu metottur. <code>self</code>, metodun üzerinde çalıştığı örneğin kendisidir; Python onu ilk parametre olarak otomatik geçirir.</p>
@@ -220,7 +220,7 @@ print(len(h.islemler), "işlem;", [t for _, t, _ in h.islemler])</pre>
         o: ['Hesap sınıfının kendisini', 'cek metodunu', 'h örneğini', '500 değerini'],
         a: 2, why: 'Python, metodu çağıran örneği (h) otomatik olarak ilk parametre self\'e geçirir; çağrı Hesap.cek(h, 500) ile eşdeğerdir.' },
       { t: 'code', id: 'siniflar-oop-1',
-        q: '<p>Anadolu Bank için <code>Hesap</code> sınıfını yaz. <code>Hesap(no, sahip, bakiye=0.0)</code> ile kurulsun; <code>yatir(tutar)</code> bakiyeyi artırsın, <code>cek(tutar)</code> yeterli bakiye varsa düşüp <code>True</code>, yoksa bakiyeyi değiştirmeden <code>False</code> döndürsün. <code>__repr__</code> tam olarak <code>Hesap(\'TR01\', \'Ayşe\', 100.0)</code> biçiminde olsun (bakiye float, dizeler tırnaklı).</p>',
+        q: '<p>Ilgaz Bank için <code>Hesap</code> sınıfını yaz. <code>Hesap(no, sahip, bakiye=0.0)</code> ile kurulsun; <code>yatir(tutar)</code> bakiyeyi artırsın, <code>cek(tutar)</code> yeterli bakiye varsa düşüp <code>True</code>, yoksa bakiyeyi değiştirmeden <code>False</code> döndürsün. <code>__repr__</code> tam olarak <code>Hesap(\'TR01\', \'Ayşe\', 100.0)</code> biçiminde olsun (bakiye float, dizeler tırnaklı).</p>',
         start: 'class Hesap:\n    def __init__(self, no, sahip, bakiye=0.0):\n        pass\n\n    def yatir(self, tutar):\n        pass\n\n    def cek(self, tutar):\n        pass\n\n    def __repr__(self):\n        pass\n',
         sol: 'class Hesap:\n    def __init__(self, no, sahip, bakiye=0.0):\n        self.no = no\n        self.sahip = sahip\n        self.bakiye = bakiye\n\n    def yatir(self, tutar):\n        self.bakiye += tutar\n\n    def cek(self, tutar):\n        if tutar > self.bakiye:\n            return False\n        self.bakiye -= tutar\n        return True\n\n    def __repr__(self):\n        return f"Hesap({self.no!r}, {self.sahip!r}, {float(self.bakiye)})"\n',
         tests: 'h = Hesap("TR01", "Ayşe", 100.0)\nassert h.no == "TR01" and h.sahip == "Ayşe", "no ve sahip nitelikleri saklanmalı"\nassert h.bakiye == 100.0, "başlangıç bakiyesi"\nh.yatir(50)\nassert h.bakiye == 150.0, "yatir bakiyeyi artırmalı"\nassert h.cek(200) is False and h.bakiye == 150.0, "yetersizse False ve bakiye değişmemeli"\nassert h.cek(100) is True and h.bakiye == 50.0, "yeterliyse True ve düşmeli"\nassert repr(Hesap("TR01", "Ayşe", 100.0)) == "Hesap(\'TR01\', \'Ayşe\', 100.0)", "__repr__ biçimi"\nassert Hesap("TR09", "Can").bakiye == 0.0, "varsayılan bakiye 0.0"\n',
@@ -278,7 +278,7 @@ print(len(h.islemler), "işlem;", [t for _, t, _ in h.islemler])</pre>
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank\'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
+<p>Ilgaz Bank\'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
 
 <h2>Üst sınıf ve alt sınıf</h2>
 <p><code>class Alt(Ust):</code> yazımı Alt sınıfın Ust\'ün tüm nitelik ve metotlarını miras almasını sağlar. Alt sınıf hiçbir şey eklemese bile çalışır.</p>
@@ -813,12 +813,12 @@ print(tahsil_et(KrediKarti(), 149.9))</pre>
     ],
     body: `
 <h2>Neden önemli?</h2>
-<p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Anadolu Bank\'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
+<p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Ilgaz Bank\'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
 
 <h2>Özel istisna hiyerarşisi</h2>
 <p><code>Exception</code>\'dan türeyen bir temel sınıf ve ondan türeyen özel sınıflar tanımlarsın. Hiyerarşi sayesinde çağıran, ister tek tek ister hepsini birden yakalar. Gövde genellikle boştur (<code>pass</code> ya da docstring); gerekirse ek nitelik taşır.</p>
 <pre class="py">class BankaHatasi(Exception):
-    """Anadolu Bank iş kurallarının temel hatası."""
+    """Ilgaz Bank iş kurallarının temel hatası."""
 
 class HesapBulunamadi(BankaHatasi):
     def __init__(self, no):

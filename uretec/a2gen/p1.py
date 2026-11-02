@@ -190,7 +190,7 @@ print('\\n'.join(str(say[n]) for n in sorgular))
 probs.append(dict(
     id='a-066', title='Kredi taksiti', track=M, diff='Orta', tags=['anüite', 'float', 'round'],
     src='Finans matematiği: eşit taksitli kredi formülü', mode='func', fn='taksit',
-    statement=P('Anadolu Bank\'ın kredi hesaplayıcısını yazıyorsun. Eşit taksitli kredide aylık taksit şu formülle bulunur (anüite):',
+    statement=P('Ilgaz Bank\'ın kredi hesaplayıcısını yazıyorsun. Eşit taksitli kredide aylık taksit şu formülle bulunur (anüite):',
                 '<pre class="py">taksit = A · r · (1 + r)^n / ((1 + r)^n − 1)</pre>',
                 'Burada A anapara, r aylık faiz oranı (yüzde değil, oran: %2 → 0.02), n ay sayısıdır.',
                 '`taksit(anapara, aylik_faiz_yuzde, ay)` fonksiyonunu yaz. Faiz <b>yüzde</b> olarak gelir (ör. `2.5`). Sonucu 2 ondalığa yuvarla. Faiz 0 ise formül 0/0 olur; o durumda taksit `anapara / ay`dır. `ay` 1\'den küçükse ya da anapara negatifse `ValueError` fırlat.'),
@@ -219,7 +219,7 @@ def taksit(anapara, aylik_faiz_yuzde, ay):
 probs.append(dict(
     id='a-067', title='Anahtar üretimi: hızlı üs', track=M, diff='Orta', tags=['modüler üs', 'pow'],
     src='Modular exponentiation (CSES Exponentiation benzeri)', mode='stdin',
-    statement=P('Anadolu Bank\'ın güvenlik ekibi, test ortamında basit bir anahtar üretiminde `a^b mod m` değerine ihtiyaç duyuyor. Üs `b` 10^18\'e kadar çıkabiliyor; önce `a ** b` hesaplayıp sonra mod almak bellek ve zaman açısından imkânsız.',
+    statement=P('Ilgaz Bank\'ın güvenlik ekibi, test ortamında basit bir anahtar üretiminde `a^b mod m` değerine ihtiyaç duyuyor. Üs `b` 10^18\'e kadar çıkabiliyor; önce `a ** b` hesaplayıp sonra mod almak bellek ve zaman açısından imkânsız.',
                 'Her sorgu için `a^b mod m` değerini yaz. Not: `0^0` bu problemde 1 kabul edilir (sonra mod m alınır).'),
     input='İlk satırda `q`, sonra her satırda `a b m`.',
     output='Her sorgu için tek satırda sonuç.',
@@ -453,7 +453,7 @@ def kategori_grupla(urunler):
 probs.append(dict(
     id='a-073', title='ATM son işlemler ekranı', track=IC, diff='Kolay', tags=['deque', 'maxlen'],
     src='collections.deque (HackerRank Collections.deque benzeri)', mode='stdin',
-    statement=P('Anadolu Bank ATM\'lerinde “Son işlemler” ekranı yalnız en son <b>k</b> işlemi gösterir. Bir günlük komut akışını simüle et:',
+    statement=P('Ilgaz Bank ATM\'lerinde “Son işlemler” ekranı yalnız en son <b>k</b> işlemi gösterir. Bir günlük komut akışını simüle et:',
                 '<ul><li>`ISLEM x` — x tutarlı (tam sayı, negatif olabilir) işlem kaydedilir.</li><li>`SON` — ekranda görünen işlemleri en <b>yeniden eskiye</b> doğru, boşlukla ayrılmış yaz. Hiç işlem yoksa `BOS` yaz.</li><li>`TEMIZLE` — ekran sıfırlanır.</li></ul>'),
     input='İlk satırda `k`, ikinci satırda komut sayısı `q`, sonra `q` komut.',
     output='Her `SON` komutu için bir satır.',
@@ -584,7 +584,7 @@ def en_uzun_seri(kayit):
 probs.append(dict(
     id='a-077', title='Hesap ekstresi ve ilk eksi gün', track=IC, diff='Orta', tags=['accumulate', 'itertools'],
     src='itertools.accumulate ile önek toplam', mode='stdin',
-    statement=P('Anadolu Bank müşterisinin ay başı bakiyesi ve gün gün net hareketleri (pozitif: giriş, negatif: çıkış) veriliyor. Ekstre özeti için:',
+    statement=P('Ilgaz Bank müşterisinin ay başı bakiyesi ve gün gün net hareketleri (pozitif: giriş, negatif: çıkış) veriliyor. Ekstre özeti için:',
                 '<ol><li>Her gün sonundaki bakiyeyi,</li><li>Ay içindeki <b>en düşük</b> gün sonu bakiyesini ve ilk kez görüldüğü gün numarasını (1\'den başlar),</li><li>Bakiyenin ilk kez <b>sıfırın altına</b> düştüğü günü (hiç düşmediyse `YOK`) yaz.</li></ol>'),
     input='İlk satırda `baslangic n`, ikinci satırda `n` tam sayı (günlük hareketler).',
     output='1. satır: gün sonu bakiyeleri (boşlukla). 2. satır: `EN_DUSUK deger gun`. 3. satır: `EKSI gun` ya da `EKSI YOK`.',

@@ -1,4 +1,4 @@
-/* PythonPatika v2 — uzantı: kapsam-moduller */
+/* Kesit Python v2 — uzantı: kapsam-moduller */
 (function (W) {
 'use strict';
 const X = W.PY_EXT = W.PY_EXT || [];
@@ -153,7 +153,7 @@ print(round(statistics.stdev(sureler), 2))</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank şube bekleme süreleri: <code>aykiri_degerler(sureler)</code> fonksiyonunu yaz. IQR kuralı: <code>statistics.quantiles(sureler, n=4)</code> ile Q1, Q2, Q3\'ü bul; <code>iqr = q3 - q1</code>; <code>q1 - 1.5 * iqr</code>\'den küçük ya da <code>q3 + 1.5 * iqr</code>\'den büyük değerleri <b>sıralı</b> liste olarak döndür.</p>',
+      q: '<p>Ilgaz Bank şube bekleme süreleri: <code>aykiri_degerler(sureler)</code> fonksiyonunu yaz. IQR kuralı: <code>statistics.quantiles(sureler, n=4)</code> ile Q1, Q2, Q3\'ü bul; <code>iqr = q3 - q1</code>; <code>q1 - 1.5 * iqr</code>\'den küçük ya da <code>q3 + 1.5 * iqr</code>\'den büyük değerleri <b>sıralı</b> liste olarak döndür.</p>',
       guide: ['statistics modülünü içe aktar.', 'q1, q2, q3 = statistics.quantiles(sureler, n=4) ile açma yap.', 'Alt ve üst sınırları hesapla.', 'Sınır dışındaki değerleri topla ve sorted ile döndür.'],
       example: 'import statistics\nnotlar = [55, 60, 62, 70, 75, 80, 98]\nq1, q2, q3 = statistics.quantiles(notlar, n=4)\nprint(q1, q2, q3, "IQR:", q3 - q1)\n',
       start: 'import statistics\n\ndef aykiri_degerler(sureler):\n    # TODO: çeyrekleri bul, sınırları hesapla\n    sonuc = []\n    return sorted(sonuc)\n',

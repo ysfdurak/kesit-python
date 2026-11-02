@@ -223,7 +223,7 @@ dict(roles=['backend'], lv='ileri', topic='Sistem tasarımı: canlı kurye takib
      tip='Yazma yolu (alım), sıcak durum (Redis) ve okuma yolu (push) ayrımını net çiz; tasarım bu üç parçadan oluşur.'),
 
 dict(roles=['backend'], lv='ileri', topic='Sistem tasarımı: para transferi', kind='tasarim',
-     q='Anadolu Bank mobil uygulaması için hesaplar arası para transferi API\'si tasarla. Çift işlem, tutarsızlık ve denetim gereksinimlerini nasıl karşılarsın?',
+     q='Ilgaz Bank mobil uygulaması için hesaplar arası para transferi API\'si tasarla. Çift işlem, tutarsızlık ve denetim gereksinimlerini nasıl karşılarsın?',
      a='<p><b>Temel ilkeler:</b> Para asla yaratılmamalı veya kaybolmamalı; her işlem tekrarlanabilir istemci denemelerine karşı güvenli olmalı ve tüm hareketler denetlenebilir olmalı.</p>'
        '<p><b>API:</b> ' + c('POST /transferler') + ' + ' + c('Idempotency-Key') + ' başlığı; gövde ' + c('{kaynak, hedef, tutar_kurus, para_birimi, aciklama}') + '. Tutar her zaman tamsayı kuruş veya ' + c('Decimal') + ' olarak işlenir, asla float olmaz.</p>'
        '<p><b>Veri modeli — çift taraflı kayıt (double-entry):</b> Bakiye tek bir sütunda değiştirilmez; her transfer bir ' + c('islem') + ' kaydı ve toplamı sıfır olan iki ' + c('hareket') + ' satırı (−500 / +500) üretir. Bakiye, hareketlerin toplamıdır (performans için ayrıca güncellenen bir ' + c('bakiye') + ' sütunu tutulabilir). Kayıtlar <b>değiştirilmez</b>; hata düzeltmeleri ters kayıtla yapılır. Bu, denetim izini kendiliğinden sağlar.</p>'

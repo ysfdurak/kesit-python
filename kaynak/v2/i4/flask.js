@@ -1,4 +1,4 @@
-/* PythonPatika v2 — flask */
+/* Kesit Python v2 — flask */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];

@@ -37,7 +37,7 @@ def main():
     parts = [f"  id: {js_str(E['id'])}", f"  min: {E['min']}", '  html: `' + hj + '`']
     for k in ('ex', 'faq', 'mistakes'):
         parts.append(f"  {k}: " + js_val(E[k], 1))
-    js = ("/* PythonPatika — " + E['id'] + " uzantısı (Derinleş) */\n(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push({\n"
+    js = ("/* Kesit Python — " + E['id'] + " uzantısı (Derinleş) */\n(function (W) {\n'use strict';\nconst X = W.PY_EXT = W.PY_EXT || [];\nX.push({\n"
           + ',\n'.join(parts) + "\n});\n})(window);\n")
     open(out, 'w').write(js)
     print('yazıldı', out)
