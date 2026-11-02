@@ -108,3 +108,6 @@ Dosya başına toplu çalıştırma betikleri: `uretec/vf/chain.sh cp|pyo <dosya
 | `eski-parcalar/` | İlk sürümün ders parçaları (`frag`, `frag2`) ve kullanılmayan `c_temel1.js` |
 
 Mülakat bankası temizliği `kaynak/v3/mz/mulakat_temizlik.js` içindedir: davranışsal sorular ve Python'a dayanmayan sorular derleme sırasında listeden çıkarılır (dosya adı `mz`, diğer `m*` klasörlerinden sonra yüklensin diye).
+
+## Ortak veri setleri
+`data/` altındaki Ilgaz Bank, Kanat Havayolları, Lezzet Kurye, Pusula İK ve Pedal İzmir CSV'leri Kesit SQL üreteçlerinden gelir (Kesit SQL `NASIL.md` → Ortak veri setleri). Python'da elle düzenlenmez: Power BI `scratchpad/ds/csv` dosyasının BOM'suz kopyasıdır. Kopyalamadan sonra `data/manifest.json` içinde `rows` ve `bytes` güncellenir; `name` alanları (`Anadolu Market (Power BI modeli)`, `Kirli veri` kaynağı dahil) elle verilmiştir, korunur. Beklenen değerler `kaynak/` içindeki testlerde sabit yazılıdır: veri değişince `tools/verify.py` hangi görevlerin değiştiğini gösterir; `uretec/` betikleri eskimiş olabilir, doğrudan `kaynak/` düzenlenir.
