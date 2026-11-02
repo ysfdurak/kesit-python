@@ -1,0 +1,212 @@
+from d01 import I
+
+ITEMS = [
+I(['bilimci'], 'temel', 'kavram', 'Merkezi limit teoremi',
+  'Merkezi limit teoremi (MLT) nedir ve bir veri bilimci için pratikte neden önemlidir?',
+  '<p><b>Tanım:</b> Bağımsız ve aynı dağılımdan gelen gözlemlerin <b>ortalaması</b>, örneklem büyüdükçe, gözlemlerin kendi dağılımı ne olursa olsun yaklaşık normal dağılır. Bu dağılımın ortalaması evren ortalamasına, standart sapması (standart hata) ise σ / √n\'ye eşittir.</p>'
+  '<p><b>Önemli ayrım:</b> MLT verinin kendisinin normal olacağını söylemez. Sepet tutarları çok çarpık olabilir; ama binlerce sepetten hesaplanan ortalama normal dağılıma yaklaşır.</p>'
+  '<p><b>Neden önemli:</b></p><ul>'
+  '<li>A/B testlerinde dönüşüm oranı ve ortalama gelir için kullanılan z ve t testleri bu teoreme dayanır; ham verinin normal olması gerekmez.</li>'
+  '<li>Güven aralığı formülü (ortalama ± 1,96 × standart hata) buradan gelir.</li>'
+  '<li>√n ilişkisi, belirsizliği yarıya indirmek için dört kat veri gerektiğini söyler; deney süresi planlamasının temelidir.</li></ul>'
+  '<p><b>Sınırlar:</b> Çok çarpık ya da ağır kuyruklu verilerde (birkaç devasa kurumsal sipariş) "yeterince büyük n" binlerce olabilir. Gözlemler bağımsız değilse (aynı kullanıcının birçok oturumu) standart hata olduğundan küçük hesaplanır. Bu durumlarda bootstrap, logaritmik dönüşüm ya da kullanıcı düzeyinde toplama kullanılır.</p>',
+  ['n kaç olunca yeterince büyük sayılır?', 'Gözlemler bağımsız değilse ne yaparsın?'],
+  ['"MLT verinin normal dağıldığını söyler" demek', 'Standart hata ile standart sapmayı karıştırmak'],
+  'Tanımın hemen ardından A/B testine bağla; teorik bilgiyi pratiğe taşıdığını göstermiş olursun.'),
+
+I(['bilimci', 'analist'], 'temel', 'kod-okuma', 'Betimsel istatistik',
+  'Aynı sayılar için NumPy ve pandas farklı standart sapma veriyor. Çıktıyı ve nedenini açıkla.',
+  '<p><b>Ortalama ve medyan:</b> Toplam 40, 8 eleman → ortalama <b>5.0</b>. Sıralı dizide ortadaki iki değer 4 ve 5 → medyan <b>4.5</b>.</p>'
+  '<p><b>Standart sapma:</b> Ortalamadan sapmaların kareleri toplamı 32.</p>'
+  '<ul><li><code>np.std</code> varsayılan olarak <code>ddof=0</code> kullanır: √(32 / 8) = <b>2.0</b>. Bu, verinin <b>evrenin tamamı</b> olduğunu varsayan evren standart sapmasıdır.</li>'
+  '<li><code>pd.Series.std</code> varsayılan olarak <code>ddof=1</code> kullanır: √(32 / 7) ≈ <b>2.138</b>. Bu, örneklemden evren standart sapmasını <b>yansız</b> tahmin etmeye çalışan örneklem standart sapmasıdır (Bessel düzeltmesi).</li></ul>'
+  '<p><b>Neden önemli:</b> Aynı analizi bir yerde NumPy, bir yerde pandas ile yaparsan küçük örneklemlerde farklı sonuç alırsın ve hata ayıklamak zorlaşır. Büyük n\'de fark ihmal edilebilir. Kural: elindeki veri bir örneklemse <code>ddof=1</code>; tutarlılık için kütüphaneler arasında parametreyi açıkça yaz: <code>np.std(x, ddof=1)</code>.</p>'
+  '<p>Excel\'de de aynı ayrım vardır: STDSAPMA.P (evren) ve STDSAPMA.S (örneklem).</p>',
+  ['Varyans için de aynı fark geçerli mi?', 'Neden n − 1 ile bölmek yansız tahmin verir?'],
+  ['İki kütüphanenin aynı varsayılanı kullandığını sanmak', 'ddof\'u "serbestlik derecesi" diye adlandırıp anlamını açıklayamamak'],
+  'Bu tür "hangi sayı basılır" sorularında varsayılan parametreleri bilmek fark yaratır; ddof bunun klasik örneğidir.',
+  code='''
+import numpy as np
+import pandas as pd
+x = [2, 4, 4, 4, 5, 5, 7, 9]
+print(np.mean(x), np.median(x))
+print(np.std(x), round(pd.Series(x).std(), 3))
+'''),
+
+I(['bilimci', 'analist'], 'ileri', 'kavram', 'Çoklu karşılaştırma',
+  'Bir A/B testinde 20 farklı metriğe bakıyorsun ve birinde p &lt; 0,05 çıktı. Bu sonuca güvenir misin? Çoklu test sorununu nasıl ele alırsın?',
+  '<p><b>Sorun:</b> Her test %5 yanlış pozitif riski taşır. Gerçekte hiçbir etki olmasa bile 20 bağımsız testten en az birinin anlamlı çıkma olasılığı 1 − 0,95<sup>20</sup> ≈ <b>%64</b>\'tür. Yani tek bir anlamlı metrik büyük olasılıkla şanstır.</p>'
+  '<p><b>Aynı sorunun biçimleri:</b> Çok sayıda segmente bölmek ("yalnız İzmir\'deki 25–34 yaş kadınlarda anlamlı"), testi her gün kontrol edip anlamlı çıkınca durdurmak (peeking), çok sayıda varyant denemek.</p>'
+  '<p><b>Çözümler:</b></p><ul>'
+  '<li><b>Önceden kayıt:</b> Test başlamadan tek bir birincil metrik ve az sayıda ikincil metrik belirle. Kararı birincil metrik verir.</li>'
+  '<li><b>Bonferroni:</b> Eşiği test sayısına böl (0,05 / 20 = 0,0025). Basit ama çok tutucu; gücü düşürür.</li>'
+  '<li><b>Benjamini-Hochberg:</b> Yanlış keşif oranını (FDR) kontrol eder; çok sayıda metrikte daha dengeli.</li>'
+  '<li><b>Keşif ve doğrulama ayrımı:</b> Segment analizinde bulunan ilginç sonucu yeni bir testle doğrula.</li>'
+  '<li><b>Sıralı testler:</b> Ara bakış gerekiyorsa buna izin veren yöntemler (alfa harcama fonksiyonları, her zaman geçerli p-değerleri).</li></ul>',
+  ['Bonferroni ile Benjamini-Hochberg arasındaki fark nedir?', 'Erken bakış (peeking) yanlış pozitif oranını neden şişirir?'],
+  ['Anlamlı çıkan tek metriği bulgu olarak sunmak', '20 metriğe bakmanın bir risk taşıdığını fark etmemek'],
+  '%64 hesabını kafandan yapabilmek etkileyicidir; 1 − 0,95^n formülünü hatırla.'),
+
+I(['bilimci', 'ml'], 'orta', 'kavram', 'Dengesiz veri teknikleri',
+  'Dengesiz sınıflı bir veri setinde (pozitif oran %2) model eğitirken hangi teknikleri kullanırsın? Her birinin riski nedir?',
+  '<p><b>1) Önce metrik ve eşik:</b> Çoğu zaman en etkili adım teknik değil, doğru değerlendirmedir: PR-AUC, sınıf bazında precision/recall ve iş maliyetine göre seçilen eşik. Model iyi sıralıyorsa eşik ayarı tek başına yeterli olabilir.</p>'
+  '<p><b>2) Sınıf ağırlıkları:</b> <code>class_weight=\'balanced\'</code> ya da gradient boosting\'de <code>scale_pos_weight</code>. Veriyi değiştirmez, kayıpta azınlığın hatasını daha pahalı yapar. Risk: olasılıklar kalibrasyonunu kaybeder; olasılığın kendisi kullanılacaksa (beklenen kayıp hesabı) yeniden kalibre etmek gerekir.</p>'
+  '<p><b>3) Alt örnekleme (undersampling):</b> Çoğunluk sınıfından örnek atmak. Hızlıdır; risk: bilgi kaybı.</p>'
+  '<p><b>4) Üst örnekleme / SMOTE:</b> Azınlık örneklerini çoğaltmak ya da aralarında sentetik örnek üretmek. Risk: aşırı öğrenme; SMOTE gürültülü ya da kategorik veride gerçek dışı örnekler üretebilir. <b>Kritik kural:</b> yeniden örnekleme yalnız eğitim katmanında yapılır, doğrulama ve test setleri gerçek dağılımda kalır. Yoksa metrikler şişer.</p>'
+  '<p><b>5) Algoritma ve veri:</b> Ağaç tabanlı topluluk modelleri dengesizliğe görece dayanıklıdır. Mümkünse azınlık sınıfı için daha fazla etiketli veri toplamak en kalıcı çözümdür.</p>',
+  ['Kalibrasyonu nasıl kontrol edersin?', 'Anomali tespiti yaklaşımı ne zaman daha uygun?'],
+  ['Test setini de yeniden örneklemek', 'SMOTE\'u her dengesizlik için varsayılan çözüm saymak'],
+  'Cevaba "önce metrik" diye başla; tekniklerden önce değerlendirmeyi düzeltmek kıdemli bakıştır.'),
+
+I(['bilimci', 'ml'], 'ileri', 'kod-okuma', 'Hedef kodlama sızıntısı',
+  'Şube bazında çalışan ayrılma oranı iki yöntemle özellik olarak kodlanıyor. Çıktıyı yorumla: hangi satırlar sorunlu?',
+  '<p><b>te_saf:</b> Şubenin ayrılma ortalaması (K: 0.5, L: 1.0, M: 0.33). Bu değer satırın <b>kendi hedefini de içerir</b>. En çarpıcı satır L: tek kişilik şubede kodlanmış değer 1.0, yani hedefin kendisi. Model "te_saf = 1 ise ayrıldı" kuralını öğrenir; testte bu bilgi yoktur.</p>'
+  '<p><b>te_loo (birini dışarıda bırak):</b> Her satır için kendisi hariç şubenin ortalaması. K\'de ayrılan kişi için diğer kişi (0) → 0.0; kalan için diğer kişi (1) → 1.0. M\'de ayrılmayanlar için (0 + 1) / 2 = 0.5, ayrılan için 0.0. L\'de kimse kalmaz: 0 / 0 → <b>NaN</b>.</p>'
+  '<p><b>Dikkat:</b> LOO bile tamamen güvenli değildir. K ve M\'ye bak: ayrılanların kodu sistematik olarak <b>daha düşük</b>, kalanlarınki daha yüksek. Güçlü bir model bu ters ilişkiyi kullanabilir.</p>'
+  '<p><b>Sağlam yaklaşım:</b> Katman dışı (out-of-fold) hedef kodlama: her katman için değerleri diğer katmanlardan hesapla; az örnekli kategorileri genel ortalamaya doğru büzüştür (ör. (toplam + m × genel_ort) / (sayı + m)); yeni ya da tekil kategoriler için genel ortalamayı kullan. scikit-learn\'deki <code>TargetEncoder</code> bunu iç çapraz doğrulamayla yapar.</p>',
+  ['Büzüştürme (smoothing) parametresi m nasıl seçilir?', 'Zaman serisinde hedef kodlama nasıl yapılmalı?'],
+  ['Tek elemanlı grupta kodun hedefle aynı olduğunu fark etmemek', 'LOO\'nun sızıntıyı tamamen çözdüğünü sanmak'],
+  'Kod okuma sorusunda en uç satırı (tek kişilik grup) bulup vurgulamak, sorunun özünü yakaladığını gösterir.',
+  code='''
+import pandas as pd
+df = pd.DataFrame({'sube': ['K', 'K', 'L', 'M', 'M', 'M'],
+                   'ayrildi': [1, 0, 1, 0, 0, 1]})
+g = df.groupby('sube')['ayrildi']
+df['te_saf'] = g.transform('mean')
+df['te_loo'] = (g.transform('sum') - df['ayrildi']) / (g.transform('count') - 1)
+print(df.round(2).to_string(index=False))
+'''),
+
+I(['bilimci', 'ml'], 'orta', 'vaka', 'Vaka: çalışan ayrılma tahmini',
+  'Pusula İK, müşterisi olan bir şirket için "önümüzdeki 6 ayda ayrılacak çalışanları" tahmin eden bir model istiyor. Problemi nasıl kurgularsın?',
+  '<p><b>1) Hedef ve zaman çerçevesi:</b> Her ay için bir "gözlem tarihi" seç; o tarihte aktif her çalışan bir satırdır. Hedef: gözlem tarihinden sonraki 6 ay içinde gönüllü ayrılma (işten çıkarılanlar ve emekliler ayrı tutulur). Bu yapı modele "o gün ne biliyordum?" sorusunu sormayı zorunlu kılar.</p>'
+  '<p><b>2) Özellikler (yalnız gözlem tarihi itibarıyla):</b> Kıdem, son zamdan bu yana geçen süre, maaşın bant içindeki konumu, yönetici değişikliği, performans puanı, terfi beklemesi, izin kullanımı, fazla mesai trendi, ekipteki son ayrılmalar.</p>'
+  '<p><b>3) Sızıntı tuzakları:</b> "Çıkış mülakatı tarihi", "son çalışma günü", ayrılma sonrası doldurulan "devir teslim tamamlandı" alanları ya da ayrılma kararından sonra sisteme düşen izin talepleri. Her alanın kayıt zamanını kontrol et.</p>'
+  '<p><b>4) Değerlendirme:</b> Zamana göre bölme (2023 ile eğit, 2024\'te test). Metrik: en riskli %10\'luk dilimde yakalanan ayrılmaların oranı (recall@k); İK ekibinin ayda kaç kişiyle görüşebileceğine göre k seçilir.</p>'
+  '<p><b>5) Etik ve kullanım:</b> Kişisel veri mevzuatı (KVKK), cinsiyet ve yaş gibi korumalı özelliklerde adalet analizi, skorların cezalandırma için değil destek için kullanılması. Açıklanabilirlik: her skorun yanında başlıca nedenler.</p>',
+  ['Gözlem tarihlerini neden aylık kaydırırsın?', 'Modelin işe yarayıp yaramadığını iş açısından nasıl ölçersin?', 'Sağ sansürlü veriyi nasıl ele alırsın?'],
+  ['Tüm çalışanların son durumunu tek satır olarak alıp hedefi "ayrıldı mı" yapmak', 'Etik ve mevzuat boyutunu hiç anmamak'],
+  'Zaman çerçevesini (gözlem tarihi + tahmin penceresi) ilk iki dakikada kurarsan sorunun yarısını çözmüş olursun.'),
+
+I(['bilimci', 'analist'], 'temel', 'kavram', 'Korelasyon',
+  'Pearson ve Spearman korelasyonu arasındaki fark nedir? Korelasyon katsayısının sınırları nelerdir?',
+  '<p><b>Pearson:</b> İki değişken arasındaki <b>doğrusal</b> ilişkinin gücünü ve yönünü −1 ile +1 arasında ölçer. Aykırı değerlere çok duyarlıdır; tek bir uç nokta katsayıyı ciddi biçimde değiştirebilir.</p>'
+  '<p><b>Spearman:</b> Değerlerin sıralarına Pearson uygular; <b>monoton</b> (sürekli artan ya da azalan, doğrusal olması gerekmeyen) ilişkiyi ölçer. Aykırılara dayanıklıdır ve sıralı veride (memnuniyet puanı 1–5) de kullanılabilir.</p>'
+  '<p><b>Sınırlar:</b></p><ul>'
+  '<li>Korelasyon 0 ilişki yok demek değildir: U biçimli bir ilişkide (ör. sıcaklık ile enerji tüketimi) Pearson sıfıra yakın çıkabilir.</li>'
+  '<li>Aynı katsayı çok farklı veri desenlerinden çıkabilir (Anscombe dörtlüsü). Her zaman saçılım grafiğine bak.</li>'
+  '<li>Korelasyon eğimi değil gücü ölçer; 0,9 korelasyon "bir artınca öteki çok artar" demek değildir.</li>'
+  '<li>Nedensellik söylemez; karıştırıcı değişkenler sahte korelasyon üretebilir.</li>'
+  '<li>Toplulaştırma düzeyi önemlidir: şehir ortalamalarındaki korelasyon, bireyler arası korelasyondan çok daha yüksek çıkabilir (ekolojik yanılgı).</li></ul>'
+  '<p>pandas\'ta <code>df.corr(method=\'spearman\')</code> ile kolayca hesaplanır.</p>',
+  ['Kategorik bir değişkenle sayısal değişken arasındaki ilişkiyi nasıl ölçersin?', 'Korelasyonun anlamlılığını nasıl test edersin?'],
+  ['Sıfır korelasyonu "ilişki yok" diye yorumlamak', 'Grafiğe bakmadan katsayı yorumlamak'],
+  'Anscombe dörtlüsünü anmak, "önce görselleştiririm" ilkesini kanıtlamanın en hızlı yoludur.'),
+
+I(['bilimci'], 'ileri', 'kavram', 'Regresyon yorumu',
+  'Doğrusal regresyonda bir katsayıyı nasıl yorumlarsın? Çoklu doğrusallık (multicollinearity) yorumu nasıl etkiler?',
+  '<p><b>Yorum:</b> Katsayı, <b>diğer tüm değişkenler sabitken</b> o değişkendeki bir birimlik artışın hedefte beklenen değişimidir. Örnek: daire fiyatı modelinde metrekare katsayısı 25.000 ise, oda sayısı ve konum sabitken 1 m² artış fiyatı ortalama 25.000 TL artırır. Hedef logaritmik ise katsayı yaklaşık yüzde değişim olarak okunur.</p>'
+  '<p><b>Dikkat edilecekler:</b> "Sabit tutma" gözlemsel veride gerçekçi olmayabilir; katsayı ilişkiyi gösterir, nedensellik için ek varsayımlar gerekir. Modele alınmamış bir karıştırıcı değişken katsayıyı yanlı yapar (dışlanmış değişken yanlılığı).</p>'
+  '<p><b>Çoklu doğrusallık:</b> Açıklayıcı değişkenler birbirleriyle güçlü ilişkiliyse (metrekare ve oda sayısı) model hangisine ne kadar pay vereceğini ayırt edemez. Sonuçlar:</p><ul>'
+  '<li>Katsayıların standart hataları büyür; tek tek anlamsız görünebilirler.</li>'
+  '<li>Küçük veri değişikliklerinde katsayılar, hatta işaretleri değişebilir.</li>'
+  '<li><b>Tahmin performansı</b> genellikle etkilenmez; sorun yorumdadır.</li></ul>'
+  '<p><b>Teşhis ve çözüm:</b> Varyans şişirme faktörü (VIF > 5–10 uyarıdır), korelasyon matrisi. Çözüm: ilişkili değişkenlerden birini çıkarmak, birleştirmek (m² / oda), Ridge düzenlileştirme ya da amaç tahminse olduğu gibi bırakmak.</p>',
+  ['Kategorik değişkenin katsayısı nasıl yorumlanır?', 'R² yüksek ama katsayılar anlamsızsa ne düşünürsün?', 'Etkileşim terimi eklenince yorum nasıl değişir?'],
+  ['"Diğer değişkenler sabitken" ifadesini atlamak', 'Çoklu doğrusallığın tahmin doğruluğunu da bozduğunu söylemek'],
+  'Yorumu her zaman birimleriyle söyle ("1 m² artış 25.000 TL"); soyut "bir birim" ifadesinden daha güçlüdür.'),
+
+I(['bilimci', 'analist'], 'ileri', 'vaka', 'Vaka: heterojen etki',
+  'Anadolu Market\'in yeni öneri modülü A/B testinde genel olarak +%2 gelir getirdi. Ama segmentlere bakınca yeni müşterilerde +%9, sadık müşterilerde −%3. Ürün ekibi ne yapmalı?',
+  '<p><b>1) Önce bulgunun sağlamlığı:</b> Segmentler test öncesinde planlanmış mıydı? Planlanmamış çok sayıda segmente bakıldıysa çoklu test riski var. Her segmentin güven aralığını hesapla: sadık müşterilerdeki −%3 istatistiksel olarak sıfırdan ayrışıyor mu?</p>'
+  '<p><b>2) Mekanizmayı düşün:</b> Yeni müşteri ürün keşfetmeye ihtiyaç duyar; öneri modülü yardımcı olur. Sadık müşteri ne alacağını bilir; modül sayfayı kalabalıklaştırıp hızlı alışverişi yavaşlatıyor olabilir. Bu hikâye ek verilerle (sadık müşterilerde sepete ekleme süresi uzadı mı?) desteklenebilir.</p>'
+  '<p><b>3) Yeniliğin etkisi:</b> Sadık müşteriler değişikliğe başta tepki verip sonra alışabilir (değişim karşıtlığı); yeni müşteriler için ise etki zamanla azalabilir. Etkinin haftalara göre seyrine bak.</p>'
+  '<p><b>4) Karar seçenekleri:</b> a) Herkese yayınla (+%2). b) Yalnız yeni müşterilere göster; ama bu kişiselleştirme kararının kendisini <b>yeni bir testle</b> doğrula. c) Sadık müşteriler için daha sade bir sürüm tasarla ve test et.</p>'
+  '<p><b>Önerim:</b> Segment bulgusu doğrulama testinde tekrarlanırsa hedefli yayın; tekrarlanmazsa genel yayın. Uzun vadeli sadakat metriklerini (tekrar sipariş) iki ay izle.</p>',
+  ['Heterojen etkiyi sistematik olarak nasıl ararsın (uplift modeli)?', 'Yenilik etkisini nasıl tespit edersin?'],
+  ['Segment sonucunu doğrulamadan kalıcı kişiselleştirmeye çevirmek', 'Genel ortalamaya bakıp segment farkını görmezden gelmek'],
+  'Segment bulgularını "hipotez üreten keşif" olarak konumlandır; doğrulama testi önermek olgunluk göstergesidir.'),
+
+I(['bilimci', 'analist'], 'orta', 'kod-okuma', 'Logaritmik dönüşüm',
+  'Çarpık bir gelir dağılımına logaritma uygulanıyor. Çıktıdaki sayıları yorumla; dönüşüm neden yapılır?',
+  '<p><b>İlk satır:</b> 8 gelir değerinin ortalaması <b>157.5</b>, medyanı <b>37.5</b>. Tek bir 1000\'lik değer ortalamayı medyanın dört katından fazlasına çıkarmış; dağılım sağa çarpık.</p>'
+  '<p><b>İkinci satır:</b> log10 sonrası ortalama <b>1.72</b>, medyan <b>1.57</b>. İkisi birbirine çok yaklaştı; dağılım daha simetrik. 1000 değeri artık 3, 20 değeri 1.3; uç değerin etkisi sıkıştırıldı.</p>'
+  '<p><b>Neden yapılır:</b> 1) Doğrusal regresyon gibi modellerde artıkların daha simetrik ve sabit varyanslı olmasını sağlamak. 2) Çarpımsal ilişkileri toplamsal hâle getirmek: log ölçekte katsayı yüzde değişim olarak yorumlanır. 3) Grafiklerde geniş aralıklı veriyi okunur kılmak.</p>'
+  '<p><b>Dikkat:</b> Log ölçekteki ortalamayı geri çevirmek (10<sup>1.72</sup> ≈ 53) aritmetik ortalamayı değil <b>geometrik ortalamayı</b> verir; ciro tahmini gibi toplamın önemli olduğu durumlarda sistematik olarak düşük tahmin yapar. Sıfır ve negatif değerlerde log tanımsızdır; <code>np.log1p</code> ya da başka dönüşümler kullanılır. Ağaç tabanlı modeller sıralamaya baktığı için bu dönüşüme genelde ihtiyaç duymaz.</p>',
+  ['Sıfır içeren veride hangi dönüşümü kullanırsın?', 'Box-Cox dönüşümü nedir?'],
+  ['Log ölçekteki ortalamanın geri dönüşümünü aritmetik ortalama sanmak', 'Ağaç modelleri için de log dönüşümünü zorunlu saymak'],
+  'Dönüşüm sorularında "geri çevirince ne oluyor?" sorusunu kendin gündeme getir.',
+  code='''
+import numpy as np
+gelir = np.array([20, 25, 30, 35, 40, 50, 60, 1000])
+print(gelir.mean(), np.median(gelir))
+log = np.log10(gelir)
+print(round(log.mean(), 2), round(np.median(log), 2))
+'''),
+
+I(['bilimci', 'ml'], 'ileri', 'tasarim', 'Deney tasarımı: switchback',
+  'Pedal İzmir, talebe göre dakika ücretini değiştiren dinamik fiyatlandırmayı test etmek istiyor. Kullanıcıları rastgele ikiye bölmek neden yetersizdir? Nasıl bir deney tasarlarsın?',
+  '<p><b>Sorun, ağ etkisi (müdahale sızıntısı):</b> Kullanıcılar aynı bisiklet havuzunu paylaşır. Dinamik fiyat grubundaki kullanıcılar yoğun saatte vazgeçerse, istasyonda kalan bisikletleri kontrol grubu kullanır. Kontrol grubu "yapay olarak iyi" görünür; iki grup bağımsız değildir ve etkinin tahmini yanlıdır.</p>'
+  '<p><b>Switchback tasarımı:</b> Rastgeleleştirme birimi kullanıcı değil <b>bölge × zaman dilimi</b> olur. Örneğin İzmir 6 bölgeye ayrılır; her bölgede her 2 saatlik dilim rastgele "dinamik" ya da "sabit" fiyat alır. Böylece bir anda bir bölgedeki herkes aynı koşulu yaşar.</p>'
+  '<p><b>Tasarım kararları:</b></p><ul>'
+  '<li><b>Dilim uzunluğu:</b> Fiyatın etkisinin oturacağı kadar uzun (bisikletin istasyonlar arası dolaşımı), yeterli sayıda dilim üretecek kadar kısa.</li>'
+  '<li><b>Taşma etkisi:</b> Önceki dilimin etkisi sonrakine geçer; dilim başındaki ilk 15 dakika analizden çıkarılabilir.</li>'
+  '<li><b>Metrikler:</b> Saat başı gelir, tamamlanan yolculuk, boş istasyon süresi; denge metriği olarak kullanıcı şikâyeti.</li>'
+  '<li><b>Süre:</b> Hafta içi/sonu ve hava koşullarını kapsayan en az 3–4 hafta.</li></ul>'
+  '<p><b>Analiz:</b> Birim dilimdir; standart hatalar dilim düzeyinde (kümelenmiş) hesaplanır. Kullanıcı düzeyinde analiz yapmak, gözlemleri bağımsız sayıp güveni olduğundan yüksek gösterir.</p>',
+  ['Coğrafi kümeli rastgeleleştirme (cluster randomization) ile switchback\'in farkı nedir?', 'Fiyat değişiminin uzun vadeli sadakate etkisini nasıl ölçersin?'],
+  ['Ağ etkisini fark etmeden kullanıcı bazlı test önermek', 'Analizde birim olarak dilim yerine kullanıcıyı almak'],
+  'Paylaşılan kaynaklı pazarlarda (kurye, bisiklet, sürücü) "SUTVA ihlali" ifadesini bilmek kıdemli bilimci izlenimi verir.'),
+
+I(['bilimci', 'analist'], 'orta', 'kavram', 'Hipotez testi seçimi',
+  'İki grubu karşılaştırırken hangi istatistiksel testi seçeceğine nasıl karar verirsin? t-testi, ki-kare ve Mann-Whitney ne zaman kullanılır?',
+  '<p><b>Karar ağacı: metriğin türü ve verinin yapısı.</b></p><ul>'
+  '<li><b>Oran / ikili sonuç</b> (dönüşüm, tıklama): iki oran z-testi ya da 2×2 tablo için <b>ki-kare</b> testi. Hücre sayıları çok küçükse Fisher kesin testi.</li>'
+  '<li><b>Sürekli metrik, ortalama farkı</b> (sepet tutarı, süre): <b>Welch t-testi</b>. Varyansların eşit olduğunu varsaymadığı için klasik t-testinden daha güvenlidir. Büyük örneklemde merkezi limit teoremi sayesinde verinin normal olması gerekmez.</li>'
+  '<li><b>Çok çarpık veri, küçük örneklem ya da sıralı ölçek</b> (memnuniyet 1–5): <b>Mann-Whitney U</b>. Ortalamayı değil, bir gruptan rastgele seçilen değerin ötekinden büyük olma eğilimini test eder; "ortalama gelir arttı mı?" sorusunu doğrudan cevaplamaz.</li>'
+  '<li><b>Eşleştirilmiş veri</b> (aynı mağazanın önce/sonra satışı): eşleştirilmiş t-testi ya da Wilcoxon işaretli sıra testi.</li>'
+  '<li><b>İkiden fazla grup:</b> ANOVA ya da Kruskal-Wallis; ardından çoklu karşılaştırma düzeltmesi.</li>'
+  '<li><b>Karmaşık istatistikler</b> (medyan, P90, oran metriği): bootstrap ya da permütasyon testi.</li></ul>'
+  '<p>Python\'da bunların çoğu <code>scipy.stats</code> içindedir (<code>ttest_ind(equal_var=False)</code>, <code>chi2_contingency</code>, <code>mannwhitneyu</code>).</p>',
+  ['Kullanıcı başına gelir gibi oran metriklerinde varyansı nasıl hesaplarsın?', 'Permütasyon testi nasıl çalışır?'],
+  ['Mann-Whitney\'in ortalamaları karşılaştırdığını söylemek', 'Her durumda normal dağılım şartı arayıp büyük örneklemde t-testini reddetmek'],
+  'Test adlarını ezber listesi olarak değil, "metrik türü → test" eşlemesiyle anlat.'),
+
+I(['bilimci', 'analist'], 'temel', 'vaka', 'Vaka: müşteri segmentasyonu',
+  'Anadolu Market pazarlama ekibi "Müşterilerimizi segmentlere ayır" diyor. Nasıl ilerlersin?',
+  '<p><b>1) Amacı sor:</b> Segmentler ne için kullanılacak? Kampanya hedefleme, müşteri hizmetleri önceliği, ürün stratejisi? Amaç, kullanılacak değişkenleri ve segment sayısını belirler. 30 segmenti pazarlama ekibi yönetemez; 4–7 segment genelde uygulanabilir.</p>'
+  '<p><b>2) Basit ve açıklanabilir başlangıç, RFM:</b> Her müşteri için <b>R</b> (son siparişten bu yana gün), <b>F</b> (son 12 aydaki sipariş sayısı), <b>M</b> (toplam harcama). Her birini çeyreklik dilimlere ayırıp puanla (1–4); "Şampiyonlar" (R, F, M yüksek), "Kaybedilmek üzere" (R düşük, F ve M yüksek), "Yeni" gibi isimli segmentler oluştur. pandas\'ta <code>groupby</code> ve <code>pd.qcut</code> ile birkaç satır.</p>'
+  '<p><b>3) Gerekirse kümeleme:</b> Kategori tercihleri, kanal, indirim duyarlılığı gibi değişkenler eklenecekse K-means. Değişkenleri ölçeklendir (çarpık olanlara önce log), küme sayısını dirsek yöntemi ve siluet skoruyla, ama asıl olarak <b>yorumlanabilirlik</b> ile seç.</p>'
+  '<p><b>4) Segmentleri profille:</b> Her segmentin büyüklüğü, ciro payı, tipik davranışı ve önerilen aksiyon tek tabloda.</p>'
+  '<p><b>5) Kullan ve ölç:</b> Bir segmente özel kampanyayı kontrol grubuyla test et. Segmentlerin zaman içindeki kararlılığını izle; her ay yeniden hesaplanacak bir betik kur.</p>',
+  ['K-means\'in varsayımları ve zayıflıkları nelerdir?', 'Segmentasyonun başarılı olduğunu nasıl ölçersin?'],
+  ['Amacı sormadan doğrudan K-means çalıştırmak', 'Ölçeklendirme yapmadan farklı birimli değişkenleri kümelemek'],
+  'Basit ve açıklanabilir bir yöntemle (RFM) başlayıp gerekirse karmaşıklaştırmak, iş tarafının en çok takdir ettiği yaklaşımdır.'),
+
+I(['bilimci', 'analist'], 'ileri', 'vaka', 'Vaka: seçilim yanlılığı',
+  'Pazarlama ekibi: "E-posta bültenine abone olan müşteriler, olmayanlara göre yılda %30 daha fazla harcıyor; bülten çok başarılı, bütçeyi ikiye katlayalım." Ne dersin?',
+  '<p><b>1) Seçilim yanlılığı:</b> Bülten aboneliği rastgele dağıtılmadı; müşteriler kendileri seçti. Markaya zaten ilgili, sık alışveriş yapan müşterilerin abone olma olasılığı daha yüksek. %30\'luk farkın büyük kısmı bültenin değil, abone olan müşteri tipinin etkisi olabilir.</p>'
+  '<p><b>2) Mevcut veriyle daha iyi tahmin:</b></p><ul>'
+  '<li><b>Önce-sonra karşılaştırması:</b> Abone olanların abonelikten önceki 6 ay ve sonraki 6 ay harcamaları; benzer dönemde abone olmayan benzer müşterilerle (fark içinde fark).</li>'
+  '<li><b>Eşleştirme:</b> Geçmiş harcama, sipariş sıklığı, üyelik süresi ve şehir bakımından benzer abone/abone olmayan çiftler oluştur ve karşılaştır.</li></ul>'
+  '<p><b>3) En güçlü yol, deney:</b> Mevcut abonelerin rastgele %10\'una bülteni 3 ay göndermeyerek (holdout grubu) gerçek artımsal etkiyi ölç. Bu küçük kayıp, bütçeyi ikiye katlamadan önce ödenebilecek ucuz bir bedeldir.</p>'
+  '<p><b>4) Doğru metrik:</b> Kararı belirleyen soru "bülten ek olarak ne kadar ciro getiriyor ve bu bütçenin marjinal getirisi nedir?" sorusudur; bütçeyi ikiye katlamak etkiyi ikiye katlamaz.</p>'
+  '<p><b>Mesaj:</b> "Bülten muhtemelen işe yarıyor ama %30 abartılı. 3 aylık holdout testiyle gerçek etkiyi ölçüp bütçeyi ona göre belirleyelim."</p>',
+  ['Holdout grubu ne büyüklükte olmalı?', 'Artımsal (incremental) etki ile atfedilen (attributed) etki arasındaki fark nedir?'],
+  ['Gözlemsel farkı doğrudan bültenin etkisi olarak kabul etmek', 'Eleştirip alternatif bir ölçüm yolu önermemek'],
+  'Pazarlama vakalarında "artımsal etki" ve "holdout" kavramlarını kullanmak, iş diliyle istatistiği birleştirdiğini gösterir.'),
+
+I(['bilimci', 'ml'], 'orta', 'tasarim', 'Değerlendirme çerçevesi',
+  'Lezzet Kurye için tahmini teslim süresi (ETA) modeli geliştiriyorsun. Modeli hangi metriklerle ve nasıl değerlendireceğini tasarla.',
+  '<p><b>1) İş hedefini metriğe çevir:</b> Müşteri için en kötü deneyim, söz verilenden <b>geç</b> gelen yemektir; erken gelmek daha az rahatsız eder. Yani hatalar simetrik değil.</p>'
+  '<p><b>2) Metrik seçimi:</b></p><ul>'
+  '<li><b>MAE</b> (ortalama mutlak hata): dakika cinsinden yorumlanır, aykırılara RMSE\'den daha az duyarlıdır. Ana teknik metrik.</li>'
+  '<li><b>RMSE:</b> büyük hataları ağır cezalandırır; 40 dakikalık sapmalar özellikle kötüyse eklenir.</li>'
+  '<li><b>MAPE</b> uygun değildir: kısa teslimlerde yüzde hata patlar, uzun teslimlerde gizlenir.</li>'
+  '<li><b>İş metriği:</b> "Söz verilen sürenin 5 dakikadan fazla aşıldığı sipariş oranı" ve eksik tahminin (geç kalma) payı. Gerekirse model, asimetrik kayıpla (quantile regresyon, ör. %80 yüzdelik) eğitilir.</li></ul>'
+  '<p><b>3) Değerlendirme kurgusu:</b> Zamana göre bölme (son 4 hafta test). Segment kırılımları: şehir, saat dilimi, mesafe, yağmurlu günler; ortalama iyi olup akşam yoğunluğunda kötü olan model kabul edilmez. Taban model karşılaştırması: restoran ortalaması + mesafe kuralı.</p>'
+  '<p><b>4) Canlı doğrulama:</b> Çevrim dışı kazanç A/B testiyle doğrulanır: müşteri iptal oranı, şikâyet ve sipariş dönüşümü. Daha doğru ama daha uzun ETA dönüşümü düşürebilir; bu denge iş birimiyle konuşulur.</p>',
+  ['Quantile regresyon nasıl çalışır?', 'Çevrim dışı ve çevrim içi metrikler çelişirse hangisine güvenirsin?'],
+  ['Asimetrik hata maliyetini düşünmeden yalnız RMSE seçmek', 'Taban model karşılaştırması yapmamak'],
+  'Metrik seçiminde önce "hangi hata daha pahalı?" sorusunu sor; teknik metrikler bu cevaptan türemeli.'),
+]

@@ -1,0 +1,25 @@
+exec(open('../h.py').read())
+f=veri.oku('kanat_havayollari','hv_flights',parse_dates=['sched_dep','sched_arr','actual_dep','actual_arr'])
+print(f.head(3)); print(f.status.value_counts().to_dict())
+f['gecikme']=(f.actual_dep-f.sched_dep).dt.total_seconds()/60
+l=f[f.status!='cancelled']; print(len(l), l.gecikme.describe().round(2).to_dict(), l.gecikme.isna().sum())
+print('ontime', round((l.gecikme<15).mean()*100,1))
+d=veri.oku('kanat_havayollari','hv_delays'); print(d.groupby('reason').minutes.sum().sort_values(ascending=False).to_dict(), len(d), d.flight_id.nunique())
+print(((f.gecikme>=15)).sum())
+m=l.set_index('sched_dep').gecikme.lt(15).resample('MS').mean().mul(100).round(1); print(m.to_dict())
+w=l.set_index('sched_dep').gecikme.lt(15).resample('W').mean().mul(100).round(1); print(len(w), w.head().tolist(), w.min(), w.idxmin())
+h=l.groupby(l.sched_dep.dt.hour).gecikme.mean().round(1); print(h.to_dict())
+r=veri.oku('kanat_havayollari','hv_routes'); print(r.head())
+fr=l.merge(r,on='route_id'); fr['rota']=fr.origin+'-'+fr.dest; top=fr.rota.value_counts().head(4); print(top.to_dict())
+print(np.histogram(l.gecikme.clip(upper=180), bins=range(0,181,15))[0] if False else '')
+print(l.gecikme.min(), (l.gecikme<0).sum())
+print('----')
+fr['zaman']=fr.gecikme<15
+top4=fr.rota.value_counts().head(4).index.tolist(); print(top4)
+for rr in top4:
+    s=fr[fr.rota==rr].set_index('sched_dep').zaman.resample('MS').mean().mul(100).round(1); print(rr, s.tolist())
+import matplotlib; matplotlib.use('Agg'); import matplotlib.pyplot as plt
+toplam = d.groupby("reason")["minutes"].sum().sort_values()
+fig, ax = plt.subplots(); ax.barh(toplam.index, toplam.values); print(len(ax.patches), ax.patches[-1].get_width())
+fig, ax = plt.subplots(); n,b,p=ax.hist(l.gecikme.clip(upper=180), bins=range(-15,181,15)); print(n.tolist(), len(ax.patches))
+print(sorted(h[h>25].index.tolist()))

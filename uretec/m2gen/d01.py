@@ -1,0 +1,271 @@
+def I(roles, lv, kind, topic, q, a, follow, flags, tip, code=None):
+    d = dict(roles=roles, lv=lv, kind=kind, topic=topic, q=q, a=a, follow=follow, flags=flags, tip=tip)
+    if code: d['code'] = code
+    return d
+
+ITEMS = [
+I(['analist', 'genel'], 'temel', 'kavram', 'pandas: merge',
+  'pandas <code>merge</code> ile inner, left ve outer birleştirme arasındaki fark nedir? Birleştirmeden sonra satır sayısı neden beklenenden fazla çıkabilir?',
+  '<p><b>Kısa cevap:</b> <code>how</code> parametresi hangi tarafın satırlarının korunacağını belirler. <b>inner</b> yalnız iki tabloda da eşleşen anahtarları tutar; <b>left</b> soldaki tüm satırları tutar, eşleşmeyenlerde sağ sütunlar <code>NaN</code> olur; <b>outer</b> iki taraftaki tüm anahtarları birleştirir.</p>'
+  '<p><b>Örnek:</b> Anadolu Market\'te <code>siparisler.merge(musteriler, on=\'musteri_id\', how=\'left\')</code> her siparişi korur; silinmiş bir müşterinin siparişi kaybolmaz, yalnız şehir bilgisi boş kalır. Aynı işi inner ile yaparsan o siparişler sessizce düşer ve ciro eksik çıkar.</p>'
+  '<p><b>Satır patlaması:</b> Sağ tabloda anahtar <b>tekrar ediyorsa</b> (ör. bir ürünün iki fiyat kaydı), her sol satır her eşleşmeyle çoğalır; buna çoktan-çoğa (many-to-many) birleşme denir. Sonuç: ciro iki katına çıkar. Korunma yolları: birleştirmeden önce <code>df[\'anahtar\'].is_unique</code> kontrolü, <code>validate=\'many_to_one\'</code> parametresi ve birleştirme öncesi/sonrası satır sayısını karşılaştırmak. <code>indicator=True</code> ise her satırın hangi taraftan geldiğini (<code>_merge</code> sütunu) gösterir; eşleşmeyenleri bulmak için idealdir.</p>',
+  ['Eşleşmeyen satırları nasıl bulursun?', 'merge ile join ve concat arasındaki fark nedir?', 'Anahtar sütun adları farklıysa ne yaparsın?'],
+  ['Satır sayısını birleştirmeden sonra hiç kontrol etmemek', '"left join her zaman sol tablonun satır sayısını korur" demek (tekrarlı anahtarda korumaz)'],
+  'Cevabına SQL karşılığını (LEFT JOIN) ekle; analist mülakatlarında iki dili birlikte düşündüğünü göstermek artı puandır.'),
+
+I(['analist'], 'orta', 'kavram', 'pandas: groupby',
+  'groupby sonrasında <code>agg</code>, <code>transform</code> ve <code>apply</code> arasındaki fark nedir? Hangisini ne zaman seçersin?',
+  '<p><b>groupby</b> böl-uygula-birleştir (split-apply-combine) mantığıyla çalışır. Fark, <b>sonucun şeklinde</b>:</p>'
+  '<ul><li><b>agg:</b> her grubu tek satıra indirir. "Şehir başına toplam ciro" gibi özet tablolar için. Adlandırılmış toplama (<code>agg(ciro=(\'tutar\', \'sum\'))</code>) okunaklı sütun adları verir.</li>'
+  '<li><b>transform:</b> grup sonucunu <b>orijinal satır sayısında</b> geri yayar. "Her siparişin, kendi şehrinin ortalamasından sapması" gibi satır düzeyi özellikler için; SQL\'deki <code>AVG(...) OVER (PARTITION BY ...)</code> karşılığıdır.</li>'
+  '<li><b>apply:</b> her grup alt DataFrame\'ine keyfi bir fonksiyon uygular; en esnek ama en yavaş olanıdır. "Her müşterinin son 3 siparişi" gibi başka yolla ifade edilemeyen işler için.</li></ul>'
+  '<p><b>Performans:</b> <code>sum</code>, <code>mean</code>, <code>count</code> gibi yerleşik toplamalar C ile vektörleştirilmiştir; <code>apply(lambda g: ...)</code> ise Python döngüsü gibi davranır ve milyon satırda onlarca kat yavaşlayabilir. Kural: önce yerleşik agg/transform, olmuyorsa apply.</p>',
+  ['transform ile pencere fonksiyonu arasındaki ilişkiyi örnekle anlat.', 'filter metodu ne işe yarar?', 'Birden fazla sütuna farklı toplama nasıl uygularsın?'],
+  ['Her işi apply ile çözmek ve performansı hiç düşünmemek', 'transform sonucunun satır sayısını grup sayısı sanmak'],
+  'Üç metodu "sonuç kaç satır?" sorusuyla ayırt et; görüşmeci bu net çerçeveyi sever.'),
+
+I(['analist'], 'temel', 'kod-okuma', 'pandas: groupby',
+  'Aşağıdaki kodun çıktısı ne olur? <code>size</code> yerine <code>count</code> kullansaydık fark eder miydi?',
+  '<p>Kod, Anadolu Market siparişlerini şehre göre gruplar ve adlandırılmış toplamayla iki sütun üretir: <code>siparis</code> (grup büyüklüğü) ve <code>ciro</code> (tutar toplamı). Sonra ciroya göre azalan sıralar.</p>'
+  '<p>İzmir: 2 sipariş, 120+200 = 320; Bursa: 1 sipariş, 150; Ankara: 2 sipariş, 80+40 = 120. Sıralama 320 → 150 → 120 olur. Grup anahtarı <code>sehir</code> sonuçta <b>indeks</b> olur; çıktıdaki ayrı satırda görünen <code>sehir</code> başlığı indeksin adıdır. Düz sütun istersen <code>as_index=False</code> ya da <code>reset_index()</code> kullanırsın.</p>'
+  '<p><b>size ve count farkı:</b> <code>size</code> eksik değerler dahil satır sayar; <code>count</code> yalnız dolu değerleri sayar. Bu veride <code>tutar</code> boş olmadığı için sonuç aynı olurdu; ama tutarı boş bir sipariş olsaydı <code>count</code> onu atlardı. "Sipariş adedi" soruluyorsa genelde <code>size</code> ya da kimlik sütununda <code>nunique</code> daha doğru tanımdır.</p>',
+  ['Aynı sonucu pivot_table ile nasıl alırsın?', 'Ciro payını (%) sütun olarak nasıl eklersin?'],
+  ['Grup anahtarının indeks olduğunu fark etmemek', 'size ile count\'u eş anlamlı sanmak'],
+  'Kod okurken önce ara sonuçları sesli hesapla, sonra sıralamayı uygula; adım atlamak hata getirir.',
+  code='''
+import pandas as pd
+df = pd.DataFrame({
+    'sehir': ['İzmir', 'Ankara', 'İzmir', 'Ankara', 'Bursa'],
+    'tutar': [120, 80, 200, 40, 150],
+})
+ozet = df.groupby('sehir').agg(siparis=('tutar', 'size'), ciro=('tutar', 'sum'))
+print(ozet.sort_values('ciro', ascending=False))
+'''),
+
+I(['analist', 'bilimci'], 'orta', 'kavram', 'Eksik veri',
+  'Bir veri setinde eksik değerlerle karşılaştın. Satırları silmek ile doldurmak arasında nasıl karar verirsin?',
+  '<p><b>Önce neden eksik olduğunu sor.</b> Üç tip vardır: <b>MCAR</b> (tamamen rastgele eksik; ör. bir sensörün ara sıra kopması), <b>MAR</b> (eksiklik başka gözlenen değişkenle ilişkili; ör. mobil uygulama kullanıcılarında doğum tarihi alanı daha sık boş) ve <b>MNAR</b> (eksiklik değerin kendisiyle ilişkili; ör. yüksek gelirliler gelir alanını boş bırakıyor).</p>'
+  '<p><b>Karar adımları:</b> 1) Eksik oranını sütun ve segment bazında çıkar (<code>df.isna().mean()</code>). 2) Oran küçükse ve MCAR ise satır silmek kabul edilebilir. 3) Değilse doldur: sayısallarda medyan (aykırılara dayanıklı), kategoriklerde "Bilinmiyor" sınıfı, zaman serisinde ileri doldurma (<code>ffill</code>) ya da enterpolasyon. 4) Eksikliğin kendisi bilgi taşıyorsa <code>gelir_bos</code> gibi bir bayrak sütunu ekle.</p>'
+  '<p><b>Dikkat:</b> Ortalama ile doldurmak varyansı yapay olarak düşürür ve korelasyonları bozar. Modelleme yapıyorsan doldurma istatistiğini yalnız eğitim verisinden hesapla; aksi hâlde sızıntı olur. Ve en önemlisi: kararını raporda yaz; "eksikler silindi" bilgisi okuyanın sonucu yorumlamasını değiştirir.</p>',
+  ['Zaman serisinde ffill neden tehlikeli olabilir?', 'Eksik veriyi görselleştirmek için ne yaparsın?', 'Sıfır ile eksik arasındaki fark nedir?'],
+  ['Her durumda dropna() ya da ortalamayla doldurmak', 'Eksikliğin nedenini hiç sorgulamamak'],
+  'MCAR/MAR/MNAR terimlerini bilmek iyi; ama her birine Türk iş hayatından birer örnek vermek seni öne çıkarır.'),
+
+I(['analist'], 'orta', 'kod-okuma', 'Eksik veri',
+  'pandas eksik değerlerle nasıl hesap yapar? Aşağıdaki kodun çıktısını tahmin et.',
+  '<p>pandas toplama fonksiyonları varsayılan olarak <code>skipna=True</code> ile çalışır, yani <code>NaN</code> değerleri <b>yok sayar</b>.</p>'
+  '<ul><li><code>s.mean()</code>: yalnız 10 ve 30 dikkate alınır → 20.0 (4\'e değil 2\'ye bölünür).</li>'
+  '<li><code>s.sum()</code>: 40.0.</li><li><code>count()</code> dolu değerleri sayar → 2; <code>size</code> tüm elemanları → 4.</li>'
+  '<li>Tamamı boş bir serinin toplamı <b>0.0</b>, ortalaması ise <b>nan</b> olur. Toplamın etkisiz elemanı 0 olduğu için pandas bunu böyle tanımlar.</li></ul>'
+  '<p><b>İş etkisi:</b> Lezzet Kurye\'de teslim süresi kaydı olmayan siparişleri ortalamadan sessizce atmak, "ortalama teslim 28 dakika" raporunu iyimser gösterebilir; çünkü süresi kaydedilmeyenler çoğu zaman sorunlu siparişlerdir. Boş bir gün için ciro 0 görünmesi de "satış yok" ile "veri gelmedi" ayrımını gizler. Gerekirse <code>sum(min_count=1)</code> kullan: hiç dolu değer yoksa 0 yerine NaN döner.</p>',
+  ['NumPy\'da np.mean bir NaN içeren dizide ne döndürür?', 'min_count parametresi ne işe yarar?'],
+  ['Ortalamanın eksikleri sıfır sayarak hesaplandığını düşünmek', 'Boş grubun toplamı 0 çıktığında "satış yok" diye raporlamak'],
+  'NaN davranışını sorulduğunda pandas ile NumPy farkını (np.mean → nan, np.nanmean → atlar) da söyle.',
+  code='''
+import pandas as pd
+import numpy as np
+s = pd.Series([10, np.nan, 30, np.nan])
+print(s.mean(), s.sum(), s.count(), s.size)
+bos = pd.Series([np.nan, np.nan])
+print(bos.sum(), bos.mean())
+'''),
+
+I(['analist'], 'orta', 'kavram', 'pandas: pivot ve melt',
+  '<code>pivot</code>, <code>pivot_table</code> ve <code>melt</code> arasındaki farkları açıkla. "Geniş" ve "uzun" veri biçimi ne demektir?',
+  '<p><b>Uzun (long) biçim:</b> her satır tek bir gözlemdir: <code>tarih, sehir, ciro</code>. <b>Geniş (wide) biçim:</b> bir değişkenin değerleri sütun olur: her şehir ayrı sütun. Analiz ve grafik kütüphaneleri genelde uzun biçimi, insanlar ve Excel raporları geniş biçimi sever.</p>'
+  '<ul><li><b>pivot:</b> uzundan genişe çevirir ama <b>toplama yapmaz</b>. Aynı (indeks, sütun) çiftinden iki satır varsa <code>ValueError</code> verir.</li>'
+  '<li><b>pivot_table:</b> aynı çevirmeyi <code>aggfunc</code> ile toplayarak yapar (varsayılan ortalama!). Excel\'deki Özet Tablo\'nun karşılığıdır; <code>margins=True</code> ile toplam satırı, <code>fill_value=0</code> ile boş hücre doldurma sunar.</li>'
+  '<li><b>melt:</b> tersini yapar; genişten uzuna. Excel\'den gelen "Ocak, Şubat, Mart" sütunlu bir hedef tablosunu <code>id_vars=[\'bayi\'], var_name=\'ay\', value_name=\'hedef\'</code> ile uzun hâle getirip satış tablosuyla birleştirebilirsin.</li></ul>'
+  '<p><b>Sık tuzak:</b> pivot_table\'ın varsayılan <code>aggfunc=\'mean\'</code> olduğunu unutup ciroyu ortalama olarak raporlamak. Toplam istiyorsan <code>aggfunc=\'sum\'</code> yazmayı alışkanlık hâline getir.</p>',
+  ['stack ve unstack bu işlemlerle nasıl ilişkilidir?', 'pivot_table\'da birden fazla aggfunc kullanabilir misin?', 'Uzun biçim neden grafik için daha uygundur?'],
+  ['pivot ile pivot_table\'ı aynı şey sanmak', 'pivot_table\'ın varsayılan toplama fonksiyonunu bilmemek'],
+  'Excel geçmişin varsa "Özet Tablo = pivot_table, DÜŞEYARA = merge" eşlemesini kurarak anlat; somut ve akılda kalıcıdır.'),
+
+I(['analist'], 'ileri', 'kavram', 'SQL pencere fonksiyonları ve pandas',
+  'SQL pencere fonksiyonlarının (ROW_NUMBER, SUM OVER, LAG) pandas karşılıkları nelerdir? Hangi durumda SQL\'de, hangi durumda pandas\'ta yaparsın?',
+  '<p>Pencere fonksiyonu satır sayısını değiştirmeden, her satırın yanına grubuna ait bir hesap ekler. pandas karşılıkları:</p>'
+  '<table><tr><th>SQL</th><th>pandas</th></tr>'
+  '<tr><td><code>ROW_NUMBER() OVER (PARTITION BY m ORDER BY t)</code></td><td><code>df.sort_values(\'t\').groupby(\'m\').cumcount() + 1</code></td></tr>'
+  '<tr><td><code>RANK()</code> / <code>DENSE_RANK()</code></td><td><code>groupby(\'m\')[\'x\'].rank(method=\'min\')</code> / <code>method=\'dense\'</code></td></tr>'
+  '<tr><td><code>SUM(x) OVER (PARTITION BY m)</code></td><td><code>groupby(\'m\')[\'x\'].transform(\'sum\')</code></td></tr>'
+  '<tr><td>Kümülatif toplam</td><td><code>groupby(\'m\')[\'x\'].cumsum()</code></td></tr>'
+  '<tr><td><code>LAG(x, 1)</code> / <code>LEAD</code></td><td><code>groupby(\'m\')[\'x\'].shift(1)</code> / <code>shift(-1)</code></td></tr>'
+  '<tr><td>Kayan ortalama (ROWS 6 PRECEDING)</td><td><code>groupby(\'m\')[\'x\'].rolling(7).mean()</code></td></tr></table>'
+  '<p><b>Kritik fark:</b> SQL\'de sıralama <code>ORDER BY</code> ile pencereye bağlıdır; pandas\'ta önce <code>sort_values</code> yapmazsan shift ve cumsum yanlış satırı kullanır.</p>'
+  '<p><b>Seçim:</b> Veri ambarda milyonlarca satırsa hesabı SQL\'de yap, yalnız sonucu çek; veriyi taşımak pahalıdır. Sonraki adımlar (modelleme, karmaşık temizlik, grafik) Python\'daysa ve veri belleğe sığıyorsa pandas esneklik kazandırır.</p>',
+  ['RANK ile DENSE_RANK farkını örnekle.', 'Her müşterinin en son siparişini iki dilde nasıl seçersin?', 'pandas\'ta QUALIFY benzeri filtre nasıl yapılır?'],
+  ['shift/cumsum öncesinde sıralamayı unutmak', 'Pencere fonksiyonunu GROUP BY ile karıştırmak (satır sayısı azalır sanmak)'],
+  'Tablo çizer gibi iki sütunlu eşleme yap; ardından "sıralama" tuzağını kendiliğinden söyle.'),
+
+I(['analist'], 'orta', 'kod-okuma', 'pandas: grup içi sıra işlemleri',
+  'Müşteri başına aylık harcama verisinde <code>shift</code>, <code>cumsum</code> ve <code>cumcount</code> kullanılıyor. Çıktıyı yorumla.',
+  '<p>Kod önce <b>müşteri ve aya göre sıralar</b>; grup içi sıra işlemleri ancak bundan sonra anlamlıdır.</p>'
+  '<ul><li><code>onceki</code> = <code>groupby(\'musteri\').shift(1)</code>: her satıra aynı müşterinin bir önceki ayını getirir; SQL\'deki <code>LAG</code>. Her müşterinin ilk ayında önceki değer olmadığı için <b>NaN</b> gelir. B\'nin ilk satırına A\'nın son değeri (120) <b>taşınmaz</b>; gruplama tam bunu engeller.</li>'
+  '<li>NaN bulunduğu için sütun ondalıklı (<code>float</code>) olur: 100.0 gibi.</li>'
+  '<li><code>kumulatif</code>: A için 100, 250, 370; B için 50, 125.</li>'
+  '<li><code>sira</code>: <code>cumcount</code> 0\'dan başlar, +1 ile 1-tabanlı sıra numarası olur (ROW_NUMBER).</li></ul>'
+  '<p>Bu kalıp, Anadolu Market\'te "bir önceki aya göre değişim" (<code>harcama - onceki</code>), "müşterinin kaçıncı siparişi" ya da "ilk siparişten bu yana toplam" gibi özellikler üretmenin temelidir.</p>',
+  ['Aylık değişim yüzdesini nasıl hesaplarsın?', 'Ayların arasında boşluk varsa (Mart yok) shift ne yapar?'],
+  ['groupby olmadan shift kullanıp müşteriler arası değer sızdırmak', 'cumcount\'un 0\'dan başladığını unutmak'],
+  'Grup sınırında ne olduğunu (ilk satırda NaN) özellikle vurgula; görüşmeci tam bunu soruyordur.',
+  code='''
+import pandas as pd
+df = pd.DataFrame({
+    'musteri': ['A', 'B', 'A', 'B', 'A'],
+    'ay': [1, 1, 2, 2, 3],
+    'harcama': [100, 50, 150, 75, 120],
+})
+df = df.sort_values(['musteri', 'ay'])
+df['onceki'] = df.groupby('musteri')['harcama'].shift(1)
+df['kumulatif'] = df.groupby('musteri')['harcama'].cumsum()
+df['sira'] = df.groupby('musteri').cumcount() + 1
+print(df.to_string(index=False))
+'''),
+
+I(['analist'], 'orta', 'vaka', 'Vaka: satış düşüşü',
+  'Anadolu Market\'in Satış Direktörü: "Geçen ay satışlar %10 düştü. Neden?" Bir analist olarak adım adım ne yaparsın?',
+  '<p><b>1) Soruyu netleştir:</b> "Satış" ciro mu, sipariş adedi mi? Hangi döneme göre: önceki ay mı, geçen yılın aynı ayı mı? Ocak\'ın Aralık\'a göre düşmesi mevsimsel olabilir.</p>'
+  '<p><b>2) Veriyi doğrula:</b> Düşüş gerçek mi, ölçüm hatası mı? ETL gecikmesi, eksik gün, iade kayıtlarının yeni işlenmesi, kur değişimi ya da takip kodunun bozulması kontrol edilir.</p>'
+  '<p><b>3) Formülle ayrıştır:</b> Ciro = ziyaretçi × dönüşüm oranı × ortalama sepet. Hangi çarpan düştü? Trafik düştüyse pazarlamaya, dönüşüm düştüyse ürün/ödeme akışına, sepet düştüyse fiyat ve kampanyaya bakılır.</p>'
+  '<p><b>4) Segmentlere böl:</b> Şehir, kanal (web/mobil), kategori, yeni/eski müşteri. Düşüş tek bir segmentte mi yoğunlaşıyor? Örneğin yalnız İzmir mobilde, 12. günden sonra.</p>'
+  '<p><b>5) İç ve dış olayları eşle:</b> Uygulama sürümü, fiyat artışı, stok bitişi, rakip kampanyası, bayram.</p>'
+  '<p><b>6) Hipotezi test et ve öner:</b> "Mobil ödeme sayfasındaki hata dönüşümü %18 düşürdü; 9 milyon TL\'lik farkın yaklaşık 7 milyonunu açıklıyor." Sonra eylem: hatayı düzelt, takip panosuna dönüşüm alarmı ekle.</p>',
+  ['Düşüşün mevsimsel olup olmadığını nasıl ayırt edersin?', 'Birden fazla neden aynı anda varsa etkilerini nasıl ayırırsın?', 'Bu analizi bir daha elle yapmamak için ne kurarsın?'],
+  ['Veri doğrulamadan hemen hipotez üretmeye başlamak', 'Tek bir segment grafiğine bakıp kesin neden ilan etmek'],
+  'Vaka sorularında yapını baştan söyle ("önce tanım, sonra doğrulama, sonra ayrıştırma..."); görüşmeci düşünce sürecini puanlar.'),
+
+I(['analist'], 'temel', 'kavram', 'KPI tanımı',
+  'İyi bir KPI\'ın özellikleri nelerdir? Lezzet Kurye için "teslimat performansı" KPI\'ını nasıl tanımlarsın?',
+  '<p>Bir KPI (anahtar performans göstergesi), işin hedefine bağlı, düzenli izlenen ve karar tetikleyen bir metriktir. İyi bir KPI:</p>'
+  '<ul><li><b>Net tanımlıdır:</b> pay, payda, filtre ve zaman penceresi yazılıdır.</li><li><b>Etkilenebilirdir:</b> bir ekip onu değiştirebilir.</li><li><b>Zamanında ölçülebilir:</b> haftalar sonra gelen veriyle yönetilmez.</li><li><b>Kandırılmaya dirençlidir</b> ya da bir denge metriğiyle eşlenmiştir.</li></ul>'
+  '<p><b>Lezzet Kurye örneği:</b> "Zamanında teslim oranı = vaat edilen süre + 5 dk içinde teslim edilen sipariş / teslim edilen sipariş; iptaller hariç, günlük ve şehir bazında." Ortalama yerine oran ya da yüzdelik (P90 teslim süresi) seçilir; çünkü ortalama birkaç uç değerle oynar ve müşterinin yaşadığı kötü deneyimi gizler.</p>'
+  '<p><b>Denge metriği:</b> Kuryeler hızlandırılınca soğuk yemek ya da kaza riski artabilir; bu yüzden "müşteri puanı" ve "iptal oranı" yanında izlenir. Goodhart yasasını hatırla: bir ölçü hedef hâline gelince iyi bir ölçü olmaktan çıkar.</p>',
+  ['Öncü (leading) ve gecikmeli (lagging) gösterge farkı nedir?', 'Kuzey yıldızı metriği ile KPI arasındaki fark ne?', 'Paydanın değişmesi KPI\'ı nasıl yanıltır?'],
+  ['KPI\'ı formül ve filtre vermeden tanımlamak', 'Tek bir metriği denge metriği olmadan önermek'],
+  'Tanımı söyledikten sonra "bu metriği nasıl kandırabilirim?" diye kendini sorgula; görüşmeci bu olgunluğu arar.'),
+
+I(['analist', 'bilimci'], 'orta', 'kavram', 'A/B testi yorumlama',
+  'Bir A/B testinde yeni sepet sayfası dönüşümü %4,0\'dan %4,3\'e çıkardı, p-değeri 0,03. Ürün yöneticisine ne söylersin?',
+  '<p><b>İstatistiksel anlam:</b> p = 0,03, gerçekte fark olmasaydı bu büyüklükte ya da daha uç bir farkı görme olasılığının %3 olduğunu söyler. Önceden belirlenmiş %5 eşiğinin altında, yani sonuç istatistiksel olarak anlamlı. "Yeni sayfanın daha iyi olma olasılığı %97" demek <b>yanlış</b> yorumdur.</p>'
+  '<p><b>Etki büyüklüğü:</b> Mutlak artış 0,3 puan, göreli artış %7,5. Güven aralığını mutlaka iste: göreli artış %1 ile %14 arasındaysa alt sınırda bile değişiklik kârlı mı? Bu, iş tarafının sorusudur.</p>'
+  '<p><b>Geçerlilik kontrolleri:</b> Test önceden belirlenen süre boyunca mı koştu, yoksa anlamlı çıkınca mı durduruldu (erken bakış, "peeking")? Gruplar dengeli mi (örnek oranı uyumsuzluğu, SRM)? Tam haftaları kapsıyor mu? Denge metrikleri (iade oranı, sayfa hızı) kötüleşti mi?</p>'
+  '<p><b>Öneri:</b> "Kontroller temizse yayına alalım; beklenen etki aylık yaklaşık X TL, en kötü senaryoda Y TL. Yeniliğin etkisi (novelty) sönmesin diye ilk iki hafta izleyelim."</p>',
+  ['Güven aralığı sıfırı içerseydi ne derdin?', 'Pratik anlamlılık ile istatistiksel anlamlılık neden farklı?', 'Test erken durdurulduysa ne olur?'],
+  ['p-değerini "B\'nin daha iyi olma olasılığı" diye yorumlamak', 'Yalnız p-değerine bakıp etki büyüklüğünü ve geçerlilik kontrollerini atlamak'],
+  'İstatistiği iş diline çevir: "anlamlı" yerine "beklenen aylık katkı" de; karar verici rakam ister.'),
+
+I(['analist', 'bilimci'], 'ileri', 'vaka', 'A/B testi: örnek oranı uyumsuzluğu',
+  'Kanat Havayolları\'nda 50/50 bölünen bir ödeme sayfası testinde A grubunda 50.000, B grubunda 47.800 kullanıcı var. B\'nin dönüşümü belirgin şekilde yüksek. Ne yaparsın?',
+  '<p><b>1) Alarm:</b> 50/50 planlanan bir testte 2.200 kişilik fark tesadüf olamayacak kadar büyük. Ki-kare uyum testi bu dengesizlik için çok küçük bir p-değeri verir (yaklaşık 10<sup>-12</sup>). Buna <b>örnek oranı uyumsuzluğu (SRM)</b> denir ve sonuç <b>güvenilmez</b> sayılır; dönüşüm farkını raporlamam.</p>'
+  '<p><b>2) Kök nedeni ara:</b> B sürümü bazı tarayıcılarda çöküp kullanıcıyı loglamadan mı kaybediyor? Yönlendirme B\'de daha yavaş olduğu için sabırsız kullanıcılar sayfa yüklenmeden mi çıkıyor? Bot filtresi gruplara farklı mı uygulanıyor? Atama kullanıcı yerine oturum bazında mı yapılmış?</p>'
+  '<p><b>3) Segment kır:</b> Uyumsuzluğu cihaz, tarayıcı, gün ve ülke bazında incele; çoğu zaman tek bir segmentte yoğunlaşır (ör. eski Android WebView).</p>'
+  '<p><b>4) Neden kritik:</b> B\'de kaybolan kullanıcılar muhtemelen sorun yaşayanlardır; geriye "dayanıklı" kullanıcılar kalır ve B yapay olarak iyi görünür. Bu bir seçilim yanlılığıdır.</p>'
+  '<p><b>5) Sonuç:</b> Hatayı düzelt, testi yeniden başlat. Kalıcı çözüm olarak deney platformuna otomatik SRM kontrolü ekle.</p>',
+  ['SRM kontrolünü hangi testle yaparsın?', 'Atama birimi oturum olursa hangi sorunlar çıkar?', 'Kısmi veriyle bir şey kurtarılabilir mi?'],
+  ['Grup büyüklüklerine hiç bakmadan dönüşüm farkını kutlamak', 'Dengesizliği "küçük fark" diye geçiştirmek'],
+  'A/B vakalarında sonuca geçmeden önce "test sağlıklı mı?" sorusunu sormak, kıdemli analisti ayırt eden davranıştır.'),
+
+I(['analist'], 'temel', 'kavram', 'Görselleştirme seçimi',
+  'Hangi soruya hangi grafik türünü seçersin? Pasta grafiği ne zaman uygun, ne zaman değil?',
+  '<p><b>Kural: grafik, sorunun türünü izler.</b></p>'
+  '<ul><li><b>Zaman içinde değişim (trend):</b> çizgi grafik. Günlük ciro, aylık aktif kullanıcı.</li>'
+  '<li><b>Kategorileri karşılaştırma:</b> yatay çubuk grafik, büyükten küçüğe sıralı. Şehir bazında ciro; uzun etiketler yatayda rahat okunur.</li>'
+  '<li><b>Dağılım:</b> histogram ya da kutu grafik (box plot). Sepet tutarının dağılımı, aykırı değerler.</li>'
+  '<li><b>İki sayısal değişken ilişkisi:</b> saçılım grafiği (scatter). İndirim oranı ve satış adedi.</li>'
+  '<li><b>Parçanın bütüne oranı:</b> yığılmış çubuk ya da <b>az sayıda</b> dilimle pasta.</li></ul>'
+  '<p><b>Pasta grafiği:</b> 2–4 dilim varsa ve mesaj "biri baskın" ise kabul edilebilir. İnsan gözü açıları ve alanları uzunluklardan daha kötü karşılaştırır; 8 dilimli bir pastada %12 ile %14\'ü ayırt edemezsin. Zaman içinde pay değişimi için pasta hiç uygun değildir.</p>'
+  '<p><b>Genel ilkeler:</b> çubuk grafikte eksen sıfırdan başlar; renk anlam taşımalı (vurgulanacak tek kategori renkli, diğerleri gri); başlık, grafiğin ana mesajını söylemeli: "İzmir cirosu 3 aydır düşüyor".</p>',
+  ['Çizgi grafikte y ekseni sıfırdan başlamak zorunda mı?', 'İkili y eksenli grafikler neden tartışmalı?', 'Çok sayıda kategori varsa ne yaparsın?'],
+  ['Her şeye pasta grafik önermek', 'Grafiği sorudan bağımsız, "güzel göründüğü" için seçmek'],
+  'Cevabı soru türlerine göre grupla (trend, karşılaştırma, dağılım, ilişki); ezber listesi yerine yöntem göstermiş olursun.'),
+
+I(['analist', 'otomasyon'], 'temel', 'kavram', 'Excel\'den Python\'a geçiş',
+  'Excel\'de sık kullandığın DÜŞEYARA, Özet Tablo, EĞER ve ÇOKETOPLA işlemlerini pandas\'ta nasıl yaparsın? Neden Python\'a geçmeye değer?',
+  '<table><tr><th>Excel</th><th>pandas</th></tr>'
+  '<tr><td>DÜŞEYARA / XLOOKUP</td><td><code>siparis.merge(urun, on=\'urun_id\', how=\'left\')</code></td></tr>'
+  '<tr><td>Özet Tablo</td><td><code>pd.pivot_table(df, index=\'sehir\', columns=\'ay\', values=\'ciro\', aggfunc=\'sum\')</code></td></tr>'
+  '<tr><td>EĞER</td><td><code>np.where(df[\'tutar\'] &gt; 500, \'büyük\', \'küçük\')</code>; çok koşullu için <code>np.select</code></td></tr>'
+  '<tr><td>ÇOKETOPLA</td><td><code>df.loc[(df.sehir == \'İzmir\') &amp; (df.ay == 3), \'ciro\'].sum()</code> ya da <code>groupby</code></td></tr>'
+  '<tr><td>Yinelenenleri Kaldır</td><td><code>drop_duplicates()</code></td></tr></table>'
+  '<p><b>Neden geçmeli?</b> 1) <b>Tekrarlanabilirlik:</b> her ay aynı adımları elle tekrarlamak yerine betiği yeniden çalıştırırsın. 2) <b>Ölçek:</b> Excel\'in yaklaşık 1 milyon satır sınırı vardır; pandas milyonlarca satırla rahat çalışır. 3) <b>İzlenebilirlik:</b> kod, sürüm kontrolüyle kimin neyi değiştirdiğini gösterir; gizli bir hücre formülünün bozulması fark edilmez. 4) <b>Birleştirme:</b> veritabanı, API ve dosyaları tek akışta birleştirebilirsin.</p>'
+  '<p><b>Dikkat:</b> DÜŞEYARA ilk eşleşmeyi alır; merge ise tüm eşleşmeleri getirir. Arama tablosunda yinelenen anahtar varsa satır sayısı artar.</p>',
+  ['Excel çıktısını biçimli (renkli başlık, sütun genişliği) nasıl üretirsin?', 'Türkçe ondalık virgüllü Excel dosyasını okurken nelere dikkat edersin?'],
+  ['merge\'ün DÜŞEYARA gibi yalnız ilk eşleşmeyi aldığını sanmak', 'Python\'un avantajını yalnız "daha hızlı" diye özetlemek'],
+  'Excel geçmişini saklama; "şu raporu Excel\'de 3 saatte hazırlıyordum, Python\'la 2 dakikaya indirdim" gibi somut bir hikâye anlat.'),
+
+I(['analist', 'muhendis'], 'ileri', 'kod-okuma', 'pandas: merge doğrulama',
+  'Sipariş tablosu ürün fiyat tablosuyla birleştiriliyor. Kod kaç satır ve hangi toplamı basar? Son satırda ne olur?',
+  '<p><b>Satır sayısı:</b> Fiyat tablosunda <code>urun_id=1</code> <b>iki kez</b> var (eski ve yeni fiyat). Siparişteki iki adet 1 numaralı satırın her biri iki fiyatla eşleşir: 2 × 2 = 4 satır, artı ürün 2 için 1 satır → <b>5</b>. Beklenen 3 satırdı.</p>'
+  '<p><b>Toplam:</b> 2×10 + 2×12 + 1×10 + 1×12 + 5×7 = <b>101</b>. Doğru ciro tek fiyatla hesaplanmalıydı (ör. güncel fiyat 12 ile: 2×12 + 1×12 + 5×7 = 71). Yani rapor yaklaşık %42 şişmiş olur ve kimse fark etmeyebilir.</p>'
+  '<p><b>Son blok:</b> <code>validate=\'many_to_one\'</code> sağ tablonun anahtarının benzersiz olmasını şart koşar; koşul bozulduğu için <code>MergeError</code> fırlatılır. Bu, sessiz hatayı yüksek sesli hataya çevirir.</p>'
+  '<p><b>Kök çözüm:</b> fiyat tablosu tarih aralıklı (geçerlilik başlangıç/bitiş) ise sipariş tarihine göre doğru fiyatı seçmek gerekir: <code>merge_asof</code> ya da tarih koşullu filtre. Boyut tablosunu önce <code>drop_duplicates(\'urun_id\', keep=\'last\')</code> ile tekilleştirmek hızlı ama bilgi kaybettiren bir çözümdür.</p>',
+  ['merge_asof ne zaman kullanılır?', 'validate parametresinin alabileceği diğer değerler nelerdir?'],
+  ['Birleştirme sonrası satır sayısını 3 sanmak', 'MergeError\'ı try/except ile yutup devam etmek'],
+  'Kod okuma sorusunda sayıyı söyledikten sonra "bu üretimde nasıl fark edilirdi?" kısmını da anlat; gerçek işte değerli olan budur.',
+  code='''
+import pandas as pd
+siparis = pd.DataFrame({'urun_id': [1, 1, 2], 'adet': [2, 1, 5]})
+fiyat = pd.DataFrame({'urun_id': [1, 1, 2], 'fiyat': [10, 12, 7]})
+m = siparis.merge(fiyat, on='urun_id', how='left')
+print(len(m), (m['adet'] * m['fiyat']).sum())
+try:
+    siparis.merge(fiyat, on='urun_id', validate='many_to_one')
+except Exception as e:
+    print(type(e).__name__)
+'''),
+
+I(['analist'], 'orta', 'vaka', 'İş sorusunu analize çevirme',
+  'Anadolu Bank pazarlama müdürü "Müşteriler neden bizi bırakıyor?" diye soruyor. Bu belirsiz soruyu analiz edilebilir hâle nasıl getirirsin?',
+  '<p><b>1) Terki tanımla:</b> Bankada "terk" net değildir. Hesap kapatma mı, 90 gün işlem yapmama mı, maaş hesabını taşıma mı? İş birimiyle birlikte ölçülebilir bir tanım seçilir: "Son 90 günde hiç işlem yapmayan ve bakiyesi 100 TL altına inen bireysel müşteri."</p>'
+  '<p><b>2) Soruyu alt sorulara böl:</b> Terk oranı ne ve zamanla nasıl değişiyor? Hangi segmentlerde yüksek (yaş, ürün sayısı, kanal, şube)? Terkten önce hangi sinyaller var (şikâyet, ücret artışı, kart limit reddi)?</p>'
+  '<p><b>3) Hipotezler kur:</b> "Tek ürünlü müşteriler daha çok terk ediyor", "Hesap işletim ücretinin getirildiği aydan sonra terk arttı", "Mobil uygulamayı kullanmayanlar daha riskli".</p>'
+  '<p><b>4) Veri ve yöntem:</b> Müşteri-ay tablosu kur; kohort tutma eğrileri, segment karşılaştırmaları, gerekirse lojistik regresyonla risk faktörleri. Korelasyonu nedensellik gibi sunmamaya dikkat et.</p>'
+  '<p><b>5) Eyleme bağla:</b> Çıktı "şu 3 segment, şu sinyaller; önerimiz şu" biçiminde olmalı ve ölçülebilir bir eyleme dönüşmeli: riskli müşteriye ücret muafiyeti teklifini A/B testiyle denemek gibi.</p>',
+  ['Terk tanımın değişirse sonuçlar nasıl etkilenir?', 'Analizin başarısını nasıl ölçersin?', 'Paydaş beklentisini nasıl yönetirsin?'],
+  ['Tanım yapmadan doğrudan model kurmaya atlamak', 'Analizi bir eylem önerisine bağlamamak'],
+  'Belirsiz sorularda ilk cümlen bir netleştirme sorusu olsun; bu, görüşmecinin aradığı analist refleksidir.'),
+
+I(['analist'], 'orta', 'tasarim', 'Pano tasarımı',
+  'Lezzet Kurye operasyon ekibi için günlük bir performans panosu (dashboard) tasarla. Hangi metrikleri, hangi düzende koyarsın?',
+  '<p><b>1) Kullanıcıyı ve kararı belirle:</b> Kullanıcı şehir operasyon yöneticisi; sabah 9\'da "dün ne oldu, bugün nereye müdahale edeyim?" sorusunu soruyor. Pano bu iki soruya cevap vermeli.</p>'
+  '<p><b>2) Üst satır, KPI kartları:</b> Teslim edilen sipariş, zamanında teslim oranı, P90 teslim süresi, iptal oranı, müşteri puanı. Her kartta dünkü değer, geçen haftanın aynı gününe göre değişim ve hedefe göre renk.</p>'
+  '<p><b>3) Orta bölüm, trend:</b> Son 28 günün saatlik ya da günlük çizgi grafiği; yoğun saatler (öğle, akşam) belirgin.</p>'
+  '<p><b>4) Alt bölüm, kırılım:</b> Bölge ve restoran bazında sıralı tablo: "en çok gecikme yaşanan 10 restoran". Tıklayınca sipariş detayına inilir (drill-down).</p>'
+  '<p><b>5) Filtreler:</b> şehir, tarih, kanal. Varsayılan görünüm dün olmalı.</p>'
+  '<p><b>Teknik notlar:</b> Veri gece toplu işle hazırlanmış özet tablodan gelir (hızlı açılış). Her metriğin tanımı panoda bilgi simgesinde yazılı olur. Veri tazeliği ("son güncelleme 06:10") görünür. Pano kullanılmaya başlandıktan sonra hangi grafiğe hiç bakılmadığı izlenir ve gereksizler çıkarılır.</p>',
+  ['Gerçek zamanlı pano gerçekten gerekli mi? Nasıl karar verirsin?', 'Panoya kaç metrik fazla gelir?', 'Uyarı (alert) ile pano arasındaki işbölümü nedir?'],
+  ['Kullanıcıyı sormadan 30 grafiklik bir pano çizmek', 'Metrik tanımlarını ve veri tazeliğini panoda göstermemek'],
+  'Tasarım sorusunda önce "kim kullanacak, hangi kararı verecek?" diye başla; görsel düzen bundan sonra gelir.'),
+
+I(['analist', 'bilimci'], 'ileri', 'kavram', 'Simpson paradoksu',
+  'Simpson paradoksu nedir? Bir iş örneğiyle açıkla ve analizde nasıl korunursun.',
+  '<p><b>Tanım:</b> Bir eğilim alt grupların her birinde aynı yöndeyken, gruplar birleştirildiğinde tersine dönebilir. Nedeni, grupların büyüklüklerinin (karışımın) karşılaştırılan seçenekler arasında farklı olmasıdır.</p>'
+  '<p><b>Örnek (Kanat Havayolları):</b> İki havalimanında zamanında kalkış oranları: Ankara\'da A ekibi %92, B ekibi %90; İstanbul\'da A ekibi %75, B ekibi %72. A <b>her iki</b> havalimanında daha iyi. Ama A ekibi uçuşlarının çoğunu yoğun İstanbul\'da, B ise çoğunu Ankara\'da yapıyorsa, toplamda B\'nin oranı daha yüksek görünür. Yönetim yanlışlıkla "B ekibi daha başarılı" sonucuna varabilir.</p>'
+  '<p><b>Neden önemli:</b> Toplam rakam, karıştırıcı değişkenin (burada havalimanı zorluğu) etkisini taşır. Hangi görünümün doğru olduğu nedensel soruya bağlıdır: ekip performansını soruyorsan havalimanını sabit tutmalısın.</p>'
+  '<p><b>Korunma:</b> Oran karşılaştırırken ana segmentlerde kırılım yap; karışımın (mix) gruplar arasında farklı olup olmadığını kontrol et; gerekiyorsa ağırlıklı/standartlaştırılmış oran ya da tabakalı analiz kullan. Deneylerde rastgele atama bu sorunu büyük ölçüde ortadan kaldırır.</p>',
+  ['Karışım etkisini sayısal olarak nasıl ayrıştırırsın?', 'A/B testinde Simpson paradoksu ortaya çıkabilir mi?'],
+  ['Paradoksu "veri hatası" sanmak', 'Hangi görünümün doğru olduğunun soruya bağlı olduğunu söylememek'],
+  'Kendi uydurduğun küçük bir sayısal örneği ezberde tut; tahtaya 2x2 tabloyla yazmak çok etkileyicidir.'),
+
+I(['analist'], 'ileri', 'vaka', 'Vaka: karışım etkisi',
+  'Anadolu Market\'te bu çeyrek sitenin dönüşüm oranı %3\'ten %3,6\'ya çıktı ama toplam ciro düştü. Yönetim çelişki görüyor. Nasıl açıklarsın?',
+  '<p><b>1) Ciroyu formülle ayrıştır:</b> Ciro = oturum × dönüşüm × ortalama sepet. Dönüşüm %20 artmış; ciro düştüyse ya oturum sayısı ya da ortalama sepet daha fazla düşmüş olmalı.</p>'
+  '<p><b>2) Payda etkisini kontrol et:</b> Pazarlama bütçesi kısıldıysa düşük niyetli reklam trafiği kesilmiş olabilir. Geriye satın almaya zaten niyetli kullanıcılar kalır: oturum azalır, dönüşüm oranı <b>mekanik olarak</b> yükselir ama sipariş adedi düşer. Bu, oranın paydası değiştiği için oluşan bir karışım (mix) etkisidir.</p>'
+  '<p><b>3) Sepet tarafı:</b> Kategori karışımı değişmiş olabilir: elektronik kampanyası bitmiş, siparişler düşük tutarlı market ürünlerine kaymış olabilir. Kategori bazında sipariş payı ve ortalama sepet karşılaştırılır.</p>'
+  '<p><b>4) Sayısal ayrıştırma:</b> Her bileşenin etkisini sırayla sabit tutarak hesapla: "Ciro düşüşünün 1,8 milyon TL\'si trafik kaybından, 0,6 milyonu sepet küçülmesinden; dönüşüm artışı 1,1 milyon TL geri kazandırdı."</p>'
+  '<p><b>5) Mesaj:</b> "Dönüşüm iyileşmesi gerçek ama kısmen trafik kalitesinin değişmesinden kaynaklanıyor. Tek başına başarı göstergesi olarak kullanmayalım; sipariş adedi ve ciro ile birlikte izleyelim."</p>',
+  ['Kanal bazında dönüşümü sabit karışımla nasıl karşılaştırırsın?', 'Bu durumu panoda nasıl önceden yakalardın?'],
+  ['Oranı paydasından bağımsız yorumlamak', '"Veri yanlış olmalı" deyip ayrıştırma yapmamak'],
+  'Çelişkili görünen metrik vakalarında ilk refleksin "pay ve payda ayrı ayrı ne yaptı?" olsun.'),
+
+I(['analist', 'bilimci'], 'ileri', 'tasarim', 'Kohort analizi',
+  'Anadolu Market için aylık müşteri tutma (retention) kohort analizini tasarla. Veri hazırlığından sunuma kadar anlat.',
+  '<p><b>1) Tanımlar:</b> Kohort = müşterinin <b>ilk sipariş ayı</b>. Aktif = o ay en az bir sipariş vermiş olmak. Ay farkı = sipariş ayı − kohort ayı (0, 1, 2...). İptal edilen siparişler hariç tutulur.</p>'
+  '<p><b>2) Veri hazırlığı (pandas):</b> <code>orders</code> tablosundan ay sütunu üret: <code>df[\'ay\'] = df[\'tarih\'].dt.to_period(\'M\')</code>. Kohort: <code>df.groupby(\'musteri_id\')[\'ay\'].transform(\'min\')</code>. Ay farkı: iki Period farkının <code>.n</code> değeri. Sonra <code>groupby([\'kohort\', \'fark\'])[\'musteri_id\'].nunique()</code> ve <code>unstack</code> ile matris; her satırı 0. ay değerine bölerek tutma oranı elde et.</p>'
+  '<p><b>3) Görselleştirme:</b> Satırlar kohort, sütunlar ay farkı olan ısı haritası (heatmap) ve birkaç kohortun tutma eğrisi. Köşegen boyunca renk değişimi takvim etkisini (ör. bayram kampanyası) gösterir.</p>'
+  '<p><b>4) Tuzaklar:</b> Son kohortlar henüz olgunlaşmamıştır (sağ sansürleme); boş hücreler sıfır değil "henüz gözlenmedi"dir. Küçük kohortlarda oranlar oynaktır; kohort büyüklüğünü yanında göster.</p>'
+  '<p><b>5) Sunum:</b> "Mart kohortundan itibaren 3. ay tutma %22\'den %28\'e çıktı; sadakat programının başlangıcıyla örtüşüyor" gibi tek cümlelik bulgu ve önerilen sonraki test.</p>',
+  ['Gelir bazlı kohort (net gelir tutma) nasıl hesaplanır?', 'Haftalık mı aylık mı kohort seçersin?', 'SQL ile aynı analizi nasıl kurarsın?'],
+  ['Kohortu kayıt tarihi yerine her siparişin ayı olarak tanımlamak', 'Olgunlaşmamış kohortları diğerleriyle aynı şekilde karşılaştırmak'],
+  'Tasarımda önce tanımları söyle; kohort sorularında puanın çoğu doğru tanımdan gelir.'),
+]

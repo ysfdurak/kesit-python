@@ -1,0 +1,314 @@
+T = [
+dict(id='b-311', topic='numpy', diff=2, kind='predict', needs=['numpy'],
+  title='Kampanya tablosu: broadcasting şekli',
+  q='<p>Anadolu Market 3 ürünün fiyatını 4 farklı kampanya oranıyla tek hamlede hesaplıyor. Bu kod ne yazdırır?</p>',
+  code=r'''
+import numpy as np
+
+fiyat = np.array([[100], [200], [300]])     # (3, 1)
+indirim = np.array([0.0, 0.1, 0.2, 0.5])     # (4,)
+tablo = fiyat * (1 - indirim)
+print(tablo.shape)
+print(tablo[2, 3])
+''',
+  o=['(3, 4)\n150.0', '(4, 3)\n150.0', '(3,)\n150.0', 'ValueError hatası verir'], a=0,
+  hints=['Broadcasting kuralı: şekiller sağdan hizalanır; 1 olan boyut diğerine genişler.', '(3, 1) ile (4,) → (3, 4). Satır 2 = 300 TL, sütun 3 = %50 indirim.'],
+  why='Şekiller sağdan karşılaştırılır: (3, 1) ve (1, 4) → her iki boyutta da biri 1 olduğu için sonuç (3, 4) olur; ValueError ancak iki boyut da 1 değilken ve eşit değilken çıkar. tablo[2, 3] = 300 × (1 − 0.5) = 150.0. Bu yöntem iç içe döngünün O(n·m) işini C hızında yapar; alternatif np.outer(fiyat.ravel(), 1 - indirim) aynı sonucu verir.',
+  tags=['broadcasting', 'shape'], min=3),
+
+dict(id='b-312', topic='numpy', diff=2, kind='rehberli', needs=['numpy'],
+  title='Mağaza bazında ürün payları',
+  q='<p>Satırları mağaza, sütunları ürün olan bir satış matrisi var. <code>urun_paylari(satis)</code> fonksiyonunu yaz: her satırı kendi toplamına bölerek <b>yüzde</b> pay matrisi döndürsün (1 ondalık). Hiç satış yapmamış mağazanın (toplamı 0) satırı <code>nan</code> değil <b>0</b> olmalı.</p>',
+  guide=['Girdiyi float numpy dizisine çevir.', 'Satır toplamlarını <code>axis=1, keepdims=True</code> ile hesapla; şekil (n, 1) olur ve bölmede yayılır.', '<code>np.divide(..., out=np.zeros_like(m), where=toplam != 0)</code> ile sıfıra bölmeyi atla.', '100 ile çarp, <code>np.round(..., 1)</code> ile yuvarla ve döndür.'],
+  example=r'''
+import numpy as np
+# Sütun bazında normalize: her sütunu kendi en büyük değerine böl
+m = np.array([[2.0, 0.0], [4.0, 0.0]])
+en_buyuk = m.max(axis=0, keepdims=True)          # şekil (1, 2)
+oran = np.divide(m, en_buyuk, out=np.zeros_like(m), where=en_buyuk != 0)
+print(oran)
+''',
+  start=r'''
+import numpy as np
+
+def urun_paylari(satis):
+    m = np.asarray(satis, dtype=float)
+    # TODO 1: satır toplamlarını axis=1 ve keepdims=True ile hesapla
+    # TODO 2: toplamı 0 olan satırlarda bölme yapmadan 0 bırak (np.divide + where)
+    # TODO 3: yüzdeye çevir, 1 ondalığa yuvarla, döndür
+    return None
+''',
+  sol=r'''
+import numpy as np
+
+def urun_paylari(satis):
+    m = np.asarray(satis, dtype=float)
+    toplam = m.sum(axis=1, keepdims=True)
+    pay = np.divide(m, toplam, out=np.zeros_like(m), where=toplam != 0)
+    return np.round(pay * 100, 1)
+''',
+  tests=r'''
+r = urun_paylari([[10, 30, 60], [0, 0, 0], [5, 5, 10]])
+assert r is not None, "Fonksiyon bir dizi döndürmeli"
+assert r.shape == (3, 3), "Çıktı girdiyle aynı şekilde (3, 3) olmalı"
+assert not np.isnan(r).any(), "Toplamı 0 olan satır nan değil 0 olmalı: where=toplam != 0 kullan"
+assert np.allclose(r, [[10, 30, 60], [0, 0, 0], [25, 25, 50]]), "Her satır kendi toplamına bölünüp yüzdeye çevrilmeli"
+r2 = urun_paylari([[1, 2]])
+assert np.allclose(r2, [[33.3, 66.7]]), "1/3 → 33.3, 2/3 → 66.7 (1 ondalık)"
+''',
+  hints=['Satır toplamı için <code>sum(axis=1, keepdims=True)</code>; keepdims şekli (n, 1) yapar, böylece bölme her satıra yayılır.', '<code>np.divide(a, b, out=np.zeros_like(a), where=b != 0)</code> sıfır paydaları atlar, oradaki değer <code>out</code>\'tan (0) gelir.', 'Son adım: <code>return np.round(pay * 100, 1)</code>'],
+  why='keepdims=True olmadan toplam (n,) şekilli olur ve sütunlara yanlış yayılır (ya da hata verir). np.divide + where sıfıra bölme uyarısı ve nan üretmeden güvenli böler. Karmaşıklık O(n·m), tek geçiş. Alternatif: pandas’ta df.div(df.sum(axis=1), axis=0).fillna(0).',
+  tags=['axis', 'keepdims', 'np.divide'], min=6),
+
+dict(id='b-313', topic='numpy', diff=2, kind='yaz', needs=['numpy'],
+  title='Günlük satışta hareketli ortalama',
+  q='<p><code>hareketli_ortalama(satis, k)</code> fonksiyonunu yaz: günlük satış listesinin <code>k</code> günlük hareketli ortalamasını numpy dizisi olarak döndürsün. Yalnızca tam pencereler hesaplanır, yani sonuç uzunluğu <code>n - k + 1</code> olur. <code>k &lt; 1</code> ya da <code>k &gt; n</code> ise <code>ValueError</code> fırlat. Python döngüsü kullanma: <code>np.cumsum</code> ya da <code>np.convolve</code> ile çöz.</p>',
+  start=r'''
+import numpy as np
+
+def hareketli_ortalama(satis, k):
+    pass
+''',
+  sol=r'''
+import numpy as np
+
+def hareketli_ortalama(satis, k):
+    a = np.asarray(satis, dtype=float)
+    if k < 1 or k > len(a):
+        raise ValueError("k 1 ile veri uzunluğu arasında olmalı")
+    c = np.cumsum(np.insert(a, 0, 0.0))
+    return (c[k:] - c[:-k]) / k
+''',
+  tests=r'''
+r = hareketli_ortalama([10, 20, 30, 40, 50], 3)
+assert isinstance(r, np.ndarray), "numpy dizisi döndürmeli"
+assert len(r) == 3, "5 gün, k=3 → 3 tam pencere"
+assert np.allclose(r, [20, 30, 40]), "Pencereler: (10,20,30), (20,30,40), (30,40,50)"
+assert np.allclose(hareketli_ortalama([4, 8], 1), [4, 8]), "k=1 seriyi aynen döndürür"
+assert np.allclose(hareketli_ortalama([1, 2, 3, 4], 4), [2.5]), "k=n tek pencere verir"
+for kotu in (0, 5):
+    try:
+        hareketli_ortalama([1, 2, 3, 4], kotu)
+        assert False, f"k={kotu} için ValueError bekleniyordu"
+    except ValueError:
+        pass
+''',
+  hints=['Kümülatif toplamın başına 0 eklersen, i..i+k aralığının toplamı c[i+k] - c[i] olur.', '<code>c = np.cumsum(np.insert(a, 0, 0))</code>; sonuç <code>(c[k:] - c[:-k]) / k</code>', 'Alternatif: <code>np.convolve(a, np.ones(k) / k, mode="valid")</code>'],
+  why='Ön-toplam (prefix sum) hilesiyle her pencere toplamı iki elemanın farkıdır: O(n) zaman, k’dan bağımsız. Naif döngü O(n·k)’dir. np.convolve(mode="valid") ya da numpy.lib.stride_tricks.sliding_window_view(a, k).mean(axis=1) aynı sonucu verir; pandas’ta s.rolling(k).mean() kısa yoldur.',
+  tags=['cumsum', 'pencere', 'vektörleştirme'], min=7),
+
+dict(id='b-314', topic='numpy', diff=2, kind='bug', needs=['numpy'],
+  title='Kopya sanılan görünüm (view)',
+  q='<p>Kodda bir hata var, bul ve düzelt. <code>kampanya_uygula(fiyatlar, bas, bit, oran)</code> fiyat dizisinin <code>[bas:bit)</code> aralığına indirim uygulanmış <b>yeni</b> bir dizi döndürmeli; orijinal fiyat listesi değişmemeli. Ama raporlarda ana fiyat listesi de indirimli görünüyor.</p>',
+  start=r'''
+import numpy as np
+
+def kampanya_uygula(fiyatlar, bas, bit, oran):
+    yeni = fiyatlar[:]          # kopya alındığı sanılıyor
+    yeni[bas:bit] = yeni[bas:bit] * (1 - oran)
+    return yeni
+''',
+  sol=r'''
+import numpy as np
+
+def kampanya_uygula(fiyatlar, bas, bit, oran):
+    yeni = fiyatlar.copy()
+    yeni[bas:bit] = yeni[bas:bit] * (1 - oran)
+    return yeni
+''',
+  tests=r'''
+f = np.array([100.0, 200.0, 300.0, 400.0])
+r = kampanya_uygula(f, 1, 3, 0.25)
+assert np.allclose(r, [100, 150, 225, 400]), "Yalnız 1 ve 2. indeksler %25 indirimli olmalı"
+assert np.allclose(f, [100, 200, 300, 400]), "Orijinal dizi değişmemeli: numpy dilimi (a[:]) kopya değil görünümdür, .copy() kullan"
+assert not np.shares_memory(r, f), "Dönen dizi orijinalle belleği paylaşmamalı"
+''',
+  hints=['Python listesinde <code>a[:]</code> kopyadır; numpy\'da ise aynı belleğe bakan bir <b>görünüm</b> (view) üretir.', '<code>np.shares_memory(a, b)</code> ile iki dizinin belleği paylaşıp paylaşmadığını görebilirsin.', '<code>yeni = fiyatlar.copy()</code>'],
+  why='numpy temel dilimleme veri kopyalamaz, aynı tampona bakan view döndürür; bu sayede büyük dizilerde dilimleme O(1)’dir ama yazma orijinali de değiştirir. .copy() O(n) bellek/zaman harcar ama güvenlidir. Boolean ya da liste ile indeksleme (fancy indexing) zaten kopya üretir; emin olmak için np.shares_memory veya arr.base kontrol edilebilir.',
+  tags=['view', 'copy', 'dilimleme'], min=4),
+
+dict(id='b-315', topic='numpy', diff=2, kind='tamamla', needs=['numpy'],
+  title='np.select ile müşteri segmenti',
+  q='<p>Anadolu Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
+  start=r'''
+import numpy as np
+
+def segment(harcama):
+    h = np.asarray(harcama)
+    kosullar = [h >= 5000, ___]
+    secenekler = ["altın", "gümüş"]
+    return np.select(kosullar, secenekler, default=___)
+''',
+  sol=r'''
+import numpy as np
+
+def segment(harcama):
+    h = np.asarray(harcama)
+    kosullar = [h >= 5000, h >= 1000]
+    secenekler = ["altın", "gümüş"]
+    return np.select(kosullar, secenekler, default="bronz")
+''',
+  tests=r'''
+r = segment([7200, 5000, 4999, 1000, 999, 0])
+assert r.tolist() == ["altın", "altın", "gümüş", "gümüş", "bronz", "bronz"], "Sınırlar dahil: 5000 altın, 1000 gümüş, 999 bronz"
+assert segment([300]).tolist() == ["bronz"], "Hiçbir koşul tutmazsa default değer (bronz) kullanılır"
+''',
+  hints=['np.select koşulları sırayla dener; ilk doğru olanın seçeneğini alır.', 'İkinci koşulda yalnızca <code>h &gt;= 1000</code> yeterli; 5000 üstü zaten ilk koşulda yakalanır.', '<code>default="bronz"</code>'],
+  why='np.select, iç içe np.where zincirinin okunur hâlidir: koşullar sırayla değerlendirilir, ilk eşleşen kazanır (if/elif mantığı). Karmaşıklık O(n·k), k koşul sayısı. Alternatif: sıralı eşikler için np.digitize(h, [1000, 5000]) indeks verir, sonra np.array(["bronz","gümüş","altın"])[idx]; pandas’ta pd.cut.',
+  tags=['np.select', 'koşullu atama'], min=3),
+
+dict(id='b-316', topic='numpy', diff=3, kind='yaz', needs=['numpy'],
+  title='Her müşteriye en yakın depo',
+  q='<p>Anadolu Market lojistik ekibi her müşteriyi en yakın depoya atamak istiyor. <code>en_yakin_depo(musteriler, depolar)</code> fonksiyonunu yaz: <code>musteriler</code> (n, 2), <code>depolar</code> (m, 2) koordinat listesi. Her müşteri için <b>en yakın deponun indeksini</b> ve <b>Öklid mesafesini</b> (2 ondalık) döndür: <code>(indeks_listesi, mesafe_listesi)</code>. Döngü kullanmadan broadcasting ile (n, m) mesafe matrisi kur.</p>',
+  start=r'''
+import numpy as np
+
+def en_yakin_depo(musteriler, depolar):
+    pass
+''',
+  sol=r'''
+import numpy as np
+
+def en_yakin_depo(musteriler, depolar):
+    M = np.asarray(musteriler, dtype=float)
+    D = np.asarray(depolar, dtype=float)
+    fark = M[:, None, :] - D[None, :, :]        # (n, m, 2)
+    mesafe = np.sqrt((fark ** 2).sum(axis=2))    # (n, m)
+    idx = mesafe.argmin(axis=1)
+    en_kisa = mesafe[np.arange(len(M)), idx]
+    return idx.tolist(), np.round(en_kisa, 2).tolist()
+''',
+  tests=r'''
+musteri = [[0, 0], [10, 10], [6, 1], [3, 4]]
+depo = [[1, 1], [9, 9], [6, 0]]
+idx, mes = en_yakin_depo(musteri, depo)
+assert idx == [0, 1, 2, 0], f"Beklenen indeksler [0, 1, 2, 0], gelen {idx}"
+assert np.allclose(mes, [1.41, 1.41, 1.0, 3.61]), f"Mesafeler 2 ondalık: [1.41, 1.41, 1.0, 3.61], gelen {mes}"
+idx2, _ = en_yakin_depo([[5, 5]], [[0, 0]])
+assert idx2 == [0], "Tek depo varsa herkes 0. depoya gider"
+assert "for " not in __source__, "Döngü kullanma: M[:, None, :] - D[None, :, :] ile (n, m, 2) fark tensörü kur"
+''',
+  hints=['Müşterilere yeni eksen ekle: <code>M[:, None, :]</code> (n,1,2); depolara <code>D[None, :, :]</code> (1,m,2). Fark (n,m,2) olur.', 'Kareleri son eksende topla, karekök al → (n, m) mesafe matrisi; <code>argmin(axis=1)</code> her satırın en küçüğünün yeri.', 'Seçilen mesafeler: <code>mesafe[np.arange(n), idx]</code>'],
+  why='Broadcasting ile tüm çiftlerin mesafesi tek ifadede hesaplanır: zaman O(n·m), bellek O(n·m). Çok büyük n·m için bellek patlar; o zaman parçalara bölerek (chunk) ya da scipy.spatial.cKDTree ile O((n+m) log m) sorgulama yapılır. scipy.spatial.distance.cdist de aynı matrisi hazır verir.',
+  tags=['broadcasting', 'argmin', 'mesafe matrisi'], min=10),
+
+dict(id='b-317', topic='pandas', diff=2, kind='predict', needs=['pandas'],
+  title='agg mı transform mu?',
+  q='<p>Şehir toplamını iki farklı yolla hesaplayan bu kod ne yazdırır?</p>',
+  code=r'''
+import pandas as pd
+
+df = pd.DataFrame({"sehir": ["Ankara", "İzmir", "Ankara", "Bursa", "İzmir"],
+                   "tutar": [100, 50, 300, 80, 150]})
+a = df.groupby("sehir")["tutar"].sum()
+b = df.groupby("sehir")["tutar"].transform("sum")
+print(len(a), len(b))
+print(b.tolist())
+''',
+  o=['3 5\n[400, 200, 400, 80, 200]', '3 3\n[400, 80, 200]', '5 5\n[400, 200, 400, 80, 200]', '3 5\n[100, 50, 300, 80, 150]'], a=0,
+  hints=['sum() grup başına bir satır döndürür.', 'transform sonucu orijinal satırlara geri yayar; uzunluk df ile aynıdır.'],
+  why='groupby().sum() grup sayısı kadar (3) satır üretir. transform("sum") aynı toplamı her satıra, kendi grubunun değeri olarak geri yazar; sonuç 5 uzunluklu ve df ile hizalıdır. Bu, "siparişin şehir cirosundaki payı" gibi satır bazlı oranlar için ideal: df["pay"] = df.tutar / b. Alternatif: agg sonucunu merge ile geri birleştirmek, ama transform tek adımda ve indeks hizalı.',
+  tags=['groupby', 'transform', 'agg'], min=3),
+
+dict(id='b-318', topic='pandas', diff=2, kind='order', needs=['pandas'],
+  title='Filtrele, grupla, sırala',
+  q='<p>500 TL altındaki küçük siparişleri dışlayıp şehir bazında sipariş sayısı ve ciroyu, ciroya göre azalan sırada yazdıran programın satırlarını sırala.</p>',
+  lines=[
+    'import pandas as pd',
+    'df = pd.DataFrame({"sehir": ["Ankara", "İzmir", "Ankara", "Bursa", "Bursa", "İzmir"], "tutar": [1200, 450, 600, 2000, 900, 3000]})',
+    'df = df[df["tutar"] >= 500]',
+    'ozet = df.groupby("sehir")["tutar"].agg(["count", "sum"])',
+    'ozet = ozet.sort_values("sum", ascending=False)',
+    'for sehir, satir in ozet.iterrows():',
+    '    print(sehir, satir["count"], satir["sum"])',
+  ],
+  expect='İzmir 1 3000\nBursa 2 2900\nAnkara 2 1800\n',
+  hints=['Filtre ham veri üzerinde, gruplamadan önce uygulanır (tutar sütunu özetten sonra yoktur).', 'Sıralama ancak "sum" sütunu oluştuktan sonra yapılabilir.'],
+  why='Satır filtresi (WHERE) her zaman toplamadan önce gelir; özet tablosunda tutar sütunu artık yoktur. agg(["count", "sum"]) tek geçişte iki istatistik çıkarır; sort_values ile ciroya göre sıralanır. SQL karşılığı: SELECT sehir, COUNT(*), SUM(tutar) FROM df WHERE tutar >= 500 GROUP BY sehir ORDER BY 3 DESC.',
+  tags=['groupby', 'agg', 'filtre'], min=4),
+
+dict(id='b-319', topic='pandas', diff=2, kind='rehberli', needs=['pandas'],
+  title='Zincirleme yöntemle kategori cirosu',
+  q='<p><code>kategori_net(df)</code> fonksiyonunu tek bir yöntem zinciriyle (method chaining) yaz. <code>df</code> sütunları: <code>kategori</code>, <code>adet</code>, <code>birim_fiyat</code>, <code>iade</code> (bool). İade edilen satırları çıkar, <code>ciro = adet * birim_fiyat</code> sütunu ekle, kategori bazında ciroyu topla ve <b>büyükten küçüğe</b> sıralı bir <code>Series</code> döndür.</p>',
+  guide=['İade olmayan satırları seç: <code>df[~df["iade"]]</code> ya da <code>.query("not iade")</code>.', '<code>.assign(ciro=lambda d: d["adet"] * d["birim_fiyat"])</code> ile yeni sütun ekle.', '<code>.groupby("kategori")["ciro"].sum()</code> ile topla.', '<code>.sort_values(ascending=False)</code> ile sırala ve döndür.'],
+  example=r'''
+import pandas as pd
+personel = pd.DataFrame({"birim": ["İK", "BT", "BT"], "maas": [40, 55, 60], "aktif": [True, True, False]})
+sonuc = (
+    personel[personel["aktif"]]
+    .assign(yillik=lambda d: d["maas"] * 12)
+    .groupby("birim")["yillik"].sum()
+)
+print(sonuc)
+''',
+  start=r'''
+import pandas as pd
+
+def kategori_net(df):
+    return (
+        df
+        # TODO 1: iade edilen satırları çıkar
+        # TODO 2: assign ile ciro sütunu ekle
+        # TODO 3: kategoriye göre ciroyu topla
+        # TODO 4: büyükten küçüğe sırala
+    )
+''',
+  sol=r'''
+import pandas as pd
+
+def kategori_net(df):
+    return (
+        df[~df["iade"]]
+        .assign(ciro=lambda d: d["adet"] * d["birim_fiyat"])
+        .groupby("kategori")["ciro"].sum()
+        .sort_values(ascending=False)
+    )
+''',
+  tests=r'''
+df = pd.DataFrame({
+    "kategori": ["Elektronik", "Gıda", "Elektronik", "Giyim", "Gıda"],
+    "adet": [2, 10, 1, 3, 5],
+    "birim_fiyat": [1500.0, 20.0, 9000.0, 300.0, 40.0],
+    "iade": [False, False, True, False, False],
+})
+r = kategori_net(df)
+assert isinstance(r, pd.Series), "Series döndürmeli (groupby(...)['ciro'].sum())"
+assert r.to_dict() == {"Elektronik": 3000.0, "Giyim": 900.0, "Gıda": 400.0}, f"İade satırı (9000 TL) dışlanmalı; gelen {r.to_dict()}"
+assert list(r.index) == ["Elektronik", "Giyim", "Gıda"], "Ciroya göre azalan sırada olmalı"
+assert "iade" in df.columns and "ciro" not in df.columns, "Zincir orijinal df'yi değiştirmemeli (assign yeni nesne döndürür)"
+''',
+  hints=['Boolean sütunu tersine çevirmek için <code>~</code> kullan.', 'assign içinde lambda, zincirin o anki ara DataFrame\'ini alır.', 'Eksik son halka: <code>.sort_values(ascending=False)</code>'],
+  why='Yöntem zinciri ara değişkenleri ortadan kaldırır, adımlar yukarıdan aşağı bir veri hattı gibi okunur ve assign orijinal df’yi değiştirmez (yan etkisiz). Karmaşıklık: filtre O(n), groupby O(n), sıralama O(k log k). Alternatif: ara değişkenlerle adım adım yazmak; hata ayıklarken zincire .pipe(lambda d: print(d.shape) or d) eklenebilir.',
+  tags=['method chaining', 'assign', 'groupby'], min=6),
+
+dict(id='b-320', topic='pandas', diff=2, kind='yaz', needs=['pandas'],
+  title='Şehir × kanal sipariş payı',
+  q='<p><code>kanal_payi(df)</code> fonksiyonunu yaz: <code>df</code> sütunları <code>sehir</code> ve <code>kanal</code> (web, mobil, magaza). Satırları şehir, sütunları kanal olan ve her hücrede o şehrin siparişlerinin <b>yüzde kaçının</b> o kanaldan geldiğini (1 ondalık) gösteren bir DataFrame döndür. Bir şehirde hiç olmayan kanal 0 olmalı.</p>',
+  start=r'''
+import pandas as pd
+
+def kanal_payi(df):
+    pass
+''',
+  sol=r'''
+import pandas as pd
+
+def kanal_payi(df):
+    return (pd.crosstab(df["sehir"], df["kanal"], normalize="index") * 100).round(1)
+''',
+  tests=r'''
+df = pd.DataFrame({
+    "sehir": ["Ankara", "Ankara", "Ankara", "İzmir", "İzmir", "Bursa"],
+    "kanal": ["mobil", "web", "mobil", "magaza", "web", "web"],
+})
+r = kanal_payi(df)
+assert isinstance(r, pd.DataFrame), "DataFrame döndürmeli"
+assert abs(r.loc["Ankara", "mobil"] - 66.7) < 1e-9, "Ankara'nın 3 siparişinin 2'si mobil → 66.7"
+assert abs(r.loc["İzmir", "magaza"] - 50.0) < 1e-9, "İzmir: 1 mağaza, 1 web → 50.0"
+assert r.loc["Bursa", "mobil"] == 0, "Bursa'da mobil sipariş yok → 0"
+assert ((r.sum(axis=1) - 100).abs() < 0.2).all(), "Her satırın toplamı ~100 olmalı (satır bazında normalize)"
+''',
+  hints=['Çapraz frekans tablosu için <code>pd.crosstab(satir, sutun)</code>.', '<code>normalize="index"</code> her satırı kendi toplamına böler.', '100 ile çarp ve <code>.round(1)</code>.'],
+  why='pd.crosstab sayım tablosunu kurar ve normalize="index" satır yüzdelerini tek adımda verir; olmayan kombinasyonlar otomatik 0 olur. Karmaşıklık O(n). Alternatifler: df.groupby(["sehir","kanal"]).size().unstack(fill_value=0) sonra .div(.sum(axis=1), axis=0); ya da pivot_table(aggfunc="size"). normalize="columns" kanal içindeki şehir dağılımını verir.',
+  tags=['crosstab', 'normalize', 'oran'], min=5),
+]

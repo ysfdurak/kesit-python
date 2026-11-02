@@ -1,0 +1,26 @@
+exec(open('../h.py').read())
+o=veri.oku('anadolu_market','orders'); oi=veri.oku('anadolu_market','order_items'); p=veri.oku('anadolu_market','products'); c=veri.oku('anadolu_market','customers')
+d=o.merge(oi,on='order_id'); print(len(o),len(d),d.order_id.nunique())
+print(oi.groupby('order_id').size().max(), oi.groupby('order_id').size().value_counts().to_dict())
+oi['ciro']=oi.quantity*oi.unit_price*(1-oi.discount)
+x=oi.merge(o,on='order_id'); x=x[x.status=='delivered']
+s=x.groupby('order_id').agg(kalem=('item_id','size'),adet=('quantity','sum'),tutar=('ciro','sum'))
+print(round(s.kalem.mean(),2), round(s.adet.mean(),2), round(s.tutar.mean(),2), len(s))
+x2=x.merge(p,on='product_id')
+pv=x2.pivot_table(index='category',columns='channel',values='ciro',aggfunc='sum',fill_value=0).round(0); print(pv)
+t=x2.groupby('name').ciro.sum().sort_values(ascending=False); tot=t.sum(); print((t.head(3)/tot*100).round(1))
+# returned share by category
+y=oi.merge(o,on='order_id').merge(p,on='product_id')
+r=y.groupby('category').apply(lambda g: (g.status=='returned').mean()) ; print(r.round(3))
+r2=(y.status=='returned').groupby(y.category).mean().round(3).sort_values(ascending=False); print(r2.to_dict())
+# segment AOV
+z=x.merge(c[['customer_id','segment']],on='customer_id')
+aov=z.groupby(['segment','order_id']).ciro.sum().groupby('segment').mean().round(2); print(aov.to_dict())
+bad=z.groupby('segment').ciro.mean().round(2); print(bad.to_dict())
+nord=z.groupby('segment').order_id.nunique().to_dict(); print(nord, z.groupby('segment').size().to_dict())
+# leader per category
+x2['pay']=x2.ciro/x2.groupby('category').ciro.transform('sum')
+up=x2.groupby(['category','name']).pay.sum()
+lead=up.groupby(level=0).idxmax(); print({k:(v[1], round(up[v]*100,1)) for k,v in lead.items()})
+print(oi.discount.value_counts())
+dd=oi.groupby('discount').agg(satir=('item_id','size'),ort_adet=('quantity','mean')).round(2); print(dd)

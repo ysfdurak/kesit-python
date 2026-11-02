@@ -1,0 +1,210 @@
+from d01 import I
+
+ITEMS = [
+I(['analist', 'genel'], 'temel', 'kavram', 'pandas: seçim',
+  '<code>loc</code> ile <code>iloc</code> arasındaki fark nedir? Koşullu filtrelemede ve değer atamada nelere dikkat edersin?',
+  '<p><b>loc etiketle</b>, <b>iloc konumla</b> seçer. <code>df.loc[5, \'tutar\']</code> indeks etiketi 5 olan satırı getirir; <code>df.iloc[5, 2]</code> altıncı satırın üçüncü sütununu. Filtreleme ya da sıralamadan sonra etiketler artık 0, 1, 2 diye gitmez; bu yüzden ikisini karıştırmak sessiz hatalara yol açar.</p>'
+  '<p><b>Dilim farkı:</b> <code>loc[\'a\':\'c\']</code> bitiş etiketini <b>dahil eder</b>; <code>iloc[0:3]</code> Python dilimleri gibi bitişi dahil etmez.</p>'
+  '<p><b>Koşullu filtre:</b> <code>df.loc[(df[\'sehir\'] == \'İzmir\') &amp; (df[\'tutar\'] &gt; 100)]</code>. Koşullar parantez içinde olmalı ve <code>and</code>/<code>or</code> yerine <code>&amp;</code>/<code>|</code> kullanılmalı; aksi hâlde "truth value of a Series is ambiguous" hatası alırsın.</p>'
+  '<p><b>Atama:</b> Değeri her zaman tek adımda ata: <code>df.loc[df[\'tutar\'] &lt; 0, \'tutar\'] = 0</code>. Zincirleme atama (<code>df[df.x &gt; 0][\'y\'] = 1</code>) bir kopyaya yazar ve asıl tabloyu değiştirmez; eski sürümler <code>SettingWithCopyWarning</code> uyarısı verir, pandas 3\'te varsayılan olan Copy-on-Write ile ise bu atama hiçbir zaman asıl tabloyu değiştirmez. Filtrelenmiş bir alt tabloyla çalışacaksan <code>.copy()</code> ile açıkça kopya al.</p>',
+  ['at ve iat ne zaman tercih edilir?', 'query metodu ne avantaj sağlar?', 'isin ile çoklu değer filtrelemeyi göster.'],
+  ['loc ve iloc\'u eş anlamlı kullanmak', 'Koşulları and/or ile birleştirmeye çalışmak'],
+  'Kısa bir örnekle göster: filtreden sonra indeks 0\'dan başlamaz, bu yüzden iloc[0] ile loc[0] farklı satır getirebilir.'),
+
+I(['analist'], 'temel', 'kavram', 'Betimsel istatistik',
+  'Ortalama sepet tutarını raporlarken ortalama mı medyan mı kullanırsın? Neden?',
+  '<p><b>Dağılıma bağlı.</b> Ortalama tüm değerleri hesaba katar, bu yüzden <b>aykırı değerlere duyarlıdır</b>. Medyan ortadaki değerdir; uç değerlerden etkilenmez.</p>'
+  '<p><b>Örnek:</b> Anadolu Market\'te dokuz müşteri 200 TL\'lik, bir kurumsal müşteri 20.000 TL\'lik sipariş verdi. Ortalama 2.180 TL, medyan 200 TL. "Tipik müşteri ne kadar harcıyor?" sorusunu medyan cevaplar; ortalama yanıltıcı bir tablo çizer.</p>'
+  '<p><b>Ama ortalama da gereklidir:</b> Toplam ciro planlaması yapılıyorsa (ortalama × sipariş sayısı = ciro) ortalamaya ihtiyaç vardır. Medyanlar toplanamaz.</p>'
+  '<p><b>Pratik öneri:</b> Sepet tutarı, gelir, teslim süresi gibi sağa çarpık (uzun kuyruklu) metriklerde ikisini birlikte ver; fark büyükse dağılımı histogramla göster. Ayrıca yüzdelikler (P25, P75, P90) dağılımı tek sayıdan çok daha iyi anlatır. Uç değerlerin hata mı yoksa gerçek (ör. toptan alıcı) mi olduğunu ayrıca sorgula; gerçekse ayrı bir segment olarak raporlamak daha doğrudur.</p>',
+  ['Ortalama medyandan büyükse dağılım hakkında ne söylersin?', 'Kırpılmış ortalama (trimmed mean) nedir?', 'Aykırı değeri nasıl tanımlarsın?'],
+  ['"Medyan her zaman daha iyidir" demek', 'Dağılıma bakmadan tek bir istatistik önermek'],
+  'Sayısal bir örnek ver; görüşmeci sezgini rakamla gösterdiğinde ikna olur.'),
+
+I(['analist'], 'temel', 'kod-okuma', 'pandas: value_counts',
+  'Ödeme yöntemleri dağılımı hesaplanıyor. İki satırın çıktısı neden farklı?',
+  '<p>Serinin 6 elemanı var: 3 kart, 1 nakit, 1 havale ve 1 <b>eksik</b> değer.</p>'
+  '<ul><li><code>value_counts(normalize=True)</code> varsayılan olarak eksikleri <b>dışarıda bırakır</b>; payda 5 olur. Kart payı 3/5 = <b>0.6</b>.</li>'
+  '<li><code>dropna=False</code> eklenince eksikler de bir kategori olarak sayılır; payda 6 olur. Kart payı 3/6 = <b>0.5</b>.</li>'
+  '<li><code>isna().sum()</code> eksik sayısını verir: 1.</li></ul>'
+  '<p><b>Neden önemli:</b> "Siparişlerin %60\'ı kartla ödeniyor" ile "%50\'si" arasındaki fark, ödeme ortaklığı pazarlığında ciddi para demektir. Raporda paydanın ne olduğunu (eksikler dahil mi?) mutlaka belirt. Eksik oranı yüksekse önce neden eksik olduğunu araştır: belki kapıda ödemelerde ödeme yöntemi hiç kaydedilmiyordur, bu da dağılımı sistematik olarak bozar.</p>',
+  ['value_counts sonucunu yüzde ve adet olarak tek tabloda nasıl gösterirsin?', 'Sayısal bir sütunda bins parametresi ne işe yarar?'],
+  ['Eksiklerin otomatik olarak sayıldığını sanmak', 'Oranın paydasını belirtmeden yüzde raporlamak'],
+  'Eksik değer içeren her oran sorusunda "payda ne?" diye sesli sor; bu cümle seni hatadan korur.',
+  code='''
+import pandas as pd
+odeme = pd.Series(['kart', 'kart', 'nakit', None, 'kart', 'havale'])
+print(odeme.value_counts(normalize=True)['kart'])
+print(odeme.value_counts(normalize=True, dropna=False)['kart'])
+print(odeme.isna().sum())
+'''),
+
+I(['analist'], 'orta', 'kavram', 'Zaman serisi işlemleri',
+  'pandas\'ta günlük satış verisini haftalık ve aylık özetlere çevirirken hangi araçları kullanırsın ve nelere dikkat edersin?',
+  '<p><b>Hazırlık:</b> Tarih sütununu <code>pd.to_datetime</code> ile dönüştür (Türkçe biçimde <code>dayfirst=True</code> ya da açık <code>format=\'%d.%m.%Y\'</code>). Sonra ya indekse al ya da <code>resample(..., on=\'tarih\')</code> kullan.</p>'
+  '<p><b>Araçlar:</b> <code>resample(\'W-MON\')</code> haftalık, <code>resample(\'MS\')</code> ay başı etiketli aylık özet üretir; ardından <code>.sum()</code> ya da <code>.mean()</code>. Gruplu özet için <code>groupby([\'sehir\', pd.Grouper(key=\'tarih\', freq=\'MS\')])</code>. Kayan ortalama için <code>rolling(7).mean()</code>; mevsimselliği yumuşatır.</p>'
+  '<p><b>Dikkat edilecekler:</b></p><ul>'
+  '<li><b>Eksik günler:</b> Satış olmayan gün tabloda hiç yoksa günlük ortalama şişer; önce <code>asfreq(\'D\', fill_value=0)</code> ya da <code>reindex</code> ile takvimi tamamla.</li>'
+  '<li><b>Hafta tanımı:</b> Türkiye\'de hafta pazartesi başlar; varsayılan <code>\'W\'</code> pazar biter. İş birimiyle aynı tanımı kullan.</li>'
+  '<li><b>Yarım dönemler:</b> İçinde bulunulan ay eksiktir; grafikte son noktanın "düşüş" gibi görünmesini engelle.</li>'
+  '<li><b>Saat dilimi:</b> UTC kaydedilen zaman damgaları gece yarısına yakın siparişleri yanlış güne atar; <code>tz_convert(\'Europe/Istanbul\')</code>.</li></ul>',
+  ['Geçen yılın aynı dönemiyle karşılaştırmayı nasıl yaparsın?', 'Bayram gibi hareketli tatilleri nasıl ele alırsın?'],
+  ['Eksik günleri tamamlamadan ortalama almak', 'İçinde bulunulan yarım ayı tam ay gibi grafiğe koymak'],
+  'Saat dilimi ve hafta başlangıcı gibi "küçük" ayrıntılar kıdemli analisti gösterir; fırsat bulursan söyle.'),
+
+I(['analist'], 'orta', 'kod-okuma', 'Zaman serisi: eksik günler',
+  'Bir mağazanın günlük satış adetleri var ama satış olmayan günler tabloda yok. Kodun iki satırında hangi değerler basılır?',
+  '<p>Seride yalnız 3 gün var: 1, 2 ve 5 Mart; toplam 16 adet.</p>'
+  '<ul><li>İlk satır: <code>satis.mean()</code> = 16 / 3 = <b>5.33</b>. Bu, "satış olan günlerin ortalaması"dır.</li>'
+  '<li><code>asfreq(\'D\', fill_value=0)</code> indeksi 1–5 Mart arasındaki her güne genişletir ve yeni günleri 0 ile doldurur. Uzunluk <b>5</b>, ortalama 16 / 5 = <b>3.2</b>.</li></ul>'
+  '<p><b>Hangisi doğru?</b> Soruya bağlı. "Günlük ortalama satış" soruluyorsa 3.2 doğrudur; çünkü 3 ve 4 Mart\'ta gerçekten satış olmamıştır. Ama o günler mağaza <b>kapalıysa</b> sıfır yazmak yanlış olur; onları NaN bırakıp hariç tutmak gerekir. Yani 0 ile "veri yok" ayrımını iş bilgisiyle yap.</p>'
+  '<p>Bu fark tahmin modellerinde kritik hâle gelir: eksik günleri sıfır yapmadan kurulan bir kayan ortalama ya da gecikme (lag) özelliği yanlış satırları komşu sanır.</p>',
+  ['Birden fazla mağaza için aynı tamamlamayı nasıl yaparsın?', 'reindex ile asfreq farkı nedir?'],
+  ['Eksik günlerin otomatik sıfır sayıldığını düşünmek', 'Kapalı günleri de sıfır satış gibi doldurmak'],
+  'Sayıyı söyledikten sonra "hangisi doğru, iş bağlamına göre" ayrımını yap; tek doğru cevap yoktur ve bunu bilmen beklenir.',
+  code='''
+import pandas as pd
+satis = pd.Series([5, 3, 8], index=pd.to_datetime(['2024-03-01', '2024-03-02', '2024-03-05']))
+print(round(satis.mean(), 2))
+tam = satis.asfreq('D', fill_value=0)
+print(len(tam), round(tam.mean(), 2))
+'''),
+
+I(['analist', 'bilimci'], 'orta', 'kavram', 'Korelasyon ve nedensellik',
+  '"Mobil uygulamayı kullanan müşteriler %40 daha fazla harcıyor; herkesi uygulamaya geçirelim" önerisine nasıl yaklaşırsın?',
+  '<p><b>Korelasyon nedensellik değildir.</b> Gözlenen ilişkinin en az üç açıklaması olabilir:</p>'
+  '<ul><li><b>Seçilim / karıştırıcı değişken:</b> Zaten sadık ve çok harcayan müşteriler uygulamayı indirmeye daha yatkındır. Harcamayı artıran uygulama değil, müşteri tipidir.</li>'
+  '<li><b>Ters nedensellik:</b> Çok alışveriş yapanlar zamanla uygulamaya geçer; harcama uygulamayı doğurur.</li>'
+  '<li><b>Gerçek etki:</b> Bildirimler ve kolay ödeme gerçekten harcamayı artırıyor olabilir.</li></ul>'
+  '<p><b>Nasıl ayırt edersin?</b> En güçlü yol deney: rastgele seçilen bir müşteri grubuna uygulama indirme teşviki ver ve kontrol grubuyla karşılaştır. Deney yapılamıyorsa: uygulamayı yükleyen müşterilerin <b>yükleme öncesi ve sonrası</b> harcamasını benzer ama yüklememiş müşterilerle karşılaştır (fark içinde fark), ya da geçmiş harcama, şehir, üyelik süresi gibi değişkenlerle eşleştirme yap.</p>'
+  '<p><b>Cevabım:</b> "Fikir umut verici ama %40 rakamı büyük olasılıkla etkiyi abartıyor. Küçük bir teşvik deneyiyle gerçek etkiyi ölçelim, sonra yatırımı büyütelim."</p>',
+  ['Fark içinde fark yönteminin varsayımı nedir?', 'Eşleştirme (matching) yaparken hangi değişkenleri seçersin?'],
+  ['Korelasyonu doğrudan iş kararına çevirmek', '"Korelasyon nedensellik değildir" deyip alternatif yöntem önermemek'],
+  'Klişe cümleyi söylemek yetmez; somut bir karıştırıcı değişken ve somut bir test önerisi ver.'),
+
+I(['analist'], 'temel', 'vaka', 'Vaka: huni analizi',
+  'Pusula İK\'nın işe alım ekibi "Pozisyonları doldurmak eskisinden uzun sürüyor" diyor. Analizine nasıl başlarsın?',
+  '<p><b>1) Metriği tanımla:</b> "İşe alım süresi" = ilan açılış tarihi ile teklifin kabul tarihi arasındaki gün. İptal edilen ilanlar hariç; medyan ve P75 raporlanır, çünkü birkaç zor pozisyon ortalamayı çarpıtır.</p>'
+  '<p><b>2) Değişimi doğrula:</b> Son iki çeyreği karşılaştır. Pozisyon karışımı değişti mi? Kıdemli mühendis ilanları arttıysa süre doğal olarak uzar; pozisyon seviyesine göre ayrı bak.</p>'
+  '<p><b>3) Süreci huniye böl:</b> İlan → başvuru → ön eleme → mülakat → teklif → kabul. Her aşamada iki şeye bak: <b>dönüşüm oranı</b> ve <b>aşamada bekleme süresi</b>. Örneğin başvuru sayısı aynı kalmış ama "mülakat planlama" aşaması 4 günden 11 güne çıkmış olabilir.</p>'
+  '<p><b>4) Kök neden:</b> O aşamada ne değişti? Yeni bir onay adımı, mülakatçı sayısının azalması, takvim aracı geçişi?</p>'
+  '<p><b>5) Öneri ve izleme:</b> "Mülakat planlama süresi 7 gün uzadı; toplam artışın çoğunu açıklıyor. Mülakatçı havuzunu genişletip aşama süresini haftalık panoda izleyelim."</p>'
+  '<p>Veri olarak <code>ik_applications</code> ve aşama geçiş zaman damgaları yeterlidir; pandas\'ta aşama başına <code>groupby</code> ve tarih farkıyla kolayca hesaplanır.</p>',
+  ['Huninin hangi aşamasının en büyük etkiye sahip olduğunu nasıl sayısallaştırırsın?', 'Aday deneyimini ölçmek için hangi metriği eklerdin?'],
+  ['Pozisyon karışımını kontrol etmeden "süreç yavaşladı" demek', 'Yalnız toplam süreye bakıp aşamalara ayırmamak'],
+  'Süreç sorularında huniyi çiz; aşama, dönüşüm ve bekleme süresi üçlüsü neredeyse her vakada işe yarar.'),
+
+I(['analist', 'muhendis'], 'temel', 'kavram', 'Veri temizliği',
+  'Yeni bir veri seti eline geçtiğinde analize başlamadan önce hangi temizlik ve kontrol adımlarını uygularsın?',
+  '<p>Bir kontrol listesiyle ilerlerim:</p><ol>'
+  '<li><b>Yapı:</b> <code>df.shape</code>, <code>df.info()</code>, <code>df.head()</code>. Sütun adları tutarlı mı (boşluk, büyük-küçük harf)? <code>df.columns.str.strip().str.lower()</code>.</li>'
+  '<li><b>Tipler:</b> Sayı metin olarak mı gelmiş? Türkçe biçimli "1.250,50" değerleri doğrudan sayıya çevrilemez; önce nokta silinip virgül noktaya çevrilir. Tarihler <code>to_datetime</code> ile dönüştürülür.</li>'
+  '<li><b>Yinelenenler:</b> <code>df.duplicated().sum()</code> ve anahtar bazında <code>df[\'siparis_id\'].duplicated()</code>.</li>'
+  '<li><b>Eksikler:</b> <code>df.isna().mean()</code>; eksiklik deseni.</li>'
+  '<li><b>Geçerlilik:</b> Negatif tutar, gelecekteki tarih, 150 yaşında müşteri, "izmir / İzmir / IZMIR" gibi yazım farkları (<code>str.strip().str.title()</code>, Türkçe İ/ı dönüşümüne dikkat).</li>'
+  '<li><b>Tutarlılık:</b> Satır toplamları bilinen bir kontrol rakamıyla (finansın aylık ciro rakamı) eşleşiyor mu?</li></ol>'
+  '<p>Her adımda kaç satırın etkilendiğini not ederim. Temizlik kodunu bir fonksiyona koyarım ki bir sonraki ay aynı dosya geldiğinde tek satırla tekrar çalışsın.</p>',
+  ['Türkçe karakterli büyük-küçük harf dönüşümünde hangi sorun çıkar?', 'Temizlik adımlarını nasıl belgelersin?', 'Hangi aşamada iş birimine geri dönersin?'],
+  ['Kontrol etmeden doğrudan analize ya da grafiğe başlamak', 'Temizlik kararlarını belgelememek'],
+  'Liste yerine gerçek bir anekdot ekle: "Bir keresinde ciro iki katı çıktı, sebep yinelenen satırlardı."'),
+
+I(['analist', 'muhendis'], 'ileri', 'kod-okuma', 'Türkçe sayı biçimi',
+  'Excel\'den gelen Türkçe biçimli tutarlar sayıya çevriliyor. İki listenin çıktısı ne olur? İlk yöntem neden tehlikeli?',
+  '<p><b>yanlis:</b> <code>pd.to_numeric</code> İngilizce biçim bekler (nokta ondalık ayırıcı).</p>'
+  '<ul><li><code>\'1.250,50\'</code> virgül içerdiği için çevrilemez → <code>errors=\'coerce\'</code> sayesinde <b>nan</b>.</li>'
+  '<li><code>\'980\'</code> → 980.0.</li>'
+  '<li><code>\'2.000\'</code> → <b>2.0</b>! Türkçede iki bin olan değer sessizce ikiye dönüşür. Hata vermez, en tehlikelisi budur.</li>'
+  '<li><code>\'yok\'</code> → nan.</li></ul>'
+  '<p><b>dogru:</b> Önce binlik ayırıcı nokta silinir, sonra ondalık virgül noktaya çevrilir: 1250.5, 980.0, 2000.0, nan. <code>regex=False</code> önemlidir; düzenli ifadede nokta "her karakter" anlamına gelir ve tüm metni silerdi.</p>'
+  '<p><b>Alternatifler ve öneriler:</b> Dosya CSV ise <code>pd.read_csv(..., decimal=\',\', thousands=\'.\')</code> en temiz yoldur. Dönüşümden sonra <b>kaç değerin NaN olduğunu say</b> ve orijinal metinleri yan yana göster: <code>s[dogru.isna()]</code>. <code>errors=\'coerce\'</code> sorunları gizler; çıktıyı kontrol etmeden kullanma.</p>',
+  ['read_csv\'de decimal ve thousands parametreleri nasıl kullanılır?', '"₺1.250,50" gibi para birimli değeri nasıl temizlersin?'],
+  ['\'2.000\' değerinin 2.0 olduğunu fark etmemek', 'errors=\'coerce\' ile hataları sessizce NaN\'a çevirip saymamak'],
+  'Sessiz hataları (hata vermeyen ama yanlış sonuç üreten) özellikle vurgula; mülakatçılar en çok bunu sever.',
+  code='''
+import pandas as pd
+s = pd.Series(['1.250,50', '980', '2.000', 'yok'])
+yanlis = pd.to_numeric(s, errors='coerce')
+dogru = pd.to_numeric(s.str.replace('.', '', regex=False).str.replace(',', '.', regex=False), errors='coerce')
+print(yanlis.tolist())
+print(dogru.tolist())
+'''),
+
+I(['analist'], 'orta', 'vaka', 'Vaka: talep analizi',
+  'Pedal İzmir bisiklet paylaşımında kullanıcılar "bazı istasyonlarda hiç bisiklet yok, bazıları tıka basa dolu" diye şikâyet ediyor. Analizi nasıl kurgularsın?',
+  '<p><b>1) Sorunu ölç:</b> İstasyon başına "boş kalma süresi" (bisiklet sayısı 0) ve "dolu kalma süresi" (park yeri yok) oranları. Bunlar şikâyetin doğrudan karşılığıdır.</p>'
+  '<p><b>2) Akışı çıkar:</b> <code>bk_trips</code> tablosundan her istasyon ve saat için çıkan ve gelen yolculuk sayısı; net akış = gelen − çıkan. Sabah sahil ve merkez istasyonlarına net giriş, akşam ters yönde akış gibi desenler beklenir.</p>'
+  '<p><b>3) Desenleri segmentle:</b> Hafta içi/sonu, saat dilimi, hava durumu. Isı haritası (istasyon × saat) ve harita üzerinde net akış okları sorunlu bölgeleri bir bakışta gösterir.</p>'
+  '<p><b>4) Kök neden:</b> Sorun yapısal mı (tepedeki istasyondan herkes iniyor, kimse çıkmıyor) yoksa operasyonel mi (dağıtım aracı rotası yanlış zamanlı)?</p>'
+  '<p><b>5) Öneriler:</b> Dağıtım ekibi için saatlik yeniden dengeleme planı; kronik dolu istasyonlara kapasite ekleme; ters yöne giden kullanıcıya puan veren bir teşvik deneyi. Başarı metriği: boş/dolu kalma süresinin azalması.</p>'
+  '<p>Not: ~117 bin yolculukluk veri pandas için küçüktür; <code>groupby([\'istasyon\', saat])</code> saniyeler içinde çalışır.</p>',
+  ['Yeniden dengeleme ihtiyacını nasıl tahmin edersin?', 'Kayıp talebi (bisiklet olmadığı için başlamayan yolculuk) nasıl tahmin edersin?'],
+  ['Yalnız toplam yolculuk sayısına bakıp istasyon akışını incelememek', 'Hafta içi ve hafta sonu desenlerini karıştırmak'],
+  'Operasyon vakalarında "gözlenmeyen talep" kavramını anarsan derinliğini gösterirsin.'),
+
+I(['analist'], 'orta', 'tasarim', 'Huni analizi tasarımı',
+  'Anadolu Market\'in mobil uygulaması için bir satın alma hunisi (funnel) analizi tasarla. Hangi olayları, hangi tanımlarla ölçersin?',
+  '<p><b>1) Adımlar:</b> Uygulama açılışı → ürün görüntüleme → sepete ekleme → ödeme sayfası → sipariş tamamlama.</p>'
+  '<p><b>2) Tanım kararları:</b></p><ul>'
+  '<li><b>Birim:</b> Kullanıcı mı, oturum mu? Günlük karar için oturum, uzun vadeli davranış için kullanıcı.</li>'
+  '<li><b>Zaman penceresi:</b> Adımların aynı oturumda ya da 24 saat içinde gerçekleşmesi.</li>'
+  '<li><b>Sıra:</b> Kesin sıralı mı (ödeme sayfası sepete eklemeden sonra olmalı) yoksa sadece "adımı yaptı mı"?</li></ul>'
+  '<p><b>3) Hesap:</b> Olay tablosundan (kullanıcı, oturum, olay, zaman) pandas ile her oturum için hangi adımlara ulaşıldığını pivotla; adım bazında oturum sayısı, bir önceki adıma göre dönüşüm ve ilk adıma göre toplam dönüşüm.</p>'
+  '<p><b>4) Kırılımlar:</b> Platform (iOS/Android), sürüm, yeni/eski kullanıcı, trafik kaynağı. En büyük kaybın olduğu adım ve segment önceliklidir.</p>'
+  '<p><b>5) Kalite:</b> Olay takibinin eksiksiz olduğunu doğrula (sipariş sayısı veritabanıyla eşleşiyor mu?). Mobil olaylar çevrim dışıyken gecikmeli gelebilir.</p>'
+  '<p><b>6) Çıktı:</b> Huni grafiği ve "Android 7.2 sürümünde ödeme adımı dönüşümü %15 düştü" gibi eyleme dönük bulgu.</p>',
+  ['Huniyi SQL ile nasıl kurarsın?', 'Adımlar arası süreyi analize nasıl katarsın?'],
+  ['Birim (kullanıcı/oturum) ve zaman penceresini tanımlamamak', 'Takip verisini veritabanıyla karşılaştırıp doğrulamamak'],
+  'Huni tasarımında "tanım kararları" bölümünü atlama; çoğu adayın kaçırdığı yer burasıdır.'),
+
+I(['analist', 'bilimci'], 'ileri', 'kavram', 'Oran metrikleri',
+  'Şube bazında iade oranlarının ortalamasını almak ile toplam iade oranını hesaplamak arasında ne fark var? Hangisi ne zaman doğru?',
+  '<p><b>İki farklı soru:</b></p><ul>'
+  '<li><b>Oranların ortalaması</b> (ortalama şube oranı): Her şubenin oranı hesaplanır, sonra şubelerin basit ortalaması alınır. Her şube eşit ağırlıktadır. "Tipik bir şube nasıl?" sorusuna cevaptır.</li>'
+  '<li><b>Toplamların oranı</b> (havuzlanmış oran): Tüm iadeler / tüm siparişler. Her sipariş eşit ağırlıktadır. "Şirket genelinde siparişlerin yüzde kaçı iade ediliyor?" sorusuna cevaptır.</li></ul>'
+  '<p><b>Örnek:</b> A şubesi 1.000 siparişte 20 iade (%2), B şubesi 10 siparişte 5 iade (%50). Oranların ortalaması %26, toplam oran 25/1.010 ≈ %2,5. Küçük şube ortalamayı uçurmuştur.</p>'
+  '<p><b>Pratik kurallar:</b> Şirket metriği ve finansal etki için toplam oran kullanılır. Şube karşılaştırması yapılıyorsa küçük örneklemli şubelerin oranları oynaktır; güven aralığıyla göster ya da minimum hacim eşiği koy. pandas\'ta toplam oranı <code>df.iade.sum() / df.siparis.sum()</code> ile hesapla; <code>df.oran.mean()</code> kolay ama çoğu zaman yanlış sorunun cevabıdır.</p>'
+  '<p>Aynı tuzak, SQL\'de <code>AVG(oran)</code> ile <code>SUM(pay) / SUM(payda)</code> arasında da vardır.</p>',
+  ['Küçük örneklemli segmentleri sıralarken ne yaparsın?', 'Ağırlıklı ortalama bu iki yaklaşımla nasıl ilişkilidir?'],
+  ['Şube oranlarının basit ortalamasını şirket oranı diye raporlamak', 'Küçük paydalı oranların oynaklığını göz ardı etmek'],
+  'Bu tür sorularda her zaman iki sayısal örnek hazır tut; fark sayıyla görünce çok net anlaşılır.'),
+
+I(['analist', 'muhendis'], 'temel', 'kavram', 'SQL mi pandas mı',
+  'Bir analizi SQL\'de mi, pandas\'ta mı yapacağına nasıl karar verirsin?',
+  '<p><b>Temel ilke: hesabı verinin yanında yap.</b></p>'
+  '<p><b>SQL\'i seçtiğim durumlar:</b></p><ul>'
+  '<li>Veri ambarda ve büyük (on milyonlarca satır). Filtreleme, birleştirme, toplama ambarın motorunda paralel çalışır; yalnız küçük sonuç ağa taşınır.</li>'
+  '<li>Sonuç başka ekiplerin de kullanacağı kalıcı bir tablo ya da görünüm (view) olacak.</li>'
+  '<li>Pano aracı doğrudan sorguya bağlanacak.</li></ul>'
+  '<p><b>pandas\'ı seçtiğim durumlar:</b></p><ul>'
+  '<li>Veri belleğe sığıyor ve birden fazla kaynaktan (CSV, Excel, API) geliyor.</li>'
+  '<li>Karmaşık, adım adım temizlik, metin işleme ya da özel iş mantığı gerekiyor; Python\'da test etmek kolay.</li>'
+  '<li>Sonraki adım istatistik, modelleme ya da grafik.</li></ul>'
+  '<p><b>Pratikte ikisi birlikte:</b> Ambardan SQL ile ihtiyacım olan sütunları ve dönemi filtreleyip özetlerim (<code>pd.read_sql(sorgu, baglanti)</code>), ardından pandas\'ta analiz ederim. <code>SELECT *</code> ile 50 milyon satırı dizüstü bilgisayara çekmek en sık yapılan hatadır.</p>',
+  ['DuckDB gibi araçlar bu ayrımı nasıl değiştiriyor?', 'pd.read_sql kullanırken parametreleri neden ayrı veririz?'],
+  ['Tüm tabloyu çekip pandas\'ta filtrelemek', 'Birini "her zaman daha iyi" ilan etmek'],
+  'Karar ölçütlerini sırala (veri boyutu, yeniden kullanım, sonraki adım); dogmatik cevaplardan kaçın.'),
+
+I(['analist', 'bilimci'], 'ileri', 'vaka', 'Deney olmadan etki ölçme',
+  'Anadolu Market Ekim\'de yalnız İzmir\'de ücretsiz kargo kampanyası yaptı; A/B testi yoktu. Kampanyanın satışa etkisini nasıl tahmin edersin?',
+  '<p><b>1) Naif yaklaşımın sorunu:</b> İzmir\'in Ekim satışını Eylül\'le karşılaştırmak, mevsimselliği ve genel pazar eğilimini kampanyaya mal eder.</p>'
+  '<p><b>2) Fark içinde fark (difference-in-differences):</b> Kampanya almayan ama benzer davranan şehirleri (ör. Bursa, Antalya) kontrol grubu seç. Etki = (İzmir Ekim − İzmir Eylül) − (Kontrol Ekim − Kontrol Eylül). Böylece ortak mevsimsel değişim düşülür.</p>'
+  '<p><b>3) Varsayımı kontrol et:</b> Paralel eğilim varsayımı: kampanya öncesi aylarda İzmir ve kontrol şehirlerin satışları birlikte hareket ediyor muydu? Son 6–12 ayı aynı grafikte çiz. Ayrışıyorsa kontrol grubunu değiştir ya da birden fazla şehri ağırlıklandırarak sentetik bir kontrol oluştur.</p>'
+  '<p><b>4) Diğer tehditler:</b> Aynı dönemde İzmir\'de başka bir olay (rakip mağaza kapanması, fuar) var mı? Kampanya, satışı başka şehirlerden İzmir adresine mi kaydırdı? Kampanya bitince satışlar düştü mü (talep öne çekilmiş olabilir)?</p>'
+  '<p><b>5) Sunum:</b> Tek bir sayı değil aralık ver: "Ek ciro yaklaşık 1,2–1,8 milyon TL; kargo maliyeti 0,9 milyon TL." Ve gelecek kampanya için rastgele şehir/bölge ataması önerisi.</p>',
+  ['Sentetik kontrol yöntemini kısaca anlat.', 'Kampanya etkisinin kalıcı olup olmadığını nasıl ölçersin?', 'Kesintili zaman serisi (interrupted time series) ne zaman kullanılır?'],
+  ['Kampanya öncesi ve sonrasını kontrol grubu olmadan karşılaştırmak', 'Paralel eğilim varsayımını kontrol etmemek'],
+  'Nedensel çıkarım vakalarında yöntemi, varsayımı ve varsayımı nasıl test edeceğini üçlü olarak söyle.'),
+
+I(['analist', 'muhendis'], 'ileri', 'tasarim', 'Metrik katmanı',
+  'Şirkette farklı panolar aynı "aktif müşteri" metriği için farklı sayılar gösteriyor. Tek doğruluk kaynağı sağlayan bir metrik katmanı nasıl tasarlarsın?',
+  '<p><b>Sorunun kökü:</b> Her analist metriği kendi SQL\'inde yeniden tanımlıyor: biri 30 gün, öteki 28 gün; biri iptalleri hariç tutuyor, öteki tutmuyor.</p>'
+  '<p><b>1) Metrik sözlüğü:</b> Her metrik için ad, iş tanımı, formül, filtreler, zaman penceresi, sahibi ve sürümü. Örnek: "Aktif müşteri: son 30 takvim gününde en az 1 tamamlanmış (iptal/iade hariç) siparişi olan benzersiz müşteri."</p>'
+  '<p><b>2) Kodlanmış tanım:</b> Tanım bir kez, versiyon kontrollü bir yerde kodlanır: dbt modeli, ambar görünümü ya da semantik katman (metrik tanım dosyası). Panolar ham tablolara değil bu katmana bağlanır.</p>'
+  '<p><b>3) Katmanlar:</b> Ham → temizlenmiş → iş varlıkları (müşteri, sipariş) → metrik tabloları. Analistler yalnız son iki katmanı kullanır.</p>'
+  '<p><b>4) Yönetişim:</b> Tanım değişikliği kod incelemesi (pull request) ve metrik sahibinin onayıyla yapılır; değişiklik günlüğü tutulur. Eski tanımla geçmiş rakamlar karşılaştırılırken fark açıklanır.</p>'
+  '<p><b>5) Test:</b> Metrik tabloları için otomatik kontroller: bugünün değeri geçen haftaya göre ±%30 dışında mı, toplamlar finans rakamıyla tutuyor mu?</p>'
+  '<p><b>Geçiş:</b> Önce en çok kullanılan 10 metrikle başla; eski panoları kademeli taşı.</p>',
+  ['Metrik tanımı değişince geçmiş raporları ne yaparsın?', 'Self-servis analitik ile yönetişim arasında nasıl denge kurarsın?'],
+  ['Sorunu "panoları düzeltelim" diye teknik bir hataya indirgemek', 'Metriğin bir sahibi olması gerektiğini söylememek'],
+  'Bu soru teknik olduğu kadar organizasyoneldir; sahiplik ve süreç kısmını mutlaka anlat.'),
+]
