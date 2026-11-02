@@ -1,0 +1,28 @@
+emp_id,first_name,last_name,dept_id,manager_id,title,salary,hire_date,email
+1,Selim,Aksoy,,,Genel Müdür,145000.0,2015-03-01,selim.aksoy@anadolumarket.com
+2,Elif,Doğan,1,1,Satış Müdürü,96000.0,2016-09-21,elif.dogan@anadolumarket.com
+3,Derya,Öztürk,2,1,Pazarlama Müdürü,83000.0,2016-06-21,derya.ozturk@anadolumarket.com
+4,Serkan,Özdemir,3,1,Analitik Müdürü,97000.0,2017-11-08,serkan.ozdemir@anadolumarket.com
+5,Selin,Özdemir,4,1,Yazılım Müdürü,87000.0,2016-12-07,selin.ozdemir@anadolumarket.com
+6,Onur,Özkan,5,1,İK Müdürü,90000.0,2016-09-10,onur.ozkan@anadolumarket.com
+7,Elif,Koç,6,1,Finans Müdürü,82000.0,2018-04-14,elif.koc@anadolumarket.com
+8,Gamze,Özkan,1,2,Satış Uzmanı,43000.0,2021-04-29,gamze.ozkan@anadolumarket.com
+9,Ece,Kurt,1,2,Satış Temsilcisi,52000.0,2022-05-25,ece.kurt@anadolumarket.com
+10,Can,Aydın,1,2,Satış Temsilcisi,70000.0,2022-12-17,can.aydin@anadolumarket.com
+11,Yusuf,Kara,1,2,Satış Temsilcisi,58000.0,2024-07-09,yusuf.kara@anadolumarket.com
+12,Oğuz,Demir,1,2,Satış Uzmanı,38000.0,2022-10-14,oguz.demir@anadolumarket.com
+13,Deniz,Arslan,2,3,İçerik Uzmanı,44000.0,2024-03-13,deniz.arslan@anadolumarket.com
+14,İrem,Doğan,2,3,İçerik Uzmanı,48000.0,2024-04-04,irem.dogan@anadolumarket.com
+15,Onur,Erdem,2,3,Pazarlama Uzmanı,44000.0,2021-06-12,onur.erdem@anadolumarket.com
+16,Ahmet,Erdem,3,4,Veri Bilimci,60000.0,2019-09-12,ahmet.erdem@anadolumarket.com
+17,Pınar,Yıldırım,3,4,Veri Mühendisi,71000.0,2019-04-29,
+18,Defne,Öztürk,3,4,Veri Bilimci,60000.0,2020-10-10,
+19,Emine,Aydın,3,4,Veri Analisti,48000.0,2022-12-07,emine.aydin@anadolumarket.com
+20,Seda,Aksoy,4,5,Yazılım Geliştirici,71000.0,2020-09-28,seda.aksoy@anadolumarket.com
+21,Eren,Yıldız,4,5,Yazılım Geliştirici,57000.0,2018-04-26,eren.yildiz@anadolumarket.com
+22,Seda,Güneş,4,5,Kıdemli Geliştirici,75000.0,2020-07-28,seda.gunes@anadolumarket.com
+23,Mehmet,Öztürk,4,5,Kıdemli Geliştirici,66000.0,2022-01-24,mehmet.ozturk@anadolumarket.com
+24,Fatma,Kurt,5,6,İK Uzmanı,72000.0,2023-10-18,fatma.kurt@anadolumarket.com
+25,Kerem,Yılmaz,5,6,İK Uzmanı,67000.0,2022-09-28,
+26,Murat,Arslan,6,7,Muhasebeci,69000.0,2022-03-29,murat.arslan@anadolumarket.com
+27,İrem,Şahin,6,7,Finans Uzmanı,63000.0,2023-01-12,irem.sahin@anadolumarket.com

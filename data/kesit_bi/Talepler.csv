@@ -1,0 +1,271 @@
+TalepNo,Tarih,MusteriNo,Kanal,Konu,Oncelik,IlkYanitDk,CozumSaat,Cozuldu,Memnuniyet
+1,2023-01-11,113,Canlı destek,Ödeme,Düşük,6,19.59,Evet,5
+2,2023-01-23,64,Canlı destek,Ürün bilgisi,Düşük,12,10.63,Evet,
+3,2023-01-23,94,Telefon,Ürün bilgisi,Düşük,5,19.71,Evet,
+4,2023-01-28,51,Canlı destek,Ürün bilgisi,Düşük,8,17.26,Hayır,
+5,2023-02-05,12,Telefon,Kargo gecikmesi,Orta,5,22.37,Evet,4
+6,2023-02-06,51,Canlı destek,Kargo gecikmesi,Yüksek,13,20.51,Evet,4
+7,2023-02-07,147,Canlı destek,Hasarlı ürün,Yüksek,14,31.02,Hayır,
+8,2023-02-08,107,Canlı destek,Kargo gecikmesi,Orta,15,6.32,Evet,4
+9,2023-02-12,131,Sosyal medya,Ürün bilgisi,Düşük,119,3.81,Evet,5
+10,2023-02-25,107,E-posta,Diğer,Düşük,68,5.98,Evet,
+11,2023-03-14,69,Telefon,Diğer,Düşük,4,11.85,Evet,
+12,2023-03-15,39,Telefon,Kargo gecikmesi,Orta,6,30.7,Evet,
+13,2023-03-15,64,Canlı destek,İade ve değişim,Orta,16,79.9,Evet,4
+14,2023-03-18,31,E-posta,Hasarlı ürün,Yüksek,143,21.87,Evet,4
+15,2023-03-25,116,E-posta,Ürün bilgisi,Düşük,193,4.1,Evet,
+16,2023-03-30,23,Telefon,Hasarlı ürün,Yüksek,7,60.36,Hayır,1
+17,2023-03-31,12,Sosyal medya,Hesap ve üyelik,Düşük,43,15.69,Evet,
+18,2023-04-02,113,Sosyal medya,Ürün bilgisi,Düşük,208,16.92,Evet,
+19,2023-04-12,97,Canlı destek,İade ve değişim,Orta,10,59.85,Evet,4
+20,2023-04-20,134,Canlı destek,Ödeme,Düşük,9,4.29,Evet,5
+21,2023-04-22,109,E-posta,Hasarlı ürün,Yüksek,175,29.52,Evet,
+22,2023-05-07,26,Telefon,İade ve değişim,Orta,4,84.28,Evet,4
+23,2023-05-08,26,Telefon,İade ve değişim,Orta,3,74.44,Evet,3
+24,2023-05-08,58,E-posta,İade ve değişim,Orta,422,70.15,Evet,
+25,2023-05-09,26,Telefon,İade ve değişim,Orta,2,48.5,Evet,
+26,2023-05-09,58,Canlı destek,İade ve değişim,Orta,9,90.57,Evet,3
+27,2023-05-12,58,Canlı destek,İade ve değişim,Orta,9,73.57,Evet,
+28,2023-05-17,58,Canlı destek,Kargo gecikmesi,Yüksek,6,21.94,Evet,4
+29,2023-05-19,121,Canlı destek,Diğer,Düşük,9,4.22,Evet,4
+30,2023-05-26,31,E-posta,Ürün bilgisi,Düşük,244,16.77,Evet,
+31,2023-05-27,45,Telefon,Kargo gecikmesi,Orta,7,43.28,Evet,
+32,2023-06-03,61,Telefon,İade ve değişim,Orta,11,30.53,Evet,
+33,2023-06-04,61,Telefon,İade ve değişim,Orta,5,37.92,Evet,
+34,2023-06-06,7,E-posta,Ödeme,Düşük,347,19.37,Evet,
+35,2023-06-06,15,Canlı destek,Kargo gecikmesi,Orta,8,40.15,Evet,5
+36,2023-06-06,96,Sosyal medya,Ödeme,Düşük,94,2.39,Evet,4
+37,2023-06-07,134,E-posta,Kargo gecikmesi,Yüksek,222,20.51,Evet,4
+38,2023-06-27,24,Canlı destek,Hesap ve üyelik,Düşük,10,17.56,Evet,5
+39,2023-06-28,28,E-posta,İade ve değişim,Orta,165,89.98,Evet,3
+40,2023-06-28,64,E-posta,Ürün bilgisi,Düşük,101,11.87,Evet,
+41,2023-06-29,28,Telefon,İade ve değişim,Orta,2,51.57,Hayır,1
+42,2023-07-02,11,Telefon,Hasarlı ürün,Yüksek,6,50.29,Evet,2
+43,2023-07-10,147,E-posta,Diğer,Düşük,318,7.9,Evet,4
+44,2023-07-20,12,Canlı destek,Kargo gecikmesi,Orta,8,42.33,Evet,4
+45,2023-07-21,141,E-posta,İade ve değişim,Orta,369,47.45,Evet,4
+46,2023-07-22,135,Canlı destek,İade ve değişim,Orta,14,44.54,Evet,4
+47,2023-07-22,141,Canlı destek,İade ve değişim,Orta,8,25.65,Evet,5
+48,2023-07-23,91,Telefon,Ödeme,Düşük,7,20.14,Evet,4
+49,2023-07-25,93,E-posta,Hesap ve üyelik,Düşük,281,19.21,Evet,
+50,2023-07-26,45,Canlı destek,Kargo gecikmesi,Yüksek,9,13.78,Evet,3
+51,2023-07-27,58,Sosyal medya,Kargo gecikmesi,Yüksek,41,19.24,Evet,4
+52,2023-07-28,39,Telefon,Ödeme,Düşük,4,4.72,Evet,4
+53,2023-08-07,97,E-posta,Hesap ve üyelik,Düşük,329,15.28,Evet,
+54,2023-08-17,51,E-posta,Hasarlı ürün,Yüksek,405,15.67,Evet,4
+55,2023-08-30,114,E-posta,Hesap ve üyelik,Düşük,323,9.62,Evet,3
+56,2023-08-31,12,E-posta,Ürün bilgisi,Düşük,431,15.63,Evet,3
+57,2023-09-01,94,E-posta,Hasarlı ürün,Yüksek,66,56.19,Evet,
+58,2023-09-01,135,E-posta,İade ve değişim,Orta,408,92.6,Evet,2
+59,2023-09-07,49,Canlı destek,Hesap ve üyelik,Düşük,13,11.71,Evet,4
+60,2023-09-14,28,Canlı destek,İade ve değişim,Orta,8,40.57,Evet,4
+61,2023-09-16,1,Canlı destek,Kargo gecikmesi,Orta,15,31.42,Evet,
+62,2023-09-17,62,Telefon,Kargo gecikmesi,Yüksek,5,25.64,Evet,4
+63,2023-09-18,28,Telefon,İade ve değişim,Orta,10,61.15,Evet,3
+64,2023-09-19,28,Telefon,İade ve değişim,Orta,11,91.18,Evet,4
+65,2023-09-30,64,Telefon,Hesap ve üyelik,Düşük,6,1.94,Evet,5
+66,2023-10-04,24,Telefon,Ürün bilgisi,Düşük,9,20.79,Evet,5
+67,2023-10-05,46,Telefon,Ödeme,Düşük,2,4.68,Evet,
+68,2023-10-07,24,Canlı destek,Hasarlı ürün,Yüksek,10,20.66,Evet,
+69,2023-10-07,120,Telefon,Kargo gecikmesi,Yüksek,6,28.64,Evet,
+70,2023-10-12,38,E-posta,Hasarlı ürün,Yüksek,271,18.83,Evet,
+71,2023-10-17,147,E-posta,Kargo gecikmesi,Yüksek,250,40.2,Evet,2
+72,2023-10-19,65,Sosyal medya,İade ve değişim,Orta,262,95.87,Evet,
+73,2023-10-20,28,Sosyal medya,İade ve değişim,Orta,74,62.54,Evet,3
+74,2023-10-22,28,E-posta,İade ve değişim,Orta,124,28.87,Evet,
+75,2023-10-22,103,Telefon,Kargo gecikmesi,Orta,7,15.06,Evet,
+76,2023-10-25,82,Telefon,Hasarlı ürün,Yüksek,3,71.81,Evet,
+77,2023-11-01,45,Canlı destek,İade ve değişim,Orta,9,87.63,Evet,4
+78,2023-11-02,45,E-posta,İade ve değişim,Orta,342,41.54,Hayır,
+79,2023-11-02,147,Canlı destek,Kargo gecikmesi,Orta,15,20.36,Evet,4
+80,2023-11-03,99,Canlı destek,İade ve değişim,Orta,13,64.11,Evet,4
+81,2023-11-04,99,E-posta,İade ve değişim,Orta,400,60.86,Evet,3
+82,2023-11-05,99,E-posta,Kargo gecikmesi,Orta,220,29.74,Evet,
+83,2023-11-05,99,Sosyal medya,İade ve değişim,Orta,188,94.85,Evet,4
+84,2023-11-08,39,Telefon,Ödeme,Düşük,7,11.06,Evet,
+85,2023-11-08,44,E-posta,Ödeme,Düşük,190,8.32,Evet,4
+86,2023-11-08,96,Sosyal medya,Ödeme,Düşük,227,12.49,Evet,
+87,2023-11-09,56,E-posta,Kargo gecikmesi,Orta,119,7,Evet,4
+88,2023-11-11,61,E-posta,Kargo gecikmesi,Yüksek,342,7.81,Evet,
+89,2023-11-12,107,Sosyal medya,Ürün bilgisi,Düşük,129,16.6,Evet,
+90,2023-11-16,101,E-posta,Kargo gecikmesi,Yüksek,133,44.99,Evet,3
+91,2023-11-24,82,Canlı destek,Hesap ve üyelik,Düşük,6,8.12,Evet,
+92,2023-11-27,126,Telefon,Hesap ve üyelik,Düşük,2,8.93,Evet,4
+93,2023-12-01,24,Telefon,İade ve değişim,Orta,11,32.47,Evet,4
+94,2023-12-05,24,Telefon,İade ve değişim,Orta,4,78.2,Evet,3
+95,2023-12-06,145,Canlı destek,Kargo gecikmesi,Yüksek,7,10.72,Evet,4
+96,2023-12-07,12,E-posta,Kargo gecikmesi,Yüksek,264,24.15,Evet,3
+97,2023-12-17,52,Telefon,Kargo gecikmesi,Orta,9,19.72,Evet,
+98,2023-12-19,6,Telefon,Diğer,Düşük,11,6.52,Evet,
+99,2023-12-19,64,E-posta,Kargo gecikmesi,Yüksek,219,19.75,Hayır,2
+100,2023-12-21,58,Canlı destek,Ürün bilgisi,Düşük,10,3.86,Evet,
+101,2023-12-21,113,E-posta,İade ve değişim,Orta,214,61.2,Evet,3
+102,2023-12-23,109,Canlı destek,Ödeme,Düşük,4,14.34,Evet,
+103,2023-12-23,113,E-posta,İade ve değişim,Orta,247,69.28,Evet,
+104,2023-12-28,126,Canlı destek,Ödeme,Düşük,12,14.3,Evet,5
+105,2023-12-29,148,Canlı destek,Kargo gecikmesi,Orta,16,16.28,Evet,5
+106,2024-01-03,45,Telefon,Diğer,Düşük,4,0.94,Evet,5
+107,2024-01-03,126,E-posta,Kargo gecikmesi,Orta,238,8.44,Evet,
+108,2024-01-03,127,Telefon,Ödeme,Düşük,6,12.27,Evet,4
+109,2024-01-04,80,Canlı destek,Ürün bilgisi,Düşük,5,5.59,Evet,4
+110,2024-01-06,107,Telefon,Hesap ve üyelik,Düşük,2,9.75,Hayır,
+111,2024-01-08,54,Sosyal medya,Hesap ve üyelik,Düşük,37,2.15,Evet,5
+112,2024-01-20,64,Telefon,Hesap ve üyelik,Düşük,8,11.63,Evet,5
+113,2024-01-25,135,Canlı destek,Hesap ve üyelik,Düşük,8,7.53,Evet,4
+114,2024-02-02,79,Sosyal medya,Ürün bilgisi,Düşük,136,10.83,Evet,
+115,2024-02-07,29,E-posta,Kargo gecikmesi,Yüksek,212,28.06,Evet,4
+116,2024-02-10,21,Sosyal medya,İade ve değişim,Orta,149,20.14,Evet,
+117,2024-02-11,21,Telefon,İade ve değişim,Orta,3,70.17,Evet,
+118,2024-02-12,21,Sosyal medya,İade ve değişim,Orta,52,46.04,Hayır,1
+119,2024-02-14,39,Telefon,Hesap ve üyelik,Düşük,5,5.43,Evet,
+120,2024-02-18,12,Canlı destek,Ürün bilgisi,Düşük,9,14.37,Evet,4
+121,2024-02-24,2,E-posta,Diğer,Düşük,180,13.27,Evet,5
+122,2024-02-24,149,Telefon,Kargo gecikmesi,Orta,5,8.94,Evet,
+123,2024-02-25,12,Telefon,Kargo gecikmesi,Yüksek,9,21.56,Evet,4
+124,2024-02-25,74,Telefon,İade ve değişim,Orta,8,53.13,Evet,
+125,2024-02-27,74,E-posta,İade ve değişim,Orta,133,69.23,Evet,
+126,2024-02-28,87,E-posta,İade ve değişim,Orta,263,60.52,Evet,3
+127,2024-02-29,87,Canlı destek,İade ve değişim,Orta,4,64.93,Evet,3
+128,2024-03-01,101,E-posta,Ödeme,Düşük,269,15.73,Evet,
+129,2024-03-03,85,Canlı destek,Kargo gecikmesi,Yüksek,4,25.74,Evet,
+130,2024-03-04,4,Canlı destek,Hesap ve üyelik,Düşük,7,2.08,Evet,
+131,2024-03-04,46,Canlı destek,Ürün bilgisi,Düşük,6,3.8,Evet,
+132,2024-03-05,107,E-posta,Ödeme,Düşük,31,5.16,Evet,
+133,2024-03-07,145,E-posta,İade ve değişim,Orta,64,38.79,Evet,3
+134,2024-03-11,145,E-posta,İade ve değişim,Orta,325,37.57,Evet,4
+135,2024-03-17,94,E-posta,Kargo gecikmesi,Yüksek,233,26.61,Evet,3
+136,2024-03-18,49,Sosyal medya,Hasarlı ürün,Yüksek,164,22.94,Evet,
+137,2024-03-18,82,E-posta,Ödeme,Düşük,106,13.73,Evet,4
+138,2024-03-18,96,Canlı destek,Kargo gecikmesi,Orta,6,15.21,Evet,
+139,2024-03-19,82,E-posta,Ürün bilgisi,Düşük,163,7.52,Evet,
+140,2024-03-20,80,E-posta,Hesap ve üyelik,Düşük,338,5.47,Evet,3
+141,2024-03-22,92,Canlı destek,Kargo gecikmesi,Yüksek,9,30.59,Evet,
+142,2024-03-22,140,E-posta,Ürün bilgisi,Düşük,175,11.93,Evet,4
+143,2024-03-27,42,E-posta,İade ve değişim,Orta,158,46.01,Evet,4
+144,2024-03-29,24,E-posta,Kargo gecikmesi,Yüksek,306,5.72,Evet,4
+145,2024-03-29,42,E-posta,İade ve değişim,Orta,71,70.59,Evet,
+146,2024-03-29,112,Telefon,İade ve değişim,Orta,6,20.14,Evet,5
+147,2024-03-30,45,Telefon,Ödeme,Düşük,6,1.98,Evet,4
+148,2024-04-04,4,Telefon,Kargo gecikmesi,Orta,3,11.86,Evet,
+149,2024-04-13,3,Sosyal medya,İade ve değişim,Orta,99,62.05,Evet,
+150,2024-04-13,3,Canlı destek,İade ve değişim,Orta,6,30.74,Evet,4
+151,2024-04-16,65,Telefon,İade ve değişim,Orta,6,20.72,Evet,
+152,2024-04-22,120,Canlı destek,Ürün bilgisi,Düşük,9,13.86,Evet,5
+153,2024-04-23,120,Telefon,Ödeme,Düşük,4,8.57,Evet,5
+154,2024-04-26,84,Telefon,Kargo gecikmesi,Orta,5,30.78,Evet,3
+155,2024-05-01,31,Canlı destek,İade ve değişim,Orta,8,42.88,Evet,
+156,2024-05-01,64,Canlı destek,Kargo gecikmesi,Yüksek,12,11.92,Evet,5
+157,2024-05-03,98,Canlı destek,Diğer,Düşük,3,9.92,Evet,4
+158,2024-05-05,31,E-posta,İade ve değişim,Orta,123,23.01,Evet,5
+159,2024-05-12,102,Telefon,İade ve değişim,Orta,6,46.57,Evet,
+160,2024-05-14,102,E-posta,İade ve değişim,Orta,258,64.06,Evet,
+161,2024-05-14,102,Telefon,İade ve değişim,Orta,7,20.64,Evet,
+162,2024-05-15,17,Canlı destek,Diğer,Düşük,8,13.88,Evet,
+163,2024-05-15,55,Canlı destek,Ödeme,Düşük,5,8.84,Hayır,1
+164,2024-05-15,69,Telefon,Ürün bilgisi,Düşük,6,9.42,Evet,4
+165,2024-05-16,102,Canlı destek,İade ve değişim,Orta,10,60.11,Evet,4
+166,2024-05-22,134,Telefon,İade ve değişim,Orta,9,70.33,Evet,
+167,2024-05-24,57,Canlı destek,Kargo gecikmesi,Yüksek,7,28.41,Evet,
+168,2024-05-25,134,E-posta,İade ve değişim,Orta,154,31.53,Evet,4
+169,2024-05-30,39,Canlı destek,Kargo gecikmesi,Orta,5,11.61,Evet,5
+170,2024-05-31,111,Telefon,Ürün bilgisi,Düşük,9,5.93,Evet,
+171,2024-06-01,22,E-posta,Ürün bilgisi,Düşük,94,13.32,Evet,5
+172,2024-06-05,111,Telefon,İade ve değişim,Orta,9,45.56,Evet,4
+173,2024-06-07,120,Canlı destek,Kargo gecikmesi,Orta,5,25.24,Hayır,2
+174,2024-06-14,7,Canlı destek,Kargo gecikmesi,Orta,5,20.4,Evet,4
+175,2024-06-14,99,E-posta,Ödeme,Düşük,300,4.44,Hayır,
+176,2024-06-14,135,Telefon,Hesap ve üyelik,Düşük,3,3.26,Evet,
+177,2024-06-17,59,E-posta,Kargo gecikmesi,Orta,79,23.01,Evet,4
+178,2024-06-18,6,Canlı destek,Ürün bilgisi,Düşük,5,13.69,Evet,5
+179,2024-06-20,80,Telefon,Ürün bilgisi,Düşük,5,3.13,Evet,
+180,2024-06-21,138,Telefon,Ürün bilgisi,Düşük,4,0.92,Evet,
+181,2024-06-22,58,Canlı destek,Kargo gecikmesi,Yüksek,8,21.01,Evet,4
+182,2024-06-22,112,E-posta,Ödeme,Düşük,122,8.63,Evet,
+183,2024-06-25,88,Canlı destek,İade ve değişim,Orta,11,51.7,Evet,3
+184,2024-06-28,33,Telefon,Ödeme,Düşük,9,1.9,Evet,
+185,2024-07-05,21,Telefon,İade ve değişim,Orta,7,35.5,Evet,4
+186,2024-07-05,126,Telefon,Hasarlı ürün,Yüksek,5,40.1,Evet,
+187,2024-07-06,44,E-posta,Hasarlı ürün,Yüksek,300,35.21,Evet,3
+188,2024-07-08,85,Sosyal medya,Kargo gecikmesi,Orta,174,32.45,Evet,4
+189,2024-07-10,52,Canlı destek,Kargo gecikmesi,Orta,5,29.57,Evet,
+190,2024-07-13,146,Telefon,Hasarlı ürün,Yüksek,5,31.53,Evet,
+191,2024-07-14,4,Telefon,Kargo gecikmesi,Orta,4,24.32,Evet,4
+192,2024-07-16,68,E-posta,Kargo gecikmesi,Orta,165,9.27,Evet,5
+193,2024-07-17,88,Telefon,Ürün bilgisi,Düşük,2,9.09,Evet,4
+194,2024-07-18,98,Canlı destek,İade ve değişim,Orta,10,24.72,Evet,3
+195,2024-07-23,49,Sosyal medya,İade ve değişim,Orta,97,50.39,Evet,4
+196,2024-07-27,18,Canlı destek,Kargo gecikmesi,Yüksek,7,7.88,Evet,5
+197,2024-07-27,55,Canlı destek,Kargo gecikmesi,Orta,7,27.12,Evet,
+198,2024-07-31,2,Canlı destek,Kargo gecikmesi,Orta,4,12.47,Evet,4
+199,2024-08-02,127,Telefon,Diğer,Düşük,5,14.28,Evet,5
+200,2024-08-14,126,E-posta,Diğer,Düşük,64,4.61,Hayır,1
+201,2024-08-15,56,E-posta,Ürün bilgisi,Düşük,239,13,Evet,4
+202,2024-08-19,20,E-posta,Ürün bilgisi,Düşük,315,7.02,Evet,
+203,2024-08-23,3,Telefon,Kargo gecikmesi,Orta,6,31.74,Evet,4
+204,2024-09-08,120,Canlı destek,Kargo gecikmesi,Yüksek,12,25.29,Evet,
+205,2024-09-08,145,Telefon,Hasarlı ürün,Yüksek,2,35.08,Evet,3
+206,2024-09-08,146,Sosyal medya,İade ve değişim,Orta,173,61.13,Evet,
+207,2024-09-10,146,Telefon,İade ve değişim,Orta,6,20.39,Evet,5
+208,2024-09-11,11,Canlı destek,Ürün bilgisi,Düşük,4,5.6,Evet,
+209,2024-09-11,51,Sosyal medya,Diğer,Düşük,73,7.25,Evet,
+210,2024-09-18,85,E-posta,Ödeme,Düşük,69,8.15,Evet,
+211,2024-09-21,16,Telefon,İade ve değişim,Orta,4,63.38,Evet,3
+212,2024-09-22,5,E-posta,Ürün bilgisi,Düşük,243,4.92,Evet,3
+213,2024-09-22,16,E-posta,İade ve değişim,Orta,222,39.39,Evet,4
+214,2024-09-22,104,Telefon,Kargo gecikmesi,Orta,2,11.5,Evet,5
+215,2024-09-25,24,Sosyal medya,Ürün bilgisi,Düşük,95,5.25,Evet,4
+216,2024-09-25,44,Telefon,Ürün bilgisi,Düşük,9,13.14,Evet,
+217,2024-09-29,28,E-posta,Diğer,Düşük,84,10.25,Evet,
+218,2024-10-02,87,Telefon,Hesap ve üyelik,Düşük,5,11.17,Evet,4
+219,2024-10-03,99,Canlı destek,Ödeme,Düşük,3,8.06,Evet,
+220,2024-10-07,3,Canlı destek,Ödeme,Düşük,5,13.39,Evet,
+221,2024-10-08,97,Sosyal medya,Kargo gecikmesi,Orta,51,30.46,Evet,5
+222,2024-10-08,134,Canlı destek,Ürün bilgisi,Düşük,5,12.76,Evet,5
+223,2024-10-10,55,E-posta,Kargo gecikmesi,Orta,304,20.59,Evet,
+224,2024-10-16,54,Canlı destek,Kargo gecikmesi,Yüksek,8,21.81,Evet,4
+225,2024-10-17,52,E-posta,İade ve değişim,Orta,269,35.02,Evet,2
+226,2024-10-20,67,Telefon,Ürün bilgisi,Düşük,4,0.83,Evet,5
+227,2024-10-21,108,Telefon,Ödeme,Düşük,7,4.25,Evet,5
+228,2024-10-23,137,Canlı destek,Kargo gecikmesi,Orta,4,11.25,Evet,5
+229,2024-10-27,117,Telefon,İade ve değişim,Orta,7,65.09,Evet,
+230,2024-10-29,33,Telefon,Ödeme,Düşük,3,13.93,Evet,
+231,2024-10-31,28,E-posta,Ürün bilgisi,Düşük,150,1.81,Evet,5
+232,2024-10-31,45,E-posta,İade ve değişim,Orta,189,23.67,Evet,
+233,2024-10-31,98,Canlı destek,Ödeme,Düşük,3,8.72,Evet,
+234,2024-11-01,45,E-posta,İade ve değişim,Orta,184,64.22,Evet,4
+235,2024-11-06,119,Canlı destek,Hesap ve üyelik,Düşük,12,6.99,Evet,4
+236,2024-11-07,88,Canlı destek,İade ve değişim,Orta,11,62.63,Evet,4
+237,2024-11-11,49,E-posta,Ürün bilgisi,Düşük,256,13.54,Evet,4
+238,2024-11-11,109,Telefon,Ödeme,Düşük,4,14.77,Evet,
+239,2024-11-12,19,Sosyal medya,Hesap ve üyelik,Düşük,110,6.34,Evet,4
+240,2024-11-12,95,Sosyal medya,Hesap ve üyelik,Düşük,48,12.91,Evet,5
+241,2024-11-13,66,E-posta,Ürün bilgisi,Düşük,196,9.45,Hayır,2
+242,2024-11-14,148,Sosyal medya,Diğer,Düşük,56,9.43,Hayır,1
+243,2024-11-18,85,Canlı destek,Ürün bilgisi,Düşük,12,14.47,Hayır,2
+244,2024-11-22,39,E-posta,Hesap ve üyelik,Düşük,152,3.31,Evet,
+245,2024-11-30,96,Telefon,Ürün bilgisi,Düşük,2,7.81,Evet,4
+246,2024-12-01,145,E-posta,Ürün bilgisi,Düşük,193,6.98,Evet,
+247,2024-12-02,16,Canlı destek,Kargo gecikmesi,Orta,11,22.71,Evet,
+248,2024-12-03,66,Telefon,İade ve değişim,Orta,9,68.82,Evet,4
+249,2024-12-03,132,Telefon,Hesap ve üyelik,Düşük,6,14.18,Evet,
+250,2024-12-04,5,Telefon,Kargo gecikmesi,Orta,8,28.55,Evet,4
+251,2024-12-05,9,E-posta,Kargo gecikmesi,Yüksek,103,20.54,Evet,4
+252,2024-12-05,66,Sosyal medya,İade ve değişim,Orta,87,56.41,Evet,3
+253,2024-12-07,11,E-posta,Hesap ve üyelik,Düşük,227,7.78,Hayır,2
+254,2024-12-08,145,Canlı destek,Kargo gecikmesi,Yüksek,6,19.22,Evet,
+255,2024-12-09,12,Telefon,Kargo gecikmesi,Orta,8,7.88,Evet,5
+256,2024-12-10,107,E-posta,Kargo gecikmesi,Orta,65,16.05,Evet,4
+257,2024-12-11,18,Canlı destek,İade ve değişim,Orta,10,25.48,Evet,4
+258,2024-12-12,85,Canlı destek,Hasarlı ürün,Yüksek,5,25.1,Hayır,
+259,2024-12-13,18,Canlı destek,İade ve değişim,Orta,8,26.92,Evet,3
+260,2024-12-13,94,Telefon,Ödeme,Düşük,5,2.32,Evet,5
+261,2024-12-13,132,Telefon,Kargo gecikmesi,Yüksek,4,6.38,Evet,5
+262,2024-12-14,2,E-posta,Kargo gecikmesi,Orta,52,26.97,Evet,3
+263,2024-12-14,117,E-posta,İade ve değişim,Orta,117,19.12,Evet,
+264,2024-12-15,78,E-posta,Ödeme,Düşük,309,3.31,Evet,4
+265,2024-12-19,117,Canlı destek,İade ve değişim,Orta,8,19.92,Evet,4
+266,2024-12-21,19,Telefon,Kargo gecikmesi,Yüksek,3,9.58,Evet,
+267,2024-12-23,36,Canlı destek,Ürün bilgisi,Düşük,8,11.65,Evet,5
+268,2024-12-25,63,Telefon,İade ve değişim,Orta,8,26.78,Evet,
+269,2024-12-26,63,Telefon,İade ve değişim,Orta,4,24.99,Evet,
+270,2024-12-27,39,Telefon,İade ve değişim,Orta,5,43.96,Evet,4

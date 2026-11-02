@@ -1,0 +1,563 @@
+/* PythonPatika v2 — kimlik-yetki */
+(function (W) {
+'use strict';
+const L = W.PY_LESSONS = W.PY_LESSONS || [];
+L.push(
+{
+  id: 'kimlik-yetki',
+  lv: 'ileri',
+  mod: 'Web ve API',
+  min: 80,
+  title: 'Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC',
+  sum: 'Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT\'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token döndürür, OAuth2 + PKCE akışını kurar, RBAC/ABAC ile IDOR açıklarını Pusula İK izin verisi üzerinde kapatırsın.',
+  goals: [
+    'Kimlik doğrulama ile yetkilendirmeyi ayırır, 401 ile 403 arasındaki farkı doğru uygularım.',
+    'HMAC ile JWT imzalar, alg/imza/exp/nbf/iss/aud kontrollerini doğru sırayla yapar, kid ile anahtar döndürebilirim.',
+    'Access ve refresh token döngüsünü döndürme, yeniden kullanım tespiti ve iptal ile tasarlayabilirim.',
+    'OAuth2 authorization code + PKCE ve client credentials akışlarını açıklar, PKCE doğrulamasını yazabilirim.',
+    'RBAC ve ABAC kurallarını SQL sorgusuna taşıyarak IDOR açığını kapatır, güvenli parola sıfırlama akışı tasarlayabilirim.'
+  ],
+  needs: ['sqlite3'],
+  body: `
+<h2>Neden önemli?</h2>
+<p>Pusula A.Ş.'nin İK portalını düşün. Çalışan kendi izinlerini görür ve yeni izin ister; yönetici yalnız kendi ekibinin izinlerini onaylar; İK uzmanı herkesi görür ama maaş ekranına giremez; bordro servisi gece çalışıp izin günlerini çeker. Bir kullanıcının <b>kim olduğunu</b> kanıtlamak ile <b>neye dokunabileceğine</b> karar vermek ayrı işlerdir ve ikisinden birindeki tek bir açık, 2.199 çalışanın sağlık izni kayıtlarını herkese açar. OWASP listesinde "Bozuk erişim kontrolü" (Broken Access Control) yıllardır ilk sırada; bu dersi bu yüzden ayrı tuttuk.</p>
+<p>Web güvenliği dersinde parolayı tuzlu PBKDF2 ile saklamayı, HMAC ile imzalı token üretmeyi ve <code>hmac.compare_digest</code> ile sabit zamanlı karşılaştırmayı gördün. Burada o temelin üstüne gerçek bir kimlik sistemi kuruyoruz: oturum ve token seçimi, JWT'nin doğru doğrulanması, access/refresh döngüsü, OAuth2 akışları, rol ve öznitelik tabanlı yetki, nesne düzeyinde yetki (IDOR) ve parola sıfırlama.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>Sorduğu soru</th><th>Başarısızsa HTTP kodu</th><th>Pusula İK örneği</th></tr>
+<tr><td>Kimlik doğrulama (authentication, authN)</td><td>Sen kimsin?</td><td>401 Unauthorized</td><td>Token yok, süresi dolmuş ya da imzası bozuk</td></tr>
+<tr><td>Yetkilendirme (authorization, authZ)</td><td>Bunu yapmaya iznin var mı?</td><td>403 Forbidden (ya da 404)</td><td>Çalışan, başkasının izin kaydını onaylamaya çalışıyor</td></tr>
+<tr><td>Hesap verebilirlik (audit)</td><td>Kim, ne zaman, ne yaptı?</td><td>-</td><td>"Rıza Karabulut 19 numaralı izni onayladı" kaydı</td></tr>
+</table></div>
+<div class="note"><b>401 adı yanıltıcıdır</b>HTTP standardında 401'in adı "Unauthorized" olsa da anlamı "kimliğini doğrulayamadım"dır. Kim olduğunu bildiğin ama izin vermediğin durum 403'tür. Kaydın varlığını bile sızdırmak istemiyorsan 404 döndürmek de meşru bir seçimdir.</div>
+
+<h2>Oturum çerezi mi, token mı?</h2>
+<p>Klasik yöntemde sunucu giriş başarılı olunca rastgele bir oturum kimliği (session id) üretir, bunu sunucu tarafında (veritabanı ya da Redis) saklar ve tarayıcıya çerez olarak verir. Token yönteminde ise sunucu kullanıcının bilgilerini (claim) imzalayıp verir; sonraki isteklerde imzayı doğrulamak yeter, depoya bakmak gerekmez.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Sunucu oturumu + çerez</th><th>İmzalı token (JWT)</th></tr>
+<tr><td>Sunucuda durum</td><td>Var (oturum deposu)</td><td>Yok ya da az (iptal listesi)</td></tr>
+<tr><td>Anında iptal</td><td>Kolay: kaydı sil</td><td>Zor: süre dolana kadar geçerli; iptal listesi gerekir</td></tr>
+<tr><td>Ölçekleme</td><td>Ortak depo ister</td><td>Her servis anahtarla doğrular</td></tr>
+<tr><td>Uygun olduğu yer</td><td>Tarayıcıdaki klasik web uygulaması</td><td>Mobil, servisler arası çağrı, birden çok API</td></tr>
+<tr><td>Başlıca risk</td><td>CSRF (SameSite ve CSRF token ile kapanır)</td><td>XSS ile çalınma (localStorage), uzun ömür</td></tr>
+</table></div>
+<p>Tarayıcıda hangi yöntemi seçersen seç, kimlik taşıyan çerez <code>HttpOnly</code> (JavaScript okuyamaz), <code>Secure</code> (yalnız HTTPS) ve <code>SameSite=Lax</code> ya da <code>Strict</code> bayraklarıyla verilmelidir. Tek sayfalı uygulamalarda yaygın ve güvenli desen: kısa ömürlü access token bellekte, refresh token HttpOnly çerezde.</p>
+
+<h2>Giriş akışı ve deneme sınırlama</h2>
+<p>Parolanın nasıl saklandığını web güvenliği dersinde gördün. Giriş uç noktasının iki ek görevi var: kullanıcı numaralandırmayı (user enumeration) önlemek ve kaba kuvvet (brute force) denemelerini yavaşlatmak. "Böyle bir kullanıcı yok" ile "parola yanlış" mesajları farklıysa saldırgan geçerli e-postaları toplar; bu yüzden tek bir mesaj kullan. Deneme sınırlaması için her hesap (ve ayrıca her IP) için kayan bir pencerede başarısız denemeleri say. Saati dışarıdan vermek, kodu test edilebilir yapar.</p>
+<pre class="py">from collections import defaultdict, deque
+
+class GirisKoruyucu:
+    def __init__(self, limit=3, pencere=300):
+        self.limit, self.pencere = limit, pencere
+        self.hatalar = defaultdict(deque)      # hesap -&gt; başarısız deneme zamanları
+
+    def izin_var_mi(self, hesap, simdi):
+        q = self.hatalar[hesap]
+        while q and q[0] &lt;= simdi - self.pencere:   # pencereden çıkanları at
+            q.popleft()
+        return len(q) &lt; self.limit
+
+    def basarisiz(self, hesap, simdi):
+        self.hatalar[hesap].append(simdi)
+
+k = GirisKoruyucu()
+for t in (0, 10, 20, 30, 400):
+    izin = k.izin_var_mi("cem@pusula.com", t)
+    print(t, "deneyebilir" if izin else "429 Too Many Requests")
+    if izin:
+        k.basarisiz("cem@pusula.com", t)</pre>
+<p>Üçüncü başarısız denemeden sonra pencere dolana kadar istek reddedilir; 400. saniyede eski kayıtlar pencereden düştüğü için yeniden denenebilir. Gerçek sistemde sayaç Redis'te tutulur (bunu Redis ve kuyruk dersinde göreceksin) ve kilit yerine artan gecikme ya da CAPTCHA tercih edilir; kalıcı kilit, saldırganın başkasının hesabını kilitlemesine izin verir.</p>
+
+<h2>JWT'yi doğru kullanmak</h2>
+<p>JWT (JSON Web Token) üç base64url parçadan oluşur: <code>başlık.yük.imza</code>. Başlıkta algoritma (<code>alg</code>) ve anahtar kimliği (<code>kid</code>), yükte claim'ler bulunur. Yük <b>şifreli değildir</b>, yalnız imzalıdır; içine parola, TC kimlik no ya da maaş koyma. İmzalı olmak "değiştirilemez" demektir, "gizli" demek değildir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Claim</th><th>Anlamı</th><th>Doğrulamada ne yapılır?</th></tr>
+<tr><td><code>sub</code></td><td>Konu: kullanıcı kimliği</td><td>Yetki kararında kullanılır</td></tr>
+<tr><td><code>exp</code></td><td>Bitiş zamanı (Unix saniye)</td><td><code>simdi &gt;= exp</code> ise reddet (küçük saat kayması toleransı olabilir)</td></tr>
+<tr><td><code>nbf</code>, <code>iat</code></td><td>Bundan önce geçersiz / üretilme anı</td><td><code>simdi &lt; nbf</code> ise reddet</td></tr>
+<tr><td><code>iss</code></td><td>Tokenı kim üretti</td><td>Beklenen yayıncıya eşit olmalı</td></tr>
+<tr><td><code>aud</code></td><td>Token kimin için</td><td>Bu servis listede yoksa reddet; başka API'nin tokenı burada geçmemeli</td></tr>
+<tr><td><code>jti</code></td><td>Tokenın benzersiz kimliği</td><td>İptal listesinde mi diye bakılır</td></tr>
+<tr><td><code>scope</code></td><td>Verilen kapsamlar</td><td>Uç nokta gereken kapsamı ister</td></tr>
+</table></div>
+<p>Aşağıdaki kutu PyJWT kütüphanesinin HS256 için ürettiği tokenın aynısını saf Python ile üretir ve doğrular. Sırayla: algoritmayı sabitle, imzayı sabit zamanlı karşılaştır, <b>sonra</b> claim'lere bak.</p>
+<pre class="py">import base64, hashlib, hmac, json
+
+def b64e(b):
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+
+def b64d(s):
+    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+
+def imzala(yuk, anahtar):
+    baslik = {"alg": "HS256", "typ": "JWT"}
+    govde = b64e(json.dumps(baslik, separators=(",", ":")).encode()) + "." + \\
+            b64e(json.dumps(yuk, separators=(",", ":")).encode())
+    imza = hmac.new(anahtar, govde.encode(), hashlib.sha256).digest()
+    return govde + "." + b64e(imza)
+
+def dogrula(token, anahtar, simdi, aud, iss):
+    b, y, i = token.split(".")
+    if json.loads(b64d(b)).get("alg") != "HS256":       # alg=none saldırısına kapı açma
+        return "algoritma reddedildi"
+    beklenen = hmac.new(anahtar, f"{b}.{y}".encode(), hashlib.sha256).digest()
+    if not hmac.compare_digest(beklenen, b64d(i)):
+        return "imza geçersiz"
+    yuk = json.loads(b64d(y))
+    if simdi &gt;= yuk["exp"]:
+        return "süresi dolmuş"
+    if yuk.get("iss") != iss or aud not in (yuk["aud"] if isinstance(yuk["aud"], list) else [yuk["aud"]]):
+        return "yanlış yayıncı ya da hedef"
+    return yuk
+
+ANAHTAR = b"pusula-ik-ornek-anahtar-32-bayt!"
+t = imzala({"sub": "418", "iss": "pusula-sso", "aud": "izin-api", "exp": 1_000_900}, ANAHTAR)
+print(t[:40] + "...")
+print(dogrula(t, ANAHTAR, 1_000_000, "izin-api", "pusula-sso"))
+print(dogrula(t, ANAHTAR, 1_000_000, "bordro-api", "pusula-sso"))
+print(dogrula(t, ANAHTAR, 1_001_000, "izin-api", "pusula-sso"))
+sahte = t.rsplit(".", 1)[0][:-2] + "fQ." + t.rsplit(".", 1)[1]
+print(dogrula(sahte, ANAHTAR, 1_000_000, "izin-api", "pusula-sso"))</pre>
+<div class="warn"><b>Bilinen JWT saldırıları</b><b>alg=none</b>: başlıkta algoritmayı "none" yapıp imzayı silmek; tokendaki <code>alg</code> alanına güvenen kütüphane kandırılır. <b>Algoritma karışıklığı</b>: RS256 bekleyen sunucuya, açık anahtarı HMAC anahtarı gibi kullanılan HS256 token yollamak. Çözüm aynı: kabul edilen algoritmaları sunucuda sabitle (<code>jwt.decode(t, key, algorithms=["HS256"])</code>), tokendaki <code>alg</code>'a göre davranma.</div>
+<h3>Anahtar döndürme ve kid</h3>
+<p>İmza anahtarı bir gün değişecek (sızma, periyodik döndürme). Başlıktaki <code>kid</code> hangi anahtarla imzalandığını söyler; sunucu birkaç anahtarı aynı anda tanır: yeni tokenlar yeni anahtarla imzalanır, eski anahtar yalnız doğrulama için en uzun token ömrü kadar tutulur, sonra silinir. Asimetrik algoritmalarda (RS256, ES256) açık anahtarlar bir JWKS uç noktasında yayınlanır.</p>
+
+<h2>Access ve refresh token</h2>
+<p>JWT'yi iptal etmek zor olduğu için access token kısa ömürlü olur (5–15 dakika). Kullanıcıyı her 15 dakikada bir giriş ekranına göndermemek için yanında uzun ömürlü bir <b>refresh token</b> verilir; bu token yalnız yetki sunucusuna gider ve yeni bir access token alır. Refresh token sunucuda (özeti) saklanan, iptal edilebilen bir kayıttır.</p>
+<ul>
+<li><b>Döndürme (rotation):</b> her yenilemede eski refresh token geçersiz olur, yenisi verilir.</li>
+<li><b>Yeniden kullanım tespiti (reuse detection):</b> geçersiz olmuş bir refresh token tekrar gelirse token çalınmış demektir; o "aileye" ait tüm tokenlar iptal edilir, kullanıcı yeniden giriş yapar.</li>
+<li><b>İptal listesi (denylist):</b> çıkışta ya da hesap kapatılınca access tokenın <code>jti</code>'si süresi dolana kadar listede tutulur.</li>
+</ul>
+<pre class="py">import itertools
+
+sayac = itertools.count(1)
+gecerli, kullanilmis, aile_of = {}, set(), {}
+
+def ver(kullanici, aile):
+    t = f"rt-{next(sayac)}"
+    gecerli[t] = kullanici
+    aile_of[t] = aile
+    return t
+
+def yenile(t):
+    if t in kullanilmis:                        # çalıntı token tekrar geldi
+        aile = aile_of[t]
+        for x in [x for x in gecerli if aile_of[x] == aile]:
+            del gecerli[x]
+        return "ALARM: aile iptal edildi"
+    kullanici = gecerli.pop(t)
+    kullanilmis.add(t)
+    return ver(kullanici, aile_of[t])
+
+r1 = ver("emp-418", aile="cihaz-A")
+r2 = yenile(r1)
+print(r1, "-&gt;", r2)
+print(yenile(r1))           # saldırgan eski tokenı denedi
+print("geçerli tokenlar:", gecerli)</pre>
+
+<h2>Yetkilendirme modelleri: RBAC ve ABAC</h2>
+<p><b>RBAC</b> (Role-Based Access Control) kullanıcıya rol, role izin verir: <code>calisan → izin:oku_kendi, izin:iste</code>; <code>yonetici → calisan'ın her şeyi + izin:onayla</code>. Basit ve denetlenebilirdir. Ama "yönetici yalnız <b>kendi ekibinin</b> iznini onaylar" kuralını rol tek başına ifade edemez. Burada <b>ABAC</b> (Attribute-Based Access Control) devreye girer: karar, kullanıcının, kaynağın ve ortamın özniteliklerine bakan kurallarla verilir (<code>kaynak.calisan.manager_id == kullanici.emp_id</code>, mesai saati, şehir...). Pratikte ikisi birlikte kullanılır: rol kaba kapıyı açar, öznitelik kuralı satırı süzer.</p>
+<pre class="py">import veri
+
+calisanlar = {c["emp_id"]: c for c in veri.kayitlar("pusula_ik", "ik_employees")}
+izinler = veri.kayitlar("pusula_ik", "ik_leaves")
+
+ROL_IZIN = {"calisan": {"izin:oku"}, "yonetici": {"izin:oku", "izin:onayla"}, "ik": {"izin:oku", "izin:onayla"}}
+
+def gorebilir_mi(kullanici, izin_kaydi):
+    if "izin:oku" not in ROL_IZIN[kullanici["rol"]]:          # RBAC kapısı
+        return False
+    if kullanici["rol"] == "ik":
+        return True
+    sahip = calisanlar[izin_kaydi["emp_id"]]
+    return sahip["emp_id"] == kullanici["emp_id"] or sahip["manager_id"] == kullanici["emp_id"]   # ABAC
+
+riza = {"emp_id": 13, "rol": "yonetici"}
+cem = {"emp_id": 418, "rol": "calisan"}
+print("Rıza görebilir:", sum(gorebilir_mi(riza, k) for k in izinler))
+print("Cem görebilir:", sum(gorebilir_mi(cem, k) for k in izinler))</pre>
+<p>Rıza Karabulut'un doğrudan bağlı 122 kişisi (ayrılanlar dahil) var; 1.042 ekip izni ve kendi 4 izni ona görünür. Cem yalnız kendi 7 kaydını görür. Gerçek sistemde bu süzme Python döngüsüyle değil SQL'in <code>WHERE</code> koşuluyla yapılır; aksi hâlde tüm tabloyu çekip süzersin.</p>
+
+<h2>Nesne düzeyinde yetki ve IDOR</h2>
+<p>IDOR (Insecure Direct Object Reference), kullanıcının URL'deki kimliği değiştirerek başkasının kaydına ulaşmasıdır: <code>GET /izinler/3319</code> Cem'in yıllık iznini döndürüyorsa, <code>/izinler/3320</code> denemek başkasının hastalık iznini açar. Uç noktada "giriş yapmış mı?" kontrolü vardır ama "<b>bu kayıt onun mu?</b>" kontrolü yoktur. API güvenliği listesinde (OWASP API Top 10) bu açık BOLA (Broken Object Level Authorization) adıyla ilk sıradadır.</p>
+<div class="steps-list"><ol>
+<li>Kaydı her zaman kullanıcının kapsamıyla sorgula: <code>WHERE leave_id = ? AND emp_id = ?</code> ya da yönetici için ekip alt sorgusu.</li>
+<li>Yetki kontrolünü tek bir yerde topla (servis katmanı, Django'da <code>get_queryset</code>); her view'da yeniden yazma.</li>
+<li>Tahmin edilemez kimlik (UUID) kullanmak saldırıyı zorlaştırır ama <b>yetki kontrolünün yerini tutmaz</b>.</li>
+<li>Yetkisiz erişimde 404 dönmek kaydın varlığını gizler; denemeleri logla.</li>
+</ol></div>
+
+<h2>OAuth2 ve OpenID Connect</h2>
+<p>OAuth2 bir <b>yetki devri</b> çerçevesidir: kullanıcı (resource owner), bir uygulamaya (client) kendi parolasını vermeden, yetki sunucusunun (authorization server) verdiği token ile kaynak sunucusundaki (resource server) verisine sınırlı erişim tanır. OAuth2 tek başına "kim giriş yaptı" sorusunu cevaplamaz; bunun için üstüne kurulan <b>OpenID Connect (OIDC)</b> bir <code>id_token</code> (kullanıcı bilgisi taşıyan JWT) ekler. "Google ile giriş", kurumsal SSO (tek oturum açma; Azure AD/Entra ID, Okta, Keycloak) OIDC'dir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Akış (grant)</th><th>Kim kullanır?</th><th>Durum</th></tr>
+<tr><td>Authorization code + PKCE</td><td>Web, mobil, tek sayfalı uygulama (kullanıcı var)</td><td>Önerilen</td></tr>
+<tr><td>Client credentials</td><td>Servisten servise (kullanıcı yok): bordro işi izin API'sini çağırır</td><td>Önerilen</td></tr>
+<tr><td>Refresh token</td><td>Access token yenileme</td><td>Döndürmeyle birlikte</td></tr>
+<tr><td>Implicit, Password (ROPC)</td><td>Eski SPA'lar, birinci taraf uygulamalar</td><td>OAuth 2.1 ile kaldırıldı</td></tr>
+</table></div>
+<div class="steps-list"><ol>
+<li>Uygulama rastgele bir <code>code_verifier</code> üretir, SHA-256 özetinin base64url hâlini <code>code_challenge</code> olarak hesaplar; ayrıca CSRF'e karşı rastgele bir <code>state</code> üretir.</li>
+<li>Kullanıcıyı <code>/authorize?response_type=code&amp;client_id=...&amp;scope=openid izin:oku&amp;code_challenge=...&amp;code_challenge_method=S256&amp;state=...</code> adresine yönlendirir.</li>
+<li>Kullanıcı yetki sunucusunda giriş yapar ve onay verir; sunucu <code>redirect_uri?code=...&amp;state=...</code> ile geri döner. Uygulama <code>state</code>'in kendi ürettiğiyle aynı olduğunu kontrol eder.</li>
+<li>Uygulama arka kanaldan <code>/token</code> uç noktasına <code>code</code> ve <code>code_verifier</code>'ı yollar. Sunucu verifier'ın özetini saklı challenge ile karşılaştırır; tutarsa access, refresh (ve OIDC'de id) token verir.</li>
+</ol></div>
+<pre class="py">import base64, hashlib
+
+def challenge(verifier):
+    ozet = hashlib.sha256(verifier.encode("ascii")).digest()
+    return base64.urlsafe_b64encode(ozet).rstrip(b"=").decode()
+
+# RFC 7636 ekindeki resmi örnek değerler
+verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+print(challenge(verifier))
+print(challenge(verifier) == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")</pre>
+<p>PKCE (Proof Key for Code Exchange) sayesinde yönlendirme sırasında <code>code</code> çalınsa bile, verifier'ı bilmeyen saldırgan onu tokena çeviremez. Client credentials akışında ise kullanıcı ve tarayıcı yoktur: servis kendi <code>client_id</code> ve <code>client_secret</code>'ı (ya da imzalı bir JWT'yi) doğrudan <code>/token</code>'a yollar ve yalnız kendi kapsamlarını alır.</p>
+
+<h2>FastAPI'de güvenlik bağımlılıkları</h2>
+<p>FastAPI dersinde <code>Depends</code>'i gördün. Kimlik doğrulama da bir bağımlılıktır: <code>OAuth2PasswordBearer</code>, <code>Authorization: Bearer ...</code> başlığını okur ve OpenAPI belgesine kilit simgesini ekler; <code>Security</code> ise <code>Depends</code>'in kapsam (scope) taşıyan hâlidir.</p>
+<pre class="code"># pip install "fastapi[standard]" pyjwt
+from typing import Annotated
+import jwt
+from fastapi import FastAPI, HTTPException, Security, status
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+
+ANAHTAR = "ortam-degiskeninden-oku"
+oauth2 = OAuth2PasswordBearer(tokenUrl="token", scopes={"izin:oku": "İzinleri oku", "izin:onayla": "İzin onayla"})
+app = FastAPI()
+
+def aktif_kullanici(guvenlik: SecurityScopes, token: Annotated[str, Security(oauth2)]):
+    try:
+        yuk = jwt.decode(token, ANAHTAR, algorithms=["HS256"], audience="izin-api", issuer="pusula-sso")
+    except jwt.PyJWTError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Geçersiz token",
+                            headers={"WWW-Authenticate": "Bearer"})
+    eksik = set(guvenlik.scopes) - set(yuk.get("scope", "").split())
+    if eksik:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, f"Eksik kapsam: {sorted(eksik)}")
+    return yuk
+
+@app.post("/izinler/{izin_id}/onay")
+def onayla(izin_id: int, k: Annotated[dict, Security(aktif_kullanici, scopes=["izin:onayla"])]):
+    # kapsam yetmez: bu izin, k["sub"] yöneticisinin ekibinden mi? (nesne düzeyinde kontrol)
+    ...</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install "fastapi[standard]" pyjwt</code> kur, dosyayı <code>main.py</code> olarak kaydet, <code>fastapi dev main.py</code> ile başlat ve <code>http://127.0.0.1:8000/docs</code> sayfasındaki "Authorize" düğmesini dene. Bu kutu tarayıcıda çalışmaz; alıştırmalar aynı mantığı saf Python ile kuruyor.</div>
+
+<h2>Django'da kimlik ve izinler</h2>
+<p>Django kullanıcı modeli, gruplar ve model başına otomatik izinlerle (<code>add_</code>, <code>change_</code>, <code>delete_</code>, <code>view_</code>) RBAC'ı hazır verir. Nesne düzeyinde kontrolü ise sen yazarsın; en güvenli yer, kullanıcının görebileceği satırları döndüren <code>get_queryset</code>'tir. DRF izin sınıflarını İleri Django dersinde yazacaksın.</p>
+<pre class="code">from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
+@login_required
+@permission_required("izin.view_izin", raise_exception=True)   # RBAC: 403
+def izin_detay(request, pk):
+    u = request.user
+    kapsam = Q(calisan=u.calisan) | Q(calisan__yonetici=u.calisan)    # ABAC: kendi + ekip
+    izin = get_object_or_404(Izin.objects.filter(kapsam), pk=pk)     # IDOR yerine 404
+    ...</pre>
+
+<h2>Parola sıfırlama ve e-posta doğrulama</h2>
+<p>Parola sıfırlama, giriş ekranının arka kapısıdır; zayıf tasarlanırsa parolayı bilmeden hesap ele geçirilir. Güvenli tasarımın kuralları:</p>
+<ul>
+<li>Yanıt, e-posta kayıtlı olsun olmasın <b>aynıdır</b>: "Hesap varsa bağlantı gönderdik."</li>
+<li>Token <code>secrets.token_urlsafe(32)</code> ile üretilir; veritabanında yalnız <b>SHA-256 özeti</b> saklanır (veritabanı sızsa da bağlantı kullanılamaz).</li>
+<li>Kısa ömürlüdür (15–60 dk) ve <b>tek kullanımlıktır</b>; yeni istek eski tokenları geçersiz kılar.</li>
+<li>Başarılı sıfırlamadan sonra kullanıcının tüm oturumları ve refresh tokenları iptal edilir ve kullanıcıya bilgilendirme e-postası gider.</li>
+<li>Bağlantı adresi yapılandırmadan gelir, isteğin <code>Host</code> başlığından kurulmaz (Host başlığı zehirleme).</li>
+</ul>
+<p>E-posta doğrulama bağlantısı da aynı kalıptır; ek olarak <code>purpose</code> alanı tutulur ki doğrulama tokenı sıfırlamada kullanılamasın.</p>
+<div class="note"><b>Gerçek işte</b>Kurumsal projelerde kimlik sistemini genellikle sıfırdan yazmazsın: şirketin kimlik sağlayıcısı (Entra ID, Okta, Keycloak) OIDC ile bağlanır, uygulama yalnız tokenı doğrular ve yetki kurallarını uygular. Senden beklenen; tokenı doğru doğrulamak (alg, imza, exp, aud, iss), kapsam ve rolleri doğru eşlemek ve her uç noktada nesne düzeyinde kontrolü unutmamaktır. Güvenlik testlerinde ilk denenen şey de budur: iki kullanıcıyla giriş yapıp birinin kimliğini diğerinin isteğine koymak.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kriptografiyi kütüphaneye bırak</h3>
+<p>Bu dersteki saf Python imzalar öğretim içindir. Üretimde <code>PyJWT</code> ya da <code>authlib</code> kullan, <code>algorithms</code> listesini her zaman ver, <code>audience</code> ve <code>issuer</code> doğrulamasını aç. Servisler arası güvende asimetrik imza (RS256/ES256) tercih edilir: yalnız kimlik sağlayıcısı özel anahtarı bilir, diğer servisler JWKS'ten açık anahtarı çeker.</p>
+<h3>Politikayı koddan ayır</h3>
+<p>Kurallar çoğaldıkça <code>if rol == ...</code> zincirleri dağılır. Olgun sistemler yetki kararını tek bir "politika karar noktasına" toplar: Open Policy Agent (Rego), Cedar ya da Google Zanzibar esinli ilişki tabanlı (ReBAC) sistemler (OpenFGA, SpiceDB). Uygulama yalnız "bu özne bu eylemi bu kaynakta yapabilir mi?" diye sorar.</p>
+<h3>Denetim izi ve en az yetki</h3>
+<p>Her yetki kararını (özellikle reddedilenleri) yapılandırılmış log olarak kaydet; birden çok 403 üreten kullanıcı IDOR taraması yapıyor olabilir. Servis hesaplarına yalnız gereken kapsamları ver, adım adım yükseltme (step-up authentication) ile hassas işlemlerde (maaş görüntüleme) ikinci faktör iste.</p>
+</section>
+`,
+  ex: [
+    {
+      t: 'mc',
+      stage: 'Isınma',
+      q: 'İzin API\'sine geçerli bir tokenla gelen çalışan, başka bir çalışanın izin kaydını onaylamaya çalışıyor. Sunucu hangi durum koduyla yanıt vermeli?',
+      o: ['401 Unauthorized, çünkü kullanıcı yetkisiz', '403 Forbidden (ya da kaydı gizlemek için 404)', '400 Bad Request', '500 Internal Server Error'],
+      a: 1,
+      why: 'Kimliği doğrulanmış (token geçerli) ama bu işleme izni yok: bu yetkilendirme hatasıdır, 403. Kaydın varlığını sızdırmamak için 404 de seçilebilir. 401 yalnız kimlik doğrulanamadığında (token yok, bozuk, süresi dolmuş) kullanılır.'
+    },
+    {
+      t: 'mc',
+      stage: 'Isınma',
+      q: 'Refresh token döndürme (rotation) kullanan bir sistemde, <b>zaten kullanılmış</b> bir refresh token yeniden geliyor. En doğru tepki hangisi?',
+      o: ['Yeni bir access token verip devam etmek', 'Yalnız o isteği reddetmek', 'Token çalınmış say; aynı ailedeki tüm tokenları iptal et', 'Kullanıcının parolasını kendiliğinden değiştirmek'],
+      a: 2,
+      why: 'Kullanılmış bir refresh tokenın tekrar gelmesi, iki tarafın (gerçek kullanıcı ve saldırgan) aynı tokena sahip olduğunu gösterir. Hangisinin meşru olduğu bilinemediği için aile tümden iptal edilir ve kullanıcı yeniden giriş yapar. Yalnız isteği reddetmek saldırganın elindeki yeni tokenı geçerli bırakabilir.'
+    },
+    {
+      t: 'mc',
+      stage: 'Isınma',
+      q: 'Authorization code akışında PKCE neyi engeller?',
+      o: ['Çalınan code\'un saldırganca tokena çevrilmesini', 'Kullanıcının giriş ekranında zayıf parola seçmesini', 'Token yükünün ağda üçüncü kişilerce okunmasını', 'Access tokenın süresinin erken dolmasını'],
+      a: 0,
+      why: 'Uygulama code_verifier\'ı yalnız kendisi bilir; yetki sunucusu /token çağrısında verifier\'ın SHA-256 özetinin baştaki code_challenge ile eşleştiğini kontrol eder. Code\'u ele geçiren saldırgan verifier\'ı bilmediği için token alamaz. PKCE yükü şifrelemez, parola kalitesiyle ilgisi yoktur.'
+    },
+    {
+      t: 'predict',
+      stage: 'Kodu oku',
+      q: 'JWT parçaları base64url ile kodlanır ve sondaki <code>=</code> dolgusu atılır. Bu kod ne yazdırır?',
+      code: 'import base64, json\nyuk = json.dumps({"sub": "42"}, separators=(",", ":")).encode()\nham = base64.urlsafe_b64encode(yuk)\nprint(ham)\nprint(ham.rstrip(b"=").decode())\nprint(len(yuk), len(ham))\n',
+      o: ['b\'eyJzdWIiOiI0MiJ9\'\neyJzdWIiOiI0MiJ9\n12 16', 'b\'eyJzdWIiOiI0MiJ9==\'\neyJzdWIiOiI0MiJ9\n12 18', 'eyJzdWIiOiI0MiJ9\neyJzdWIiOiI0MiJ9\n12 16', 'b\'eyJzdWIiOiI0MiJ9\'\neyJzdWIiOiI0MiJ9\n16 12'],
+      a: 0,
+      why: 'base64 her 3 baytı 4 karaktere çevirir; 12 bayt tam 4 grup eder, 16 karakter çıkar ve dolgu gerekmez. Sonuç bytes olduğu için ilk satır b\'...\' biçimindedir. Uzunluk 3\'ün katı olmasaydı sona = eklenirdi; JWT bunları atar, çözerken geri eklemek gerekir.'
+    },
+    {
+      t: 'predict',
+      stage: 'Kodu oku',
+      q: 'Claim doğrulaması: bu kod ne yazdırır?',
+      code: 'def kontrol(yuk, simdi, aud, tolerans=0):\n    if simdi >= yuk["exp"] + tolerans:\n        return "exp"\n    if simdi < yuk.get("nbf", 0) - tolerans:\n        return "nbf"\n    hedefler = yuk["aud"] if isinstance(yuk["aud"], list) else [yuk["aud"]]\n    return "tamam" if aud in hedefler else "aud"\n\nyuk = {"exp": 1000, "nbf": 400, "aud": ["izin-api", "bordro-api"]}\nprint(kontrol(yuk, 1000, "izin-api"), kontrol(yuk, 1000, "izin-api", tolerans=30),\n      kontrol(yuk, 380, "bordro-api", tolerans=30), kontrol(yuk, 500, "ik-api"))\n',
+      o: ['tamam tamam tamam aud', 'exp tamam nbf aud', 'exp tamam tamam aud', 'exp exp tamam tamam'],
+      a: 2,
+      why: 'simdi == exp anında token geçersizdir (exp dahil değil). 30 saniyelik tolerans exp\'i 1030\'a, nbf\'yi 370\'e kaydırır; bu yüzden 1000 ve 380 kabul edilir. aud bir liste olabilir; ik-api listede olmadığı için "aud" döner.'
+    },
+    {
+      t: 'predict',
+      stage: 'Kodu oku',
+      q: 'Rol kalıtımlı RBAC: bu kod ne yazdırır?',
+      code: 'ROLLER = {\n    "calisan": {"izin": {"izin:iste", "izin:oku"}, "ust": None},\n    "yonetici": {"izin": {"izin:onayla"}, "ust": "calisan"},\n    "ik": {"izin": {"rapor:oku"}, "ust": "yonetici"},\n}\n\ndef izinler(rol):\n    toplam = set()\n    while rol:\n        toplam |= ROLLER[rol]["izin"]\n        rol = ROLLER[rol]["ust"]\n    return toplam\n\nprint(len(izinler("calisan")), len(izinler("ik")), "izin:onayla" in izinler("calisan"))\n',
+      o: ['2 1 False', '2 4 True', '2 4 False', '3 4 False'],
+      a: 2,
+      why: 'Döngü rolden başlayıp üst rollere çıkarak izinleri birleştirir. ik → yonetici → calisan zinciriyle 1 + 1 + 2 = 4 izin toplanır. Kalıtım yalnız yukarı doğrudur: calisan yöneticinin onay iznini almaz.'
+    },
+    {
+      t: 'order',
+      stage: 'Kodu oku',
+      q: '<p>PKCE\'de verilen <code>code_verifier</code>\'dan <code>code_challenge</code> (S256) hesaplayıp RFC 7636 örnek değeriyle karşılaştıran programın satırlarını sırala.</p>',
+      lines: ['import base64, hashlib', 'verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"', 'ozet = hashlib.sha256(verifier.encode("ascii")).digest()', 'kodlu = base64.urlsafe_b64encode(ozet)', 'challenge = kodlu.rstrip(b"=").decode()', 'print(challenge == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")'],
+      expect: 'True\n',
+      hint: 'Önce özet (bytes), sonra base64url, en son dolgu atılıp metne çevrilir.',
+      why: 'S256 yöntemi: challenge = BASE64URL(SHA256(ASCII(verifier))), dolgusuz. Yetki sunucusu aynı hesabı /token çağrısında yapar ve sonuçları karşılaştırır.'
+    },
+    {
+      id: 'kimlik-yetki-1',
+      t: 'code',
+      stage: 'Rehberli',
+      diff: 1,
+      q: '<p>JWT parçaları için iki yardımcı yaz. <code>b64e(veri: bytes) -&gt; str</code>: <code>base64.urlsafe_b64encode</code> ile kodlasın, sondaki <code>=</code> dolgusunu atsın ve <code>str</code> döndürsün. <code>b64d(metin: str) -&gt; bytes</code>: eksik dolguyu geri ekleyip çözsün. Dolgu sayısı, uzunluğu 4\'ün katına tamamlayacak kadar olmalı (0, 1 ya da 2).</p>',
+      guide: ['b64e: urlsafe_b64encode bytes döndürür; rstrip(b"=") ile dolguyu at, decode() ile metne çevir.', 'b64d: eksik dolgu sayısı (-len(metin)) % 4 ile bulunur.', 'Metne o kadar "=" ekleyip urlsafe_b64decode ile çöz.'],
+      example: 'for n in [8, 9, 10, 11, 12]:\n    print(n, (-n) % 4)   # 4\'ün katına tamamlamak için eksik sayı\n',
+      start: 'import base64\n\ndef b64e(veri):\n    # TODO: urlsafe kodla, = dolgusunu at, str döndür\n    pass\n\ndef b64d(metin):\n    # TODO: eksik = dolgusunu ekle ve çöz\n    pass\n',
+      sol: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n',
+      tests: 'assert b64e(b\'{"alg":"HS256","typ":"JWT"}\') == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "JWT başlığının bilinen kodlaması bu olmalı"\nassert isinstance(b64e(b"a"), str), "b64e str döndürmeli (decode et)"\nassert "=" not in b64e(b"ab") and "=" not in b64e(b"a"), "dolgu (=) atılmalı"\nassert b64e(bytes([251, 255])) == "-_8", "urlsafe alfabe + ve / yerine - ve _ kullanır"\nfor ham in [b"", b"a", b"ab", b"abc", b"abcd", "Ömer Çağrı".encode()]:\n    assert b64d(b64e(ham)) == ham, f"{ham!r} kodlanıp çözülünce aynısı dönmeli"\nassert b64d("eyJzdWIiOiI0MiJ9") == b\'{"sub":"42"}\', "dolgusuz parça çözülebilmeli"\n',
+      hints: ['urlsafe_b64encode bytes döndürür; metin için .decode() gerekir.', 'Eksik dolgu: (-len(metin)) % 4. Örneğin uzunluk 10 ise 2 tane "=" eklenir.', 'return base64.urlsafe_b64decode(metin + "=" * (-len(metin) % 4))'],
+      why: 'JWT standardı (RFC 7515) dolgusuz base64url ister; URL ve başlıkta sorun çıkaran + / = karakterleri böylece ortadan kalkar. Çözerken dolguyu geri eklemezsen binascii.Error alırsın.'
+    },
+    {
+      id: 'kimlik-yetki-2',
+      t: 'code',
+      stage: 'Rehberli',
+      diff: 2,
+      q: '<p><code>jwt_imzala(yuk, anahtar)</code> fonksiyonunu yaz: HS256 ile imzalı, PyJWT\'nin ürettiğiyle birebir aynı token döndürsün. Başlık <code>{"alg": "HS256", "typ": "JWT"}</code>. Başlık ve yük <code>json.dumps(..., separators=(",", ":"))</code> ile (boşluksuz, anahtar sırası korunarak) metne çevrilir, <code>b64e</code> ile kodlanır ve nokta ile birleştirilir. İmza, bu <code>"başlık.yük"</code> metninin <code>anahtar</code> (bytes) ile HMAC-SHA256 özetidir; o da <code>b64e</code> ile kodlanıp sona eklenir. <code>b64e</code> hazır.</p>',
+      guide: ['Başlığı ve yükü separators=(",", ":") ile JSON\'a çevir, encode() et, b64e ile kodla.', 'imzalanacak = başlık_kodlu + "." + yük_kodlu', 'hmac.new(anahtar, imzalanacak.encode(), hashlib.sha256).digest() ile ham imzayı al.', 'imzalanacak + "." + b64e(imza) döndür.'],
+      example: 'import hmac, hashlib\nmesaj = "siparis=1042&tutar=350"\nprint(hmac.new(b"gizli", mesaj.encode(), hashlib.sha256).hexdigest()[:16])\n',
+      start: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef jwt_imzala(yuk, anahtar):\n    baslik = {"alg": "HS256", "typ": "JWT"}\n    # TODO: başlığı ve yükü kodla, imzala, üç parçayı birleştir\n    pass\n',
+      sol: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef jwt_imzala(yuk, anahtar):\n    baslik = {"alg": "HS256", "typ": "JWT"}\n    def kodla(d):\n        return b64e(json.dumps(d, separators=(",", ":")).encode())\n    imzalanacak = kodla(baslik) + "." + kodla(yuk)\n    imza = hmac.new(anahtar, imzalanacak.encode(), hashlib.sha256).digest()\n    return imzalanacak + "." + b64e(imza)\n',
+      tests: 't = jwt_imzala({"sub": "418", "rol": "calisan", "exp": 1767225600}, b"pusula-gizli")\nassert isinstance(t, str) and t.count(".") == 2, "token üç parçalı bir str olmalı"\nassert t.split(".")[0] == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9", "başlık boşluksuz JSON olarak kodlanmalı"\nassert t == "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiI0MTgiLCJyb2wiOiJjYWxpc2FuIiwiZXhwIjoxNzY3MjI1NjAwfQ.eKM6TOmxw4OUfHO9CPEYrn3z8hnGvtPenNuRhn_0Ops", "PyJWT\'nin aynı girdiyle ürettiği tokenla birebir aynı olmalı"\nassert jwt_imzala({"sub": "418"}, b"baska") != jwt_imzala({"sub": "418"}, b"pusula-gizli"), "anahtar değişince imza değişmeli"\nassert jwt_imzala({"sub": "419"}, b"k").split(".")[1] != jwt_imzala({"sub": "418"}, b"k").split(".")[1], "yük değişince orta parça değişmeli"\n',
+      hints: ['Üç parça: b64e(başlık JSON), b64e(yük JSON), b64e(HMAC imzası).', 'İmza, kodlanmış "başlık.yük" metni üzerinden alınır; ham sözlük üzerinden değil.', 'imza = hmac.new(anahtar, imzalanacak.encode(), hashlib.sha256).digest()'],
+      why: 'JWS kompakt biçimi tam olarak budur. İmza kodlanmış metin üzerinden alındığı için, yükteki tek bir karakter değişse imza tutmaz. Yük şifreli değildir: orta parçayı herkes b64d ile okuyabilir.'
+    },
+    {
+      id: 'kimlik-yetki-3',
+      t: 'code',
+      stage: 'Rehberli',
+      diff: 2,
+      q: '<p><code>claim_dogrula(yuk, simdi, aud, iss, tolerans=0)</code> fonksiyonunu yaz. İmza zaten doğrulanmış; sıra önemli, ilk başarısız kontrolün kodunu döndür:</p><ol><li><code>exp</code> yoksa ya da <code>simdi &gt;= exp + tolerans</code> ise <code>"suresi_doldu"</code></li><li><code>nbf</code> varsa ve <code>simdi &lt; nbf - tolerans</code> ise <code>"henuz_gecerli_degil"</code></li><li><code>yuk.get("iss") != iss</code> ise <code>"yanlis_iss"</code></li><li><code>aud</code> claim\'i tek metin ya da liste olabilir; beklenen <code>aud</code> içinde yoksa <code>"yanlis_aud"</code></li><li>hepsi geçerse <code>"tamam"</code></li></ol>',
+      guide: ['exp\'i yuk.get("exp") ile oku; None ise de süresi dolmuş say (exp\'siz token sonsuza dek geçerli olmamalı).', 'nbf kontrolünü yalnız alan varsa yap.', 'aud metinse tek elemanlı listeye çevir; sonra in ile ara.', 'Kontrolleri sırayla yaz, ilk başarısızda return et.'],
+      example: 'def listele(x):\n    return x if isinstance(x, list) else [x]\nprint(listele("a"), listele(["a", "b"]))\n',
+      start: 'def claim_dogrula(yuk, simdi, aud, iss, tolerans=0):\n    exp = yuk.get("exp")\n    if exp is None or simdi >= exp + tolerans:\n        return "suresi_doldu"\n    # TODO: nbf, iss, aud kontrolleri\n    return "tamam"\n',
+      sol: 'def claim_dogrula(yuk, simdi, aud, iss, tolerans=0):\n    exp = yuk.get("exp")\n    if exp is None or simdi >= exp + tolerans:\n        return "suresi_doldu"\n    nbf = yuk.get("nbf")\n    if nbf is not None and simdi < nbf - tolerans:\n        return "henuz_gecerli_degil"\n    if yuk.get("iss") != iss:\n        return "yanlis_iss"\n    hedef = yuk.get("aud")\n    hedefler = hedef if isinstance(hedef, list) else [hedef]\n    if aud not in hedefler:\n        return "yanlis_aud"\n    return "tamam"\n',
+      tests: 'y = {"sub": "418", "iss": "pusula-sso", "aud": "izin-api", "nbf": 1000, "exp": 1900}\nassert claim_dogrula(y, 1500, "izin-api", "pusula-sso") == "tamam", "geçerli token tamam dönmeli"\nassert claim_dogrula(y, 1900, "izin-api", "pusula-sso") == "suresi_doldu", "simdi == exp anında token artık geçersizdir"\nassert claim_dogrula(y, 1920, "izin-api", "pusula-sso", tolerans=30) == "tamam", "tolerans saat kaymasını affetmeli"\nassert claim_dogrula(y, 990, "izin-api", "pusula-sso") == "henuz_gecerli_degil", "nbf\'den önce geçersiz"\nassert claim_dogrula(y, 1500, "izin-api", "sahte-sso") == "yanlis_iss", "yayıncı eşleşmeli"\nassert claim_dogrula(y, 1500, "bordro-api", "pusula-sso") == "yanlis_aud", "başka servisin tokenı burada geçmemeli"\ny2 = dict(y, aud=["bordro-api", "izin-api"])\nassert claim_dogrula(y2, 1500, "izin-api", "pusula-sso") == "tamam", "aud liste olabilir"\nassert claim_dogrula({"iss": "pusula-sso", "aud": "izin-api"}, 1, "izin-api", "pusula-sso") == "suresi_doldu", "exp\'siz token reddedilmeli"\nassert claim_dogrula(dict(y, iss="x", exp=1), 1500, "izin-api", "pusula-sso") == "suresi_doldu", "sıra önemli: önce exp"\n',
+      hints: ['Her kontrol bir if + return; en sonda "tamam".', 'nbf yoksa yuk.get("nbf") None döner; o zaman kontrolü atla.', 'hedefler = hedef if isinstance(hedef, list) else [hedef]'],
+      why: 'İmzanın doğru olması tokenın bu servis için ve şu an geçerli olduğunu göstermez. aud kontrolü olmadan bordro servisi için verilmiş bir token izin API\'sinde de çalışır (token yeniden kullanımı). Küçük bir tolerans (genelde 30–60 sn) sunucular arasındaki saat farkını karşılar.'
+    },
+    {
+      id: 'kimlik-yetki-4',
+      t: 'code',
+      stage: 'Rehberli',
+      diff: 2,
+      q: '<p>Rol kalıtımlı RBAC yaz. <code>ROLLER</code> sözlüğünde her rolün kendi izinleri ve kalıttığı roller (<code>"kalit"</code>, liste) var. <code>izinleri_coz(rol)</code> rolün kendi ve kalıttığı tüm rollerin izinlerini <code>set</code> olarak döndürsün (çoklu kalıtım ve elmas yapıyı desteklesin). <code>yetkili_mi(roller, izin)</code> kullanıcının rol listesinden herhangi biri izni veriyorsa <code>True</code> döndürsün. <code>"*"</code> izni her şeyi kapsar. Tanımsız rol <code>KeyError</code> değil, boş küme versin.</p>',
+      guide: ['izinleri_coz\'u özyinelemeli yaz: kendi izinleri + her kalıtılan rol için izinleri_coz(ust).', 'ROLLER.get(rol) None ise boş küme döndür.', 'yetkili_mi: tüm rollerin izinlerini birleştir; "*" ya da izin kümede ise True.'],
+      example: 'agac = {"a": ["b", "c"], "b": ["d"], "c": ["d"], "d": []}\ndef hepsi(x):\n    s = {x}\n    for y in agac[x]:\n        s |= hepsi(y)\n    return s\nprint(sorted(hepsi("a")))\n',
+      start: 'ROLLER = {\n    "calisan": {"izin": {"izin:iste", "izin:oku_kendi"}, "kalit": []},\n    "yonetici": {"izin": {"izin:onayla", "izin:oku_ekip"}, "kalit": ["calisan"]},\n    "ik_uzmani": {"izin": {"izin:oku_tum", "rapor:oku"}, "kalit": ["calisan"]},\n    "ik_muduru": {"izin": {"maas:oku"}, "kalit": ["yonetici", "ik_uzmani"]},\n    "admin": {"izin": {"*"}, "kalit": []},\n}\n\ndef izinleri_coz(rol):\n    # TODO: kendi izinleri + kalıttığı rollerin izinleri\n    pass\n\ndef yetkili_mi(roller, izin):\n    # TODO\n    pass\n',
+      sol: 'ROLLER = {\n    "calisan": {"izin": {"izin:iste", "izin:oku_kendi"}, "kalit": []},\n    "yonetici": {"izin": {"izin:onayla", "izin:oku_ekip"}, "kalit": ["calisan"]},\n    "ik_uzmani": {"izin": {"izin:oku_tum", "rapor:oku"}, "kalit": ["calisan"]},\n    "ik_muduru": {"izin": {"maas:oku"}, "kalit": ["yonetici", "ik_uzmani"]},\n    "admin": {"izin": {"*"}, "kalit": []},\n}\n\ndef izinleri_coz(rol):\n    tanim = ROLLER.get(rol)\n    if tanim is None:\n        return set()\n    toplam = set(tanim["izin"])\n    for ust in tanim["kalit"]:\n        toplam |= izinleri_coz(ust)\n    return toplam\n\ndef yetkili_mi(roller, izin):\n    toplam = set()\n    for r in roller:\n        toplam |= izinleri_coz(r)\n    return "*" in toplam or izin in toplam\n',
+      tests: 'assert izinleri_coz("calisan") == {"izin:iste", "izin:oku_kendi"}, "çalışanın yalnız kendi izinleri var"\nassert izinleri_coz("yonetici") == {"izin:onayla", "izin:oku_ekip", "izin:iste", "izin:oku_kendi"}, "yönetici çalışandan kalıtmalı"\nassert izinleri_coz("ik_muduru") == {"maas:oku", "izin:onayla", "izin:oku_ekip", "izin:oku_tum", "rapor:oku", "izin:iste", "izin:oku_kendi"}, "ik_muduru iki üst rolden (elmas) kalıtmalı"\nassert izinleri_coz("stajyer") == set(), "tanımsız rol boş küme vermeli"\nassert yetkili_mi(["calisan"], "izin:onayla") is False, "çalışan onaylayamaz"\nassert yetkili_mi(["calisan", "ik_uzmani"], "rapor:oku") is True, "rollerden biri yeterli"\nassert yetkili_mi(["admin"], "maas:oku") is True, "* her şeyi kapsar"\nassert yetkili_mi([], "izin:iste") is False, "rolü olmayan hiçbir şey yapamaz"\nassert ROLLER["calisan"]["izin"] == {"izin:iste", "izin:oku_kendi"}, "ROLLER tanımını değiştirme (set(...) ile kopya al)"\n',
+      hints: ['Özyineleme: izinleri_coz(rol) = kendi izinleri ∪ izinleri_coz(üst) her üst için.', 'set(tanim["izin"]) ile kopya al; doğrudan |= yaparsan ROLLER\'daki küme değişir.', 'return "*" in toplam or izin in toplam'],
+      why: 'Rol kalıtımı tekrar eden izin listelerini önler ve denetimi kolaylaştırır. Kopya almak önemli: tanım kümesine |= uygularsan ilk çağrıda roller birbirinin izinlerini kalıcı olarak kazanır; bu, tespiti zor bir yetki yükseltme açığıdır. Döngüsel kalıtım (a → b → a) yapılandırma hatasıdır; üretimde ziyaret kümesiyle korunmalıdır.'
+    },
+    {
+      id: 'kimlik-yetki-5',
+      t: 'code',
+      stage: 'Kendin yaz',
+      diff: 2,
+      q: '<p>Giriş denemelerini sınırlayan <code>GirisSiniri(limit=5, pencere=300, ceza=900)</code> sınıfını yaz. Saat her metoda <code>simdi</code> (saniye) olarak verilir.</p><ul><li><code>dene(hesap, simdi)</code>: hesap cezalıysa <code>"kilitli"</code>; değilse <code>"serbest"</code> döndürür.</li><li><code>basarisiz(hesap, simdi)</code>: zamanı kaydeder; son <code>pencere</code> saniyedeki (yani <code>simdi - pencere</code>\'den büyük zamanlardaki) başarısız deneme sayısı <code>limit</code>\'e ulaşırsa hesap <code>simdi + ceza</code> anına kadar kilitlenir.</li><li><code>basarili(hesap)</code>: hesabın sayacını sıfırlar.</li></ul><p>Ceza bitince (<code>simdi &gt;= bitis</code>) hesap yine serbesttir ve eski denemeler sayılmaz.</p>',
+      start: 'class GirisSiniri:\n    def __init__(self, limit=5, pencere=300, ceza=900):\n        pass\n',
+      sol: 'from collections import defaultdict\n\nclass GirisSiniri:\n    def __init__(self, limit=5, pencere=300, ceza=900):\n        self.limit, self.pencere, self.ceza = limit, pencere, ceza\n        self.denemeler = defaultdict(list)\n        self.kilit = {}\n\n    def dene(self, hesap, simdi):\n        bitis = self.kilit.get(hesap)\n        if bitis is not None and simdi < bitis:\n            return "kilitli"\n        if bitis is not None:\n            del self.kilit[hesap]\n            self.denemeler[hesap].clear()\n        return "serbest"\n\n    def basarisiz(self, hesap, simdi):\n        son = [t for t in self.denemeler[hesap] if t > simdi - self.pencere]\n        son.append(simdi)\n        self.denemeler[hesap] = son\n        if len(son) >= self.limit:\n            self.kilit[hesap] = simdi + self.ceza\n\n    def basarili(self, hesap):\n        self.denemeler.pop(hesap, None)\n',
+      tests: 'g = GirisSiniri(limit=3, pencere=60, ceza=600)\nfor t in (0, 10, 20):\n    assert g.dene("cem", t) == "serbest", "limit dolmadan serbest olmalı"\n    g.basarisiz("cem", t)\nassert g.dene("cem", 25) == "kilitli", "3. başarısız denemeden sonra kilitlenmeli"\nassert g.dene("ayse", 25) == "serbest", "kilit hesap başına olmalı"\nassert g.dene("cem", 619) == "kilitli", "ceza 20 + 600 = 620\'ye kadar sürer"\nassert g.dene("cem", 620) == "serbest", "ceza bitince serbest"\ng.basarisiz("cem", 621)\nassert g.dene("cem", 622) == "serbest", "ceza bitince eski denemeler sayılmamalı"\nh = GirisSiniri(limit=3, pencere=60, ceza=600)\nfor t in (0, 50, 100, 150):\n    h.basarisiz("ali", t)\nassert h.dene("ali", 151) == "serbest", "pencere dışına düşen denemeler sayılmaz (60 sn içinde hep en çok 2 deneme var)"\nk = GirisSiniri(limit=2, pencere=60, ceza=100)\nk.basarisiz("can", 0)\nk.basarili("can")\nk.basarisiz("can", 5)\nassert k.dene("can", 6) == "serbest", "başarılı giriş sayacı sıfırlamalı"\n',
+      hints: ['İki sözlük tut: hesap → deneme zamanları, hesap → kilit bitiş anı.', 'basarisiz içinde önce pencere dışındaki zamanları ayıkla: t > simdi - pencere.', 'dene: kilit varsa ve simdi < bitis ise "kilitli"; süresi bitmişse kilidi ve geçmişi temizle.'],
+      why: 'Kayan pencere, "son 5 dakikada kaç hata" sorusunu doğru cevaplar; sabit pencere (dakika başı sıfırlanan sayaç) sınırda iki katı denemeye izin verir. Saati parametre almak testi deterministik yapar. Üretimde aynı mantık IP için de uygulanır, çünkü saldırgan tek parolayı binlerce hesapta dener (password spraying).'
+    },
+    {
+      id: 'kimlik-yetki-6',
+      t: 'code',
+      stage: 'Kendin yaz',
+      diff: 2,
+      q: '<p>Refresh token döndürmesi ve yeniden kullanım tespiti yapan <code>TokenDeposu</code> sınıfını yaz. Token metinleri sırayla <code>"rt-1"</code>, <code>"rt-2"</code>, ... olsun.</p><ul><li><code>giris(kullanici)</code>: yeni bir aile açar (aile adı <code>"aile-1"</code>, <code>"aile-2"</code>, ...) ve ilk tokenı döndürür.</li><li><code>yenile(token)</code>: token geçerliyse onu kullanılmış işaretler ve aynı aileden yeni token döndürür. Kullanılmış bir token gelirse ailenin tüm tokenlarını iptal eder ve <code>PermissionError("yeniden kullanım")</code> fırlatır. Hiç bilinmeyen ya da iptal edilmiş token için <code>PermissionError("geçersiz")</code>.</li><li><code>cikis(kullanici)</code>: kullanıcının tüm ailelerini iptal eder.</li></ul>',
+      start: 'class TokenDeposu:\n    def __init__(self):\n        pass\n',
+      sol: 'class TokenDeposu:\n    def __init__(self):\n        self.no = 0\n        self.aile_no = 0\n        self.kayit = {}   # token -> {"kullanici", "aile", "durum"}\n\n    def _uret(self, kullanici, aile):\n        self.no += 1\n        t = f"rt-{self.no}"\n        self.kayit[t] = {"kullanici": kullanici, "aile": aile, "durum": "gecerli"}\n        return t\n\n    def giris(self, kullanici):\n        self.aile_no += 1\n        return self._uret(kullanici, f"aile-{self.aile_no}")\n\n    def _iptal(self, kosul):\n        for k in self.kayit.values():\n            if kosul(k) and k["durum"] == "gecerli":\n                k["durum"] = "iptal"\n\n    def yenile(self, token):\n        k = self.kayit.get(token)\n        if k is None or k["durum"] == "iptal":\n            raise PermissionError("geçersiz")\n        if k["durum"] == "kullanildi":\n            self._iptal(lambda x: x["aile"] == k["aile"])\n            raise PermissionError("yeniden kullanım")\n        k["durum"] = "kullanildi"\n        return self._uret(k["kullanici"], k["aile"])\n\n    def cikis(self, kullanici):\n        self._iptal(lambda x: x["kullanici"] == kullanici)\n',
+      tests: 'd = TokenDeposu()\nt1 = d.giris("emp-418")\nassert t1 == "rt-1", "ilk token rt-1 olmalı"\nt2 = d.yenile(t1)\nassert t2 == "rt-2", "yenileme yeni token vermeli"\nt3 = d.yenile(t2)\nbaska = d.giris("emp-603")\ntry:\n    d.yenile(t1)\n    assert False, "kullanılmış token tekrar gelince PermissionError bekleniyordu"\nexcept PermissionError as e:\n    assert "yeniden" in str(e), "mesaj \'yeniden kullanım\' olmalı"\ntry:\n    d.yenile(t3)\n    assert False, "yeniden kullanım tespitinde aile iptal edilmeli; t3 artık geçersiz"\nexcept PermissionError as e:\n    assert "geçersiz" in str(e), "iptal edilmiş token için mesaj \'geçersiz\' olmalı"\nassert d.yenile(baska).startswith("rt-"), "başka kullanıcının ailesi etkilenmemeli"\ntry:\n    d.yenile("rt-999")\n    assert False, "bilinmeyen token reddedilmeli"\nexcept PermissionError:\n    pass\nd2 = TokenDeposu()\na = d2.giris("emp-1"); b = d2.giris("emp-1")\nd2.cikis("emp-1")\nfor t in (a, b):\n    try:\n        d2.yenile(t)\n        assert False, "çıkış kullanıcının tüm ailelerini iptal etmeli"\n    except PermissionError:\n        pass\n',
+      hints: ['Her token için kullanıcı, aile ve durum (gecerli / kullanildi / iptal) tut.', 'yenile\'de sıra: bilinmiyor ya da iptal → geçersiz; kullanıldı → aileyi iptal et ve yeniden kullanım; geçerli → kullanıldı yap, yenisini üret.', 'İptal yardımcısı bir koşul fonksiyonu alırsa hem aile hem kullanıcı iptalinde kullanılır.'],
+      why: 'Döndürme, çalınan refresh tokenın ömrünü tek kullanıma indirir; yeniden kullanım tespiti de hırsızlığı görünür kılar. Gerçek sistemde token metni değil SHA-256 özeti saklanır, aile kaydı cihaz bilgisiyle tutulur ve kullanıcıya "tüm cihazlardan çıkış" düğmesi cikis ile verilir.'
+    },
+    {
+      id: 'kimlik-yetki-7',
+      t: 'code',
+      stage: 'Kendin yaz',
+      diff: 2,
+      q: '<p>OAuth2 authorization code + PKCE akışının yetki sunucusu tarafını yaz. <code>YetkiSunucusu</code> sınıfı:</p><ul><li><code>authorize(client_id, redirect_uri, challenge, method, simdi)</code>: <code>client_id</code> kayıtlı değilse ya da <code>redirect_uri</code> o istemcinin kayıtlı adresiyle <b>birebir</b> aynı değilse <code>ValueError</code>; <code>method</code> <code>"S256"</code> değilse <code>ValueError</code>. Geçerliyse <code>"code-1"</code>, <code>"code-2"</code>... üretip (60 sn ömürlü) saklar ve döndürür.</li><li><code>token(code, verifier, client_id, simdi)</code>: code bilinmiyor, kullanılmış, süresi dolmuş (<code>simdi &gt;= üretim + 60</code>), başka istemciye ait ya da verifier\'ın S256 özeti challenge ile eşleşmiyorsa <code>PermissionError</code>. Geçerliyse code\'u tüketir ve <code>{"access_token": "at-" + code}</code> döndürür.</li></ul><p>İstemciler <code>ISTEMCILER = {"izin-mobil": "pusulaik://cb"}</code>.</p>',
+      start: 'import base64, hashlib\n\nISTEMCILER = {"izin-mobil": "pusulaik://cb"}\n\nclass YetkiSunucusu:\n    pass\n',
+      sol: 'import base64, hashlib, hmac\n\nISTEMCILER = {"izin-mobil": "pusulaik://cb"}\n\ndef s256(verifier):\n    return base64.urlsafe_b64encode(hashlib.sha256(verifier.encode("ascii")).digest()).rstrip(b"=").decode()\n\nclass YetkiSunucusu:\n    def __init__(self):\n        self.no = 0\n        self.kodlar = {}\n\n    def authorize(self, client_id, redirect_uri, challenge, method, simdi):\n        if ISTEMCILER.get(client_id) != redirect_uri:\n            raise ValueError("istemci ya da yönlendirme adresi geçersiz")\n        if method != "S256":\n            raise ValueError("yalnız S256")\n        self.no += 1\n        kod = f"code-{self.no}"\n        self.kodlar[kod] = {"client": client_id, "challenge": challenge, "zaman": simdi}\n        return kod\n\n    def token(self, code, verifier, client_id, simdi):\n        k = self.kodlar.pop(code, None)\n        if k is None:\n            raise PermissionError("bilinmeyen ya da kullanılmış code")\n        if simdi >= k["zaman"] + 60 or k["client"] != client_id:\n            raise PermissionError("süresi dolmuş ya da başka istemci")\n        if not hmac.compare_digest(s256(verifier), k["challenge"]):\n            raise PermissionError("PKCE doğrulanamadı")\n        return {"access_token": "at-" + code}\n',
+      tests: 'V = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"\nC = "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM"\nys = YetkiSunucusu()\nkod = ys.authorize("izin-mobil", "pusulaik://cb", C, "S256", 1000)\nassert kod == "code-1", "ilk code code-1 olmalı"\nassert ys.token(kod, V, "izin-mobil", 1030) == {"access_token": "at-code-1"}, "doğru verifier ile token alınmalı (RFC 7636 örnek değerleri)"\ndef red(f, tur, mesaj):\n    try:\n        f()\n    except tur:\n        return\n    assert False, mesaj\nred(lambda: ys.token(kod, V, "izin-mobil", 1031), PermissionError, "code tek kullanımlık olmalı")\nred(lambda: ys.authorize("izin-mobil", "pusulaik://cb/../saldirgan", C, "S256", 0), ValueError, "redirect_uri birebir eşleşmeli")\nred(lambda: ys.authorize("bilinmeyen", "pusulaik://cb", C, "S256", 0), ValueError, "kayıtsız istemci reddedilmeli")\nred(lambda: ys.authorize("izin-mobil", "pusulaik://cb", V, "plain", 0), ValueError, "plain yöntemi kabul edilmemeli")\nk2 = ys.authorize("izin-mobil", "pusulaik://cb", C, "S256", 2000)\nred(lambda: ys.token(k2, "yanlis-verifier", "izin-mobil", 2001), PermissionError, "yanlış verifier reddedilmeli")\nk3 = ys.authorize("izin-mobil", "pusulaik://cb", C, "S256", 3000)\nred(lambda: ys.token(k3, V, "izin-mobil", 3060), PermissionError, "60 sn sonra code geçersiz")\nk4 = ys.authorize("izin-mobil", "pusulaik://cb", C, "S256", 4000)\nred(lambda: ys.token(k4, V, "baska-istemci", 4001), PermissionError, "code yalnız kendi istemcisine verilmeli")\n',
+      hints: ['S256: base64url(sha256(verifier)) dolgusuz; ders gövdesindeki challenge fonksiyonunu kullan.', 'Code\'u token() başında pop ile çıkar: hata da olsa başarı da olsa bir daha kullanılamaz.', 'redirect_uri için önek ya da içerir kontrolü değil, birebir eşitlik kullan.'],
+      why: 'Yetki sunucusunun üç temel savunması: kayıtlı redirect_uri ile birebir eşleşme (açık yönlendirme ile code çalınmasına karşı), kısa ömürlü ve tek kullanımlık code, PKCE doğrulaması. plain yöntemi challenge\'ı verifier\'ın kendisi yapar; yönlendirmeyi gören onu da görür, bu yüzden reddedilir.'
+    },
+    {
+      id: 'kimlik-yetki-8',
+      t: 'code',
+      stage: 'Kendin yaz',
+      diff: 2,
+      needs: ['sqlite3'],
+      q: '<p>Pusula İK verisiyle ABAC. <code>gorunur_izinler(con, kullanici)</code> fonksiyonunu yaz: <code>con</code>, <code>veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])</code> bağlantısıdır; <code>kullanici</code> <code>{"emp_id": ..., "rol": ...}</code> sözlüğüdür. Kurallar:</p><ul><li><code>"ik"</code> rolü tüm izin kayıtlarını görür.</li><li><code>"yonetici"</code> kendi izinlerini ve <b>doğrudan bağlı</b> çalışanlarının (<code>ik_employees.manager_id = emp_id</code>) izinlerini görür.</li><li><code>"calisan"</code> yalnız kendi izinlerini görür.</li><li>Bilinmeyen rol hiçbir şey görmez.</li></ul><p>Fonksiyon görülebilen <code>leave_id</code>\'lerin sıralı listesini döndürsün. Süzmeyi SQL\'de yap ve parametre kullan.</p>',
+      start: 'import veri\n\ncon = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\n\ndef gorunur_izinler(con, kullanici):\n    pass\n\nprint(len(gorunur_izinler(con, {"emp_id": 13, "rol": "yonetici"})))\n',
+      sol: 'import veri\n\ncon = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\n\ndef gorunur_izinler(con, kullanici):\n    rol, emp = kullanici["rol"], kullanici["emp_id"]\n    if rol == "ik":\n        sql, p = "SELECT leave_id FROM ik_leaves", ()\n    elif rol == "yonetici":\n        sql = """SELECT leave_id FROM ik_leaves\n                 WHERE emp_id = ?\n                    OR emp_id IN (SELECT emp_id FROM ik_employees WHERE manager_id = ?)"""\n        p = (emp, emp)\n    elif rol == "calisan":\n        sql, p = "SELECT leave_id FROM ik_leaves WHERE emp_id = ?", (emp,)\n    else:\n        return []\n    return sorted(r[0] for r in con.execute(sql, p))\n\nprint(len(gorunur_izinler(con, {"emp_id": 13, "rol": "yonetici"})))\n',
+      tests: '_c = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\nr = gorunur_izinler(_c, {"emp_id": 13, "rol": "yonetici"})\nassert len(r) == 1046, f"Rıza Karabulut (13) kendi 4 + ekibinin 1042 iznini görmeli, {len(r)} geldi"\nassert r == sorted(r), "liste sıralı olmalı"\nassert 19 in r, "19 numaralı izin (emp 1305) Rıza\'nın ekibinden"\nc = gorunur_izinler(_c, {"emp_id": 418, "rol": "calisan"})\nassert c[:3] == [1, 3319, 6012] and len(c) == 7, "Cem Bal (418) yalnız kendi 7 iznini görmeli"\nassert len(gorunur_izinler(_c, {"emp_id": 418, "rol": "ik"})) == 16577, "İK tüm 16577 kaydı görmeli"\nassert len(gorunur_izinler(_c, {"emp_id": 418, "rol": "yonetici"})) == 7, "kimseye yöneticilik yapmayan yönetici rolü yalnız kendi kayıtlarını görür"\nassert gorunur_izinler(_c, {"emp_id": 13, "rol": "misafir"}) == [], "bilinmeyen rol boş liste"\nassert "?" in __source__, "kullanıcı kimliğini SQL\'e parametre (?) ile ver"\n',
+      hints: ['Rol başına bir SQL ve parametre demeti seç; bilinmeyen rolde hemen [] dön.', 'Yönetici için alt sorgu: emp_id IN (SELECT emp_id FROM ik_employees WHERE manager_id = ?)', 'sorted(r[0] for r in con.execute(sql, p))'],
+      why: 'Yetki süzmesi veritabanında yapılmalı: tüm tabloyu çekip Python\'da süzmek hem yavaş hem de "unutulan süzme" riskidir. Rol (RBAC) hangi sorgu şablonunun kullanılacağını, öznitelik (manager_id, ABAC) hangi satırların geleceğini belirler. Bu, Django\'da get_queryset ile, FastAPI\'de bağımlılık içinde yapılan işin aynısıdır.'
+    },
+    {
+      id: 'kimlik-yetki-9',
+      t: 'code',
+      stage: 'Hata avı',
+      diff: 2,
+      kind: 'bug',
+      q: '<p><b>Hatayı bul ve düzelt.</b> Stajyerin yazdığı <code>dogrula(token, anahtar, simdi)</code> testlerdeki iyi niyetli tokenları kabul ediyor ama güvenlik incelemesinde üç sorun bulundu: (1) başlıktaki <code>alg</code> alanına güveniyor, <code>"none"</code> gelince imzayı hiç kontrol etmiyor; (2) imzayı <code>==</code> ile karşılaştırıyor (zamanlama saldırısı); (3) <code>exp</code>\'i kontrol etmiyor. Sabit algoritma HS256 olmalı; başka her <code>alg</code> ve geçersiz her durum için <code>None</code>, geçerliyse yük sözlüğü dönsün. <code>simdi &gt;= exp</code> ise süresi dolmuştur.</p>',
+      start: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef dogrula(token, anahtar, simdi):\n    try:\n        b, y, i = token.split(".")\n    except ValueError:\n        return None\n    baslik = json.loads(b64d(b))\n    if baslik["alg"] == "HS256":\n        beklenen = b64e(hmac.new(anahtar, f"{b}.{y}".encode(), hashlib.sha256).digest())\n        if beklenen != i:\n            return None\n    return json.loads(b64d(y))\n',
+      sol: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef dogrula(token, anahtar, simdi):\n    try:\n        b, y, i = token.split(".")\n    except ValueError:\n        return None\n    baslik = json.loads(b64d(b))\n    if baslik.get("alg") != "HS256":\n        return None\n    beklenen = b64e(hmac.new(anahtar, f"{b}.{y}".encode(), hashlib.sha256).digest())\n    if not hmac.compare_digest(beklenen, i):\n        return None\n    yuk = json.loads(b64d(y))\n    if "exp" not in yuk or simdi >= yuk["exp"]:\n        return None\n    return yuk\n',
+      tests: 'import hashlib as _h, hmac as _hm, json as _j\ndef _uret(yuk, alg="HS256", anahtar=b"k"):\n    g = b64e(_j.dumps({"alg": alg, "typ": "JWT"}).encode()) + "." + b64e(_j.dumps(yuk).encode())\n    return g + "." + (b64e(_hm.new(anahtar, g.encode(), _h.sha256).digest()) if alg == "HS256" else "")\nassert dogrula(_uret({"sub": "418", "exp": 100}), b"k", 50) == {"sub": "418", "exp": 100}, "geçerli token yükü döndürmeli"\nassert dogrula(_uret({"sub": "1", "rol": "ik", "exp": 100}, alg="none"), b"k", 50) is None, "alg=none tokenı reddedilmeli: algoritmayı sunucuda sabitle"\nassert dogrula(_uret({"sub": "1", "exp": 100}, alg="HS512"), b"k", 50) is None, "beklenmeyen algoritma reddedilmeli"\nassert dogrula(_uret({"sub": "418", "exp": 100}), b"k", 100) is None, "süresi dolmuş token reddedilmeli"\nassert dogrula(_uret({"sub": "418"}), b"k", 1) is None, "exp\'siz token reddedilmeli"\nassert dogrula(_uret({"sub": "418", "exp": 100}, anahtar=b"x"), b"k", 50) is None, "yanlış anahtarla imzalanan token reddedilmeli"\nassert "compare_digest" in __source__, "imzayı hmac.compare_digest ile karşılaştır"\n',
+      hints: ['Tokendaki alg\'a göre dallanma; alg HS256 değilse doğrudan None dön.', 'beklenen != i yerine hmac.compare_digest(beklenen, i).', 'Yükü çözdükten sonra exp yoksa ya da simdi >= exp ise None.'],
+      why: 'Orijinal kod alg "HS256" değilse imza bloğunu tümden atlıyordu: saldırgan başlığa "none" yazıp yükü istediği gibi (rol: ik) değiştirebiliyordu. Gerçek kütüphanelerde algorithms=["HS256"] parametresi tam bu yüzden zorunludur. == ilk farklı karakterde durduğu için yanıt süresi imzayı tahmin ettirir; compare_digest sabit sürede çalışır.'
+    },
+    {
+      id: 'kimlik-yetki-10',
+      t: 'code',
+      stage: 'Hata avı',
+      diff: 2,
+      kind: 'bug',
+      needs: ['sqlite3'],
+      q: '<p><b>Hatayı bul ve düzelt.</b> Pusula İK portalındaki <code>izin_detay(con, kullanici_id, leave_id)</code> fonksiyonu giriş yapmış kullanıcının <code>/izinler/&lt;leave_id&gt;</code> isteğini karşılıyor. Sızma testinde bir çalışanın URL\'deki sayıyı değiştirerek başkalarının hastalık izinlerini okuyabildiği görüldü (IDOR). Düzelt: kayıt yalnız <b>kendisine</b> ya da <b>doğrudan bağlı çalışanına</b> aitse sözlük olarak dönsün; aksi hâlde (kayıt yoksa da) <code>None</code> dönsün (API bunu 404\'e çevirir). Kontrolü SQL\'de yap.</p>',
+      start: 'import veri\n\ncon = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\n\ndef izin_detay(con, kullanici_id, leave_id):\n    satir = con.execute(\n        "SELECT leave_id, emp_id, leave_type, start_date, days FROM ik_leaves WHERE leave_id = ?",\n        (leave_id,),\n    ).fetchone()\n    if satir is None:\n        return None\n    return dict(zip(["leave_id", "emp_id", "leave_type", "start_date", "days"], satir))\n',
+      sol: 'import veri\n\ncon = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\n\ndef izin_detay(con, kullanici_id, leave_id):\n    satir = con.execute(\n        """SELECT l.leave_id, l.emp_id, l.leave_type, l.start_date, l.days\n           FROM ik_leaves l JOIN ik_employees e ON e.emp_id = l.emp_id\n           WHERE l.leave_id = ? AND (l.emp_id = ? OR e.manager_id = ?)""",\n        (leave_id, kullanici_id, kullanici_id),\n    ).fetchone()\n    if satir is None:\n        return None\n    return dict(zip(["leave_id", "emp_id", "leave_type", "start_date", "days"], satir))\n',
+      tests: '_c = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])\nassert izin_detay(_c, 418, 3319) == {"leave_id": 3319, "emp_id": 418, "leave_type": "yıllık", "start_date": "2022-08-29", "days": 2}, "Cem (418) kendi iznini görebilmeli"\nassert izin_detay(_c, 418, 2) is None, "Cem, 603 numaralı çalışanın iznini (leave 2) görememeli: IDOR"\nassert izin_detay(_c, 42, 3319) is not None, "Cem\'in yöneticisi Barış Aslan (42) ekibinin iznini görebilmeli"\nassert izin_detay(_c, 33, 3319) is None, "başka ekibin yöneticisi (33) göremez"\nassert izin_detay(_c, 33, 2) is not None, "603\'ün yöneticisi 33, leave 2\'yi görebilmeli"\nassert izin_detay(_c, 418, 999999) is None, "olmayan kayıt None"\n',
+      hints: ['Sorgu yalnız leave_id\'ye bakıyor; kaydın kime ait olduğu hiç sorulmuyor.', 'ik_leaves ile ik_employees\'i emp_id üzerinden birleştir, manager_id\'ye eriş.', 'WHERE l.leave_id = ? AND (l.emp_id = ? OR e.manager_id = ?)'],
+      why: 'IDOR\'un kökü, kaydın "kimliğe göre" değil "kimlik + kapsam" ile çekilmemesidir. Kapsamı sorgunun WHERE koşuluna koymak, "önce çek sonra kontrol et" yaklaşımındaki unutma riskini ortadan kaldırır. Yetkisizken 404 dönmek kaydın varlığını da gizler; böylece saldırgan hangi numaraların dolu olduğunu öğrenemez.'
+    },
+    {
+      id: 'kimlik-yetki-11',
+      t: 'code',
+      stage: 'Meydan okuma',
+      diff: 3,
+      q: '<p>Anahtar döndürmeyi destekleyen tam bir doğrulayıcı yaz: <code>tam_dogrula(token, anahtarlar, simdi, aud, iss)</code>. <code>anahtarlar</code> <code>{kid: bytes}</code> sözlüğüdür. Başarısızlıkta <code>ValueError</code> fırlat (mesajı serbest), başarıda yükü döndür. Kontrol sırası:</p><ol><li>Token tam üç parça değilse ya da başlık/yük JSON olarak çözülemiyorsa hata.</li><li>Başlıkta <code>alg</code> <code>"HS256"</code> değilse hata; <code>kid</code> yoksa ya da <code>anahtarlar</code>\'da değilse hata.</li><li>İmza o <code>kid</code>\'in anahtarıyla sabit zamanlı karşılaştırılır.</li><li><code>exp</code> zorunlu (<code>simdi &gt;= exp</code> ise hata), <code>nbf</code> varsa <code>simdi &lt; nbf</code> ise hata, <code>iss</code> eşit olmalı, <code>aud</code> metin ya da liste olabilir.</li></ol><p><code>b64e</code>, <code>b64d</code> ve imzalayan <code>uret(yuk, kid, anahtar)</code> hazır.</p>',
+      start: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef uret(yuk, kid, anahtar):\n    g = b64e(json.dumps({"alg": "HS256", "kid": kid}).encode()) + "." + b64e(json.dumps(yuk).encode())\n    return g + "." + b64e(hmac.new(anahtar, g.encode(), hashlib.sha256).digest())\n\ndef tam_dogrula(token, anahtarlar, simdi, aud, iss):\n    pass\n',
+      sol: 'import base64\n\ndef b64e(b):\n    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()\n\ndef b64d(s):\n    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))\n\nimport hashlib, hmac, json\n\ndef uret(yuk, kid, anahtar):\n    g = b64e(json.dumps({"alg": "HS256", "kid": kid}).encode()) + "." + b64e(json.dumps(yuk).encode())\n    return g + "." + b64e(hmac.new(anahtar, g.encode(), hashlib.sha256).digest())\n\ndef tam_dogrula(token, anahtarlar, simdi, aud, iss):\n    parcalar = token.split(".") if isinstance(token, str) else []\n    if len(parcalar) != 3:\n        raise ValueError("biçim")\n    b, y, i = parcalar\n    try:\n        baslik = json.loads(b64d(b))\n        yuk = json.loads(b64d(y))\n        imza = b64d(i)\n    except Exception:\n        raise ValueError("çözülemedi")\n    if not isinstance(baslik, dict) or not isinstance(yuk, dict):\n        raise ValueError("biçim")\n    if baslik.get("alg") != "HS256":\n        raise ValueError("algoritma")\n    anahtar = anahtarlar.get(baslik.get("kid"))\n    if anahtar is None:\n        raise ValueError("bilinmeyen kid")\n    beklenen = hmac.new(anahtar, f"{b}.{y}".encode(), hashlib.sha256).digest()\n    if not hmac.compare_digest(beklenen, imza):\n        raise ValueError("imza")\n    if "exp" not in yuk or simdi >= yuk["exp"]:\n        raise ValueError("exp")\n    if "nbf" in yuk and simdi < yuk["nbf"]:\n        raise ValueError("nbf")\n    if yuk.get("iss") != iss:\n        raise ValueError("iss")\n    hedef = yuk.get("aud")\n    if aud not in (hedef if isinstance(hedef, list) else [hedef]):\n        raise ValueError("aud")\n    return yuk\n',
+      tests: 'ESKI, YENI = b"2025-anahtar-eski-32-bayt-uzunluk", b"2026-anahtar-yeni-32-bayt-uzunluk"\nA = {"2025-12": ESKI, "2026-01": YENI}\nyuk = {"sub": "418", "iss": "pusula-sso", "aud": ["izin-api"], "exp": 2000, "nbf": 1000}\nassert tam_dogrula(uret(yuk, "2026-01", YENI), A, 1500, "izin-api", "pusula-sso") == yuk, "yeni anahtarla imzalı token geçmeli"\nassert tam_dogrula(uret(yuk, "2025-12", ESKI), A, 1500, "izin-api", "pusula-sso") == yuk, "döndürme süresince eski anahtar da tanınmalı"\ndef red(token, anahtarlar=A, simdi=1500, aud="izin-api", iss="pusula-sso", mesaj=""):\n    try:\n        tam_dogrula(token, anahtarlar, simdi, aud, iss)\n    except ValueError:\n        return\n    except Exception as e:\n        assert False, f"{mesaj}: ValueError bekleniyordu, {type(e).__name__} geldi"\n    assert False, mesaj\nred(uret(yuk, "2025-12", ESKI), anahtarlar={"2026-01": YENI}, mesaj="emekli edilmiş anahtarla imzalı token reddedilmeli")\nred(uret(yuk, "2026-01", ESKI), mesaj="kid ile anahtar uyuşmuyorsa imza tutmamalı")\nred(uret(yuk, "yok", YENI), mesaj="bilinmeyen kid")\nred(uret(yuk, "2026-01", YENI), simdi=2000, mesaj="exp")\nred(uret(yuk, "2026-01", YENI), simdi=999, mesaj="nbf")\nred(uret(yuk, "2026-01", YENI), aud="bordro-api", mesaj="aud")\nred(uret(yuk, "2026-01", YENI), iss="baska", mesaj="iss")\nred(uret({"sub": "1", "iss": "pusula-sso", "aud": "izin-api"}, "2026-01", YENI), mesaj="exp zorunlu")\nred("a.b", mesaj="iki parçalı token")\nred("!!!.@@@.###", mesaj="çözülemeyen token ValueError vermeli")\nt = uret(yuk, "2026-01", YENI)\nb, y, i = t.split(".")\nnone_b = b64e(json.dumps({"alg": "none", "kid": "2026-01"}).encode())\nred(f"{none_b}.{y}.", mesaj="alg=none")\nsahte_y = b64e(json.dumps(dict(yuk, sub="1")).encode())\nred(f"{b}.{sahte_y}.{i}", mesaj="yükü değiştirilmiş token")\nassert "compare_digest" in __source__, "imza sabit zamanlı karşılaştırılmalı"\n',
+      hints: ['Çözme adımlarını tek bir try içine al; json ya da base64 hatasını ValueError\'a çevir.', 'Anahtarı başlıktaki kid ile seç: anahtarlar.get(baslik.get("kid")).', 'Sıra: biçim → alg → kid → imza → exp → nbf → iss → aud. İmza doğrulanmadan yükteki hiçbir değere güvenme.'],
+      why: 'kid anahtar döndürmeyi kesintisiz yapar: yeni tokenlar yeni anahtarla imzalanırken eski tokenlar ömürleri bitene kadar doğrulanır, sonra eski anahtar listeden çıkarılır. Tüm hataları tek bir ValueError türüne indirmek, istemciye neden reddedildiğini sızdırmamanı da kolaylaştırır (ayrıntı yalnız loga yazılır).'
+    },
+    {
+      id: 'kimlik-yetki-12',
+      t: 'code',
+      stage: 'Meydan okuma',
+      diff: 3,
+      q: '<p>Güvenli parola sıfırlama servisi yaz: <code>SifirlamaServisi(kullanicilar, uretec)</code>. <code>kullanicilar</code> <code>{eposta: {"parola": ..., "oturumlar": set(...)}}</code>; <code>uretec()</code> her çağrıda yeni rastgele token metni döndürür (testte sabit sıra verilir).</p><ul><li><code>iste(eposta, simdi)</code>: her durumda aynı metni döndürür: <code>"Hesap varsa bağlantı gönderildi."</code>. Kayıtlı e-postada <code>uretec()</code> ile token üretir, <code>self.giden</code> listesine <code>(eposta, token)</code> ekler (e-posta yerine), yalnız <b>SHA-256 özetini</b> (<code>hexdigest</code>) 900 sn ömürle saklar ve o kullanıcının önceki bekleyen tokenlarını geçersiz kılar. Kayıtsız e-postada <code>uretec</code> çağrılmaz.</li><li><code>sifirla(token, yeni_parola, simdi)</code>: token geçerliyse parolayı değiştirir, tokenı tüketir, kullanıcının tüm <code>oturumlar</code>\'ını temizler ve <code>True</code>; değilse (bilinmiyor, kullanılmış, süresi dolmuş: <code>simdi &gt;= üretim + 900</code>) <code>False</code>.</li></ul><p>Saklanan hiçbir yerde ham token bulunmamalı (<code>self.giden</code> hariç).</p>',
+      start: 'import hashlib\n\nclass SifirlamaServisi:\n    def __init__(self, kullanicilar, uretec):\n        self.kullanicilar = kullanicilar\n        self.uretec = uretec\n        self.giden = []\n',
+      sol: 'import hashlib\n\nclass SifirlamaServisi:\n    MESAJ = "Hesap varsa bağlantı gönderildi."\n\n    def __init__(self, kullanicilar, uretec):\n        self.kullanicilar = kullanicilar\n        self.uretec = uretec\n        self.giden = []\n        self.bekleyen = {}   # özet -> (eposta, üretim zamanı)\n\n    @staticmethod\n    def _ozet(token):\n        return hashlib.sha256(token.encode()).hexdigest()\n\n    def iste(self, eposta, simdi):\n        if eposta in self.kullanicilar:\n            self.bekleyen = {o: v for o, v in self.bekleyen.items() if v[0] != eposta}\n            token = self.uretec()\n            self.bekleyen[self._ozet(token)] = (eposta, simdi)\n            self.giden.append((eposta, token))\n        return self.MESAJ\n\n    def sifirla(self, token, yeni_parola, simdi):\n        kayit = self.bekleyen.pop(self._ozet(token), None)\n        if kayit is None:\n            return False\n        eposta, zaman = kayit\n        if simdi >= zaman + 900:\n            return False\n        k = self.kullanicilar[eposta]\n        k["parola"] = yeni_parola\n        k["oturumlar"].clear()\n        return True\n',
+      tests: 'import hashlib as _h\nsira = iter(["tok-A", "tok-B", "tok-C", "tok-D"])\nK = {"cem@pusula.com": {"parola": "eski", "oturumlar": {"s1", "s2"}}, "ayse@pusula.com": {"parola": "x", "oturumlar": set()}}\ns = SifirlamaServisi(K, lambda: next(sira))\nm1 = s.iste("cem@pusula.com", 0)\nm2 = s.iste("yok@pusula.com", 0)\nassert m1 == m2 == "Hesap varsa bağlantı gönderildi.", "yanıt hesap olsun olmasın aynı olmalı (numaralandırma)"\nassert s.giden == [("cem@pusula.com", "tok-A")], "kayıtsız e-postaya token üretilmemeli"\nham = [v for k, v in vars(s).items() if k not in ("giden", "uretec", "kullanicilar")]\nassert "tok-A" not in repr(ham), "ham token saklanmamalı; yalnız SHA-256 özeti"\nassert _h.sha256(b"tok-A").hexdigest() in repr(ham), "token özeti (hexdigest) saklanmalı"\ns.iste("cem@pusula.com", 10)\nassert s.sifirla("tok-A", "yeni1", 20) is False, "yeni istek eski tokenı geçersiz kılmalı"\nassert s.sifirla("tok-B", "Yeni-Parola-1", 20) is True, "geçerli token ile sıfırlama başarılı olmalı"\nassert K["cem@pusula.com"]["parola"] == "Yeni-Parola-1", "parola değişmeli"\nassert K["cem@pusula.com"]["oturumlar"] == set(), "tüm oturumlar kapatılmalı"\nassert s.sifirla("tok-B", "baska", 21) is False, "token tek kullanımlık"\ns.iste("ayse@pusula.com", 1000)\nassert s.sifirla("tok-C", "z", 1900) is False, "900 sn sonra süresi dolmuş olmalı"\ns.iste("ayse@pusula.com", 2000)\nassert s.sifirla("tok-D", "z", 2899) is True, "süre dolmadan geçerli"\nassert s.sifirla("uydurma", "z", 0) is False, "bilinmeyen token False"\n',
+      hints: ['Sakladığın sözlüğün anahtarı tokenın kendisi değil hashlib.sha256(token.encode()).hexdigest() olsun.', 'Yeni istekte aynı e-postaya ait bekleyen kayıtları sözlükten çıkar.', 'sifirla\'da özeti pop ile çıkar: başarılı da olsa başarısız da olsa tek kullanımlık olur.'],
+      why: 'Özet saklamak, veritabanı sızsa bile bekleyen bağlantıların kullanılamamasını sağlar (token yüksek entropili olduğu için tuz ve yavaş özet gerekmez). Aynı yanıt kullanıcı numaralandırmayı engeller; oturumları kapatmak, saldırgan zaten içerideyse onu dışarı atar. Gerçek sistemde uretec secrets.token_urlsafe(32) olur.'
+    },
+    {
+      id: 'kimlik-yetki-13',
+      t: 'code',
+      stage: 'Mini proje',
+      diff: 3,
+      q: '<p><b>Pusula İK izin API\'sinin yetki katmanı.</b> <code>istek_isle(yuk, yontem, yol)</code> fonksiyonunu yaz; <code>yuk</code> doğrulanmış token yüküdür ya da token geçersizse <code>None</code>. Dönüş <code>(durum_kodu, gövde)</code> demeti. Veri <code>veri.kayitlar("pusula_ik", ...)</code> ile hazır yüklendi (<code>CALISAN</code>, <code>IZIN</code> sözlükleri, <code>ONAY</code> kümesi).</p><ul><li><code>yuk is None</code> → <code>(401, "kimlik")</code></li><li><code>GET /izinler/&lt;id&gt;</code>: kapsam <code>"izin:oku"</code> gerekir (<code>yuk["scope"]</code> boşlukla ayrılmış metin; yoksa <code>(403, "kapsam")</code>). Kayıt yoksa ya da kullanıcı (<code>int(yuk["sub"])</code>) ne sahibi ne de sahibinin yöneticisiyse ve rolü (<code>yuk["rol"]</code>) <code>"ik"</code> değilse → <code>(404, "yok")</code>. Aksi hâlde <code>(200, izin_sözlüğü)</code>.</li><li><code>POST /izinler/&lt;id&gt;/onay</code>: kapsam <code>"izin:onayla"</code> gerekir. Kayıt yoksa <code>(404, "yok")</code>. Yalnız sahibinin <b>yöneticisi</b> onaylayabilir; kişi kendi iznini onaylayamaz; diğer herkes (ik dahil) <code>(403, "yetki")</code>. Zaten onaylıysa <code>(409, "zaten")</code>. Başarıda id\'yi <code>ONAY</code>\'a ekle, <code>(200, "onaylandı")</code>.</li><li>Diğer her yol/yöntem → <code>(404, "yol")</code>.</li></ul>',
+      start: 'import re\nimport veri\n\nCALISAN = {c["emp_id"]: c for c in veri.kayitlar("pusula_ik", "ik_employees")}\nIZIN = {k["leave_id"]: k for k in veri.kayitlar("pusula_ik", "ik_leaves")}\nONAY = set()\n\ndef istek_isle(yuk, yontem, yol):\n    # TODO\n    return (404, "yol")\n',
+      sol: 'import re\nimport veri\n\nCALISAN = {c["emp_id"]: c for c in veri.kayitlar("pusula_ik", "ik_employees")}\nIZIN = {k["leave_id"]: k for k in veri.kayitlar("pusula_ik", "ik_leaves")}\nONAY = set()\n\ndef _yonetici(izin):\n    return CALISAN[izin["emp_id"]]["manager_id"]\n\ndef istek_isle(yuk, yontem, yol):\n    if yuk is None:\n        return (401, "kimlik")\n    kapsam = set(yuk.get("scope", "").split())\n    kim = int(yuk["sub"])\n    m_oku = re.fullmatch(r"/izinler/(\\d+)", yol)\n    m_onay = re.fullmatch(r"/izinler/(\\d+)/onay", yol)\n    if yontem == "GET" and m_oku:\n        if "izin:oku" not in kapsam:\n            return (403, "kapsam")\n        izin = IZIN.get(int(m_oku.group(1)))\n        if izin is None:\n            return (404, "yok")\n        if yuk.get("rol") == "ik" or kim in (izin["emp_id"], _yonetici(izin)):\n            return (200, izin)\n        return (404, "yok")\n    if yontem == "POST" and m_onay:\n        if "izin:onayla" not in kapsam:\n            return (403, "kapsam")\n        izin_id = int(m_onay.group(1))\n        izin = IZIN.get(izin_id)\n        if izin is None:\n            return (404, "yok")\n        if kim != _yonetici(izin) or kim == izin["emp_id"]:\n            return (403, "yetki")\n        if izin_id in ONAY:\n            return (409, "zaten")\n        ONAY.add(izin_id)\n        return (200, "onaylandı")\n    return (404, "yol")\n',
+      tests: 'ONAY.clear()\ncem = {"sub": "418", "rol": "calisan", "scope": "izin:oku"}\nbaris = {"sub": "42", "rol": "yonetici", "scope": "izin:oku izin:onayla"}\nik = {"sub": "2", "rol": "ik", "scope": "izin:oku izin:onayla"}\nassert istek_isle(None, "GET", "/izinler/3319") == (401, "kimlik"), "token yoksa 401"\nassert istek_isle(cem, "GET", "/izinler/3319") == (200, IZIN[3319]), "Cem kendi iznini okur"\nassert istek_isle(cem, "GET", "/izinler/2") == (404, "yok"), "başkasının izni 404 (IDOR koruması)"\nassert istek_isle(cem, "GET", "/izinler/99999999") == (404, "yok"), "olmayan izin 404"\nassert istek_isle(dict(cem, scope=""), "GET", "/izinler/3319") == (403, "kapsam"), "kapsam yoksa 403"\nassert istek_isle(ik, "GET", "/izinler/2")[0] == 200, "İK herkesi okur"\nassert istek_isle(baris, "GET", "/izinler/3319")[0] == 200, "yönetici ekibini okur"\nassert istek_isle(cem, "POST", "/izinler/3319/onay") == (403, "kapsam"), "çalışanın onay kapsamı yok"\nassert istek_isle(dict(cem, scope="izin:onayla"), "POST", "/izinler/3319/onay") == (403, "yetki"), "kişi kendi iznini onaylayamaz"\nassert istek_isle(ik, "POST", "/izinler/3319/onay") == (403, "yetki"), "İK bile yalnız yöneticinin yerine onaylayamaz"\nassert istek_isle(baris, "POST", "/izinler/2/onay") == (403, "yetki"), "başka ekibin iznini onaylayamaz"\nassert istek_isle(baris, "POST", "/izinler/3319/onay") == (200, "onaylandı"), "yönetici ekibinin iznini onaylar"\nassert 3319 in ONAY, "onay kaydedilmeli"\nassert istek_isle(baris, "POST", "/izinler/3319/onay") == (409, "zaten"), "ikinci onay 409"\nassert istek_isle(baris, "POST", "/izinler/99999999/onay") == (404, "yok"), "olmayan izin 404"\nassert istek_isle(baris, "DELETE", "/izinler/3319") == (404, "yol"), "tanımsız yöntem"\nassert istek_isle(baris, "GET", "/izinler/3319/ek") == (404, "yol"), "tanımsız yol"\n',
+      hints: ['Yolu re.fullmatch(r"/izinler/(\\d+)", yol) ve r"/izinler/(\\d+)/onay" ile ayır.', 'Kontrol sırası: kimlik (401) → kapsam (403) → kayıt var mı (404) → nesne yetkisi (404/403) → iş kuralı (409).', 'Sahibinin yöneticisi: CALISAN[izin["emp_id"]]["manager_id"].'],
+      why: 'Gerçek API\'lerde yetki katmanlıdır: önce kimlik, sonra token kapsamı (istemciye ne devredildi), sonra kullanıcının bu nesne üzerindeki hakkı, en son iş kuralları. Okumada yetkisiz erişime 404 dönmek kaydı gizler; onayda ise kişi kaydı zaten görebildiğinden 403 daha açıklayıcıdır. Kapsam ile rolün ayrı olduğuna dikkat: İK\'nın onay kapsamı olsa da iş kuralı onayı yöneticiye bırakıyor.'
+    }
+  ],
+  faq: [
+    {
+      q: 'JWT\'yi localStorage\'da mı tutmalıyım, çerezde mi?',
+      a: 'localStorage\'a JavaScript erişebildiği için bir XSS açığı tokenı çaldırır. Tarayıcı uygulamalarında yaygın güvenli desen: kısa ömürlü access token yalnız bellekte, refresh token HttpOnly + Secure + SameSite çerezde. Çerez kullanıyorsan CSRF korumasını da unutma.'
+    },
+    {
+      q: 'Çıkış yapınca JWT nasıl geçersiz olur?',
+      a: 'Kendiliğinden olmaz; imza süre dolana kadar geçerlidir. Bu yüzden access token ömrü kısa tutulur, refresh token sunucuda iptal edilir ve gerekirse access tokenın jti değeri süresi dolana kadar bir iptal listesinde (genelde Redis, TTL ile) tutulur.'
+    },
+    {
+      q: 'OAuth2 ile OpenID Connect aynı şey mi?',
+      a: 'Hayır. OAuth2 yetki devridir: "bu uygulama benim izin kayıtlarımı okuyabilir". OIDC bunun üstüne kimlik katmanı ekler: id_token ile "giriş yapan kişi Cem Bal, e-postası şu". "X ile giriş yap" ve kurumsal SSO OIDC kullanır.'
+    },
+    {
+      q: 'UUID kullanırsam IDOR\'dan korunmuş olur muyum?',
+      a: 'Hayır, yalnız tahmini zorlaştırırsın. UUID\'ler loglarda, e-postalarda, paylaşılan bağlantılarda sızar. Her istekte "bu kayıt bu kullanıcının kapsamında mı?" kontrolü yine zorunludur.'
+    },
+    {
+      q: 'Rolleri tokenın içine koymak güvenli mi?',
+      a: 'İmzalı olduğu için değiştirilemez, ama token ömrü boyunca eski kalır: yöneticilikten alınan biri 15 dakika daha yönetici görünür. Kritik işlemlerde (maaş, onay) güncel rolü veritabanından okumak ya da token ömrünü kısa tutmak gerekir.'
+    }
+  ],
+  mistakes: [
+    {
+      why: 'Tokendaki alg alanına göre davranmak alg=none ve algoritma karışıklığı saldırılarına kapı açar.',
+      bad: 'yuk = jwt.decode(token, ANAHTAR, algorithms=jwt.get_unverified_header(token)["alg"])',
+      good: 'yuk = jwt.decode(token, ANAHTAR, algorithms=["HS256"], audience="izin-api", issuer="pusula-sso")'
+    },
+    {
+      why: 'Yalnız giriş kontrolü yapıp kaydın kime ait olduğuna bakmamak IDOR açığıdır.',
+      bad: 'izin = con.execute("SELECT * FROM ik_leaves WHERE leave_id = ?", (izin_id,)).fetchone()',
+      good: 'izin = con.execute("SELECT * FROM ik_leaves WHERE leave_id = ? AND emp_id = ?",\n                   (izin_id, kullanici_id)).fetchone()'
+    },
+    {
+      why: 'Farklı hata mesajları geçerli kullanıcı adlarını sızdırır (kullanıcı numaralandırma).',
+      bad: 'if kullanici is None:\n    return "Böyle bir kullanıcı yok"\nif not parola_dogru:\n    return "Parola yanlış"',
+      good: 'if kullanici is None or not parola_dogru:\n    return "E-posta ya da parola hatalı"'
+    },
+    {
+      why: 'Parola sıfırlama tokenını düz metin saklamak, veritabanı sızıntısında tüm bekleyen bağlantıları kullanılır yapar.',
+      bad: 'db.kaydet(token=token, eposta=eposta)',
+      good: 'db.kaydet(ozet=hashlib.sha256(token.encode()).hexdigest(), eposta=eposta, bitis=simdi + 900)'
+    },
+    {
+      why: 'Uzun ömürlü access token iptal edilemediği için çalınırsa günlerce kullanılır.',
+      bad: 'yuk["exp"] = simdi + 30 * 24 * 3600   # 30 gün',
+      good: 'yuk["exp"] = simdi + 15 * 60          # 15 dk; uzun oturum için refresh token'
+    }
+  ]
+}
+);
+})(window);

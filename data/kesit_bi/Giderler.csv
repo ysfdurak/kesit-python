@@ -1,0 +1,187 @@
+GiderNo,Tarih,GiderTuru,DepartmanNo,Tutar
+1,2022-06-01,Personel,1,2226.74
+2,2022-06-01,Kira ve tesis,0,1500
+3,2022-06-01,Pazarlama ve reklam,2,357.38
+4,2022-06-01,Lojistik ve kargo,1,24.2
+5,2022-06-01,Teknoloji,4,518.09
+6,2022-06-01,Genel yönetim,0,659.41
+7,2022-07-01,Personel,1,3095.42
+8,2022-07-01,Kira ve tesis,0,1500
+9,2022-07-01,Pazarlama ve reklam,2,895.26
+10,2022-07-01,Lojistik ve kargo,1,49.77
+11,2022-07-01,Teknoloji,4,513.87
+12,2022-07-01,Genel yönetim,0,707.58
+13,2022-08-01,Personel,1,2623.27
+14,2022-08-01,Kira ve tesis,0,1500
+15,2022-08-01,Pazarlama ve reklam,2,748.9
+16,2022-08-01,Lojistik ve kargo,1,75.18
+17,2022-08-01,Teknoloji,4,534.5
+18,2022-08-01,Genel yönetim,0,791.98
+19,2022-09-01,Personel,1,2775.7
+20,2022-09-01,Kira ve tesis,0,1500
+21,2022-09-01,Pazarlama ve reklam,2,677.18
+22,2022-09-01,Lojistik ve kargo,1,70.29
+23,2022-09-01,Teknoloji,4,512.48
+24,2022-09-01,Genel yönetim,0,642.26
+25,2022-10-01,Personel,1,3393.19
+26,2022-10-01,Kira ve tesis,0,1500
+27,2022-10-01,Pazarlama ve reklam,2,1300.27
+28,2022-10-01,Lojistik ve kargo,1,90.37
+29,2022-10-01,Teknoloji,4,561.28
+30,2022-10-01,Genel yönetim,0,769.32
+31,2022-11-01,Personel,1,3460.46
+32,2022-11-01,Kira ve tesis,0,1500
+33,2022-11-01,Pazarlama ve reklam,2,2468.33
+34,2022-11-01,Lojistik ve kargo,1,146.01
+35,2022-11-01,Teknoloji,4,557.89
+36,2022-11-01,Genel yönetim,0,677.4
+37,2022-12-01,Personel,1,5061.96
+38,2022-12-01,Kira ve tesis,0,1500
+39,2022-12-01,Pazarlama ve reklam,2,4395.46
+40,2022-12-01,Lojistik ve kargo,1,254.72
+41,2022-12-01,Teknoloji,4,575.64
+42,2022-12-01,Genel yönetim,0,783.89
+43,2023-01-01,Personel,1,3168.98
+44,2023-01-01,Kira ve tesis,0,1500
+45,2023-01-01,Pazarlama ve reklam,2,1044.77
+46,2023-01-01,Lojistik ve kargo,1,186.08
+47,2023-01-01,Teknoloji,4,1772.96
+48,2023-01-01,Genel yönetim,0,724.4
+49,2023-02-01,Personel,1,4288.88
+50,2023-02-01,Kira ve tesis,0,1500
+51,2023-02-01,Pazarlama ve reklam,2,1812.06
+52,2023-02-01,Lojistik ve kargo,1,172.19
+53,2023-02-01,Teknoloji,4,551.95
+54,2023-02-01,Genel yönetim,0,671.11
+55,2023-03-01,Personel,1,3985.41
+56,2023-03-01,Kira ve tesis,0,1500
+57,2023-03-01,Pazarlama ve reklam,2,1575.3
+58,2023-03-01,Lojistik ve kargo,1,199.33
+59,2023-03-01,Teknoloji,4,582.42
+60,2023-03-01,Genel yönetim,0,720.91
+61,2023-04-01,Personel,1,3883.92
+62,2023-04-01,Kira ve tesis,0,1500
+63,2023-04-01,Pazarlama ve reklam,2,1444.2
+64,2023-04-01,Lojistik ve kargo,1,226.79
+65,2023-04-01,Teknoloji,4,602.73
+66,2023-04-01,Genel yönetim,0,798.55
+67,2023-05-01,Personel,1,4237.06
+68,2023-05-01,Kira ve tesis,0,1500
+69,2023-05-01,Pazarlama ve reklam,2,1689.01
+70,2023-05-01,Lojistik ve kargo,1,261.89
+71,2023-05-01,Teknoloji,4,621.45
+72,2023-05-01,Genel yönetim,0,692.47
+73,2023-06-01,Personel,1,4861.4
+74,2023-06-01,Kira ve tesis,0,1500
+75,2023-06-01,Pazarlama ve reklam,2,2514.46
+76,2023-06-01,Lojistik ve kargo,1,265.67
+77,2023-06-01,Teknoloji,4,641.2
+78,2023-06-01,Genel yönetim,0,789.37
+79,2023-07-01,Personel,1,5440.39
+80,2023-07-01,Kira ve tesis,0,1500
+81,2023-07-01,Pazarlama ve reklam,2,2472.8
+82,2023-07-01,Lojistik ve kargo,1,401.13
+83,2023-07-01,Teknoloji,4,628.61
+84,2023-07-01,Genel yönetim,0,663.12
+85,2023-08-01,Personel,1,3627.72
+86,2023-08-01,Kira ve tesis,0,1500
+87,2023-08-01,Pazarlama ve reklam,2,1641.28
+88,2023-08-01,Lojistik ve kargo,1,204.83
+89,2023-08-01,Teknoloji,4,618.74
+90,2023-08-01,Genel yönetim,0,595.78
+91,2023-09-01,Personel,1,4777.39
+92,2023-09-01,Kira ve tesis,0,1500
+93,2023-09-01,Pazarlama ve reklam,2,2065.24
+94,2023-09-01,Lojistik ve kargo,1,285.5
+95,2023-09-01,Teknoloji,4,682.16
+96,2023-09-01,Genel yönetim,0,693.56
+97,2023-10-01,Personel,1,5178.79
+98,2023-10-01,Kira ve tesis,0,1500
+99,2023-10-01,Pazarlama ve reklam,2,2823.96
+100,2023-10-01,Lojistik ve kargo,1,321.63
+101,2023-10-01,Teknoloji,4,629.96
+102,2023-10-01,Genel yönetim,0,699.79
+103,2023-11-01,Personel,1,6163.47
+104,2023-11-01,Kira ve tesis,0,1500
+105,2023-11-01,Pazarlama ve reklam,2,5264.64
+106,2023-11-01,Lojistik ve kargo,1,491.29
+107,2023-11-01,Teknoloji,4,648.97
+108,2023-11-01,Genel yönetim,0,718.72
+109,2023-12-01,Personel,1,5220.02
+110,2023-12-01,Kira ve tesis,0,1500
+111,2023-12-01,Pazarlama ve reklam,2,4340.34
+112,2023-12-01,Lojistik ve kargo,1,398.18
+113,2023-12-01,Teknoloji,4,688.23
+114,2023-12-01,Genel yönetim,0,620.87
+115,2024-01-01,Personel,1,5528.27
+116,2024-01-01,Kira ve tesis,0,1800
+117,2024-01-01,Pazarlama ve reklam,2,2891.68
+118,2024-01-01,Lojistik ve kargo,1,505.62
+119,2024-01-01,Teknoloji,4,1865.87
+120,2024-01-01,Genel yönetim,0,729.16
+121,2024-02-01,Personel,1,5351.16
+122,2024-02-01,Kira ve tesis,0,1800
+123,2024-02-01,Pazarlama ve reklam,2,3012.4
+124,2024-02-01,Lojistik ve kargo,1,384.63
+125,2024-02-01,Teknoloji,4,678.91
+126,2024-02-01,Genel yönetim,0,626.85
+127,2024-03-01,Personel,1,6598.64
+128,2024-03-01,Kira ve tesis,0,1800
+129,2024-03-01,Pazarlama ve reklam,2,4051.16
+130,2024-03-01,Lojistik ve kargo,1,422.94
+131,2024-03-01,Teknoloji,4,721.57
+132,2024-03-01,Genel yönetim,0,756.24
+133,2024-04-01,Personel,1,4462.16
+134,2024-04-01,Kira ve tesis,0,1800
+135,2024-04-01,Pazarlama ve reklam,2,1924.92
+136,2024-04-01,Lojistik ve kargo,1,307.75
+137,2024-04-01,Teknoloji,4,684.02
+138,2024-04-01,Genel yönetim,0,645.4
+139,2024-05-01,Personel,1,5389.23
+140,2024-05-01,Kira ve tesis,0,1800
+141,2024-05-01,Pazarlama ve reklam,2,2687.76
+142,2024-05-01,Lojistik ve kargo,1,409.37
+143,2024-05-01,Teknoloji,4,750.85
+144,2024-05-01,Genel yönetim,0,626.04
+145,2024-06-01,Personel,1,6573.02
+146,2024-06-01,Kira ve tesis,0,1800
+147,2024-06-01,Pazarlama ve reklam,2,3840.36
+148,2024-06-01,Lojistik ve kargo,1,478.29
+149,2024-06-01,Teknoloji,4,719.73
+150,2024-06-01,Genel yönetim,0,775.91
+151,2024-07-01,Personel,1,6215.47
+152,2024-07-01,Kira ve tesis,0,1800
+153,2024-07-01,Pazarlama ve reklam,2,4018.35
+154,2024-07-01,Lojistik ve kargo,1,404.34
+155,2024-07-01,Teknoloji,4,772.16
+156,2024-07-01,Genel yönetim,0,780.65
+157,2024-08-01,Personel,1,6001.88
+158,2024-08-01,Kira ve tesis,0,1800
+159,2024-08-01,Pazarlama ve reklam,2,3540.86
+160,2024-08-01,Lojistik ve kargo,1,509.38
+161,2024-08-01,Teknoloji,4,740.8
+162,2024-08-01,Genel yönetim,0,757.99
+163,2024-09-01,Personel,1,7253.49
+164,2024-09-01,Kira ve tesis,0,1800
+165,2024-09-01,Pazarlama ve reklam,2,3977.23
+166,2024-09-01,Lojistik ve kargo,1,459.63
+167,2024-09-01,Teknoloji,4,758.88
+168,2024-09-01,Genel yönetim,0,784.15
+169,2024-10-01,Personel,1,7460.81
+170,2024-10-01,Kira ve tesis,0,1800
+171,2024-10-01,Pazarlama ve reklam,2,4048.45
+172,2024-10-01,Lojistik ve kargo,1,557.25
+173,2024-10-01,Teknoloji,4,781.03
+174,2024-10-01,Genel yönetim,0,679.97
+175,2024-11-01,Personel,1,8163.13
+176,2024-11-01,Kira ve tesis,0,1800
+177,2024-11-01,Pazarlama ve reklam,2,6840.69
+178,2024-11-01,Lojistik ve kargo,1,730.73
+179,2024-11-01,Teknoloji,4,770.13
+180,2024-11-01,Genel yönetim,0,765.36
+181,2024-12-01,Personel,1,8505.27
+182,2024-12-01,Kira ve tesis,0,1800
+183,2024-12-01,Pazarlama ve reklam,2,7232.32
+184,2024-12-01,Lojistik ve kargo,1,645.56
+185,2024-12-01,Teknoloji,4,806.98
+186,2024-12-01,Genel yönetim,0,596.38

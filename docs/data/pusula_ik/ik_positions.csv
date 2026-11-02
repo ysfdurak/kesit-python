@@ -1,0 +1,68 @@
+position_id,title,dept_id,level,band_min,band_max
+1,Takım Lideri · Strateji,1,4,92000.0,129800.0
+2,Müdür · Strateji,1,5,122600.0,173100.0
+3,Direktör · Strateji,1,6,167500.0,236500.0
+4,Satış Uzman Yardımcısı,2,1,40400.0,57000.0
+5,Satış Uzmanı,2,2,55000.0,77700.0
+6,Kıdemli Satış Uzmanı,2,3,72800.0,102800.0
+7,Takım Lideri · Satış,2,4,97300.0,137300.0
+8,Müdür · Satış,2,5,108200.0,152700.0
+9,Direktör · Satış,2,6,169000.0,238600.0
+10,Kurumsal Satış Uzman Yardımcısı,3,1,42900.0,60600.0
+11,Kurumsal Satış Uzmanı,3,2,64900.0,91700.0
+12,Kıdemli Kurumsal Satış Uzmanı,3,3,83100.0,117300.0
+13,Takım Lideri · Kurumsal Satış,3,4,112600.0,159000.0
+14,Müdür · Kurumsal Satış,3,5,128100.0,180900.0
+15,Direktör · Kurumsal Satış,3,6,183000.0,258300.0
+16,Mağaza Uzman Yardımcısı,4,1,35100.0,49500.0
+17,Mağaza Uzmanı,4,2,47300.0,66800.0
+18,Kıdemli Mağaza Uzmanı,4,3,64400.0,90900.0
+19,Takım Lideri · Mağaza,4,4,85400.0,120600.0
+20,Müdür · Mağaza,4,5,93700.0,132300.0
+21,Direktör · Mağaza,4,6,167300.0,236200.0
+22,Müşteri Temsilcisi Uzman Yardımcısı,5,1,32000.0,45200.0
+23,Müşteri Temsilcisi Uzmanı,5,2,39700.0,56000.0
+24,Kıdemli Müşteri Temsilcisi Uzmanı,5,3,53200.0,75100.0
+25,Takım Lideri · Müşteri Temsilcisi,5,4,75800.0,107000.0
+26,Müdür · Müşteri Temsilcisi,5,5,91600.0,129300.0
+27,Lojistik Uzman Yardımcısı,6,1,32900.0,46400.0
+28,Lojistik Uzmanı,6,2,43700.0,61700.0
+29,Kıdemli Lojistik Uzmanı,6,3,62100.0,87700.0
+30,Takım Lideri · Lojistik,6,4,77600.0,109500.0
+31,Müdür · Lojistik,6,5,113700.0,160500.0
+32,Yazılım Uzman Yardımcısı,7,1,59100.0,83400.0
+33,Yazılım Uzmanı,7,2,76100.0,107500.0
+34,Kıdemli Yazılım Uzmanı,7,3,102800.0,145100.0
+35,Takım Lideri · Yazılım,7,4,140000.0,197700.0
+36,Müdür · Yazılım,7,5,162300.0,229200.0
+37,Direktör · Yazılım,7,6,225400.0,318200.0
+38,Veri Uzman Yardımcısı,8,1,57700.0,81400.0
+39,Veri Uzmanı,8,2,79500.0,112200.0
+40,Kıdemli Veri Uzmanı,8,3,99500.0,140400.0
+41,Takım Lideri · Veri,8,4,143300.0,202300.0
+42,Müdür · Veri,8,5,167800.0,236900.0
+43,Direktör · Veri,8,6,238700.0,336900.0
+44,Sistem Uzman Yardımcısı,9,1,53700.0,75800.0
+45,Sistem Uzmanı,9,2,71100.0,100300.0
+46,Kıdemli Sistem Uzmanı,9,3,94600.0,133500.0
+47,Takım Lideri · Sistem,9,4,132700.0,187300.0
+48,Müdür · Sistem,9,5,164700.0,232500.0
+49,Direktör · Sistem,9,6,208200.0,293900.0
+50,Finans Uzman Yardımcısı,10,1,51100.0,72100.0
+51,Finans Uzmanı,10,2,66100.0,93300.0
+52,Kıdemli Finans Uzmanı,10,3,87500.0,123500.0
+53,Takım Lideri · Finans,10,4,114100.0,161100.0
+54,Müdür · Finans,10,5,137100.0,193500.0
+55,Direktör · Finans,10,6,230600.0,325500.0
+56,İK Uzman Yardımcısı,11,1,48700.0,68800.0
+57,İK Uzmanı,11,2,58400.0,82400.0
+58,Kıdemli İK Uzmanı,11,3,72800.0,102800.0
+59,Takım Lideri · İK,11,4,112900.0,159300.0
+60,Müdür · İK,11,5,147700.0,208600.0
+61,Direktör · İK,11,6,172700.0,243900.0
+62,Pazarlama Uzman Yardımcısı,12,1,46400.0,65600.0
+63,Pazarlama Uzmanı,12,2,61500.0,86800.0
+64,Kıdemli Pazarlama Uzmanı,12,3,86000.0,121400.0
+65,Takım Lideri · Pazarlama,12,4,108000.0,152500.0
+66,Müdür · Pazarlama,12,5,134800.0,190300.0
+67,Direktör · Pazarlama,12,6,177700.0,250900.0

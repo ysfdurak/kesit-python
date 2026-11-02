@@ -1,0 +1,151 @@
+MusteriNo,Musteri,Cinsiyet,DogumYili,YasGrubu,Sehir,Bolge,Segment,KayitTarihi,IlkSiparis,KohortAy,TemsilciNo
+1,Can Yılmaz,Erkek,1991,25-34,Kayseri,İç Anadolu,Premium,2023-04-19,2023-04-27,2023-04,8
+2,Can Kurt,Erkek,2002,18-24,İstanbul,Marmara,Premium,2024-01-02,2024-02-24,2024-02,9
+3,Ayşe Özdemir,Kadın,1982,35-44,Ankara,İç Anadolu,Kurumsal,2024-02-13,2024-04-11,2024-04,10
+4,Zeynep Polat,Kadın,1966,55+,Trabzon,Karadeniz,Premium,2022-11-16,2022-12-11,2022-12,11
+5,Esra Yıldız,Kadın,1991,25-34,Konya,İç Anadolu,Bireysel,2024-01-17,2024-02-10,2024-02,12
+6,Murat Koç,Erkek,1974,45-54,,,Bireysel,2023-04-08,2023-04-19,2023-04,2
+7,Ayşe Yıldız,Kadın,1999,25-34,Adana,Akdeniz,Bireysel,2023-05-05,2023-06-06,2023-06,8
+8,Seda Aslan,Kadın,1969,55+,Adana,Akdeniz,Bireysel,2023-11-05,2023-11-17,2023-11,9
+9,Aslı Aydın,Kadın,1974,45-54,Bursa,Marmara,Bireysel,2024-01-12,2024-01-18,2024-01,10
+10,Merve Özdemir,Kadın,1986,35-44,Bursa,Marmara,Bireysel,2024-05-11,2024-05-19,2024-05,11
+11,Eren Kurt,Erkek,1961,55+,Trabzon,Karadeniz,Bireysel,2022-12-03,2022-12-10,2022-12,12
+12,Emre Yıldız,Erkek,1997,25-34,İstanbul,Marmara,Premium,2022-12-16,2022-12-30,2022-12,2
+13,Barış Arslan,Erkek,1995,25-34,Ankara,İç Anadolu,Bireysel,2022-12-25,2023-01-27,2023-01,8
+14,Esra Aslan,Kadın,1999,25-34,İstanbul,Marmara,Kurumsal,2024-08-19,2024-08-27,2024-08,9
+15,Defne Şimşek,Kadın,2000,18-24,İstanbul,Marmara,Bireysel,2022-08-08,2022-08-30,2022-08,10
+16,Zeynep Kaya,Kadın,1960,55+,Kayseri,İç Anadolu,Kurumsal,2024-08-23,2024-09-18,2024-09,11
+17,Tolga Şimşek,Erkek,1987,35-44,İstanbul,Marmara,Kurumsal,2024-02-22,2024-03-30,2024-03,12
+18,Gamze Çetin,Kadın,1968,55+,Ankara,İç Anadolu,Bireysel,2023-11-20,2023-12-03,2023-12,2
+19,Mehmet Yılmaz,Erkek,1982,35-44,Antalya,Akdeniz,Premium,2024-09-27,2024-11-12,2024-11,8
+20,Ali Koç,Erkek,1960,55+,Gaziantep,Güneydoğu Anadolu,Bireysel,2024-02-01,2024-02-05,2024-02,9
+21,Fatma Kara,Kadın,1967,55+,Eskişehir,İç Anadolu,Kurumsal,2024-01-29,2024-02-08,2024-02,10
+22,Hüseyin Özdemir,Erkek,2005,18-24,Konya,İç Anadolu,Bireysel,2024-02-16,2024-03-26,2024-03,11
+23,Zeynep Demir,Kadın,1969,55+,Ankara,İç Anadolu,Bireysel,2022-12-27,2022-12-30,2022-12,12
+24,Gamze Kaya,Kadın,2005,18-24,İstanbul,Marmara,Kurumsal,2022-10-21,2022-11-06,2022-11,2
+25,Oğuz Erdem,Erkek,1982,35-44,İzmir,Ege,Kurumsal,2023-12-31,2024-01-06,2024-01,8
+26,Mehmet Şahin,Erkek,1978,45-54,İzmir,Ege,Bireysel,2023-04-03,2023-05-04,2023-05,9
+27,Emine Yılmaz,Kadın,1998,25-34,İstanbul,Marmara,Bireysel,2024-08-24,2024-09-26,2024-09,10
+28,Ayşe Yıldız,Kadın,1966,55+,İzmir,Ege,Kurumsal,2023-03-17,2023-04-25,2023-04,11
+29,Hüseyin Yıldırım,Erkek,1963,55+,Gaziantep,Güneydoğu Anadolu,Bireysel,2023-12-27,2024-01-28,2024-01,12
+30,Ceren Arslan,Kadın,2000,18-24,İstanbul,Marmara,Premium,2023-04-24,2023-05-26,2023-05,2
+31,Emine Çelik,Kadın,2004,18-24,Bursa,Marmara,Bireysel,2022-12-02,2023-03-14,2023-03,8
+32,Deniz Güneş,Erkek,1990,25-34,Ankara,İç Anadolu,Bireysel,2024-09-23,2024-10-16,2024-10,9
+33,Ayşe Doğan,Kadın,1964,55+,Antalya,Akdeniz,Bireysel,2024-06-12,2024-06-28,2024-06,10
+34,Kerem Yıldırım,Erkek,1976,45-54,Antalya,Akdeniz,Kurumsal,2024-06-11,2024-07-01,2024-07,11
+35,Merve Yıldırım,Kadın,1989,35-44,Eskişehir,İç Anadolu,Premium,2024-08-10,2024-08-31,2024-08,12
+36,Ayşe Şimşek,Kadın,1995,25-34,Eskişehir,İç Anadolu,Bireysel,2024-01-24,2024-02-19,2024-02,2
+37,Elif Kurt,Kadın,1963,55+,Eskişehir,İç Anadolu,Bireysel,2022-10-02,,,8
+38,Burak Özdemir,Erkek,1989,35-44,Ankara,İç Anadolu,Bireysel,2023-09-09,2023-10-10,2023-10,9
+39,Merve Erdem,Kadın,1966,55+,İzmir,Ege,Premium,2022-10-13,2022-10-27,2022-10,10
+40,Onur Aslan,Erkek,1982,35-44,Gaziantep,Güneydoğu Anadolu,Premium,2022-10-11,,,11
+41,Kerem Kara,Erkek,1981,35-44,İzmir,Ege,Bireysel,2022-08-26,2022-12-19,2022-12,12
+42,Elif Demir,Kadın,1968,55+,Eskişehir,İç Anadolu,Bireysel,2023-06-20,2023-07-15,2023-07,2
+43,İrem Koç,Kadın,1987,35-44,Gaziantep,Güneydoğu Anadolu,Bireysel,2023-07-20,,,8
+44,Mustafa Güneş,Erkek,1991,25-34,İzmir,Ege,Bireysel,2022-06-22,2022-06-22,2022-06,9
+45,Barış Koç,Erkek,1981,35-44,Trabzon,Karadeniz,Premium,2023-04-22,2023-05-22,2023-05,10
+46,Pınar Aydın,Kadın,1975,45-54,İstanbul,Marmara,Kurumsal,2023-05-26,2023-05-28,2023-05,11
+47,Derya Yılmaz,Kadın,1988,35-44,Trabzon,Karadeniz,Bireysel,2023-11-26,2023-11-28,2023-11,12
+48,Nur Erdem,Kadın,1971,45-54,Samsun,Karadeniz,Bireysel,2023-11-26,2023-12-20,2023-12,2
+49,Kaan Kara,Erkek,1998,25-34,Antalya,Akdeniz,Premium,2022-11-26,2022-12-25,2022-12,8
+50,Elif Doğan,Kadın,1963,55+,Konya,İç Anadolu,Premium,2022-12-03,2022-12-29,2022-12,9
+51,Eren Çelik,Erkek,2000,18-24,,,Bireysel,2022-09-26,2022-11-04,2022-11,10
+52,Deniz Kılıç,Erkek,1995,25-34,Eskişehir,İç Anadolu,Premium,2023-10-11,2023-10-21,2023-10,11
+53,Ece Özdemir,Kadın,1967,55+,Ankara,İç Anadolu,Bireysel,2024-04-02,2024-09-02,2024-09,12
+54,Mehmet Aslan,Erkek,1994,25-34,Samsun,Karadeniz,Bireysel,2023-06-26,2023-07-24,2023-07,2
+55,Selin Çetin,Kadın,1990,25-34,Ankara,İç Anadolu,Premium,2024-02-26,2024-03-23,2024-03,8
+56,Kerem Kılıç,Erkek,1971,45-54,Kayseri,İç Anadolu,Bireysel,2023-10-03,2023-11-04,2023-11,9
+57,Esra Polat,Kadın,2002,18-24,Ankara,İç Anadolu,Bireysel,2023-12-14,2024-01-19,2024-01,10
+58,Can Yıldırım,Erkek,1970,45-54,Trabzon,Karadeniz,Kurumsal,2022-07-08,2022-07-23,2022-07,11
+59,Ahmet Güneş,Erkek,2000,18-24,Ankara,İç Anadolu,Bireysel,2023-11-28,2023-12-13,2023-12,12
+60,Pınar Çetin,Kadın,1987,35-44,İzmir,Ege,Premium,2024-02-26,,,2
+61,Mehmet Kılıç,Erkek,1985,35-44,Kayseri,İç Anadolu,Premium,2022-12-24,2022-12-25,2022-12,8
+62,Fatma Yıldırım,Kadın,1998,25-34,İstanbul,Marmara,Bireysel,2022-07-26,2022-08-25,2022-08,9
+63,Gamze Yılmaz,Kadın,1971,45-54,Adana,Akdeniz,Bireysel,2024-01-27,2024-03-01,2024-03,10
+64,Duygu Aydın,Kadın,1982,35-44,İstanbul,Marmara,Premium,2022-11-27,2023-01-02,2023-01,11
+65,Elif Koç,Kadın,2001,18-24,İzmir,Ege,Kurumsal,2022-07-24,2022-08-10,2022-08,12
+66,Burak Özkan,Erkek,1997,25-34,Ankara,İç Anadolu,Kurumsal,2024-07-08,2024-08-07,2024-08,2
+67,Pınar Özkan,Kadın,1990,25-34,Gaziantep,Güneydoğu Anadolu,Premium,2024-06-28,2024-07-14,2024-07,8
+68,Fatma Aydın,Kadın,1969,55+,Eskişehir,İç Anadolu,Bireysel,2023-12-18,2024-01-02,2024-01,9
+69,Aslı Güneş,Kadın,1980,35-44,Antalya,Akdeniz,Kurumsal,2022-11-08,2022-12-16,2022-12,10
+70,Deniz Aslan,Erkek,1999,25-34,Antalya,Akdeniz,Bireysel,2023-06-05,,,11
+71,Tolga Çetin,Erkek,1987,35-44,Konya,İç Anadolu,Bireysel,2024-09-10,2024-10-05,2024-10,12
+72,Fatma Demir,Kadın,1987,35-44,Bursa,Marmara,Bireysel,2023-11-02,2023-11-12,2023-11,2
+73,Zeynep Kılıç,Kadın,2004,18-24,İzmir,Ege,Kurumsal,2024-08-11,2024-11-19,2024-11,8
+74,Pınar Çelik,Kadın,1974,45-54,İzmir,Ege,Bireysel,2023-09-29,2023-11-04,2023-11,9
+75,Ali Yılmaz,Erkek,1987,35-44,Eskişehir,İç Anadolu,Bireysel,2024-07-30,2024-08-10,2024-08,10
+76,Duygu Yıldırım,Kadın,1995,25-34,Kayseri,İç Anadolu,Kurumsal,2024-01-28,,,11
+77,Kerem Koç,Erkek,1999,25-34,İzmir,Ege,Bireysel,2023-07-09,2023-08-07,2023-08,12
+78,Burak Şahin,Erkek,1985,35-44,Samsun,Karadeniz,Bireysel,2023-12-14,2024-03-21,2024-03,2
+79,Kerem Kurt,Erkek,1990,25-34,İstanbul,Marmara,Bireysel,2023-05-07,2023-05-10,2023-05,8
+80,Seda Erdem,Kadın,1997,25-34,İstanbul,Marmara,Bireysel,2022-08-25,2022-09-25,2022-09,9
+81,Buse Aslan,Kadın,2005,18-24,İstanbul,Marmara,Bireysel,2022-11-22,2022-11-25,2022-11,10
+82,Burak Kaya,Erkek,1967,55+,Konya,İç Anadolu,Premium,2023-08-16,2023-08-29,2023-08,11
+83,Buse Doğan,Kadın,1974,45-54,İzmir,Ege,Bireysel,2022-06-13,,,12
+84,Burak Yıldırım,Erkek,1963,55+,Samsun,Karadeniz,Kurumsal,2023-11-22,2023-12-11,2023-12,2
+85,Nur Şimşek,Kadın,1982,35-44,Kayseri,İç Anadolu,Premium,2023-12-24,2024-01-07,2024-01,8
+86,Barış Kurt,Erkek,1990,25-34,İstanbul,Marmara,Bireysel,2023-03-06,,,9
+87,Eren Yıldız,Erkek,1969,55+,Adana,Akdeniz,Premium,2024-01-09,2024-01-15,2024-01,10
+88,Defne Yıldız,Kadın,1997,25-34,Kayseri,İç Anadolu,Premium,2024-02-17,2024-03-06,2024-03,11
+89,Kerem Yıldırım,Erkek,1971,45-54,Samsun,Karadeniz,Kurumsal,2024-04-20,2024-05-24,2024-05,12
+90,Selin Arslan,Kadın,1977,45-54,Trabzon,Karadeniz,Kurumsal,2023-05-15,,,2
+91,Ayşe Doğan,Kadın,1979,45-54,Bursa,Marmara,Kurumsal,2022-12-03,2022-12-07,2022-12,8
+92,Tolga Şimşek,Erkek,1998,25-34,,,Bireysel,2024-02-15,2024-03-15,2024-03,9
+93,Ahmet Kurt,Erkek,1961,55+,Ankara,İç Anadolu,Premium,2022-12-26,2023-02-02,2023-02,10
+94,İrem Aslan,Kadın,1963,55+,Antalya,Akdeniz,Kurumsal,2023-01-04,2023-03-24,2023-03,11
+95,Burak Doğan,Erkek,1993,25-34,Antalya,Akdeniz,Bireysel,2024-05-05,2024-06-11,2024-06,12
+96,Defne Erdem,Kadın,1995,25-34,İstanbul,Marmara,Kurumsal,2022-12-12,2023-01-17,2023-01,2
+97,Mehmet Doğan,Erkek,1985,35-44,Bursa,Marmara,Bireysel,2022-09-09,2022-10-17,2022-10,8
+98,Duygu Erdem,Kadın,1977,45-54,Bursa,Marmara,Premium,2024-05-01,2024-06-13,2024-06,9
+99,Duygu Güneş,Kadın,1977,45-54,Samsun,Karadeniz,Bireysel,2023-04-22,2023-05-08,2023-05,10
+100,İrem Çetin,Kadın,1989,35-44,Kayseri,İç Anadolu,Bireysel,2023-12-04,2023-12-10,2023-12,11
+101,Can Yıldız,Erkek,1986,35-44,İstanbul,Marmara,Bireysel,2023-09-27,2023-11-05,2023-11,12
+102,Derya Doğan,Kadın,1972,45-54,İstanbul,Marmara,Bireysel,2023-06-15,2024-01-13,2024-01,2
+103,Deniz Polat,Erkek,1998,25-34,Gaziantep,Güneydoğu Anadolu,Bireysel,2022-06-07,2022-07-02,2022-07,8
+104,Merve Aslan,Kadın,1994,25-34,İstanbul,Marmara,Bireysel,2024-08-20,2024-09-16,2024-09,9
+105,Ahmet Şimşek,Erkek,1988,35-44,Samsun,Karadeniz,Kurumsal,2023-02-03,,,10
+106,Seda Kılıç,Kadın,1994,25-34,,,Bireysel,2024-06-14,2024-07-21,2024-07,11
+107,Ece Yıldırım,Kadın,1964,55+,İstanbul,Marmara,Premium,2022-10-03,2022-11-08,2022-11,12
+108,Kerem Polat,Erkek,1990,25-34,İstanbul,Marmara,Bireysel,2024-09-13,2024-10-21,2024-10,2
+109,Kaan Kara,Erkek,1961,55+,Bursa,Marmara,Kurumsal,2022-06-18,2022-07-04,2022-07,8
+110,Selin Özdemir,Kadın,1971,45-54,İstanbul,Marmara,Bireysel,2023-09-10,2023-09-28,2023-09,9
+111,Buse Aslan,Kadın,1985,35-44,Kayseri,İç Anadolu,Kurumsal,2024-05-05,2024-06-01,2024-06,10
+112,Derya Öztürk,Kadın,1960,55+,,,Premium,2024-01-14,2024-01-24,2024-01,11
+113,Can Özkan,Erkek,1985,35-44,Bursa,Marmara,Kurumsal,2022-11-12,2022-11-22,2022-11,12
+114,Barış Kılıç,Erkek,2004,18-24,Ankara,İç Anadolu,Bireysel,2022-09-12,2022-09-24,2022-09,2
+115,Ayşe Aksoy,Kadın,2001,18-24,Gaziantep,Güneydoğu Anadolu,Bireysel,2024-08-29,2024-09-09,2024-09,8
+116,Nur Demir,Kadın,1981,35-44,Antalya,Akdeniz,Bireysel,2023-03-01,2023-03-26,2023-03,9
+117,Ece Aksoy,Kadın,1962,55+,Trabzon,Karadeniz,Kurumsal,2024-02-22,2024-02-22,2024-02,10
+118,Deniz Kılıç,Erkek,1978,45-54,İstanbul,Marmara,Bireysel,2024-02-17,2024-03-15,2024-03,11
+119,Emine Öztürk,Kadın,1988,35-44,İstanbul,Marmara,Bireysel,2023-06-06,2023-06-13,2023-06,12
+120,Tolga Aslan,Erkek,1961,55+,Eskişehir,İç Anadolu,Kurumsal,2023-06-10,2023-07-13,2023-07,2
+121,Ceren Özkan,Kadın,2004,18-24,,,Bireysel,2022-10-31,2022-11-25,2022-11,8
+122,Mehmet Doğan,Erkek,1995,25-34,İzmir,Ege,Kurumsal,2024-05-12,2024-06-15,2024-06,9
+123,Duygu Yıldız,Kadın,2004,18-24,Gaziantep,Güneydoğu Anadolu,Premium,2023-12-07,,,10
+124,Nur Güneş,Kadın,1996,25-34,Antalya,Akdeniz,Bireysel,2022-09-18,2022-10-07,2022-10,11
+125,Defne Çelik,Kadın,1978,45-54,Eskişehir,İç Anadolu,Bireysel,2024-04-26,2024-05-31,2024-05,12
+126,Ahmet Şahin,Erkek,2000,18-24,Adana,Akdeniz,Premium,2023-10-30,2023-11-08,2023-11,2
+127,Aslı Kurt,Kadın,2001,18-24,Adana,Akdeniz,Bireysel,2023-06-13,2023-07-01,2023-07,8
+128,Kaan Koç,Erkek,1986,35-44,Eskişehir,İç Anadolu,Bireysel,2023-07-06,,,9
+129,Seda Arslan,Kadın,1972,45-54,Kayseri,İç Anadolu,Bireysel,2024-04-16,2024-05-25,2024-05,10
+130,Barış Çelik,Erkek,1966,55+,Eskişehir,İç Anadolu,Bireysel,2024-08-07,2024-09-07,2024-09,11
+131,Deniz Özdemir,Erkek,1990,25-34,Ankara,İç Anadolu,Kurumsal,2022-07-25,2022-08-05,2022-08,12
+132,Seda Çelik,Kadın,1984,35-44,Eskişehir,İç Anadolu,Bireysel,2023-04-07,2023-05-15,2023-05,2
+133,Esra Arslan,Kadın,1993,25-34,Eskişehir,İç Anadolu,Bireysel,2024-05-11,2024-05-31,2024-05,8
+134,Barış Polat,Erkek,1977,45-54,İstanbul,Marmara,Premium,2023-03-12,2023-04-21,2023-04,9
+135,Ceren Şimşek,Kadın,1995,25-34,İzmir,Ege,Premium,2023-06-11,2023-07-21,2023-07,10
+136,Serkan Kaya,Erkek,1975,45-54,Eskişehir,İç Anadolu,Kurumsal,2024-08-07,2024-09-12,2024-09,11
+137,Emre Yıldırım,Erkek,1997,25-34,Ankara,İç Anadolu,Bireysel,2023-12-16,2024-01-18,2024-01,12
+138,Hüseyin Özkan,Erkek,1981,35-44,İstanbul,Marmara,Bireysel,2023-12-26,2024-01-23,2024-01,2
+139,Seda Yıldız,Kadın,1985,35-44,Gaziantep,Güneydoğu Anadolu,Bireysel,2022-12-10,,,8
+140,Burak Şahin,Erkek,1970,45-54,İzmir,Ege,Bireysel,2023-07-13,2023-07-25,2023-07,9
+141,Eren Aydın,Erkek,1988,35-44,Trabzon,Karadeniz,Premium,2022-06-07,2022-06-23,2022-06,10
+142,Emine Özkan,Kadın,1978,45-54,Gaziantep,Güneydoğu Anadolu,Bireysel,2024-05-24,2024-07-03,2024-07,11
+143,Yusuf Özkan,Erkek,1989,35-44,İstanbul,Marmara,Bireysel,2024-07-26,2024-10-11,2024-10,12
+144,Mustafa Güneş,Erkek,1988,35-44,Kayseri,İç Anadolu,Bireysel,2023-07-01,,,2
+145,Tolga Yılmaz,Erkek,1961,55+,,,Kurumsal,2022-10-21,2022-10-22,2022-10,8
+146,Ceren Kaya,Kadın,2004,18-24,Gaziantep,Güneydoğu Anadolu,Premium,2024-06-08,2024-07-08,2024-07,9
+147,Defne Arslan,Kadın,1970,45-54,Eskişehir,İç Anadolu,Premium,2022-08-21,2022-09-21,2022-09,10
+148,Onur Erdem,Erkek,1974,45-54,İzmir,Ege,Bireysel,2023-01-29,2023-02-09,2023-02,11
+149,İrem Özdemir,Kadın,1977,45-54,İstanbul,Marmara,Bireysel,2023-07-12,2023-11-04,2023-11,12
+150,Gamze Özkan,Kadın,1967,55+,Eskişehir,İç Anadolu,Bireysel,2024-09-05,2024-10-06,2024-10,2

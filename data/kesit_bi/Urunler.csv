@@ -1,0 +1,41 @@
+UrunNo,Urun,Kategori,Fiyat,BirimMaliyet,Stok
+1,Kablosuz Kulaklık,Elektronik,1299,626,5
+2,Akıllı Saat,Elektronik,3499,2181,5
+3,Bluetooth Hoparlör,Elektronik,899,543,2
+4,Powerbank 20000mAh,Elektronik,649,442,3
+5,Mekanik Klavye,Elektronik,1899,1116,5
+6,Oyuncu Mouse,Elektronik,749,404,7
+7,"27"" Monitör",Elektronik,7499,4367,2
+8,USB-C Hub,Elektronik,549,324,5
+9,Suç ve Ceza,Kitap,145,82,9
+10,Kürk Mantolu Madonna,Kitap,95,64,7
+11,Tutunamayanlar,Kitap,260,180,19
+12,İnce Memed,Kitap,180,124,14
+13,Saatleri Ayarlama Enstitüsü,Kitap,165,87,11
+14,SQL ile Veri Analizi,Kitap,420,205,11
+15,İstatistiğe Giriş,Kitap,380,234,9
+16,Türk Kahvesi Makinesi,Ev & Yaşam,2199,1530,3
+17,Çaydanlık Seti,Ev & Yaşam,899,580,2
+18,Pamuk Nevresim Takımı,Ev & Yaşam,1150,643,4
+19,Bakır Cezve,Ev & Yaşam,320,165,22
+20,Seramik Kupa Seti,Ev & Yaşam,275,156,9
+21,Robot Süpürge,Ev & Yaşam,8999,4689,3
+22,Basic Tişört,Giyim,249,142,6
+23,Kot Pantolon,Giyim,799,509,5
+24,Mont,Giyim,2499,1299,2
+25,Spor Ayakkabı,Giyim,1899,1076,2
+26,Yün Atkı,Giyim,349,210,23
+27,Keten Gömlek,Giyim,649,410,9
+28,Yoga Matı,Spor,399,204,9
+29,Dambıl Seti 10kg,Spor,899,520,2
+30,Koşu Bandı,Spor,15999,10391,4
+31,Termos 750ml,Spor,459,294,6
+32,Bisiklet Kaskı,Spor,1099,708,3
+33,Kamp Çadırı,Spor,3299,2130,4
+34,Nemlendirici Krem,Kozmetik,289,194,28
+35,Güneş Kremi SPF50,Kozmetik,349,217,15
+36,Parfüm 100ml,Kozmetik,1799,1104,3
+37,Şampuan,Kozmetik,129,68,8
+38,Dudak Balmı,Kozmetik,79,38,15
+39,Hediye Kartı 500 TL,Hediye,500,318,5
+40,Gurme Lokum Kutusu,Hediye,350,191,5

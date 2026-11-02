@@ -1,0 +1,20 @@
+airport_code,name,city,country,tz_offset,lat,lon
+IST,İstanbul Havalimanı,İstanbul,Türkiye,3,41.2753,28.7519
+SAW,Sabiha Gökçen,İstanbul,Türkiye,3,40.8986,29.3092
+ESB,Esenboğa,Ankara,Türkiye,3,40.1281,32.9951
+ADB,Adnan Menderes,İzmir,Türkiye,3,38.2924,27.157
+AYT,Antalya,Antalya,Türkiye,3,36.8987,30.8005
+DLM,Dalaman,Muğla,Türkiye,3,36.7131,28.7925
+TZX,Trabzon,Trabzon,Türkiye,3,40.9951,39.7897
+GZT,Gaziantep,Gaziantep,Türkiye,3,36.9472,37.4787
+DIY,Diyarbakır,Diyarbakır,Türkiye,3,37.8939,40.201
+ERZ,Erzurum,Erzurum,Türkiye,3,39.9565,41.1702
+VAN,Van Ferit Melen,Van,Türkiye,3,38.4682,43.3323
+ADA,Adana Şakirpaşa,Adana,Türkiye,3,36.9822,35.2804
+FRA,Frankfurt,Frankfurt,Almanya,1,50.0379,8.5622
+BER,Berlin Brandenburg,Berlin,Almanya,1,52.3667,13.5033
+AMS,Schiphol,Amsterdam,Hollanda,1,52.3105,4.7683
+LHR,Heathrow,Londra,Birleşik Krallık,0,51.47,-0.4543
+CDG,Charles de Gaulle,Paris,Fransa,1,49.0097,2.5479
+DXB,Dubai,Dubai,BAE,4,25.2532,55.3657
+BAK,Haydar Aliyev,Bakü,Azerbaycan,4,40.4675,50.0467

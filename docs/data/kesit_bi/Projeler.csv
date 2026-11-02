@@ -1,0 +1,15 @@
+ProjeNo,Proje,DepartmanNo,Birim,Baslangic,BitisPlan,BitisGercek,Durum,Butce,Harcanan,Ilerleme
+1,Yönetim kokpiti (Power BI),3,Veri Analitiği,2024-01-08,2024-03-29,2024-04-12,Tamamlandı,180000,192500,1
+2,Müşteri 360 veri modeli,3,Veri Analitiği,2024-03-04,2024-07-31,2024-08-23,Tamamlandı,260000,271000,1
+3,Mobil uygulama yenileme,4,Yazılım,2024-02-01,2024-10-31,,Gecikmede,540000,498000,0.78
+4,Depo yönetim sistemi entegrasyonu,4,Yazılım,2024-04-15,2024-11-30,,Devam,320000,205000,0.64
+5,Sadakat programı,2,Pazarlama,2024-05-01,2024-12-20,,Devam,150000,81000,0.55
+6,Kampanya ölçümleme altyapısı,2,Pazarlama,2024-06-10,2024-10-15,,Riskli,90000,84000,0.6
+7,Fabric veri platformu geçişi,3,Veri Analitiği,2024-07-01,2025-03-31,,Devam,420000,151000,0.35
+8,Satış temsilcisi performans raporu,1,Satış,2024-08-05,2024-10-30,2024-10-25,Tamamlandı,45000,41200,1
+9,Bütçe ve tahmin (FP&A) modeli,6,Finans,2024-09-02,2025-01-31,,Devam,210000,72000,0.4
+10,Ücret karşılaştırma analizi,5,İnsan Kaynakları,2024-10-01,2024-12-15,,Gecikmede,60000,52000,0.7
+11,KVKK veri envanteri,7,Hukuk,2024-03-01,2024-06-30,2024-07-19,Tamamlandı,75000,79800,1
+12,Yapay zekâ destekli talep tahmini,3,Veri Analitiği,2024-11-04,2025-05-30,,Planlandı,300000,18000,0.05
+13,E-fatura otomasyonu,6,Finans,2023-10-02,2024-02-29,2024-02-26,Tamamlandı,110000,104000,1
+14,Çağrı merkezi yazılımı,4,Yazılım,2024-09-16,2025-02-28,,Riskli,280000,160000,0.38

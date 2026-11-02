@@ -1,0 +1,13 @@
+dept_id,name,function_area,parent_id
+1,Genel Müdürlük,Yönetim,
+2,Satış,Ticari,1
+3,Kurumsal Satış,Ticari,2
+4,Mağaza Operasyonları,Operasyon,1
+5,Çağrı Merkezi,Operasyon,4
+6,Lojistik,Operasyon,4
+7,Yazılım Geliştirme,Teknoloji,1
+8,Veri ve Analitik,Teknoloji,7
+9,BT Altyapı,Teknoloji,7
+10,Finans,Destek,1
+11,İnsan Kaynakları,Destek,1
+12,Pazarlama,Ticari,2

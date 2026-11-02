@@ -1,0 +1,28 @@
+CalisanNo,AdSoyad,DepartmanNo,YoneticiNo,Unvan,Maas,IseGiris,Eposta,Yol,Seviye,KidemYil,MaasKutusu
+1,Selim Aksoy,0,,Genel Müdür,145000,2015-03-01,selim.aksoy@anadolumarket.com,1,1,9,140000
+2,Elif Doğan,1,1,Satış Müdürü,96000,2016-09-21,elif.dogan@anadolumarket.com,1|2,2,8,80000
+3,Derya Öztürk,2,1,Pazarlama Müdürü,83000,2016-06-21,derya.ozturk@anadolumarket.com,1|3,2,8,80000
+4,Serkan Özdemir,3,1,Analitik Müdürü,97000,2017-11-08,serkan.ozdemir@anadolumarket.com,1|4,2,7,80000
+5,Selin Özdemir,4,1,Yazılım Müdürü,87000,2016-12-07,selin.ozdemir@anadolumarket.com,1|5,2,8,80000
+6,Onur Özkan,5,1,İK Müdürü,90000,2016-09-10,onur.ozkan@anadolumarket.com,1|6,2,8,80000
+7,Elif Koç,6,1,Finans Müdürü,82000,2018-04-14,elif.koc@anadolumarket.com,1|7,2,6,80000
+8,Gamze Özkan,1,2,Satış Uzmanı,43000,2021-04-29,gamze.ozkan@anadolumarket.com,1|2|8,3,3,40000
+9,Ece Kurt,1,2,Satış Temsilcisi,52000,2022-05-25,ece.kurt@anadolumarket.com,1|2|9,3,2,40000
+10,Can Aydın,1,2,Satış Temsilcisi,70000,2022-12-17,can.aydin@anadolumarket.com,1|2|10,3,2,60000
+11,Yusuf Kara,1,2,Satış Temsilcisi,58000,2024-07-09,yusuf.kara@anadolumarket.com,1|2|11,3,0,40000
+12,Oğuz Demir,1,2,Satış Uzmanı,38000,2022-10-14,oguz.demir@anadolumarket.com,1|2|12,3,2,20000
+13,Deniz Arslan,2,3,İçerik Uzmanı,44000,2024-03-13,deniz.arslan@anadolumarket.com,1|3|13,3,0,40000
+14,İrem Doğan,2,3,İçerik Uzmanı,48000,2024-04-04,irem.dogan@anadolumarket.com,1|3|14,3,0,40000
+15,Onur Erdem,2,3,Pazarlama Uzmanı,44000,2021-06-12,onur.erdem@anadolumarket.com,1|3|15,3,3,40000
+16,Ahmet Erdem,3,4,Veri Bilimci,60000,2019-09-12,ahmet.erdem@anadolumarket.com,1|4|16,3,5,60000
+17,Pınar Yıldırım,3,4,Veri Mühendisi,71000,2019-04-29,,1|4|17,3,5,60000
+18,Defne Öztürk,3,4,Veri Bilimci,60000,2020-10-10,,1|4|18,3,4,60000
+19,Emine Aydın,3,4,Veri Analisti,48000,2022-12-07,emine.aydin@anadolumarket.com,1|4|19,3,2,40000
+20,Seda Aksoy,4,5,Yazılım Geliştirici,71000,2020-09-28,seda.aksoy@anadolumarket.com,1|5|20,3,4,60000
+21,Eren Yıldız,4,5,Yazılım Geliştirici,57000,2018-04-26,eren.yildiz@anadolumarket.com,1|5|21,3,6,40000
+22,Seda Güneş,4,5,Kıdemli Geliştirici,75000,2020-07-28,seda.gunes@anadolumarket.com,1|5|22,3,4,60000
+23,Mehmet Öztürk,4,5,Kıdemli Geliştirici,66000,2022-01-24,mehmet.ozturk@anadolumarket.com,1|5|23,3,2,60000
+24,Fatma Kurt,5,6,İK Uzmanı,72000,2023-10-18,fatma.kurt@anadolumarket.com,1|6|24,3,1,60000
+25,Kerem Yılmaz,5,6,İK Uzmanı,67000,2022-09-28,,1|6|25,3,2,60000
+26,Murat Arslan,6,7,Muhasebeci,69000,2022-03-29,murat.arslan@anadolumarket.com,1|7|26,3,2,60000
+27,İrem Şahin,6,7,Finans Uzmanı,63000,2023-01-12,irem.sahin@anadolumarket.com,1|7|27,3,1,60000
