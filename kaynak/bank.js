@@ -274,8 +274,8 @@ L.push(
     start: 'def on_onay(yas, gelir, kredi_notu):\n    # buraya yaz\n    pass\n',
     sol: 'def on_onay(yas, gelir, kredi_notu):\n    if not (18 <= yas <= 70):\n        return "YAS"\n    if gelir < 15000:\n        return "GELIR"\n    if kredi_notu < 1300:\n        return "NOT"\n    return "ONAY"\n',
     tests: 'assert on_onay(30, 20000, 1500) == "ONAY", "uygun başvuru ONAY"\nassert on_onay(17, 20000, 1500) == "YAS", "17 yaş YAS"\nassert on_onay(71, 20000, 1500) == "YAS", "71 yaş YAS"\nassert on_onay(30, 10000, 1500) == "GELIR", "düşük gelir GELIR"\nassert on_onay(30, 20000, 1000) == "NOT", "düşük not NOT"\nassert on_onay(18, 15000, 1300) == "ONAY", "sınır değerler ONAY"\n',
-    hints: ['Zincirli karşılaştırma: 18 <= yas <= 70.', 'Erken return ile sırayla ele.'],
-    why: 'Her koşul sırayla kontrol edilip erken return ile cevaplanır; sınır değerler dahil olduğu için <= ve >= kullanılır.',
+    hints: ['Zincirli karşılaştırma: 18 &lt;= yas &lt;= 70.', 'Erken return ile sırayla ele.'],
+    why: 'Her koşul sırayla kontrol edilip erken return ile cevaplanır; sınır değerler dahil olduğu için &lt;= ve >= kullanılır.',
     tags: ['if', 'zincirli karşılaştırma', 'erken return'], min: 5 },
 
   { id: 'b-028', lv: 'temel', topic: 'Koşullar', diff: 3, kind: 'tamamla',
@@ -345,7 +345,7 @@ L.push(
     start: 'def kac_yil(anapara, oran, hedef):\n    # buraya yaz\n    pass\n',
     sol: 'def kac_yil(anapara, oran, hedef):\n    yil = 0\n    bakiye = anapara\n    while bakiye < hedef:\n        bakiye *= 1 + oran / 100\n        yil += 1\n    return yil\n',
     tests: 'assert kac_yil(1000, 10, 1300) == 3, "1000 -> 1331 üçüncü yılda hedefi geçer"\nassert kac_yil(1000, 10, 1000) == 0, "zaten hedefte: 0 yıl"\nassert kac_yil(100, 100, 800) == 3, "her yıl ikiye katlanır: 3 yıl"\n',
-    hints: ['while bakiye < hedef: bakiye *= 1 + oran/100; yıl sayacını artır.'],
+    hints: ['while bakiye &lt; hedef: bakiye *= 1 + oran/100; yıl sayacını artır.'],
     why: 'Koşul sağlanana kadar bakiye artırılır; yıl sayacı her turda artar.',
     tags: ['while', 'bileşik faiz'], min: 5 },
 
@@ -406,7 +406,7 @@ L.push(
     start: 'def faktoriyel(n):\n    # buraya yaz\n    pass\n\n\ndef rakam_toplami(n):\n    # buraya yaz\n    pass\n',
     sol: 'def faktoriyel(n):\n    if n <= 1:\n        return 1\n    return n * faktoriyel(n - 1)\n\n\ndef rakam_toplami(n):\n    if n < 10:\n        return n\n    return n % 10 + rakam_toplami(n // 10)\n',
     tests: 'assert faktoriyel(0) == 1, "0! = 1"\nassert faktoriyel(5) == 120, "5! = 120"\nassert rakam_toplami(1234) == 10, "1234 basamak toplamı 10"\nassert rakam_toplami(7) == 7, "tek basamak kendisi"\n',
-    hints: ['Taban durumu: n <= 1 için 1; n < 10 için n.', 'n % 10 son basamak, n // 10 kalanı.'],
+    hints: ['Taban durumu: n &lt;= 1 için 1; n &lt; 10 için n.', 'n % 10 son basamak, n // 10 kalanı.'],
     why: 'Özyinelemede taban durumu döngüyü sonlandırır; her çağrı problemi bir adım küçültür.',
     tags: ['recursion', 'taban durumu'], min: 6 },
 
@@ -771,7 +771,7 @@ L.push(
     start: 'from datetime import date, timedelta\n\ndef is_gunu_say(bas, bit):\n    # buraya yaz\n    pass\n',
     sol: 'from datetime import date, timedelta\n\ndef is_gunu_say(bas, bit):\n    d = date.fromisoformat(bas)\n    son = date.fromisoformat(bit)\n    sayac = 0\n    while d <= son:\n        if d.weekday() < 5:\n            sayac += 1\n        d += timedelta(days=1)\n    return sayac\n',
     tests: 'assert is_gunu_say("2026-03-02", "2026-03-08") == 5, "2-8 Mart 2026 (Pzt-Paz): 5 iş günü"\nassert is_gunu_say("2026-03-07", "2026-03-08") == 0, "hafta sonu: 0"\nassert is_gunu_say("2026-03-04", "2026-03-04") == 1, "tek iş günü 1"\n',
-    hints: ['while d <= son: weekday() < 5 ise say; d += timedelta(days=1).'],
+    hints: ['while d &lt;= son: weekday() &lt; 5 ise say; d += timedelta(days=1).'],
     why: 'Günleri tek tek dolaşıp weekday ile hafta içi olanları saymak en okunur yoldur.',
     tags: ['weekday', 'timedelta'], min: 5 },
 
@@ -792,7 +792,7 @@ L.push(
     start: 'import re\n\ndef log_ayristir(satir):\n    # buraya yaz\n    pass\n',
     sol: 'import re\n\nDESEN = re.compile(r"^(?P<tarih>\\d{4}-\\d{2}-\\d{2}) (?P<saat>\\d{2}:\\d{2}:\\d{2}) \\[(?P<seviye>[A-Z]+)\\] (?P<mesaj>.*)$")\n\ndef log_ayristir(satir):\n    m = DESEN.match(satir)\n    return m.groupdict() if m else None\n',
     tests: 'r = log_ayristir("2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı")\nassert r == {"tarih": "2026-03-15", "saat": "14:02:11", "seviye": "ERROR", "mesaj": "Hesap TR12 bulunamadı"}, "alanlar doğru ayrışmalı"\nassert log_ayristir("bozuk satır") is None, "eşleşmeyen satır None"\n',
-    hints: ['(?P<ad>...) isimli grup; m.groupdict() sözlük verir.', 'Köşeli parantezleri \\[ \\] ile kaç.'],
+    hints: ['(?P&lt;ad>...) isimli grup; m.groupdict() sözlük verir.', 'Köşeli parantezleri \\[ \\] ile kaç.'],
     why: 'İsimli gruplar eşleşmeyi doğrudan anlamlı sözlüğe çevirir; match satır başından eşler.',
     tags: ['named group', 'groupdict', 're.compile'], min: 6 },
 
@@ -802,7 +802,7 @@ L.push(
     start: 'import re\n\ndef etiketleri_sil(html):\n    return re.sub(r"<.*>", "", html)\n',
     sol: 'import re\n\ndef etiketleri_sil(html):\n    return re.sub(r"<.*?>", "", html)\n',
     tests: 'assert etiketleri_sil("<b>Ali</b> ve <i>Ayşe</i>") == "Ali ve Ayşe", "yalnızca etiketler silinmeli (tembel .*? kullan)"\nassert etiketleri_sil("etiket yok") == "etiket yok", "etiketsiz metin aynen kalmalı"\n',
-    hints: ['.* açgözlüdür; ilk < ile son > arasını yutar. .*? tembel eşler.'],
+    hints: ['.* açgözlüdür; ilk &lt; ile son > arasını yutar. .*? tembel eşler.'],
     why: 'Açgözlü nicelik en uzun eşleşmeyi seçer; ? eklemek en kısa eşleşmeye zorlar.',
     tags: ['re.sub', 'greedy', 'lazy'], min: 2 },
 
