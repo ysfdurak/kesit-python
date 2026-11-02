@@ -28,10 +28,10 @@ con = veri.baglan("lezzet_kurye")                  # bellek içi SQLite
 
 ## Çalıştırma
 
-Yayımlanmış site `docs/` klasöründedir (GitHub Pages: *Settings → Pages → Branch: main, /docs*). Yerelde:
+Derlenmiş site deponun kökündedir (GitHub Pages: *Settings → Pages → Branch: main, / (root)*). Yerelde:
 
 ```bash
-cd docs && python3 -m http.server 8000
+python3 -m http.server 8000
 # http://localhost:8000
 ```
 
@@ -40,29 +40,30 @@ cd docs && python3 -m http.server 8000
 ## Klasör yapısı
 
 ```
-index.html, app.js, app2.js   arayüz (görünümler, arena, mülakat, sık hatalar, veri setleri, yapay zekâ)
-engine.js                     Pyodide motoru: uyumluluk katmanı (asyncio, thread, polars), test çalıştırıcı
-levels.js, paths.js           seviyeler, ders sırası, patikalar, müfredat
-c_*.js                        çekirdek dersler
-v2/                           ek dersler (n*, t*, o*, i*), ders uzantıları (e*, x*), pratik görevleri (b*)
-v3/                           arena (a*), mülakat (m*), sık hatalar (h*), veri seti görevleri (d*), patika sınavları (s1)
-data/                         CSV veri setleri + manifest.json
+index.html, *.js              derlenmiş site (tools/build.py üretir; elle düzenleme, kaynak/ altında değiştir)
+data/                         CSV veri setleri + manifest.json (site ve araçlar ortak kullanır)
+kaynak/
+  index.html, app.js, app2.js arayüz (görünümler, arena, mülakat, sık hatalar, veri setleri, yapay zekâ)
+  engine.js                   Pyodide motoru: uyumluluk katmanı (asyncio, thread, polars), test çalıştırıcı
+  levels.js, paths.js         seviyeler, ders sırası, patikalar, müfredat
+  c_*.js, bank.js, exams.js   çekirdek dersler, pratik bankası, sınavlar
+  v2/                         ek dersler (n*, t*, o*, i*), ders uzantıları (e*, x*), pratik görevleri (b*)
+  v3/                         arena (a*), mülakat (m*), sık hatalar (h*), veri seti görevleri (d*), patika sınavları (s1)
 tools/                        derleme ve doğrulama araçları; tools/pylib/veri.py
-docs/                         derlenmiş site (tools/build.py üretir)
 belgeler/                     içerik şemaları ve uzman denetim raporu
 ```
 
 ## Derleme ve doğrulama
 
 ```bash
-python3 tools/build.py                 # v2/v3 parçalarını birleştirir → docs/
+python3 tools/build.py                 # kaynak/ parçalarını birleştirir → kök (site)
 python3 tools/verify.py <dosyalar>     # her alıştırmayı CPython'da çalıştırır (çözüm geçmeli, başlangıç kodu kalmalı)
 python3 tools/examples.py <dosyalar>   # ders gövdesindeki örnek kodları çalıştırır
 npm install                            # pyodide
 node tools/pyodide_verify.mjs <dosya>  # aynı denetimi gerçek tarayıcı motoruyla yapar
 node tools/pyodide_examples.mjs <dosya>
 python3 tools/uitest.py                # Playwright ile tüm görünümleri açar
-node tools/gen_exams.mjs > v3/s1/sinav_roller.js   # patika sınavlarını doğrulanmış alıştırmalardan derler
+node tools/gen_exams.mjs > kaynak/v3/s1/sinav_roller.js   # patika sınavlarını doğrulanmış alıştırmalardan derler
 ```
 
 `pyodide_verify.mjs` pandas gibi paketleri Pyodide CDN'inden indirir; ağ yoksa tam Pyodide sürümünü ([0.27.8](https://github.com/pyodide/pyodide/releases/tag/0.27.8)) indirip `.whl` dosyalarını `node_modules/pyodide/` içine kopyalayın.

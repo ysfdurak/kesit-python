@@ -1,7 +1,7 @@
 // Patika (rol) sınavlarını, iki ortamda doğrulanmış ders alıştırmalarından derler.
-// Kullanım: node tools/gen_exams.mjs > v3/s1/sinav_roller.js   (dist/ derlendikten sonra)
+// Kullanım: node tools/gen_exams.mjs > kaynak/v3/s1/sinav_roller.js   (derlendikten sonra)
 import fs from 'fs';
-const D = new URL('../docs/', import.meta.url).pathname;
+const D = new URL('../', import.meta.url).pathname;
 const window = {}; globalThis.window = window;
 for (const f of ['levels.js', 'paths.js', 'c_temel.js', 'c_orta.js', 'c_ileri.js', 'n_temel.js', 'n_orta.js', 'n_ileri.js', 'x_1.js', 'x_2.js']) new Function('window', fs.readFileSync(D + f, 'utf8'))(window);
 const L = {}; window.PY_LESSONS.forEach(l => L[l.id] = { ...l, ex: [...(l.ex || [])] });

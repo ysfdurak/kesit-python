@@ -1,13 +1,13 @@
 #!/usr/bin/env python3
 """Yayın paketini derler: v2/<grup>/*.js parçalarını türüne göre (ders / uzantı / pratik / sınav) birleştirir,
 her birini node --check ile denetler ve index.html'deki içerik betiklerini günceller.
-Çıktı: docs/ klasörü (GitHub Pages) (yayımlanacak dosyalar)."""
+Kaynak: kaynak/ klasörü. Çıktı: deponun kökü (GitHub Pages: main / root). data/ kökte durur, kopyalanmaz."""
 import glob, os, re, shutil, subprocess, json, sys
 import os as _os
-ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))); DIST = ROOT + '/docs'
-os.makedirs(DIST, exist_ok=True)
-for f in glob.glob(DIST + '/*'):
-    (shutil.rmtree if os.path.isdir(f) else os.remove)(f)
+KOK = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+ROOT = KOK + '/kaynak'; DIST = KOK
+# yalnız önceki derlemenin ürettiği paketleri sil (kök klasörde kaynak/araç/veri de var)
+for f in glob.glob(DIST + '/[nx]_*.js'): os.remove(f)
 
 def ok(path):
     r = subprocess.run(['node', '--check', path], capture_output=True, text=True)
@@ -75,11 +75,10 @@ content = [x for x in out if x not in ('bank.js', 'exams.js', 'arena.js', 'inter
 tags = '\n'.join(f'<script charset="utf-8" src="{x}"></script>' for x in content)
 html = re.sub(r'(<script charset="utf-8" src="paths.js"></script>\n)(?:<script charset="utf-8" src="[cnx]_[^"]+"></script>\n)*', lambda m: m.group(1) + tags + '\n', html)
 html = html.replace('<!--EXTRA-->', '\n'.join(f'<script charset="utf-8" src="{x}"></script>' for x in extra))
-shutil.rmtree(f'{DIST}/data', ignore_errors=True); shutil.copytree(f'{ROOT}/data', f'{DIST}/data')
 open(f'{DIST}/index.html', 'w', encoding='utf-8').write(html)
 print('paketler:', content + ['bank.js', 'exams.js'])
 print('arena/mülakat/hata dosyası:', len(groups['arena']), len(groups['interview']), len(groups['mistakes']))
 print('ders dosyası:', len(groups['lessons']), 'uzantı:', len(groups['ext']), 'pratik parça:', len(bank_extra), 'sınav parça:', len(groups['exams']))
 for f, e in skipped: print('ATLANDI', f, e[:200])
-tot = sum(os.path.getsize(f) for f in glob.glob(DIST + '/**', recursive=True) if os.path.isfile(f))
+tot = sum(os.path.getsize(f) for f in glob.glob(DIST + '/*.js') + [DIST + '/index.html'] + glob.glob(DIST + '/data/**', recursive=True) if os.path.isfile(f))
 print(f'toplam boyut: {tot/1e6:.1f} MB')

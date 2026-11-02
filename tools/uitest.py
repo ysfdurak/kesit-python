@@ -3,7 +3,7 @@
 import threading, http.server, socketserver, functools, json, sys
 from playwright.sync_api import sync_playwright
 import os as _os
-ROOT = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), 'docs')
+ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
 class Q(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
 H = functools.partial(Q, directory=ROOT)

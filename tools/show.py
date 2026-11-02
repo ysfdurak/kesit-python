@@ -3,7 +3,7 @@
 Alıştırmaların türü, aşaması, sorusu ve fonksiyon adları; FAQ/mistakes başlıkları; body başlıkları (h2/h3)."""
 import json, subprocess, sys, re, glob, os
 import os as _os
-ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+ROOT = _os.path.join(_os.path.dirname(_os.path.dirname(_os.path.abspath(__file__))), 'kaynak')
 files = [f'{ROOT}/c_temel.js', f'{ROOT}/c_orta.js', f'{ROOT}/c_ileri.js'] + sorted(glob.glob(f'{ROOT}/v2/*/*.js'))
 DUMP = "const fs=require('fs');const window={console};for(const f of process.argv.slice(1)){try{new Function('window',fs.readFileSync(f,'utf8'))(window)}catch(e){}}const L=window.PY_LESSONS||[];(window.PY_EXT||[]).forEach(x=>{const l=L.find(y=>y.id===x.id);if(l){l.ex=(l.ex||[]).concat(x.ex||[]);if(x.html)l.body+=x.html}});process.stdout.write(JSON.stringify(L))"
 L = json.loads(subprocess.run(['node', '-e', DUMP] + [f for f in files if os.path.exists(f)], capture_output=True, text=True).stdout)

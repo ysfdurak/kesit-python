@@ -4,9 +4,9 @@
   "description": "PythonPatika — tarayıcıda gerçek Python ile Türkçe Python öğrenme uygulaması",
   "scripts": {
     "build": "python3 tools/build.py",
-    "verify": "python3 tools/verify.py c_temel.js c_orta.js c_ileri.js bank.js exams.js v2/*/*.js v3/*/*.js",
+    "verify": "cd kaynak && python3 ../tools/verify.py c_temel.js c_orta.js c_ileri.js bank.js exams.js v2/*/*.js v3/*/*.js",
     "verify:browser": "node tools/pyodide_verify.mjs",
-    "examples": "python3 tools/examples.py docs/c_temel.js docs/c_orta.js docs/c_ileri.js docs/n_temel.js docs/n_orta.js docs/n_ileri.js docs/x_1.js docs/x_2.js",
+    "examples": "python3 tools/examples.py c_temel.js c_orta.js c_ileri.js n_temel.js n_orta.js n_ileri.js x_1.js x_2.js",
     "uitest": "python3 tools/uitest.py"
   },
   "devDependencies": {
