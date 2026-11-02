@@ -46,8 +46,8 @@ B.push(
     start: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.___(kullanici)\n    eksikler = sorted(gerekli ___ kullanici)\n    return izinli_mi, eksikler\n',
     sol: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.issubset(kullanici)\n    eksikler = sorted(gerekli - kullanici)\n    return izinli_mi, eksikler\n',
     tests: 'assert yetki_kontrol({"oku", "yaz", "onayla"}, {"oku", "onayla"}) == (True, []), "Tüm gerekli yetkiler var: (True, [])"\nassert yetki_kontrol({"oku"}, {"oku", "yaz", "sil"}) == (False, ["sil", "yaz"]), "Eksikler sıralı liste: [\\"sil\\", \\"yaz\\"]"\nassert yetki_kontrol(set(), set()) == (True, []), "Hiç yetki gerekmiyorsa izin var"\n',
-    hints: ['"A, B\'nin alt kümesi mi?" sorusunun metodu: A.issubset(B) (ya da A <= B).', 'Gerekli olup kullanıcıda olmayanlar: küme farkı.'],
-    why: 'issubset "gerekli kümenin her elemanı kullanıcıda var mı" sorusunu tek çağrıda cevaplar; operatör karşılığı gerekli <= kullanici. Fark (-) eksik yetkileri verir ve aslında izinli_mi = not eksikler diye de yazılabilirdi. Rol tabanlı yetkilendirmede (RBAC) bu desen yaygındır; kümeler sırasız olduğu için kullanıcıya gösterilecek listeler sıralanır.',
+    hints: ['"A, B\'nin alt kümesi mi?" sorusunun metodu: A.issubset(B) (ya da A &lt;= B).', 'Gerekli olup kullanıcıda olmayanlar: küme farkı.'],
+    why: 'issubset "gerekli kümenin her elemanı kullanıcıda var mı" sorusunu tek çağrıda cevaplar; operatör karşılığı gerekli &lt;= kullanici. Fark (-) eksik yetkileri verir ve aslında izinli_mi = not eksikler diye de yazılabilirdi. Rol tabanlı yetkilendirmede (RBAC) bu desen yaygındır; kümeler sırasız olduğu için kullanıcıya gösterilecek listeler sıralanır.',
     tags: ['set', 'issubset', 'fark', 'güvenlik'],
     min: 3
   },

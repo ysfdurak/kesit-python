@@ -400,7 +400,7 @@ print(sahte_istek("/yok"))</pre>
       code: 'from jinja2 import Environment\n\nenv = Environment(autoescape=True)\nt = env.from_string("<p>{{ yorum }}</p>")\nprint(t.render(yorum=\'<b>Harika</b> & hızlı\'))\n',
       o: ['<p><b>Harika</b> & hızlı</p>', '<p>&lt;b&gt;Harika&lt;/b&gt; &amp; hızlı</p>', '<p>Harika & hızlı</p>', '&lt;p&gt;&lt;b&gt;Harika&lt;/b&gt; &amp; hızlı&lt;/p&gt;'],
       a: 1,
-      why: 'autoescape yalnız {{ }} ile basılan değeri kaçışlar; şablonun kendi HTML\'i (&lt;p&gt;) olduğu gibi kalır. Değerdeki &lt;, &gt; ve &amp; karakterleri HTML varlıklarına çevrilir, böylece tarayıcı onları etiket olarak yorumlamaz.' },
+      why: 'autoescape yalnız {{ }} ile basılan değeri kaçışlar; şablonun kendi HTML\'i (<code>&lt;p&gt;</code>) olduğu gibi kalır. Değerdeki &lt;, &gt; ve &amp; karakterleri HTML varlıklarına çevrilir, böylece tarayıcı onları etiket olarak yorumlamaz.' },
     { t: 'predict',
       stage: 'Kodu oku',
       q: 'Dekoratörle route kaydı: bu kod ne yazdırır?',

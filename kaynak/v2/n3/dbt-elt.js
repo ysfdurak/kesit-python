@@ -342,7 +342,7 @@ select * from {{ source('kanat', 'hv_passengers') }}
         'Önce kaynak ifadesini kur: where varsa (select * from tablo where ...) t, yoksa tablo.',
         'unique: group by sutun having count(*) > 1',
         'not_null: where sutun is null; accepted_values: where sutun not in (\'a\', \'b\')',
-        'test_calistir: select count(*) from (<test sql>)'
+        'test_calistir: select count(*) from (&lt;test sql>)'
       ],
       example: 'degerler = ["Eko", "EkoFlex", "Business"]\nliste = ", ".join(f"\'{d}\'" for d in degerler)\nprint(f"select * from rezervasyon where fare_class not in ({liste})")\n',
       start: 'import duckdb\nimport veri\n\n\ndef test_sql(tur, tablo, sutun, **kw):\n    kaynak = tablo\n    # TODO: where varsa kaynağı alt sorguya çevir\n    # TODO: tur\'e göre SQL döndür; bilinmeyen tür -> ValueError\n    return ""\n\n\ndef test_calistir(con, tur, tablo, sutun, **kw):\n    # TODO\n    return None\n\n\ncon = duckdb.connect()\ncon.execute(f"CREATE VIEW ucus AS SELECT * FROM read_csv(\'{veri.yol(\'kanat_havayollari\', \'hv_flights\')}\')")\nprint(test_calistir(con, "not_null", "ucus", "actual_dep"))\n',

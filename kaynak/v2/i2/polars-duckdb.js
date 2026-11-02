@@ -399,10 +399,10 @@ print(isaretli["sehir_ort"].to_list())
       sol: 'def arac_sec(veri_gb, ram_gb):\n    if ram_gb <= 0:\n        raise ValueError("ram_gb pozitif olmalı")\n    if veri_gb < ram_gb / 5:\n        return "pandas"\n    if veri_gb < 500:\n        return "polars/duckdb"\n    return "pyspark"\n',
       tests: 'assert arac_sec(2, 16) == "pandas", "2 GB veri, 16 GB RAM: beşte birin (3.2) altında, pandas"\nassert arac_sec(3.2, 16) == "polars/duckdb", "tam sınırda (3.2 = 16/5) artık pandas değil"\nassert arac_sec(60, 16) == "polars/duckdb", "60 GB tek makinede polars/duckdb ile işlenir"\nassert arac_sec(500, 64) == "pyspark", "500 GB ve üzeri pyspark"\nassert arac_sec(4000, 256) == "pyspark", "4 TB pyspark"\ntry:\n    arac_sec(1, 0)\n    assert False, "ram_gb 0 iken ValueError bekleniyordu"\nexcept ValueError:\n    pass\n',
       hints: [
-        'Önce geçersiz girdiyi kontrol et: if ram_gb <= 0: raise ValueError(...)',
-        'Koşulları küçükten büyüğe sırala: veri_gb < ram_gb / 5, sonra veri_gb < 500.'
+        'Önce geçersiz girdiyi kontrol et: if ram_gb &lt;= 0: raise ValueError(...)',
+        'Koşulları küçükten büyüğe sırala: veri_gb &lt; ram_gb / 5, sonra veri_gb &lt; 500.'
       ],
-      why: 'Karar kuralını kod olarak yazmak ekipte tutarlılık sağlar. Sınır değerlerini (tam 3.2, tam 500) testlemek, < ile <= farkından doğan hataları yakalar.' },
+      why: 'Karar kuralını kod olarak yazmak ekipte tutarlılık sağlar. Sınır değerlerini (tam 3.2, tam 500) testlemek, &lt; ile &lt;= farkından doğan hataları yakalar.' },
     { t: 'code',
       stage: 'Hata avı',
       kind: 'bug',

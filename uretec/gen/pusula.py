@@ -7,7 +7,7 @@ TASKS = [
 {
 'id': 'b-481', 'lv': 'temel', 'diff': 1, 'kind': 'rehberli', 'min': 8,
 'title': 'Şehirlere göre aktif çalışan sayısı',
-'q': '''<p>Pusula A.Ş. İK direktörü yeni ofis kiralama kararından önce soruyor: <b>"Hangi şehirde şu an kaç kişi çalışıyor?"</b></p>
+'q': '''<p>Pusula A.Ş.'nin İK direktörü yeni ofis kiralama kararından önce soruyor: <b>"Hangi şehirde şu an kaç kişi çalışıyor?"</b></p>
 <p><code>ik_employees</code> tablosunda <code>term_date</code> doluysa kişi ayrılmıştır; boşsa (<code>None</code>) hâlâ çalışıyordur.</p>
 <p><code>aktif_sehir_sayilari(calisanlar)</code> fonksiyonunu yaz: çalışan kayıtları listesini (sözlükler) alsın, yalnız <b>aktif</b> çalışanları sayıp <code>{şehir: kişi_sayısı}</code> sözlüğü döndürsün.</p>''',
 'start': '''

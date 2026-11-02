@@ -463,7 +463,7 @@ print(beklenen.round(0), "toplam:", round(beklenen.sum()))
       tests: '_g = [0, 0, 0, 0, 1, 1, 1, 1]\n_r = [0.1, 0.3, 0.6, 0.2, 0.9, 0.55, 0.4, 0.8]\n_s = maliyet_esigi(_g, _r, 10000, 1000)\nassert _s == (0.4, 1000), f"FN pahalıyken 0.4 eşiği tüm temerrütleri yakalar, yalnız 1 FP: (0.4, 1000); gelen {_s}"\n_s2 = maliyet_esigi(_g, _r, 1000, 10000)\nassert _s2 == (0.8, 2000), f"FP pahalıyken eşik yükselir: 0.65-0.80 arası eşikler 2000 maliyetlidir, eşitlikte en büyüğü (0.8) seçilir; gelen {_s2}"\nassert isinstance(_s[0], float) and type(_s[1]) is int, "eşik float, maliyet int olmalı"\n_s3 = maliyet_esigi([0, 0, 0], [0.2, 0.5, 0.9], 5000, 100)\nassert _s3 == (0.95, 0), "hiç temerrüt yoksa en büyük eşik (0.95) sıfır maliyetle seçilir"\n',
       hints: [
         'Boolean maske: tahmin = r >= e; FN = (y == 1) & ~tahmin, FP = (y == 0) & tahmin.',
-        'Eşitlikte büyük eşik: eşikleri artan gezip maliyet <= en iyi olduğunda güncelle.',
+        'Eşitlikte büyük eşik: eşikleri artan gezip maliyet &lt;= en iyi olduğunda güncelle.',
         'np.round ile oluşturduğun eşikleri float(e) ile Python sayısına çevir.'
       ],
       why: 'Eşiği iş maliyetine bağlamak, modeli karar sistemine dönüştürmenin en somut adımıdır. FN pahalıysa eşik düşer (daha çok red), FP pahalıysa yükselir. Aynı model, farklı ürünlerde (kredi kartı, konut kredisi) farklı eşiklerle kullanılabilir.' },

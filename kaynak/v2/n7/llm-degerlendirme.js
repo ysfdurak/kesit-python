@@ -519,7 +519,7 @@ print(len(satirlar), "olay;", [s["adim"] for s in satirlar], "| hepsi aynı iz:"
         hints: [
           'Eşleştirilmiş bootstrap: aynı idx ile hem a hem b\'den örnekle.',
           'np.percentile(farklar, [2.5, 97.5]) ve float(...)',
-          'anlamli = alt > 0 or ust < 0'
+          'anlamli = alt > 0 or ust &lt; 0'
         ],
         why: '20 örnekte +0.10 farkın güven aralığı sıfırı kapsıyor: iyileşme şans olabilir. Aynı oran 200 örnekte anlamlı hâle gelir. İstem kararlarını aralıkla raporlamak, gürültüye göre istem değiştirip durmayı önler.'
       },
@@ -625,7 +625,7 @@ print(len(satirlar), "olay;", [s["adim"] for s in satirlar], "| hepsi aynı iz:"
         hints: [
           'try: tahmin = json.loads(metin).get("duygu") except json.JSONDecodeError: tahmin = None',
           'Ağırlıklı doğruluk: sikliklar.get(girdi, 0) * ok toplamı / altın girdilerin sıklık toplamı.',
-          'sec: uygun = [r for r in raporlar if r["p95_ms"] <= max_p95 and r["sema"] == 1.0]; max(uygun, key=lambda r: (r["agirlikli"], -r["usd"]))'
+          'sec: uygun = [r for r in raporlar if r["p95_ms"] &lt;= max_p95 and r["sema"] == 1.0]; max(uygun, key=lambda r: (r["agirlikli"], -r["usd"]))'
         ],
         why: 'v2, "Biraz geç geldi ama lezzetli" gibi karışık yorumları doğru etiketlediği için ağırlıklı doğrulukta önde (0,962 ve 0,939); ama bir yorumda şema dışı çıktı ürettiği ve daha pahalı olduğu için doğrudan seçilemez. Gerçek bir sürüm kararı tam olarak böyle verilir: doğruluk, gerçek trafik ağırlığı, şema güvenilirliği, gecikme ve maliyet birlikte. Loglar da her kararın gerekçesini saklar.'
       }

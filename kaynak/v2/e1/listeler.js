@@ -150,7 +150,7 @@ print(dogru[0] is dogru[1])</pre><p>İkinci yazımdaki <code>for _ in range(2)</
         q: '<p><code>son_n(liste, n)</code> fonksiyonunu yaz: listenin son <code>n</code> elemanını yeni bir liste olarak döndürsün. <code>n</code> sıfırsa boş liste, listenin uzunluğundan büyükse tüm liste dönmeli. Dikkat: <code>liste[-0:]</code> tüm listeyi verir!</p>',
         sol: 'def son_n(liste, n):\n    if n <= 0:\n        return []\n    return liste[-n:]\n',
         tests: 'assert son_n([1, 2, 3, 4, 5], 2) == [4, 5], "Son 2 eleman"\nassert son_n([1, 2, 3], 0) == [], "n=0 boş liste döndürmeli; -0 sıfırdır ve [-0:] tüm listeyi verir"\nassert son_n([1, 2, 3], 10) == [1, 2, 3], "n listeden büyükse tüm liste"\nassert son_n([], 3) == [], "Boş liste"\nl = [1, 2]\nassert son_n(l, 2) is not l, "Yeni bir liste dönmeli"\n',
-        hints: ['-0 ile 0 aynı sayıdır; liste[0:] tüm listeyi verir.', 'n <= 0 durumunu ayrıca ele al, sonra liste[-n:] döndür.'],
+        hints: ['-0 ile 0 aynı sayıdır; liste[0:] tüm listeyi verir.', 'n &lt;= 0 durumunu ayrıca ele al, sonra liste[-n:] döndür.'],
         why: 'Negatif dilim sınırı sondan sayar, ama -0 sıfıra eşittir ve [0:] baştan başlar. Bu kenar durumu ayrıca ele almak gerekir. Dilim her zaman yeni liste döndürdüğü için orijinal korunur.'
       },
       {

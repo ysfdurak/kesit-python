@@ -111,7 +111,7 @@ VIEWS['arena-p'] = { html() {
     const b = ev.target.closest('button[data-act]'); if (!b) return; const act = b.dataset.act;
     if (act === 'ar-peek') { if (!confirm('Çözümü açarsan bu problemden puan alamazsın. Devam edilsin mi?')) return; r.peek = 1; save(); render(); return; }
     if (act === 'ar-load') { P.drafts[a.id] = r.subs[+b.dataset.i].code; save(); go('arena-p', a.id); return; }
-    if (act === 'ar-hint') { const hs = a.hints || []; const box = $('.hints', m); r.hn = Math.min((r.hn || 0) + 1, hs.length); box.hidden = false; box.innerHTML = hs.length ? hs.slice(0, r.hn).map((x, i) => '<div class="tip"><b>İpucu ' + (i + 1) + '</b>' + esc(x) + '</div>').join('') : '<p class="muted">Bu problemde ipucu yok.</p>'; return; }
+    if (act === 'ar-hint') { const hs = a.hints || []; const box = $('.hints', m); r.hn = Math.min((r.hn || 0) + 1, hs.length); box.hidden = false; box.innerHTML = hs.length ? hs.slice(0, r.hn).map((x, i) => '<div class="tip"><b>İpucu ' + (i + 1) + '</b>' + x + '</div>').join('') : '<p class="muted">Bu problemde ipucu yok.</p>'; return; }
     const ta = $('#ta-ar', m); const out = $('.exout', m); if (!ta) return;
     if (act === 'ar-reset') { if (!confirm('Kodun başlangıç haline dönsün mü?')) return; delete P.drafts[a.id]; save(); render(); return; }
     out.hidden = false;

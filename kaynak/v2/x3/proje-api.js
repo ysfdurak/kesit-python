@@ -167,7 +167,7 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
         guide: [
           'saat() ile şimdiki zamanı, // ile pencere numarasını hesapla.',
           'Sayaç sözlüğünde (anahtar, no) değerini 1 artır; eski numaralı girdileri temizle.',
-          'sayac <= limit ise izinli.',
+          'sayac &lt;= limit ise izinli.',
           'Değilse retry_after = ceil((no + 1) * pencere_sn - simdi).'
         ],
         example: 'import math\nsimdi, pencere = 125.3, 60\nno = int(simdi // pencere)\nprint(no, math.ceil((no + 1) * pencere - simdi))\n',
@@ -217,7 +217,7 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
         tests: 'hata_sayisi = {101: 1, 102: 0, 103: 9, 104: 2}\ndef gonder(i, d):\n    return d > hata_sayisi[i]\nr = isci_calistir([(0, 101), (0, 102), (5, 103), (20, 104)], gonder)\nassert r["basarili"] == [(102, 0, 1), (101, 10, 2), (104, 90, 3)], f"Başarılar: {r[\'basarili\']}"\nassert r["olu"] == [103], "103 dört denemede de başarısız: ölü kuyruğa"\nassert isci_calistir([], gonder) == {"basarili": [], "olu": []}, "Boş kuyruk"\nr2 = isci_calistir([(0, 7)], lambda i, d: False, gecikmeler=())\nassert r2 == {"basarili": [], "olu": [7]}, "Yeniden deneme yoksa ilk hatada ölü"\n',
         hints: [
           'Öncelik kuyruğu: heapq ile (zaman, is_id, deneme) demetleri; en küçük önce çıkar.',
-          'Başarısızlıkta deneme <= len(gecikmeler) ise yeni zamanla geri koy.',
+          'Başarısızlıkta deneme &lt;= len(gecikmeler) ise yeni zamanla geri koy.',
           '104: 20\'de ilk deneme, +10 → 30\'da ikinci, +60 → 90\'da üçüncü (başarılı).'
         ],
         why: 'RQ, Celery ve arq\'ın yeniden deneme mantığı budur: artan gecikmeler geçici hataları (SMTP yoğunluğu) atlatır, sınırlı deneme sayısı kalıcı hataları (geçersiz adres) sonsuz döngüden kurtarır. Ölü kuyruk, elle incelenecek işlerin kaybolmamasını sağlar.'

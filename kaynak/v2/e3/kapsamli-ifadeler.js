@@ -201,7 +201,7 @@ print([ad for ad, p in zip(musteriler, puanlar) if vip_mi(ad, p)])
         q: '<p><code>indirimli_vitrin(urunler, oran, esik)</code>: <code>urunler</code> <code>(ad, fiyat)</code> listesi. Her ürünün indirimli fiyatını <code>round(fiyat * (1 - oran), 2)</code> ile hesapla; indirimli fiyatı <code>esik</code>\'ten <b>küçük</b> olanları <code>(ad, indirimli_fiyat)</code> olarak döndür. İndirimli fiyat her ürün için <b>yalnız bir kez</b> hesaplanmalı: hesabı <code>indirimli(fiyat, oran)</code> yardımcı fonksiyonuna koy ve comprehension\'da walrus kullan.</p>',
         guide: [
           'indirimli(fiyat, oran) fonksiyonunu yaz: yuvarlanmış indirimli fiyatı döndürsün.',
-          'Comprehension\'ın if kısmında (f := indirimli(fiyat, oran)) < esik yaz.',
+          'Comprehension\'ın if kısmında (f := indirimli(fiyat, oran)) &lt; esik yaz.',
           'Sonuç kısmında (ad, f) kullan.',
           'Walrus ifadesini parantez içine almayı unutma.'
         ],
@@ -210,8 +210,8 @@ print([ad for ad, p in zip(musteriler, puanlar) if vip_mi(ad, p)])
         sol: 'def indirimli(fiyat, oran):\n    return round(fiyat * (1 - oran), 2)\n\ndef indirimli_vitrin(urunler, oran, esik):\n    return [(ad, f) for ad, fiyat in urunler if (f := indirimli(fiyat, oran)) < esik]\n',
         tests: 'U = [("Kulaklık", 899.90), ("Kablo", 79.90), ("Monitör", 4599.0), ("Mouse", 349.50)]\nr = indirimli_vitrin(U, 0.2, 750)\nassert r == [("Kulaklık", 719.92), ("Kablo", 63.92), ("Mouse", 279.6)], "Gelen: " + str(r)\n_say = {"n": 0}\n_eski = indirimli\ndef indirimli(fiyat, oran):\n    _say["n"] += 1\n    return _eski(fiyat, oran)\nindirimli_vitrin(U, 0.2, 750)\nassert _say["n"] == 4, f"indirimli 4 ürün için 4 kez çağrılmalı, {_say[\'n\']} kez çağrıldı: walrus ile tek hesaplama yap"\nassert ":=" in __source__, "Walrus işlecini (:=) kullan"\n',
         hints: [
-          'Walrus koşulda değeri bir ada bağlar: if (f := hesap) < esik',
-          'Sonuç kısmında aynı adı kullanırsın: [(ad, f) for ad, fiyat in urunler if (f := indirimli(fiyat, oran)) < esik]'
+          'Walrus koşulda değeri bir ada bağlar: if (f := hesap) &lt; esik',
+          'Sonuç kısmında aynı adı kullanırsın: [(ad, f) for ad, fiyat in urunler if (f := indirimli(fiyat, oran)) &lt; esik]'
         ],
         why: 'Walrus, pahalı ya da yan etkili bir hesabı koşul ve sonuç arasında paylaştırır. Parantez zorunludur; yoksa karşılaştırmanın True/False sonucu atanır.' },
       { t: 'code',

@@ -163,7 +163,7 @@ print("Hatalı satırlar:", hatalilar)
         code: 'ciro = {"İzmir": 820.0, "Ankara": 1830.0, "Bursa": 450.0}\nfor sehir, tutar in sorted(ciro.items(), key=lambda x: x[1], reverse=True)[:2]:\n    print(f"{sehir:<7}|{tutar:>9,.2f}")\n',
         o: ['Ankara | 1,830.00\nİzmir  |   820.00', 'Ankara|1,830.00\nİzmir|820.00', 'Bursa  |   450.00\nİzmir  |   820.00', 'Ankara |  1830.00\nİzmir  |    820.00'],
         a: 0,
-        why: 'Değere göre azalan sıralayıp ilk ikisini alır. :<7 adı 7 karaktere sola, :>9,.2f tutarı binlik ayırıcı ve 2 ondalıkla 9 karaktere sağa yaslar.' },
+        why: 'Değere göre azalan sıralayıp ilk ikisini alır. :&lt;7 adı 7 karaktere sola, :>9,.2f tutarı binlik ayırıcı ve 2 ondalıkla 9 karaktere sağa yaslar.' },
       { t: 'predict',
         stage: 'Kodu oku',
         q: 'Temizleme fonksiyonu girdiyi kopyalamıyor. Bu kod ne yazdırır?',

@@ -241,7 +241,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
       sol: 'while True:\n    metin = input("Adet (1-99): ")\n    try:\n        adet = int(metin)\n    except ValueError:\n        print("Lütfen tam sayı gir.")\n        continue\n    if 1 <= adet <= 99:\n        break\n    print("1 ile 99 arasında olmalı.")\nprint(f"Sepete {adet} adet eklendi.")\n',
       stdin: ['on iki', '0', '150', '2.5', '12'],
       expect: 'Adet (1-99): on iki\nLütfen tam sayı gir.\nAdet (1-99): 0\n1 ile 99 arasında olmalı.\nAdet (1-99): 150\n1 ile 99 arasında olmalı.\nAdet (1-99): 2.5\nLütfen tam sayı gir.\nAdet (1-99): 12\nSepete 12 adet eklendi.\n',
-      hints: ['Dönüşüm hatası ile iş kuralı hatası ayrı mesajlar alıyor: önce try/except, sonra if.', 'continue döngünün başına döner; break döngüden çıkar.', 'if 1 <= adet <= 99: break'],
+      hints: ['Dönüşüm hatası ile iş kuralı hatası ayrı mesajlar alıyor: önce try/except, sonra if.', 'continue döngünün başına döner; break döngüden çıkar.', 'if 1 &lt;= adet &lt;= 99: break'],
       why: 'Doğrulama döngüsünün iki katmanı vardır: biçim (int\'e dönüşüyor mu?) ve iş kuralı (aralıkta mı?). Her birine ayrı ve yol gösterici mesaj vermek kullanıcının neyi düzelteceğini anlamasını sağlar.' },
     { erken: true, t: 'code',
       id: 'girdi-donusum-4',

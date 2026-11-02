@@ -144,7 +144,7 @@ print(matris.loc[:, [8, 12, 18, 23]])
         sol: 'import veri\n\ndef gece_ozeti():\n    t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at", "ended_at"], parse_dates=["started_at", "ended_at"])\n    saat = t["started_at"].dt.hour\n    gece = t[(saat >= 22) | (saat < 5)]\n    sure = (gece["ended_at"] - gece["started_at"]).dt.total_seconds() / 60\n    return int(len(gece)), round(float(sure.median()), 1)\n',
         tests: 'r = gece_ozeti()\nassert r == (6717, 19.7), f"Gece özeti farklı: {r}"\n',
         hints: ['between(22, 5) "22 ≤ x ≤ 5" demektir; böyle bir sayı var mı?', 'Gece aralığı gece yarısını aşar: iki koşulu | ile birleştir.'],
-        why: 'Gece yarısını aşan aralıklar tek bir between ile yazılamaz. (saat >= 22) | (saat < 5) doğru maskedir; 6.717 gece yolculuğu var.'
+        why: 'Gece yarısını aşan aralıklar tek bir between ile yazılamaz. (saat >= 22) | (saat &lt; 5) doğru maskedir; 6.717 gece yolculuğu var.'
       },
       {
         t: 'code',

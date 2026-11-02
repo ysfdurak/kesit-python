@@ -280,7 +280,7 @@ while (satir := satirlar[i]) != "":
       start: 'def rgb_ayir(renk):\n    pass\n\ndef rgb_birlestir(r, g, b):\n    pass\n',
       sol: 'def rgb_ayir(renk):\n    r = (renk >> 16) & 0xFF\n    g = (renk >> 8) & 0xFF\n    b = renk & 0xFF\n    return (r, g, b)\n\ndef rgb_birlestir(r, g, b):\n    return (r << 16) | (g << 8) | b\n',
       tests: 'assert rgb_ayir(0x1E90FF) == (30, 144, 255), "0x1E90FF -> (30, 144, 255)"\nassert rgb_ayir(0x000000) == (0, 0, 0), "Siyah"\nassert rgb_ayir(0xFF0000) == (255, 0, 0), "Kırmızı"\nassert rgb_birlestir(30, 144, 255) == 0x1E90FF, "Birleştirme ayırmanın tersi olmalı"\nassert rgb_birlestir(*rgb_ayir(0xABCDEF)) == 0xABCDEF, "Gidiş-dönüş aynı rengi vermeli"\nassert "str(" not in __kod__ and "hex(" not in __kod__, "Metne çevirmeden, bit operatörleriyle çöz"\n',
-      hints: ['Her renk kanalı 8 bittir; kırmızı en üstteki 8 bit.', 'Sağa 16 kaydırınca kırmızı en alta iner; & 0xFF ile yalnız alttaki 8 bit kalır.', 'Birleştirme: (r << 16) | (g << 8) | b'],
+      hints: ['Her renk kanalı 8 bittir; kırmızı en üstteki 8 bit.', 'Sağa 16 kaydırınca kırmızı en alta iner; & 0xFF ile yalnız alttaki 8 bit kalır.', 'Birleştirme: (r &lt;&lt; 16) | (g &lt;&lt; 8) | b'],
       why: 'Kaydırma bitleri yerine taşır, & 0xFF maskesi istenmeyen bitleri siler, | parçaları birleştirir. Bu kalıp renklerde, ağ adreslerinde ve ikili dosya biçimlerinde aynen kullanılır.' },
     { erken: true, t: 'code',
       id: 'operatorler-7',
@@ -300,7 +300,7 @@ while (satir := satirlar[i]) != "":
       start: 'def kademe(puan):\n    pass\n',
       sol: 'def kademe(puan):\n    if 90 <= puan <= 100:\n        return "A"\n    if 75 <= puan < 90:\n        return "B"\n    if 60 <= puan < 75:\n        return "C"\n    if 0 <= puan < 60:\n        return "D"\n    raise ValueError(f"Geçersiz puan: {puan}")\n',
       tests: 'assert [kademe(p) for p in (100, 90, 89.5, 75, 74, 60, 59, 0)] == ["A", "A", "B", "B", "C", "C", "D", "D"], "Sınırlar: 90 A, 75 B, 60 C dahil"\ntry:\n    kademe(101)\n    assert False, "101 için ValueError beklenirdi"\nexcept ValueError:\n    pass\ntry:\n    kademe(-1)\n    assert False, "-1 için ValueError beklenirdi"\nexcept ValueError:\n    pass\n',
-      hints: ['Zincirleme: 75 <= puan < 90 tek ifadede iki sınırı birden denetler.', 'Hiçbir aralığa uymayan puan en sona düşer; orada raise ValueError(...) yaz.', 'Sınırlarda dahil/hariç ayrımına dikkat: 90 A\'dır, B değil.'],
+      hints: ['Zincirleme: 75 &lt;= puan &lt; 90 tek ifadede iki sınırı birden denetler.', 'Hiçbir aralığa uymayan puan en sona düşer; orada raise ValueError(...) yaz.', 'Sınırlarda dahil/hariç ayrımına dikkat: 90 A\'dır, B değil.'],
       why: 'Zincirleme karşılaştırma aralık kontrolünü matematikteki gibi okunur yazar ve her sınırı açıkça gösterir. Aralık dışını sessizce "D" yapmak yerine hata fırlatmak, bozuk veriyi erken yakalar.' },
     { erken: true, t: 'code',
       id: 'operatorler-9',
@@ -332,7 +332,7 @@ while (satir := satirlar[i]) != "":
       start: 'def tarih_paketle(yil, ay, gun):\n    pass\n\ndef tarih_coz(paket):\n    pass\n',
       sol: 'def tarih_paketle(yil, ay, gun):\n    if not (1980 <= yil <= 2107 and 1 <= ay <= 12 and 1 <= gun <= 31):\n        raise ValueError("Geçersiz tarih")\n    return ((yil - 1980) << 9) | (ay << 5) | gun\n\ndef tarih_coz(paket):\n    if not 0 <= paket <= 0xFFFF:\n        raise ValueError("16 bit dışında")\n    yil = (paket >> 9) + 1980\n    ay = (paket >> 5) & 0b1111\n    gun = paket & 0b11111\n    return (yil, ay, gun)\n',
       tests: 'p = tarih_paketle(2026, 10, 28)\nassert p == (46 << 9) | (10 << 5) | 28, "Bit yerleşimi: yıl<<9 | ay<<5 | gün"\nassert tarih_coz(p) == (2026, 10, 28), "Çözme paketlemenin tersi olmalı"\nassert tarih_coz(tarih_paketle(1980, 1, 1)) == (1980, 1, 1), "Alt sınır"\nassert tarih_coz(tarih_paketle(2107, 12, 31)) == (2107, 12, 31), "Üst sınır: 7 bit yıl 127\'ye kadar"\nassert tarih_paketle(2107, 12, 31) <= 0xFFFF, "Sonuç 16 bite sığmalı"\nfor kotu in [(1979, 1, 1), (2108, 1, 1), (2000, 0, 1), (2000, 13, 1), (2000, 1, 0), (2000, 1, 32)]:\n    try:\n        tarih_paketle(*kotu)\n        assert False, f"{kotu} için ValueError beklenirdi"\n    except ValueError:\n        pass\nfor kotu in [-1, 65536]:\n    try:\n        tarih_coz(kotu)\n        assert False, f"{kotu} için ValueError beklenirdi"\n    except ValueError:\n        pass\n',
-      hints: ['Gün 5 bit (0-31), ay 4 bit (0-15): ay 5 bit, yıl 9 bit sola kaydırılır.', 'Çözerken önce kaydır sonra maskele: ay = (paket >> 5) & 0b1111.', 'Doğrulama: if not (1980 <= yil <= 2107 and 1 <= ay <= 12 and 1 <= gun <= 31): raise ValueError(...)'],
+      hints: ['Gün 5 bit (0-31), ay 4 bit (0-15): ay 5 bit, yıl 9 bit sola kaydırılır.', 'Çözerken önce kaydır sonra maskele: ay = (paket >> 5) & 0b1111.', 'Doğrulama: if not (1980 &lt;= yil &lt;= 2107 and 1 &lt;= ay &lt;= 12 and 1 &lt;= gun &lt;= 31): raise ValueError(...)'],
       why: 'Bit paketleme, alanların genişliklerini bilerek her alanı kendi yerine kaydırmak ve | ile birleştirmektir; çözme ise kaydırıp & maskesiyle o alanı yalıtmaktır. Zincirleme karşılaştırmalar doğrulamayı tek satırda okunur kılar. Not: "and" önce bağlar, "not" tüm parantezi tersine çevirir.' }
   ],
   faq: [

@@ -15,7 +15,7 @@ B.push(
     expect: 'Stok 3: Sipariş ver\n',
     hint: 'Koşullu ifade (ternary), kritik değişkeni hesaplandıktan sonra kullanılabilir.',
     hints: ['Karşılaştırma sonucu bir bool\'dur ve değişkende saklanabilir.'],
-    why: 'stok < 5 ifadesi True/False üretir ve kritik değişkenine atanabilir; bu, koşula bir ad vermenin en okunur yoludur. a if kosul else b koşullu ifadesi (ternary) iki değerden birini seçer ve tek satırlık if/else\'in yerini tutar. Uzun ya da iç içe ternary yazmaktan kaçın; okunurluk düşer.',
+    why: 'stok &lt; 5 ifadesi True/False üretir ve kritik değişkenine atanabilir; bu, koşula bir ad vermenin en okunur yoludur. a if kosul else b koşullu ifadesi (ternary) iki değerden birini seçer ve tek satırlık if/else\'in yerini tutar. Uzun ya da iç içe ternary yazmaktan kaçın; okunurluk düşer.',
     tags: ['bool', 'ternary', 'if'],
     min: 2
   },
@@ -50,7 +50,7 @@ B.push(
     tests: 'assert su_faturasi(8) == 160, "8 m³ tamamen ilk kademede: 8 × 20 = 160"\nassert su_faturasi(10) == 200, "Sınır: 10 m³ = 200"\nassert su_faturasi(15) == 350, "15 m³ = 200 + 5 × 30 = 350"\nassert su_faturasi(25) == 725, "25 m³ = 200 + 300 + 5 × 45 = 725"\nassert su_faturasi(0) == 0, "Tüketim yoksa fatura 0"\n',
     guide: ['Tüketim 10 veya altındaysa yalnızca ilk kademe: m3 * 20', '20 veya altındaysa: ilk 10 m³ tam (200) + (m3 - 10) * 30', '20\'nin üstündeyse: 200 + 300 + (m3 - 20) * 45', 'Koşulları küçükten büyüğe if/elif/else ile yaz.'],
     example: '# Benzer teknik: kademeli prim hesabı (ilk 10.000 TL %2, üstü %5)\ndef prim(satis):\n    if satis <= 10000:\n        return satis * 0.02\n    return 10000 * 0.02 + (satis - 10000) * 0.05\nprint(prim(8000), prim(15000))\n',
-    hints: ['Kademeli tarifede tüm tüketim en yüksek fiyattan hesaplanmaz; her parça kendi fiyatından.', 'elif m3 <= 20: return 200 + (m3 - 10) * 30', 'else: return 500 + (m3 - 20) * 45'],
+    hints: ['Kademeli tarifede tüm tüketim en yüksek fiyattan hesaplanmaz; her parça kendi fiyatından.', 'elif m3 &lt;= 20: return 200 + (m3 - 10) * 30', 'else: return 500 + (m3 - 20) * 45'],
     why: 'Kademeli (dilimli) hesaplarda alt kademeler her zaman tam doludur; yalnızca son kademe kısmidir. elif zinciri küçükten büyüğe sıralandığı için her dalda önceki sınırların aşıldığı bilinir. Sabit sayıları (10, 20, 30, 45) değişkenlere ya da bir kademe listesine taşımak tarife değiştiğinde kodu korur: [(10, 20), (10, 30), (None, 45)] üzerinde dönen genel bir fonksiyon, gelir vergisi dilimleri için de kullanılabilir.',
     tags: ['if', 'elif', 'kademeli tarife', 'belediye'],
     min: 6
@@ -82,8 +82,8 @@ B.push(
     start: 'def yas_grubu(yas):\n    if 18 < yas < 65:\n        return "yetişkin"\n    elif yas > 65:\n        return "emekli"\n    else:\n        return "genç"\n',
     sol: 'def yas_grubu(yas):\n    if yas < 18:\n        return "genç"\n    elif yas < 65:\n        return "yetişkin"\n    else:\n        return "emekli"\n',
     tests: 'assert yas_grubu(17) == "genç", "17 yaş genç"\nassert yas_grubu(18) == "yetişkin", "18 yaş YETİŞKİN olmalı (sınır dahil)"\nassert yas_grubu(64) == "yetişkin", "64 yaş yetişkin"\nassert yas_grubu(65) == "emekli", "65 yaş EMEKLİ olmalı (sınır dahil)"\nassert yas_grubu(0) == "genç", "0 yaş genç"\n',
-    hints: ['18 < yas, 18 için doğru mu? 65 > 65 doğru mu?', 'Küçükten büyüğe sıralı tek yönlü karşılaştırmalar (yas < 18, yas < 65) sınır hatalarını önler.'],
-    why: '18 < yas ifadesi 18\'i dışarıda bırakır, yas > 65 da 65\'i; ikisi de else\'e düşüp "genç" olur. Bu tür sınır hatalarına (off-by-one) karşı en sağlam yöntem aralıkları küçükten büyüğe tek yönlü karşılaştırmayla yazmaktır: önceki koşul sağlanmadıysa alt sınır zaten garantidir. Test yazarken her zaman sınır değerlerini (17, 18, 64, 65) dene.',
+    hints: ['18 &lt; yas, 18 için doğru mu? 65 > 65 doğru mu?', 'Küçükten büyüğe sıralı tek yönlü karşılaştırmalar (yas &lt; 18, yas &lt; 65) sınır hatalarını önler.'],
+    why: '18 &lt; yas ifadesi 18\'i dışarıda bırakır, yas > 65 da 65\'i; ikisi de else\'e düşüp "genç" olur. Bu tür sınır hatalarına (off-by-one) karşı en sağlam yöntem aralıkları küçükten büyüğe tek yönlü karşılaştırmayla yazmaktır: önceki koşul sağlanmadıysa alt sınır zaten garantidir. Test yazarken her zaman sınır değerlerini (17, 18, 64, 65) dene.',
     tags: ['if', 'sınır değer', 'off-by-one', 'belediye'],
     min: 3
   },
@@ -148,9 +148,9 @@ B.push(
     start: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            # TODO: çekme (yeterliyse)\n            # TODO: transfer (yeterliyse)\n            # TODO: diğerleri\n    return bakiye\n',
     sol: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            case ("cek", tutar) if tutar <= bakiye:\n                bakiye -= tutar\n            case ("transfer", tutar, _) if tutar <= bakiye:\n                bakiye -= tutar\n            case _:\n                pass\n    return bakiye\n',
     tests: 'h = [("yatir", 500), ("cek", 200), ("transfer", 100, "TR99"), ("cek", 5000)]\nassert bakiye_hesapla(1000, h) == 1200, "1000 + 500 - 200 - 100 = 1200; 5000 çekme yetersiz bakiye nedeniyle atlanmalı"\nassert bakiye_hesapla(100, [("transfer", 150, "TR1")]) == 100, "Yetersiz bakiyede transfer atlanmalı"\nassert bakiye_hesapla(50, [("faiz",), ("yatir", 10, "fazla")]) == 50, "Tanınmayan biçimler yok sayılmalı"\nassert bakiye_hesapla(0, []) == 0, "Hareket yoksa bakiye değişmez"\n',
-    guide: ['bakiye = baslangic ile başla, hareketlerde dolaş.', 'case ("yatir", tutar): bakiye += tutar', 'Çekme ve transferi ayrı case\'lerde yaz; guard ile yeterlilik kontrolü yap: case ("cek", tutar) if tutar <= bakiye:', 'case _: pass ile diğerlerini atla.'],
+    guide: ['bakiye = baslangic ile başla, hareketlerde dolaş.', 'case ("yatir", tutar): bakiye += tutar', 'Çekme ve transferi ayrı case\'lerde yaz; guard ile yeterlilik kontrolü yap: case ("cek", tutar) if tutar &lt;= bakiye:', 'case _: pass ile diğerlerini atla.'],
     example: '# Benzer teknik: demet kalıbıyla stok hareketi\nstok = 10\nfor hareket in [("giris", 5), ("cikis", 3), ("sayim",), ("cikis", 50)]:\n    match hareket:\n        case ("giris", adet):\n            stok += adet\n        case ("cikis", adet) if adet <= stok:\n            stok -= adet\n        case _:\n            print("atlandı:", hareket)\nprint(stok)\n',
-    hints: ['Demet kalıbı eleman sayısını da kontrol eder: ("yatir", 10, "fazla") ("yatir", tutar) ile eşleşmez.', 'Koşullu kalıp: case ("cek", tutar) if tutar <= bakiye:', 'Kullanmayacağın elemanı _ ile karşıla: case ("transfer", tutar, _) if tutar <= bakiye:'],
+    hints: ['Demet kalıbı eleman sayısını da kontrol eder: ("yatir", 10, "fazla") ("yatir", tutar) ile eşleşmez.', 'Koşullu kalıp: case ("cek", tutar) if tutar &lt;= bakiye:', 'Kullanmayacağın elemanı _ ile karşıla: case ("transfer", tutar, _) if tutar &lt;= bakiye:'],
     why: 'Demet kalıpları hem biçimi (eleman sayısı ve sabit ilk eleman) hem de değişken bağlamayı tek satırda yapar. Guard (if) koşulu sağlanmazsa o case eşleşmemiş sayılır ve sonraki kalıplara geçilir; yetersiz bakiyeli çekme bu yüzden case _ dalına düşer ve atlanır. Gerçek sistemde atlanan işlemler bir hata listesine kaydedilir; bunu bir sonuç listesine append ederek ekleyebilirsin.',
     tags: ['match', 'tuple kalıbı', 'guard', 'bankacılık'],
     min: 7
@@ -166,7 +166,7 @@ B.push(
     start: 'def kargo_ucreti(paket):\n    # buraya yaz\n    pass\n',
     sol: 'def kargo_ucreti(paket):\n    match paket:\n        case {"tip": "zarf"}:\n            return 30\n        case {"tip": "koli", "desi": d} if d <= 10:\n            return 50\n        case {"tip": "koli", "desi": d}:\n            return 50 + (d - 10) * 4\n        case {"tip": "palet", "kg": k}:\n            return k * 2.5\n        case _:\n            return None\n',
     tests: 'assert kargo_ucreti({"tip": "zarf"}) == 30, "Zarf 30 TL"\nassert kargo_ucreti({"tip": "zarf", "not": "acil"}) == 30, "Sözlük kalıbı ek anahtarları yok sayar: yine 30"\nassert kargo_ucreti({"tip": "koli", "desi": 8}) == 50, "10 desi ve altı koli 50 TL"\nassert kargo_ucreti({"tip": "koli", "desi": 15}) == 70, "15 desi: 50 + 5 × 4 = 70"\nassert kargo_ucreti({"tip": "palet", "kg": 200}) == 500.0, "200 kg palet: 500.0"\nassert kargo_ucreti({"tip": "koli"}) is None, "Desisi olmayan koli tanımsız: None"\nassert kargo_ucreti({"tip": "konteyner"}) is None, "Bilinmeyen tip: None"\n',
-    hints: ['Sözlük kalıbı: case {"tip": "koli", "desi": d}: — d değişkenine değer bağlanır.', 'Aynı kalıbın guard\'lı sürümü (if d <= 10) guard\'sızdan önce gelmeli.'],
+    hints: ['Sözlük kalıbı: case {"tip": "koli", "desi": d}: — d değişkenine değer bağlanır.', 'Aynı kalıbın guard\'lı sürümü (if d &lt;= 10) guard\'sızdan önce gelmeli.'],
     why: 'Sözlük kalıpları yalnızca yazılan anahtarlara bakar ve eksik anahtar varsa eşleşmez; bu sayede desisi olmayan koli hiçbir koli dalına girmez ve None döner. Guard\'lı dal önce gelir, çünkü kalıplar sırayla denenir. if/elif ile yazmak için önce paket.get("tip"), sonra "desi" in paket kontrolleri gerekir; match bu yapısal kontrolü bildirimsel (declarative) hale getirir.',
     tags: ['match', 'sözlük kalıbı', 'guard', 'lojistik'],
     min: 6

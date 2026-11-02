@@ -487,7 +487,7 @@ print("doğru :", "".join(ekran))</pre>
       hints: [
         'Yığına (zaman, sira, kimlik, fonk, args) koy; sira eşit zamanlarda planlama sırasını korur ve fonksiyonların karşılaştırılmasını önler.',
         'İptali bir kümede tut; çıkarırken iptalse atla.',
-        'Döngü: while yigin and yigin[0][0] <= sure: pop → simdi = zaman → fonk(*args).'
+        'Döngü: while yigin and yigin[0][0] &lt;= sure: pop → simdi = zaman → fonk(*args).'
       ],
       why: 'Gerçek olay döngüleri (tkinter, asyncio) zamanlayıcıları tam olarak böyle bir öncelik kuyruğunda tutar. Sanal zamanla yazılan döngü, "her saniye güncellenen saat" gibi davranışları beklemeden ve deterministik olarak test etmeyi sağlar.'
     },

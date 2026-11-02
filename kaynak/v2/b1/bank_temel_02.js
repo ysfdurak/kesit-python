@@ -146,10 +146,10 @@ B.push(
     start: 'def fatura_satiri(urun, adet, fiyat):\n    # TODO: uzun adları 14 karakter + "…" yap\n    tutar = adet * fiyat\n    # TODO: hizalı metni f-string ile döndür\n    return urun\n',
     sol: 'def fatura_satiri(urun, adet, fiyat):\n    if len(urun) > 15:\n        urun = urun[:14] + "…"\n    tutar = adet * fiyat\n    return f"{urun:<15}{adet:>4}{tutar:>10.2f}"\n',
     tests: 's = fatura_satiri("Çay", 2, 64.9)\nassert s == "Çay" + " " * 12 + "   2" + "    129.80", "\\"Çay\\", 2, 64.9 için ad 15 sola, adet 4 sağa, tutar 10 sağa yaslı olmalı"\nassert len(s) == 29, "Satır uzunluğu her zaman 15 + 4 + 10 = 29 olmalı"\nu = fatura_satiri("Organik Fındık Ezmesi", 1, 189.0)\nassert u.startswith("Organik Fındık…"), "Uzun ad 14 karakter + … olarak kısaltılmalı"\nassert len(u) == 29, "Kısaltılmış satır da 29 karakter olmalı"\n',
-    guide: ['Önce ad uzunluğunu kontrol et: len(urun) > 15 ise kısalt.', 'Kısaltma: urun[:14] + "…"', 'Tutarı hesapla.', 'f-string ile hizala: {ad:<15}{adet:>4}{tutar:>10.2f}'],
+    guide: ['Önce ad uzunluğunu kontrol et: len(urun) > 15 ise kısalt.', 'Kısaltma: urun[:14] + "…"', 'Tutarı hesapla.', 'f-string ile hizala: {ad:&lt;15}{adet:>4}{tutar:>10.2f}'],
     example: '# Benzer teknik: hizalı personel listesi\nad = "Ayşe Yılmaz"\ngun = 22\nprint(f"[{ad:<12}][{gun:>3}][{1234.5:>9.2f}]")\n',
-    hints: ['Biçim belirteçleri: < sola, > sağa yaslar; sayı genişliktir.', '.2f iki ondalık demektir; genişlikle birleşir: >10.2f', 'return f"{urun:<15}{adet:>4}{tutar:>10.2f}"'],
-    why: 'f-string biçim belirteçleri (format spec) rapor ve fiş üretmenin en kısa yoludur: hizalama yönü, genişlik ve ondalık tek ifadede belirtilir. Uzun adları kısaltmazsan :<15 metni kesmez, sadece kısa olanları doldurur; satır taşar ve sütunlar kayar. Alternatif: urun.ljust(15), str(adet).rjust(4), format(tutar, ">10.2f") — aynı işi metotlarla yapar.',
+    hints: ['Biçim belirteçleri: &lt; sola, > sağa yaslar; sayı genişliktir.', '.2f iki ondalık demektir; genişlikle birleşir: >10.2f', 'return f"{urun:&lt;15}{adet:>4}{tutar:>10.2f}"'],
+    why: 'f-string biçim belirteçleri (format spec) rapor ve fiş üretmenin en kısa yoludur: hizalama yönü, genişlik ve ondalık tek ifadede belirtilir. Uzun adları kısaltmazsan :&lt;15 metni kesmez, sadece kısa olanları doldurur; satır taşar ve sütunlar kayar. Alternatif: urun.ljust(15), str(adet).rjust(4), format(tutar, ">10.2f") — aynı işi metotlarla yapar.',
     tags: ['f-string', 'hizalama', 'dilimleme', 'fatura'],
     min: 7
   },

@@ -158,7 +158,7 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
         start: 'def katlar(n, n_splits, test_size):\n    return []\n',
         sol: 'def katlar(n, n_splits, test_size):\n    ilk_test = n - n_splits * test_size\n    if ilk_test <= 0:\n        raise ValueError("eğitim kümesi boş kalıyor")\n    sonuc = []\n    for i in range(n_splits):\n        tb = ilk_test + i * test_size\n        sonuc.append((0, tb, tb, tb + test_size))\n    return sonuc\n',
         tests: 'from sklearn.model_selection import TimeSeriesSplit\nimport numpy as np\nfor n, k, t in [(85, 3, 7), (20, 4, 3), (10, 2, 4)]:\n    beklenen = [(int(a[0]), int(a[-1]) + 1, int(b[0]), int(b[-1]) + 1) for a, b in TimeSeriesSplit(n_splits=k, test_size=t).split(np.zeros(n))]\n    assert katlar(n, k, t) == beklenen, f"n={n}, k={k}, t={t}: sklearn {beklenen}, gelen {katlar(n, k, t)}"\ntry:\n    katlar(10, 5, 2)\n    assert False, "10 satırda 5x2 test bloğu eğitime yer bırakmaz: ValueError"\nexcept ValueError:\n    pass\n',
-        hints: ['Test blokları sondan geriye dizilir: ilk test bloğu n - n_splits * test_size\'da başlar.', 'i. katın test başı: ilk_test + i * test_size; eğitim 0\'dan test başına kadar.', 'ilk_test <= 0 ise eğitim boştur.'],
+        hints: ['Test blokları sondan geriye dizilir: ilk test bloğu n - n_splits * test_size\'da başlar.', 'i. katın test başı: ilk_test + i * test_size; eğitim 0\'dan test başına kadar.', 'ilk_test &lt;= 0 ise eğitim boştur.'],
         why: 'Genişleyen pencereli ileri yürüyen doğrulama, modelin her tahminde yalnız geçmişi gördüğü gerçek kullanımı taklit eder. Hata katlar boyunca artıyorsa veri dağılımı kayıyordur (drift); bu da zaman serisi tahmini dersinde yeniden eğitim sıklığını belirleyecek.'
       }
     ],

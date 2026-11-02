@@ -211,7 +211,7 @@ print(temizle("  Anadolu Market Rapor "))
         sol: 'KURALLAR = {\n    "YUZDE10": lambda t: t * 0.9,\n    "50TL": lambda t: max(0, t - 50),\n    "KARGO": lambda t: t + 39.90 if t < 500 else t,\n}\n\ndef uygula(kod, tutar):\n    if kod is None:\n        return round(tutar, 2)\n    if kod not in KURALLAR:\n        raise ValueError(f"geçersiz kampanya: {kod}")\n    return round(KURALLAR[kod](tutar), 2)\n',
         tests: 'assert callable(KURALLAR.get("YUZDE10")), "KURALLAR sözlüğünde YUZDE10 fonksiyonu olmalı"\nassert uygula("YUZDE10", 899.90) == 809.91, "%10 indirim"\nassert uygula("50TL", 120) == 70 and uygula("50TL", 30) == 0, "50TL indirim, sıfırın altına inmez"\nassert uygula("KARGO", 300) == 339.9 and uygula("KARGO", 500) == 500, "500 altına kargo eklenir, 500 ve üstü aynen"\nassert uygula(None, 99.999) == 100.0, "Kod yoksa yuvarlanmış tutar"\ntry:\n    uygula("BEDAVA", 100)\n    assert False, "Bilinmeyen kod ValueError vermeli"\nexcept ValueError as e:\n    assert str(e) == "geçersiz kampanya: BEDAVA"\nKURALLAR["YUZDE20"] = lambda t: t * 0.8\nassert uygula("YUZDE20", 100) == 80.0, "Yeni kural yalnız tabloya eklenerek çalışmalı"\n',
         hints: [
-          'Lambda içinde koşullu ifade kullanabilirsin: lambda t: t + 39.90 if t < 500 else t',
+          'Lambda içinde koşullu ifade kullanabilirsin: lambda t: t + 39.90 if t &lt; 500 else t',
           'uygula: if kod not in KURALLAR: raise ValueError(...)',
           'Son satır: return round(KURALLAR[kod](tutar), 2)'
         ],

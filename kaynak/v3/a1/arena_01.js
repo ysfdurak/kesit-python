@@ -158,7 +158,7 @@
   start: 'b, n = map(int, input().split())\nhareketler = list(map(int, input().split()))\n# son, en düşük, eksi gün\n',
   sol: 'b, n = map(int, input().split())\nhareketler = list(map(int, input().split()))\nen_dusuk = None\neksi = 0\nfor h in hareketler:\n    b += h\n    if en_dusuk is None or b < en_dusuk:\n        en_dusuk = b\n    if b < 0:\n        eksi += 1\nprint(b, en_dusuk, eksi)\n',
   editorial: '<p><b>Fikir:</b> Bakiyeyi tek değişkende biriktir. En düşük değeri izlemek için başlangıç değeri önemli: ilk gün sonu bakiyesiyle başla (ya da <code>float(\'inf\')</code> kullan). <b>Gün başı bakiyesi</b> en düşüğe dahil değildir; yalnız gün sonları sayılır.</p><p><b>Alternatif:</b> <code>itertools.accumulate(hareketler, initial=B)</code> birikimli bakiyeleri üretir; ilk elemanı (B) atlayıp <code>min</code> ve <code>sum(x &lt; 0 for x in ...)</code> uygulayabilirsin.</p><p><b>Sık hata:</b> <code>en_dusuk = 0</code> ile başlamak: bakiye hep pozitifse yanlış olarak 0 çıkar. Bakiye tam 0 ise eksi sayılmaz.</p>',
-  hints: ['En düşük değeri izlerken başlangıç değerini 0 seçme; ilk gün sonu bakiyesini ya da sonsuzu kullan.', 'Eksi gün koşulu: bakiye < 0 (0 dahil değil).']
+  hints: ['En düşük değeri izlerken başlangıç değerini 0 seçme; ilk gün sonu bakiyesini ya da sonsuzu kullan.', 'Eksi gün koşulu: bakiye &lt; 0 (0 dahil değil).']
 },
 {
   id: 'a-009',
@@ -199,7 +199,7 @@
   start: 'q = int(input())\nfor _ in range(q):\n    b, r, h = map(int, input().split())\n    # while ile yılları say\n',
   sol: 'q = int(input())\nfor _ in range(q):\n    b, r, h = map(int, input().split())\n    yil = 0\n    sonuc = None\n    while b < h:\n        faiz = b * r // 100\n        if faiz == 0:\n            sonuc = \'ASLA\'\n            break\n        b += faiz\n        yil += 1\n    print(sonuc if sonuc else yil)\n',
   editorial: '<p><b>Fikir:</b> Hedef koşulu sağlanana kadar dönen bir <code>while b &lt; h</code> döngüsü. Her yıl faiz <code>b * r // 100</code> (önce çarp, sonra böl; tersi <code>b // 100 * r</code> kuruş kaybettirir).</p><p><b>Sonsuz döngü tuzağı:</b> Faiz 0 kuruşa yuvarlanırsa bakiye hiç değişmez ve döngü bitmez. Bu durumu yakalayıp <code>break</code> ile çık. <code>while</code> yazarken her zaman "döngü değişkeni her turda ilerliyor mu?" diye sor.</p><p><b>Karmaşıklık:</b> Faiz pozitifse bakiye en az %1 büyür; ama küçük bakiyelerde artış 1 kuruşla sınırlı olabilir. Faiz pozitifken <code>b·r ≥ 100</code> olduğundan her yıl bakiye <code>(1 + r/100)</code> katına yakın büyür, yıl sayısı logaritmiktir (birkaç bin adım).</p><p><b>Sık hata:</b> <code>b * (1 + r / 100)</code> ile float kullanmak: 10^12 düzeyinde yuvarlama farkları yıl sayısını değiştirebilir.</p>',
-  hints: ['while b < h döngüsünde her yıl faizi tam sayı bölmeyle hesapla.', 'Faiz 0 çıkarsa bakiye artmaz; döngüden ASLA ile çık.']
+  hints: ['while b &lt; h döngüsünde her yıl faizi tam sayı bölmeyle hesapla.', 'Faiz 0 çıkarsa bakiye artmaz; döngüden ASLA ile çık.']
 },
 {
   id: 'a-011',

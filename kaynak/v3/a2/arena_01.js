@@ -272,7 +272,7 @@
   start: 'from itertools import combinations\n\ndef ikili_paketler(urunler, butce):\n    # kodunu yaz\n    pass\n',
   sol: 'from itertools import combinations\n\ndef ikili_paketler(urunler, butce):\n    return [(a[0], b[0]) for a, b in combinations(urunler, 2) if a[1] + b[1] <= butce]\n',
   editorial: '<p><b>Yaklaşım:</b> <code>combinations(liste, 2)</code> her ikiliyi bir kez ve sıra korunarak üretir (i &lt; j). Liste kavrayışı içinde bütçe koşuluyla süzgeçten geçir.</p><p><b>Karmaşıklık:</b> O(n²) ikili; n = 200 için ~20 bin, sorun değil.</p><p><b>Alternatif:</b> İç içe iki <code>for</code> ile <code>range(i + 1, n)</code> aynı sonucu verir. Yalnız ikili sayısı lazım olsaydı fiyatları sıralayıp iki işaretçi (two pointers) ile O(n log n) çözülebilirdi. Sıra önemli olsaydı <code>permutations</code>, aynı ürün iki kez seçilebilseydi <code>combinations_with_replacement</code> kullanılırdı.</p><p><b>Sık hata:</b> <code>permutations</code> kullanıp her ikiliyi iki kez üretmek; “aşmayan” yerine <code>&lt;</code> yazıp tam bütçeye eşit paketleri kaçırmak.</p>',
-  hints: ['itertools.combinations(urunler, 2) tüm ikilileri verir.', 'Her ikilide fiyatları topla, <= butce olanların adlarını demet olarak al.']
+  hints: ['itertools.combinations(urunler, 2) tüm ikilileri verir.', 'Her ikilide fiyatları topla, &lt;= butce olanların adlarını demet olarak al.']
 },
 {
   id: 'a-075',
@@ -311,7 +311,7 @@
   start: 'from itertools import groupby\n\ndef en_uzun_seri(kayit):\n    # kodunu yaz\n    pass\n',
   sol: 'from itertools import groupby\n\ndef en_uzun_seri(kayit):\n    enuzun = {}\n    for harf, grup in groupby(kayit):\n        uzunluk = sum(1 for _ in grup)\n        if uzunluk > enuzun.get(harf, 0):\n            enuzun[harf] = uzunluk\n    return {h: enuzun[h] for h in sorted(enuzun)}\n',
   editorial: '<p><b>Yaklaşım:</b> <code>groupby</code> ardışık eşit elemanları gruplar (sıralama yapmaz!). Her grubun uzunluğunu <code>sum(1 for _ in grup)</code> ile say ve o harfin şimdiye kadarki en büyüğüyle karşılaştır. Sonda anahtarları sıralayıp yeni sözlük kur.</p><p><b>Karmaşıklık:</b> O(n) tek geçiş + O(u log u) anahtar sıralaması.</p><p><b>Alternatif:</b> Elle sayaç: önceki harfi ve mevcut seri uzunluğunu tutan döngü. <code>re.finditer(r\'(.)\\1*\', kayit)</code> de ardışık blokları bulur.</p><p><b>Sık hata:</b> <code>groupby</code>\'ın grubu bir yineleyicidir (iterator); <code>len(grup)</code> çalışmaz. Grubu tüketmeden bir sonraki gruba geçince eski grup boşalır. groupby\'ın sıralama yaptığını sanmak: <code>Counter</code> toplam adet verir, seri değil.</p>',
-  hints: ['groupby(\'ZZG\') → (\'Z\', <grup>), (\'G\', <grup>) gibi ardışık bloklar verir.', 'Grup bir iterator: uzunluğu sum(1 for _ in grup) ile bul.']
+  hints: ['groupby(\'ZZG\') → (\'Z\', &lt;grup>), (\'G\', &lt;grup>) gibi ardışık bloklar verir.', 'Grup bir iterator: uzunluğu sum(1 for _ in grup) ile bul.']
 },
 {
   id: 'a-077',
@@ -331,7 +331,7 @@
   start: 'from itertools import accumulate\n\nbaslangic, n = map(int, input().split())\nhareket = list(map(int, input().split()))\n# kodunu yaz\n',
   sol: 'from itertools import accumulate\n\nbaslangic, n = map(int, input().split())\nhareket = list(map(int, input().split()))\nbakiye = list(accumulate(hareket, initial=baslangic))[1:]\nprint(*bakiye)\nen_dusuk = min(bakiye)\nprint(\'EN_DUSUK\', en_dusuk, bakiye.index(en_dusuk) + 1)\nilk = next((i + 1 for i, b in enumerate(bakiye) if b < 0), None)\nprint(\'EKSI\', ilk if ilk is not None else \'YOK\')\n',
   editorial: '<p><b>Yaklaşım:</b> <code>accumulate(hareket, initial=baslangic)</code> önek toplamları üretir; ilk eleman başlangıç bakiyesidir, onu <code>[1:]</code> ile atarsın. En düşük değeri <code>min</code>, ilk görülme gününü <code>index</code> verir. İlk eksi gün için <code>next(üreteç, None)</code> kalıbı: koşulu sağlayan ilk elemanı bulur, yoksa varsayılanı döndürür.</p><p><b>Karmaşıklık:</b> O(n) zaman ve bellek.</p><p><b>Alternatif:</b> <code>initial</code> parametresi Python 3.8+ ile gelir; yoksa <code>accumulate([baslangic] + hareket)</code>. <code>accumulate(veri, max)</code> gibi farklı ikili fonksiyonlarla kayan maksimum da üretebilirsin.</p><p><b>Sık hata:</b> “Sıfırın altı” koşulunu <code>&lt;= 0</code> yazmak. Başlangıç bakiyesini çıktıya eklemek. Gün numarasını 0\'dan başlatmak.</p>',
-  hints: ['accumulate(liste, initial=x) önek toplamları üretir; ilk eleman x\'tir.', 'next((i for i, b in enumerate(...) if b < 0), None) ilk eşleşmeyi bulur.']
+  hints: ['accumulate(liste, initial=x) önek toplamları üretir; ilk eleman x\'tir.', 'next((i for i, b in enumerate(...) if b &lt; 0), None) ilk eşleşmeyi bulur.']
 },
 {
   id: 'a-078',

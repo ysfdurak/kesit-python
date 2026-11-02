@@ -127,7 +127,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         o: ['115 166', '166 166', '115 115', '166 115'],
         a: 0,
         code: 'import veri\nc = veri.baglan("lezzet_kurye", tablolar=["lk_orders"])\na = c.execute("SELECT COUNT(*) FROM lk_orders WHERE placed_at BETWEEN \'2024-10-01\' AND \'2024-10-03\'").fetchone()[0]\nb = c.execute("SELECT COUNT(*) FROM lk_orders WHERE placed_at >= \'2024-10-01\' AND placed_at < \'2024-10-04\'").fetchone()[0]\nprint(a, b)\n',
-        why: 'placed_at metin olarak "2024-10-03 11:20:00" biçimindedir ve "2024-10-03"ten büyüktür; BETWEEN üst sınırı 3 Ekim\'in tüm siparişlerini dışarıda bırakır (62 + 53 = 115). Yarı açık aralık (>= başlangıç, < ertesi gün) üç günü eksiksiz alır: 62 + 53 + 51 = 166.'
+        why: 'placed_at metin olarak "2024-10-03 11:20:00" biçimindedir ve "2024-10-03"ten büyüktür; BETWEEN üst sınırı 3 Ekim\'in tüm siparişlerini dışarıda bırakır (62 + 53 = 115). Yarı açık aralık (>= başlangıç, &lt; ertesi gün) üç günü eksiksiz alır: 62 + 53 + 51 = 166.'
       },
       {
         t: 'order',
@@ -148,7 +148,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         guide: [
           'İki metni datetime.strptime(m, "%Y-%m-%d %H:%M") ile çevir.',
           'adim = timedelta(hours=adim_saat).',
-          'while bas + adim <= bit: dilimi ekle, bas\'ı adım kadar ilerlet.',
+          'while bas + adim &lt;= bit: dilimi ekle, bas\'ı adım kadar ilerlet.',
           'Demetleri strftime ile aynı biçime geri çevir.'
         ],
         example: 'from datetime import datetime, timedelta\nt = datetime.strptime("2024-10-01 06:00", "%Y-%m-%d %H:%M")\nprint((t + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M"))\n',
@@ -157,7 +157,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         tests: 'assert dilimler("2024-10-01 00:00", "2024-10-03 00:00") == [("2024-10-01 00:00", "2024-10-02 00:00"), ("2024-10-02 00:00", "2024-10-03 00:00")], "İki tam gün"\nassert dilimler("2024-10-01 00:00", "2024-10-02 12:00") == [("2024-10-01 00:00", "2024-10-02 00:00")], "Yarım kalan dilim işlenmez"\nassert len(dilimler("2024-10-01 00:00", "2024-10-02 00:00", adim_saat=6)) == 4, "Günde 4 adet 6 saatlik dilim"\nassert dilimler("2024-10-31 22:00", "2024-11-01 01:00", adim_saat=1)[-1] == ("2024-11-01 00:00", "2024-11-01 01:00"), "Ay geçişi doğru olmalı"\nassert dilimler("2024-10-01 00:00", "2024-10-01 00:00") == [], "Boş aralık"\n',
         hints: [
           'Tarih aritmetiğini metinle değil datetime + timedelta ile yap; ay ve yıl geçişleri kendiliğinden çözülür.',
-          'Koşul bas + adim <= bit: dilimin SONU bitişi geçmemeli.',
+          'Koşul bas + adim &lt;= bit: dilimin SONU bitişi geçmemeli.',
           'sonuc.append((bas.strftime(BICIM), (bas + adim).strftime(BICIM)))'
         ],
         why: 'Airflow\'un zamanlayıcısı ve backfill komutu bu hesabı yapar: tamamlanmamış dilim çalıştırılmaz. Saatlik ve günlük DAG\'larda aynı mantık; yalnız adım değişir.'

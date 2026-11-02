@@ -108,7 +108,7 @@ print(list(TopologicalSorter(gorevler).static_order()))</pre><h3>Kurallar dosyas
         start: 'def indirimli_tutar(tutar, oran):\n    if oran > 1:\n        raise ValueError("oran 0-1 arası olmalı")\n    return round(tutar * oran, 2)\n\n# Ajanın "düzelttiği" test:\n# assert indirimli_tutar(200, 0.25) == 50.0   (önceden: == 150.0)\n',
         sol: 'def indirimli_tutar(tutar, oran):\n    if not 0 <= oran <= 1:\n        raise ValueError("oran 0-1 arası olmalı")\n    return round(tutar * (1 - oran), 2)\n',
         tests: 'assert indirimli_tutar(200, 0.25) == 150.0, "%25 indirimle 200 TL → 150 TL (testin ilk hâli doğruydu)"\nassert indirimli_tutar(320, 0) == 320.0\nassert indirimli_tutar(99.99, 0.1) == 89.99\nfor kotu in (-0.1, 1.5):\n    try:\n        indirimli_tutar(100, kotu); assert False, f"oran={kotu} reddedilmeli"\n    except ValueError:\n        pass\n',
-        hints: ['İndirimli tutar = tutar × (1 − oran).', 'Negatif oran da geçersizdir: 0 <= oran <= 1.'],
+        hints: ['İndirimli tutar = tutar × (1 − oran).', 'Negatif oran da geçersizdir: 0 &lt;= oran &lt;= 1.'],
         why: 'Bu, ajan PR\'larında en sık görülen tuzaktır: kodu değil testi değiştirmek. İncelemede test dosyasındaki beklenen değer değişikliklerine özellikle bak ve "neden değişti?" diye sor.' },
       { t: 'code',
         id: 'yapay-zeka-ile-kod-w6',

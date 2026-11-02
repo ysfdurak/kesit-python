@@ -226,7 +226,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
       q: 'Jinja2\'de <code>autoescape=True</code> ne işe yarar?',
       o: [
         'Şablondaki tüm HTML etiketlerini silerek yalnızca düz metin üretir',
-        'Değişkenlerden gelen <, >, & karakterlerini kaçırıp XSS\'i önler',
+        'Değişkenlerden gelen &lt;, >, & karakterlerini kaçırıp XSS\'i önler',
         'Tanımsız değişkenlerde boş metin yerine hemen hata fırlatır',
         'Şablonu ilk kullanımda derleyip sonraki çağrılar için önbelleğe alır'
       ],
@@ -315,7 +315,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
         'Toplam: {{ "%.2f"|format(siparisler|sum(attribute="tutar")) }}',
         'for satırı ve endfor satırı kendi satırlarında dururken trim_blocks onların bıraktığı satır sonunu siler.'
       ],
-      why: 'Hesabı filtreyle yapıp biçimi şablonda tutmak sunum ile veriyi ayırır. autoescape sayesinde müşteri adındaki <script> metin olarak görünür, çalışmaz.' },
+      why: 'Hesabı filtreyle yapıp biçimi şablonda tutmak sunum ile veriyi ayırır. autoescape sayesinde müşteri adındaki &lt;script> metin olarak görünür, çalışmaz.' },
     { id: 'sablon-rapor-10',
       t: 'code',
       stage: 'Rehberli',
@@ -445,7 +445,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
         'set_content(duz) sonra add_alternative(html, subtype="html").',
         'Düz metin şablonunda trim_blocks=True for/endfor satırlarının boş satır bırakmasını engeller.'
       ],
-      why: 'Aynı veriden iki çıktı (metin ve HTML) üretmek e-posta pazarlamasının standardıdır. Kaçış bağlama göredir: HTML\'de <1kg> varlığa çevrilmeli, düz metinde ise olduğu gibi kalmalıdır; bu yüzden iki ayrı ortam kullanılır.' }
+      why: 'Aynı veriden iki çıktı (metin ve HTML) üretmek e-posta pazarlamasının standardıdır. Kaçış bağlama göredir: HTML\'de &lt;1kg> varlığa çevrilmeli, düz metinde ise olduğu gibi kalmalıdır; bu yüzden iki ayrı ortam kullanılır.' }
   ],
   faq: [
     { q: 'Jinja2 ile Django şablonları aynı şey mi?',
@@ -455,7 +455,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
     { q: 'Jinja\'da döngü içinde bir değişkeni neden güncelleyemiyorum?',
       a: 'Jinja\'da for döngüsünün kendi kapsamı vardır; içeride set ile atanan değer döngü bitince kaybolur. Toplam için sum filtresini kullan ya da {% set ns = namespace(toplam=0) %} ile oluşturduğun nesnenin niteliğini güncelle (ns.toplam).' },
     { q: 'HTML e-postada CSS neden çalışmıyor?',
-      a: 'Gmail ve Outlook gibi istemciler <style> bloklarını ve harici CSS\'i kısmen ya da tamamen yok sayar. Stilleri style="..." ile satır içi yaz, düzen için tablo kullan; premailer gibi araçlar CSS\'i otomatik satır içine taşır.' },
+      a: 'Gmail ve Outlook gibi istemciler &lt;style> bloklarını ve harici CSS\'i kısmen ya da tamamen yok sayar. Stilleri style="..." ile satır içi yaz, düzen için tablo kullan; premailer gibi araçlar CSS\'i otomatik satır içine taşır.' },
     { q: 'Markdown raporu nerede kullanırım?',
       a: 'GitHub/GitLab sorunları ve README\'ler, Teams/Slack mesajları, Notion ve Confluence sayfaları, Jupyter notları Markdown okur. Aynı veriden HTML ve Markdown iki ayrı şablonla üretilebilir; veri katmanı değişmez.' }
   ],

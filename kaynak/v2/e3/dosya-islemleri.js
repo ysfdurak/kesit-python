@@ -301,9 +301,9 @@ print("utf-8-sig ile:", kayit)
         hints: [
           'deque(maxlen=n) dolunca en eski elemanı kendisi atar; sonunda elinde son n eleman kalır.',
           'deque(üreteç, maxlen=n) tek satırda olur; dosya yokluğunu try/except FileNotFoundError ile yakala.',
-          'n <= 0 kontrolünü en başta yap: deque(maxlen=0) her şeyi atar ama negatif maxlen ValueError verir.'
+          'n &lt;= 0 kontrolünü en başta yap: deque(maxlen=0) her şeyi atar ama negatif maxlen ValueError verir.'
         ],
-        why: 'deque(maxlen=n) bellekte yalnız n satır tutar; dosya bir milyon satır da olsa bellek sabit kalır. Kenar durumlar (n<=0, kısa dosya, olmayan dosya) iş betiklerinin sessizce çökmesini önler.' }
+        why: 'deque(maxlen=n) bellekte yalnız n satır tutar; dosya bir milyon satır da olsa bellek sabit kalır. Kenar durumlar (n&lt;=0, kısa dosya, olmayan dosya) iş betiklerinin sessizce çökmesini önler.' }
     ],
     faq: [
       { q: 'os.path mi pathlib mi kullanmalıyım?',

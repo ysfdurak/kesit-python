@@ -210,7 +210,7 @@ for paket, liste in isteyenler.items():
       code: 'import shlex\nkomut = \'python -m pip install "pandas>=2.2,<3" -c constraints.txt\'\nparcalar = shlex.split(komut)\nprint(len(parcalar), parcalar[4])\n',
       o: ['7 pandas>=2.2,<3', '7 "pandas>=2.2,<3"', '6 pandas>=2.2,<3', '8 pandas>=2.2,'],
       a: 0,
-      why: 'shlex.split kabuk kurallarıyla böler: tırnak içindeki metin tek parça olur ve tırnaklar atılır. Parçalar: python, -m, pip, install, pandas>=2.2,<3, -c, constraints.txt (7 adet). Tırnak olmasaydı kabuk < işaretini dosya yönlendirmesi sanardı.'
+      why: 'shlex.split kabuk kurallarıyla böler: tırnak içindeki metin tek parça olur ve tırnaklar atılır. Parçalar: python, -m, pip, install, pandas>=2.2,&lt;3, -c, constraints.txt (7 adet). Tırnak olmasaydı kabuk &lt; işaretini dosya yönlendirmesi sanardı.'
     },
     {
       t: 'predict',
@@ -273,12 +273,12 @@ for paket, liste in isteyenler.items():
       id: 'sanal-ortam-pip-x3',
       diff: 2,
       q: '<p><code>kisit_uygula(gereksinimler, kisitlar)</code> yaz. <code>gereksinimler</code> <code>["pandas&gt;=2.2", "Requests", "rich==13.9.4"]</code> gibi satırların listesi; <code>kisitlar</code> <code>"ad==sürüm"</code> satırlarının listesi. Her gereksinim için paket adını (ilk <code>&lt; &gt; = ! ~</code> karakterine kadar, kırpılmış) bul; kısıtlarda (harf duyarsız) varsa sonuç satırı <code>"ad==sürüm"</code> olsun (kısıttaki sürüm, gereksinimdeki adla), yoksa gereksinim aynen kalsın. Kısıtta olup gereksinimde olmayan paket <b>eklenmesin</b>.</p>',
-      guide: ['Önce kısıtlardan {ad.lower(): sürüm} sözlüğü kur (partition("==")).', 'Gereksinim adını re.split(r"[<>=!~]", satir, maxsplit=1)[0].strip() ile al.', 'Ad sözlükte varsa f"{ad}=={surum}", yoksa satırın kendisi.', 'Yalnızca gereksinimlerde dön; kısıtlarda değil.'],
+      guide: ['Önce kısıtlardan {ad.lower(): sürüm} sözlüğü kur (partition("==")).', 'Gereksinim adını re.split(r"[&lt;>=!~]", satir, maxsplit=1)[0].strip() ile al.', 'Ad sözlükte varsa f"{ad}=={surum}", yoksa satırın kendisi.', 'Yalnızca gereksinimlerde dön; kısıtlarda değil.'],
       example: 'import re\nfor s in ["numpy>=1.26", "httpx", "rich ~= 13.0"]:\n    print(repr(re.split(r"[<>=!~]", s, maxsplit=1)[0].strip()))\n',
       start: 'import re\n\ndef kisit_uygula(gereksinimler, kisitlar):\n    sabit = {}\n    # TODO: kısıtlardan ad -> sürüm sözlüğü\n    sonuc = []\n    # TODO: her gereksinimin adını bul, kısıt varsa uygula\n    return sonuc\n',
       sol: 'import re\n\ndef kisit_uygula(gereksinimler, kisitlar):\n    sabit = {}\n    for k in kisitlar:\n        ad, _, surum = k.partition("==")\n        sabit[ad.strip().lower()] = surum.strip()\n    sonuc = []\n    for g in gereksinimler:\n        ad = re.split(r"[<>=!~]", g, maxsplit=1)[0].strip()\n        if ad.lower() in sabit:\n            sonuc.append(f"{ad}=={sabit[ad.lower()]}")\n        else:\n            sonuc.append(g)\n    return sonuc\n',
       tests: '_g = ["pandas>=2.2", "Requests", "rich==13.9.4", "httpx"]\n_k = ["pandas==2.2.3", "requests==2.32.3", "django==5.1.4", "numpy==2.1.3"]\n_r = kisit_uygula(_g, _k)\nassert _r == ["pandas==2.2.3", "Requests==2.32.3", "rich==13.9.4", "httpx"], f"yanlış: {_r}"\nassert not any("django" in x for x in _r), "kısıttaki django kurulmamalı (eklenmemeli)"\nassert kisit_uygula([], _k) == [], "gereksinim yoksa hiçbir şey kurulmaz"\n',
-      hints: ['Kısıt sözlüğünün anahtarları küçük harf olsun; aramayı da küçük harfle yap.', 're.split(r"[<>=!~]", g, maxsplit=1)[0].strip()', 'Sonuç listesini gereksinimler üzerinde dönerek kur; kısıtlar yalnızca sözlükte kullanılır.'],
+      hints: ['Kısıt sözlüğünün anahtarları küçük harf olsun; aramayı da küçük harfle yap.', 're.split(r"[&lt;>=!~]", g, maxsplit=1)[0].strip()', 'Sonuç listesini gereksinimler üzerinde dönerek kur; kısıtlar yalnızca sözlükte kullanılır.'],
       why: 'Constraints dosyası "ne kurulacağını" değil "kurulursa hangi sürümün kullanılacağını" söyler. Bu yüzden şirket genelinde tek bir constraints dosyası yüzlerce paketi içerse de her proje yalnızca kendi istediklerini kurar.'
     },
     {

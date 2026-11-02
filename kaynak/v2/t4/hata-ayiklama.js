@@ -286,8 +286,8 @@ for i, k in enumerate(kayitlar):
       tests: 'assert indirimli_fiyat(200, 0.15) == 170.0, "200 TL %15 indirimle 170.0 olmalı"\nassert indirimli_fiyat(99.9, 0) == 99.9, "oran 0 ise fiyat aynı kalmalı"\ndef _mesaj(f, o):\n    try:\n        indirimli_fiyat(f, o)\n    except AssertionError as e:\n        return str(e)\n    return None\nassert _mesaj(200, 15) == "oran 0 ile 1 arasında olmalı", "oran=15 (yüzde sanılmış) AssertionError vermeli"\nassert _mesaj(200, -0.1) == "oran 0 ile 1 arasında olmalı", "negatif oran AssertionError vermeli"\nassert _mesaj(-5, 0.1) == "fiyat negatif olamaz", "negatif fiyat AssertionError vermeli"\nassert _mesaj(100, 1) is None, "oran tam 1 (yüzde 100 indirim) geçerli bir sınır değeri"\n',
       hints: [
         'assert koşul, "mesaj" biçimi: koşul False ise mesajla AssertionError fırlar.',
-        'Aralık denetimini tek satırda yaz: 0 <= oran <= 1',
-        'assert 0 <= oran <= 1, "oran 0 ile 1 arasında olmalı"'
+        'Aralık denetimini tek satırda yaz: 0 &lt;= oran &lt;= 1',
+        'assert 0 &lt;= oran &lt;= 1, "oran 0 ile 1 arasında olmalı"'
       ],
       why: 'assert, yanlış değeri doğduğu yerde durdurur. oran=15 gibi bir hata, assert olmadan -2800 TL gibi bir fiyat üretip çok sonra fark edilirdi.' },
     { id: 'hata-ayiklama-r3',

@@ -313,8 +313,8 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       tests: 'assert tahmini_oku("42") == 42, "\\"42\\" → 42"\nassert tahmini_oku(" 7 ") == 7, "Boşluklar atılmalı"\nassert tahmini_oku("yedi") is None, "Sayı olmayan metin None"\nassert tahmini_oku("3.5") is None, "Ondalıklı metin tam sayı değil: None"\nassert tahmini_oku("0") is None and tahmini_oku("101") is None, "Aralık dışı None"\nassert tahmini_oku("1") == 1 and tahmini_oku("100") == 100, "Sınırlar dahil"\nassert tahmini_oku("15", alt=1, ust=10) is None, "alt/ust parametreleri kullanılmalı"\nassert tahmin_degerlendir(30, 37) == "Daha büyük", "Tahmin küçükse daha büyük denemeli"\nassert tahmin_degerlendir(50, 37) == "Daha küçük", "Tahmin büyükse daha küçük denemeli"\nassert tahmin_degerlendir(37, 37) == "Bildin!", "Eşitse Bildin!"\n',
       hints: [
         'int("3.5") ve int("yedi") ikisi de ValueError verir; ikisini de aynı except yakalar.',
-        'Aralık için: if alt <= sayi <= ust: return sayi',
-        'tahmin < hedef ise oyuncu daha BÜYÜK bir sayı denemeli.'
+        'Aralık için: if alt &lt;= sayi &lt;= ust: return sayi',
+        'tahmin &lt; hedef ise oyuncu daha BÜYÜK bir sayı denemeli.'
       ],
       why: 'Girdiyi okuma ve değerlendirme oyunun beyni; ikisi de saf fonksiyon olduğu için klavye olmadan, birkaç assert ile her durumu denedin. Döngü bunları yalnızca çağıracak.' },
     { id: 'proje-oyunlar-r2',
@@ -326,7 +326,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
         'Kelimenin her karakteri için bir parça üret: boşluksa "/", tahmin edildiyse harfin kendisi, değilse "_".',
         'Parçaları " ".join ile birleştir.',
         'kazandi_mi için kelimedeki harflerin kümesini al, boşluğu çıkar.',
-        'Bu küme tahminlerin alt kümesi mi? (<= operatörü ya da issubset)'
+        'Bu küme tahminlerin alt kümesi mi? (&lt;= operatörü ya da issubset)'
       ],
       example: 'kod = "AM-42"\ngosterim = " ".join("#" if k.isdigit() else k for k in kod)\nprint(gosterim)\ngerekli = {"süt", "ekmek"}\nsepet = {"ekmek", "süt", "çay"}\nprint(gerekli <= sepet, gerekli - {"süt"})\n',
       start: 'def maske(kelime, tahminler):\n    parcalar = []\n    for h in kelime:\n        # TODO: boşluk → "/", tahmin edilmiş → h, diğer → "_"\n        pass\n    return " ".join(parcalar)\n\n\ndef kazandi_mi(kelime, tahminler):\n    # TODO: boşluk hariç harf kümesi tahminlerin alt kümesi mi?\n    pass\n',
@@ -335,7 +335,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       hints: [
         'Üç dallı bir if/elif/else, her karakter için parçayı belirler.',
         'set(kelime) - {" "} boşluk hariç harf kümesini verir.',
-        'return harfler <= set(tahminler)'
+        'return harfler &lt;= set(tahminler)'
       ],
       why: 'Ekrandaki görüntü (maske) ve oyunun sonucu (kazandi_mi), oyun durumundan (tahmin kümesi) hesaplanır. Ayrı sayaç tutmadığın için "ekranda her şey açık ama oyun bitmedi" gibi tutarsızlıklar oluşamaz.' },
     { id: 'proje-oyunlar-r3',
@@ -408,7 +408,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       sol: 'def atm_islem(bakiye, komut, tutar=0):\n    match komut:\n        case "bakiye":\n            return bakiye, f"Bakiye: {bakiye:.2f} TL"\n        case "yatir" | "cek" if tutar <= 0:\n            return bakiye, "Geçersiz tutar"\n        case "yatir":\n            return bakiye + tutar, f"{tutar:.2f} TL yatırıldı"\n        case "cek" if tutar > bakiye:\n            return bakiye, "Yetersiz bakiye"\n        case "cek":\n            return bakiye - tutar, f"{tutar:.2f} TL çekildi"\n        case _:\n            return bakiye, "Bilinmeyen işlem"\n',
       tests: 'assert atm_islem(1500, "bakiye") == (1500, "Bakiye: 1500.00 TL"), "Bakiye sorgusu"\nassert atm_islem(1000, "yatir", 250) == (1250, "250.00 TL yatırıldı"), "Para yatırma"\nassert atm_islem(1000, "cek", 100) == (900, "100.00 TL çekildi"), "Para çekme"\nassert atm_islem(1000, "cek", 1000) == (0, "1000.00 TL çekildi"), "Bakiyenin tamamı çekilebilir"\nassert atm_islem(1000, "cek", 5000) == (1000, "Yetersiz bakiye"), "Yetersiz bakiye"\nassert atm_islem(1000, "yatir", -50) == (1000, "Geçersiz tutar"), "Negatif yatırma geçersiz"\nassert atm_islem(1000, "cek", 0) == (1000, "Geçersiz tutar"), "Sıfır çekme geçersiz (yetersiz bakiye değil)"\nassert atm_islem(1000, "havale", 10) == (1000, "Bilinmeyen işlem"), "Bilinmeyen komut"\nassert "match" in __source__, "match yapısını kullan"\n',
       hints: [
-        'case "yatir" | "cek" if tutar <= 0: iki komutu ve bir koşulu tek case\'te birleştirir.',
+        'case "yatir" | "cek" if tutar &lt;= 0: iki komutu ve bir koşulu tek case\'te birleştirir.',
         'case\'ler yukarıdan aşağı denenir: önce geçersiz tutar, sonra yetersiz bakiye, sonra normal çekme.'
       ],
       why: 'match + koruma koşulu (guard, case ... if ...) iş kurallarını okunur bir tabloya dönüştürür. Sıra önemlidir: daha özel durumlar (geçersiz tutar, yetersiz bakiye) genel durumdan önce gelmelidir.' },
@@ -424,8 +424,8 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       expect: 'Tahmin: 50\nDaha küçük\nTahmin: 25\nDaha büyük\nTahmin: 30\nDaha büyük\nHakkın bitti. Sayı 37 idi.\n',
       tests: 'import io, contextlib\n_g = iter(["40", "37"])\nwith contextlib.redirect_stdout(io.StringIO()):\n    _sonuc = oyna(37, 5, girdi=lambda istem: next(_g))\nassert _sonuc == 2, "37\'yi ikinci denemede bilen oyuncu için 2 dönmeli"\n',
       hints: [
-        'input (ve girdi) her zaman METİN döndürür: "50" < 37 karşılaştırması TypeError verir.',
-        'deneme 0\'dan başlıyor; deneme <= hak koşulu 0, 1, 2, 3 için, yani 4 kez doğrudur.'
+        'input (ve girdi) her zaman METİN döndürür: "50" &lt; 37 karşılaştırması TypeError verir.',
+        'deneme 0\'dan başlıyor; deneme &lt;= hak koşulu 0, 1, 2, 3 için, yani 4 kez doğrudur.'
       ],
       why: 'İki klasik hata: input\'tan gelen metni sayıya çevirmemek ve döngü sınırında off-by-one. İkincisi sessizdir; yalnızca oyunu gerçekten oynayan ya da hakkı sayan bir test fark eder. Beklenen çıktı (expect) tam olarak bunu denetler: 3 tahminden sonra oyun bitmeli.' },
     { id: 'proje-oyunlar-b2',
@@ -439,7 +439,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       tests: 'assert sezar("abc", 1) == "bcd", "Küçük harfler küçük kalmalı: abc +1 → bcd; gelen " + sezar("abc", 1)\nassert sezar("Ankara", 2) == "Cpmctc", "Ankara +2 → Cpmctc"\nassert sezar("Şeker", 1) == "Şflfs", "Ş kaydırılmamalı (yalnızca A-Z, a-z); gelen " + sezar("Şeker", 1)\nassert sezar("İğne", 3) == "İğqh", "İ ve ğ olduğu gibi kalmalı"\nassert coz(sezar("Gizli Mesaj", 5), 5) == "Gizli Mesaj", "coz şifreyi geri almalı"\n',
       hints: [
         'Küçük harf satırında hangi sayı eklenerek harfe dönülüyor? 65 "A"nın, 97 "a"nın kodudur.',
-        'isupper() Türkçe Ş için de True döner; aralık kontrolü ("A" <= h <= "Z") kullan.',
+        'isupper() Türkçe Ş için de True döner; aralık kontrolü ("A" &lt;= h &lt;= "Z") kullan.',
         'Çözmek ters yönde kaydırmaktır.'
       ],
       why: 'isupper/islower Unicode\'un tüm harflerini kapsar, ama formül yalnızca 26 harflik İngilizce alfabe için geçerli: Ş gibi bir harf alfabe dışına taşar. Kopyala-yapıştır ile yazılan küçük harf satırında 65 değişmeden kalmış; çözme ise -k ile yapılır.' },

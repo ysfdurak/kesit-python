@@ -73,7 +73,7 @@ print(lgbm.best_iteration_)</pre><div class="warn"><b>Erken durdurmada test sız
         q: 'Lezzet Kurye verisinde 30 değerli <code>restoran</code> sütununu HistGradientBoosting\'e nasıl vermek en uygunudur?',
         o: ['Restoran numarasını tamsayı olarak vermek; ağaç zaten uygun bölmeyi kendisi bulur', 'category tipine çevirip categorical_features ile belirtmek; ağaç kategorileri gruplar', 'One-hot ile 30 sütuna açmak zorunludur; boosting kategorik veri kabul etmez', 'Sütunu tamamen atmak; 30 farklı değer ağaç modelleri için çok fazladır'],
         a: 1,
-        why: 'Tamsayı kodlama yapay bir sıra (7 < 12) varsayar. One-hot çalışır ama her bölmede tek kategoriyi ayırabildiği için verimsizdir. Doğal kategorik destek, kategori kümelerini tek bölmede ayırabilir. 255\'ten az kategori sınırı vardır.' },
+        why: 'Tamsayı kodlama yapay bir sıra (7 &lt; 12) varsayar. One-hot çalışır ama her bölmede tek kategoriyi ayırabildiği için verimsizdir. Doğal kategorik destek, kategori kümelerini tek bölmede ayırabilir. 255\'ten az kategori sınırı vardır.' },
       { t: 'predict',
         stage: 'Kodu oku',
         q: 'Artıklarla düzeltme yapan "boosting" iskeleti. Bu kod ne yazdırır?',

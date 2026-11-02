@@ -300,7 +300,7 @@ print(Hesap._sayac)</pre>
       code: 'class Hesap:\n    def __init__(self):\n        self.__pin = "1234"\n        self._limit = 500\n\nh = Hesap()\nh.__pin = "0000"\nprint(sorted(vars(h)))\n',
       o: ['[\'_Hesap__pin\', \'_limit\']', '[\'__pin\', \'_limit\']', '[\'__pin\', \'_Hesap__pin\', \'_limit\']', '[\'_Hesap__pin\', \'__pin\', \'_limit\']'],
       a: 3,
-      why: 'Kurucudaki self.__pin, _Hesap__pin olarak saklanır. Sınıf dışındaki h.__pin = "0000" karıştırılmaz ve __pin adında YENİ bir nitelik ekler. sorted karakter koduna göre sıralar; ikinci karakterler H < _ < l olduğundan sıra "_Hesap__pin", "__pin", "_limit" olur.'
+      why: 'Kurucudaki self.__pin, _Hesap__pin olarak saklanır. Sınıf dışındaki h.__pin = "0000" karıştırılmaz ve __pin adında YENİ bir nitelik ekler. sorted karakter koduna göre sıralar; ikinci karakterler H &lt; _ &lt; l olduğundan sıra "_Hesap__pin", "__pin", "_limit" olur.'
     },
     {
       t: 'order',
@@ -343,7 +343,7 @@ print(Hesap._sayac)</pre>
       tests: 'u = Urun("Termos", 349.999)\nassert u.fiyat == 350.0, "fiyat round(..., 2) ile saklanmalı: 349.999 -> 350.0"\nassert "_fiyat" in vars(u), "değer _fiyat adıyla nesnenin sözlüğünde durmalı"\nassert isinstance(type(u).__dict__.get("fiyat"), property), "fiyat bir property olmalı"\nu.fiyat = 120\nassert u.fiyat == 120.0, "geçerli atama değeri güncellemeli"\nfor kotu in (-5, "100", None):\n    try:\n        u.fiyat = kotu\n        assert False, f"{kotu!r} ataması ValueError vermeliydi"\n    except ValueError:\n        pass\nassert u.fiyat == 120.0, "hatalı atama eski değeri bozmamalı"\ntry:\n    Urun("Bozuk", -1)\n    assert False, "kurucu da doğrulamalı: Urun(\'Bozuk\', -1) ValueError vermeli"\nexcept ValueError:\n    pass\n',
       hints: [
         'Kavram: property + setter; değeri property ile AYNI adda saklama.',
-        'Setter içinde: if not isinstance(deger, (int, float)) or deger < 0: raise ValueError("Geçersiz fiyat")',
+        'Setter içinde: if not isinstance(deger, (int, float)) or deger &lt; 0: raise ValueError("Geçersiz fiyat")',
         'Son satır: self._fiyat = round(float(deger), 2); kurucuda self.fiyat = fiyat.'
       ],
       why: 'Kurucu self.fiyat = fiyat yazdığı için setter ilk oluşturmada da çalışır. Değer _fiyat\'ta saklanır; property ile aynı ad kullanılsaydı setter kendini sonsuza kadar çağırırdı. bool, int\'in alt sınıfı olduğu için ayrıca elenebilir.'
@@ -394,7 +394,7 @@ print(Hesap._sayac)</pre>
       start: 'class Hesap:\n    def __init__(self, no, bakiye=0.0):\n        self.no = no\n        self.bakiye = bakiye\n',
       sol: 'class Hesap:\n    def __init__(self, no, bakiye=0.0):\n        self.no = no\n        self.__bakiye = float(bakiye)\n        self.__islem = 0\n\n    @property\n    def bakiye(self):\n        return self.__bakiye\n\n    @property\n    def islem_sayisi(self):\n        return self.__islem\n\n    def yatir(self, tutar):\n        if tutar <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        self.__bakiye += tutar\n        self.__islem += 1\n\n    def cek(self, tutar):\n        if tutar <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        if tutar > self.__bakiye:\n            raise ValueError("Yetersiz bakiye")\n        self.__bakiye -= tutar\n        self.__islem += 1\n',
       tests: 'h = Hesap("AB-001", 1000)\nh.yatir(500)\nh.cek(200)\nassert h.bakiye == 1300, f"1000 + 500 - 200 = 1300 olmalı, gelen {h.bakiye}"\nassert h.islem_sayisi == 2, "iki başarılı işlem sayılmalı"\nassert "_Hesap__bakiye" in vars(h), "bakiye self.__bakiye olarak (karıştırılmış adla) saklanmalı"\ntry:\n    h.bakiye = 10**6\n    assert False, "bakiye salt okunur olmalı: atama AttributeError vermeli"\nexcept AttributeError:\n    pass\nfor f, t, msg in ((h.cek, 5000, "Yetersiz bakiye"), (h.yatir, 0, "Tutar pozitif olmalı"), (h.cek, -3, "Tutar pozitif olmalı")):\n    try:\n        f(t)\n        assert False, f"{f.__name__}({t}) ValueError vermeliydi"\n    except ValueError as e:\n        assert str(e) == msg, f"mesaj {msg!r} olmalı, gelen {str(e)!r}"\nassert h.bakiye == 1300 and h.islem_sayisi == 2, "hatalı işlemler bakiye ve sayacı değiştirmemeli"\n',
-      hints: ['İki gizli alan tut: self.__bakiye ve self.__islem; ikisine de yalnız getter yaz.', 'Önce tutar <= 0 kontrolü, sonra (cek için) tutar > bakiye kontrolü; ikisi de geçerse değiştir ve sayacı artır.'],
+      hints: ['İki gizli alan tut: self.__bakiye ve self.__islem; ikisine de yalnız getter yaz.', 'Önce tutar &lt;= 0 kontrolü, sonra (cek için) tutar > bakiye kontrolü; ikisi de geçerse değiştir ve sayacı artır.'],
       why: 'Salt okunur property dışarıya okuma kapısı açar ama yazmayı kapatır; bakiye yalnız kurallı iki metotla değişir. Hata kontrolleri değişiklikten ÖNCE yapıldığı için hatalı işlem durumu bozmaz.'
     },
     {

@@ -95,7 +95,7 @@
   start: 'from datetime import date, timedelta\n\ndef is_gunu_ekle(baslangic, n, tatiller=()):\n    # kodunu yaz\n    pass\n',
   sol: 'from datetime import date, timedelta\n\ndef is_gunu_ekle(baslangic, n, tatiller=()):\n    if n < 0:\n        raise ValueError(\'n negatif olamaz\')\n    tatil = {date.fromisoformat(t) for t in tatiller}\n    gun = date.fromisoformat(baslangic)\n    kalan = n\n    while kalan > 0:\n        gun += timedelta(days=1)\n        if gun.weekday() < 5 and gun not in tatil:\n            kalan -= 1\n    return gun.isoformat()\n',
   editorial: '<p><b>Yaklaşım:</b> Tatilleri baştan bir <code>set</code>\'e çevir (üyelik testi O(1)). Sonra günü birer birer ilerlet; hafta içi ve tatil değilse sayacı azalt. Sayaç sıfırlanınca o gün cevaptır.</p><p><b>Karmaşıklık:</b> O(n · 7/5 + t): her iş günü için ortalama 1,4 takvim günü gezilir.</p><p><b>Alternatif:</b> Büyük n için tam haftaları (5 iş günü = 7 takvim günü) tek seferde atlayıp tatilleri ayrıca düzeltebilirsin. Veri biliminde <code>numpy.busday_offset</code> ve <code>pandas.offsets.CustomBusinessDay</code> bu işi hazır yapar.</p><p><b>Sık hata:</b> Başlangıç gününü de saymak (görev “sonraki günlerden” diyor). Tatilleri liste olarak bırakıp her günde O(t) arama yapmak. Tatil metnini <code>date</code> ile karşılaştırmak (\'2026-10-29\' != date(2026, 10, 29)).</p>',
-  hints: ['Tatilleri set içinde date nesnesi olarak tut.', 'Günü timedelta(days=1) ile ilerlet; weekday() < 5 ve tatil değilse bir iş günü say.']
+  hints: ['Tatilleri set içinde date nesnesi olarak tut.', 'Günü timedelta(days=1) ile ilerlet; weekday() &lt; 5 ve tatil değilse bir iş günü say.']
 },
 {
   id: 'a-086',

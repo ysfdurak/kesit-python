@@ -67,7 +67,7 @@ B.push(
     o: ['1 4 4', '1 3 4', '2 4 4', '1 4 3'],
     a: 0,
     hints: ['bisect_left eşit elemanların en soluna, bisect_right en sağının bir sonrasına ekleme noktasını verir.', 'Listede olmayan 25 için ekleme noktası 20\'lerden sonra, 35\'ten öncedir.'],
-    why: 'bisect_left(a, x) "x’ten küçük eleman sayısı", bisect_right(a, x) "x’e eşit ya da küçük eleman sayısı"dır; farkları (4 − 1 = 3) x’in kaç kez geçtiğini O(log n)’de verir. 25 listede yok; ekleme noktası 4. Fiyat aralığı sorguları (20 ≤ f < 35 kaç ürün?) bisect_left(35) − bisect_left(20) ile O(log n) yapılır. Python 3.10+’da key= parametresi de var.',
+    why: 'bisect_left(a, x) "x’ten küçük eleman sayısı", bisect_right(a, x) "x’e eşit ya da küçük eleman sayısı"dır; farkları (4 − 1 = 3) x’in kaç kez geçtiğini O(log n)’de verir. 25 listede yok; ekleme noktası 4. Fiyat aralığı sorguları (20 ≤ f &lt; 35 kaç ürün?) bisect_left(35) − bisect_left(20) ile O(log n) yapılır. Python 3.10+’da key= parametresi de var.',
     tags: ['bisect', 'ikili arama', 'O(log n)'],
     min: 3
   },

@@ -82,7 +82,7 @@ B.push(
     start: 'def sirali_birlestir(a, b):\n    # buraya yaz\n    pass\n',
     sol: 'def sirali_birlestir(a, b):\n    sonuc = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] <= b[j]:\n            sonuc.append(a[i])\n            i += 1\n        else:\n            sonuc.append(b[j])\n            j += 1\n    sonuc.extend(a[i:])\n    sonuc.extend(b[j:])\n    return sonuc\n',
     tests: 'assert sirali_birlestir([1, 4, 9], [2, 3, 10, 12]) == [1, 2, 3, 4, 9, 10, 12], "Karışık birleşim sıralı olmalı"\nassert sirali_birlestir([], [5, 6]) == [5, 6], "Bir liste boşsa diğeri aynen dönmeli"\nassert sirali_birlestir([2, 2], [2]) == [2, 2, 2], "Eşit elemanların hepsi korunmalı"\nassert sirali_birlestir([], []) == [], "İki boş liste: boş sonuç"\nassert "sort" not in __kod__, "Bu görevde sort/sorted kullanmadan çöz"\n',
-    hints: ['i ve j adlı iki indeks tut; ikisi de 0\'dan başlar.', 'Döngü biri bitince durur; kalan elemanları extend ile sona ekle.', 'if a[i] <= b[j]: sonuc.append(a[i]); i += 1'],
+    hints: ['i ve j adlı iki indeks tut; ikisi de 0\'dan başlar.', 'Döngü biri bitince durur; kalan elemanları extend ile sona ekle.', 'if a[i] &lt;= b[j]: sonuc.append(a[i]); i += 1'],
     why: 'Her adımda yalnızca iki listenin ön elemanı karşılaştırılır, bu yüzden toplam iş O(len(a) + len(b)) olur; sorted(a + b) ise O(n log n). Döngü bittiğinde listelerden birinde kalan elemanlar zaten sıralı olduğundan doğrudan eklenir. Bu, birleştirmeli sıralamanın (merge sort) çekirdeğidir. Hazır alternatif: heapq.merge(a, b) aynı işi tembel (lazy) yapar.',
     tags: ['two pointers', 'while', 'algoritma', 'merge'],
     min: 9

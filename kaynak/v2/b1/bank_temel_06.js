@@ -163,7 +163,7 @@ B.push(
     o: ['Geçti\nİyi\nTeşekkür', 'İyi\nTeşekkür', 'Geçti\nTeşekkür', 'Geçti\n-'],
     a: 2,
     hints: ['if/elif zincirinde yalnızca İLK doğru dal çalışır.', 'İkinci if yeni bir zincir başlatır; öncekinden bağımsızdır.'],
-    why: 'İlk zincirde puan >= 50 doğru olduğu için "Geçti" yazılır ve elif hiç denetlenmez; bu yüzden "İyi" asla yazılmaz (sıralama hatası: dar koşul önce yazılmalıydı). İkinci if ayrı bir zincirdir ve 85 >= 80 olduğu için "Teşekkür" yazar. Kural: aralık kontrollerinde en kısıtlayıcı koşulu en üste koy ya da koşulları 50 <= puan < 80 gibi kapalı aralıklarla yaz.',
+    why: 'İlk zincirde puan >= 50 doğru olduğu için "Geçti" yazılır ve elif hiç denetlenmez; bu yüzden "İyi" asla yazılmaz (sıralama hatası: dar koşul önce yazılmalıydı). İkinci if ayrı bir zincirdir ve 85 >= 80 olduğu için "Teşekkür" yazar. Kural: aralık kontrollerinde en kısıtlayıcı koşulu en üste koy ya da koşulları 50 &lt;= puan &lt; 80 gibi kapalı aralıklarla yaz.',
     tags: ['if', 'elif', 'sıra hatası'],
     min: 2
   }

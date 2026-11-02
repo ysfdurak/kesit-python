@@ -116,14 +116,14 @@ print(supheliler(akis))</pre>
         guide: [
           'Siparişleri müşteriye göre grupla (defaultdict(list)).',
           'Her müşterinin zamanlarını sırala.',
-          'İki işaretçi (sol, sağ) ile kayan pencere: sağ ilerlerken zaman[sol] <= zaman[sağ] - pencere oldukça sol\'u ilerlet.',
+          'İki işaretçi (sol, sağ) ile kayan pencere: sağ ilerlerken zaman[sol] &lt;= zaman[sağ] - pencere oldukça sol\'u ilerlet.',
           'Pencere boyu sağ - sol + 1 sınırı aşınca o zamanı kaydet ve o müşteriyi bırak.'
         ],
         example: 'z = [1, 2, 5, 9, 10]\nsol = 0\nfor sag in range(len(z)):\n    while z[sol] <= z[sag] - 4:\n        sol += 1\n    print(z[sag], sag - sol + 1)\n',
         start: 'from collections import defaultdict\n\ndef supheliler_sirasiz(siparisler, pencere=60, sinir=3):\n    gruplar = defaultdict(list)\n    # TODO: grupla\n    sonuc = {}\n    for musteri, zamanlar in gruplar.items():\n        zamanlar.sort()\n        # TODO: iki işaretçili pencere\n    return sonuc\n',
         sol: 'from collections import defaultdict\n\ndef supheliler_sirasiz(siparisler, pencere=60, sinir=3):\n    gruplar = defaultdict(list)\n    for musteri, t in siparisler:\n        gruplar[musteri].append(t)\n    sonuc = {}\n    for musteri, zamanlar in gruplar.items():\n        zamanlar.sort()\n        sol = 0\n        for sag in range(len(zamanlar)):\n            while zamanlar[sol] <= zamanlar[sag] - pencere:\n                sol += 1\n            if sag - sol + 1 > sinir:\n                sonuc[musteri] = zamanlar[sag]\n                break\n    return sonuc\n',
         tests: 'akis = [(7, 62), (9, 70), (7, 30), (7, 0), (9, 12), (7, 55), (7, 10), (7, 61)]\nassert supheliler_sirasiz(akis) == {7: 55}, "Sırasız akışta da müşteri 7 55. saniyede yakalanmalı"\nassert supheliler_sirasiz([(1, 0), (1, 60), (1, 120), (1, 180)]) == {}, "Tam 60 sn aralık pencereye girmez (yarı açık)"\nassert supheliler_sirasiz([(2, 5)] * 4) == {2: 5}, "Aynı saniyede 4 sipariş"\nassert supheliler_sirasiz([]) == {}, "Boş akış"\n',
-        hints: ['Sıralama sonrası problem, sıralı bir dizide kayan pencereye dönüşür.', 'Sol işaretçi yalnız ileri gider; toplam iş O(n log n) (sıralama) + O(n).', 'while zamanlar[sol] <= zamanlar[sag] - pencere: sol += 1'],
+        hints: ['Sıralama sonrası problem, sıralı bir dizide kayan pencereye dönüşür.', 'Sol işaretçi yalnız ileri gider; toplam iş O(n log n) (sıralama) + O(n).', 'while zamanlar[sol] &lt;= zamanlar[sag] - pencere: sol += 1'],
         why: 'Takip sorusunda beklenen, kısıtı değiştirince veri yapısını yeniden seçebilmendir: sırasız ama tam veri varsa sırala + iki işaretçi; sonsuz akışta ise olay zamanına göre tampon ve gecikme sınırı (watermark) gerekir.'
       },
       {

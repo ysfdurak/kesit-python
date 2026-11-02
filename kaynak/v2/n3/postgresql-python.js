@@ -271,7 +271,7 @@ print(con.execute("SELECT id, json_extract(ozellik, '$.garanti') FROM urun WHERE
         'reddedildi\n[(100,), (130,)]'
       ],
       a: 1,
-      why: 'Üçüncü UPDATE CHECK kısıtını ihlal eder (20 - 80 < 0). with con bloğu hata görünce bütün transaction\'ı geri alır; önceki iki UPDATE de iptal olur ve bakiyeler başlangıçtaki gibi kalır.' },
+      why: 'Üçüncü UPDATE CHECK kısıtını ihlal eder (20 - 80 &lt; 0). with con bloğu hata görünce bütün transaction\'ı geri alır; önceki iki UPDATE de iptal olur ve bakiyeler başlangıçtaki gibi kalır.' },
     { t: 'predict',
       stage: 'Kodu oku',
       q: 'RETURNING ne döndürür? Bu kod ne yazdırır?',

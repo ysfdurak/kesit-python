@@ -387,9 +387,9 @@ print("Toplam ek ücret:", toplam)</pre>
       hints: [
         'Kavram: mixin, ev sahibinin _anahtar() sözleşmesine dayanır.',
         'if not isinstance(other, KarsilastirmaMixin): return NotImplemented',
-        'return self._anahtar() < other._anahtar(); Calisan\'da def _anahtar(self): return self.maas'
+        'return self._anahtar() &lt; other._anahtar(); Calisan\'da def _anahtar(self): return self.maas'
       ],
-      why: 'Mixin karşılaştırma mantığını bir kez yazar; ev sahibi yalnız neye göre karşılaştırılacağını söyler. NotImplemented döndürmek Python\'a "öbür tarafa sor" der; iki taraf da bilmiyorsa == False, < ise TypeError olur.'
+      why: 'Mixin karşılaştırma mantığını bir kez yazar; ev sahibi yalnız neye göre karşılaştırılacağını söyler. NotImplemented döndürmek Python\'a "öbür tarafa sor" der; iki taraf da bilmiyorsa == False, &lt; ise TypeError olur.'
     },
     {
       id: 'coklu-kalitim-4',

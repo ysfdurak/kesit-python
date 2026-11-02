@@ -115,7 +115,7 @@ B.push(
     o: ['2\n1\nBaşla!', '2\n1\nBaşla!\n< 2\n< 1', '2\n1\nBaşla!\n< 1\n< 2', '2\n< 2\n1\n< 1\nBaşla!'],
     a: 2,
     hints: ['Özyinelemeli çağrı bitmeden sonraki print çalışmaz.', 'Çağrılar yığın (stack) gibi biter: en son başlayan ilk biter.'],
-    why: 'geri_say(2) 2 yazar ve geri_say(1)\'i çağırır; o da 1 yazıp geri_say(0)\'ı çağırır, "Başla!" yazılır. Sonra çağrılar ters sırayla tamamlanır: önce geri_say(1)\'in kalan satırı "< 1", sonra geri_say(2)\'nin "< 2". Çağrı yığını (call stack) son giren ilk çıkar (LIFO) mantığıyla çalışır. Ağaç gezme ve geri izleme (backtracking) algoritmaları bu "dönüş yolunda iş yapma" özelliğine dayanır.',
+    why: 'geri_say(2) 2 yazar ve geri_say(1)\'i çağırır; o da 1 yazıp geri_say(0)\'ı çağırır, "Başla!" yazılır. Sonra çağrılar ters sırayla tamamlanır: önce geri_say(1)\'in kalan satırı "&lt; 1", sonra geri_say(2)\'nin "&lt; 2". Çağrı yığını (call stack) son giren ilk çıkar (LIFO) mantığıyla çalışır. Ağaç gezme ve geri izleme (backtracking) algoritmaları bu "dönüş yolunda iş yapma" özelliğine dayanır.',
     tags: ['özyineleme', 'call stack', 'temel durum'],
     min: 3
   },

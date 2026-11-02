@@ -113,7 +113,7 @@ print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
       code: 'satirlar = [("İzmir", 3), ("Ankara", 5), ("İzmir", 1)]\nprint(sorted(satirlar))\n',
       o: ["[('Ankara', 5), ('İzmir', 1), ('İzmir', 3)]", "[('Ankara', 5), ('İzmir', 3), ('İzmir', 1)]", "[('İzmir', 1), ('İzmir', 3), ('Ankara', 5)]", "[('İzmir', 1), ('İzmir', 3), ('Ankara', 5)] (sayıya göre)"],
       a: 0,
-      why: 'Demetler önce ilk elemana göre karşılaştırılır: "Ankara" < "İzmir". İki İzmir kaydında ilk eleman eşit olduğu için ikinci elemana (1 < 3) bakılır.' },
+      why: 'Demetler önce ilk elemana göre karşılaştırılır: "Ankara" &lt; "İzmir". İki İzmir kaydında ilk eleman eşit olduğu için ikinci elemana (1 &lt; 3) bakılır.' },
     { t: 'predict',
       stage: 'Kodu oku',
       q: 'Yerinde güncelleme: bu kod ne yazdırır?',
@@ -223,7 +223,7 @@ print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
       sol: 'def tekrar_eden_ikililer(sepetler):\n    gorulen = set()\n    tekrar = set()\n    for sepet in sepetler:\n        urunler = sorted(set(sepet))\n        ikililer = set()\n        for i in range(len(urunler)):\n            for j in range(i + 1, len(urunler)):\n                ikililer.add((urunler[i], urunler[j]))\n        for ikili in ikililer:\n            if ikili in gorulen:\n                tekrar.add(ikili)\n            else:\n                gorulen.add(ikili)\n    return sorted(tekrar)\n',
       tests: 's = [["çay", "şeker", "ekmek"], ["şeker", "çay"], ["ekmek", "süt", "ekmek"], ["süt", "ekmek", "peynir"]]\nr = tekrar_eden_ikililer(s)\nassert r == [("ekmek", "süt"), ("çay", "şeker")], f"çay-şeker ve ekmek-süt ikişer sepette; gelen {r}"\nassert tekrar_eden_ikililer([["a", "b", "a", "b"]]) == [], "aynı sepetteki tekrarlar ikinci sepet sayılmaz"\nassert tekrar_eden_ikililer([["x"], ["x"]]) == [], "tek ürünlü sepette ikili yok"\nassert tekrar_eden_ikililer([]) == [], "boş liste"\nassert "dict" not in __kod__ and "{}" not in __kod__ and "Counter" not in __kod__, "sözlük kullanmadan iki kümeyle çöz"\n',
       hints: ['Önce sepeti tekilleştir ve sırala: sorted(set(sepet)); böylece her ikili (küçük, büyük) sırasında oluşur.', 'İkili için iç içe döngü: j, i + 1\'den başlar.', 'İki küme: gorulen (en az bir kez) ve tekrar (en az iki kez). İkili gorulen\'deyse tekrar\'a ekle, değilse gorulen\'e.'],
-      why: 'Sepeti önce tekilleştirmek aynı sepetteki tekrarların ikinci kez sayılmasını, sıralamak da ikililerin tek biçimde (a < b) yazılmasını sağlar. "Görülen/tekrar" iki küme kalıbı, "en az iki kez" sorusunu sayaç tutmadan çözer.' }
+      why: 'Sepeti önce tekilleştirmek aynı sepetteki tekrarların ikinci kez sayılmasını, sıralamak da ikililerin tek biçimde (a &lt; b) yazılmasını sağlar. "Görülen/tekrar" iki küme kalıbı, "en az iki kez" sorusunu sayaç tutmadan çözer.' }
   ],
   faq: [
     { q: 'Demet listeden daha hızlı mı, sırf bu yüzden demet kullanmalı mıyım?', a: 'Demet biraz daha az bellek kullanır ve oluşturulması biraz daha hızlıdır ama fark çoğu programda önemsizdir. Seçimi anlama göre yap: sabit yapılı kayıt (enlem, boylam) demet, büyüyüp küçülen koleksiyon liste.' },

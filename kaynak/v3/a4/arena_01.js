@@ -154,7 +154,7 @@
   mode: 'func',
   fn: 'aktif_dagilim',
   ds: 'pusula_ik',
-  statement: '<p>Pusula A.Ş. İK ekibi, şu an çalışmakta olan kişileri farklı boyutlarda kırmak istiyor. <code>ik_employees</code> tablosunda işten ayrılmamış çalışanların <code>term_date</code> değeri boştur (<code>veri.kayitlar</code> boş hücreyi <code>None</code> yapar).</p><p><code>aktif_dagilim(alan)</code>: aktif çalışanları <code>alan</code> sütununun değerine göre say ve sözlük döndür. <code>alan</code> örneğin <code>"work_mode"</code>, <code>"education"</code>, <code>"gender"</code> olabilir.</p>',
+  statement: '<p>Pusula A.Ş.\'nin İK ekibi, şu an çalışmakta olan kişileri farklı boyutlarda kırmak istiyor. <code>ik_employees</code> tablosunda işten ayrılmamış çalışanların <code>term_date</code> değeri boştur (<code>veri.kayitlar</code> boş hücreyi <code>None</code> yapar).</p><p><code>aktif_dagilim(alan)</code>: aktif çalışanları <code>alan</code> sütununun değerine göre say ve sözlük döndür. <code>alan</code> örneğin <code>"work_mode"</code>, <code>"education"</code>, <code>"gender"</code> olabilir.</p>',
   input: '<p><code>alan</code>: <code>ik_employees</code> sütun adı (str).</p>',
   output: '<p><code>dict</code>: değer → aktif çalışan sayısı.</p>',
   constraints: 'ik_employees 2199 satır',

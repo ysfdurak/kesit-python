@@ -198,7 +198,7 @@ print(list(ust()))
         diff: 2,
         q: '<p><code>parcalar(yinelenebilir, n)</code> üreteç fonksiyonunu yaz: veriyi <code>n</code>\'er elemanlık <b>listeler</b> hâlinde yield etsin; son parça kısa olabilir. Her türlü yinelenebilirle (liste, range, üreteç, hatta sonsuz üreteç) çalışmalı ve <b>tembel</b> olmalı. <code>n &lt; 1</code> ise <code>ValueError</code> fırlat. (itertools.batched kullanma; islice serbest.)</p>',
         guide: [
-          'n < 1 kontrolünü yap ve ValueError fırlat.',
+          'n &lt; 1 kontrolünü yap ve ValueError fırlat.',
           'Konumu tutacak tek bir yineleyici oluştur: it = iter(yinelenebilir).',
           'Döngüde list(islice(it, n)) ile sıradaki parçayı al.',
           'Parça boşsa dur; değilse yield et (walrus ile while koşulunda yazabilirsin).'

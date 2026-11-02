@@ -327,7 +327,7 @@ for s in siparisler:
       start: 'def tablo_yazdir(satirlar):\n    pass\n\nveri = [\n    {"no": "AM-101", "urun": "Çay", "tutar": 240.0},\n    {"no": "AM-101", "urun": "Bardak", "tutar": 150.0},\n    {"no": "AM-102", "urun": "Kahve", "tutar": 350.0},\n]\ntablo_yazdir(veri)\n',
       sol: 'def tablo_yazdir(satirlar):\n    print(f"{\'Sipariş\':<8} {\'Ürün\':<10} {\'Tutar\':>8}")\n    print("-" * 28)\n    toplam = 0\n    for r in satirlar:\n        print(f"{r[\'no\']:<8} {r[\'urun\']:<10} {r[\'tutar\']:>8.2f}")\n        toplam += r["tutar"]\n    print("-" * 28)\n    print(f"{\'TOPLAM\':<19} {toplam:>8.2f}")\n\nveri = [\n    {"no": "AM-101", "urun": "Çay", "tutar": 240.0},\n    {"no": "AM-101", "urun": "Bardak", "tutar": 150.0},\n    {"no": "AM-102", "urun": "Kahve", "tutar": 350.0},\n]\ntablo_yazdir(veri)\n',
       expect: 'Sipariş  Ürün          Tutar\n----------------------------\nAM-101   Çay          240.00\nAM-101   Bardak       150.00\nAM-102   Kahve        350.00\n----------------------------\nTOPLAM                740.00\n',
-      hints: ['f"{deger:<8}" sola, f"{deger:>8.2f}" sağa yaslar ve 2 ondalık verir.', 'f-string içinde anahtar yazarken tek tırnak kullan: f"{r[\'no\']:<8}"'],
+      hints: ['f"{deger:&lt;8}" sola, f"{deger:>8.2f}" sağa yaslar ve 2 ondalık verir.', 'f-string içinde anahtar yazarken tek tırnak kullan: f"{r[\'no\']:&lt;8}"'],
       why: 'Genişlik ve hizalama belirteçleri, sütunları değer uzunluğundan bağımsız hizalar; metin sola, sayı sağa yaslanır.' },
     { id: 'ic-ice-veri-8',
       t: 'code',

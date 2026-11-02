@@ -167,7 +167,7 @@ print(unicodedata.name("ğ"))</pre>
       code: 'print(len("çay"), len("çay".encode("utf-8")), "Zeytin" < "armut")\n',
       o: ['3 3 False', '3 4 True', '4 4 True', '3 4 False'],
       a: 1,
-      why: '"çay" 3 karakterdir; ç UTF-8\'de 2 bayt olduğundan toplam 4 bayt. "Z" (90) "a"dan (97) küçük kod noktasına sahip olduğu için "Zeytin" < "armut" True\'dur.' },
+      why: '"çay" 3 karakterdir; ç UTF-8\'de 2 bayt olduğundan toplam 4 bayt. "Z" (90) "a"dan (97) küçük kod noktasına sahip olduğu için "Zeytin" &lt; "armut" True\'dur.' },
     { t: 'predict',
       stage: 'Kodu oku',
       q: 'Bu kod ne yazdırır?',

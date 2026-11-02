@@ -76,7 +76,7 @@ def sepet_api():
         code: 'from jinja2 import Environment\nenv = Environment(autoescape=True)\nt = env.from_string(\'<option value="{{ k }}">{{ k }}</option>\')\nprint(t.render(k=\'Ev & Yaşam\'))\n',
         o: ['<option value="Ev &amp; Yaşam">Ev &amp; Yaşam</option>', '<option value="Ev & Yaşam">Ev & Yaşam</option>', '<option value="Ev &amp; Yaşam">Ev & Yaşam</option>', '<option value="Ev%20%26%20Yaşam">Ev & Yaşam</option>'],
         a: 0,
-        why: 'autoescape her {{ }} çıktısında &, <, >, " ve \' karakterlerini HTML varlığına çevirir; öznitelik içinde de, metin içinde de. Tarayıcı &amp;amp; değerini ekranda & olarak gösterir ve form gönderiminde de & olarak yollar.' },
+        why: 'autoescape her {{ }} çıktısında &, &lt;, >, " ve \' karakterlerini HTML varlığına çevirir; öznitelik içinde de, metin içinde de. Tarayıcı <code>&amp;amp;</code> değerini ekranda & olarak gösterir ve form gönderiminde de & olarak yollar.' },
       { t: 'code',
         id: 'flask-w1',
         stage: 'Rehberli',
@@ -140,7 +140,7 @@ def sepet_api():
         start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\nfrom urllib.parse import urlencode\n\ndef sayfa_parcasi(kategori, sayfa, boyut=5):\n    pass\n',
         sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\nfrom urllib.parse import urlencode\n\ndef sayfa_parcasi(kategori, sayfa, boyut=5):\n    secili = [u for u in urunler if u["category"] == kategori]\n    bas = (sayfa - 1) * boyut\n    if sayfa < 1 or bas >= len(secili):\n        return ""\n    parca = secili[bas:bas + boyut]\n    satirlar = "".join(f"<tr><td>{html.escape(u[\'name\'])}</td></tr>" for u in parca)\n    if bas + boyut < len(secili):\n        adres = "/urunler?" + urlencode({"kategori": kategori, "sayfa": sayfa + 1})\n        satirlar += (f\'<tr hx-get="{html.escape(adres)}" hx-trigger="revealed" hx-swap="outerHTML">\'\n                     "<td>Yükleniyor...</td></tr>")\n    return satirlar\n',
         tests: 'p1 = sayfa_parcasi("Elektronik", 1)\nassert p1.count("<tr><td>") == 5 and "Kablosuz Kulaklık" in p1, "İlk sayfada 5 ürün"\nassert p1.endswith(\'<tr hx-get="/urunler?kategori=Elektronik&amp;sayfa=2" hx-trigger="revealed" hx-swap="outerHTML"><td>Yükleniyor...</td></tr>\'), f"Gözcü satırı hatalı: {p1[-140:]}"\np2 = sayfa_parcasi("Elektronik", 2)\nassert "hx-get" not in p2 and p2.count("<tr>") == 3, "Elektronikte 8 ürün var: 2. sayfa 3 ürün, gözcü yok"\nassert "27&quot; Monitör" in p2, "Ad içindeki tırnak kaçırılmalı"\ne = sayfa_parcasi("Ev & Yaşam", 1)\nassert "kategori=Ev+%26+Ya%C5%9Fam&amp;sayfa=2" in e, "Kategori URL kodlanmalı, & öznitelikte kaçırılmalı"\nassert sayfa_parcasi("Kitap", 3) == "" and sayfa_parcasi("Kitap", 0) == ""\n',
-        hints: ['Dilim başlangıcı (sayfa - 1) * boyut.', 'urlencode boşluğu + ve & karakterini %26 yapar; ardından html.escape adresi öznitelik için güvenli kılar.', 'Gözcü yalnız bas + boyut < toplam ise eklenir.'],
+        hints: ['Dilim başlangıcı (sayfa - 1) * boyut.', 'urlencode boşluğu + ve & karakterini %26 yapar; ardından html.escape adresi öznitelik için güvenli kılar.', 'Gözcü yalnız bas + boyut &lt; toplam ise eklenir.'],
         why: 'hx-trigger="revealed" satır ekranda görünür olunca isteği atar; outerHTML gözcü satırının kendisini yeni satırlarla değiştirir. Böylece JavaScript yazmadan sonsuz kaydırma elde edilir. URL kodlama ve HTML kaçışı iki ayrı katmandır ve ikisi de gerekir.' }
     ],
     faq: [

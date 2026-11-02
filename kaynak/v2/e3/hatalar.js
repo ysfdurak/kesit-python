@@ -241,7 +241,7 @@ for deneme in range(1, 4):
           'class StokYetersiz(Exception): pass ile sınıfı tanımla.',
           'Fonksiyonda önce adet kontrolünü yap ve ValueError fırlat.',
           'mevcut = stok[urun] satırı ürün yoksa KeyError\'ı kendisi üretir.',
-          'mevcut < adet ise StokYetersiz fırlat; değilse sözlüğü güncelle ve kalanı döndür.'
+          'mevcut &lt; adet ise StokYetersiz fırlat; değilse sözlüğü güncelle ve kalanı döndür.'
         ],
         example: 'class LimitAsildi(Exception):\n    pass\n\ndef harca(limit, tutar):\n    if tutar > limit:\n        raise LimitAsildi(f"limit {limit}, istenen {tutar}")\n    return limit - tutar\n\ntry:\n    harca(500, 800)\nexcept LimitAsildi as e:\n    print("Reddedildi:", e)\n',
         start: '# TODO: StokYetersiz sınıfını tanımla\n\ndef stoktan_dus(stok, urun, adet):\n    # TODO: adet < 1 → ValueError("adet pozitif olmalı")\n    mevcut = stok[urun]\n    # TODO: mevcut < adet → StokYetersiz(...)\n    stok[urun] = mevcut - adet\n    return stok[urun]\n',
@@ -250,7 +250,7 @@ for deneme in range(1, 4):
         hints: [
           'Özel istisna için gövdesi pass olan bir sınıf yeter: class Ad(Exception): pass',
           'Kontrolleri stok güncellemesinden ÖNCE yap ki hata durumunda stok bozulmasın.',
-          'if mevcut < adet: raise StokYetersiz(f"{urun}: stok {mevcut}, istenen {adet}")'
+          'if mevcut &lt; adet: raise StokYetersiz(f"{urun}: stok {mevcut}, istenen {adet}")'
         ],
         why: 'Kendi istisna sınıfın, çağıranın iş kuralı ihlalini (stok yetersiz) girdi hatasından (ValueError) ve veri hatasından (KeyError) ayırmasını sağlar. Kontroller değişiklikten önce yapılır: ya hep ya hiç.' },
       { t: 'code',

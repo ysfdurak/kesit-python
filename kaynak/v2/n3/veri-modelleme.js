@@ -240,7 +240,7 @@ print(con.execute("""
         '(11, \'Bireysel\') None'
       ],
       a: 0,
-      why: 'Aralık yarı açıktır: başlangıç dahil, bitiş hariç. 2024-02-29 ilk sürüme, tam 2024-03-01 ikinci sürüme düşer. Uçlarda çakışma olmaması için bitiş = yeni sürümün başlangıcı ve "<" kullanılır; açık sürümün bitişi uzak bir tarihtir (9999-12-31).' },
+      why: 'Aralık yarı açıktır: başlangıç dahil, bitiş hariç. 2024-02-29 ilk sürüme, tam 2024-03-01 ikinci sürüme düşer. Uçlarda çakışma olmaması için bitiş = yeni sürümün başlangıcı ve "&lt;" kullanılır; açık sürümün bitişi uzak bir tarihtir (9999-12-31).' },
     { t: 'order',
       stage: 'Kodu oku',
       q: '<p>Bir haftalık tarih boyutu üreten programın satırlarını sırala.</p>',
@@ -315,7 +315,7 @@ print(con.execute("""
       tests: '_c = veri.baglan("kesit_bi", tablolar=["Satislar", "Musteriler", "Tarih"])\n_r = bolge_ciro(_c, 2024)\nassert _r[:2] == [("İç Anadolu", 255512.8), ("Marmara", 155605.3)], f"2024 ilk iki bölge yanlış: {_r[:2]}"\nassert ("Bilinmiyor", 40514.45) in _r, "bölgesi boş müşteriler \'Bilinmiyor\' olarak görünmeli"\nassert all(b is not None for b, _ in _r), "NULL bölge kalmamalı"\nassert len(_r) == 7, "6 bölge + Bilinmiyor"\nassert bolge_ciro(_c, 2022) != _r, "yıl parametresi kullanılmalı"\n',
       hints: [
         'JOIN Musteriler m ON m.MusteriNo = s.MusteriNo JOIN Tarih t ON t.Tarih = s.Tarih',
-        'WHERE t.Yil = ? AND s.Durum <> \'İptal\' ve parametre (yil,)',
+        'WHERE t.Yil = ? AND s.Durum &lt;> \'İptal\' ve parametre (yil,)',
         'SELECT COALESCE(m.Bolge, \'Bilinmiyor\')'
       ],
       why: 'Yıldız sorgusunun kalıbı hep aynıdır: olguyu boyutlara bağla, filtreyi ve gruplamayı boyuttan, toplamı olgudan al. Boş boyut değerlerini adlandırmak raporda "(boş)" satırını ortadan kaldırır; ambarda bu genellikle boyut yüklenirken yapılır.' },
@@ -440,9 +440,9 @@ print(con.execute("""
       hints: [
         'Müşteri numarasına göre sürümleri grupla ve bas\'a göre sırala; ayrı bir bas listesi tut.',
         'bisect_right(baslar, tarih) - 1 tarihten önce ya da tarihte başlayan son sürümün indeksini verir.',
-        'Bulunan sürümde tarih < bitis değilse (aralık kapanmış) -1 ver; olgu sözlüğünü {**o, "musteri_key": key} ile kopyala.'
+        'Bulunan sürümde tarih &lt; bitis değilse (aralık kapanmış) -1 ver; olgu sözlüğünü {**o, "musteri_key": key} ile kopyala.'
       ],
-      why: 'Ambar yüklemesinde olgu satırına boyut anahtarı atamak (surrogate key lookup) en sık yapılan işlemdir. SQL\'de bu "JOIN ... ON no = no AND tarih >= bas AND tarih < bitis" ile yapılır; Python\'da sıralı arama O(log n) maliyetle büyük hacimde de hızlı kalır.' },
+      why: 'Ambar yüklemesinde olgu satırına boyut anahtarı atamak (surrogate key lookup) en sık yapılan işlemdir. SQL\'de bu "JOIN ... ON no = no AND tarih >= bas AND tarih &lt; bitis" ile yapılır; Python\'da sıralı arama O(log n) maliyetle büyük hacimde de hızlı kalır.' },
     { t: 'code',
       stage: 'Meydan okuma',
       id: 'veri-modelleme-12',
