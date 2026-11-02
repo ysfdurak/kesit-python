@@ -28,7 +28,7 @@ process.stdout.write(`# Kesit Python
 ## Nasıl çalışıyor?
 - Sunucu yok: Python kodu CPython'ın WebAssembly sürümü olan Pyodide ile tarayıcıda çalışır.
 - İlerleme yalnızca kullanıcının tarayıcısında saklanır; Profil sayfasından dosyaya kaydedilip başka cihazda yüklenebilir. Site kişisel veri toplamaz. Python motoru ve kütüphaneler jsDelivr'dan iner.
-- Alıştırma çözümleri otomatik testlerle gerçek Python'da doğrulanır; denetim araçları `kaynak` dalındadır.
+- Alıştırma çözümleri otomatik testlerle gerçek Python'da doğrulanır; denetim araçları \`kaynak\` dalındadır.
 
 ## Kaynak kod ve kardeş projeler
 Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [\`kaynak\` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)** ve **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**.
