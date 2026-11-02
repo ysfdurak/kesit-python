@@ -223,17 +223,17 @@ W.PY_MOD_FIX = {
 "pandas-groupby": "Veri analizine giriş",
 "gorsellestirme": "Veri analizine giriş",
 "ml-giris": "Veri analizine giriş",
-"excel-otomasyon": "Otomasyon ve araçlar",
-"web-scraping": "Otomasyon ve araçlar",
-"http-api": "Otomasyon ve araçlar",
-"flask": "Otomasyon ve araçlar",
-"entegrasyon-saas": "Otomasyon ve araçlar",
-"cli-araclari": "Otomasyon ve araçlar",
-"ofis-otomasyon": "Otomasyon ve araçlar",
-"sablon-rapor": "Otomasyon ve araçlar",
-"pdf-word-otomasyon": "Otomasyon ve araçlar",
-"pydantic-dogrulama": "Otomasyon ve araçlar",
-"gui-tkinter": "Otomasyon ve araçlar",
+"excel-otomasyon": "Otomasyon, web ve araçlar",
+"web-scraping": "Otomasyon, web ve araçlar",
+"http-api": "Otomasyon, web ve araçlar",
+"flask": "Otomasyon, web ve araçlar",
+"entegrasyon-saas": "Otomasyon, web ve araçlar",
+"cli-araclari": "Otomasyon, web ve araçlar",
+"ofis-otomasyon": "Otomasyon, web ve araçlar",
+"sablon-rapor": "Otomasyon, web ve araçlar",
+"pdf-word-otomasyon": "Otomasyon, web ve araçlar",
+"pydantic-dogrulama": "Otomasyon, web ve araçlar",
+"gui-tkinter": "Otomasyon, web ve araçlar",
 "test-yazma": "Test",
 "pytest": "Test",
 "proje-orta": "Orta bitirme",
@@ -369,5 +369,5 @@ W.PY_ALIAS = {
 W.PY_OPTIONAL = ['kurulum-araclar', 'kurulum-windows', 'kurulum-macos-linux', 'vscode', 'jupyter-colab', 'terminal-temelleri', 'gui-tkinter'];
 /* "Temelleri bilmiyorum" diyene yolun başına eklenen dersler */
 W.PY_PREREQ = ['python-nedir', 'ilk-program', 'fonksiyon-iskeleti', 'degiskenler', 'metinler', 'kosullar', 'donguler', 'listeler', 'sozlukler', 'fonksiyonlar', 'dosya-islemleri', 'hatalar'];
-W.PY_MODS = {"temel": ["Başlangıç", "Değerler ve metinler", "Akış kontrolü", "Veri yapıları", "Fonksiyonlar ve modüller", "Dosya ve hata", "Bitirme", "Bilgisayarına geç"], "orta": ["Pythonic kod", "Modüller, paketler ve Git", "Nesne yönelimli programlama", "Standart kütüphane", "Veritabanı (giriş)", "Veri yapıları ve algoritmalar", "Veri analizine giriş", "Otomasyon ve araçlar", "Test", "Orta bitirme"], "ileri": ["Veri analizi ve bilimi", "Makine öğrenmesi", "Eşzamanlılık ve performans", "Mimari", "Veritabanı", "Web ve API", "Yapay Zekâ", "Veri mühendisliği", "Üretime hazırlık", "Mülakat", "İleri bitirme"]};
+W.PY_MODS = {"temel": ["Başlangıç", "Değerler ve metinler", "Akış kontrolü", "Veri yapıları", "Fonksiyonlar ve modüller", "Dosya ve hata", "Bitirme", "Bilgisayarına geç"], "orta": ["Pythonic kod", "Modüller, paketler ve Git", "Nesne yönelimli programlama", "Standart kütüphane", "Veritabanı (giriş)", "Veri yapıları ve algoritmalar", "Veri analizine giriş", "Otomasyon, web ve araçlar", "Test", "Orta bitirme"], "ileri": ["Veri analizi ve bilimi", "Makine öğrenmesi", "Eşzamanlılık ve performans", "Mimari", "Veritabanı", "Web ve API", "Yapay Zekâ", "Veri mühendisliği", "Üretime hazırlık", "Mülakat", "İleri bitirme"]};
 })(window);

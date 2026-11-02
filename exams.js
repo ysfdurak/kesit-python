@@ -335,7 +335,7 @@ E.push(
         why: 'frozen=True nitelik atamasını engeller (FrozenInstanceError) ve nesneyi hashlenebilir yapar; tip doğrulaması yapmaz.' }
     ] },
   { id: 'ileri-bitirme', title: 'İleri seviye bitirme sınavı', lv: 'ileri', kind: 'quiz', min: 40, pass: 70,
-    desc: 'Kapsam: ileri veri araçları, eşzamanlılık, performans ve mimari. Makine öğrenmesi, web ve yapay zekâ için yol sınavlarına bak. İleri seviyenin tamamını ölçer: numpy, pandas, async, threading ve GIL, performans, bellek ve kopyalama, ileri OOP, tasarım kalıpları, tip sistemi, ETL, paketleme ve CI. 25 çoktan seçmeli soru, geçme notu %70.',
+    desc: 'Kapsam: ileri veri araçları, async, threading ve GIL, performans, bellek ve kopyalama, ileri OOP, tasarım kalıpları, tip sistemi, ETL, paketleme ve CI. Makine öğrenmesi, web ve yapay zekâ için yol sınavlarına bak. 25 çoktan seçmeli soru, geçme notu %70.',
     qs: [
       { t: 'mc', topic: 'numpy', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">import numpy as np\na = np.arange(6).reshape(2, 3)\nprint(a.shape, a[:, 1].tolist())</pre>',
         o: ['(3, 2) [1, 4]', '(2, 3) [3, 4, 5]', '(2, 3) [1, 4]', '(6,) [1]'], a: 2,

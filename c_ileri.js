@@ -1150,7 +1150,7 @@ for fn in (yatir_guvensiz, yatir_guvenli):
     print(fn.__name__, "beklenen 8000, gelen", bakiye)
 </pre>
 <pre class="out">Kendi bilgisayarında beklenen çıktı (ilk sayı her çalıştırmada farklı olur, 8000'den küçüktür):
-yatir_guvensiz beklenen 8000, gelen 2317
+yatir_guvensiz beklenen 8000, gelen 2004
 yatir_guvenli beklenen 8000, gelen 8000
 Tarayıcıda ikisi de 8000 görünür, çünkü thread'ler sırayla çalışır: yarış burada oluşmaz.</pre>
 <div class="warn"><b>Kilit her yerde değil</b>Kilit tutulan süre kısa olsun; kilit içinde I/O yapma. Birden çok kilit varsa hep aynı sırada al, yoksa karşılıklı bekleme (deadlock) oluşur. Mümkünse paylaşılan durumdan kaçın: her işçi kendi sonucunu döndürsün, ana thread toplasın.</div>

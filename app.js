@@ -458,7 +458,7 @@ VIEWS.task = { html() {
   const t = BMAP[V.id]; if (!t) return '<p>Görev bulunamadı.</p>';
   const list = BANK; const i = list.indexOf(t); const prev = list[i - 1], next = list[i + 1];
   return '<div class="lhead"><div class="crumbs"><button data-go="practice">Pratik</button> › <span>' + esc(t.topic) + '</span></div><div class="row" style="justify-content:space-between"><h1>' + esc(t.title) + '</h1><div class="row">' + lvBadge(t.lv) + '<span class="chip">' + '★'.repeat(t.diff || 1) + '</span><span class="chip">' + (KINDS[t.t === 'predict' ? 'predict' : t.t === 'order' ? 'order' : t.kind] || 'görev') + '</span></div></div></div>' + (t.t === 'predict' || t.t === 'order' ? exView(t, 'bank#' + t.id) : codeExView(t, 'bank#' + t.id, { label: 'Görev ' + t.id.replace('b-', '#'), h: 320 })) + '<div class="row" style="justify-content:space-between">' + (prev ? '<button class="btn" data-go="task" data-id="' + prev.id + '">← Önceki</button>' : '<span></span>') + (next ? '<button class="btn" data-go="task" data-id="' + next.id + '">Sonraki görev →</button>' : '') + '</div>';
-}, mount(m) { const t = BMAP[V.id]; if (!t) return; exMount(m, t, 'bank#' + t.id, { kind: 'bank' }); if (t.needs) E.ensurePkgs(t.needs).catch(() => {}); } };
+}, mount(m) { const t = BMAP[V.id]; if (!t) return; exMount(m, t, 'bank#' + t.id, { kind: 'bank' }); if (t.needs && E.state() === 'hazir') E.ensurePkgs(t.needs).catch(() => {}); } };
 
 /* Sınavlar */
 VIEWS.exams = { html() {
@@ -515,7 +515,7 @@ VIEWS.exam = { html() {
 } };
 function suggestLevel(rows) { const by = { temel: [0, 0], orta: [0, 0], ileri: [0, 0] }; rows.forEach(r => { const lv = TIER(r.q.lv || 'temel'); if (!by[lv]) return; by[lv][1]++; if (r.ok) by[lv][0]++; }); const rate = lv => by[lv][1] ? by[lv][0] / by[lv][1] : 0; if (rate('temel') >= .75 && rate('orta') >= .7 && rate('ileri') >= .6) return 'ileri'; if (rate('temel') >= .7 && rate('orta') >= .4) return 'orta'; return 'temel'; }
 function firstOf(lv) { return ORDERED.find(l => TIER(l.lv) === lv && !l.opt); }
-function weakLessons(R) { const norm = s => String(s).toLocaleLowerCase('tr'); const out = []; Object.entries(R.topics).filter(([, v]) => v.ok / v.n < .5).forEach(([t]) => { const key = norm(t).split(/[\s/]/)[0]; const l = ORDERED.find(x => norm(x.title).includes(key) && !x.opt); if (l && !out.includes(l)) out.push(l); }); return out.slice(0, 3); }
+function weakLessons(R) { const norm = s => String(s).toLocaleLowerCase('tr'); const out = []; Object.entries(R.topics).filter(([, v]) => v.ok / v.n < .5).forEach(([t]) => { const key = norm(t).split(/[\s/]/)[0]; const l = ORDERED.find(x => norm(x.title).includes(norm(t)) && !x.opt) || ORDERED.find(x => norm(x.title).includes(key) && !x.opt); if (l && !out.includes(l)) out.push(l); }); return out.slice(0, 3); }
 function examResult(x) {
   const R = XS.res; if (!R) return '';
   const ring = '<div class="ring ' + (R.passed ? 'ok' : 'bad') + '"><b class="num">%' + R.pct + '</b><span>' + R.got + '/' + R.tot + ' puan</span></div>';

@@ -79,7 +79,7 @@ print("Kalan stok:", 250 - 31)</pre>
 <p>Dördüncü satırdaki bölme işlemi ondalıklı sonuç verir; bunun neden hep böyle olduğunu Sayılar dersinde öğreneceksin. Şimdilik şunu gör: Python bir hesap makinesi gibi parantez önceliğine uyar ve sonucu hemen basar.</p>
 
 <h2>Yorumlanan dil ne demek?</h2>
-<p>Python yorumlanan (interpreted) bir dildir: kodunu önce makine diline çeviren ayrı bir program çalıştırmazsın; yorumlayıcı satırları sırayla okur ve uygular. Bunun iki sonucu var. Birincisi, deneme yapmak hızlıdır: bir satır yazar, hemen sonucu görürsün. İkincisi, çoğu hata (yazım hatası hariç) ancak o satıra sıra geldiğinde ortaya çıkar; Python önce dosyanın tamamını okur, sözdizimi hatası varsa hiçbir satırı çalıştırmaz. Dolayısıyla kodu küçük parçalar hâlinde sık sık çalıştırmak iyi bir alışkanlıktır. Bir sonraki derste Python'ı kendi bilgisayarına kuracak ve bu yorumlayıcıyı terminalden çalıştıracaksın.</p>
+<p>Python yorumlanan (interpreted) bir dildir: kodunu önce makine diline çeviren ayrı bir program çalıştırmazsın; yorumlayıcı satırları sırayla okur ve uygular. Bunun iki sonucu var. Birincisi, deneme yapmak hızlıdır: bir satır yazar, hemen sonucu görürsün. İkincisi, çoğu hata (yazım hatası hariç) ancak o satıra sıra geldiğinde ortaya çıkar; Python önce dosyanın tamamını okur, sözdizimi hatası varsa hiçbir satırı çalıştırmaz. Dolayısıyla kodu küçük parçalar hâlinde sık sık çalıştırmak iyi bir alışkanlıktır. Şimdilik her şey tarayıcıda çalışıyor; hazır olduğunda "Bilgisayarına geç" bölümünde Python'ı kendi bilgisayarına kurar, bu yorumlayıcıyı terminalden çalıştırırsın.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Excel'den Python'a geçiş neden kârlı?</h3>
@@ -348,7 +348,7 @@ print("Tutar   :", tutar, "TL")
 print("Komisyon:", komisyon, "TL")
 print("Net     :", tutar - komisyon, "TL")
 print("=" * 28)</pre>
-<p>Dikkat et: değişken adları (<code>musteri</code>, <code>tutar</code>) tırnaksız, etiketler tırnaklı. Değişkenleri bir sonraki derste derinlemesine ele alacağız.</p>
+<p>Dikkat et: değişken adları (<code>musteri</code>, <code>tutar</code>) tırnaksız, etiketler tırnaklı. Değişkenleri ayrı bir derste derinlemesine ele alacağız.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Gerçek programlarda input nerede?</h3>
@@ -515,7 +515,7 @@ print(type(deger), deger is None)</pre>
 <h3>Tip ipuçları: dinamik dilde belgeleme</h3>
 <p>Python 3'te değişkene beklenen türü yazabilirsin: <code>tutar: float = 1499.90</code>. Buna tip ipucu (type hint) denir. Python bunu çalışırken denetlemez; ama VS Code ve mypy gibi araçlar okur, yanlış türde atama yapınca altını çizer. Kurumsal projelerde fonksiyon imzalarında neredeyse standarttır; Orta seviyede ayrıntılı göreceksin.</p>
 <h3>Para için float mı?</h3>
-<p>Bankacılıkta kuruş hatası kabul edilmez ve <code>float</code> bazı ondalıkları tam temsil edemez (bir sonraki derste göreceksin). Finans yazılımları ya tutarı kuruş cinsinden <code>int</code> tutar (1499.90 TL yerine 149990 kuruş) ya da <code>decimal</code> modülünü kullanır. Raporlama ve analizde <code>float</code> yeterlidir; muhasebe kaydında değildir.</p>
+<p>Bankacılıkta kuruş hatası kabul edilmez ve <code>float</code> bazı ondalıkları tam temsil edemez (Sayılar dersinde göreceksin). Finans yazılımları ya tutarı kuruş cinsinden <code>int</code> tutar (1499.90 TL yerine 149990 kuruş) ya da <code>decimal</code> modülünü kullanır. Raporlama ve analizde <code>float</code> yeterlidir; muhasebe kaydında değildir.</p>
 <h3>Değişken aslında neye işaret eder?</h3>
 <p>Python'da her değer bellekte bir nesnedir (object) ve değişken ona bir referanstır. <code>a = b</code> dediğinde değer kopyalanmaz, ikinci bir etiket aynı nesneye takılır. Sayı ve metinler değiştirilemez olduğundan bunu fark etmezsin; ama liste gibi değiştirilebilir nesnelerde bu "kopyalama tuzağı"na dönüşür. Listeler dersinde başına gelmeden önce burada duymuş ol.</p>
 </section>
@@ -812,7 +812,7 @@ kelimeler = "  Kahve   Makinesi  Siyah ".split()
 print(kelimeler)
 print(" ".join(kelimeler))
 print(" | ".join(["Ad", "Şehir", "Tutar"]))</pre>
-<p><code>split()</code> ayraçsız çağrılırsa her türlü boşluktan böler ve fazla boşlukları yok sayar; dağınık metni kelimelere ayırmanın en kolay yolu budur. <code>join</code>'in yazımına dikkat: ayraç önde, liste parantez içinde. Listeleri bir sonraki derste ayrıntılı göreceksin.</p>
+<p><code>split()</code> ayraçsız çağrılırsa her türlü boşluktan böler ve fazla boşlukları yok sayar; dağınık metni kelimelere ayırmanın en kolay yolu budur. <code>join</code>'in yazımına dikkat: ayraç önde, liste parantez içinde. Listeleri ilerideki Listeler dersinde ayrıntılı göreceksin.</p>
 
 <h2>f-string: değişkeni metne yerleştirmek</h2>
 <p>Rapor satırı üretmek için + ile birleştirmek hem yorucu hem hataya açıktır (sayıları str'ye çevirmek gerekir). <b>f-string</b> çözümdür: tırnağın önüne <code>f</code> koy, süslü parantez içine değişken ya da ifade yaz.</p>
@@ -848,7 +848,7 @@ sehir = sehir.upper()         # yeni metni aynı ada bağla
 print(sehir)
 yeni = "İ" + sehir[1:]        # ilk harfi değiştirmek: yeni metin kur
 print(yeni)</pre>
-<p>Değişmezlik ilk bakışta kısıtlama gibi dursa da bir güvencedir: bir metni fonksiyona verdiğinde fonksiyonun onu bozmayacağını bilirsin. Listelerde bu güvence yoktur ve bunun sonuçlarını bir sonraki derste yaşayacaksın.</p>
+<p>Değişmezlik ilk bakışta kısıtlama gibi dursa da bir güvencedir: bir metni fonksiyona verdiğinde fonksiyonun onu bozmayacağını bilirsin. Listelerde bu güvence yoktur ve bunun sonuçlarını Listeler dersinde göreceksin.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Veri temizliğinin standart hattı</h3>
