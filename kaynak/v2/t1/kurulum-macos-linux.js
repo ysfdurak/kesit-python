@@ -18,6 +18,7 @@ L.push(
     'which -a, shebang ve os-release bilgisinden hangi Python\'ın çalıştığını teşhis edebilirim.'
   ],
   body: `
+<div class="note"><b>Hangi sürüm?</b>Kasım 2026'da öneri Python 3.14. Bu dersteki komutlarda 3.12 geçen yerlere kurduğun sürümü yaz. Tarayıcıdaki motorun 3.12 olması seçimini bağlamaz.</div>
 <h2>Unix dünyasında Python zaten var... ya da var gibi görünür</h2>
 <p>Windows dersinde Python'ın sıfırdan kurulduğunu gördün. macOS ve Linux'ta durum farklıdır: işletim sistemi kendi işleri için bir Python'a sahiptir ya da ona benzeyen bir yer tutucu koyar. Bu ders, <b>sistemin Python'ına dokunmadan</b> kendi Python'ını nasıl kuracağını, birden çok sürümü nasıl yöneteceğini ve Linux'ta bir gün mutlaka göreceğin <code>externally-managed-environment</code> hatasını anlatır. Kurulumun kısa hâlini <b>Kurulum ve araçlar</b> dersinde, sanal ortamın ayrıntısını <b>Sanal ortam ve paket yönetimi</b> dersinde bulursun; burada işletim sistemine özgü kısımlara odaklanıyoruz.</p>
 <p>Altın kural: <b>sistem Python'ı işletim sistemine aittir</b>. Ubuntu'nun paket yöneticisi, ağ araçları ve masaüstü bileşenleri <code>/usr/bin/python3</code>'e güvenir. Oraya <code>sudo pip install</code> ile paket eklemek ya da <code>/usr/bin/python3</code> bağlantısını başka sürüme çevirmek sistemi bozabilir. Senin projelerin her zaman ya ayrı bir kurulumda ya da bir sanal ortamda yaşar.</p>

@@ -57,7 +57,7 @@ _sw = open(O + '/sw.js', encoding='utf-8').read().replace('__SURUM__', _h.hexdig
 open(O + '/sw.js', 'w', encoding='utf-8').write(_sw)
 if os.path.isdir('kaynak/gh/ekran'): shutil.copytree('kaynak/gh/ekran', O + '/ekran')
 open(O + '/.nojekyll', 'w').close()
-r = subprocess.run(['node', 'tools/readme.js'], check=True, capture_output=True, text=True)
+r = subprocess.run(['node', 'tools/readme.js'], check=True, capture_output=True, text=True, cwd=KOK)
 open(O + '/README.md', 'w', encoding='utf-8').write(r.stdout)
 tt = sum(os.path.getsize(os.path.join(a, f)) for a, _, b in os.walk(O) for f in b)
 print('paket', O, 'dosya', sum(len(b) for _, _, b in os.walk(O)), f'{tt/1e6:.1f} MB')

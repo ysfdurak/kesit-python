@@ -340,7 +340,7 @@ async function ensureData(py, src) {
 
 async function mplReady(py) {
   if (S.pkgs.has('mpl-agg')) return;
-  await py.runPythonAsync('import warnings, matplotlib\nmatplotlib.use("Agg")\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")\nwarnings.filterwarnings("ignore", message=".*Glyph.*")');
+  await py.runPythonAsync('import warnings, matplotlib\nmatplotlib.use("Agg")\nimport matplotlib.font_manager\nwarnings.filterwarnings("ignore", message=".*non-interactive.*")\nwarnings.filterwarnings("ignore", message=".*Glyph.*")');
   S.pkgs.add('mpl-agg');
 }
 

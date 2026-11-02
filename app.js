@@ -23,7 +23,10 @@ LESSONS.forEach(l => { (l.ex || []).forEach(e => { if (!e.stage) e.stage = e.t =
   if (l.ex) { const rank = e => STAGE_ORDER.indexOf(e.stage); l.ex = l.ex.map((e, i) => [e, i]).sort((a, b) => rank(a[0]) - rank(b[0]) || a[1] - b[1]).map(x => x[0]); } });
 /* Ders metinlerindeki iç kimlikleri başlıklı bağlantıya çevir (<b>http-api</b> dersi → tıklanır başlık) */
 function linkIds(h) { if (!h) return h; return String(h).replace(/<(b|code)>([a-z0-9]+(?:-[a-z0-9]+)*)<\/\1>/g, (m, tag, id, at, all) => { if (!LMAP[id]) return m; if (!id.includes('-') && !/^\s*ders/.test(all.slice(at + m.length, at + m.length + 8))) return m; return '<a class="lk" href="#/lesson/' + id + '" data-go="lesson" data-id="' + id + '">' + esc(LMAP[id].title) + '</a>'; }); }
-LESSONS.forEach(l => { l.body = linkIds(l.body); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
+/* Terim dili: Türkçe terimin ilk geçtiği yere İngilizcesi eklenir (ders metninde, kod ve bağlantı dışında) */
+const TERMS = (window.PY_TERMS || []).map(([tr, en]) => [new RegExp('(?<![\\p{L}\\p{N}])(' + tr + ')(\\p{L}*)(?![\\p{L}\\p{N}]*\\s*\\()', 'iu'), en]);
+function termify(h) { const parts = String(h).split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<a [\s\S]*?<\/a>|<h[1-6][\s\S]*?<\/h[1-6]>|<[^>]+>)/); TERMS.forEach(([re, en]) => { if (new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(h)) return; for (let i = 0; i < parts.length; i += 2) { const m = re.exec(parts[i]); if (m) { const end = m.index + m[0].length; parts[i] = parts[i].slice(0, end) + ' (' + en + ')' + parts[i].slice(end); break; } } }); return parts.join(''); }
+LESSONS.forEach(l => { l.body = termify(linkIds(l.body)); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
 const ORDERED = ORDER.map(id => LMAP[id]).filter(Boolean);
 LESSONS.forEach(l => { if (!ORDER.includes(l.id)) ORDERED.push(l); });
 ORDERED.forEach((l, i) => { l._i = i; });
@@ -120,6 +123,10 @@ const ICON = {
   data: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v14c0 1.7 3.6 3 8 3s8-1.3 8-3V5M4 12c0 1.7 3.6 3 8 3s8-1.3 8-3"/></svg>',
   profile: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="8" r="4"/><path d="M4 21a8 8 0 0 1 16 0"/></svg>',
   ai: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l1.8 4.7L18.5 9.5l-4.7 1.8L12 16l-1.8-4.7L5.5 9.5l4.7-1.8z"/><path d="M18 15l.9 2.1L21 18l-2.1.9L18 21l-.9-2.1L15 18l2.1-.9z"/></svg>',
+  placement: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>',
+  projects: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h6l2 2h10v10a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg>',
+  cheat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 3h9l4 4v14H6z"/><path d="M9 11h7M9 15h7"/></svg>',
+  glossary: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-5-5"/></svg>',
   menu: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="4" width="6" height="6" rx="1"/><rect x="14" y="4" width="6" height="6" rx="1"/><rect x="4" y="14" width="6" height="6" rx="1"/><rect x="14" y="14" width="6" height="6" rx="1"/></svg>'
 };
 const NAVG = [
@@ -143,8 +150,8 @@ window.addEventListener('popstate', () => { fromHash(); render(); const y = SCRO
 /* Erken meydan okumalar (henüz görülmemiş yapı kullanan görevler) dersi bitirmek için gerekmez */
 const reqEx = l => (l.ex || []).filter(e => !e.erken);
 function exKey(l, i) { const e = l.ex[i]; return l.id + '#' + (e.id || e._k); }
-function lessonState(l) { if (P.read && P.read[l.id]) return 'done'; const rq = reqEx(l); if (!rq.length) return P.done[l.id] ? 'done' : 'new'; const n = rq.filter(e => P.ex[l.id + '#' + (e.id || e._k)]).length; if (n === rq.length) return 'done'; return n ? 'part' : 'new'; }
-function lessonPct(l) { if (P.read && P.read[l.id]) return 100; const rq = reqEx(l); if (!rq.length) return P.done[l.id] ? 100 : 0; return Math.round(100 * rq.filter(e => P.ex[l.id + '#' + (e.id || e._k)]).length / rq.length); }
+function lessonState(l) { if (P.done[l.id] || (P.read && P.read[l.id])) return 'done'; const rq = reqEx(l); if (!rq.length) return P.done[l.id] ? 'done' : 'new'; const n = rq.filter(e => P.ex[l.id + '#' + (e.id || e._k)]).length; if (n === rq.length) return 'done'; return n ? 'part' : 'new'; }
+function lessonPct(l) { if (P.done[l.id] || (P.read && P.read[l.id])) return 100; const rq = reqEx(l); if (!rq.length) return P.done[l.id] ? 100 : 0; return Math.round(100 * rq.filter(e => P.ex[l.id + '#' + (e.id || e._k)]).length / rq.length); }
 function checkLessonDone(l) { if (lessonState(l) === 'done' && !P.done[l.id]) { P.done[l.id] = today(); addXP(30); toast('Ders tamamlandı: ' + l.title + ' (+30 XP)'); } }
 function levelLessons(lv) { return ORDERED.filter(l => TIER(l.lv) === lv); }
 /* İlerleme yüzdesi: isteğe bağlı dersler sayılmaz */
@@ -399,7 +406,7 @@ VIEWS.lesson = { html() {
   m.addEventListener('click', ev => { const b = ev.target.closest('[data-act^="l-"]'); if (!b) return; const a = b.dataset.act; P.skip = P.skip || {}; P.read = P.read || {}; if (a === 'l-skip') { P.skip[l.id] = today(); toast('Bu ders atlandı; sıradaki ders hesabına girmez, tamamlanmış sayılmaz.'); } if (a === 'l-unskip') delete P.skip[l.id]; if (a === 'l-read') { P.read[l.id] = today(); if (!P.done[l.id]) P.done[l.id] = today(); toast('Ders tamam sayıldı.'); } if (a === 'l-unread') { delete P.read[l.id]; if (l.ex && l.ex.some((e, i) => !P.ex[exKey(l, i)])) delete P.done[l.id]; } save(); render(); });
 } };
 
-/* Patikalar */
+/* Öğrenme yolları */
 VIEWS.paths = { html() { return '<div class="sec-head"><div><h1>Öğrenme yolları</h1></div></div><p class="muted" style="margin:0;max-width:70ch">Her yol, o rol için gereken dersleri doğru sırada dizer; sınav, mülakat soruları ve portföy projeleriyle biter. Çoğu yol Python temellerini bildiğini varsayar: yol sayfasında "Temelleri bilmiyorum" dersen temel dersler başa eklenir. Hedef yolun ana sayfadaki "devam" düğmesini belirler.</p><div class="paths">' + PATHS.map(pathCard).join('') + '</div>'; } };
 VIEWS.path = { html() {
   const p = PMAP[V.id]; if (!p) return '<p>Öğrenme yolu bulunamadı.</p>';
@@ -431,7 +438,7 @@ VIEWS.projects = { html() {
   return h;
 } };
 
-/* Pratik bankası */
+/* Pratik */
 const KINDS = { yaz: 'sıfırdan yaz', bug: 'hatayı bul', tamamla: 'tamamla', rehberli: 'rehberli', predict: 'çıktıyı tahmin et', order: 'satırları sırala' };
 const PF = { lv: 'all', topic: 'all', diff: 'all', kind: 'all', st: 'all', q: '' };
 window.PY_PF = topic => { PF.lv = 'all'; PF.topic = topic; PF.diff = 'all'; PF.kind = 'all'; PF.st = 'all'; PF.q = ''; };
@@ -534,13 +541,13 @@ function resolveKey(key) {
   const m = key.match(/^(.+?)#(.+)$/); if (!m) return null; const l = LMAP[m[1]]; if (!l) return null; const i = l.ex.findIndex(e => (e.id || e._k) === m[2]); const e = l.ex[i]; return e ? { key, e, src: 'Ders: ' + l.title, go: 'lesson', goId: l.id } : null;
 }
 
-/* Deneme alanı */
+/* Kod editörü */
 const PLAY_DEFAULT = '# Kod editörü: istediğin Python kodunu yaz, Ctrl+Enter ile çalıştır.\nsiparisler = [\n    {"sehir": "İstanbul", "tutar": 1250.0},\n    {"sehir": "Ankara", "tutar": 640.5},\n    {"sehir": "İstanbul", "tutar": 310.0},\n]\ntoplam = {}\nfor s in siparisler:\n    toplam[s["sehir"]] = toplam.get(s["sehir"], 0) + s["tutar"]\nfor sehir, t in sorted(toplam.items(), key=lambda kv: -kv[1]):\n    print(f"{sehir:<10} {t:>10,.2f} TL")\n';
 VIEWS.play = { html() { const code = (P.pg && P.pg.__play) || PLAY_DEFAULT; return '<div class="sec-head"><div><h1>Kod editörü</h1></div><span class="muted">Standart kütüphane; pandas, numpy, matplotlib, scikit-learn gibi paketler ilk kullanımda yüklenir</span></div><div class="play">' + editor('ta-play', code, { h: 360, label: 'kod.py' }) + '<details class="custom"><summary>input() girdileri</summary><textarea class="input mono" rows="3" data-stdin placeholder="Her satıra bir girdi yaz. Örnek:&#10;Ayşe, Yılmaz&#10;25" aria-label="input() girdileri, her satıra bir tane"></textarea></details><div class="row"><button class="btn pri" data-act="play-run">Çalıştır</button><button class="btn" data-act="play-clear">Temizle</button></div><div class="out" hidden></div></div>'; },
   mount(m) { const ta = $('#ta-play', m); bindEditor(ta); ta.addEventListener('input', () => { clearTimeout(ta._d); ta._d = setTimeout(() => { P.pg = P.pg && typeof P.pg === 'object' ? P.pg : {}; P.pg.__play = ta.value; save(); }, 600); });
     m.addEventListener('click', async ev => { const b = ev.target.closest('button'); if (!b) return; const out = $('.play .out', m); if (b.dataset.act === 'play-clear') { ta.value = ''; ta.dispatchEvent(new Event('input')); out.hidden = true; } if (b.dataset.act === 'play-run') { out.hidden = false; out.innerHTML = busyHTML(); const stdin = $('[data-stdin]', m).value.split('\n').filter(s => s.length); try { const r = await E.run({ code: ta.value, stdin, needs: needsOf(ta.value) }); out.innerHTML = outHTML(r, { ms: r.ms }); } catch (e) { out.innerHTML = engineFail(); } } }); } };
 
-/* Başvuru */
+/* Referans */
 VIEWS.ref = { html() { const tab = ['kopya', 'sozluk', 'mufredat'].includes(V.id) ? V.id : 'kopya'; const D = window.PY_DICT || [], C = window.PY_CHEATS || [];
   const q = (RF.q || '').trim().toLocaleLowerCase('tr');
   let h = '<div class="sec-head"><div><span class="eyebrow">Referans</span><h1>' + (tab === 'kopya' ? 'Kopya kâğıdı' : tab === 'sozluk' ? 'Sözlük' : 'Müfredat haritası') + '</h1></div><div class="filters">' + [['kopya', 'Kopya kâğıdı'], ['sozluk', 'Sözlük']].map(([k, t]) => '<button type="button" data-go="ref" data-id="' + k + '" aria-pressed="' + (tab === k) + '">' + t + '</button>').join('') + '</div></div>';
@@ -588,7 +595,7 @@ VIEWS.profile = { html() {
 /* ---------- Genel olaylar ---------- */
 function applyTheme() { if (P.theme) document.documentElement.setAttribute('data-theme', P.theme); else document.documentElement.removeAttribute('data-theme'); }
 document.addEventListener('click', ev => {
-  const sc = ev.target.closest('[data-scroll]'); if (sc) { ev.preventDefault(); const t = document.getElementById(sc.dataset.scroll); if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
+  const sc = ev.target.closest('[data-scroll]'); if (sc) { ev.preventDefault(); const t = document.getElementById(sc.dataset.scroll); if (t && t.tagName === 'DETAILS') t.open = true; if (t) t.scrollIntoView({ behavior: 'smooth', block: 'start' }); return; }
   const g = ev.target.closest('[data-go]'); if (g) { ev.preventDefault(); go(g.dataset.go, g.dataset.id, g.dataset.sub); return; }
   const os = ev.target.closest('[data-os] button'); if (os) { ev.stopPropagation(); P.os = os.dataset.v; save(); render(); return; }
   const b = ev.target.closest('button[data-act]'); if (!b) return; const box = b.closest('.codebox');

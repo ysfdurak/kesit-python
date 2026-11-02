@@ -327,6 +327,8 @@ W.PY_TITLE_FIX = {
 "mulakat-kaliplari-2": "Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP",
 "mulakat-hazirlik": "Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama"
 };
+/* Terim dili: Türkçe terimin ilk geçtiği yere İngilizcesi eklenir */
+W.PY_TERMS = [['üreteç', 'generator'], ['yineleyici', 'iterator'], ['istem', 'prompt'], ['getirme', 'retrieval'], ['parçalama', 'chunking'], ['pencere fonksiyon', 'window function'], ['dekoratör', 'decorator'], ['kapanış', 'closure'], ['kalıtım', 'inheritance'], ['özyineleme', 'recursion'], ['sanal ortam', 'virtual environment'], ['bağlam yöneticisi', 'context manager'], ['eşzamanlılık', 'concurrency'], ['vektörleştirme', 'vectorization'], ['aşırı öğrenme', 'overfitting'], ['özellik mühendisliği', 'feature engineering'], ['çapraz doğrulama', 'cross-validation'], ['veri sızıntısı', 'data leakage'], ['önbellek', 'cache'], ['boru hattı', 'pipeline'], ['tip ipucu', 'type hint'], ['kod inceleme', 'code review'], ['hata ayıklama', 'debugging']];
 /* Arama için ek terimler */
 W.PY_ALIAS = {
 "iteratorler-uretecler": "generator iterator yield üreteç yineleyici",

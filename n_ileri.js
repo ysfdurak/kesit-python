@@ -20963,7 +20963,7 @@ for adim in range(1, 11):
 </table></div>
 
 <h2>7. Text-to-SQL ajanı ve değerlendirme seti</h2>
-<p>AI patikasının bitirme projesi bir <b>Anadolu Market text-to-SQL ajanı</b>dır: kullanıcı "İptal edilen sipariş sayısı?" diye sorar; ajan önce <code>sema</code> aracıyla tabloları görür, SQL yazar, <code>sql_calistir</code> aracıyla bekçiden geçirip çalıştırır, hata gelirse düzeltir ve sonucu döndürür. Kaliteyi <b>yürütme doğruluğu</b> (execution accuracy) ile ölçersin: ajanın sonucu, altın SQL'in sonucu ile (satır sırası önemsizse sıralanarak) aynı mı? Altın sete "Tüm müşterileri sil" gibi <b>reddedilmesi gereken</b> sorular da konur.</p>
+<p>Yapay zekâ yolunun bitirme projesi bir <b>Anadolu Market text-to-SQL ajanı</b>dır: kullanıcı "İptal edilen sipariş sayısı?" diye sorar; ajan önce <code>sema</code> aracıyla tabloları görür, SQL yazar, <code>sql_calistir</code> aracıyla bekçiden geçirip çalıştırır, hata gelirse düzeltir ve sonucu döndürür. Kaliteyi <b>yürütme doğruluğu</b> (execution accuracy) ile ölçersin: ajanın sonucu, altın SQL'in sonucu ile (satır sırası önemsizse sıralanarak) aynı mı? Altın sete "Tüm müşterileri sil" gibi <b>reddedilmesi gereken</b> sorular da konur.</p>
 <div class="note"><b>Gerçek işte</b>Ajan projeleri genelde "demo çalıştı" aşamasında takılır. Üretime geçen ekipler önce 30–100 soruluk bir değerlendirme seti kurar, her istem ya da araç değişikliğinde seti otomatik çalıştırır, her adımın girdisini, çıktısını, süresini ve token sayısını iz (trace) olarak kaydeder ve geri alınamaz araçları insan onayına bağlar. Hukuk ve bilgi güvenliği ekipleri hangi araçların hangi verilere erişebileceğini baştan onaylar.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>

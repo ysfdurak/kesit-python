@@ -91,9 +91,9 @@ print("Kalan stok:", 250 - 31)</pre>
 </section>
 `,
   ex: [
-    { t: 'mc', q: "Python adını nereden alır?",
-      o: ['Piton yılanından', 'Monty Python komedi grubundan', 'Yunan mitolojisindeki bir yaratıktan', "Guido van Rossum'un doğduğu kasabanın adından"], a: 1,
-      why: "Guido van Rossum dilin adını, sevdiği Monty Python komedi grubundan seçti. Yılan logosu sonradan geldi; mitoloji ve kasaba seçenekleri uydurmadır." },
+    { t: 'mc', q: "Bu uygulamada yazdığın Python kodu nerede çalışır?",
+      o: ["Kendi tarayıcının içinde, gerçek bir Python yorumlayıcısında", "Uzaktaki bir sunucuda; kodun oraya gönderilir", "Hiç çalışmaz, yalnızca metin olarak denetlenir", "Bilgisayarına kurulan bir programda"], a: 0,
+      why: "Motor (Pyodide) tarayıcıda çalışır; kodun bir sunucuya gitmez ve kurulum gerekmez." },
     { t: 'code', id: 'python-nedir-1',
       q: '<p>Ekrana tam olarak <code>Merhaba, Anadolu Market!</code> yazdır.</p>',
       start: '# print ile yazdır\n',
@@ -210,7 +210,7 @@ print("Uygulama:", platform.python_implementation())</pre>
 
 <h2>İlk betiği adım adım çalıştırmak</h2>
 <div class="steps-list"><ol>
-<li>VS Code'da bir klasör aç (örneğin <code>pythonpatika</code>).</li>
+<li>VS Code'da bir klasör aç (örneğin <code>python-proje</code>).</li>
 <li>Yeni dosya oluştur, adını <code>merhaba.py</code> koy ve içine <code>print("Merhaba")</code> yaz, kaydet.</li>
 <li>Üst menüden Terminal &gt; New Terminal ile editörün içinde bir terminal aç; terminal zaten klasörün içinde başlar.</li>
 <li><code>python merhaba.py</code> (ya da <code>python3 merhaba.py</code>) yaz ve Enter'a bas.</li>

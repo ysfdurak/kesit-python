@@ -156,6 +156,7 @@ def mc_code(e):
     """Sorudaki kodu ve çıktı soruluyor mu bilgisini çıkarır. Çalıştırılacak yoksa None."""
     import re, html
     q = str(e.get('q') or '')
+    if re.search(r'\bneden\b|niçin|niye', _untag(q), re.I): return None
     asks = re.search(r'çıktı|yazdırır|yazdırılır|değeri nedir|değeri ne|ne döndürür|ne olur|sonucu nedir|sonucu ne|hangi değer', _untag(q), re.I)
     m = re.search(r'<pre[^>]*>(.*?)</pre>', q, re.S)
     if e.get('code'): code = e['code']

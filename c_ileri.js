@@ -1195,7 +1195,7 @@ Tarayıcıda işin tamamını ilk işçi yapar: {'isci0': 10, 'isci1': 0, 'isci2
 <tr><td>Çok sayıda ağ/disk beklemesi, kütüphane async destekliyor</td><td>asyncio</td><td>Tek thread, binlerce bağlantı, düşük bellek</td></tr>
 <tr><td>Ağ/disk beklemesi, kütüphane senkron (requests, sqlite)</td><td>ThreadPoolExecutor</td><td>Kodu değiştirmeden paralel; GIL beklerken bırakılır</td></tr>
 <tr><td>Saf Python CPU hesabı</td><td>ProcessPoolExecutor</td><td>GIL\'i aşar, çekirdekleri kullanır</td></tr>
-<tr><td>Sayısal hesap</td><td>numpy/pandas (önce bunu dene)</td><td>C döngüsü GIL\'i bırakır; çoğu zaman paralelliğe gerek kalmaz</td></tr>
+<tr><td>Sayısal hesap</td><td>numpy/pandas (önce bunu dene)</td><td>Vektörel işlem C'de çalışır, çoğu zaman tek çekirdekte bile en hızlısıdır; numpy birçok döngüde GIL\'i bırakır, pandas\'ta bu işleme göre değişir</td></tr>
 <tr><td>Basit betik</td><td>Hiçbiri</td><td>Karmaşıklık maliyeti kazancı geçer</td></tr>
 </table></div>
 

@@ -7,7 +7,7 @@ X.push(
     id: 'mulakat-hazirlik',
     min: 30,
     html: `<p>Bu ders her rol için ortak çekirdeği veriyor: Python kavramları, algoritma kalıpları, canlı kodlama ve davranışsal sorular. Ama bir veri analisti ile bir backend geliştiricinin mülakatı aynı değildir. Bu bölüm iki şey ekliyor: öğrenme yoluna göre "hangi bölüm sana ne kadar lazım" haritası ve kendi kendine uygulayabileceğin 45 dakikalık bir deneme mülakatı senaryosu.</p>
-<h2>Patikalara göre harita</h2>
+<h2>Öğrenme yollarına göre harita</h2>
 <div class="tbl-wrap"><table><tr><th>Yol</th><th>Bu dersten öncelik</th><th>Ardından çalış</th><th>Mülakatta ağırlık</th></tr>
 <tr><td>Veri analisti</td><td>Kavram soruları, sözlükle sayım, davranışsal sorular</td><td><b>Veri mülakatı</b> (SQL, pandas, metrik, vaka), <b>İş metrikleri</b></td><td>SQL canlı yazım, pandas ile analiz, iş sorusunu metriğe çevirme</td></tr>
 <tr><td>Veri bilimci / ML</td><td>Kavramlar, Big-O, kayan pencere, heap</td><td><b>Veri mülakatı</b>, ML derslerindeki SSS'ler</td><td>İstatistik, model değerlendirme, sızıntı, A/B testi, ev ödevi</td></tr>
@@ -131,7 +131,7 @@ print(supheliler(akis))</pre>
         id: 'mulakat-hazirlik-y6',
         stage: 'Kendin yaz',
         diff: 1,
-        q: '<p>Patika haritasını koda dök: <code>calisma_plani(yol, bitenler)</code> yaz. <code>HARITA</code> sözlüğü hazır: her yol için sıralı ders listesi. Yoldaki derslerden <code>bitenler</code> kümesinde olmayanları sırayla döndür. Bilinmeyen yol için <code>ValueError</code> fırlat; mesajda geçerli yollar alfabetik ve virgülle ayrılmış olsun.</p>',
+        q: '<p>Yol haritasını koda dök: <code>calisma_plani(yol, bitenler)</code> yaz. <code>HARITA</code> sözlüğü hazır: her yol için sıralı ders listesi. Yoldaki derslerden <code>bitenler</code> kümesinde olmayanları sırayla döndür. Bilinmeyen yol için <code>ValueError</code> fırlat; mesajda geçerli yollar alfabetik ve virgülle ayrılmış olsun.</p>',
         start: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(yol, bitenler):\n    pass\n',
         sol: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(yol, bitenler):\n    if yol not in HARITA:\n        raise ValueError("Geçerli yollar: " + ", ".join(sorted(HARITA)))\n    return [d for d in HARITA[yol] if d not in bitenler]\n',
         tests: 'assert calisma_plani("backend", {"mulakat-hazirlik"}) == ["mulakat-kaliplari-2", "sistem-tasarimi"], "Biten ders çıkarılmalı, sıra korunmalı"\nassert calisma_plani("analist", set()) == ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"], "Hiç bitmemişse tüm liste"\nassert calisma_plani("muhendis", set(HARITA["muhendis"])) == [], "Hepsi bittiyse boş"\ntry:\n    calisma_plani("tasarimci", set())\n    assert False, "Bilinmeyen yol ValueError vermeli"\nexcept ValueError as e:\n    assert str(e) == "Geçerli yollar: analist, backend, muhendis", f"Mesaj: {e}"\n',

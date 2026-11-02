@@ -1,7 +1,7 @@
 /* README.md üretir (sayılar uygulamanın içeriğinden) */
 const fs = require('fs'), vm = require('vm');
 global.window = global; const h = fs.readFileSync('index.html', 'utf8');
-const files = h.match(/src="[^"]+\.js"/g).map(s => s.slice(5, -1)).filter(f => !/^(app|app2|engine|sync|portfolio)\.js$/.test(f));
+const files = h.match(/src="[^"]+\.js"/g).map(s => s.slice(5, -1)).filter(f => !/^(app|app2|engine|sync|portfolio|config)\.js$/.test(f));
 for (const f of files) vm.runInThisContext(fs.readFileSync(f, 'utf8'));
 const lm = {}; const L = (window.PY_LESSONS || []).filter(l => (window.PY_ORDER || []).includes(l.id)); L.forEach(l => lm[l.id] = l);
 (window.PY_EXT || []).forEach(x => { if (lm[x.id] && x.ex) lm[x.id].ex = (lm[x.id].ex || []).concat(x.ex); });
@@ -16,25 +16,34 @@ process.stdout.write(`# Kesit Python
 ![Tarayıcıda çalışan Python](ekran/alistirma.png)
 
 ## Neler var?
-- **${n(L.length)} ders, ${n(ex)} ders içi alıştırma, ${n((window.PY_BANK || []).length)} pratik görevi.** Kurulumdan pandas'a, otomasyondan web geliştirmeye, makine öğrenmesinden LLM uygulamalarına.
-- **${n((window.PY_PATHS || []).length)} rol patikası:** veri analisti, veri bilimci, web geliştirici, yapay zekâ ve diğerleri.
-- **${n((window.PY_ARENA || []).length)} arena problemi, ${n(IV.length)} Python mülakat sorusu, ${n((window.PY_MISTAKES || []).length)} sık hata kaydı, ${n((window.PY_EXAMS || []).length)} sınav.**
-- **8 hayali veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
+- **${n(L.length)} ders, ${n(ex)} ders içi alıştırma, ${n((window.PY_BANK || []).length)} pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
+- **${n((window.PY_PATHS || []).length)} öğrenme yolu:** veri analisti, veri bilimci, veri mühendisi, backend, web, makine öğrenmesi, yapay zekâ, otomasyon ve diğerleri. Her yolda ön koşul, sınav, role süzülmüş mülakat soruları ve portföy önerileri.
+- **${n((window.PY_ARENA || []).length)} Python Arena problemi, ${n(IV.length)} Python mülakat sorusu, ${n((window.PY_MISTAKES || []).length)} sık hata kaydı, ${n((window.PY_EXAMS || []).length)} sınav.**
+- **8 kurgusal veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
 
 | Karşılama | Ders | Yapay zekâ |
 |---|---|---|
 | ![](ekran/karsilama.png) | ![](ekran/ders.png) | ![](ekran/yapay-zeka.png) |
 
 ## Nasıl çalışıyor?
-- Sunucu yok: Python kodu CPython'ın WebAssembly sürümü olan Pyodide ile tarayıcıda çalışır.
-- İlerleme yalnızca kullanıcının tarayıcısında saklanır; Profil sayfasından dosyaya kaydedilip başka cihazda yüklenebilir. Site kişisel veri toplamaz. Python motoru ve kütüphaneler jsDelivr'dan iner.
-- Alıştırma çözümleri otomatik testlerle gerçek Python'da doğrulanır; denetim araçları \`kaynak\` dalındadır.
+- Sunucu yok: Python kodu CPython'ın WebAssembly sürümü olan Pyodide ile tarayıcıda, ayrı bir iş parçacığında (Web Worker) çalışır. Sonsuz döngü sayfayı dondurmaz; Durdur düğmesi ve 60 saniyelik süre sınırı motoru yeniden başlatır.
+- İlerleme yalnızca kullanıcının tarayıcısında saklanır; Profil sayfasından dosyaya kaydedilip başka cihazda birleştirilerek yüklenebilir. Site kişisel veri toplamaz.
+- Python motoru ve kütüphaneler ilk kod çalıştırmada jsDelivr'dan iner; site dosyaları ilk ziyarette tarayıcı önbelleğine alınır, yeni sürümde eski önbellek silinir.
+- Alıştırma çözümleri otomatik testlerle gerçek Python'da denetlenir; denetim araçları \`kaynak\` dalındadır.
+
+## Bilinen sınırlar
+- Tarayıcıda gerçek iş parçacığı, süreç ve doğrudan ağ yok; bu konuları anlatan dersler kendi bilgisayarında beklenen çıktıyı yazar. Flask, Django, Docker, Spark gibi araçların alıştırmaları taklit eder, "Kendi bilgisayarında" görevleri gerçeğini çalıştırmanı ister.
+- input() girdileri kod çalışmadan önce verilir.
 
 ## Kaynak kod ve kardeş projeler
-Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [\`kaynak\` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)** ve **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**.
+Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [\`kaynak\` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)** ve **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.
 
 ## Yapay zekâ kullanımı
 Ürün kararlarını ve kapsamı Yusuf Durak belirledi; kod ve içerik yapay zekâ (Claude) ile geliştirildi.
+
+## Açık kaynak bileşenler
+- [Pyodide](https://pyodide.org) (MPL-2.0) ve içinde gelen paketler, kendi lisanslarıyla
+- Yazı tipleri: Bricolage Grotesque, IBM Plex Sans, JetBrains Mono (SIL Open Font License; metinler \`vendor/fonts\` içinde)
 
 ## Sorumluluk notu
 Ücretsiz, ticari olmayan bir eğitim ve portföy projesidir; içerik “olduğu gibi” sunulur. Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir. Python Software Foundation ya da Python Institute ile bağlantılı değildir.

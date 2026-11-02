@@ -31,7 +31,7 @@ with sync_playwright() as p:
             n = len(errs); txt = pg.inner_text('#main')
             if len(txt) < 200 and sub == '': bad.append((lid, 'kısa içerik'))
             if errs: bad.append((lid + sub, errs[0])); errs.clear()
-    for r in ['#/lessons', '#/paths', '#/practice', '#/exams', '#/review', '#/play', '#/ref', '#/ref/kopya', '#/ref/sozluk', '#/profile'] + ['#/path/' + x for x in pg.evaluate('window.PY_PATHS.map(p=>p.id)')]:
+    for r in ['#/lessons', '#/lessons/temel', '#/paths', '#/practice', '#/exams', '#/review', '#/play', '#/ref', '#/ref/kopya', '#/ref/sozluk', '#/profile', '#/menu', '#/projects', '#/projects/analist', '#/ai', '#/arena', '#/arena-c', '#/interview', '#/interview/kart', '#/interview-sim', '#/mistakes', '#/data', '#/dataset/ilgaz_bank', '#/hakkinda'] + ['#/path/' + x for x in pg.evaluate('window.PY_PATHS.map(p=>p.id)')]:
         pg.goto(base + r); pg.wait_for_timeout(150)
         if errs: bad.append((r, errs[0])); errs.clear()
     bank = pg.evaluate('(window.PY_BANK||[]).map(t=>t.id)')
@@ -46,6 +46,11 @@ with sync_playwright() as p:
     # patika ders id'leri
     for pid, miss in pg.evaluate('window.PY_PATHS.map(p=>[p.id, p.lessons.filter(id=>!window.PY_LESSONS.some(l=>l.id===id))])'):
         if miss: bad.append(('path ' + pid, 'olmayan ders: ' + ','.join(miss)))
+    for a in pg.evaluate('(window.PY_ARENA||[]).map(a=>a.id)')[::9]:
+        pg.goto(base + '#/arena-p/' + a); pg.wait_for_timeout(60)
+        if errs: bad.append((a, errs[0])); errs.clear()
+    # motor sayfa açılışında yüklenmemeli
+    if pg.evaluate('window.PY_ENGINE.state()') != 'bos': bad.append(('motor', 'kod çalıştırılmadan yüklendi'))
     print('pratik:', len(bank), 'sınav:', len(pg.evaluate('(window.PY_EXAMS||[]).map(e=>e.qs.length)')))
     b.close()
 srv.shutdown()

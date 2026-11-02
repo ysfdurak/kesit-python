@@ -136,7 +136,7 @@ VIEWS['arena-p'] = { html() {
   const ta = $('#ta-ar', m); if (ta) { bindEditor(ta); ta.addEventListener('input', () => { clearTimeout(ta._d); ta._d = setTimeout(() => { P.drafts[a.id] = ta.value; save(); }, 600); }); ta.addEventListener('keydown', ev => { if (ev.key === 'Enter' && (ev.ctrlKey || ev.metaKey)) { ev.preventDefault(); $('[data-act="ar-run"]', m).click(); } }); }
 } };
 
-/* Yarışma */
+/* Zamanlı set */
 function pickContest() {
   const seed = Date.now(); const by = d => ARENA.filter(a => a.diff === d && a.mode !== 'func' && !solved(a.id)).concat(ARENA.filter(a => a.diff === d && a.mode !== 'func' && solved(a.id)));
   const take = (d, n) => { const pool = by(d).slice(0, 40); const out = []; let x = seed; while (out.length < n && pool.length) { x = (x * 1103515245 + 12345) >>> 0; out.push(pool.splice(x % pool.length, 1)[0].id); } return out; };

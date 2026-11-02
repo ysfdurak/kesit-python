@@ -373,6 +373,7 @@ L.push(
     'which -a, shebang ve os-release bilgisinden hangi Python\'ın çalıştığını teşhis edebilirim.'
   ],
   body: `
+<div class="note"><b>Hangi sürüm?</b>Kasım 2026'da öneri Python 3.14. Bu dersteki komutlarda 3.12 geçen yerlere kurduğun sürümü yaz. Tarayıcıdaki motorun 3.12 olması seçimini bağlamaz.</div>
 <h2>Unix dünyasında Python zaten var... ya da var gibi görünür</h2>
 <p>Windows dersinde Python'ın sıfırdan kurulduğunu gördün. macOS ve Linux'ta durum farklıdır: işletim sistemi kendi işleri için bir Python'a sahiptir ya da ona benzeyen bir yer tutucu koyar. Bu ders, <b>sistemin Python'ına dokunmadan</b> kendi Python'ını nasıl kuracağını, birden çok sürümü nasıl yöneteceğini ve Linux'ta bir gün mutlaka göreceğin <code>externally-managed-environment</code> hatasını anlatır. Kurulumun kısa hâlini <b>Kurulum ve araçlar</b> dersinde, sanal ortamın ayrıntısını <b>Sanal ortam ve paket yönetimi</b> dersinde bulursun; burada işletim sistemine özgü kısımlara odaklanıyoruz.</p>
 <p>Altın kural: <b>sistem Python'ı işletim sistemine aittir</b>. Ubuntu'nun paket yöneticisi, ağ araçları ve masaüstü bileşenleri <code>/usr/bin/python3</code>'e güvenir. Oraya <code>sudo pip install</code> ile paket eklemek ya da <code>/usr/bin/python3</code> bağlantısını başka sürüme çevirmek sistemi bozabilir. Senin projelerin her zaman ya ayrı bir kurulumda ya da bir sanal ortamda yaşar.</p>
@@ -652,6 +653,7 @@ L.push(
     'Sık kurulum hatalarını belirti → neden → çözüm mantığıyla teşhis edebilirim.'
   ],
   body: `
+<div class="note"><b>Hangi sürüm?</b>Kasım 2026'da öneri Python 3.14. Bu dersteki komutlarda 3.12 geçen yerlere kurduğun sürümü yaz. Tarayıcıdaki motorun 3.12 olması seçimini bağlamaz. Windows'ta python.org artık Python install manager'ı öne çıkarıyor, klasik yükleyici de sunuluyor; ikisi de olur. </div>
 <h2>Neden ayrı bir Windows dersi?</h2>
 <p><b>Kurulum ve araçlar</b> dersinde Python'ı kurmayı kısaca gördün. Bu ders, o kısa anlatımın "ama bende çalışmadı" kısmıdır. Windows'ta Python kurulumu çoğu zaman beş dakika sürer; sorun çıktığında ise saatler alabilir, çünkü hata mesajı genellikle asıl nedeni söylemez. <code>'python' is not recognized</code> diyen bir terminal sana "PATH ortam değişkeninde Python klasörü yok" demez. Bu derste kurulumun her ekranını, Windows'un bir komutu nasıl bulduğunu ve en sık karşılaşılan hataların gerçek nedenini öğreneceksin. Amaç ezber değil, <b>teşhis</b> yapabilmek: bir sonraki bilgisayarda ya da bir ekip arkadaşının ekranında sorunu iki dakikada çözmek.</p>
 <p>Anadolu Market'in veri ekibine yeni katılan bir stajyer düşün. İlk gün kurumsal dizüstü bilgisayarına Python kuruyor, VS Code'u açıyor ve ilk betiği çalıştırınca terminal Microsoft Store'u açıyor. Bu derste o sorunun neden olduğunu ve neden tek bir ayar düğmesiyle çözüldüğünü göreceksin.</p>
