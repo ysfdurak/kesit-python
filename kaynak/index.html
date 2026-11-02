@@ -17,8 +17,8 @@
   --bg:#F1F0EC; --surface:#FFFFFF; --surface-2:#F7F6F2; --ink:#1B1A16; --muted:#625F55; --line:#DEDBD2;
   --accent:#3B6FD6; --accent-text:#2A56B5; --accent-soft:#E3EBFB; --accent-ink:#FFFFFF; --accent2:#F2C230;
   --ok:#17855A; --ok-soft:#E1F3EA; --warn:#A86A12; --warn-soft:#FBF0DD; --err:#C0392B; --err-soft:#FBE6E3;
-  --code-bg:#17150F; --code-ink:#E8E4D8; --code-kw:#F2C14E; --code-fn:#8FC8FF; --code-str:#B8E07A; --code-num:#F5A86B; --code-com:#7D7868; --code-var:#E2A8FF; --code-line:#2A271E; --code-tab:#201D16;
-  --l1:#2F9A5A; --l3:#3866D1; --l5:#B8418F; --l6:#C2410C;
+  --code-bg:#17150F; --code-ink:#E8E4D8; --code-kw:#F2C14E; --code-fn:#8FC8FF; --code-str:#B8E07A; --code-num:#F5A86B; --code-com:#8F8A79; --code-var:#E2A8FF; --code-line:#2A271E; --code-tab:#201D16;
+  --l1:#1F7F47; --l3:#3866D1; --l5:#B8418F; --l6:#C2410C; --lv-ink:#fff; --ic-shade:rgba(0,0,0,.38);
   --s1:#2a78d6; --s2:#eb6834; --s3:#1baf7a; --s4:#eda100; --s5:#e87ba4; --s6:#008300; --s7:#6250d6; --s8:#e34948;
   --grid:#E8E6DF; --axis:#8E8A7E;
   --f-display:"Bricolage Grotesque", "Segoe UI", system-ui, sans-serif;
@@ -31,7 +31,7 @@
   --accent:#5B8DEF; --accent-text:#8FB3FF; --accent-soft:#1C2A48; --accent-ink:#0B1220; --accent2:#F2C94C;
   --ok:#45C08A; --ok-soft:#14302A; --warn:#E3A84B; --warn-soft:#352A16; --err:#FF7B6E; --err-soft:#3A1F1E;
   --code-bg:#0E0D09; --code-line:#2A271E; --code-tab:#16140F;
-  --l1:#4CC27E; --l3:#6E93F0; --l5:#E06BB6; --l6:#F07A45;
+  --l1:#4CC27E; --l3:#6E93F0; --l5:#E06BB6; --l6:#F07A45; --lv-ink:#0B1220; --ic-shade:rgba(0,0,0,.45);
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
   --grid:#2C2A23; --axis:#857F70;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark }}
@@ -40,7 +40,7 @@
   --accent:#5B8DEF; --accent-text:#8FB3FF; --accent-soft:#1C2A48; --accent-ink:#0B1220; --accent2:#F2C94C;
   --ok:#45C08A; --ok-soft:#14302A; --warn:#E3A84B; --warn-soft:#352A16; --err:#FF7B6E; --err-soft:#3A1F1E;
   --code-bg:#0E0D09; --code-line:#2A271E; --code-tab:#16140F;
-  --l1:#4CC27E; --l3:#6E93F0; --l5:#E06BB6; --l6:#F07A45;
+  --l1:#4CC27E; --l3:#6E93F0; --l5:#E06BB6; --l6:#F07A45; --lv-ink:#0B1220; --ic-shade:rgba(0,0,0,.45);
   --s1:#3987e5; --s2:#d95926; --s3:#199e70; --s4:#c98500; --s5:#d55181; --s6:#008300; --s7:#9085e9; --s8:#e66767;
   --grid:#2C2A23; --axis:#857F70;
   --shadow:0 1px 2px rgba(0,0,0,.3); color-scheme:dark }
@@ -105,7 +105,7 @@ main{min-width:0; padding-block:28px 64px; padding-left:max(16px, env(safe-area-
 .chip{display:inline-flex; align-items:center; gap:6px; font-size:.75rem; font-weight:600; padding:3px 9px; border-radius:99px; background:var(--surface-2); border:1px solid var(--line); color:var(--muted); white-space:nowrap}
 button.chip{cursor:pointer} button.chip:hover{border-color:var(--muted); color:var(--ink)}
 button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink); color:var(--bg)}
-.lv{display:inline-grid; place-items:center; min-width:48px; height:22px; padding:0 8px; border-radius:5px; font-weight:600; font-size:.72rem; color:#fff; letter-spacing:.02em; white-space:nowrap}
+.lv{display:inline-grid; place-items:center; min-width:48px; height:22px; padding:0 8px; border-radius:5px; font-weight:600; font-size:.72rem; color:var(--lv-ink); letter-spacing:.02em; white-space:nowrap}
 .lv-temel{background:var(--l1)} .lv-orta{background:var(--l3)} .lv-ileri{background:var(--l6)}
 .bar{height:6px; background:var(--surface-2); border-radius:99px; overflow:hidden; border:1px solid var(--line)}
 .bar i{display:block; height:100%; background:var(--accent); border-radius:99px}
@@ -142,7 +142,7 @@ button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
 .paths{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
 .pcard{padding:18px; display:flex; flex-direction:column; gap:10px; text-align:left; cursor:pointer; border:1px solid var(--line); background:var(--surface); border-radius:var(--r)}
 .pcard:hover{border-color:var(--muted)}
-.ic{min-width:38px; height:38px; padding:0 8px; border-radius:8px; display:grid; place-items:center; color:#fff; font-family:var(--f-display); font-weight:800; font-size:.9rem}
+.ic{min-width:38px; height:38px; padding:0 8px; border-radius:8px; display:grid; place-items:center; color:#fff; box-shadow:inset 0 0 0 99px var(--ic-shade); font-family:var(--f-display); font-weight:800; font-size:.9rem}
 .pcard p{margin:0; color:var(--muted); font-size:.9rem}
 .pcard .foot{display:flex; justify-content:space-between; font-size:.8rem; color:var(--muted); margin-top:auto}
 
@@ -222,6 +222,7 @@ button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
 .work{display:flex; flex-direction:column; gap:10px; min-width:0}
 .ed-shell{border-radius:var(--r); overflow:hidden; background:var(--code-bg); border:1px solid var(--code-line)}
 .ed-top{display:flex; align-items:center; justify-content:space-between; gap:8px; padding:6px 10px; border-bottom:1px solid var(--code-line); color:var(--code-com); font-size:.75rem; font-family:var(--f-mono); flex-wrap:wrap}
+.ed-top .muted{color:var(--code-com)}
 .ed-top select{background:#1C2735; color:var(--code-ink); border:1px solid var(--code-line); border-radius:6px; padding:3px 6px; font-family:var(--f-body); font-size:.8rem; font-weight:600}
 .ed{position:relative; height:230px}
 .ed textarea,.ed pre{position:absolute; inset:0; margin:0; padding:14px 16px; border:0; font-family:var(--f-mono); font-size:14px; line-height:1.6; white-space:pre; tab-size:2; overflow:auto; letter-spacing:0; word-spacing:0}
@@ -506,7 +507,8 @@ pre.stderr::before{content:'stderr'; display:block; font-size:.68rem; color:var(
 .olines{list-style:none; padding:0; margin:0; display:flex; flex-direction:column; gap:6px; counter-reset:ln}
 .olines li{display:flex; align-items:center; gap:10px; background:var(--code-bg); border:1px solid var(--code-line); border-radius:8px; padding:6px 8px 6px 10px; counter-increment:ln}
 .olines li::before{content:counter(ln); color:var(--code-com); font-family:var(--f-mono); font-size:.74rem; width:18px; flex:none}
-.olines li code{flex:1; color:var(--code-ink); white-space:pre; overflow-x:auto; font-size:.86rem; background:none; border:0}
+.olines li code{flex:1; min-width:0; color:var(--code-ink); white-space:pre; overflow-x:auto; font-size:.86rem; background:none; border:0}
+@media (max-width:560px){ .olines li code{white-space:pre-wrap; overflow-wrap:anywhere} }
 .olines li.good{border-color:var(--ok)} .olines li.bad{border-color:var(--err)}
 .olines .mv{display:flex; gap:4px; flex:none}
 .olines .mv button{background:transparent; color:var(--code-ink); border:1px solid var(--code-line); border-radius:6px; width:30px; height:28px}
@@ -587,7 +589,7 @@ pre.outbox{background:var(--surface-2); border:1px solid var(--line); border-rad
 .heat i.h3{background:color-mix(in srgb, var(--accent) 80%, var(--surface)); border-color:transparent}
 .heat i.h4{background:var(--accent-text); border-color:transparent}
 .stop{border:1px solid var(--line); background:var(--surface)}
-.chip.on{background:var(--ok-soft); color:var(--ok); border-color:color-mix(in srgb, var(--ok) 40%, transparent)}
+.chip.on{background:var(--ok-soft); color:color-mix(in srgb, var(--ok) 80%, var(--ink)); border-color:color-mix(in srgb, var(--ok) 40%, transparent)}
 .lhead h1{font-size:clamp(1.4rem,3vw,2rem)}
 .filters{flex-wrap:wrap}
 .engine-note:empty{display:none}
