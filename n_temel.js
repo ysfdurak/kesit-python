@@ -1,4 +1,4 @@
-/* PythonPatika — v2/t1: jupyter-colab */
+/* Kesit Python — v2/t1: jupyter-colab */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -515,7 +515,7 @@ print(bastan_calistir(hucreler[:3]))</pre>
 }
 );
 })(window);
-/* PythonPatika — v2/t1: kurulum-macos-linux */
+/* Kesit Python — v2/t1: kurulum-macos-linux */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -1010,7 +1010,7 @@ for satir in ["#!/usr/bin/env python3", "#!/usr/bin/python3.12 -u", "#!/usr/bin/
 }
 );
 })(window);
-/* PythonPatika — v2/t1: kurulum-windows */
+/* Kesit Python — v2/t1: kurulum-windows */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -1303,7 +1303,7 @@ print(shlex.split(r"TargetDir=C:\\Python312"))   # tırnaksız: ters bölü kayb
       stage: 'Rehberli',
       id: 'kurulum-windows-1',
       diff: 1,
-      q: '<p>Anadolu Bank\'ın rapor betiği en az Python 3.10 istiyor (match ifadesi kullanıyor). <code>surum_kontrol(surum, en_az=(3, 10))</code> fonksiyonunu yaz. <code>surum</code>, <code>(3, 12, 4)</code> gibi üç sayılık bir demettir (sys.version_info[:3] de böyle bir demet verir).</p><ul><li>Sürüm yeterliyse <code>"Uygun: 3.12.4"</code> döndür.</li><li>Yeterli değilse <code>"Eski sürüm: 3.9.18 (en az 3.10 gerekli)"</code> döndür.</li></ul>',
+      q: '<p>Ilgaz Bank\'ın rapor betiği en az Python 3.10 istiyor (match ifadesi kullanıyor). <code>surum_kontrol(surum, en_az=(3, 10))</code> fonksiyonunu yaz. <code>surum</code>, <code>(3, 12, 4)</code> gibi üç sayılık bir demettir (sys.version_info[:3] de böyle bir demet verir).</p><ul><li>Sürüm yeterliyse <code>"Uygun: 3.12.4"</code> döndür.</li><li>Yeterli değilse <code>"Eski sürüm: 3.9.18 (en az 3.10 gerekli)"</code> döndür.</li></ul>',
       guide: [
         'Demetteki sayıları noktayla birleştirip "3.12.4" metnini üret (map(str, ...) ve ".".join).',
         'en_az demetini de aynı yolla "3.10" metnine çevir.',
@@ -1512,7 +1512,7 @@ print(shlex.split(r"TargetDir=C:\\Python312"))   # tırnaksız: ters bölü kayb
 }
 );
 })(window);
-/* PythonPatika — v2/t1: vscode */
+/* Kesit Python — v2/t1: vscode */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -1707,7 +1707,7 @@ print(indirimli_fiyat.__doc__)</pre>
 <tr><td>JupyterLab</td><td>Hücre hücre keşif, grafik ve tablo çıktısı</td><td>Uzun kod ve test için uygun değil</td><td>Veri analizi; <b>Jupyter ve Colab</b> dersinde</td></tr>
 </table></div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın veri ekibinde yeni gelen biri depoyu klonlayıp VS Code'da açtığında sağ altta "Bu depo için önerilen eklentileri kurmak ister misiniz?" bildirimi çıkar; bu, <code>.vscode/extensions.json</code> dosyasının işidir. Ardından <code>settings.json</code> yorumlayıcıyı <code>.venv</code>'e, biçimlendiriciyi Ruff'a ayarlar ve herkes aynı stille kaydeder. Kod incelemelerinde (code review) "buraya boşluk koy" yorumları kaybolur; tartışma mantığa odaklanır. Ekip ayrıca <code>launch.json</code>'a "Günlük rapor (test verisi)" gibi hazır hata ayıklama yapılandırmaları koyar; böylece yeni gelen kişi ilk gün F5 ile sistemi uçtan uca çalıştırabilir.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın veri ekibinde yeni gelen biri depoyu klonlayıp VS Code'da açtığında sağ altta "Bu depo için önerilen eklentileri kurmak ister misiniz?" bildirimi çıkar; bu, <code>.vscode/extensions.json</code> dosyasının işidir. Ardından <code>settings.json</code> yorumlayıcıyı <code>.venv</code>'e, biçimlendiriciyi Ruff'a ayarlar ve herkes aynı stille kaydeder. Kod incelemelerinde (code review) "buraya boşluk koy" yorumları kaybolur; tartışma mantığa odaklanır. Ekip ayrıca <code>launch.json</code>'a "Günlük rapor (test verisi)" gibi hazır hata ayıklama yapılandırmaları koyar; böylece yeni gelen kişi ilk gün F5 ile sistemi uçtan uca çalıştırabilir.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Hata ayıklayıcı nasıl çalışır?</h3>
@@ -2029,7 +2029,7 @@ print("Sonuç:", sonuc)</pre>
 }
 );
 })(window);
-/* PythonPatika v2/t2 — Kullanıcı girdisi ve tür dönüşümü */
+/* Kesit Python v2/t2 — Kullanıcı girdisi ve tür dönüşümü */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2173,7 +2173,7 @@ sehir = girilen_sehir.strip() or "İstanbul"
 gun = int(girilen_gun.strip() or "7")
 print(f"Rapor: {sehir}, {gun} gün")</pre>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank şubelerinde kullanılan eski bir terminal uygulaması, gişe görevlisinin girdiği tutarı <code>float(input())</code> ile okuyordu. "1.500" yazan görevli 1,5 TL'lik işlem yaptı; "1500,00" yazan ise ValueError ile ekranı kilitledi. Yeni sürümde girdi katmanı üç kurala bağlandı: Türkçe biçim ayrıştırıcı (binlik nokta, ondalık virgül), aralık kontrolü (0 &lt; tutar ≤ günlük limit) ve büyük tutarlarda "1.500,00 TL onaylıyor musunuz? (e/h)" teyidi. Aynı ilkeler web formlarında da geçerlidir: istemci tarafı kontrol yetmez, sunucu girdiyi her zaman yeniden doğrular.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank şubelerinde kullanılan eski bir terminal uygulaması, gişe görevlisinin girdiği tutarı <code>float(input())</code> ile okuyordu. "1.500" yazan görevli 1,5 TL'lik işlem yaptı; "1500,00" yazan ise ValueError ile ekranı kilitledi. Yeni sürümde girdi katmanı üç kurala bağlandı: Türkçe biçim ayrıştırıcı (binlik nokta, ondalık virgül), aralık kontrolü (0 &lt; tutar ≤ günlük limit) ve büyük tutarlarda "1.500,00 TL onaylıyor musunuz? (e/h)" teyidi. Aynı ilkeler web formlarında da geçerlidir: istemci tarafı kontrol yetmez, sunucu girdiyi her zaman yeniden doğrular.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Asla eval(input()) yazma</h3>
@@ -2397,7 +2397,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
   ]
 });
 })(window);
-/* PythonPatika v2/t2 — Operatörler derinlemesine */
+/* Kesit Python v2/t2 — Operatörler derinlemesine */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2553,7 +2553,7 @@ while (satir := satirlar[i]) != "":
     i += 1</pre>
 <p>Önceliği en düşük operatör olduğu için koşul içinde genellikle parantez gerekir: <code>(n := len(x)) &gt; 5</code>. Parantezsiz <code>n := len(x) &gt; 5</code>, n'ye <code>True/False</code> atar. Okunurluğu artırdığı yerde kullan; her atamayı mors'a çevirmek kodu zorlaştırır.</p>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın kullanıcı yetki tablosunda her personelin izinleri tek bir tam sayı sütununda tutulur: 1 = hesap görüntüleme, 2 = havale başlatma, 4 = havale onaylama, 8 = limit değiştirme. Denetim ekibi "havale başlatıp aynı zamanda onaylayabilen" riskli kullanıcıları <code>(izin &amp; 6) == 6</code> sorgusuyla bulur. Aynı bit mantığı Linux dosya izinlerinde, ağ maskelerinde (IP alt ağları) ve oyun motorlarındaki çarpışma katmanlarında da karşına çıkacak.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kullanıcı yetki tablosunda her personelin izinleri tek bir tam sayı sütununda tutulur: 1 = hesap görüntüleme, 2 = havale başlatma, 4 = havale onaylama, 8 = limit değiştirme. Denetim ekibi "havale başlatıp aynı zamanda onaylayabilen" riskli kullanıcıları <code>(izin &amp; 6) == 6</code> sorgusuyla bulur. Aynı bit mantığı Linux dosya izinlerinde, ağ maskelerinde (IP alt ağları) ve oyun motorlarındaki çarpışma katmanlarında da karşına çıkacak.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Operatörler aslında metot çağrısıdır</h3>
@@ -2629,7 +2629,7 @@ while (satir := satirlar[i]) != "":
       id: 'operatorler-2',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank yetki sistemi: <code>GORUNTULE=1</code>, <code>HAVALE=2</code>, <code>ONAY=4</code>, <code>LIMIT=8</code>. Üç fonksiyon yaz:</p><ul><li><code>izin_ekle(mevcut, izin)</code> → izni eklenmiş sayı</li><li><code>izin_kaldir(mevcut, izin)</code> → izni kaldırılmış sayı (izin yoksa sayı değişmez)</li><li><code>izin_var_mi(mevcut, izin)</code> → <b>bool</b>; birden fazla bit verilirse <b>hepsi</b> olmalı</li></ul>',
+      q: '<p>Ilgaz Bank yetki sistemi: <code>GORUNTULE=1</code>, <code>HAVALE=2</code>, <code>ONAY=4</code>, <code>LIMIT=8</code>. Üç fonksiyon yaz:</p><ul><li><code>izin_ekle(mevcut, izin)</code> → izni eklenmiş sayı</li><li><code>izin_kaldir(mevcut, izin)</code> → izni kaldırılmış sayı (izin yoksa sayı değişmez)</li><li><code>izin_var_mi(mevcut, izin)</code> → <b>bool</b>; birden fazla bit verilirse <b>hepsi</b> olmalı</li></ul>',
       guide: ['Eklemek için bit VEYA (|) kullan.', 'Kaldırmak için iznin tümleyeniyle (~izin) bit VE (&) yap.', 'Kontrol için (mevcut & izin) == izin karşılaştırmasını döndür.', 'Sabitleri dosyanın başında tanımla.'],
       example: 'KALIN, ITALIK, ALTI_CIZILI = 1, 2, 4\nstil = KALIN | ALTI_CIZILI\nprint(stil, (stil & ITALIK) == ITALIK)\nstil = stil & ~KALIN\nprint(stil)\n',
       start: 'GORUNTULE, HAVALE, ONAY, LIMIT = 1, 2, 4, 8\n\ndef izin_ekle(mevcut, izin):\n    # TODO: bit VEYA\n    return mevcut + izin\n\ndef izin_kaldir(mevcut, izin):\n    # TODO: bit VE ve tümleyen\n    return mevcut - izin\n\ndef izin_var_mi(mevcut, izin):\n    # TODO: tüm bitler var mı?\n    return bool(mevcut & izin)\n',
@@ -2763,7 +2763,7 @@ while (satir := satirlar[i]) != "":
   ]
 });
 })(window);
-/* PythonPatika v2/t2 — Terminal ve komut satırı */
+/* Kesit Python v2/t2 — Terminal ve komut satırı */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2925,7 +2925,7 @@ os.environ["ANADOLU_ORTAM"] = "test"     # yalnız bu süreç ve alt süreçleri
 print("Yeni değer:", os.environ["ANADOLU_ORTAM"])</pre>
 <div class="warn"><b>Parolayı koda yazma</b>Veritabanı parolası, API anahtarı gibi sırlar kod dosyasına değil ortam değişkenine (ya da gizli kasa/vault aracına) konur. Kod Git'e gider; ortam değişkeni gitmez. <code>os.environ["SIFRE"]</code> değişken yoksa KeyError verir, <code>.get()</code> ise None ya da varsayılanı döndürür.</div>
 
-<div class="note"><b>Gerçek işte</b>Anadolu Bank'ın gün sonu mutabakat betiği şöyle çağrılır: <code>python -m mutabakat 2026-10-27 --sube 0412 &gt; mutabakat.csv 2&gt; mutabakat.log</code>. Zamanlayıcı her gece bu komutu koşturur; veritabanı adresi <code>BANKA_DB_URL</code> ortam değişkeninden gelir. Betik çıkış kodu 0 dönerse CSV muhasebeye gider; 1 dönerse nöbetçi geliştiriciye otomatik bildirim düşer ve log dosyası incelenir. Hiç kimse ekrana bakmaz; her şeyi çıkış kodu, stdout ve stderr anlatır.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın gün sonu mutabakat betiği şöyle çağrılır: <code>python -m mutabakat 2026-10-27 --sube 0412 &gt; mutabakat.csv 2&gt; mutabakat.log</code>. Zamanlayıcı her gece bu komutu koşturur; veritabanı adresi <code>BANKA_DB_URL</code> ortam değişkeninden gelir. Betik çıkış kodu 0 dönerse CSV muhasebeye gider; 1 dönerse nöbetçi geliştiriciye otomatik bildirim düşer ve log dosyası incelenir. Hiç kimse ekrana bakmaz; her şeyi çıkış kodu, stdout ve stderr anlatır.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Test edilebilir komut satırı kalıbı</h3>
@@ -3152,7 +3152,7 @@ print("Çıkış kodu:", kod)
   ]
 });
 })(window);
-/* PythonPatika v2/t2 — Karakterler, Unicode ve Türkçe */
+/* Kesit Python v2/t2 — Karakterler, Unicode ve Türkçe */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -3283,7 +3283,7 @@ def aksansiz(metin):
 
 print(aksansiz("Çağrı Şüküroğlu Gölbaşı"))
 print(unicodedata.name("ğ"))</pre>
-<div class="note"><b>Gerçek işte</b>Anadolu Bank müşteri eşleştirme ekibi, şubelerden gelen "İSMAİL ÖZTÜRK", "ismail ozturk" ve "Ismail Öztürk" kayıtlarının aynı kişi olup olmadığını bulmak zorunda. Kullandıkları "anahtar üretici" tam olarak bu dersin adımlarıdır: NFC normalleştirme, Türkçe kurallarıyla küçük harf, aksanları silme, fazla boşlukları teke indirme. Bu anahtar üzerinden yapılan eşleştirme, mükerrer müşteri kaydını ve bunun yol açtığı yanlış risk raporlarını büyük ölçüde azaltır. E-ticaret aramasında da aynı mantık çalışır: "cagri" yazan kullanıcı "Çağrı" ürününü bulmalıdır.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank müşteri eşleştirme ekibi, şubelerden gelen "İSMAİL ÖZTÜRK", "ismail ozturk" ve "Ismail Öztürk" kayıtlarının aynı kişi olup olmadığını bulmak zorunda. Kullandıkları "anahtar üretici" tam olarak bu dersin adımlarıdır: NFC normalleştirme, Türkçe kurallarıyla küçük harf, aksanları silme, fazla boşlukları teke indirme. Bu anahtar üzerinden yapılan eşleştirme, mükerrer müşteri kaydını ve bunun yol açtığı yanlış risk raporlarını büyük ölçüde azaltır. E-ticaret aramasında da aynı mantık çalışır: "cagri" yazan kullanıcı "Çağrı" ürününü bulmalıdır.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Karakter mi, kod noktası mı, grafem mi?</h3>
@@ -3493,7 +3493,7 @@ print(unicodedata.name("ğ"))</pre>
   ]
 });
 })(window);
-/* PythonPatika v2 — dongu-kaliplari */
+/* Kesit Python v2 — dongu-kaliplari */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -3523,7 +3523,7 @@ L.push(
 
 <h2>Sayaç ve biriktirici: tek geçişte birden fazla sonuç</h2>
 <p>Bu ikisini zaten biliyorsun. Burada kazanman gereken alışkanlık: aynı veriyi birkaç kez gezmek yerine <b>tek geçişte</b> birden fazla sayaç ve biriktirici tutmak.</p>
-<pre class="py">islemler = [1200, -350, 4800, -90, -1500, 600, 0, 75]   # Anadolu Bank hesap hareketleri
+<pre class="py">islemler = [1200, -350, 4800, -90, -1500, 600, 0, 75]   # Ilgaz Bank hesap hareketleri
 
 giris_toplam = 0
 cikis_toplam = 0
@@ -3649,7 +3649,7 @@ for i in range(len(fiyatlar)):
 <p>İç içe döngüde iş sayısı çarpılır: 1000 elemanlı listede tüm çiftler yaklaşık yarım milyon karşılaştırmadır. Bu, Uzmanlaş bölümündeki karmaşıklık konusunun girişidir.</p>
 
 <h2>while: koşula kadar tekrar</h2>
-<p>Kaç tur süreceğini <b>önceden bilmediğin</b> durumlarda <code>while</code> kullanırsın. Anadolu Bank'ın klasik müşteri sorusu: "Hesabımda 10.000 TL var, aylık %3 faiz alırsam 15.000 TL'ye kaç ayda ulaşırım?"</p>
+<p>Kaç tur süreceğini <b>önceden bilmediğin</b> durumlarda <code>while</code> kullanırsın. Ilgaz Bank'ın klasik müşteri sorusu: "Hesabımda 10.000 TL var, aylık %3 faiz alırsam 15.000 TL'ye kaç ayda ulaşırım?"</p>
 <pre class="py">bakiye = 10_000
 aylik_faiz = 0.03
 hedef = 15_000
@@ -3800,7 +3800,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank birikim simülatörü: <code>kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0)</code> fonksiyonunu while ile yaz. Her ay önce faiz eklenir (<code>bakiye *= 1 + aylik_faiz</code>), sonra <code>aylik_ek</code> yatırılır. Bakiyenin <code>hedef</code>\'e ulaştığı (<code>&gt;=</code>) ay sayısını döndür. Başta zaten hedefteyse 0 döndür. Hedefe 1200 ayda (100 yıl) ulaşılamıyorsa <code>None</code> döndür.</p>',
+      q: '<p>Ilgaz Bank birikim simülatörü: <code>kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0)</code> fonksiyonunu while ile yaz. Her ay önce faiz eklenir (<code>bakiye *= 1 + aylik_faiz</code>), sonra <code>aylik_ek</code> yatırılır. Bakiyenin <code>hedef</code>\'e ulaştığı (<code>&gt;=</code>) ay sayısını döndür. Başta zaten hedefteyse 0 döndür. Hedefe 1200 ayda (100 yıl) ulaşılamıyorsa <code>None</code> döndür.</p>',
       start: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    pass\n',
       sol: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    ay = 0\n    while bakiye < hedef:\n        if ay >= 1200:\n            return None\n        bakiye *= 1 + aylik_faiz\n        bakiye += aylik_ek\n        ay += 1\n    return ay\n',
       tests: 'assert kac_ay(10000, 0.03, 15000) == 14, "10000 TL %3 ile 14. ayda 15000\'i geçer"\nassert kac_ay(1000, 0.0, 2000, 250) == 4, "faizsiz, ayda 250 ek ile 4 ay"\nassert kac_ay(5000, 0.05, 5000) == 0, "zaten hedefteyse 0 ay"\nassert kac_ay(1000, 0.0, 2000) is None, "faiz ve ek yoksa hedefe ulaşılamaz: None (sonsuz döngü olmamalı)"\nassert kac_ay(1000, 0.01, 1100, 0) == 10, "1000 × 1.01^10 ≈ 1104.6"\n',
@@ -3908,7 +3908,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
   ] }
 );
 })(window);
-/* PythonPatika v2 — ic-ice-veri */
+/* Kesit Python v2 — ic-ice-veri */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -4311,7 +4311,7 @@ for s in siparisler:
   ] }
 );
 })(window);
-/* PythonPatika v2 — match-case */
+/* Kesit Python v2 — match-case */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -4326,7 +4326,7 @@ L.push(
   body: `
 <h2>Neden yeni bir dallanma aracı?</h2>
 <p>Koşullar dersinde <code>match</code>'i kısaca gördün: bir değeri birkaç sabitle karşılaştırmanın düzenli yolu. Ama <code>match</code> aslında bundan çok daha güçlüdür. Adı <b>yapısal desen eşleme</b> (structural pattern matching): yalnızca "değer şuna eşit mi" diye sormaz, "veri <b>şu şekilde</b> mi" diye sorar ve şekle uyuyorsa parçalarını tek hamlede değişkenlere ayırır.</p>
-<p>Anadolu Bank'ın işlem kuyruğunu düşün. Kuyruğa gelen her mesaj bir sözlüktür ama türü farklıdır: havalede alıcı IBAN'ı ve tutar vardır, fatura ödemesinde kurum kodu, kart işleminde kart numarası ve taksit sayısı. if/elif ile yazarsan her dalda önce türü kontrol eder, sonra anahtarların var olup olmadığına bakar, sonra değerleri tek tek çekersin. <code>match</code> bunların üçünü tek satırda yapar.</p>
+<p>Ilgaz Bank'ın işlem kuyruğunu düşün. Kuyruğa gelen her mesaj bir sözlüktür ama türü farklıdır: havalede alıcı IBAN'ı ve tutar vardır, fatura ödemesinde kurum kodu, kart işleminde kart numarası ve taksit sayısı. if/elif ile yazarsan her dalda önce türü kontrol eder, sonra anahtarların var olup olmadığına bakar, sonra değerleri tek tek çekersin. <code>match</code> bunların üçünü tek satırda yapar.</p>
 
 <h2>Temel söz dizimi ve değer desenleri</h2>
 <pre class="py">def kargo_durumu(kod):
@@ -4569,7 +4569,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       why: '[ilk, *orta, son] en az iki elemanla eşleşir; dört elemanda orta ["b", "c"] olur, iki elemanda orta boş liste olur. Boş liste ne [ilk] ne de en az iki elemanlı desenle eşleşir, joker dala düşer.' },
     { t: 'order',
       stage: 'Kodu oku',
-      q: '<p>Anadolu Bank işlemini sözlük desenleriyle yönlendiren fonksiyonun satırlarını sırala. Büyük havale kontrolü genel havaleden önce gelmeli.</p>',
+      q: '<p>Ilgaz Bank işlemini sözlük desenleriyle yönlendiren fonksiyonun satırlarını sırala. Büyük havale kontrolü genel havaleden önce gelmeli.</p>',
       lines: ['def yonlendir(islem):', '    match islem:', '        case {"tip": "havale", "tutar": t} if t > 50000:', '            return "uyum"', '        case {"tip": "havale"}:', '            return "transfer"', '        case _:', '            return "diğer"', 'print(yonlendir({"tip": "havale", "tutar": 90000}), yonlendir({"tip": "havale", "tutar": 10}), yonlendir({}))'],
       expect: 'uyum transfer diğer\n',
       hint: 'Her case satırının hemen altında kendi return satırı gelir; özel (guard\'lı) dal genel daldan önce, joker en sonda.',
@@ -4602,7 +4602,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Anadolu Bank işlem kuyruğu için <code>islem_kanali(islem)</code> fonksiyonunu sözlük desenleriyle yaz. Dönüş değerleri:</p><ul><li><code>"tip"</code> <code>"havale"</code> ya da <code>"eft"</code> ve <code>"tutar"</code> 50000\'den büyükse → <code>"UYUM"</code></li><li><code>"tip"</code> <code>"havale"</code> ya da <code>"eft"</code> (tutar var) → <code>"TRANSFER"</code></li><li><code>"tip": "fatura"</code> ve <code>"kurum"</code> anahtarı varsa → <code>"FATURA:" + kurum</code></li><li><code>"tip"</code> anahtarı olan diğer sözlükler → <code>"DESTEKLENMIYOR"</code></li><li>geri kalan her şey (sözlük değil ya da tip yok) → <code>"GECERSIZ"</code></li></ul>',
+      q: '<p>Ilgaz Bank işlem kuyruğu için <code>islem_kanali(islem)</code> fonksiyonunu sözlük desenleriyle yaz. Dönüş değerleri:</p><ul><li><code>"tip"</code> <code>"havale"</code> ya da <code>"eft"</code> ve <code>"tutar"</code> 50000\'den büyükse → <code>"UYUM"</code></li><li><code>"tip"</code> <code>"havale"</code> ya da <code>"eft"</code> (tutar var) → <code>"TRANSFER"</code></li><li><code>"tip": "fatura"</code> ve <code>"kurum"</code> anahtarı varsa → <code>"FATURA:" + kurum</code></li><li><code>"tip"</code> anahtarı olan diğer sözlükler → <code>"DESTEKLENMIYOR"</code></li><li>geri kalan her şey (sözlük değil ya da tip yok) → <code>"GECERSIZ"</code></li></ul>',
       guide: ['En özel dalı en üste yaz: havale/eft + guard ile tutar kontrolü.', 'Birleşik deseni sözlük içinde kullan: {"tip": "havale" | "eft", "tutar": t}', 'Fatura için kurumu yakala: {"tip": "fatura", "kurum": kurum}', 'Tip anahtarı olan her sözlük için {"tip": _} ve en sonda case _:'],
       example: 'def olay(m):\n    match m:\n        case {"olay": "giris" | "cikis", "kullanici": k}:\n            return f"oturum:{k}"\n        case {"olay": _}:\n            return "bilinmeyen olay"\n        case _:\n            return "geçersiz"\n\nprint(olay({"olay": "giris", "kullanici": "ece", "ip": "1.2.3.4"}), olay({"olay": "x"}), olay([1]))\n',
       start: 'def islem_kanali(islem):\n    match islem:\n        # TODO: havale/eft ve tutar > 50000 → "UYUM"\n        # TODO: havale/eft (tutar var) → "TRANSFER"\n        # TODO: fatura + kurum → "FATURA:" + kurum\n        # TODO: tip anahtarı olan diğerleri → "DESTEKLENMIYOR"\n        case _:\n            return "GECERSIZ"\n',
@@ -4676,7 +4676,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       t: 'code',
       stage: 'Meydan okuma',
       diff: 3,
-      q: '<p>Anadolu Bank için küçük bir komut satırı simülatörü yaz: <code>banka_cli(komutlar, hesaplar)</code>. <code>hesaplar</code> hesap no → bakiye sözlüğüdür ve <b>yerinde</b> güncellenir; aktif hesap başta <code>"H-1"</code>dir. Fonksiyon her komut için bir çıktı satırı üreten listeyi döndürsün. Komutlar:</p><ul><li><code>bakiye</code> → <code>"H-1: 150.00"</code> (aktif hesap, 2 ondalık)</li><li><code>yatir TUTAR</code> → bakiyeye ekle, <code>"OK"</code></li><li><code>cek TUTAR</code> → bakiye yetmiyorsa <code>"Yetersiz bakiye"</code>, yoksa düş ve <code>"OK"</code></li><li><code>transfer TUTAR HESAP</code> → hedef hesap yoksa <code>"Hesap yok"</code>, bakiye yetmiyorsa <code>"Yetersiz bakiye"</code>, yoksa aktarıp <code>"OK"</code></li><li><code>hesap HESAP</code> → hesap varsa aktif yap ve <code>"Aktif: HESAP"</code>, yoksa <code>"Hesap yok"</code></li><li>TUTAR pozitif bir sayı olmalı (ondalıklı olabilir: <code>"12.5"</code>); değilse <code>"Geçersiz tutar"</code>. Tanınmayan komut ya da yanlış parça sayısı → <code>"Bilinmeyen komut"</code>.</li></ul>',
+      q: '<p>Ilgaz Bank için küçük bir komut satırı simülatörü yaz: <code>banka_cli(komutlar, hesaplar)</code>. <code>hesaplar</code> hesap no → bakiye sözlüğüdür ve <b>yerinde</b> güncellenir; aktif hesap başta <code>"H-1"</code>dir. Fonksiyon her komut için bir çıktı satırı üreten listeyi döndürsün. Komutlar:</p><ul><li><code>bakiye</code> → <code>"H-1: 150.00"</code> (aktif hesap, 2 ondalık)</li><li><code>yatir TUTAR</code> → bakiyeye ekle, <code>"OK"</code></li><li><code>cek TUTAR</code> → bakiye yetmiyorsa <code>"Yetersiz bakiye"</code>, yoksa düş ve <code>"OK"</code></li><li><code>transfer TUTAR HESAP</code> → hedef hesap yoksa <code>"Hesap yok"</code>, bakiye yetmiyorsa <code>"Yetersiz bakiye"</code>, yoksa aktarıp <code>"OK"</code></li><li><code>hesap HESAP</code> → hesap varsa aktif yap ve <code>"Aktif: HESAP"</code>, yoksa <code>"Hesap yok"</code></li><li>TUTAR pozitif bir sayı olmalı (ondalıklı olabilir: <code>"12.5"</code>); değilse <code>"Geçersiz tutar"</code>. Tanınmayan komut ya da yanlış parça sayısı → <code>"Bilinmeyen komut"</code>.</li></ul>',
       start: 'def banka_cli(komutlar, hesaplar):\n    pass\n',
       sol: 'def tutar_coz(metin):\n    try:\n        t = float(metin)\n    except ValueError:\n        return None\n    return t if t > 0 else None\n\ndef banka_cli(komutlar, hesaplar):\n    aktif = "H-1"\n    cikti = []\n    for satir in komutlar:\n        match satir.split():\n            case ["bakiye"]:\n                cikti.append(f"{aktif}: {hesaplar[aktif]:.2f}")\n            case ["yatir" | "cek", metin] if tutar_coz(metin) is None:\n                cikti.append("Geçersiz tutar")\n            case ["transfer", metin, _] if tutar_coz(metin) is None:\n                cikti.append("Geçersiz tutar")\n            case ["yatir", metin]:\n                hesaplar[aktif] += tutar_coz(metin)\n                cikti.append("OK")\n            case ["cek", metin]:\n                t = tutar_coz(metin)\n                if t > hesaplar[aktif]:\n                    cikti.append("Yetersiz bakiye")\n                else:\n                    hesaplar[aktif] -= t\n                    cikti.append("OK")\n            case ["transfer", metin, hedef]:\n                t = tutar_coz(metin)\n                if hedef not in hesaplar:\n                    cikti.append("Hesap yok")\n                elif t > hesaplar[aktif]:\n                    cikti.append("Yetersiz bakiye")\n                else:\n                    hesaplar[aktif] -= t\n                    hesaplar[hedef] += t\n                    cikti.append("OK")\n            case ["hesap", no] if no in hesaplar:\n                aktif = no\n                cikti.append(f"Aktif: {no}")\n            case ["hesap", _]:\n                cikti.append("Hesap yok")\n            case _:\n                cikti.append("Bilinmeyen komut")\n    return cikti\n',
       tests: 'h = {"H-1": 100.0, "H-2": 20.0}\nkomutlar = ["bakiye", "yatir 50", "cek 500", "cek 30.5", "transfer 19.5 H-2", "transfer 10 H-9",\n            "transfer 1000 H-2", "yatir -5", "cek abc", "hesap H-2", "bakiye", "hesap H-7", "uç", "yatir", "transfer 5"]\nr = banka_cli(komutlar, h)\nbeklenen = ["H-1: 100.00", "OK", "Yetersiz bakiye", "OK", "OK", "Hesap yok",\n            "Yetersiz bakiye", "Geçersiz tutar", "Geçersiz tutar", "Aktif: H-2", "H-2: 39.50", "Hesap yok", "Bilinmeyen komut", "Bilinmeyen komut", "Bilinmeyen komut"]\nassert isinstance(r, list) and len(r) == len(beklenen), f"her komut için bir çıktı satırı olmalı ({len(beklenen)} satır)"\nfor i, (gelen, bek) in enumerate(zip(r, beklenen)):\n    assert gelen == bek, f"{komutlar[i]!r} komutu için {bek!r} bekleniyordu, gelen {gelen!r}"\nassert abs(h["H-1"] - 100.0) < 1e-9, "H-1 bakiyesi 100 + 50 - 30.5 - 19.5 = 100.0 olmalı"\nassert abs(h["H-2"] - 39.5) < 1e-9, "H-2 bakiyesi 20 + 19.5 = 39.5 olmalı"\n',
@@ -4722,7 +4722,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
   ] }
 );
 })(window);
-/* PythonPatika v2 — ozyineleme */
+/* Kesit Python v2 — ozyineleme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -5023,7 +5023,7 @@ print(toplam_boyut_yigin(disk))</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 1,
-      q: '<p><code>basamak_toplami(n)</code> fonksiyonunu <b>özyinelemeyle</b> yaz: negatif olmayan bir tam sayının basamaklarının toplamını döndürsün. Örnek: <code>basamak_toplami(4071)</code> → 12. (Anadolu Bank hesap numarası kontrol hanesi hesaplarında bu tür işlemler kullanılır.) Döngü ve <code>str</code> dönüşümü kullanma.</p>',
+      q: '<p><code>basamak_toplami(n)</code> fonksiyonunu <b>özyinelemeyle</b> yaz: negatif olmayan bir tam sayının basamaklarının toplamını döndürsün. Örnek: <code>basamak_toplami(4071)</code> → 12. (Ilgaz Bank hesap numarası kontrol hanesi hesaplarında bu tür işlemler kullanılır.) Döngü ve <code>str</code> dönüşümü kullanma.</p>',
       guide: ['Temel durumu yaz: n tek basamaklıysa (n < 10) n\'nin kendisini döndür.', 'Son basamağı n % 10 ile al.', 'Geri kalan sayıyı n // 10 ile elde et.', 'Son basamak + basamak_toplami(geri kalan) döndür.'],
       example: 'def basamak_sayisi(n):\n    if n < 10:\n        return 1\n    return 1 + basamak_sayisi(n // 10)\n\nprint(basamak_sayisi(4071), basamak_sayisi(7))\n',
       start: 'def basamak_toplami(n):\n    # TODO: temel durum (tek basamak)\n    # TODO: son basamak + kalan sayının basamak toplamı\n    pass\n',
@@ -5167,7 +5167,7 @@ print(toplam_boyut_yigin(disk))</pre>
   ] }
 );
 })(window);
-/* PythonPatika — Hata ayıklama (debugging) — temel / Dosya ve Hata */
+/* Kesit Python — Hata ayıklama (debugging) — temel / Dosya ve Hata */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -5643,7 +5643,7 @@ for i, k in enumerate(kayitlar):
   ] }
 );
 })(window);
-/* PythonPatika — Temiz kod ve PEP 8 — temel / Dosya ve Hata */
+/* Kesit Python — Temiz kod ve PEP 8 — temel / Dosya ve Hata */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -5663,7 +5663,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Anadolu Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
+<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Ilgaz Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
 <p>Python topluluğunun ortak stil kılavuzu <b>PEP 8</b>'dir (Python Enhancement Proposal 8). Kuralların çoğu zevk meselesi gibi görünür ama asıl amaç tutarlılıktır: herkes aynı biçimde yazınca göz biçime değil içeriğe odaklanır. Değişken adlandırmanın temellerini "Değişkenler" dersinde gördün; burada bütün bir programa bakıyoruz.</p>
 
 <h2>Adlandırma kuralları</h2>
@@ -5994,7 +5994,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p><b>Erken dönüşle yeniden yaz.</b> Anadolu Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
+      q: '<p><b>Erken dönüşle yeniden yaz.</b> Ilgaz Bank\'ın ön onay kuralları, sırasıyla:</p><ol><li><code>yas &lt; 18</code> → <code>"red: yaş"</code></li><li><code>aylik_gelir &lt; 20000</code> → <code>"red: gelir"</code></li><li><code>borc_orani &gt; 0.5</code> → <code>"red: borç"</code></li><li>Hepsi geçerse → <code>"ön onay"</code></li></ol><p><code>kredi_on_onay(yas, aylik_gelir, borc_orani)</code> fonksiyonunu <b>else ve elif kullanmadan</b>, iç içe if olmadan (her if fonksiyon gövdesinin doğrudan içinde) yaz.</p>',
       start: 'def kredi_on_onay(yas, aylik_gelir, borc_orani):\n    if yas >= 18:\n        if aylik_gelir >= 20000:\n            if borc_orani <= 0.5:\n                return "ön onay"\n            else:\n                return "red: borç"\n        else:\n            return "red: gelir"\n    else:\n        return "red: yaş"\n',
       sol: 'def kredi_on_onay(yas, aylik_gelir, borc_orani):\n    if yas < 18:\n        return "red: yaş"\n    if aylik_gelir < 20000:\n        return "red: gelir"\n    if borc_orani > 0.5:\n        return "red: borç"\n    return "ön onay"\n',
       tests: 'import ast\nassert kredi_on_onay(17, 50000, 0.1) == "red: yaş", "17 yaş reddedilmeli"\nassert kredi_on_onay(30, 15000, 0.1) == "red: gelir", "Düşük gelir reddedilmeli"\nassert kredi_on_onay(30, 40000, 0.7) == "red: borç", "Yüksek borç oranı reddedilmeli"\nassert kredi_on_onay(18, 20000, 0.5) == "ön onay", "Sınır değerler (18, 20000, 0.5) onaylanmalı"\nassert kredi_on_onay(16, 1000, 0.9) == "red: yaş", "Kurallar sırayla denetlenmeli: önce yaş"\n_fn = [d for d in ast.walk(ast.parse(__source__)) if isinstance(d, ast.FunctionDef) and d.name == "kredi_on_onay"][0]\n_ifler = [d for d in ast.walk(_fn) if isinstance(d, ast.If)]\nassert all(not d.orelse for d in _ifler), "else/elif kullanma: geçersiz durumu return ile erkenden ele"\nassert all(d in _fn.body for d in _ifler), "İç içe if olmamalı; her if fonksiyon gövdesinin doğrudan içinde olmalı"\n',
@@ -6128,7 +6128,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
   ] }
 );
 })(window);
-/* PythonPatika — Mini projeler: oyunlar ve araçlar — temel / Bitirme */
+/* Kesit Python — Mini projeler: oyunlar ve araçlar — temel / Bitirme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -6621,7 +6621,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       t: 'code',
       stage: 'Mini proje',
       diff: 3,
-      q: '<p><b>Anadolu Bank ATM\'si.</b> <code>atm(bakiye, pin, girdi=input)</code> fonksiyonunu yaz:</p><ol><li><b>PIN:</b> <code>girdi("PIN: ")</code> ile en fazla 3 kez sor. Yanlışsa <code>Hatalı PIN. Kalan deneme: {n}</code> yazdır. Üçüncü yanlışta <code>Kart bloke edildi.</code> yazdır ve <code>None</code> döndür.</li><li><b>Menü döngüsü</b> (<code>while True</code> + <code>match</code>): <code>girdi("İşlem (1 bakiye, 2 yatır, 3 çek, 4 çıkış): ")</code><ul><li><code>"1"</code> → <code>Bakiye: {bakiye:.2f} TL</code></li><li><code>"2"</code>/<code>"3"</code> → <code>girdi("Tutar: ")</code>; tutar pozitif bir sayı (float) değilse <code>Geçersiz tutar</code>; çekmede bakiye yetmiyorsa <code>Yetersiz bakiye</code>; başarılıysa <code>Yeni bakiye: {bakiye:.2f} TL</code></li><li><code>"4"</code> → <code>İyi günler!</code> yazdır, bakiyeyi döndür</li><li>diğer → <code>Geçersiz seçim</code></li></ul></li></ol><p>Dosyanın sonunda <code>atm(1000, "1234")</code> çağrısı hazır girdilerle çalışacak.</p>',
+      q: '<p><b>Ilgaz Bank ATM\'si.</b> <code>atm(bakiye, pin, girdi=input)</code> fonksiyonunu yaz:</p><ol><li><b>PIN:</b> <code>girdi("PIN: ")</code> ile en fazla 3 kez sor. Yanlışsa <code>Hatalı PIN. Kalan deneme: {n}</code> yazdır. Üçüncü yanlışta <code>Kart bloke edildi.</code> yazdır ve <code>None</code> döndür.</li><li><b>Menü döngüsü</b> (<code>while True</code> + <code>match</code>): <code>girdi("İşlem (1 bakiye, 2 yatır, 3 çek, 4 çıkış): ")</code><ul><li><code>"1"</code> → <code>Bakiye: {bakiye:.2f} TL</code></li><li><code>"2"</code>/<code>"3"</code> → <code>girdi("Tutar: ")</code>; tutar pozitif bir sayı (float) değilse <code>Geçersiz tutar</code>; çekmede bakiye yetmiyorsa <code>Yetersiz bakiye</code>; başarılıysa <code>Yeni bakiye: {bakiye:.2f} TL</code></li><li><code>"4"</code> → <code>İyi günler!</code> yazdır, bakiyeyi döndür</li><li>diğer → <code>Geçersiz seçim</code></li></ul></li></ol><p>Dosyanın sonunda <code>atm(1000, "1234")</code> çağrısı hazır girdilerle çalışacak.</p>',
       start: 'def atm(bakiye, pin, girdi=input):\n    # TODO: PIN kontrolü (3 hak)\n    # TODO: while True + match menüsü\n    pass\n\n\natm(1000, "1234")\n',
       sol: 'MAX_PIN_DENEME = 3\n\n\ndef tutar_oku(metin):\n    try:\n        tutar = float(metin)\n    except ValueError:\n        return None\n    return tutar if tutar > 0 else None\n\n\ndef pin_dogrula(pin, girdi):\n    for deneme in range(1, MAX_PIN_DENEME + 1):\n        if girdi("PIN: ").strip() == pin:\n            return True\n        kalan = MAX_PIN_DENEME - deneme\n        if kalan:\n            print(f"Hatalı PIN. Kalan deneme: {kalan}")\n    print("Kart bloke edildi.")\n    return False\n\n\ndef atm(bakiye, pin, girdi=input):\n    if not pin_dogrula(pin, girdi):\n        return None\n    while True:\n        secim = girdi("İşlem (1 bakiye, 2 yatır, 3 çek, 4 çıkış): ").strip()\n        match secim:\n            case "1":\n                print(f"Bakiye: {bakiye:.2f} TL")\n            case "2" | "3":\n                tutar = tutar_oku(girdi("Tutar: "))\n                if tutar is None:\n                    print("Geçersiz tutar")\n                elif secim == "3" and tutar > bakiye:\n                    print("Yetersiz bakiye")\n                else:\n                    bakiye = bakiye + tutar if secim == "2" else bakiye - tutar\n                    print(f"Yeni bakiye: {bakiye:.2f} TL")\n            case "4":\n                print("İyi günler!")\n                return bakiye\n            case _:\n                print("Geçersiz seçim")\n\n\natm(1000, "1234")\n',
       stdin: ['0000', '1234', '1', '2', 'yüz', '2', '250.5', '3', '5000', '3', '-10', '7', '3', '200', '4'],

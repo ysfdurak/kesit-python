@@ -1,4 +1,4 @@
-/* PythonPatika — Orta: mulakat-kaliplari-2 (Mülakat kalıpları II) */
+/* Kesit Python — Orta: mulakat-kaliplari-2 (Mülakat kalıpları II) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -569,7 +569,7 @@ for yazilan in ["Eskisehir", "Kayseeri", "Ankra", "İzmir"]:
   }
 );
 })(window);
-/* PythonPatika v2/n6 — İş uygulamalarıyla entegrasyon */
+/* Kesit Python v2/n6 — İş uygulamalarıyla entegrasyon */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -679,7 +679,7 @@ from email import message_from_bytes, policy
 with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
     imap.login(os.environ["MAIL_KULLANICI"], os.environ["MAIL_UYGULAMA_SIFRESI"])
     imap.select("INBOX")
-    durum, veri = imap.search(None, '(UNSEEN FROM "kadikoy@anadolubank.example" SINCE 01-Oct-2024)')
+    durum, veri = imap.search(None, '(UNSEEN FROM "kadikoy@ilgazbank.example" SINCE 01-Oct-2024)')
     for num in veri[0].split():
         durum, parca = imap.fetch(num, "(RFC822)")
         ileti = message_from_bytes(parca[0][1], policy=policy.default)
@@ -687,14 +687,14 @@ with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
             if ek.get_filename().endswith(".csv"):
                 isle(ek.get_content())                     # metin ya da bayt
         imap.store(num, "+FLAGS", "\\\\Seen")               # işlendi olarak işaretle</pre>
-<p>Aşağıdaki kod Anadolu Bank'ın 15 Mart 2024 işlemlerinden ekli bir CSV içeren gerçek bir e-posta üretiyor, bayta çeviriyor (IMAP'ten böyle gelir) ve geri ayrıştırıyor:</p>
+<p>Aşağıdaki kod Ilgaz Bank'ın 15 Mart 2024 işlemlerinden ekli bir CSV içeren gerçek bir e-posta üretiyor, bayta çeviriyor (IMAP'ten böyle gelir) ve geri ayrıştırıyor:</p>
 <pre class="py">import csv
 import io
 import veri
 from email.message import EmailMessage
 from email import message_from_bytes, policy
 
-txns = veri.kayitlar("anadolu_bank", "bank_txns")
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
 
 
 def rapor_epostasi(gun):
@@ -705,8 +705,8 @@ def rapor_epostasi(gun):
         if t["txn_time"].startswith(gun):
             yazici.writerow([t["txn_id"], t["amount"], t["channel"]])
     m = EmailMessage()
-    m["From"] = "Kadıköy Şubesi &lt;kadikoy@anadolubank.example&gt;"
-    m["To"] = "operasyon@anadolubank.example"
+    m["From"] = "Kadıköy Şubesi &lt;kadikoy@ilgazbank.example&gt;"
+    m["To"] = "operasyon@ilgazbank.example"
     m["Subject"] = f"Günlük işlem raporu {gun}"
     m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")
     m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",
@@ -886,12 +886,12 @@ async def odeme(request: Request, x_imza: str = Header(...)):
       id: 'entegrasyon-saas-2',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Başlangıç kodu, Anadolu Bank Kadıköy şubesinin gönderdiği günlük rapor e-postasını (ekinde <code>bank_txns</code> verisinden o günün işlemleri CSV olarak) <b>ham bayt</b> hâlinde üretiyor; IMAP\'ten de böyle gelir. <code>eposta_ozet(ham)</code> fonksiyonunu yaz; şu sözlüğü döndürsün:</p><ul><li><code>konu</code>: Subject</li><li><code>gonderen</code>: gönderenin e-posta adresi (yalnız adres)</li><li><code>ekler</code>: ek dosya adları listesi</li><li><code>satir</code>: CSV ekindeki veri satırı sayısı</li><li><code>toplam</code>: <code>amount</code> sütununun toplamı (2 basamak)</li></ul>',
+      q: '<p>Başlangıç kodu, Ilgaz Bank Kadıköy şubesinin gönderdiği günlük rapor e-postasını (ekinde <code>bank_txns</code> verisinden o günün işlemleri CSV olarak) <b>ham bayt</b> hâlinde üretiyor; IMAP\'ten de böyle gelir. <code>eposta_ozet(ham)</code> fonksiyonunu yaz; şu sözlüğü döndürsün:</p><ul><li><code>konu</code>: Subject</li><li><code>gonderen</code>: gönderenin e-posta adresi (yalnız adres)</li><li><code>ekler</code>: ek dosya adları listesi</li><li><code>satir</code>: CSV ekindeki veri satırı sayısı</li><li><code>toplam</code>: <code>amount</code> sütununun toplamı (2 basamak)</li></ul>',
       guide: ['<code>message_from_bytes(ham, policy=policy.default)</code> ile ayrıştır.', 'Gönderen adresi: <code>ileti["from"].addresses[0].addr_spec</code>.', '<code>ileti.iter_attachments()</code> ile ekleri gez; <code>get_filename()</code> ve <code>get_content()</code> kullan.', 'CSV metnini <code>csv.DictReader(io.StringIO(...))</code> ile oku, satırları say ve tutarları topla.'],
       example: 'from email.message import EmailMessage\nfrom email import message_from_bytes, policy\nm = EmailMessage()\nm["From"] = "Depo <depo@market.example>"\nm["Subject"] = "Stok"\nm.set_content("ekte")\nm.add_attachment(b"x\\n1\\n", maintype="text", subtype="csv", filename="stok.csv")\ng = message_from_bytes(m.as_bytes(), policy=policy.default)\nprint(g["from"].addresses[0].addr_spec, [e.get_filename() for e in g.iter_attachments()])\n',
-      start: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@anadolubank.example>"\n    m["To"] = "operasyon@anadolubank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\n\nham = rapor_epostasi("2024-03-15")\n\n\ndef eposta_ozet(ham):\n    ileti = message_from_bytes(ham, policy=policy.default)\n    ozet = {"konu": ileti["subject"], "gonderen": None, "ekler": [], "satir": 0, "toplam": 0.0}\n    # TODO 1: gönderen adresini al\n    # TODO 2: ekleri gez; adları topla, CSV satırlarını say ve tutarları topla\n    return ozet\n',
-      sol: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@anadolubank.example>"\n    m["To"] = "operasyon@anadolubank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\n\nham = rapor_epostasi("2024-03-15")\n\n\ndef eposta_ozet(ham):\n    ileti = message_from_bytes(ham, policy=policy.default)\n    ozet = {"konu": ileti["subject"], "gonderen": ileti["from"].addresses[0].addr_spec,\n            "ekler": [], "satir": 0, "toplam": 0.0}\n    for ek in ileti.iter_attachments():\n        ozet["ekler"].append(ek.get_filename())\n        if ek.get_filename().endswith(".csv"):\n            satirlar = list(csv.DictReader(io.StringIO(ek.get_content())))\n            ozet["satir"] += len(satirlar)\n            ozet["toplam"] += sum(float(s["amount"]) for s in satirlar)\n    ozet["toplam"] = round(ozet["toplam"], 2)\n    return ozet\n\n\nprint(eposta_ozet(ham))\n',
-      tests: 'r = eposta_ozet(ham)\nassert r == {"konu": "Günlük işlem raporu 2024-03-15", "gonderen": "kadikoy@anadolubank.example", "ekler": ["islemler_2024-03-15.csv"], "satir": 151, "toplam": 77044.94}, "Özet tutmuyor: " + str(r)\nr2 = eposta_ozet(rapor_epostasi("2024-03-14"))\nassert (r2["satir"], r2["toplam"]) == (129, -20446.46), "14 Mart: 129 satır, -20446.46; gelen " + str((r2["satir"], r2["toplam"]))\n',
+      start: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@ilgazbank.example>"\n    m["To"] = "operasyon@ilgazbank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\n\nham = rapor_epostasi("2024-03-15")\n\n\ndef eposta_ozet(ham):\n    ileti = message_from_bytes(ham, policy=policy.default)\n    ozet = {"konu": ileti["subject"], "gonderen": None, "ekler": [], "satir": 0, "toplam": 0.0}\n    # TODO 1: gönderen adresini al\n    # TODO 2: ekleri gez; adları topla, CSV satırlarını say ve tutarları topla\n    return ozet\n',
+      sol: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@ilgazbank.example>"\n    m["To"] = "operasyon@ilgazbank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\n\nham = rapor_epostasi("2024-03-15")\n\n\ndef eposta_ozet(ham):\n    ileti = message_from_bytes(ham, policy=policy.default)\n    ozet = {"konu": ileti["subject"], "gonderen": ileti["from"].addresses[0].addr_spec,\n            "ekler": [], "satir": 0, "toplam": 0.0}\n    for ek in ileti.iter_attachments():\n        ozet["ekler"].append(ek.get_filename())\n        if ek.get_filename().endswith(".csv"):\n            satirlar = list(csv.DictReader(io.StringIO(ek.get_content())))\n            ozet["satir"] += len(satirlar)\n            ozet["toplam"] += sum(float(s["amount"]) for s in satirlar)\n    ozet["toplam"] = round(ozet["toplam"], 2)\n    return ozet\n\n\nprint(eposta_ozet(ham))\n',
+      tests: 'r = eposta_ozet(ham)\nassert r == {"konu": "Günlük işlem raporu 2024-03-15", "gonderen": "kadikoy@ilgazbank.example", "ekler": ["islemler_2024-03-15.csv"], "satir": 151, "toplam": 77044.94}, "Özet tutmuyor: " + str(r)\nr2 = eposta_ozet(rapor_epostasi("2024-03-14"))\nassert (r2["satir"], r2["toplam"]) == (129, -20446.46), "14 Mart: 129 satır, -20446.46; gelen " + str((r2["satir"], r2["toplam"]))\n',
       hints: ['Adres nesnesi: <code>ileti["from"].addresses[0]</code>; <code>.addr_spec</code> yalnız adresi, <code>.display_name</code> görünen adı verir.', 'text/csv ekin <code>get_content()</code>\'i metin (str) döndürür.', 'Tutarlar CSV\'den metin gelir: <code>float(s["amount"])</code>.'],
       why: 'IMAP yalnız ham baytı getirir; başlık çözme, MIME parçalarını gezme ve ek kodlamasını (base64) açma işi email modülündedir. Aynı fonksiyon, gerçek posta kutusundan gelen iletiyle değişmeden çalışır: test edilebilir entegrasyonun sırrı ağ kısmını incecik tutmaktır.'
     },
@@ -954,8 +954,8 @@ async def odeme(request: Request, x_imza: str = Header(...)):
       diff: 2,
       q: '<p>imaplib\'in <code>search</code> metoduna verilecek ölçüt metnini üret. <code>imap_kriteri(kimden=None, konu=None, sonra=None, okunmamis=False)</code>:</p><ul><li><code>okunmamis</code> True ise <code>UNSEEN</code></li><li><code>kimden</code> varsa <code>FROM "..."</code></li><li><code>konu</code> varsa <code>SUBJECT "..."</code></li><li><code>sonra</code> bir <code>datetime.date</code> ise <code>SINCE 01-Oct-2024</code> biçimi (ay İngilizce üç harf, gün iki hane; yerel ayara bağlı <code>strftime("%b")</code> kullanma)</li></ul><p>Parçalar bu sırayla, tek boşlukla ve parantez içinde birleşsin: <code>(UNSEEN FROM "a@b" SINCE 01-Oct-2024)</code>. Hiç ölçüt yoksa <code>"ALL"</code>. Değerlerdeki çift tırnak <code>\\"</code> olarak kaçırılsın.</p>',
       start: 'from datetime import date\n\n\ndef imap_kriteri(kimden=None, konu=None, sonra=None, okunmamis=False):\n    pass\n',
-      sol: 'from datetime import date\n\nAYLAR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]\n\n\ndef _tirnak(s):\n    return \'"\' + s.replace(\'"\', \'\\\\"\') + \'"\'\n\n\ndef imap_kriteri(kimden=None, konu=None, sonra=None, okunmamis=False):\n    parcalar = []\n    if okunmamis:\n        parcalar.append("UNSEEN")\n    if kimden:\n        parcalar.append("FROM " + _tirnak(kimden))\n    if konu:\n        parcalar.append("SUBJECT " + _tirnak(konu))\n    if sonra:\n        parcalar.append(f"SINCE {sonra.day:02d}-{AYLAR[sonra.month - 1]}-{sonra.year}")\n    return "(" + " ".join(parcalar) + ")" if parcalar else "ALL"\n\n\nprint(imap_kriteri("kadikoy@anadolubank.example", sonra=date(2024, 10, 1), okunmamis=True))\n',
-      tests: 'assert imap_kriteri("kadikoy@anadolubank.example", sonra=date(2024, 10, 1), okunmamis=True) == \'(UNSEEN FROM "kadikoy@anadolubank.example" SINCE 01-Oct-2024)\', "Örnek ölçüt tutmuyor"\nassert imap_kriteri(konu="Günlük rapor") == \'(SUBJECT "Günlük rapor")\', "Yalnız konu"\nassert imap_kriteri(sonra=date(2025, 3, 9)) == "(SINCE 09-Mar-2025)", "Gün iki haneli, ay İngilizce"\nassert imap_kriteri() == "ALL", "Ölçüt yoksa ALL"\nassert imap_kriteri(konu=\'Rapor "Mart"\') == \'(SUBJECT "Rapor \\\\"Mart\\\\"")\', "Çift tırnak kaçırılmalı"\n',
+      sol: 'from datetime import date\n\nAYLAR = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"]\n\n\ndef _tirnak(s):\n    return \'"\' + s.replace(\'"\', \'\\\\"\') + \'"\'\n\n\ndef imap_kriteri(kimden=None, konu=None, sonra=None, okunmamis=False):\n    parcalar = []\n    if okunmamis:\n        parcalar.append("UNSEEN")\n    if kimden:\n        parcalar.append("FROM " + _tirnak(kimden))\n    if konu:\n        parcalar.append("SUBJECT " + _tirnak(konu))\n    if sonra:\n        parcalar.append(f"SINCE {sonra.day:02d}-{AYLAR[sonra.month - 1]}-{sonra.year}")\n    return "(" + " ".join(parcalar) + ")" if parcalar else "ALL"\n\n\nprint(imap_kriteri("kadikoy@ilgazbank.example", sonra=date(2024, 10, 1), okunmamis=True))\n',
+      tests: 'assert imap_kriteri("kadikoy@ilgazbank.example", sonra=date(2024, 10, 1), okunmamis=True) == \'(UNSEEN FROM "kadikoy@ilgazbank.example" SINCE 01-Oct-2024)\', "Örnek ölçüt tutmuyor"\nassert imap_kriteri(konu="Günlük rapor") == \'(SUBJECT "Günlük rapor")\', "Yalnız konu"\nassert imap_kriteri(sonra=date(2025, 3, 9)) == "(SINCE 09-Mar-2025)", "Gün iki haneli, ay İngilizce"\nassert imap_kriteri() == "ALL", "Ölçüt yoksa ALL"\nassert imap_kriteri(konu=\'Rapor "Mart"\') == \'(SUBJECT "Rapor \\\\"Mart\\\\"")\', "Çift tırnak kaçırılmalı"\n',
       hints: ['Parçaları bir listede topla, sonda <code>" ".join</code>.', 'Ay adları için sabit bir liste kullan: <code>["Jan", "Feb", ...]</code>; <code>%b</code> Türkçe yerel ayarda \'Eki\' yazabilir.', 'Kaçırma: <code>s.replace(\'"\', \'\\\\"\')</code>.'],
       why: 'IMAP tarih biçimi (RFC 3501) İngilizce ay kısaltması ister; Türkçe yerel ayarlı bir sunucuda strftime(\'%b\') farklı sonuç verip aramayı sessizce boşaltır. Ölçütü saf bir fonksiyonla üretmek onu test edilebilir yapar. Türkçe konu araması için <code>imap.search("UTF-8", ...)</code> ya da sunucu desteği gerekir.'
     },
@@ -965,8 +965,8 @@ async def odeme(request: Request, x_imza: str = Header(...)):
       stage: 'Kendin yaz',
       diff: 2,
       q: '<p>Ek işleme hattı. Başlangıç kodu şubeden gelen 4 e-postayı ham bayt olarak üretiyor: 13, 14 ve 15 Mart 2024\'ün CSV ekli raporları (<code>bank_txns</code>\'ten), bir de eki PDF olan bir ileti. <code>gunluk_toplamlar(epostalar)</code> yaz: yalnız <code>islemler_YYYY-MM-DD.csv</code> adındaki ekleri işle, tarihi dosya adından al ve <code>{tarih: (satir_sayisi, tutar_toplami)}</code> döndür (toplam 2 basamak). Aynı tarih iki kez gelirse (yeniden gönderim) ikinci kez sayma.</p>',
-      start: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@anadolubank.example>"\n    m["To"] = "operasyon@anadolubank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\nimport re\n\npdfli = EmailMessage()\npdfli["From"] = "kadikoy@anadolubank.example"\npdfli["Subject"] = "Sözleşme"\npdfli.set_content("ekte")\npdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")\nepostalar = [rapor_epostasi("2024-03-13"), pdfli.as_bytes(), rapor_epostasi("2024-03-14"),\n             rapor_epostasi("2024-03-15"), rapor_epostasi("2024-03-14")]\n\n\ndef gunluk_toplamlar(epostalar):\n    pass\n',
-      sol: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@anadolubank.example>"\n    m["To"] = "operasyon@anadolubank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\nimport re\n\npdfli = EmailMessage()\npdfli["From"] = "kadikoy@anadolubank.example"\npdfli["Subject"] = "Sözleşme"\npdfli.set_content("ekte")\npdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")\nepostalar = [rapor_epostasi("2024-03-13"), pdfli.as_bytes(), rapor_epostasi("2024-03-14"),\n             rapor_epostasi("2024-03-15"), rapor_epostasi("2024-03-14")]\n\n\ndef gunluk_toplamlar(epostalar):\n    sonuc = {}\n    for ham in epostalar:\n        ileti = message_from_bytes(ham, policy=policy.default)\n        for ek in ileti.iter_attachments():\n            m = re.fullmatch(r"islemler_(\\d{4}-\\d{2}-\\d{2})\\.csv", ek.get_filename() or "")\n            if not m or m.group(1) in sonuc:\n                continue\n            satirlar = list(csv.DictReader(io.StringIO(ek.get_content())))\n            sonuc[m.group(1)] = (len(satirlar), round(sum(float(s["amount"]) for s in satirlar), 2))\n    return sonuc\n\n\nprint(gunluk_toplamlar(epostalar))\n',
+      start: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@ilgazbank.example>"\n    m["To"] = "operasyon@ilgazbank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\nimport re\n\npdfli = EmailMessage()\npdfli["From"] = "kadikoy@ilgazbank.example"\npdfli["Subject"] = "Sözleşme"\npdfli.set_content("ekte")\npdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")\nepostalar = [rapor_epostasi("2024-03-13"), pdfli.as_bytes(), rapor_epostasi("2024-03-14"),\n             rapor_epostasi("2024-03-15"), rapor_epostasi("2024-03-14")]\n\n\ndef gunluk_toplamlar(epostalar):\n    pass\n',
+      sol: 'import csv\nimport io\nimport veri\nfrom email.message import EmailMessage\nfrom email import message_from_bytes, policy\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef rapor_epostasi(gun):\n    tampon = io.StringIO()\n    yazici = csv.writer(tampon)\n    yazici.writerow(["txn_id", "amount", "channel"])\n    for t in txns:\n        if t["txn_time"].startswith(gun):\n            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])\n    m = EmailMessage()\n    m["From"] = "Kadıköy Şubesi <kadikoy@ilgazbank.example>"\n    m["To"] = "operasyon@ilgazbank.example"\n    m["Subject"] = f"Günlük işlem raporu {gun}"\n    m.set_content("Merhaba,\\nGünlük işlem dökümü ektedir.")\n    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",\n                     filename=f"islemler_{gun}.csv")\n    return m.as_bytes()\n\nimport re\n\npdfli = EmailMessage()\npdfli["From"] = "kadikoy@ilgazbank.example"\npdfli["Subject"] = "Sözleşme"\npdfli.set_content("ekte")\npdfli.add_attachment(b"%PDF-1.4 ...", maintype="application", subtype="pdf", filename="sozlesme.pdf")\nepostalar = [rapor_epostasi("2024-03-13"), pdfli.as_bytes(), rapor_epostasi("2024-03-14"),\n             rapor_epostasi("2024-03-15"), rapor_epostasi("2024-03-14")]\n\n\ndef gunluk_toplamlar(epostalar):\n    sonuc = {}\n    for ham in epostalar:\n        ileti = message_from_bytes(ham, policy=policy.default)\n        for ek in ileti.iter_attachments():\n            m = re.fullmatch(r"islemler_(\\d{4}-\\d{2}-\\d{2})\\.csv", ek.get_filename() or "")\n            if not m or m.group(1) in sonuc:\n                continue\n            satirlar = list(csv.DictReader(io.StringIO(ek.get_content())))\n            sonuc[m.group(1)] = (len(satirlar), round(sum(float(s["amount"]) for s in satirlar), 2))\n    return sonuc\n\n\nprint(gunluk_toplamlar(epostalar))\n',
       tests: 'r = gunluk_toplamlar(epostalar)\nassert r == {"2024-03-13": (142, 98070.49), "2024-03-14": (129, -20446.46), "2024-03-15": (151, 77044.94)}, "Günlük toplamlar tutmuyor: " + str(r)\nassert gunluk_toplamlar([pdfli.as_bytes()]) == {}, "Yalnız PDF ekli iletide sonuç boş olmalı"\n',
       hints: ['Dosya adını <code>re.fullmatch(r"islemler_(\\d{4}-\\d{2}-\\d{2})\\.csv", ad)</code> ile denetle ve tarihi gruptan al.', 'Tarih sözlükte zaten varsa <code>continue</code>.', 'PDF eki eşleşmediği için kendiliğinden atlanır.'],
       why: 'Ek işleme hattında dosya adı sözleşmesi (naming convention) hem filtre hem de anahtar olur. Şubeler raporu yeniden gönderdiğinde aynı günü iki kez saymamak için tarihle tekilleştirmek gerekir; üretimde işlenen ileti kimlikleri (Message-ID) ayrıca saklanır.'
@@ -1089,7 +1089,7 @@ async def odeme(request: Request, x_imza: str = Header(...)):
   ]
 });
 })(window);
-/* PythonPatika v2/n6 — PDF ve Word belgeleriyle otomasyon */
+/* Kesit Python v2/n6 — PDF ve Word belgeleriyle otomasyon */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -1099,7 +1099,7 @@ L.push({
   mod: 'Otomasyon ve Araçlar',
   min: 55,
   title: 'PDF ve Word belgeleriyle otomasyon',
-  sum: 'PDF\'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve ekstre alanı ayıklamayı, string.Template, Jinja2 ve docxtpl ile şablon doldurmayı, toplu işlemde hata dayanıklılığını ve KVKK maskelemeyi Lezzet Kurye ve Anadolu Bank verisiyle öğrenirsin.',
+  sum: 'PDF\'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve ekstre alanı ayıklamayı, string.Template, Jinja2 ve docxtpl ile şablon doldurmayı, toplu işlemde hata dayanıklılığını ve KVKK maskelemeyi Lezzet Kurye ve Ilgaz Bank verisiyle öğrenirsin.',
   needs: ['jinja2'],
   goals: [
     'Dijital ve taranmış PDF\'i ayırt edip pypdf, pdfplumber ya da OCR arasında doğru aracı seçebilirim.',
@@ -1380,11 +1380,11 @@ print(kvkk_maskele("İletişim: irem.celik@ornek.com, 0532 123 45 67, IBAN TR33 
       id: 'pdf-word-otomasyon-2',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>Başlangıç kodu, Anadolu Bank\'ın 100583 numaralı hesabının Mart 2024 ekstresini (<code>bank_txns</code> verisinden) pdfplumber çıktısı gibi metne döküyor. <code>ekstre_satirlari(metin)</code> fonksiyonunu yaz: başlık ve sayfa satırlarını atlayıp her işlem satırından <code>{"tarih": "2024-03-03", "tur": "HAVALE_GIRIS", "tutar": 3300.0}</code> sözlüğü üretsin. Sonra <code>ekstre_ozet(satirlar)</code>: <code>(toplam_giris, toplam_cikis, adet)</code> döndürsün (çıkış negatif, 2 basamak).</p>',
+      q: '<p>Başlangıç kodu, Ilgaz Bank\'ın 100583 numaralı hesabının Mart 2024 ekstresini (<code>bank_txns</code> verisinden) pdfplumber çıktısı gibi metne döküyor. <code>ekstre_satirlari(metin)</code> fonksiyonunu yaz: başlık ve sayfa satırlarını atlayıp her işlem satırından <code>{"tarih": "2024-03-03", "tur": "HAVALE_GIRIS", "tutar": 3300.0}</code> sözlüğü üretsin. Sonra <code>ekstre_ozet(satirlar)</code>: <code>(toplam_giris, toplam_cikis, adet)</code> döndürsün (çıkış negatif, 2 basamak).</p>',
       guide: ['Önce <code>print(ekstre)</code> ile satır biçimini incele.', 'Satır kalıbı: tarih, saat, tür, kanal ve tutar; aralarında bir ya da daha fazla boşluk var.', '<code>re.finditer(kalip, metin, re.M)</code> ile tüm eşleşmeleri gez, tarihi ISO\'ya, tutarı float\'a çevir.', 'Özette pozitifleri ve negatifleri ayrı topla, <code>round(..., 2)</code> uygula.'],
       example: 'import re\nmetin = "BAŞLIK\\n01.02.2024 KIRA -5.000,00\\n02.02.2024 MAAS 40.000,00\\nSayfa 1"\nfor m in re.finditer(r"^(\\d{2})\\.(\\d{2})\\.(\\d{4}) (\\S+) (-?[\\d.]+,\\d{2})$", metin, re.M):\n    print(m.group(4), float(m.group(5).replace(".", "").replace(",", ".")))\n',
-      start: 'import veri\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef tr_para(x):\n    return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")\n\n\n# pdfplumber\'ın page.extract_text() çıktısını taklit eden ekstre metni\nsatirlar = ["ANADOLU BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]\nfor t in txns:\n    if t["account_id"] == 100583 and t["txn_time"].startswith("2024-03"):\n        g, s = t["txn_time"].split()\n        tarih = ".".join(reversed(g.split("-")))\n        satirlar.append(f"{tarih} {s[:5]}  {t[\'txn_type\'].upper()}  {t[\'channel\'].upper()}  {tr_para(t[\'amount\'])}")\nsatirlar.append("Sayfa 1/1")\nekstre = "\\n".join(satirlar)\n\nimport re\n\n\ndef ekstre_satirlari(metin):\n    sonuc = []\n    # TODO: işlem satırlarını regex ile ayıkla\n    return sonuc\n\n\ndef ekstre_ozet(satirlar):\n    # TODO: (giriş toplamı, çıkış toplamı, adet)\n    return 0, 0, 0\n',
-      sol: 'import veri\n\ntxns = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef tr_para(x):\n    return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")\n\n\n# pdfplumber\'ın page.extract_text() çıktısını taklit eden ekstre metni\nsatirlar = ["ANADOLU BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]\nfor t in txns:\n    if t["account_id"] == 100583 and t["txn_time"].startswith("2024-03"):\n        g, s = t["txn_time"].split()\n        tarih = ".".join(reversed(g.split("-")))\n        satirlar.append(f"{tarih} {s[:5]}  {t[\'txn_type\'].upper()}  {t[\'channel\'].upper()}  {tr_para(t[\'amount\'])}")\nsatirlar.append("Sayfa 1/1")\nekstre = "\\n".join(satirlar)\n\nimport re\n\nKALIP = r"^(\\d{2})\\.(\\d{2})\\.(\\d{4}) \\d{2}:\\d{2}\\s+(\\S+)\\s+\\S+\\s+(-?[\\d.]+,\\d{2})$"\n\n\ndef ekstre_satirlari(metin):\n    sonuc = []\n    for m in re.finditer(KALIP, metin, re.M):\n        g, a, y, tur, tutar = m.groups()\n        sonuc.append({"tarih": f"{y}-{a}-{g}", "tur": tur,\n                      "tutar": float(tutar.replace(".", "").replace(",", "."))})\n    return sonuc\n\n\ndef ekstre_ozet(satirlar):\n    giris = round(sum(s["tutar"] for s in satirlar if s["tutar"] > 0), 2)\n    cikis = round(sum(s["tutar"] for s in satirlar if s["tutar"] < 0), 2)\n    return giris, cikis, len(satirlar)\n\n\nprint(ekstre)\ns = ekstre_satirlari(ekstre)\nprint(s[0])\nprint(ekstre_ozet(s))\n',
+      start: 'import veri\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef tr_para(x):\n    return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")\n\n\n# pdfplumber\'ın page.extract_text() çıktısını taklit eden ekstre metni\nsatirlar = ["ILGAZ BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]\nfor t in txns:\n    if t["account_id"] == 100583 and t["txn_time"].startswith("2024-03"):\n        g, s = t["txn_time"].split()\n        tarih = ".".join(reversed(g.split("-")))\n        satirlar.append(f"{tarih} {s[:5]}  {t[\'txn_type\'].upper()}  {t[\'channel\'].upper()}  {tr_para(t[\'amount\'])}")\nsatirlar.append("Sayfa 1/1")\nekstre = "\\n".join(satirlar)\n\nimport re\n\n\ndef ekstre_satirlari(metin):\n    sonuc = []\n    # TODO: işlem satırlarını regex ile ayıkla\n    return sonuc\n\n\ndef ekstre_ozet(satirlar):\n    # TODO: (giriş toplamı, çıkış toplamı, adet)\n    return 0, 0, 0\n',
+      sol: 'import veri\n\ntxns = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef tr_para(x):\n    return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")\n\n\n# pdfplumber\'ın page.extract_text() çıktısını taklit eden ekstre metni\nsatirlar = ["ILGAZ BANK HESAP EKSTRESİ", "Hesap No: 100583   Dönem: 03/2024", ""]\nfor t in txns:\n    if t["account_id"] == 100583 and t["txn_time"].startswith("2024-03"):\n        g, s = t["txn_time"].split()\n        tarih = ".".join(reversed(g.split("-")))\n        satirlar.append(f"{tarih} {s[:5]}  {t[\'txn_type\'].upper()}  {t[\'channel\'].upper()}  {tr_para(t[\'amount\'])}")\nsatirlar.append("Sayfa 1/1")\nekstre = "\\n".join(satirlar)\n\nimport re\n\nKALIP = r"^(\\d{2})\\.(\\d{2})\\.(\\d{4}) \\d{2}:\\d{2}\\s+(\\S+)\\s+\\S+\\s+(-?[\\d.]+,\\d{2})$"\n\n\ndef ekstre_satirlari(metin):\n    sonuc = []\n    for m in re.finditer(KALIP, metin, re.M):\n        g, a, y, tur, tutar = m.groups()\n        sonuc.append({"tarih": f"{y}-{a}-{g}", "tur": tur,\n                      "tutar": float(tutar.replace(".", "").replace(",", "."))})\n    return sonuc\n\n\ndef ekstre_ozet(satirlar):\n    giris = round(sum(s["tutar"] for s in satirlar if s["tutar"] > 0), 2)\n    cikis = round(sum(s["tutar"] for s in satirlar if s["tutar"] < 0), 2)\n    return giris, cikis, len(satirlar)\n\n\nprint(ekstre)\ns = ekstre_satirlari(ekstre)\nprint(s[0])\nprint(ekstre_ozet(s))\n',
       tests: 's = ekstre_satirlari(ekstre)\nassert len(s) == 9, "Mart ekstresinde 9 işlem olmalı; başlık ve \'Sayfa 1/1\' satırı alınmamalı. Gelen " + str(len(s))\nassert s[0] == {"tarih": "2024-03-03", "tur": "HAVALE_GIRIS", "tutar": 3300.0}, "İlk satır: " + str(s[0])\nassert s[1]["tutar"] == -1235.25, "Negatif tutar korunmalı: -1.235,25 -> -1235.25"\nassert ekstre_ozet(s) == (49400.0, -9984.5, 9), "Özet (49400.0, -9984.5, 9) olmalı; gelen " + str(ekstre_ozet(s))\n',
       hints: ['Tutar kalıbı: <code>(-?[\\d.]+,\\d{2})</code>; satır sonuna <code>$</code> ile çapala.', 'Kanal sütununu yakalaman gerekmez: <code>\\s+\\S+\\s+</code> ile atla.', 'Çevirme: <code>float(t.replace(".", "").replace(",", "."))</code>.'],
       why: 'Ekstre ayıklamada satır kalıbını dar tutmak (tarih ile başla, tutarla bit) başlık, alt bilgi ve sayfa numarası gibi gürültüyü kendiliğinden eler. Toplamları bankanın ekstre altındaki toplamla karşılaştırmak, ayıklamanın eksiksiz olduğunu kanıtlar.'
@@ -1408,11 +1408,11 @@ print(kvkk_maskele("İletişim: irem.celik@ornek.com, 0532 123 45 67, IBAN TR33 
       id: 'pdf-word-otomasyon-4',
       stage: 'Rehberli',
       diff: 2,
-      q: '<p>KVKK için müşteri adlarını maskele. <code>isim_maskele(ad_soyad)</code>: her kelimenin ilk harfi kalsın, kalan harfler <code>*</code> olsun (<code>"İrem Çelik"</code> → <code>"İ*** Ç****"</code>). Fazla boşluklar tek boşluğa insin. Ardından <code>maskeli_rapor(musteriler, sehir)</code>: <code>veri.kayitlar("anadolu_bank", "bank_customers")</code> listesinden verilen şehirdeki <b>pazarlama izni olmayan</b> (<code>kvkk_consent == 0</code>) müşterileri <code>(customer_id, maskeli_ad)</code> listesi olarak döndürsün (kimliğe göre sıralı).</p>',
+      q: '<p>KVKK için müşteri adlarını maskele. <code>isim_maskele(ad_soyad)</code>: her kelimenin ilk harfi kalsın, kalan harfler <code>*</code> olsun (<code>"İrem Çelik"</code> → <code>"İ*** Ç****"</code>). Fazla boşluklar tek boşluğa insin. Ardından <code>maskeli_rapor(musteriler, sehir)</code>: <code>veri.kayitlar("ilgaz_bank", "bank_customers")</code> listesinden verilen şehirdeki <b>pazarlama izni olmayan</b> (<code>kvkk_consent == 0</code>) müşterileri <code>(customer_id, maskeli_ad)</code> listesi olarak döndürsün (kimliğe göre sıralı).</p>',
       guide: ['<code>ad_soyad.split()</code> fazla boşlukları da temizler.', 'Her kelime için <code>k[0] + "*" * (len(k) - 1)</code>.', 'Kelimeleri <code>" ".join(...)</code> ile birleştir.', 'Raporda şehir ve izin koşuluyla süz, <code>isim_maskele</code> uygula, kimliğe göre sırala.'],
       example: 'kart = "4543 1234 5678 9012"\ngruplar = kart.split()\nprint(" ".join(g if i in (0, len(gruplar) - 1) else "*" * len(g) for i, g in enumerate(gruplar)))\n',
-      start: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef isim_maskele(ad_soyad):\n    kelimeler = ad_soyad.split()\n    # TODO 1: her kelimeyi maskele ve birleştir\n    return ad_soyad\n\n\ndef maskeli_rapor(musteriler, sehir):\n    # TODO 2: şehir + izin yok koşuluyla süz, maskele, sırala\n    return []\n',
-      sol: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef isim_maskele(ad_soyad):\n    kelimeler = ad_soyad.split()\n    return " ".join(k[0] + "*" * (len(k) - 1) for k in kelimeler)\n\n\ndef maskeli_rapor(musteriler, sehir):\n    return sorted((m["customer_id"], isim_maskele(m["full_name"]))\n                  for m in musteriler if m["city"] == sehir and m["kvkk_consent"] == 0)\n\n\nr = maskeli_rapor(musteriler, "Ankara")\nprint(len(r), r[:3])\n',
+      start: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef isim_maskele(ad_soyad):\n    kelimeler = ad_soyad.split()\n    # TODO 1: her kelimeyi maskele ve birleştir\n    return ad_soyad\n\n\ndef maskeli_rapor(musteriler, sehir):\n    # TODO 2: şehir + izin yok koşuluyla süz, maskele, sırala\n    return []\n',
+      sol: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef isim_maskele(ad_soyad):\n    kelimeler = ad_soyad.split()\n    return " ".join(k[0] + "*" * (len(k) - 1) for k in kelimeler)\n\n\ndef maskeli_rapor(musteriler, sehir):\n    return sorted((m["customer_id"], isim_maskele(m["full_name"]))\n                  for m in musteriler if m["city"] == sehir and m["kvkk_consent"] == 0)\n\n\nr = maskeli_rapor(musteriler, "Ankara")\nprint(len(r), r[:3])\n',
       tests: 'r = maskeli_rapor(musteriler, "Ankara")\nassert len(r) == 15, "Ankara\'da izni olmayan 15 müşteri olmalı; gelen " + str(len(r))\nassert r[:3] == [(2, "T**** Ş*****"), (5, "G**** Y*****"), (6, "S**** Y*******")], "İlk üç kayıt: " + str(r[:3])\nassert isim_maskele("İrem Çelik") == "İ*** Ç****", "İrem Çelik -> İ*** Ç****"\nassert isim_maskele("  Ali   Rıza  Kaya ") == "A** R*** K***", "Fazla boşluk tek boşluğa inmeli"\nassert all("*" in ad for _, ad in r), "Raporda maskelenmemiş ad olmamalı"\n',
       hints: ['Liste/üreteç ifadesi: <code>" ".join(k[0] + "*" * (len(k) - 1) for k in kelimeler)</code>.', 'Raporda demetleri <code>sorted</code> ile sıralamak ilk elemana (kimlik) göre sıralar.'],
       why: 'Maskeyi raporu üreten fonksiyonun içinde, kaynağa en yakın yerde uygulamak ham adın ileriki adımlara (dosya, e-posta, log) sızmasını engeller. İlk harfi bırakmak, operasyon ekibinin kaydı tanımasına yeter ama kimliği açık etmez.'
@@ -1580,7 +1580,7 @@ print(kvkk_maskele("İletişim: irem.celik@ornek.com, 0532 123 45 67, IBAN TR33 
   ]
 });
 })(window);
-/* PythonPatika — Orta: prompt-muhendisligi (istem mühendisliği ve yapılandırılmış çıktı) */
+/* Kesit Python — Orta: prompt-muhendisligi (istem mühendisliği ve yapılandırılmış çıktı) */
 // needs: pydantic, jinja2, numpy
 (function (W) {
 'use strict';
@@ -2281,7 +2281,7 @@ print(s.ad, "v" + str(s.surum), s.parmak_izi, "|", s.aciklama)</pre>
   }
 );
 })(window);
-/* PythonPatika — Orta: Kapsam ve kapanışlar (closures) derinlemesine */
+/* Kesit Python — Orta: Kapsam ve kapanışlar (closures) derinlemesine */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2301,7 +2301,7 @@ L.push({
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Anadolu Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
+<p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Ilgaz Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
 <p>Fonksiyonel araçlar dersinde kapanışla ilk kez tanıştın (sayaç ve komisyon hesaplayıcı yazdın). Bu derste perdenin arkasına geçiyoruz: Python bir adı nerede arar, iç fonksiyon dış değişkeni nasıl "hatırlar", hatırladığı şey değer mi yoksa değişkenin kendisi mi, ve bu farkın döngülerde neden can sıktığı. Bu bilgi dekoratörlerin, geri çağırma (callback) fonksiyonlarının ve PCAP sınavının 5.3 konusunun temelidir.</p>
 
 <h2>LEGB tekrar: bir ad nerede aranır?</h2>
@@ -2439,7 +2439,7 @@ ogrenci = indirim_kurali(0.15)
 for tutar in [300, 750]:
     print(tutar, hafta_sonu(tutar), ogrenci(tutar))
 print(hafta_sonu.__name__, ogrenci.__name__)</pre>
-<p>Anadolu Bank'ta kart başına günlük limit de aynı kalıptır; bu kez kapanış durumu <b>değiştirir</b>, bu yüzden <code>nonlocal</code> gerekir:</p>
+<p>Ilgaz Bank'ta kart başına günlük limit de aynı kalıptır; bu kez kapanış durumu <b>değiştirir</b>, bu yüzden <code>nonlocal</code> gerekir:</p>
 <pre class="py">def gunluk_limit(limit):
     kalan = limit
     def harca(tutar):
@@ -2560,7 +2560,7 @@ print(sehir_tarifesi("Ankara")(4))</pre>
       hints: ['Doğrulama iç fonksiyonda değil, fabrikanın gövdesinde olmalı.', 'if not 0 < oran < 1: raise ValueError(...)', 'İç fonksiyon: if tutar >= esik: return round(tutar * (1 - oran), 2) ve sonra return tutar'],
       why: 'Fabrika doğrulamayı bir kez yapar; hatalı kural sisteme hiç giremez. Üretilen fonksiyon oran ve esik değerlerini kapanıştan okur.' },
     { t: 'code', stage: 'Rehberli', id: 'kapanis-kapsam-3', diff: 2,
-      q: '<p>Anadolu Bank kart limiti: <code>harcama_limiti(gunluk_limit)</code> fabrikasını yaz. Dönen <code>harca(tutar)</code> fonksiyonu tutar kalan limiti aşmıyorsa kalan limitten düşüp <code>True</code>, aşıyorsa hiçbir şeyi değiştirmeden <code>False</code> döndürsün. Her kartın limiti birbirinden bağımsız olmalı.</p>',
+      q: '<p>Ilgaz Bank kart limiti: <code>harcama_limiti(gunluk_limit)</code> fabrikasını yaz. Dönen <code>harca(tutar)</code> fonksiyonu tutar kalan limiti aşmıyorsa kalan limitten düşüp <code>True</code>, aşıyorsa hiçbir şeyi değiştirmeden <code>False</code> döndürsün. Her kartın limiti birbirinden bağımsız olmalı.</p>',
       guide: ['Fabrikada kalan = gunluk_limit ile durumu başlat.', 'harca içinde kalan\'a yazacağın için nonlocal bildir.', 'tutar kalan\'dan büyükse False döndür.', 'Değilse kalan\'dan düş ve True döndür.'],
       example: 'def stok_takip(adet):\n    kalan = adet\n    def sat(n):\n        nonlocal kalan\n        if n > kalan:\n            return "yetersiz"\n        kalan -= n\n        return kalan\n    return sat\n\ns = stok_takip(5)\nprint(s(2), s(4), s(3))\n',
       start: 'def harcama_limiti(gunluk_limit):\n    kalan = gunluk_limit\n    def harca(tutar):\n        # TODO: kalan\'a yazabilmek için bildirim\n        # TODO: limit aşılıyorsa False\n        # TODO: değilse düş ve True\n        pass\n    return harca\n',
@@ -2620,7 +2620,7 @@ print(sehir_tarifesi("Ankara")(4))</pre>
       hints: ['İç fonksiyonda atama yapılan her ad yerel sayılır.', 'Tek satırda iki ad: nonlocal adet, toplam'],
       why: 'adet += 1 ve toplam = toplam + ... atama olduğu için iki ad da yerel sayılıyor ve okunmadan önce bağlanmamış oluyordu. nonlocal adet, toplam ile kapsayan fonksiyonun hücrelerine yazılır.' },
     { t: 'code', stage: 'Meydan okuma', id: 'kapanis-kapsam-11', diff: 3,
-      q: '<p>Anadolu Bank API\'sinde hız sınırlayıcı: <code>oran_sinirlayici(limit, pencere)</code> fabrikasını yaz. Dönen <code>izin(zaman)</code> fonksiyonu, saniye cinsinden <code>zaman</code> alır. Son <code>pencere</code> saniyedeki (yani <code>zaman - pencere</code> değerinden <b>büyük</b> zamanlı) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür (reddedilen istek kaydedilmez). Zaman geriye giderse (önceki çağrıdan küçükse) <code>ValueError</code> fırlat. Eski kayıtları silerek belleği sınırlı tut.</p>',
+      q: '<p>Ilgaz Bank API\'sinde hız sınırlayıcı: <code>oran_sinirlayici(limit, pencere)</code> fabrikasını yaz. Dönen <code>izin(zaman)</code> fonksiyonu, saniye cinsinden <code>zaman</code> alır. Son <code>pencere</code> saniyedeki (yani <code>zaman - pencere</code> değerinden <b>büyük</b> zamanlı) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür (reddedilen istek kaydedilmez). Zaman geriye giderse (önceki çağrıdan küçükse) <code>ValueError</code> fırlat. Eski kayıtları silerek belleği sınırlı tut.</p>',
       start: 'def oran_sinirlayici(limit, pencere):\n    pass\n',
       sol: 'from collections import deque\n\ndef oran_sinirlayici(limit, pencere):\n    kabul = deque()\n    son = None\n    def izin(zaman):\n        nonlocal son\n        if son is not None and zaman < son:\n            raise ValueError("zaman geriye gidemez")\n        son = zaman\n        while kabul and kabul[0] <= zaman - pencere:\n            kabul.popleft()\n        if len(kabul) < limit:\n            kabul.append(zaman)\n            return True\n        return False\n    izin.kayitlar = kabul\n    return izin\n\ni = oran_sinirlayici(2, 10)\nprint([i(t) for t in [0, 1, 2, 10, 11, 12]])\n',
       tests: 'i = oran_sinirlayici(2, 10)\nassert [i(t) for t in [0, 1, 2]] == [True, True, False], "10 sn içinde en fazla 2 istek"\nassert i(10) is True, "zaman 10\'da 0\'daki kayıt pencereden çıkar (0 <= 10 - 10)"\nassert i(11) is True, "1\'deki kayıt da çıktı"\nassert i(12) is False, "10 ve 11 hâlâ pencerede"\ntry:\n    i(5)\nexcept ValueError:\n    pass\nelse:\n    raise AssertionError("zaman geriye giderse ValueError")\nj = oran_sinirlayici(1, 5)\nassert j(0) and not j(4) and j(5), "pencere sınırı: 0 <= 5 - 5 olduğu için 5\'te yeniden izin"\nk = oran_sinirlayici(3, 1)\nfor t in range(1000):\n    k(t)\nif hasattr(k, "kayitlar"):\n    assert len(k.kayitlar) <= 3, "eski kayıtlar silinmeli"\nelse:\n    hucreler = [h.cell_contents for h in k.__closure__ if isinstance(h.cell_contents, (list, __import__(\'collections\').deque))]\n    assert all(len(h) <= 3 for h in hucreler), "eski kayıtlar silinmeli; liste sınırsız büyümemeli"\n',
@@ -2649,7 +2649,7 @@ print(sehir_tarifesi("Ankara")(4))</pre>
   ]
 });
 })(window);
-/* PythonPatika — Orta: Python kütüphane haritası ve paket seçme */
+/* Kesit Python — Orta: Python kütüphane haritası ve paket seçme */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -2948,10 +2948,10 @@ for kategori, paketler in sorted(rapor.items()):
       hints: ['json.loads ile sözlüğe çevir; releases değerleri dosya listeleridir.', 'datetime.fromisoformat("2026-03-15T08:00:00").date() tarih verir; tarih farkı timedelta, .days gün sayısı.', 'info.get("license") or "BELİRSİZ" hem None hem boş metni yakalar.'],
       why: 'Paket değerlendirmesini otomatikleştirmek, onlarca bağımlılığı olan projelerde riskli paketleri hızla bulur. Gerçek API ağ gerektirir; mantık burada aynen çalışır, yalnızca veri kaynağı değişir.' },
     { t: 'code', stage: 'Mini proje', id: 'kutuphane-turu-12', diff: 3,
-      q: '<p>Anadolu Bank bağımlılık denetçisi. <code>bagimlilik_denetimi(metin, katalog)</code> yaz; <code>metin</code> requirements.txt, <code>katalog</code> onaylı paketlerin <code>{ad: kategori}</code> sözlüğü. Her satırda (yorum ve boş satırları atla) adı önceki alıştırmalardaki gibi çıkar ve normalleştir (küçük harf, <code>_</code> → <code>-</code>). Döndür:</p><ul><li><code>"kategoriler"</code>: <code>{kategori: adet}</code> (yalnızca katalogdakiler)</li><li><code>"sabitlenmemis"</code>: <code>==</code> ya da <code>~=</code> içermeyen satırların adları</li><li><code>"supheli"</code>: katalogda olmayıp katalogdaki bir ada <code>difflib</code> ile 0.8 ve üzeri benzeyenler: <code>{ad: benzedigi}</code></li><li><code>"onaysiz"</code>: katalogda olmayan ve şüpheli de olmayanlar</li><li><code>"gecti"</code>: şüpheli ve onaysız hiç yoksa True</li></ul><p>Listeler satır sırasını korusun.</p>',
+      q: '<p>Ilgaz Bank bağımlılık denetçisi. <code>bagimlilik_denetimi(metin, katalog)</code> yaz; <code>metin</code> requirements.txt, <code>katalog</code> onaylı paketlerin <code>{ad: kategori}</code> sözlüğü. Her satırda (yorum ve boş satırları atla) adı önceki alıştırmalardaki gibi çıkar ve normalleştir (küçük harf, <code>_</code> → <code>-</code>). Döndür:</p><ul><li><code>"kategoriler"</code>: <code>{kategori: adet}</code> (yalnızca katalogdakiler)</li><li><code>"sabitlenmemis"</code>: <code>==</code> ya da <code>~=</code> içermeyen satırların adları</li><li><code>"supheli"</code>: katalogda olmayıp katalogdaki bir ada <code>difflib</code> ile 0.8 ve üzeri benzeyenler: <code>{ad: benzedigi}</code></li><li><code>"onaysiz"</code>: katalogda olmayan ve şüpheli de olmayanlar</li><li><code>"gecti"</code>: şüpheli ve onaysız hiç yoksa True</li></ul><p>Listeler satır sırasını korusun.</p>',
       start: 'import re, difflib\n\ndef bagimlilik_denetimi(metin, katalog):\n    pass\n',
       sol: 'import re, difflib\n\ndef _ad(satir):\n    return re.split(r"[\\[<>=!~; ]", satir, maxsplit=1)[0].lower().replace("_", "-")\n\ndef bagimlilik_denetimi(metin, katalog):\n    rapor = {"kategoriler": {}, "sabitlenmemis": [], "supheli": {}, "onaysiz": []}\n    for satir in metin.splitlines():\n        satir = satir.split("#")[0].strip()\n        if not satir:\n            continue\n        ad = _ad(satir)\n        if "==" not in satir and "~=" not in satir:\n            rapor["sabitlenmemis"].append(ad)\n        if ad in katalog:\n            kat = katalog[ad]\n            rapor["kategoriler"][kat] = rapor["kategoriler"].get(kat, 0) + 1\n            continue\n        yakin = difflib.get_close_matches(ad, list(katalog), n=1, cutoff=0.8)\n        if yakin:\n            rapor["supheli"][ad] = yakin[0]\n        else:\n            rapor["onaysiz"].append(ad)\n    rapor["gecti"] = not rapor["supheli"] and not rapor["onaysiz"]\n    return rapor\n\nkatalog = {"pandas": "veri", "requests": "web", "pytest": "test"}\nprint(bagimlilik_denetimi("pandas==2.2.2\\nreqeusts>=2.31\\npytest\\n", katalog))\n',
-      tests: 'katalog = {"pandas": "veri", "numpy": "veri", "requests": "web", "pydantic": "doğrulama", "pytest": "test", "scikit-learn": "ml"}\nmetin = "# Anadolu Bank risk servisi\\npandas==2.2.2\\nNumPy~=1.26.0\\nreqeusts>=2.31  # dikkat\\nscikit_learn==1.4.2\\n\\npydantic>=2\\nleftpad==0.1\\npytest\\n"\nr = bagimlilik_denetimi(metin, katalog)\nassert r["kategoriler"] == {"veri": 2, "ml": 1, "doğrulama": 1, "test": 1}, f"kategori sayıları: {r[\'kategoriler\']}"\nassert r["sabitlenmemis"] == ["reqeusts", "pydantic", "pytest"], f"== ya da ~= içermeyenler satır sırasıyla: {r[\'sabitlenmemis\']}"\nassert r["supheli"] == {"reqeusts": "requests"}, "reqeusts, requests\'e çok benziyor"\nassert r["onaysiz"] == ["leftpad"], "katalogda olmayan, benzemeyen paket"\nassert r["gecti"] is False\ntemiz = bagimlilik_denetimi("pandas==2.2.2\\npytest==8.2.0\\n", katalog)\nassert temiz["gecti"] is True and temiz["sabitlenmemis"] == [] and temiz["supheli"] == {}, "temiz dosya geçmeli"\nassert bagimlilik_denetimi("", katalog) == {"kategoriler": {}, "sabitlenmemis": [], "supheli": {}, "onaysiz": [], "gecti": True}\n',
+      tests: 'katalog = {"pandas": "veri", "numpy": "veri", "requests": "web", "pydantic": "doğrulama", "pytest": "test", "scikit-learn": "ml"}\nmetin = "# Ilgaz Bank risk servisi\\npandas==2.2.2\\nNumPy~=1.26.0\\nreqeusts>=2.31  # dikkat\\nscikit_learn==1.4.2\\n\\npydantic>=2\\nleftpad==0.1\\npytest\\n"\nr = bagimlilik_denetimi(metin, katalog)\nassert r["kategoriler"] == {"veri": 2, "ml": 1, "doğrulama": 1, "test": 1}, f"kategori sayıları: {r[\'kategoriler\']}"\nassert r["sabitlenmemis"] == ["reqeusts", "pydantic", "pytest"], f"== ya da ~= içermeyenler satır sırasıyla: {r[\'sabitlenmemis\']}"\nassert r["supheli"] == {"reqeusts": "requests"}, "reqeusts, requests\'e çok benziyor"\nassert r["onaysiz"] == ["leftpad"], "katalogda olmayan, benzemeyen paket"\nassert r["gecti"] is False\ntemiz = bagimlilik_denetimi("pandas==2.2.2\\npytest==8.2.0\\n", katalog)\nassert temiz["gecti"] is True and temiz["sabitlenmemis"] == [] and temiz["supheli"] == {}, "temiz dosya geçmeli"\nassert bagimlilik_denetimi("", katalog) == {"kategoriler": {}, "sabitlenmemis": [], "supheli": {}, "onaysiz": [], "gecti": True}\n',
       hints: ['Ad çıkarma için küçük bir yardımcı fonksiyon yaz; normalleştirmeyi orada yap.', 'Sabitleme denetimini adı çıkarmadan önce, satırın tamamı üzerinde yap.', 'difflib.get_close_matches(ad, list(katalog), n=1, cutoff=0.8)'],
       why: 'Bu denetçi, kurumsal CI hattında pull request\'leri otomatik inceleyen bir adımın çekirdeğidir: onaysız ya da şüpheli paket ve sabitlenmemiş sürüm, birleştirmeyi durdurur. Önceki alıştırmalardaki parçaları (ad çıkarma, normalleştirme, typosquatting) tek bir iş kuralında birleştirdin.' }
   ],
@@ -2970,7 +2970,7 @@ for kategori, paketler in sorted(rapor.items()):
   ]
 });
 })(window);
-/* PythonPatika — Orta: Modüller ve paketler (PCAP 1) */
+/* Kesit Python — Orta: Modüller ve paketler (PCAP 1) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -3292,7 +3292,7 @@ print(musteriler)                          # orijinal aynı</pre>
       hints: ['from math import * math modülündeki e (Euler sayısı) adını da getirir.', 'Senin e = 1.4 tanımın importtan önce olduğu için ezildi.', 'import math yaz, sqrt yerine math.sqrt kullan.'],
       why: 'Yıldızlı import, modüldeki tüm alt çizgisiz adları ad alanına döker ve aynı adlı değişkenlerini sessizce ezer. import math ile adlar math. önekiyle ayrı tutulur.' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'moduller-paketler-10', diff: 2,
-      q: '<p><b>Hatayı bul ve düzelt.</b> Anadolu Bank\'ın <code>am_bankapkt</code> paketinde <code>kredi.py</code>, kardeş modül <code>faiz.py</code>\'yi kullanıyor. Paket kuruluyor ama <code>from am_bankapkt import kredi</code> satırı <code>ModuleNotFoundError: No module named \'faiz\'</code> veriyor. <code>paketi_kur()</code> içindeki hatayı düzelt.</p>',
+      q: '<p><b>Hatayı bul ve düzelt.</b> Ilgaz Bank\'ın <code>am_bankapkt</code> paketinde <code>kredi.py</code>, kardeş modül <code>faiz.py</code>\'yi kullanıyor. Paket kuruluyor ama <code>from am_bankapkt import kredi</code> satırı <code>ModuleNotFoundError: No module named \'faiz\'</code> veriyor. <code>paketi_kur()</code> içindeki hatayı düzelt.</p>',
       start: 'import os, sys, importlib\n\ndef paketi_kur():\n    os.makedirs("am_bankapkt", exist_ok=True)\n    with open("am_bankapkt/__init__.py", "w", encoding="utf-8") as f:\n        f.write("")\n    with open("am_bankapkt/faiz.py", "w", encoding="utf-8") as f:\n        f.write("def basit(ana, oran, yil):\\n    return round(ana * oran * yil, 2)\\n")\n    with open("am_bankapkt/kredi.py", "w", encoding="utf-8") as f:\n        f.write("from faiz import basit\\n\\ndef toplam_geri_odeme(ana, oran, yil):\\n    return ana + basit(ana, oran, yil)\\n")\n    if "." not in sys.path:\n        sys.path.insert(0, ".")\n    importlib.invalidate_caches()\n\npaketi_kur()\nfor ad in [a for a in sys.modules if a.startswith("am_bankapkt")]:\n    del sys.modules[ad]\nfrom am_bankapkt import kredi\nprint(kredi.toplam_geri_odeme(10000, 0.3, 2))\n',
       sol: 'import os, sys, importlib\n\ndef paketi_kur():\n    os.makedirs("am_bankapkt", exist_ok=True)\n    with open("am_bankapkt/__init__.py", "w", encoding="utf-8") as f:\n        f.write("")\n    with open("am_bankapkt/faiz.py", "w", encoding="utf-8") as f:\n        f.write("def basit(ana, oran, yil):\\n    return round(ana * oran * yil, 2)\\n")\n    with open("am_bankapkt/kredi.py", "w", encoding="utf-8") as f:\n        f.write("from .faiz import basit\\n\\ndef toplam_geri_odeme(ana, oran, yil):\\n    return ana + basit(ana, oran, yil)\\n")\n    if "." not in sys.path:\n        sys.path.insert(0, ".")\n    importlib.invalidate_caches()\n\npaketi_kur()\nfor ad in [a for a in sys.modules if a.startswith("am_bankapkt")]:\n    del sys.modules[ad]\nfrom am_bankapkt import kredi\nprint(kredi.toplam_geri_odeme(10000, 0.3, 2))\n',
       tests: 'import shutil\ntry:\n    from am_bankapkt import kredi as _k\n    assert _k.toplam_geri_odeme(10000, 0.3, 2) == 16000.0, "10000 + 10000*0.3*2 = 16000"\n    with open("am_bankapkt/kredi.py", encoding="utf-8") as f:\n        icerik = f.read()\n    assert "from .faiz import" in icerik or "from am_bankapkt.faiz import" in icerik, "kardeş modül göreli (from .faiz) ya da tam yolla (from am_bankapkt.faiz) import edilmeli"\nfinally:\n    shutil.rmtree("am_bankapkt", ignore_errors=True)\n',
@@ -3336,7 +3336,7 @@ print(musteriler)                          # orijinal aynı</pre>
   ]
 });
 })(window);
-/* PythonPatika — Orta: pytest ile test */
+/* Kesit Python — Orta: pytest ile test */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -3356,7 +3356,7 @@ L.push({
   ],
   body: `
 <h2>Neden pytest?</h2>
-<p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Anadolu Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
+<p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Ilgaz Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
 <p>Ama asıl ders şudur: <b>iyi test, bozuk kodda başarısız olan testtir.</b> Her zaman yeşil yanan bir test güven vermez, sadece süs olur. Bu dersin alıştırmalarında yazdığın testler önce doğru koda, sonra kasıtlı bozulmuş sürümlere karşı çalıştırılacak; bozuk sürümleri yakalayamayan test "geçmiş" sayılmayacak.</p>
 <div class="note"><b>Tarayıcıda pytest</b>pytest bir komut satırı aracıdır: dosyaları tarar, testleri toplar ve raporlar. Tarayıcıda dosya taraması yerine test fonksiyonlarını doğrudan çağıracağız; <code>pytest.raises</code>, <code>pytest.approx</code>, <code>pytest.fixture</code> ve <code>pytest.mark</code> ise gerçek pytest modülünden gelir. Komut satırı örnekleri kendi bilgisayarında çalıştırman içindir.</div>
 
@@ -3634,7 +3634,7 @@ except ConnectionError:
       hints: ['Testin bir bozuk sürümü yakalaması için o hatanın ortaya çıktığı bir girdi gerekir.', 'Yuvarlama hatası yalnızca küsuratlı sonuçta görünür: 9.99 * 1.2 = 11.988.', 'assert kdv_ekle(200, oran=0.10) == 220.0'],
       why: 'Her bozuk sürüm farklı bir girdide ortaya çıkar: yuvarlama küsuratlı tutarda, oran hatası farklı oranda. İyi test seti, olası hata türlerinin her biri için en az bir durum içerir.' },
     { t: 'code', stage: 'Rehberli', id: 'pytest-2', diff: 2,
-      q: '<p>Anadolu Bank <code>para_cek(bakiye, tutar)</code> fonksiyonu hazır: tutar 0 ya da negatifse <code>ValueError</code> ("negatif" kelimesi geçen mesajla), bakiyeden büyükse <code>YetersizBakiye</code> fırlatır. <code>test_para_cek_hatalar()</code> testini <code>pytest.raises</code> ile yaz: negatif tutar, <b>sıfır</b> tutar ve bakiyeyi aşan tutar durumlarını dene; ValueError için <code>match="negatif"</code> kullan. Ayrıca geçerli bir çekimin sonucunu da doğrula.</p>',
+      q: '<p>Ilgaz Bank <code>para_cek(bakiye, tutar)</code> fonksiyonu hazır: tutar 0 ya da negatifse <code>ValueError</code> ("negatif" kelimesi geçen mesajla), bakiyeden büyükse <code>YetersizBakiye</code> fırlatır. <code>test_para_cek_hatalar()</code> testini <code>pytest.raises</code> ile yaz: negatif tutar, <b>sıfır</b> tutar ve bakiyeyi aşan tutar durumlarını dene; ValueError için <code>match="negatif"</code> kullan. Ayrıca geçerli bir çekimin sonucunu da doğrula.</p>',
       guide: ['import pytest yaz.', 'Her hata durumu için ayrı bir with pytest.raises(...) bloğu aç; blokta yalnızca tek çağrı olsun.', 'Negatif ve sıfır tutar için ValueError, match="negatif".', 'Aşan tutar için YetersizBakiye; geçerli çekim için düz assert.'],
       example: 'import pytest\n\ndef yas_dogrula(yas):\n    if yas < 18:\n        raise ValueError("yaş 18 altında")\n    return True\n\ndef test_yas():\n    with pytest.raises(ValueError, match="18"):\n        yas_dogrula(16)\n    assert yas_dogrula(30) is True\n\ntest_yas()\nprint("geçti")\n',
       start: 'import pytest\n\nclass YetersizBakiye(Exception):\n    pass\n\ndef para_cek(bakiye, tutar):\n    if tutar <= 0:\n        raise ValueError("tutar negatif ya da sıfır olamaz")\n    if tutar > bakiye:\n        raise YetersizBakiye(f"bakiye {bakiye} TL, istenen {tutar} TL")\n    return bakiye - tutar\n\ndef test_para_cek_hatalar():\n    # TODO: negatif tutar -> ValueError (match="negatif")\n    # TODO: sıfır tutar -> ValueError\n    # TODO: bakiyeyi aşan tutar -> YetersizBakiye\n    # TODO: geçerli çekim sonucu\n    pass\n',
@@ -3733,7 +3733,7 @@ except ConnectionError:
   ]
 });
 })(window);
-/* PythonPatika — v2 o2: coklu-kalitim */
+/* Kesit Python — v2 o2: coklu-kalitim */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -4283,7 +4283,7 @@ print("Toplam ek ücret:", toplam)</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o2: gui-tkinter */
+/* Kesit Python — v2 o2: gui-tkinter */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -4841,7 +4841,7 @@ print("doğru :", "".join(ekran))</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o2: kapsulleme-ozellik */
+/* Kesit Python — v2 o2: kapsulleme-ozellik */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -4862,7 +4862,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın mobil uygulamasında bir geliştirici, hata ayıklarken şu satırı yazıp unutuyor: <code>hesap.bakiye = -25000</code>. Kod çalışıyor, test geçiyor, ama müşterinin hesabı hiçbir işlem kaydı olmadan eksiye düşüyor. Sınıflar dersinde nesnenin veriyi ve davranışı bir arada tuttuğunu gördün. Bu derste o verinin <b>nasıl korunacağını</b> (kapsülleme, encapsulation) ve bir nesnenin içine çalışma anında <b>nasıl bakılacağını</b> (iç gözlem, introspection) öğreneceksin. İkisi de PCAP sınavının 4. bölümünün çekirdeğidir ve gerçek projelerde her gün kullanılır: doğrulayan setter'lar, salt okunur alanlar, nesneyi dinamik olarak JSON'a çeviren yardımcılar, eklenti sistemleri.</p>
+<p>Ilgaz Bank'ın mobil uygulamasında bir geliştirici, hata ayıklarken şu satırı yazıp unutuyor: <code>hesap.bakiye = -25000</code>. Kod çalışıyor, test geçiyor, ama müşterinin hesabı hiçbir işlem kaydı olmadan eksiye düşüyor. Sınıflar dersinde nesnenin veriyi ve davranışı bir arada tuttuğunu gördün. Bu derste o verinin <b>nasıl korunacağını</b> (kapsülleme, encapsulation) ve bir nesnenin içine çalışma anında <b>nasıl bakılacağını</b> (iç gözlem, introspection) öğreneceksin. İkisi de PCAP sınavının 4. bölümünün çekirdeğidir ve gerçek projelerde her gün kullanılır: doğrulayan setter'lar, salt okunur alanlar, nesneyi dinamik olarak JSON'a çeviren yardımcılar, eklenti sistemleri.</p>
 <p>Kapsüllemenin özü şudur: nesnenin iç durumunu yalnızca kendi metotları değiştirsin, dışarıya kontrollü bir kapı açılsın. Python bunu derleyici zoruyla değil, <b>sözleşme ve araçlarla</b> yapar: alt çizgi adlandırması, name mangling ve <code>property</code>.</p>
 
 <h2>Örnek değişkeni ve sınıf değişkeni: arama sırası</h2>
@@ -5233,7 +5233,7 @@ print(Hesap._sayac)</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank için <code>Hesap(no, bakiye=0.0)</code> yaz. Bakiye <code>self.__bakiye</code> içinde (name mangling) dursun ve yalnız <b>salt okunur</b> <code>bakiye</code> property\'siyle okunabilsin. <code>yatir(tutar)</code> ve <code>cek(tutar)</code> pozitif olmayan tutar için <code>ValueError("Tutar pozitif olmalı")</code>, yetersiz bakiyede <code>ValueError("Yetersiz bakiye")</code> versin. Her başarılı işlem <code>islem_sayisi</code> (salt okunur property) değerini 1 artırsın.</p>',
+      q: '<p>Ilgaz Bank için <code>Hesap(no, bakiye=0.0)</code> yaz. Bakiye <code>self.__bakiye</code> içinde (name mangling) dursun ve yalnız <b>salt okunur</b> <code>bakiye</code> property\'siyle okunabilsin. <code>yatir(tutar)</code> ve <code>cek(tutar)</code> pozitif olmayan tutar için <code>ValueError("Tutar pozitif olmalı")</code>, yetersiz bakiyede <code>ValueError("Yetersiz bakiye")</code> versin. Her başarılı işlem <code>islem_sayisi</code> (salt okunur property) değerini 1 artırsın.</p>',
       start: 'class Hesap:\n    def __init__(self, no, bakiye=0.0):\n        self.no = no\n        self.bakiye = bakiye\n',
       sol: 'class Hesap:\n    def __init__(self, no, bakiye=0.0):\n        self.no = no\n        self.__bakiye = float(bakiye)\n        self.__islem = 0\n\n    @property\n    def bakiye(self):\n        return self.__bakiye\n\n    @property\n    def islem_sayisi(self):\n        return self.__islem\n\n    def yatir(self, tutar):\n        if tutar <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        self.__bakiye += tutar\n        self.__islem += 1\n\n    def cek(self, tutar):\n        if tutar <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        if tutar > self.__bakiye:\n            raise ValueError("Yetersiz bakiye")\n        self.__bakiye -= tutar\n        self.__islem += 1\n',
       tests: 'h = Hesap("AB-001", 1000)\nh.yatir(500)\nh.cek(200)\nassert h.bakiye == 1300, f"1000 + 500 - 200 = 1300 olmalı, gelen {h.bakiye}"\nassert h.islem_sayisi == 2, "iki başarılı işlem sayılmalı"\nassert "_Hesap__bakiye" in vars(h), "bakiye self.__bakiye olarak (karıştırılmış adla) saklanmalı"\ntry:\n    h.bakiye = 10**6\n    assert False, "bakiye salt okunur olmalı: atama AttributeError vermeli"\nexcept AttributeError:\n    pass\nfor f, t, msg in ((h.cek, 5000, "Yetersiz bakiye"), (h.yatir, 0, "Tutar pozitif olmalı"), (h.cek, -3, "Tutar pozitif olmalı")):\n    try:\n        f(t)\n        assert False, f"{f.__name__}({t}) ValueError vermeliydi"\n    except ValueError as e:\n        assert str(e) == msg, f"mesaj {msg!r} olmalı, gelen {str(e)!r}"\nassert h.bakiye == 1300 and h.islem_sayisi == 2, "hatalı işlemler bakiye ve sayacı değiştirmemeli"\n',
@@ -5327,7 +5327,7 @@ print(Hesap._sayac)</pre>
       t: 'code',
       stage: 'Mini proje',
       diff: 3,
-      q: '<p><b>Anadolu Bank hesap modülü.</b> Aşağıdakileri yaz:</p><ol><li><code>Hesap</code> sınıfı: sınıf değişkeni <code>_sayac = 0</code>; <code>Hesap(sahip, bakiye=0.0)</code> her oluşturulduğunda <code>no</code> <code>"AB-0001"</code>, <code>"AB-0002"</code>... olsun. <code>bakiye</code> salt okunur property (değer <code>self._bakiye</code> içinde). <code>yatir(t)</code>/<code>cek(t)</code>: t &lt;= 0 ise <code>ValueError</code>, yetersiz bakiyede <code>ValueError</code>.</li><li><code>@classmethod sozlukten(cls, d)</code>: <code>{"sahip": ..., "bakiye": ...}</code> sözlüğünden (bakiye yoksa 0) nesne üretsin.</li><li><code>__repr__</code>: <code>Hesap(AB-0001, Ayşe, 1500.00)</code> biçiminde; sınıf adı <code>type(self).__name__</code> ile gelsin.</li><li>Modül düzeyinde <code>transfer(kaynak, hedef, tutar)</code>: önce kaynaktan çek, sonra hedefe yatır; çekim başarısızsa hiçbir bakiye değişmesin.</li><li><code>ozet(hesaplar)</code>: <code>{"adet": n, "toplam": toplam bakiye, "en_zengin": sahibin adı}</code> döndürsün (boş listede <code>{"adet": 0, "toplam": 0, "en_zengin": None}</code>).</li></ol>',
+      q: '<p><b>Ilgaz Bank hesap modülü.</b> Aşağıdakileri yaz:</p><ol><li><code>Hesap</code> sınıfı: sınıf değişkeni <code>_sayac = 0</code>; <code>Hesap(sahip, bakiye=0.0)</code> her oluşturulduğunda <code>no</code> <code>"AB-0001"</code>, <code>"AB-0002"</code>... olsun. <code>bakiye</code> salt okunur property (değer <code>self._bakiye</code> içinde). <code>yatir(t)</code>/<code>cek(t)</code>: t &lt;= 0 ise <code>ValueError</code>, yetersiz bakiyede <code>ValueError</code>.</li><li><code>@classmethod sozlukten(cls, d)</code>: <code>{"sahip": ..., "bakiye": ...}</code> sözlüğünden (bakiye yoksa 0) nesne üretsin.</li><li><code>__repr__</code>: <code>Hesap(AB-0001, Ayşe, 1500.00)</code> biçiminde; sınıf adı <code>type(self).__name__</code> ile gelsin.</li><li>Modül düzeyinde <code>transfer(kaynak, hedef, tutar)</code>: önce kaynaktan çek, sonra hedefe yatır; çekim başarısızsa hiçbir bakiye değişmesin.</li><li><code>ozet(hesaplar)</code>: <code>{"adet": n, "toplam": toplam bakiye, "en_zengin": sahibin adı}</code> döndürsün (boş listede <code>{"adet": 0, "toplam": 0, "en_zengin": None}</code>).</li></ol>',
       start: 'class Hesap:\n    _sayac = 0\n\n    def __init__(self, sahip, bakiye=0.0):\n        # TODO\n        pass\n\n\ndef transfer(kaynak, hedef, tutar):\n    pass\n\n\ndef ozet(hesaplar):\n    pass\n',
       sol: 'class Hesap:\n    _sayac = 0\n\n    def __init__(self, sahip, bakiye=0.0):\n        Hesap._sayac += 1\n        self._no = f"AB-{Hesap._sayac:04d}"\n        self.sahip = sahip\n        self._bakiye = float(bakiye)\n\n    @property\n    def no(self):\n        return self._no\n\n    @property\n    def bakiye(self):\n        return self._bakiye\n\n    def yatir(self, t):\n        if t <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        self._bakiye += t\n\n    def cek(self, t):\n        if t <= 0:\n            raise ValueError("Tutar pozitif olmalı")\n        if t > self._bakiye:\n            raise ValueError("Yetersiz bakiye")\n        self._bakiye -= t\n\n    @classmethod\n    def sozlukten(cls, d):\n        return cls(d["sahip"], d.get("bakiye", 0))\n\n    def __repr__(self):\n        return f"{type(self).__name__}({self.no}, {self.sahip}, {self.bakiye:.2f})"\n\n\ndef transfer(kaynak, hedef, tutar):\n    kaynak.cek(tutar)\n    hedef.yatir(tutar)\n\n\ndef ozet(hesaplar):\n    if not hesaplar:\n        return {"adet": 0, "toplam": 0, "en_zengin": None}\n    zengin = max(hesaplar, key=lambda h: h.bakiye)\n    return {"adet": len(hesaplar), "toplam": sum(h.bakiye for h in hesaplar), "en_zengin": zengin.sahip}\n',
       tests: 'Hesap._sayac = 0\na = Hesap("Ayşe", 1500)\nb = Hesap.sozlukten({"sahip": "Burak"})\nassert (a.no, b.no) == ("AB-0001", "AB-0002"), f"numaralar sıralı olmalı: {a.no}, {b.no}"\nassert repr(a) == "Hesap(AB-0001, Ayşe, 1500.00)", f"repr biçimi yanlış: {a!r}"\ntry:\n    a.bakiye = 0\n    assert False, "bakiye salt okunur olmalı"\nexcept AttributeError:\n    pass\ntransfer(a, b, 400)\nassert (a.bakiye, b.bakiye) == (1100, 400), "transfer sonrası 1100 / 400 bekleniyordu"\ntry:\n    transfer(b, a, 9999)\n    assert False, "yetersiz bakiyede ValueError beklenir"\nexcept ValueError:\n    pass\nassert (a.bakiye, b.bakiye) == (1100, 400), "başarısız transfer bakiyeleri değiştirmemeli"\nassert ozet([a, b]) == {"adet": 2, "toplam": 1500, "en_zengin": "Ayşe"}, f"özet yanlış: {ozet([a, b])}"\nassert ozet([]) == {"adet": 0, "toplam": 0, "en_zengin": None}, "boş liste özeti yanlış"\nclass Vadeli(Hesap):\n    pass\nv = Vadeli.sozlukten({"sahip": "Can", "bakiye": 50})\nassert repr(v).startswith("Vadeli(AB-0003"), f"alt sınıf repr\'ında kendi adı görünmeli: {v!r}"\n',
@@ -5391,7 +5391,7 @@ print(Hesap._sayac)</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o2: logging */
+/* Kesit Python — v2 o2: logging */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -5875,7 +5875,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())</pre>
       t: 'code',
       stage: 'Mini proje',
       diff: 3,
-      q: '<p><b>Anadolu Bank ödeme servisi loglaması.</b> Aşağıdakileri yaz:</p><ol><li><code>JsonFormatter</code>: <code>{"seviye", "logger", "mesaj"}</code> + kayıtta varsa <code>islem_id</code>; <code>ensure_ascii=False</code>.</li><li><code>MaskeFiltresi</code>: birleşmiş mesajda 16 haneli kartı (ayraçsız ya da boşluklu) <code>**** **** **** 1234</code> yapsın; <code>args</code>\'ı boşaltsın.</li><li><code>kur(akis)</code>: <code>"anadolu.odeme"</code> logger\'ını temizleyip (propagate False, seviye INFO) verilen <code>akis</code>\'a yazan, JsonFormatter\'lı ve MaskeFiltresi\'li tek bir handler ile kurup döndürsün.</li><li><code>odeme_al(log, islem_id, kart, tutar)</code>: kart boşluklar atılınca 16 rakam değilse <code>log.error("Geçersiz kart: %s", kart)</code> + <code>False</code>; tutar 10000\'den büyükse önce <code>log.warning("Yüksek tutar: %.2f", tutar)</code>; başarıda <code>log.info("Ödeme alındı kart=%s tutar=%.2f", kart, tutar)</code> + <code>True</code>. Tüm çağrılarda <code>extra={"islem_id": islem_id}</code>.</li></ol>',
+      q: '<p><b>Ilgaz Bank ödeme servisi loglaması.</b> Aşağıdakileri yaz:</p><ol><li><code>JsonFormatter</code>: <code>{"seviye", "logger", "mesaj"}</code> + kayıtta varsa <code>islem_id</code>; <code>ensure_ascii=False</code>.</li><li><code>MaskeFiltresi</code>: birleşmiş mesajda 16 haneli kartı (ayraçsız ya da boşluklu) <code>**** **** **** 1234</code> yapsın; <code>args</code>\'ı boşaltsın.</li><li><code>kur(akis)</code>: <code>"anadolu.odeme"</code> logger\'ını temizleyip (propagate False, seviye INFO) verilen <code>akis</code>\'a yazan, JsonFormatter\'lı ve MaskeFiltresi\'li tek bir handler ile kurup döndürsün.</li><li><code>odeme_al(log, islem_id, kart, tutar)</code>: kart boşluklar atılınca 16 rakam değilse <code>log.error("Geçersiz kart: %s", kart)</code> + <code>False</code>; tutar 10000\'den büyükse önce <code>log.warning("Yüksek tutar: %.2f", tutar)</code>; başarıda <code>log.info("Ödeme alındı kart=%s tutar=%.2f", kart, tutar)</code> + <code>True</code>. Tüm çağrılarda <code>extra={"islem_id": islem_id}</code>.</li></ol>',
       start: 'import logging, json, re\n\n\nclass JsonFormatter(logging.Formatter):\n    pass\n\n\nclass MaskeFiltresi(logging.Filter):\n    pass\n\n\ndef kur(akis):\n    pass\n\n\ndef odeme_al(log, islem_id, kart, tutar):\n    pass\n',
       sol: 'import logging, json, re\n\nKART = re.compile(r"\\b\\d{4} ?\\d{4} ?\\d{4} ?(\\d{4})\\b")\n\n\nclass JsonFormatter(logging.Formatter):\n    def format(self, kayit):\n        veri = {"seviye": kayit.levelname, "logger": kayit.name, "mesaj": kayit.getMessage()}\n        if hasattr(kayit, "islem_id"):\n            veri["islem_id"] = kayit.islem_id\n        return json.dumps(veri, ensure_ascii=False)\n\n\nclass MaskeFiltresi(logging.Filter):\n    def filter(self, kayit):\n        kayit.msg = KART.sub(r"**** **** **** \\1", kayit.getMessage())\n        kayit.args = ()\n        return True\n\n\ndef kur(akis):\n    log = logging.getLogger("anadolu.odeme")\n    log.handlers.clear()\n    log.propagate = False\n    log.setLevel(logging.INFO)\n    h = logging.StreamHandler(akis)\n    h.setFormatter(JsonFormatter())\n    h.addFilter(MaskeFiltresi())\n    log.addHandler(h)\n    return log\n\n\ndef odeme_al(log, islem_id, kart, tutar):\n    ek = {"islem_id": islem_id}\n    temiz = kart.replace(" ", "")\n    if not (len(temiz) == 16 and temiz.isdigit()):\n        log.error("Geçersiz kart: %s", kart, extra=ek)\n        return False\n    if tutar > 10000:\n        log.warning("Yüksek tutar: %.2f", tutar, extra=ek)\n    log.info("Ödeme alındı kart=%s tutar=%.2f", kart, tutar, extra=ek)\n    return True\n',
       tests: 'import io, json\nakis = io.StringIO()\nlog = kur(akis)\nassert odeme_al(log, "T1", "4543 1234 5678 9012", 1499.9) is True, "geçerli ödeme True"\nassert odeme_al(log, "T2", "4543123456789012", 25000) is True, "yüksek tutar da alınır"\nassert odeme_al(log, "T3", "1234-56", 10) is False, "geçersiz kart False"\nsatirlar = [json.loads(s) for s in akis.getvalue().strip().split("\\n")]\nassert satirlar == [\n    {"seviye": "INFO", "logger": "anadolu.odeme", "mesaj": "Ödeme alındı kart=**** **** **** 9012 tutar=1499.90", "islem_id": "T1"},\n    {"seviye": "WARNING", "logger": "anadolu.odeme", "mesaj": "Yüksek tutar: 25000.00", "islem_id": "T2"},\n    {"seviye": "INFO", "logger": "anadolu.odeme", "mesaj": "Ödeme alındı kart=**** **** **** 9012 tutar=25000.00", "islem_id": "T2"},\n    {"seviye": "ERROR", "logger": "anadolu.odeme", "mesaj": "Geçersiz kart: 1234-56", "islem_id": "T3"},\n], f"log satırları farklı: {satirlar}"\nassert "5678" not in akis.getvalue(), "kart numarasının ortası hiçbir satırda görünmemeli"\nkur(akis)\nassert len(logging.getLogger("anadolu.odeme").handlers) == 1, "kur tekrar çağrılınca tek handler kalmalı"\n',
@@ -5935,7 +5935,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o3: Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS */
+/* Kesit Python — v2 o3: Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -6391,7 +6391,7 @@ print(len(dfs_erisilen(yollar, "İzmir")), "depoya ulaşılabilir")</pre>
       stage: 'Kendin yaz',
       id: 'algoritmalar-7',
       diff: 2,
-      q: '<p>Anadolu Bank dolandırıcılık ekibi, aralarında para transferi olan hesapları gruplamak istiyor (A → B ve B → C varsa A, B, C aynı halkadadır; yön önemsiz). <code>transfer_halkalari(hesaplar, transferler)</code> fonksiyonunu <b>DFS</b> ile yaz:</p><ul><li><code>hesaplar</code>: tüm hesap numaraları; <code>transferler</code>: <code>(gonderen, alici)</code> çiftleri.</li><li>Dönüş: her grup hesap numaralarının sıralı listesi; gruplar <b>büyükten küçüğe</b> (eşitlikte ilk hesap numarasına göre artan) sıralı.</li><li>Hiç transferi olmayan hesap tek kişilik bir gruptur.</li><li>Özyineleme kullanma (100 bin hesaplık zincirde Python\'ın özyineleme sınırı aşılır): yığınla yinelemeli DFS yaz.</li></ul>',
+      q: '<p>Ilgaz Bank dolandırıcılık ekibi, aralarında para transferi olan hesapları gruplamak istiyor (A → B ve B → C varsa A, B, C aynı halkadadır; yön önemsiz). <code>transfer_halkalari(hesaplar, transferler)</code> fonksiyonunu <b>DFS</b> ile yaz:</p><ul><li><code>hesaplar</code>: tüm hesap numaraları; <code>transferler</code>: <code>(gonderen, alici)</code> çiftleri.</li><li>Dönüş: her grup hesap numaralarının sıralı listesi; gruplar <b>büyükten küçüğe</b> (eşitlikte ilk hesap numarasına göre artan) sıralı.</li><li>Hiç transferi olmayan hesap tek kişilik bir gruptur.</li><li>Özyineleme kullanma (100 bin hesaplık zincirde Python\'ın özyineleme sınırı aşılır): yığınla yinelemeli DFS yaz.</li></ul>',
       start: 'def transfer_halkalari(hesaplar, transferler):\n    pass\n',
       sol: 'from collections import defaultdict\n\ndef transfer_halkalari(hesaplar, transferler):\n    komsu = defaultdict(set)\n    for a, b in transferler:\n        komsu[a].add(b)\n        komsu[b].add(a)\n    gorulen, gruplar = set(), []\n    for h in hesaplar:\n        if h in gorulen:\n            continue\n        grup, yigin = [], [h]\n        gorulen.add(h)\n        while yigin:\n            d = yigin.pop()\n            grup.append(d)\n            for k in komsu[d]:\n                if k not in gorulen:\n                    gorulen.add(k)\n                    yigin.append(k)\n        gruplar.append(sorted(grup))\n    return sorted(gruplar, key=lambda g: (-len(g), g[0]))\n',
       tests: '_h = ["H1", "H2", "H3", "H4", "H5", "H6", "H7"]\n_t = [("H1", "H2"), ("H3", "H2"), ("H5", "H6"), ("H2", "H1")]\nassert transfer_halkalari(_h, _t) == [["H1", "H2", "H3"], ["H5", "H6"], ["H4"], ["H7"]], f"gruplar yanlış: {transfer_halkalari(_h, _t)}"\nassert transfer_halkalari([], []) == []\n_n = 100_000\n_z = [f"Z{i:06d}" for i in range(_n)]\n_g = transfer_halkalari(_z, list(zip(_z, _z[1:])))\nassert len(_g) == 1 and len(_g[0]) == _n, "100 bin hesaplık zincir tek grup olmalı (özyineleme sınırına takılmadan)"\n',
@@ -6521,7 +6521,7 @@ print(len(dfs_erisilen(yollar, "İzmir")), "depoya ulaşılabilir")</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o3: İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma */
+/* Kesit Python — v2 o3: İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -6852,7 +6852,7 @@ with tempfile.TemporaryDirectory() as d:
       stage: 'Rehberli',
       id: 'dosya-ileri-1',
       diff: 1,
-      q: '<p>Anadolu Bank\'ın belge sistemine yüklenen dosyaların uzantısına güvenilmiyor; türü dosyanın ilk baytlarından (sihirli sayı, magic number) anlamak gerekiyor. <code>dosya_turu(yol)</code> fonksiyonunu yaz: dosyayı <b>ikili modda</b> açsın, ilk 4 baytı okusun ve şunu döndürsün:</p><ul><li><code>b"%PDF"</code> ile başlıyorsa <code>"pdf"</code></li><li><code>b"PK\\x03\\x04"</code> ile başlıyorsa <code>"zip"</code></li><li><code>b"\\x89PNG"</code> ile başlıyorsa <code>"png"</code></li><li>aksi hâlde <code>"bilinmiyor"</code></li></ul>',
+      q: '<p>Ilgaz Bank\'ın belge sistemine yüklenen dosyaların uzantısına güvenilmiyor; türü dosyanın ilk baytlarından (sihirli sayı, magic number) anlamak gerekiyor. <code>dosya_turu(yol)</code> fonksiyonunu yaz: dosyayı <b>ikili modda</b> açsın, ilk 4 baytı okusun ve şunu döndürsün:</p><ul><li><code>b"%PDF"</code> ile başlıyorsa <code>"pdf"</code></li><li><code>b"PK\\x03\\x04"</code> ile başlıyorsa <code>"zip"</code></li><li><code>b"\\x89PNG"</code> ile başlıyorsa <code>"png"</code></li><li>aksi hâlde <code>"bilinmiyor"</code></li></ul>',
       guide: ['Dosyayı "rb" moduyla with bloğunda aç.', 'f.read(4) ile yalnızca ilk 4 baytı oku (tüm dosyayı değil).', 'Okunan baytları b"..." ile başlayan imzalarla karşılaştır (str ile değil).', 'Hiçbiri tutmazsa "bilinmiyor" döndür.'],
       example: 'import io\nf = io.BytesIO(b"GIF89a...")\nbas = f.read(3)\nprint(bas, bas == b"GIF", bas == "GIF")\n',
       start: 'def dosya_turu(yol):\n    # TODO: dosyayı ikili modda aç ve ilk 4 baytı oku\n    # TODO: imzalarla karşılaştır\n    return "bilinmiyor"\n',
@@ -6866,7 +6866,7 @@ with tempfile.TemporaryDirectory() as d:
       stage: 'Rehberli',
       id: 'dosya-ileri-2',
       diff: 2,
-      q: '<p>Anadolu Bank\'ın günlük işlem arşivi gigabaytlarca olabilir; dosyanın değişmediğini kanıtlamak için SHA-256 özetini <b>belleğe tamamını almadan</b> hesaplamalısın. <code>parcali_ozet(yol, parca=65536)</code> fonksiyonunu yaz: dosyayı ikili modda <code>parca</code> baytlık parçalar hâlinde okusun, her parçayı <code>hashlib.sha256</code> nesnesine eklesin ve <code>(ozet_hex, parca_sayisi)</code> demetini döndürsün. Boş dosyada parça sayısı 0\'dır.</p>',
+      q: '<p>Ilgaz Bank\'ın günlük işlem arşivi gigabaytlarca olabilir; dosyanın değişmediğini kanıtlamak için SHA-256 özetini <b>belleğe tamamını almadan</b> hesaplamalısın. <code>parcali_ozet(yol, parca=65536)</code> fonksiyonunu yaz: dosyayı ikili modda <code>parca</code> baytlık parçalar hâlinde okusun, her parçayı <code>hashlib.sha256</code> nesnesine eklesin ve <code>(ozet_hex, parca_sayisi)</code> demetini döndürsün. Boş dosyada parça sayısı 0\'dır.</p>',
       guide: ['hashlib.sha256() ile boş bir özet nesnesi oluştur ve sayacı 0 yap.', 'Dosyayı "rb" ile aç.', 'while parca_veri := f.read(parca): döngüsüyle oku; boş bytes gelince döngü biter.', 'Her parçada ozet.update(...) çağır ve sayacı artır.', '(ozet.hexdigest(), sayac) döndür.'],
       example: 'import hashlib, io\nf = io.StringIO("a-b-c-d-e")\nparcalar = []\nwhile p := f.read(4):\n    parcalar.append(p)\nprint(parcalar)\nh = hashlib.sha256()\nh.update(b"ab"); h.update(b"c")\nprint(h.hexdigest() == hashlib.sha256(b"abc").hexdigest())\n',
       start: 'import hashlib\n\ndef parcali_ozet(yol, parca=65536):\n    ozet = hashlib.sha256()\n    sayac = 0\n    # TODO: dosyayı ikili modda aç\n    # TODO: parça parça oku, ozet.update ile ekle, sayacı artır\n    return ozet.hexdigest(), sayac\n',
@@ -7044,7 +7044,7 @@ with tempfile.TemporaryDirectory() as d:
 }
 );
 })(window);
-/* PythonPatika — v2 o3: Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf */
+/* Kesit Python — v2 o3: Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -7569,7 +7569,7 @@ print("Bursa-İzmir yolu var mı?", "İzmir" in graf["Bursa"])</pre>
 }
 );
 })(window);
-/* PythonPatika — v2 o3: Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri */
+/* Kesit Python — v2 o3: Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -7590,7 +7590,7 @@ L.push(
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
+<p>Ilgaz Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
 <p><b>Yapılandırma</b> (configuration, kısaca config), kod değişmeden programın davranışını değiştiren her şeydir. Bu derste yaygın beş biçimi okumayı, ortamları katmanlı birleştirmeyi, ayarı doğrulamayı ve sırları güvenle yönetmeyi öğreneceksin. JSON'un temelini <b>JSON ve CSV</b> dersinde, <code>tomllib</code>'e ilk bakışı <b>Sanal ortam ve paket yönetimi</b> dersinde gördün; burada hepsini yapılandırma gözüyle birleştiriyoruz.</p>
 
 <h2>Biçimleri tanı</h2>
@@ -7611,7 +7611,7 @@ metin = """
 uygulama: kredi-servisi
 surum: "1.4"
 veritabani:
-  host: db.anadolubank.local
+  host: db.ilgazbank.local
   port: 5432
 subeler: [Ankara, İzmir, Bursa]
 eposta_gonder: true
@@ -7638,7 +7638,7 @@ ad = "kredi-servisi"
 baslangic = 2026-01-15
 
 [veritabani]
-host = "db.anadolubank.local"
+host = "db.ilgazbank.local"
 port = 5432
 
 [[sube]]
@@ -7800,7 +7800,7 @@ for anahtar, deger in ayar.items():
     {
       t: 'mc',
       stage: 'Isınma',
-      q: 'Anadolu Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
+      q: 'Ilgaz Bank kredi servisinin prod veritabanı parolası nerede tutulmalı?',
       o: [
         'Kodda bir sabit olarak, örn. DB_PAROLA = "..."',
         'Depoya giren ayar.yaml dosyasında',
@@ -7930,7 +7930,7 @@ for anahtar, deger in ayar.items():
       example: 'satir = "URL = https://x.com/?a=1&b=2"\nanahtar, _, deger = satir.partition("=")\nprint(repr(anahtar.strip()), repr(deger.strip()))\nprint("\'abc\'"[1:-1], "export X=1".removeprefix("export "))\n',
       start: 'def env_ayristir(metin):\n    sonuc = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        # TODO: boş, yorum ve = içermeyen satırları atla\n        # TODO: export önekini at, ilk = işaretinden böl\n        # TODO: tırnakları soy ve sözlüğe ekle\n    return sonuc\n',
       sol: 'def env_ayristir(metin):\n    sonuc = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        if not satir or satir.startswith("#") or "=" not in satir:\n            continue\n        satir = satir.removeprefix("export ")\n        anahtar, _, deger = satir.partition("=")\n        anahtar, deger = anahtar.strip(), deger.strip()\n        if len(deger) >= 2 and deger[0] == deger[-1] and deger[0] in "\\"\'":\n            deger = deger[1:-1]\n        sonuc[anahtar] = deger\n    return sonuc\n',
-      tests: '_m = """\n# Anadolu Bank kredi servisi\nAPP_ENV=dev\nexport DB_URL = postgresql://kredi:x@localhost:5432/kredi?ssl=1\n\nDB_PAROLA="gizli = parola"\nAPI_TOKEN=\'tok_123\'\nBOS=\nbozuk satir\n"""\n_s = env_ayristir(_m)\nassert _s.get("APP_ENV") == "dev", "basit KEY=VALUE okunmalı"\nassert _s.get("DB_URL") == "postgresql://kredi:x@localhost:5432/kredi?ssl=1", "export öneki atılmalı, değer ilk = işaretinden sonra bütün kalmalı"\nassert _s.get("DB_PAROLA") == "gizli = parola", "çift tırnak soyulmalı, içerideki = korunmalı"\nassert _s.get("API_TOKEN") == "tok_123", "tek tırnak soyulmalı"\nassert _s.get("BOS") == "", "boş değer boş metin olmalı"\nassert len(_s) == 5, f"yorum ve bozuk satır atlanmalı, 5 anahtar bekleniyordu: {list(_s)}"\n',
+      tests: '_m = """\n# Ilgaz Bank kredi servisi\nAPP_ENV=dev\nexport DB_URL = postgresql://kredi:x@localhost:5432/kredi?ssl=1\n\nDB_PAROLA="gizli = parola"\nAPI_TOKEN=\'tok_123\'\nBOS=\nbozuk satir\n"""\n_s = env_ayristir(_m)\nassert _s.get("APP_ENV") == "dev", "basit KEY=VALUE okunmalı"\nassert _s.get("DB_URL") == "postgresql://kredi:x@localhost:5432/kredi?ssl=1", "export öneki atılmalı, değer ilk = işaretinden sonra bütün kalmalı"\nassert _s.get("DB_PAROLA") == "gizli = parola", "çift tırnak soyulmalı, içerideki = korunmalı"\nassert _s.get("API_TOKEN") == "tok_123", "tek tırnak soyulmalı"\nassert _s.get("BOS") == "", "boş değer boş metin olmalı"\nassert len(_s) == 5, f"yorum ve bozuk satır atlanmalı, 5 anahtar bekleniyordu: {list(_s)}"\n',
       hints: ['satir.partition("=") yalnızca ilk = işaretinden böler ve (önce, "=", sonra) döndürür.', 'Tırnak kontrolü: deger[0] == deger[-1] and deger[0] in "\\"\'"', 'Sırayla: atla → removeprefix → partition → strip → tırnak soy → ekle.'],
       why: 'partition ilk ayraçta böldüğü için URL ve parola gibi = içeren değerler bozulmaz. Tırnak soyma yalnız iki uç aynı tırnaksa yapılır; böylece içinde tırnak geçen değerler yanlışlıkla kırpılmaz.'
     },
@@ -8029,7 +8029,7 @@ for anahtar, deger in ayar.items():
       stage: 'Mini proje',
       id: 'yapilandirma-11',
       diff: 3,
-      q: '<p><b>Ayar yükleyici:</b> Anadolu Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
+      q: '<p><b>Ayar yükleyici:</b> Ilgaz Bank kredi servisi için <code>ayarlari_yukle(yaml_metni, ortam)</code> fonksiyonunu yaz. <code>ortam</code> bir sözlüktür (os.environ yerine).</p><ol><li>YAML\'ı <code>safe_load</code> ile oku; <code>varsayilan</code> ile <code>ortamlar[APP_ENV]</code>\'ı iç içe birleştir. <code>APP_ENV</code> ortamda yoksa <code>"dev"</code>.</li><li>Ortamdaki <code>KREDI_DB_PAROLA</code> değerini <code>ayar["db"]["parola"]</code> olarak ekle.</li><li>Doğrula ve tüm hataları topla: <code>db.host</code> (str) ve <code>db.port</code> (int, bool değil, 1-65535) zorunlu; <code>gunluk_limit</code> pozitif sayı; prod\'da <code>debug</code> True olamaz; YAML içinde <code>parola</code> anahtarı <b>herhangi bir seviyede</b> bulunursa "sır dosyada olmamalı"; parola ortamdan gelmemişse "KREDI_DB_PAROLA eksik".</li><li>Hata varsa <code>ValueError</code> yükselt; mesaj hataların <code>"; "</code> ile birleşimi olsun. Yoksa birleştirilmiş ayarı döndür.</li></ol><p>Hata metinleri (aynen): <code>"db.host eksik"</code>, <code>"db.port geçersiz"</code>, <code>"gunluk_limit pozitif olmalı"</code>, <code>"prod ortamında debug açık olamaz"</code>, <code>"sır dosyada olmamalı"</code>, <code>"KREDI_DB_PAROLA eksik"</code>. Sıra bu listedeki gibi olsun; bilinmeyen ortam için <code>ValueError("Bilinmeyen ortam: &lt;ad&gt;")</code>.</p>',
       start: 'import copy\nimport yaml\n\ndef ayarlari_yukle(yaml_metni, ortam):\n    pass\n',
       sol: 'import copy\nimport yaml\n\ndef _birlestir(temel, ust):\n    sonuc = copy.deepcopy(temel)\n    for k, v in (ust or {}).items():\n        if isinstance(v, dict) and isinstance(sonuc.get(k), dict):\n            sonuc[k] = _birlestir(sonuc[k], v)\n        else:\n            sonuc[k] = copy.deepcopy(v)\n    return sonuc\n\ndef _parola_var(veri):\n    if isinstance(veri, dict):\n        return any(k == "parola" or _parola_var(v) for k, v in veri.items())\n    if isinstance(veri, list):\n        return any(_parola_var(x) for x in veri)\n    return False\n\ndef ayarlari_yukle(yaml_metni, ortam):\n    veri = yaml.safe_load(yaml_metni) or {}\n    ad = ortam.get("APP_ENV", "dev")\n    ortamlar = veri.get("ortamlar") or {}\n    if ad not in ortamlar:\n        raise ValueError(f"Bilinmeyen ortam: {ad}")\n    ayar = _birlestir(veri.get("varsayilan") or {}, ortamlar[ad])\n    hatalar = []\n    db = ayar.get("db") if isinstance(ayar.get("db"), dict) else {}\n    if not isinstance(db.get("host"), str) or not db.get("host"):\n        hatalar.append("db.host eksik")\n    port = db.get("port")\n    if not (isinstance(port, int) and not isinstance(port, bool) and 1 <= port <= 65535):\n        hatalar.append("db.port geçersiz")\n    limit = ayar.get("gunluk_limit")\n    if not (isinstance(limit, (int, float)) and not isinstance(limit, bool) and limit > 0):\n        hatalar.append("gunluk_limit pozitif olmalı")\n    if ad == "prod" and ayar.get("debug") is True:\n        hatalar.append("prod ortamında debug açık olamaz")\n    if _parola_var(veri):\n        hatalar.append("sır dosyada olmamalı")\n    if not ortam.get("KREDI_DB_PAROLA"):\n        hatalar.append("KREDI_DB_PAROLA eksik")\n    if hatalar:\n        raise ValueError("; ".join(hatalar))\n    ayar.setdefault("db", {})["parola"] = ortam["KREDI_DB_PAROLA"]\n    return ayar\n',
       tests: '_Y = """\nvarsayilan:\n  db: {host: localhost, port: 5432}\n  gunluk_limit: 250000\n  debug: true\nortamlar:\n  dev: {}\n  prod:\n    db: {host: prod-db}\n    debug: false\n"""\n_a = ayarlari_yukle(_Y, {"KREDI_DB_PAROLA": "dev-pw"})\nassert _a == {"db": {"host": "localhost", "port": 5432, "parola": "dev-pw"}, "gunluk_limit": 250000, "debug": True}, f"dev ayarı yanlış: {_a}"\n_p = ayarlari_yukle(_Y, {"APP_ENV": "prod", "KREDI_DB_PAROLA": "pw"})\nassert _p["db"]["host"] == "prod-db" and _p["debug"] is False and _p["db"]["port"] == 5432, "prod iç içe birleşmeli"\n_B = """\nvarsayilan:\n  db: {port: true, parola: "123"}\n  gunluk_limit: -5\n  debug: true\nortamlar:\n  prod: {}\n"""\ntry:\n    ayarlari_yukle(_B, {"APP_ENV": "prod"})\n    assert False, "hatalı ayar için ValueError bekleniyordu"\nexcept ValueError as e:\n    assert str(e) == "db.host eksik; db.port geçersiz; gunluk_limit pozitif olmalı; prod ortamında debug açık olamaz; sır dosyada olmamalı; KREDI_DB_PAROLA eksik", f"tüm hatalar sırasıyla toplanmalı, gelen: {e}"\n_G = "varsayilan:\\n  db: {host: h, port: 1}\\n  gunluk_limit: 1\\n  entegrasyon: [{ad: pos, parola: x}]\\nortamlar:\\n  dev:\\n"\ntry:\n    ayarlari_yukle(_G, {"KREDI_DB_PAROLA": "x"})\n    assert False, "listedeki parola da yakalanmalı"\nexcept ValueError as e:\n    assert str(e) == "sır dosyada olmamalı", f"gelen: {e}"\ntry:\n    ayarlari_yukle(_Y, {"APP_ENV": "staging", "KREDI_DB_PAROLA": "x"})\n    assert False, "bilinmeyen ortam"\nexcept ValueError as e:\n    assert "staging" in str(e)\n',
@@ -8093,7 +8093,7 @@ for anahtar, deger in ayar.items():
 }
 );
 })(window);
-/* PythonPatika — v2/o4: Komut satırı araçları (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: Komut satırı araçları (orta / Otomasyon ve Araçlar) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -8498,7 +8498,7 @@ for dosya in track(["ocak.csv", "subat.csv", "mart.csv"], description="İşleniy
   ]
 });
 })(window);
-/* PythonPatika — v2/o4: Excel otomasyonu (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: Excel otomasyonu (orta / Otomasyon ve Araçlar) */
 // needs: pandas
 (function (W) {
 'use strict';
@@ -8787,7 +8787,7 @@ print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
       hints: ['İki iç içe enumerate döngüsü gerekir; ikisine de start=1 ver.', 'Adres: f"{sutun_harfi(c)}{r}"', 'if deger is not None: sayfa[adres] = deger (0 ve "" geçerli değerlerdir, "if deger" yazma).'],
       why: 'Hücre sözlüğü, openpyxl\'in iç modelinin sade bir kopyasıdır. None kontrolünü "is not None" ile yapmak 0 gibi geçerli değerleri kaybetmeni önler.' },
     { t: 'code', stage: 'Rehberli', id: 'excel-otomasyon-3', diff: 2,
-      q: '<p>Anadolu Bank\'tan gelen Excel\'de tarih sütunu seri numarası olarak geldi. <code>excel_tarih(seri)</code> fonksiyonunu yaz: Excel seri numarasını (<code>int</code>, <code>float</code> ya da <code>"45000"</code> gibi metin) <code>datetime.date</code> nesnesine çevirsin; başlangıç <code>date(1899, 12, 30)</code>. Ondalık kısım saati gösterir, at (<code>45000.75</code> → aynı gün). Ayrıca <code>tarih_metni(seri)</code> sonucu <code>"GG.AA.YYYY"</code> biçiminde döndürsün. Negatif seri için <code>ValueError</code>.</p>',
+      q: '<p>Ilgaz Bank\'tan gelen Excel\'de tarih sütunu seri numarası olarak geldi. <code>excel_tarih(seri)</code> fonksiyonunu yaz: Excel seri numarasını (<code>int</code>, <code>float</code> ya da <code>"45000"</code> gibi metin) <code>datetime.date</code> nesnesine çevirsin; başlangıç <code>date(1899, 12, 30)</code>. Ondalık kısım saati gösterir, at (<code>45000.75</code> → aynı gün). Ayrıca <code>tarih_metni(seri)</code> sonucu <code>"GG.AA.YYYY"</code> biçiminde döndürsün. Negatif seri için <code>ValueError</code>.</p>',
       guide: ['Gelen değeri float\'a çevir (metin de gelebilir).', 'Negatifse ValueError fırlat.', 'date(1899, 12, 30) + timedelta(days=int(seri)) ile günü bul.', 'tarih_metni içinde excel_tarih sonucunu strftime("%d.%m.%Y") ile biçimle.'],
       example: '# Benzer teknik: UNIX zaman damgasından gün\nfrom datetime import date, timedelta\nbaslangic = date(1970, 1, 1)\nprint(baslangic + timedelta(days=20000))\nprint((baslangic + timedelta(days=20000)).strftime("%d.%m.%Y"))\n',
       start: 'from datetime import date, timedelta\n\ndef excel_tarih(seri):\n    # TODO: float\'a çevir, negatifse ValueError\n    # TODO: 1899-12-30 + gün sayısı\n    pass\n\ndef tarih_metni(seri):\n    # TODO: GG.AA.YYYY\n    pass\n',
@@ -8868,7 +8868,7 @@ print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
   ]
 });
 })(window);
-/* PythonPatika — v2/o4: HTTP ve REST API istemcisi (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: HTTP ve REST API istemcisi (orta / Otomasyon ve Araçlar) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -8888,7 +8888,7 @@ L.push({
   ],
   body: `
 <h2>Neden önemli?</h2>
-<p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Anadolu Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
+<p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Ilgaz Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
 <p>Önceki derste HTML kazımayı gördün; API ise verinin makine için hazırlanmış, kurallı halidir. API varsa kazımaya gerek yoktur. Sunucu tarafını (FastAPI ile uç nokta yazmayı) ileri seviyedeki "API ve web" dersinde göreceksin; burada istemci tarafındayız.</p>
 
 <h2>HTTP isteğinin anatomisi</h2>
@@ -9132,7 +9132,7 @@ print("Retry-After ile:", bekleme(0, retry_after="7"))</pre>
       example: '# Benzer teknik: sahte taşıyıcıyla ürün sorgusu\nimport httpx\ndef sunucu(istek):\n    return httpx.Response(200, json={"sku": istek.url.path.split("/")[-1], "stok": 4})\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.example")\nprint(c.get("/urunler/AM-5").json())\n',
       start: 'import httpx\n\ndef musteri_getir(client, musteri_id):\n    yanit = client.get(f"/musteriler/{musteri_id}")\n    # TODO: 404 ise None\n    # TODO: diğer hatalarda raise_for_status\n    # TODO: JSON döndür\n    pass\n',
       sol: 'import httpx\n\ndef musteri_getir(client, musteri_id):\n    yanit = client.get(f"/musteriler/{musteri_id}")\n    if yanit.status_code == 404:\n        return None\n    yanit.raise_for_status()\n    return yanit.json()\n',
-      tests: 'import httpx\ndef sunucu(istek):\n    no = istek.url.path.rsplit("/", 1)[-1]\n    if no == "7":\n        return httpx.Response(200, json={"id": 7, "ad": "Ayşe"})\n    if no == "500":\n        return httpx.Response(500)\n    if no == "403":\n        return httpx.Response(403)\n    return httpx.Response(404)\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.anadolubank.example")\nassert musteri_getir(c, 7) == {"id": 7, "ad": "Ayşe"}, "200\'de JSON sözlüğü dönmeli"\nassert musteri_getir(c, 99) is None, "404\'te None dönmeli"\nfor kod in (500, 403):\n    try:\n        musteri_getir(c, kod)\n        assert False, f"{kod} için HTTPStatusError bekleniyordu"\n    except httpx.HTTPStatusError:\n        pass\n',
+      tests: 'import httpx\ndef sunucu(istek):\n    no = istek.url.path.rsplit("/", 1)[-1]\n    if no == "7":\n        return httpx.Response(200, json={"id": 7, "ad": "Ayşe"})\n    if no == "500":\n        return httpx.Response(500)\n    if no == "403":\n        return httpx.Response(403)\n    return httpx.Response(404)\nc = httpx.Client(transport=httpx.MockTransport(sunucu), base_url="https://api.ilgazbank.example")\nassert musteri_getir(c, 7) == {"id": 7, "ad": "Ayşe"}, "200\'de JSON sözlüğü dönmeli"\nassert musteri_getir(c, 99) is None, "404\'te None dönmeli"\nfor kod in (500, 403):\n    try:\n        musteri_getir(c, kod)\n        assert False, f"{kod} için HTTPStatusError bekleniyordu"\n    except httpx.HTTPStatusError:\n        pass\n',
       hints: ['yanit.status_code ile durumu kontrol et.', '404 kontrolü raise_for_status\'tan ÖNCE olmalı, yoksa 404 de hata fırlatır.', 'if yanit.status_code == 404: return None'],
       why: '404\'ü "kayıt yok" olarak işlemek iş mantığında doğaldır; ama 403 ya da 500\'ü None\'a çevirmek bir yetki ya da sunucu sorununu "müşteri yok" diye gizler. Bu yüzden yalnızca beklenen durum özel işlenir, gerisi hata olarak yükselir.' },
     { t: 'code', stage: 'Kendin yaz', id: 'http-api-4', diff: 1,
@@ -9207,7 +9207,7 @@ print("Retry-After ile:", bekleme(0, retry_after="7"))</pre>
   ]
 });
 })(window);
-/* PythonPatika — v2/o4: Web kazıma (orta / Otomasyon ve Araçlar) */
+/* Kesit Python — v2/o4: Web kazıma (orta / Otomasyon ve Araçlar) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -9540,7 +9540,7 @@ with sync_playwright() as p:
   ]
 });
 })(window);
-/* PythonPatika — Ofis ve iş akışı otomasyonu (v2/o5) */
+/* Kesit Python — Ofis ve iş akışı otomasyonu (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -9904,7 +9904,7 @@ print("eklenen:", eklenen, "| silinen:", silinen, "| değişen:", degisen)</pre>
         'ekler.items() üzerinde dönüp add_attachment(icerik, subtype="csv", filename=ad) çağır.',
         'Mesajı döndür.'
       ],
-      example: 'from email.message import EmailMessage\n\nm = EmailMessage()\nm["From"] = "ik@anadolubank.com.tr"\nm["To"] = "personel@anadolubank.com.tr"\nm["Subject"] = "Bordro"\nm.set_content("Bordronuz ektedir.")\nm.add_attachment("ad,net\\nAyşe,42000\\n", subtype="csv", filename="bordro.csv")\nprint(m["Subject"], [p.get_filename() for p in m.iter_attachments()])\n',
+      example: 'from email.message import EmailMessage\n\nm = EmailMessage()\nm["From"] = "ik@ilgazbank.com.tr"\nm["To"] = "personel@ilgazbank.com.tr"\nm["Subject"] = "Bordro"\nm.set_content("Bordronuz ektedir.")\nm.add_attachment("ad,net\\nAyşe,42000\\n", subtype="csv", filename="bordro.csv")\nprint(m["Subject"], [p.get_filename() for p in m.iter_attachments()])\n',
       start: 'from email.message import EmailMessage\n\ndef rapor_epostasi(alicilar, konu, govde, ekler):\n    msg = EmailMessage()\n    # TODO: From, To ve Subject başlıklarını ata\n    # TODO: düz metin gövdeyi ekle\n    # TODO: her CSV ekini ekle\n    return msg\n',
       sol: 'from email.message import EmailMessage\n\ndef rapor_epostasi(alicilar, konu, govde, ekler):\n    msg = EmailMessage()\n    msg["From"] = "rapor@anadolumarket.com.tr"\n    msg["To"] = ", ".join(alicilar)\n    msg["Subject"] = konu\n    msg.set_content(govde)\n    for ad, icerik in ekler.items():\n        msg.add_attachment(icerik, subtype="csv", filename=ad)\n    return msg\n',
       tests: 'm = rapor_epostasi(["mudur@anadolumarket.com.tr", "finans@anadolumarket.com.tr"], "Haftalık özet", "Rapor ektedir.", {"ozet.csv": "magaza,ciro\\nKadıköy,100\\n", "iade.csv": "urun,adet\\nÇay,2\\n"})\nassert m["From"] == "rapor@anadolumarket.com.tr", "Gönderen adresi rapor@anadolumarket.com.tr olmalı"\nassert m["To"] == "mudur@anadolumarket.com.tr, finans@anadolumarket.com.tr", "Alıcılar virgül ve boşlukla birleşmeli"\nassert m["Subject"] == "Haftalık özet"\nassert m.get_body(("plain",)).get_content().strip() == "Rapor ektedir.", "Düz metin gövde set_content ile eklenmeli"\nekler = {p.get_filename(): p.get_content() for p in m.iter_attachments()}\nassert set(ekler) == {"ozet.csv", "iade.csv"}, f"İki ek bekleniyordu, gelen: {list(ekler)}"\nassert "Kadıköy" in ekler["ozet.csv"], "Ek içeriği korunmalı"\nassert [p.get_content_type() for p in m.iter_attachments()] == ["text/csv", "text/csv"], "Ekler text/csv olmalı"\nbos = rapor_epostasi(["a@b.com"], "Ek yok", "Merhaba", {})\nassert bos.get_content_type() == "text/plain", "Ek yoksa mesaj tek parçalı kalmalı"\n',
@@ -10048,7 +10048,7 @@ print("eklenen:", eklenen, "| silinen:", silinen, "| değişen:", degisen)</pre>
   ] }
 );
 })(window);
-/* PythonPatika — Bitirme projesi: haftalık satış raporu otomasyonu (v2/o5) */
+/* Kesit Python — Bitirme projesi: haftalık satış raporu otomasyonu (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -10790,7 +10790,7 @@ schtasks /create /sc weekly /d MON /st 07:45 /tn HaftalikRapor /tr "C:\\rapor\\.
   ] }
 );
 })(window);
-/* PythonPatika — Veri doğrulama ve pydantic v2 (v2/o5) */
+/* Kesit Python — Veri doğrulama ve pydantic v2 (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -11157,7 +11157,7 @@ print(ayar.smtp_port, ayar.dry_run, ayar.smtp_sifre)</pre>
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
-      q: '<p>Anadolu Bank için <code>KrediBasvurusu</code> modelini yaz:</p><ul><li><code>tutar</code>: float, &gt; 0</li><li><code>vade_ay</code>: yalnızca 12, 24, 36 ya da 48 (<code>Literal</code>)</li><li><code>aylik_gelir</code>: float, &gt; 0</li><li>Alanlar arası kural (<code>model_validator(mode="after")</code>): <code>tutar / vade_ay</code> aylık gelirin yarısını aşıyorsa <code>ValueError("taksit gelirin yarısını aşamaz")</code>.</li><li><code>taksit()</code> metodu: <code>tutar / vade_ay</code> değerini 2 ondalıkla döndürsün.</li></ul>',
+      q: '<p>Ilgaz Bank için <code>KrediBasvurusu</code> modelini yaz:</p><ul><li><code>tutar</code>: float, &gt; 0</li><li><code>vade_ay</code>: yalnızca 12, 24, 36 ya da 48 (<code>Literal</code>)</li><li><code>aylik_gelir</code>: float, &gt; 0</li><li>Alanlar arası kural (<code>model_validator(mode="after")</code>): <code>tutar / vade_ay</code> aylık gelirin yarısını aşıyorsa <code>ValueError("taksit gelirin yarısını aşamaz")</code>.</li><li><code>taksit()</code> metodu: <code>tutar / vade_ay</code> değerini 2 ondalıkla döndürsün.</li></ul>',
       start: 'from typing import Literal\nfrom pydantic import BaseModel, Field, ValidationError, model_validator\n\n# KrediBasvurusu modelini yaz\n',
       sol: 'from typing import Literal\nfrom pydantic import BaseModel, Field, ValidationError, model_validator\n\nclass KrediBasvurusu(BaseModel):\n    tutar: float = Field(gt=0)\n    vade_ay: Literal[12, 24, 36, 48]\n    aylik_gelir: float = Field(gt=0)\n\n    @model_validator(mode="after")\n    def taksit_denetle(self):\n        if self.tutar / self.vade_ay > self.aylik_gelir * 0.5:\n            raise ValueError("taksit gelirin yarısını aşamaz")\n        return self\n\n    def taksit(self):\n        return round(self.tutar / self.vade_ay, 2)\n',
       tests: 'k = KrediBasvurusu(tutar=120000, vade_ay=24, aylik_gelir=12000)\nassert k.taksit() == 5000.0, "120000 / 24 = 5000"\nassert KrediBasvurusu(tutar=144000, vade_ay=12, aylik_gelir=24000).vade_ay == 12, "Sınırda (taksit = gelirin yarısı) kabul edilmeli"\ndef tip(**v):\n    try:\n        KrediBasvurusu(**v)\n        return None\n    except ValidationError as e:\n        return [(h["loc"], h["type"]) for h in e.errors()]\nassert tip(tutar=100000, vade_ay=18, aylik_gelir=50000) == [(("vade_ay",), "literal_error")], "18 ay izinli vadelerden biri değil"\nassert tip(tutar=100000, vade_ay="12", aylik_gelir=50000) == [(("vade_ay",), "literal_error")], "Literal metni sayıya çevirmez: \\"12\\" reddedilir"\nr = tip(tutar=300000, vade_ay=12, aylik_gelir=20000)\nassert r == [((), "value_error")], f"Alanlar arası hata model düzeyinde (loc boş) value_error olmalı, gelen {r}"\nassert tip(tutar=-5, vade_ay=12, aylik_gelir=1000) == [(("tutar",), "greater_than")], "Alan hatası varsa model_validator(after) çalışmaz"\n',
@@ -11277,7 +11277,7 @@ print(ayar.smtp_port, ayar.dry_run, ayar.smtp_sifre)</pre>
   ] }
 );
 })(window);
-/* PythonPatika — Şablonla rapor üretme: string.Template ve Jinja2 (v2/o5) */
+/* Kesit Python — Şablonla rapor üretme: string.Template ve Jinja2 (v2/o5) */
 (function (W) {
 'use strict';
 const L = W.PY_LESSONS = W.PY_LESSONS || [];
@@ -11560,7 +11560,7 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
       t: 'code',
       stage: 'Rehberli',
       diff: 1,
-      q: '<p>Anadolu Bank fatura hatırlatma SMS\'leri. <code>hatirlatmalar(musteriler)</code> fonksiyonunu tamamla. Her müşteri sözlüğü için <code>SABLON.substitute</code> ile mesaj üret. <code>tutar</code> 2 ondalıkla yazılsın (<code>f"{tutar:.2f}"</code>). Gerekli alanı (<code>ad</code>, <code>tarih</code>, <code>tutar</code>) eksik olan müşteriyi atla ve adını (yoksa <code>"?"</code>) <code>eksikler</code> listesine ekle. <code>(mesajlar, eksikler)</code> döndür.</p>',
+      q: '<p>Ilgaz Bank fatura hatırlatma SMS\'leri. <code>hatirlatmalar(musteriler)</code> fonksiyonunu tamamla. Her müşteri sözlüğü için <code>SABLON.substitute</code> ile mesaj üret. <code>tutar</code> 2 ondalıkla yazılsın (<code>f"{tutar:.2f}"</code>). Gerekli alanı (<code>ad</code>, <code>tarih</code>, <code>tutar</code>) eksik olan müşteriyi atla ve adını (yoksa <code>"?"</code>) <code>eksikler</code> listesine ekle. <code>(mesajlar, eksikler)</code> döndür.</p>',
       guide: [
         'Her müşteri için try bloğu aç.',
         'substitute\'a ad, tarih ve biçimlenmiş tutarı ver: m["tutar"] eksikse burada da KeyError oluşur.',

@@ -350,7 +350,7 @@ print(df.assign(kdv=lambda d: d["tutar"] * 0.2)[["tutar", "kdv"]].head(2))
     sum: 'isna/fillna/dropna ile eksik değer, to_numeric/to_datetime/astype ile tür dönüşümü, .str metotları, duplicated, IQR ile aykırı değer ve category türü.',
     goals: ['Eksik değerleri bulup silme ya da doldurma kararını verebilirim', 'Metin olarak gelen sayı ve tarihleri doğru türe çevirebilirim', '.str metotlarıyla kirli metin sütunlarını standartlaştırabilirim', 'Yinelenen kayıtları tespit edip temizleyebilirim', 'IQR yöntemiyle aykırı değerleri işaretleyebilirim'],
     body: `<h2>Gerçek veri kirlidir</h2>
-<p>Anadolu Bank\'ın şubelerden toplanan kredi başvuru dosyasında şehir adı bir satırda "ankara", diğerinde " ANKARA " yazar; tutar sütunu "12.500,00 TL" gibi metindir; bazı gelirler boştur; aynı başvuru iki kez girilmiştir. Analizin yüzde yetmişi bu temizliktir. Bu derste pandas\'ın temizlik araçlarını bir akış olarak öğreneceksin: <b>eksikleri gör → türleri düzelt → metni standartlaştır → yinelenenleri at → aykırıları işaretle</b>.</p>
+<p>Ilgaz Bank\'ın şubelerden toplanan kredi başvuru dosyasında şehir adı bir satırda "ankara", diğerinde " ANKARA " yazar; tutar sütunu "12.500,00 TL" gibi metindir; bazı gelirler boştur; aynı başvuru iki kez girilmiştir. Analizin yüzde yetmişi bu temizliktir. Bu derste pandas\'ın temizlik araçlarını bir akış olarak öğreneceksin: <b>eksikleri gör → türleri düzelt → metni standartlaştır → yinelenenleri at → aykırıları işaretle</b>.</p>
 
 <h2>Eksik değer: isna, fillna, dropna</h2>
 <p>pandas eksik değeri <code>NaN</code> (sayısal) ya da <code>NaT</code> (tarih) ile gösterir. <code>isna()</code> maske verir; <code>isna().sum()</code> sütun başına eksik sayısı. Karar iki yönlü: satırı at (<code>dropna</code>) ya da doldur (<code>fillna</code>). Doldurma değeri iş bilgisine bağlıdır: gelir için medyan, şehir için "Bilinmiyor", sayaç için 0.</p>
@@ -869,7 +869,7 @@ plt.close("all")
     sum: 'Olay döngüsü, coroutine ve await, gather/create_task ile eşzamanlı I/O, asyncio.sleep ile sahte gecikme, Semaphore ile sınırlama, timeout, async for/with.',
     goals: ['Coroutine ile normal fonksiyon arasındaki farkı açıklayabilirim', 'Birden çok I/O işini gather ile eşzamanlı çalıştırabilirim', 'create_task ile arka plan görevi başlatıp sonucunu toplayabilirim', 'Semaphore ve wait_for ile eşzamanlılığı sınırlayıp zaman aşımı koyabilirim', 'async for ve async with kalıplarını okuyup kullanabilirim'],
     body: `<h2>Beklemek zaman kaybı</h2>
-<p>Anadolu Bank\'ın bir servisi, bir kredi başvurusu için üç dış sisteme soruyor: kimlik doğrulama, kredi skoru, kara liste. Her biri yaklaşık yarım saniye. Sırayla sorarsan 1,5 saniye; aynı anda sorup üçünü de beklersen yarım saniye. İşlemci bu süre boyunca zaten boştur, yalnızca ağ cevabını bekler. <b>asyncio</b> bu "beklerken başka işe geç" düşüncesini tek iş parçacığında (thread) gerçekleştirir. Kural: asyncio <b>I/O beklemesi</b> için iyidir; ağır hesap için değil (onun için bir sonraki ders).</p>
+<p>Ilgaz Bank\'ın bir servisi, bir kredi başvurusu için üç dış sisteme soruyor: kimlik doğrulama, kredi skoru, kara liste. Her biri yaklaşık yarım saniye. Sırayla sorarsan 1,5 saniye; aynı anda sorup üçünü de beklersen yarım saniye. İşlemci bu süre boyunca zaten boştur, yalnızca ağ cevabını bekler. <b>asyncio</b> bu "beklerken başka işe geç" düşüncesini tek iş parçacığında (thread) gerçekleştirir. Kural: asyncio <b>I/O beklemesi</b> için iyidir; ağır hesap için değil (onun için bir sonraki ders).</p>
 
 <h2>Coroutine ve await</h2>
 <p><code>async def</code> ile tanımlanan fonksiyon çağrılınca çalışmaz, bir <b>coroutine nesnesi</b> döndürür. Çalışması için ya <code>await</code> edilir ya da olay döngüsüne (event loop) verilir. <code>await</code> "bu iş bitene kadar beni duraklat, döngü başka işe geçebilir" demektir. Gerçek ağ yerine <code>asyncio.sleep</code> ile sahte gecikme kullanacağız; <code>time.sleep</code> ise döngüyü <b>bloklar</b>, asla kullanma.</p>
@@ -1246,7 +1246,7 @@ print("işçi başına:", {ad: sum(1 for a, _ in islenen if a == ad) for ad in (
     sum: 'timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy\'a geçiş.',
     goals: ['timeit ve cProfile ile darboğazı ölçerek bulabilirim', 'Big-O ile algoritmanın ölçeklenmesini tahmin edebilirim', 'Doğru veri yapısıyla (set/dict) aramayı hızlandırabilirim', 'Üreteç ve lru_cache ile bellek ve zaman kazanabilirim', 'Ne zaman numpy\'a geçmem gerektiğini bilirim'],
     body: `<h2>Önce ölç, sonra düzelt</h2>
-<p>Anadolu Bank\'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5\'lik kodu düzelt, gerisine dokunma.</p>
+<p>Ilgaz Bank\'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5\'lik kodu düzelt, gerisine dokunma.</p>
 
 <h2>timeit: küçük parçayı ölç</h2>
 <p><code>timeit</code> bir ifadeyi çok kez çalıştırıp toplam süreyi verir; çöp toplayıcıyı kapatır, en küçük gürültüyle ölçer. İki alternatifi karşılaştırmak için idealdir.</p>
@@ -1439,7 +1439,7 @@ print(f"python: {timeit.timeit(kdv_python, number=3):.3f} s  numpy: {timeit.time
     sum: 'Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode.',
     goals: ['Değişkenin nesneye referans olduğunu id/is ile gösterebilirim', 'Referans sayımı ve çöp toplayıcının ne zaman devreye girdiğini açıklayabilirim', 'Sığ ve derin kopya farkını bilip doğru olanı seçebilirim', 'Interning ve is tuzağını tanırım', '__slots__ ve getsizeof ile bellek kullanımını küçültüp ölçebilirim'],
     body: `<h2>Neden iç yapı?</h2>
-<p>Anadolu Bank\'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python\'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
+<p>Ilgaz Bank\'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python\'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
 
 <h2>Her şey nesne, değişken bir etiket</h2>
 <p>Python\'da <code>a = [1, 2]</code> demek, bellekte bir liste nesnesi yaratıp <code>a</code> adını ona bağlamaktır. <code>b = a</code> ikinci bir ad bağlar, yeni nesne yaratmaz. <code>id()</code> nesnenin kimliğini (CPython\'da adresi) verir; <code>is</code> "aynı nesne mi", <code>==</code> "aynı değer mi" sorar.</p>
@@ -1630,7 +1630,7 @@ L.push(
     sum: 'Sınıflarını Python\'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol, descriptor, __slots__ ve metaclass\'a kısa bakış.',
     goals: ['__eq__, __hash__, __lt__ gibi dunder metotlarla sınıfımı küme, sözlük ve sorted ile uyumlu yapabilirim', '__len__, __getitem__, __iter__ ve __call__ ile kendi koleksiyon ve çağrılabilir nesnelerimi yazabilirim', 'ABC ile zorunlu arayüz, Protocol ile yapısal tipleme arasında doğru seçimi yapabilirim', 'Descriptor ve property ile alan doğrulamasını tek yerde toplayabilirim', '__slots__, classmethod, staticmethod ve metaclass\'ın ne zaman gerektiğini açıklayabilirim'],
     body: `<h2>Neden önemli?</h2>
-<p>Orta seviyede sınıf yazmayı, kalıtımı ve dataclass\'ı öğrendin. Kurumsal kodda ise sınıfların "Python gibi" davranması beklenir: bir <code>Para</code> nesnesi <code>==</code> ile karşılaştırılabilmeli, bir kümeye konabilmeli, <code>sorted</code> ile sıralanabilmeli; bir <code>Sepet</code> nesnesi <code>len()</code> ve <code>for</code> ile kullanılabilmeli. Anadolu Bank\'ta bir işlem motoru yazarken "bu iki tutar eşit mi?" sorusunun cevabı <code>id()</code> karşılaştırması olursa raporlar yanlış çıkar. Bu dersin konusu, sınıflarını dil ile bütünleştiren <b>özel metotlar</b> (dunder methods, "double underscore") ve kodun sınırlarını tanımlayan soyutlama araçlarıdır.</p>
+<p>Orta seviyede sınıf yazmayı, kalıtımı ve dataclass\'ı öğrendin. Kurumsal kodda ise sınıfların "Python gibi" davranması beklenir: bir <code>Para</code> nesnesi <code>==</code> ile karşılaştırılabilmeli, bir kümeye konabilmeli, <code>sorted</code> ile sıralanabilmeli; bir <code>Sepet</code> nesnesi <code>len()</code> ve <code>for</code> ile kullanılabilmeli. Ilgaz Bank\'ta bir işlem motoru yazarken "bu iki tutar eşit mi?" sorusunun cevabı <code>id()</code> karşılaştırması olursa raporlar yanlış çıkar. Bu dersin konusu, sınıflarını dil ile bütünleştiren <b>özel metotlar</b> (dunder methods, "double underscore") ve kodun sınırlarını tanımlayan soyutlama araçlarıdır.</p>
 
 <h2>Eşitlik, hash ve sıralama</h2>
 <p>Varsayılan olarak iki nesne yalnızca aynı nesneyse eşittir. <code>__eq__</code> yazarak "değer eşitliği" tanımlarsın. Dikkat: <code>__eq__</code> yazıp <code>__hash__</code> yazmazsan Python nesneyi <b>hashlenemez</b> yapar; küme ve sözlük anahtarı olarak kullanamazsın. Değişmez (immutable) nesnelerde <code>__hash__</code>\'i eşitlikte kullandığın alanlardan üret.</p>
@@ -1638,7 +1638,7 @@ L.push(
 
 @total_ordering
 class Para:
-    """Anadolu Bank: kuruş hassasiyetinde tutar."""
+    """Ilgaz Bank: kuruş hassasiyetinde tutar."""
     __slots__ = ('kurus', 'birim')
 
     def __init__(self, tutar: float, birim: str = 'TRY'):
@@ -1854,7 +1854,7 @@ print(type(Eklenti), type(type))
 </section>`,
     ex: [
       { t: 'code', id: 'ileri-oop-1',
-        q: '<p>Anadolu Bank için <code>Tutar</code> sınıfı yaz. Kurucu <code>Tutar(kurus: int, birim: str = \'TRY\')</code> olsun. <code>__eq__</code> (kurus ve birim eşitse), <code>__hash__</code> (aynı alanlardan), <code>__lt__</code> (aynı birimde kurus karşılaştır) ve <code>__add__</code> (aynı birimde yeni Tutar döndür) metotlarını tanımla. Farklı tür ile karşılaştırmada <code>NotImplemented</code> döndür.</p>',
+        q: '<p>Ilgaz Bank için <code>Tutar</code> sınıfı yaz. Kurucu <code>Tutar(kurus: int, birim: str = \'TRY\')</code> olsun. <code>__eq__</code> (kurus ve birim eşitse), <code>__hash__</code> (aynı alanlardan), <code>__lt__</code> (aynı birimde kurus karşılaştır) ve <code>__add__</code> (aynı birimde yeni Tutar döndür) metotlarını tanımla. Farklı tür ile karşılaştırmada <code>NotImplemented</code> döndür.</p>',
         start: 'class Tutar:\n    def __init__(self, kurus: int, birim: str = \'TRY\'):\n        self.kurus = kurus\n        self.birim = birim\n\n    # __eq__, __hash__, __lt__, __add__ yaz\n',
         sol: 'class Tutar:\n    def __init__(self, kurus: int, birim: str = \'TRY\'):\n        self.kurus = kurus\n        self.birim = birim\n\n    def __eq__(self, other):\n        if not isinstance(other, Tutar):\n            return NotImplemented\n        return (self.kurus, self.birim) == (other.kurus, other.birim)\n\n    def __hash__(self):\n        return hash((self.kurus, self.birim))\n\n    def __lt__(self, other):\n        if not isinstance(other, Tutar) or self.birim != other.birim:\n            return NotImplemented\n        return self.kurus < other.kurus\n\n    def __add__(self, other):\n        if not isinstance(other, Tutar) or self.birim != other.birim:\n            return NotImplemented\n        return Tutar(self.kurus + other.kurus, self.birim)\n',
         tests: 'assert Tutar(100) == Tutar(100), "Aynı kuruş ve birim eşit olmalı"\nassert Tutar(100) != Tutar(100, \'USD\'), "Farklı birim eşit olmamalı"\nassert Tutar(100) != 100, "Farklı türle eşit olmamalı"\nassert len({Tutar(5), Tutar(5), Tutar(6)}) == 2, "Hash eşitlikle tutarlı olmalı"\nassert Tutar(3) < Tutar(4), "__lt__ kuruşa göre karşılaştırmalı"\nassert sorted([Tutar(9), Tutar(1), Tutar(5)])[0] == Tutar(1), "sorted çalışmalı"\nt = Tutar(150) + Tutar(50)\nassert isinstance(t, Tutar) and t.kurus == 200, "__add__ yeni Tutar döndürmeli"\nimport operator\ntry:\n    operator.lt(Tutar(1), Tutar(1, \'USD\'))\n    assert False, "Farklı birimde < TypeError vermeli"\nexcept TypeError:\n    pass\n',
@@ -1954,7 +1954,7 @@ for s in STRATEJILER:
 <div class="tip"><b>Kalıp gerekmeyen durum</b>Strateji, "davranışı parametre olarak geçir" demektir. Python\'da bu zaten <code>sorted(key=...)</code>, <code>map</code>, dekoratör ile her gün yaptığın şeydir. Stratejinin durumu (state) ve birden fazla metodu varsa o zaman sınıf (ya da Protocol) düşün.</div>
 
 <h2>Fabrika ve kayıt (registry)</h2>
-<p>Fabrika (factory), "hangi sınıfın üretileceğini" çağıran koddan gizler. Anadolu Bank\'ta rapor türüne göre farklı dışa aktarıcı üretmek gibi. Python\'da en temiz biçim: bir sözlükte sınıfları tut, <code>__init_subclass__</code> ya da dekoratörle otomatik kaydet. Sınıflar zaten çağrılabilir olduğu için ayrı bir "Creator" hiyerarşisine gerek kalmaz.</p>
+<p>Fabrika (factory), "hangi sınıfın üretileceğini" çağıran koddan gizler. Ilgaz Bank\'ta rapor türüne göre farklı dışa aktarıcı üretmek gibi. Python\'da en temiz biçim: bir sözlükte sınıfları tut, <code>__init_subclass__</code> ya da dekoratörle otomatik kaydet. Sınıflar zaten çağrılabilir olduğu için ayrı bir "Creator" hiyerarşisine gerek kalmaz.</p>
 <pre class="py">import json, csv, io
 
 KAYIT: dict[str, type] = {}
@@ -2068,7 +2068,7 @@ print(siparisi_tamamla(OdemeAdaptoru(EskiOdemeKutuphanesi()), 0))
 </pre>
 
 <h2>Komut: işlemi nesne yapmak</h2>
-<p>Komut (command) kalıbında her işlem; çalıştırılabilen ve geri alınabilen bir nesnedir. Geri al/yinele, işlem kuyruğu, denetim kaydı (audit log) için kullanılır. Anadolu Bank\'ta hesap hareketlerini komut olarak modellemek, hatalı bir toplu işlemi tersine çevirmeyi mümkün kılar.</p>
+<p>Komut (command) kalıbında her işlem; çalıştırılabilen ve geri alınabilen bir nesnedir. Geri al/yinele, işlem kuyruğu, denetim kaydı (audit log) için kullanılır. Ilgaz Bank\'ta hesap hareketlerini komut olarak modellemek, hatalı bir toplu işlemi tersine çevirmeyi mümkün kılar.</p>
 <pre class="py">from dataclasses import dataclass, field
 
 @dataclass
@@ -2150,7 +2150,7 @@ p.geri_al(); print('yatırma geri alındı:', h)
         o: ['Daha az bellek kullanımı', 'Nesne üretimini gizlemek', 'İşlemleri geri alınabilir ve kuyruklanabilir nesneler yapmak', 'Arayüz uyumsuzluğunu gidermek'],
         a: 2, why: 'Komut, her işlemi uygula/geri_al metotlu bir nesne yapar; böylece geçmiş tutma, geri alma, kuyruk ve denetim kaydı kolaylaşır. Üretimi gizlemek fabrika, uyumsuzluk adaptör konusudur.' },
       { t: 'code', id: 'tasarim-kaliplari-6',
-        q: '<p>Anadolu Bank için komut kalıbı. <code>CekKomutu(hesaplar, hesap, tutar)</code> dataclass\'ı: <code>uygula()</code> bakiye yetersizse <code>ValueError</code> fırlatıp hiçbir şey değiştirmesin, yeterliyse düşsün; <code>geri_al()</code> tutarı geri eklesin. <code>Islemci</code> sınıfı: <code>calistir(komut)</code> uygula\'yı çağırıp başarılıysa geçmişe eklesin (hata fırlarsa geçmişe eklemeden hatayı yeniden fırlatsın), <code>geri_al()</code> son komutu geri alsın ve döndürsün (geçmiş boşsa None), <code>gecmis</code> listesi dışarıdan okunabilsin.</p>',
+        q: '<p>Ilgaz Bank için komut kalıbı. <code>CekKomutu(hesaplar, hesap, tutar)</code> dataclass\'ı: <code>uygula()</code> bakiye yetersizse <code>ValueError</code> fırlatıp hiçbir şey değiştirmesin, yeterliyse düşsün; <code>geri_al()</code> tutarı geri eklesin. <code>Islemci</code> sınıfı: <code>calistir(komut)</code> uygula\'yı çağırıp başarılıysa geçmişe eklesin (hata fırlarsa geçmişe eklemeden hatayı yeniden fırlatsın), <code>geri_al()</code> son komutu geri alsın ve döndürsün (geçmiş boşsa None), <code>gecmis</code> listesi dışarıdan okunabilsin.</p>',
         start: 'from dataclasses import dataclass, field\n\n@dataclass\nclass CekKomutu:\n    hesaplar: dict\n    hesap: str\n    tutar: float\n    # uygula, geri_al\n\n@dataclass\nclass Islemci:\n    gecmis: list = field(default_factory=list)\n    # calistir, geri_al\n',
         sol: 'from dataclasses import dataclass, field\n\n@dataclass\nclass CekKomutu:\n    hesaplar: dict\n    hesap: str\n    tutar: float\n\n    def uygula(self):\n        if self.hesaplar[self.hesap] < self.tutar:\n            raise ValueError(\'yetersiz bakiye\')\n        self.hesaplar[self.hesap] -= self.tutar\n\n    def geri_al(self):\n        self.hesaplar[self.hesap] += self.tutar\n\n@dataclass\nclass Islemci:\n    gecmis: list = field(default_factory=list)\n\n    def calistir(self, komut):\n        komut.uygula()\n        self.gecmis.append(komut)\n\n    def geri_al(self):\n        if not self.gecmis:\n            return None\n        k = self.gecmis.pop()\n        k.geri_al()\n        return k\n',
         tests: 'h = {\'TR01\': 100.0}\np = Islemci()\np.calistir(CekKomutu(h, \'TR01\', 30))\nassert h[\'TR01\'] == 70 and len(p.gecmis) == 1, "Çekim bakiyeyi düşürmeli ve geçmişe girmeli"\ntry:\n    p.calistir(CekKomutu(h, \'TR01\', 500))\n    assert False, "Yetersiz bakiye ValueError vermeli"\nexcept ValueError:\n    pass\nassert h[\'TR01\'] == 70 and len(p.gecmis) == 1, "Başarısız komut bakiye ve geçmişi değiştirmemeli"\nk = p.geri_al()\nassert isinstance(k, CekKomutu) and h[\'TR01\'] == 100, "geri_al son komutu tersine çevirmeli"\nassert p.geri_al() is None, "Boş geçmişte None dönmeli"\n',
@@ -2186,7 +2186,7 @@ L.push(
     sum: 'Generic/TypeVar, Protocol, Literal, TypedDict, overload, NewType, Callable ve ParamSpec ile kodun sözleşmesini yaz; mypy/pyright\'ın nasıl çalıştığını ve strict modu öğren.',
     goals: ['TypeVar ve Generic ile türü koruyan konteyner ve fonksiyon yazabilirim', 'Literal, TypedDict ve NewType ile sözlük ve kimlik türlerini kesinleştirebilirim', 'overload ile girdiye göre değişen dönüş tipini bildirebilirim', 'Callable ve ParamSpec ile dekoratörün imzasını koruyabilirim', 'mypy/pyright\'ın çalışma mantığını ve strict modun ne denetlediğini açıklayabilirim'],
     body: `<h2>Neden önemli?</h2>
-<p>Orta seviyede tip ipuçlarını (type hints) belgeleme aracı olarak kullandın. Kurumsal projelerde ipuçları bundan fazlasıdır: CI\'da çalışan <code>mypy</code> ya da <code>pyright</code>, kod çalışmadan önce "bu fonksiyona None gelebilir" ya da "bu sözlükte böyle bir anahtar yok" der. Anadolu Bank\'ta bir müşteri numarasıyla hesap numarasını karıştıran kod, test edilmediyse üretimde patlar; <code>NewType</code> ile bu karışıklık derleme-benzeri aşamada yakalanır. Bu ders, tip sistemini bir sözleşme dili olarak kullanmayı öğretir. Unutma: Python çalışma zamanında ipuçlarını <b>denetlemez</b>; bu yüzden alıştırmalarda ipuçlarını <code>typing.get_type_hints</code> ve <code>inspect.signature</code> ile okuyarak kendimiz kontrol edeceğiz.</p>
+<p>Orta seviyede tip ipuçlarını (type hints) belgeleme aracı olarak kullandın. Kurumsal projelerde ipuçları bundan fazlasıdır: CI\'da çalışan <code>mypy</code> ya da <code>pyright</code>, kod çalışmadan önce "bu fonksiyona None gelebilir" ya da "bu sözlükte böyle bir anahtar yok" der. Ilgaz Bank\'ta bir müşteri numarasıyla hesap numarasını karıştıran kod, test edilmediyse üretimde patlar; <code>NewType</code> ile bu karışıklık derleme-benzeri aşamada yakalanır. Bu ders, tip sistemini bir sözleşme dili olarak kullanmayı öğretir. Unutma: Python çalışma zamanında ipuçlarını <b>denetlemez</b>; bu yüzden alıştırmalarda ipuçlarını <code>typing.get_type_hints</code> ve <code>inspect.signature</code> ile okuyarak kendimiz kontrol edeceğiz.</p>
 
 <h2>TypeVar ve Generic</h2>
 <p>Bir fonksiyon "ne verirsen onu döndürür" diyorsa <code>Any</code> yazmak bilgiyi kaybettirir. <code>TypeVar</code>, "burada bir tür var, adı T, giriş ve çıkışta aynı" der. Sınıfları da generic yapabilirsin: <code>Stack[int]</code>. Python 3.12 ile <code>def ilk[T](...)</code> ve <code>class Stack[T]:</code> kısa sözdizimi geldi; eski sözdizimini de tanıman gerekir çünkü kurumsal kodun çoğu onunla yazıldı.</p>
@@ -2312,7 +2312,7 @@ print(etiket('askida'))
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Tipleri sözleşme olarak kullanmak</h3>
-<p>Olgun ekiplerde tip ipuçları belgelemeden çok tasarım aracıdır. Bir fonksiyon <code>dict[str, Any]</code> alıyorsa bu genelde "şeklini bilmiyorum" itirafıdır; TypedDict ya da dataclass\'a çevirmek sorunun yarısını çözer. <code>Optional</code> parametre çokluğu fonksiyonun iki iş yaptığına işarettir. <code>NewType</code> ile kimlikleri ayırmak, Anadolu Bank örneğindeki gibi "müşteri no yerine hesap no gönderme" hatasını tamamen ortadan kaldırır.</p>
+<p>Olgun ekiplerde tip ipuçları belgelemeden çok tasarım aracıdır. Bir fonksiyon <code>dict[str, Any]</code> alıyorsa bu genelde "şeklini bilmiyorum" itirafıdır; TypedDict ya da dataclass\'a çevirmek sorunun yarısını çözer. <code>Optional</code> parametre çokluğu fonksiyonun iki iş yaptığına işarettir. <code>NewType</code> ile kimlikleri ayırmak, Ilgaz Bank örneğindeki gibi "müşteri no yerine hesap no gönderme" hatasını tamamen ortadan kaldırır.</p>
 <p>Variance (değişinti) konusunu bil: <code>list[int]</code>, <code>list[float]</code>\'ın alt türü <b>değildir</b> (liste değişebilir, invariant); ama <code>Sequence[int]</code>, <code>Sequence[float]</code> yerine geçer (salt okunur, covariant). Parametre tiplerinde olabildiğince genel soyut tip (<code>Sequence</code>, <code>Mapping</code>, <code>Iterable</code>), dönüşte somut tip (<code>list</code>, <code>dict</code>) kullanmak bu sorunların çoğunu önler.</p>
 <p>Çalışma zamanı doğrulaması gerekiyorsa pydantic, TypedDict\'in doğal devamıdır: aynı alan tanımı hem denetleyiciye hem çalışma zamanına hizmet eder. Ancak iç fonksiyonlarda doğrulama tekrarı maliyetlidir; doğrulamayı sınırda (API girişi, dosya okuma) yap, içeride tiplere güven.</p>
 </section>`,
@@ -2386,7 +2386,7 @@ L.push(
     sum: 'HTTP\'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda sahte istemci ve fonksiyon tabanlı yönlendiriciyle çalıştır.',
     goals: ['HTTP yöntemleri, durum kodları ve başlıkları doğru yorumlayabilirim', 'requests/httpx ile oturum, zaman aşımı ve hata yönetimi kalıplarını uygulayabilirim', 'FastAPI uç noktasının yapısını ve pydantic doğrulamasının mantığını açıklayabilirim', 'Dış API yanıtını şemaya göre doğrulayıp tutarlı hata kodları üretebilirim', 'Üstel geri çekilme ile yeniden deneme ve idempotency mantığını kurabilirim'],
     body: `<h2>Neden önemli?</h2>
-<p>Kurumsal Python kodunun büyük bölümü bir ağ sınırında durur: Anadolu Market\'in sipariş servisi kargo firmasının API\'sine istek atar, Anadolu Bank\'ın kredi modülü skor servisinden yanıt bekler. Bu sınırda her şey ters gidebilir: zaman aşımı, 503, bozuk JSON, beklenmeyen alan. Bu derste HTTP\'yi, istemci kütüphanelerini ve bir API yazmanın iskeletini öğreneceksin. Tarayıcıda ağ erişimi olmadığı için örnekler <b>sahte istemci</b> (fake client) ile çalışır; gerçek <code>requests</code>/<code>httpx</code>/FastAPI kodu gösterim olarak verilir. Sahte istemci yaklaşımı aynı zamanda ekiplerin birim testte kullandığı yöntemdir, boşa gitmez.</p>
+<p>Kurumsal Python kodunun büyük bölümü bir ağ sınırında durur: Anadolu Market\'in sipariş servisi kargo firmasının API\'sine istek atar, Ilgaz Bank\'ın kredi modülü skor servisinden yanıt bekler. Bu sınırda her şey ters gidebilir: zaman aşımı, 503, bozuk JSON, beklenmeyen alan. Bu derste HTTP\'yi, istemci kütüphanelerini ve bir API yazmanın iskeletini öğreneceksin. Tarayıcıda ağ erişimi olmadığı için örnekler <b>sahte istemci</b> (fake client) ile çalışır; gerçek <code>requests</code>/<code>httpx</code>/FastAPI kodu gösterim olarak verilir. Sahte istemci yaklaşımı aynı zamanda ekiplerin birim testte kullandığı yöntemdir, boşa gitmez.</p>
 
 <h2>HTTP temelleri</h2>
 <p>Bir HTTP isteği: yöntem (GET, POST, PUT, PATCH, DELETE), yol (<code>/siparisler/42</code>), başlıklar (<code>Authorization</code>, <code>Content-Type</code>) ve gövde (genelde JSON). Yanıt: durum kodu, başlıklar, gövde. GET ve DELETE idempotent (tekrarlanınca aynı sonuç), POST değildir; bu yüzden POST\'u körlemesine yeniden denemek çift sipariş yaratabilir.</p>
@@ -2878,7 +2878,7 @@ L.push(
     sum: 'Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker\'a kısa bakış.',
     goals: ['pyproject.toml ve src düzeniyle kurulabilir paket iskeleti kurabilirim', 'argparse ile alt komutlu, test edilebilir bir CLI yazabilirim', 'Entry point ile paketimi terminal komutu olarak sunabilirim', 'Semantik sürümlemeyi uygular ve sürümleri karşılaştırabilirim', 'wheel/sdist üretimi, editable kurulum ve Docker imajının temel mantığını açıklayabilirim'],
     body: `<h2>Neden önemli?</h2>
-<p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Anadolu Bank\'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide\'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
+<p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Ilgaz Bank\'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide\'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
 
 <h2>pyproject.toml ve src düzeni</h2>
 <p><code>pyproject.toml</code>, paketin tek yapılandırma dosyasıdır: ad, sürüm, bağımlılıklar, derleme aracı ve araç ayarları (ruff, mypy, pytest). <b>src düzeni</b> (src layout) paketi <code>src/paket_adi/</code> altına koyar; böylece testler kurulmamış kaynak klasörü yerine kurulu paketi içe aktarır ve "yerelde çalışıyor, kurulunca çalışmıyor" hatası erken yakalanır.</p>
@@ -2890,7 +2890,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "anadolu-skor"
 version = "1.2.0"
-description = "Anadolu Bank kredi skoru araçları"
+description = "Ilgaz Bank kredi skoru araçları"
 requires-python = "&gt;=3.11"
 dependencies = ["httpx&gt;=0.27", "pydantic&gt;=2"]
 
@@ -3075,7 +3075,7 @@ for s in asamalar:
   }
 );
 })(window);
-/* PythonPatika — İleri 3: Üretime Hazırlık ve Bitirme (kalite-ci, mulakat-hazirlik, proje-ileri) */
+/* Kesit Python — İleri 3: Üretime Hazırlık ve Bitirme (kalite-ci, mulakat-hazirlik, proje-ileri) */
 // needs: pandas
 (function (W) {
 'use strict';
@@ -3098,7 +3098,7 @@ L.push(
   ],
   body: `
 <h2>Neden kalite otomasyonu?</h2>
-<p>Anadolu Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
+<p>Ilgaz Bank\'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit\'te, her pull request\'te aynı standardı uygulamaktır.</p>
 <p>Üretime hazır bir Python projesinde kalite zinciri dört halkadan oluşur: biçimlendirici (formatter) kodu tek stile getirir, linter şüpheli kalıpları yakalar, tip denetleyici (type checker) sözleşmeleri doğrular, test koşucusu davranışı kanıtlar. pre-commit bu zinciri yerelde, CI (continuous integration, sürekli tümleştirme) sunucuda çalıştırır.</p>
 
 <h2>Biçim ve lint: ruff, black, isort</h2>
@@ -3525,7 +3525,7 @@ print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
 </ol></div>
 
 <h2>Sistem tasarımı için Python</h2>
-<p>Üst düzey pozisyonlarda "Anadolu Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
+<p>Üst düzey pozisyonlarda "Ilgaz Bank\'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread\'e değil process\'e veririm."</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Soruyu kalıba indirgeme pratiği</h3>

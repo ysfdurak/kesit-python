@@ -36,7 +36,7 @@ L.push(
 
   { id: 'b-004', lv: 'temel', topic: 'Değişkenler ve Türler', diff: 2, kind: 'tamamla',
     title: 'Para birimi dönüşümü',
-    q: '<p>Anadolu Bank\'ta dolar-lira dönüşümü yapan <code>tl_karsiligi(dolar, kur)</code> fonksiyonundaki boşluğu tamamla. Sonuç tam sayı kuruşa (ör. 12.345 TL → 1234 kuruş) <b>aşağı yuvarlanarak</b> döndürülmeli.</p>',
+    q: '<p>Ilgaz Bank\'ta dolar-lira dönüşümü yapan <code>tl_karsiligi(dolar, kur)</code> fonksiyonundaki boşluğu tamamla. Sonuç tam sayı kuruşa (ör. 12.345 TL → 1234 kuruş) <b>aşağı yuvarlanarak</b> döndürülmeli.</p>',
     start: 'def tl_karsiligi(dolar, kur):\n    tl = dolar * kur\n    kurus = # ... buraya ...\n    return kurus\n',
     sol: 'def tl_karsiligi(dolar, kur):\n    tl = dolar * kur\n    kurus = int(tl * 100)\n    return kurus\n',
     tests: 'assert tl_karsiligi(10, 32.5) == 32500, "10 dolar * 32.5 = 32500 kuruş olmalı"\nassert tl_karsiligi(1, 32.123) == 3212, "aşağı yuvarlama: 3212 kuruş olmalı"\nassert isinstance(tl_karsiligi(2, 30), int), "sonuç int olmalı"\n',
@@ -77,7 +77,7 @@ L.push(
 
   { id: 'b-008', lv: 'temel', topic: 'Metinler', diff: 2, kind: 'yaz',
     title: 'Kart numarasını maskele',
-    q: '<p>Anadolu Bank ekranlarında kart numarasının yalnızca son 4 hanesi görünmeli. <code>maskele(kart)</code> fonksiyonunu yaz: 16 haneli metni al, ilk 12 haneyi <code>*</code> yap, son 4 haneyi bırak. Örnek: <code>"1234567812345678"</code> → <code>"************5678"</code>.</p>',
+    q: '<p>Ilgaz Bank ekranlarında kart numarasının yalnızca son 4 hanesi görünmeli. <code>maskele(kart)</code> fonksiyonunu yaz: 16 haneli metni al, ilk 12 haneyi <code>*</code> yap, son 4 haneyi bırak. Örnek: <code>"1234567812345678"</code> → <code>"************5678"</code>.</p>',
     start: 'def maskele(kart):\n    # buraya yaz\n    pass\n',
     sol: 'def maskele(kart):\n    return "*" * (len(kart) - 4) + kart[-4:]\n',
     tests: 'assert maskele("1234567812345678") == "************5678", "ilk 12 hane * olmalı"\nassert maskele("00001111") == "****1111", "8 haneli girişte de son 4 kalmalı"\n',
@@ -229,7 +229,7 @@ L.push(
 
   { id: 'b-023', lv: 'temel', topic: 'Sözlükler', diff: 3, kind: 'yaz',
     title: 'İç içe sözlükte toplam bakiye',
-    q: '<p>Anadolu Bank müşteri verisi iç içe sözlük: <code>{"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}</code>. <code>toplam_bakiye(musteriler)</code> fonksiyonunu yaz: her müşterinin tüm hesaplarının toplamını <code>{"ali": 600, "ayşe": 50}</code> biçiminde döndürsün.</p>',
+    q: '<p>Ilgaz Bank müşteri verisi iç içe sözlük: <code>{"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}</code>. <code>toplam_bakiye(musteriler)</code> fonksiyonunu yaz: her müşterinin tüm hesaplarının toplamını <code>{"ali": 600, "ayşe": 50}</code> biçiminde döndürsün.</p>',
     start: 'def toplam_bakiye(musteriler):\n    # buraya yaz\n    pass\n',
     sol: 'def toplam_bakiye(musteriler):\n    return {ad: sum(hesaplar.values()) for ad, hesaplar in musteriler.items()}\n',
     tests: 'm = {"ali": {"vadesiz": 100, "vadeli": 500}, "ayşe": {"vadesiz": 50}}\nassert toplam_bakiye(m) == {"ali": 600, "ayşe": 50}, "ali 600, ayşe 50 olmalı"\nassert toplam_bakiye({"x": {}}) == {"x": 0}, "hesabı olmayan müşteri 0"\n',
@@ -270,7 +270,7 @@ L.push(
 
   { id: 'b-027', lv: 'temel', topic: 'Koşullar', diff: 2, kind: 'yaz',
     title: 'Kredi ön onay',
-    q: '<p>Anadolu Bank kredi ön onayı: <code>on_onay(yas, gelir, kredi_notu)</code> → yaş 18-70 arası (dahil) <b>ve</b> gelir en az 15000 <b>ve</b> kredi notu en az 1300 ise <code>"ONAY"</code>; yaş uygun değilse <code>"YAS"</code>; yaş uygun ama gelir yetersizse <code>"GELIR"</code>; ikisi de uygun ama not düşükse <code>"NOT"</code> döndür.</p>',
+    q: '<p>Ilgaz Bank kredi ön onayı: <code>on_onay(yas, gelir, kredi_notu)</code> → yaş 18-70 arası (dahil) <b>ve</b> gelir en az 15000 <b>ve</b> kredi notu en az 1300 ise <code>"ONAY"</code>; yaş uygun değilse <code>"YAS"</code>; yaş uygun ama gelir yetersizse <code>"GELIR"</code>; ikisi de uygun ama not düşükse <code>"NOT"</code> döndür.</p>',
     start: 'def on_onay(yas, gelir, kredi_notu):\n    # buraya yaz\n    pass\n',
     sol: 'def on_onay(yas, gelir, kredi_notu):\n    if not (18 <= yas <= 70):\n        return "YAS"\n    if gelir < 15000:\n        return "GELIR"\n    if kredi_notu < 1300:\n        return "NOT"\n    return "ONAY"\n',
     tests: 'assert on_onay(30, 20000, 1500) == "ONAY", "uygun başvuru ONAY"\nassert on_onay(17, 20000, 1500) == "YAS", "17 yaş YAS"\nassert on_onay(71, 20000, 1500) == "YAS", "71 yaş YAS"\nassert on_onay(30, 10000, 1500) == "GELIR", "düşük gelir GELIR"\nassert on_onay(30, 20000, 1000) == "NOT", "düşük not NOT"\nassert on_onay(18, 15000, 1300) == "ONAY", "sınır değerler ONAY"\n',
@@ -311,7 +311,7 @@ L.push(
 
   { id: 'b-031', lv: 'temel', topic: 'Döngüler', diff: 2, kind: 'yaz',
     title: 'İlk negatif bakiye',
-    q: '<p>Anadolu Bank hesap hareketleri listesi: <code>[100, -30, -80, 50]</code>. Başlangıç bakiyesi 0. <code>ilk_eksi(hareketler)</code> fonksiyonunu yaz: bakiyenin ilk kez negatife düştüğü hareketin indeksini döndürsün; hiç düşmüyorsa <code>-1</code>. Negatife düşünce döngüyü <code>break</code> ile bitir.</p>',
+    q: '<p>Ilgaz Bank hesap hareketleri listesi: <code>[100, -30, -80, 50]</code>. Başlangıç bakiyesi 0. <code>ilk_eksi(hareketler)</code> fonksiyonunu yaz: bakiyenin ilk kez negatife düştüğü hareketin indeksini döndürsün; hiç düşmüyorsa <code>-1</code>. Negatife düşünce döngüyü <code>break</code> ile bitir.</p>',
     start: 'def ilk_eksi(hareketler):\n    # buraya yaz\n    pass\n',
     sol: 'def ilk_eksi(hareketler):\n    bakiye = 0\n    for i, h in enumerate(hareketler):\n        bakiye += h\n        if bakiye < 0:\n            return i\n    return -1\n',
     tests: 'assert ilk_eksi([100, -30, -80, 50]) == 2, "bakiye 2. indekste -10 olur"\nassert ilk_eksi([10, 20]) == -1, "hiç negatif olmazsa -1"\nassert ilk_eksi([-5]) == 0, "ilk hareket negatife düşürürse 0"\nassert ilk_eksi([]) == -1, "boş liste -1"\n',
@@ -341,7 +341,7 @@ L.push(
 
   { id: 'b-034', lv: 'temel', topic: 'Döngüler', diff: 3, kind: 'yaz',
     title: 'Bileşik faiz: kaç yıl?',
-    q: '<p>Anadolu Bank: <code>kac_yil(anapara, oran, hedef)</code> fonksiyonunu yaz. Her yıl bakiye <code>oran</code> yüzde artar (ör. 10 → %10). Bakiyenin <code>hedef</code>e ulaşması ya da geçmesi için gereken tam yıl sayısını <code>while</code> ile hesapla. Başlangıçta zaten hedefe ulaşmışsa 0 döndür.</p>',
+    q: '<p>Ilgaz Bank: <code>kac_yil(anapara, oran, hedef)</code> fonksiyonunu yaz. Her yıl bakiye <code>oran</code> yüzde artar (ör. 10 → %10). Bakiyenin <code>hedef</code>e ulaşması ya da geçmesi için gereken tam yıl sayısını <code>while</code> ile hesapla. Başlangıçta zaten hedefe ulaşmışsa 0 döndür.</p>',
     start: 'def kac_yil(anapara, oran, hedef):\n    # buraya yaz\n    pass\n',
     sol: 'def kac_yil(anapara, oran, hedef):\n    yil = 0\n    bakiye = anapara\n    while bakiye < hedef:\n        bakiye *= 1 + oran / 100\n        yil += 1\n    return yil\n',
     tests: 'assert kac_yil(1000, 10, 1300) == 3, "1000 -> 1331 üçüncü yılda hedefi geçer"\nassert kac_yil(1000, 10, 1000) == 0, "zaten hedefte: 0 yıl"\nassert kac_yil(100, 100, 800) == 3, "her yıl ikiye katlanır: 3 yıl"\n',
@@ -443,7 +443,7 @@ L.push(
 
   { id: 'b-044', lv: 'temel', topic: 'Dosya ve Hata', diff: 2, kind: 'tamamla',
     title: 'Kendi istisnanı fırlat',
-    q: '<p>Anadolu Bank para çekme: <code>para_cek(bakiye, tutar)</code> tutar bakiyeden büyükse <code>ValueError("Yetersiz bakiye")</code> fırlatsın, aksi halde yeni bakiyeyi döndürsün. Boşluğu tamamla.</p>',
+    q: '<p>Ilgaz Bank para çekme: <code>para_cek(bakiye, tutar)</code> tutar bakiyeden büyükse <code>ValueError("Yetersiz bakiye")</code> fırlatsın, aksi halde yeni bakiyeyi döndürsün. Boşluğu tamamla.</p>',
     start: 'def para_cek(bakiye, tutar):\n    if tutar > bakiye:\n        # ... buraya ...\n    return bakiye - tutar\n',
     sol: 'def para_cek(bakiye, tutar):\n    if tutar > bakiye:\n        raise ValueError("Yetersiz bakiye")\n    return bakiye - tutar\n',
     tests: 'assert para_cek(100, 30) == 70, "100 - 30 = 70"\ntry:\n    para_cek(10, 50)\n    assert False, "ValueError fırlatılmalıydı"\nexcept ValueError as e:\n    assert str(e) == "Yetersiz bakiye", "hata mesajı \\"Yetersiz bakiye\\" olmalı"\n',
@@ -747,7 +747,7 @@ L.push(
   /* --- Tarih-Saat --- */
   { id: 'b-073', lv: 'orta', topic: 'Tarih-Saat', diff: 1, kind: 'yaz',
     title: 'Vade tarihi',
-    q: '<p>Anadolu Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
+    q: '<p>Ilgaz Bank: <code>vade_tarihi(baslangic, gun)</code> fonksiyonunu yaz. <code>baslangic</code> <code>"YYYY-AA-GG"</code> metni; <code>gun</code> kadar sonrasını aynı biçimde metin olarak döndür. <code>datetime.date</code> ve <code>timedelta</code> kullan.</p>',
     start: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    # buraya yaz\n    pass\n',
     sol: 'from datetime import date, timedelta\n\ndef vade_tarihi(baslangic, gun):\n    d = date.fromisoformat(baslangic) + timedelta(days=gun)\n    return d.isoformat()\n',
     tests: 'assert vade_tarihi("2026-01-30", 3) == "2026-02-02", "ay geçişi doğru olmalı"\nassert vade_tarihi("2024-02-28", 1) == "2024-02-29", "artık yıl 29 Şubat"\nassert vade_tarihi("2026-12-31", 1) == "2027-01-01", "yıl geçişi"\n',
@@ -788,7 +788,7 @@ L.push(
 
   { id: 'b-077', lv: 'orta', topic: 'Regex', diff: 2, kind: 'yaz',
     title: 'Log satırını ayrıştır',
-    q: '<p>Anadolu Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
+    q: '<p>Ilgaz Bank log satırı: <code>"2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı"</code>. <code>log_ayristir(satir)</code> fonksiyonunu yaz: isimli gruplarla <code>{"tarih": ..., "saat": ..., "seviye": ..., "mesaj": ...}</code> döndürsün; eşleşmezse <code>None</code>.</p>',
     start: 'import re\n\ndef log_ayristir(satir):\n    # buraya yaz\n    pass\n',
     sol: 'import re\n\nDESEN = re.compile(r"^(?P<tarih>\\d{4}-\\d{2}-\\d{2}) (?P<saat>\\d{2}:\\d{2}:\\d{2}) \\[(?P<seviye>[A-Z]+)\\] (?P<mesaj>.*)$")\n\ndef log_ayristir(satir):\n    m = DESEN.match(satir)\n    return m.groupdict() if m else None\n',
     tests: 'r = log_ayristir("2026-03-15 14:02:11 [ERROR] Hesap TR12 bulunamadı")\nassert r == {"tarih": "2026-03-15", "saat": "14:02:11", "seviye": "ERROR", "mesaj": "Hesap TR12 bulunamadı"}, "alanlar doğru ayrışmalı"\nassert log_ayristir("bozuk satır") is None, "eşleşmeyen satır None"\n',
@@ -1143,7 +1143,7 @@ L.push(
     tags: ['singleton', 'factory', '__new__'], min: 8 }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-111 … b-120 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-111 … b-120 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -1237,7 +1237,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Kuruş hassasiyetinde toplam',
-    q: '<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Anadolu Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
+    q: '<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Ilgaz Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
     start: 'def kurus_topla(fiyatlar):\n    # buraya yaz\n    pass\n',
     sol: 'def kurus_topla(fiyatlar):\n    toplam = 0\n    for f in fiyatlar:\n        if "." in f:\n            lira, kurus = f.split(".")\n            kurus = kurus.ljust(2, "0")\n        else:\n            lira, kurus = f, "0"\n        toplam += int(lira) * 100 + int(kurus)\n    return toplam\n',
     tests: 'assert kurus_topla(["0.10", "0.20"]) == 30, "0.10 + 0.20 tam 30 kuruş olmalı (float hatası yok)"\nassert kurus_topla(["19.90", "5.05", "100"]) == 12495, "19.90 + 5.05 + 100 = 124.95 TL = 12495 kuruş"\nassert kurus_topla(["7.5"]) == 750, "\\"7.5\\" 7 lira 50 kuruştur: 750"\nassert kurus_topla([]) == 0, "Boş liste için toplam 0 olmalı"\nassert "float(" not in __source__, "Bu görevde float() kullanmadan çözmelisin"\n',
@@ -1285,7 +1285,7 @@ B.push(
     diff: 2,
     t: 'predict',
     title: 'Negatif sayılarda // ve %',
-    q: '<p>Anadolu Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
+    q: '<p>Ilgaz Bank\'ta negatif bakiyeleri gruplayan kod şu satırları içeriyor. Çıktı nedir?</p>',
     code: 'print(-7 // 2, -7 % 2)\nprint(7 // -2, 7 % -2)\n',
     o: ['-3 -1\n-3 1', '-4 1\n-4 -1', '-3 1\n-3 -1', '-4 -1\n-4 1'],
     a: 1,
@@ -1314,7 +1314,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-121 … b-130 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-121 … b-130 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -1487,7 +1487,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-131 … b-140 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-131 … b-140 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -1499,7 +1499,7 @@ B.push(
     diff: 2,
     kind: 'bug',
     title: 'Telefon numarası temizlenmiyor',
-    q: '<p>Kodda bir hata var, bul ve düzelt. Anadolu Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
+    q: '<p>Kodda bir hata var, bul ve düzelt. Ilgaz Bank müşteri kayıtlarında telefonlar <code>"0532 123-45-67"</code> gibi farklı biçimlerde girilmiş. <code>telefon_temizle(tel)</code> boşlukları, tireleri ve parantezleri silip yalnızca rakamları bırakmalı; ama fonksiyon metni hiç değiştirmeden geri veriyor.</p>',
     start: 'def telefon_temizle(tel):\n    tel.replace(" ", "")\n    tel.replace("-", "")\n    tel.replace("(", "")\n    tel.replace(")", "")\n    return tel\n',
     sol: 'def telefon_temizle(tel):\n    tel = tel.replace(" ", "")\n    tel = tel.replace("-", "")\n    tel = tel.replace("(", "")\n    tel = tel.replace(")", "")\n    return tel\n',
     tests: 'assert telefon_temizle("0532 123-45-67") == "05321234567", "Boşluk ve tireler silinmeli: 05321234567"\nassert telefon_temizle("(0212) 555 00 11") == "02125550011", "Parantezler de silinmeli"\nassert telefon_temizle("05001112233") == "05001112233", "Zaten temiz numara aynı kalmalı"\n',
@@ -1601,7 +1601,7 @@ B.push(
     diff: 1,
     kind: 'yaz',
     title: 'Taksit hesaplayan program',
-    q: '<p>Anadolu Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
+    q: '<p>Ilgaz Bank kredi kartı ekranı için bir program yaz (fonksiyon değil). Program:</p><ol><li><code>input("Tutar: ")</code> ile tutarı (ondalıklı olabilir),</li><li><code>input("Taksit sayısı: ")</code> ile taksit sayısını (tam sayı) alsın.</li><li>Taksit sayısı 3\'ten fazlaysa tutara %5 vade farkı eklensin.</li><li><code>Toplam: 12600.00 TL</code> ve <code>Aylık taksit: 2100.00 TL</code> satırlarını yazdırsın (2 ondalık).</li></ol><p>Test girdileri: <code>12000</code> ve <code>6</code>.</p>',
     start: '# buraya yaz\n',
     sol: 'tutar = float(input("Tutar: "))\ntaksit = int(input("Taksit sayısı: "))\nif taksit > 3:\n    tutar = tutar * 1.05\nprint(f"Toplam: {tutar:.2f} TL")\nprint(f"Aylık taksit: {tutar / taksit:.2f} TL")\n',
     expect: 'Tutar: 12000\nTaksit sayısı: 6\nToplam: 12600.00 TL\nAylık taksit: 2100.00 TL\n',
@@ -1661,7 +1661,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-141 … b-150 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-141 … b-150 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -1725,7 +1725,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Sayfalama (pagination)',
-    q: '<p>Anadolu Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
+    q: '<p>Ilgaz Bank internet şubesi işlem geçmişini sayfa sayfa gösteriyor. <code>sayfa_getir(kayitlar, sayfa, boyut)</code> fonksiyonunu yaz:</p><ul><li><code>sayfa</code> 1\'den başlar.</li><li>İstenen sayfadaki en fazla <code>boyut</code> kaydı liste olarak döndür.</li><li><code>sayfa</code> 1\'den küçükse ya da kayıt kalmadıysa boş liste döndür.</li></ul>',
     start: 'def sayfa_getir(kayitlar, sayfa, boyut):\n    # buraya yaz\n    pass\n',
     sol: 'def sayfa_getir(kayitlar, sayfa, boyut):\n    if sayfa < 1:\n        return []\n    bas = (sayfa - 1) * boyut\n    return kayitlar[bas:bas + boyut]\n',
     tests: 'k = list(range(1, 24))\nassert sayfa_getir(k, 1, 10) == list(range(1, 11)), "1. sayfa 1..10 kayıtlarını vermeli"\nassert sayfa_getir(k, 3, 10) == [21, 22, 23], "Son sayfa eksik dolu olabilir: [21, 22, 23]"\nassert sayfa_getir(k, 4, 10) == [], "Kayıt kalmadıysa boş liste"\nassert sayfa_getir(k, 0, 10) == [], "Sayfa 0 geçersiz: boş liste (negatif dilim tuzağına dikkat)"\n',
@@ -1836,7 +1836,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-151 … b-160 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-151 … b-160 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -1848,7 +1848,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Mükerrer işlem numaraları',
-    q: '<p>Anadolu Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
+    q: '<p>Ilgaz Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
     start: 'def mukerrerler(islem_nolari):\n    # buraya yaz\n    pass\n',
     sol: 'def mukerrerler(islem_nolari):\n    gorulen = set()\n    tekrar = set()\n    for no in islem_nolari:\n        if no in gorulen:\n            tekrar.add(no)\n        else:\n            gorulen.add(no)\n    return sorted(tekrar)\n',
     tests: 'assert mukerrerler([501, 502, 501, 503, 502, 501]) == [501, 502], "501 ve 502 tekrar ediyor; her biri bir kez, sıralı"\nassert mukerrerler([1, 2, 3]) == [], "Tekrar yoksa boş liste"\nassert mukerrerler([]) == [], "Boş liste için boş sonuç"\nassert mukerrerler([9, 9]) == [9], "İki kez geçen tek numara"\nassert ".count(" not in __source__, "count() kullanmadan, görülenler kümesiyle çöz"\n',
@@ -1880,7 +1880,7 @@ B.push(
     diff: 2,
     kind: 'tamamla',
     title: 'Yetki kontrolü',
-    q: '<p>Anadolu Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
+    q: '<p>Ilgaz Bank iç sisteminde her işlem bir yetki kümesi gerektiriyor. <code>yetki_kontrol(kullanici, gerekli)</code> iki küme alıyor ve <code>(izinli_mi, eksikler)</code> demeti döndürüyor: <code>izinli_mi</code> gerekli yetkilerin <b>hepsi</b> kullanıcıda varsa <code>True</code>; <code>eksikler</code> kullanıcıda olmayan gerekli yetkilerin <b>sıralı listesi</b>. Boşlukları (<code>___</code>) doldur.</p>',
     start: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.___(kullanici)\n    eksikler = sorted(gerekli ___ kullanici)\n    return izinli_mi, eksikler\n',
     sol: 'def yetki_kontrol(kullanici, gerekli):\n    izinli_mi = gerekli.issubset(kullanici)\n    eksikler = sorted(gerekli - kullanici)\n    return izinli_mi, eksikler\n',
     tests: 'assert yetki_kontrol({"oku", "yaz", "onayla"}, {"oku", "onayla"}) == (True, []), "Tüm gerekli yetkiler var: (True, [])"\nassert yetki_kontrol({"oku"}, {"oku", "yaz", "sil"}) == (False, ["sil", "yaz"]), "Eksikler sıralı liste: [\\"sil\\", \\"yaz\\"]"\nassert yetki_kontrol(set(), set()) == (True, []), "Hiç yetki gerekmiyorsa izin var"\n',
@@ -2007,7 +2007,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-161 … b-170 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-161 … b-170 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2103,7 +2103,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Yol ile güvenli erişim',
-    q: '<p>Anadolu Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
+    q: '<p>Ilgaz Bank\'ın bir API\'sinden gelen JSON benzeri veride bazı alanlar eksik olabiliyor. <code>guvenli_al(veri, yol, varsayilan=None)</code> fonksiyonunu yaz: <code>yol</code> anahtar ve indekslerden oluşan bir listedir, örn. <code>["musteri", "hesaplar", 0, "bakiye"]</code>. Fonksiyon bu yolu sırayla izleyip değeri döndürsün; yolun herhangi bir adımı yoksa (eksik anahtar, liste dışı indeks, ya da sözlük/liste olmayan bir değerde ilerleme) <code>varsayilan</code> döndürsün.</p>',
     start: 'def guvenli_al(veri, yol, varsayilan=None):\n    # buraya yaz\n    pass\n',
     sol: 'def guvenli_al(veri, yol, varsayilan=None):\n    simdiki = veri\n    for adim in yol:\n        try:\n            simdiki = simdiki[adim]\n        except (KeyError, IndexError, TypeError):\n            return varsayilan\n    return simdiki\n',
     tests: 'v = {"musteri": {"ad": "Ece", "hesaplar": [{"iban": "TR01", "bakiye": 1500}, {"iban": "TR02", "bakiye": 0}]}}\nassert guvenli_al(v, ["musteri", "hesaplar", 0, "bakiye"]) == 1500, "İlk hesabın bakiyesi 1500"\nassert guvenli_al(v, ["musteri", "hesaplar", 1, "bakiye"], -1) == 0, "Değer 0 olduğunda varsayılan değil 0 dönmeli"\nassert guvenli_al(v, ["musteri", "telefon"], "yok") == "yok", "Eksik anahtar → varsayılan"\nassert guvenli_al(v, ["musteri", "hesaplar", 5, "iban"]) is None, "Liste dışı indeks → None"\nassert guvenli_al(v, ["musteri", "ad", "soyad"]) is None, "Metin içinde anahtarla ilerleme → varsayılan (TypeError yakalanmalı)"\nassert guvenli_al(v, []) == v, "Boş yol verinin kendisini döndürmeli"\n',
@@ -2178,7 +2178,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-171 … b-180 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-171 … b-180 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2242,7 +2242,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Şifre gücü',
-    q: '<p>Anadolu Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
+    q: '<p>Ilgaz Bank internet şubesi kayıt ekranı için <code>sifre_gucu(sifre)</code> fonksiyonunu yaz. Şu dört ölçütten kaç tanesinin sağlandığını say:</p><ol><li>En az 8 karakter</li><li>En az bir rakam</li><li>En az bir büyük harf</li><li>En az bir küçük harf</li></ol><p>Puan 0–2 ise <code>"zayıf"</code>, 3 ise <code>"orta"</code>, 4 ise <code>"güçlü"</code> döndür.</p>',
     start: 'def sifre_gucu(sifre):\n    # buraya yaz\n    pass\n',
     sol: 'def sifre_gucu(sifre):\n    puan = 0\n    if len(sifre) >= 8:\n        puan += 1\n    if any(c.isdigit() for c in sifre):\n        puan += 1\n    if any(c.isupper() for c in sifre):\n        puan += 1\n    if any(c.islower() for c in sifre):\n        puan += 1\n    if puan == 4:\n        return "güçlü"\n    elif puan == 3:\n        return "orta"\n    return "zayıf"\n',
     tests: 'assert sifre_gucu("Anadolu2026") == "güçlü", "Uzun, rakamlı, büyük ve küçük harfli: güçlü"\nassert sifre_gucu("anadolu2026") == "orta", "Büyük harf yok: 3 puan → orta"\nassert sifre_gucu("abc") == "zayıf", "Yalnızca küçük harf: 1 puan → zayıf"\nassert sifre_gucu("") == "zayıf", "Boş şifre: zayıf"\nassert sifre_gucu("Ab1") == "orta", "Kısa ama üç tür karakter: 3 puan → orta"\n',
@@ -2324,7 +2324,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Hesap hareketlerini işle',
-    q: '<p>Anadolu Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
+    q: '<p>Ilgaz Bank hesap hareketleri demetler halinde geliyor:</p><ul><li><code>("yatir", tutar)</code> → bakiyeye ekle</li><li><code>("cek", tutar)</code> → bakiyeden düş, <b>ama</b> bakiye yetmiyorsa işlemi atla</li><li><code>("transfer", tutar, hedef_iban)</code> → çekme gibi davranır (yetmiyorsa atla)</li><li>Başka biçimde gelen hareketleri yok say.</li></ul><p><code>bakiye_hesapla(baslangic, hareketler)</code> son bakiyeyi döndürsün. <code>match-case</code> ile demet kalıpları kullan.</p>',
     start: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            # TODO: çekme (yeterliyse)\n            # TODO: transfer (yeterliyse)\n            # TODO: diğerleri\n    return bakiye\n',
     sol: 'def bakiye_hesapla(baslangic, hareketler):\n    bakiye = baslangic\n    for h in hareketler:\n        match h:\n            case ("yatir", tutar):\n                bakiye += tutar\n            case ("cek", tutar) if tutar <= bakiye:\n                bakiye -= tutar\n            case ("transfer", tutar, _) if tutar <= bakiye:\n                bakiye -= tutar\n            case _:\n                pass\n    return bakiye\n',
     tests: 'h = [("yatir", 500), ("cek", 200), ("transfer", 100, "TR99"), ("cek", 5000)]\nassert bakiye_hesapla(1000, h) == 1200, "1000 + 500 - 200 - 100 = 1200; 5000 çekme yetersiz bakiye nedeniyle atlanmalı"\nassert bakiye_hesapla(100, [("transfer", 150, "TR1")]) == 100, "Yetersiz bakiyede transfer atlanmalı"\nassert bakiye_hesapla(50, [("faiz",), ("yatir", 10, "fazla")]) == 50, "Tanınmayan biçimler yok sayılmalı"\nassert bakiye_hesapla(0, []) == 0, "Hareket yoksa bakiye değişmez"\n',
@@ -2353,7 +2353,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-181 … b-190 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-181 … b-190 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2447,7 +2447,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'İlk mükerrer işlemi yakala',
-    q: '<p>Anadolu Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
+    q: '<p>Ilgaz Bank sahtecilik birimi, işlem akışında <b>ilk tekrar eden</b> işlem numarasını hemen bulmak istiyor (akış uzun olabilir; tekrar görülür görülmez durmak gerekir). <code>ilk_tekrar(islem_nolari)</code> fonksiyonunu yaz: ikinci kez görülen ilk numarayı döndürsün; tekrar yoksa <code>None</code>.</p><p>Örnek: <code>[7, 3, 9, 3, 7]</code> → <code>3</code> (3, 7\'den önce ikinci kez görülür).</p>',
     start: 'def ilk_tekrar(islem_nolari):\n    gorulen = set()\n    for no in islem_nolari:\n        # TODO: no daha önce görüldüyse döndür\n        # TODO: değilse kümeye ekle\n        pass\n    # TODO: tekrar yoksa ne döner?\n    return -1\n',
     sol: 'def ilk_tekrar(islem_nolari):\n    gorulen = set()\n    for no in islem_nolari:\n        if no in gorulen:\n            return no\n        gorulen.add(no)\n    return None\n',
     tests: 'assert ilk_tekrar([7, 3, 9, 3, 7]) == 3, "3 ikinci kez 7\\\'den önce görülür"\nassert ilk_tekrar([1, 2, 3]) is None, "Tekrar yoksa None"\nassert ilk_tekrar([]) is None, "Boş akışta None"\nassert ilk_tekrar([5, 5]) == 5, "Hemen tekrar eden 5"\n',
@@ -2524,7 +2524,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-191 … b-200 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-191 … b-200 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2572,7 +2572,7 @@ B.push(
     diff: 2,
     kind: 'yaz',
     title: 'Kredi taksiti hesaplayıcı',
-    q: '<p>Anadolu Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
+    q: '<p>Ilgaz Bank kredi simülatörü için <code>aylik_taksit(anapara, aylik_faiz_yuzde, ay)</code> fonksiyonunu yaz. Eşit taksitli kredinin (annüite) formülü:</p><pre class="out">taksit = P × r / (1 − (1 + r) ** (−n))</pre><p>Burada P anapara, r aylık faiz oranı (yüzde değil: %3 → 0.03), n ay sayısıdır. Faiz 0 ise taksit = P / n. Sonucu 2 ondalığa yuvarla. Fonksiyona kısa bir belge dizesi (docstring) ekle.</p>',
     start: 'def aylik_taksit(anapara, aylik_faiz_yuzde, ay):\n    # buraya yaz\n    pass\n',
     sol: 'def aylik_taksit(anapara, aylik_faiz_yuzde, ay):\n    """Eşit taksitli kredinin aylık taksitini döndürür."""\n    r = aylik_faiz_yuzde / 100\n    if r == 0:\n        return round(anapara / ay, 2)\n    return round(anapara * r / (1 - (1 + r) ** (-ay)), 2)\n',
     tests: 'assert aylik_taksit(120000, 0, 12) == 10000.0, "Faizsiz: 120000 / 12 = 10000.0"\nassert aylik_taksit(100000, 3, 12) == 10046.21, "100000 TL, aylık %3, 12 ay → 10046.21"\nassert aylik_taksit(50000, 2, 24) == 2643.55, "50000 TL, aylık %2, 24 ay → 2643.55"\nassert aylik_taksit.__doc__, "Fonksiyonun bir docstring\\\'i olmalı"\n',
@@ -2697,7 +2697,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası, temel (sürüm 2): b-201 … b-210 */
+/* Kesit Python — pratik bankası, temel (sürüm 2): b-201 … b-210 */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2709,7 +2709,7 @@ B.push(
     diff: 3,
     kind: 'yaz',
     title: 'Özyinelemeli ikili arama',
-    q: '<p>Anadolu Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
+    q: '<p>Ilgaz Bank müşteri numaraları <b>sıralı</b> bir listede. <code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz: hedef listedeyse indeksini, yoksa <code>-1</code> döndürsün. Her adımda aralığın ortasındaki elemana bak ve aramayı sol ya da sağ yarıyla sınırla. Liste dilimleme (<code>liste[a:b]</code>) kullanma; <code>bas</code>/<code>son</code> indeksleriyle çalış (dilimleme her adımda kopya üretir).</p>',
     start: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    # buraya yaz\n    pass\n',
     sol: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    if son is None:\n        son = len(liste) - 1\n    if bas > son:\n        return -1\n    orta = (bas + son) // 2\n    if liste[orta] == hedef:\n        return orta\n    if liste[orta] < hedef:\n        return ikili_ara(liste, hedef, orta + 1, son)\n    return ikili_ara(liste, hedef, bas, orta - 1)\n',
     tests: 'L = [102, 115, 230, 341, 456, 578, 690, 777]\nassert ikili_ara(L, 456) == 4, "456 dördüncü indekste"\nassert ikili_ara(L, 102) == 0, "İlk eleman: 0"\nassert ikili_ara(L, 777) == 7, "Son eleman: 7"\nassert ikili_ara(L, 500) == -1, "Olmayan değer: -1"\nassert ikili_ara([], 5) == -1, "Boş liste: -1"\nassert __source__.count("ikili_ara(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\n',
@@ -2839,7 +2839,7 @@ B.push(
     diff: 1,
     kind: 'tamamla',
     title: 'İşlem günlüğüne satır ekle',
-    q: '<p>Anadolu Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
+    q: '<p>Ilgaz Bank denetim günlüğüne her işlemde bir satır <b>eklenmeli</b> (önceki kayıtlar silinmeden). <code>log_ekle(dosya_adi, mesaj)</code> mesajı sona yeni satır olarak ekleyip dosyadaki toplam satır sayısını döndürmeli. Boşlukları (<code>___</code>) doldur.</p>',
     start: 'def log_ekle(dosya_adi, mesaj):\n    with open(dosya_adi, "___", encoding="utf-8") as f:\n        f.write(mesaj + ___)\n    with open(dosya_adi, encoding="utf-8") as f:\n        return len(f.readlines())\n',
     sol: 'def log_ekle(dosya_adi, mesaj):\n    with open(dosya_adi, "a", encoding="utf-8") as f:\n        f.write(mesaj + "\\n")\n    with open(dosya_adi, encoding="utf-8") as f:\n        return len(f.readlines())\n',
     tests: 'with open("denetim.log", "w", encoding="utf-8") as f:\n    f.write("açılış\\n")\nassert log_ekle("denetim.log", "havale 500 TL") == 2, "Eski satır korunmalı, yeni satır eklenmeli: 2 satır"\nassert log_ekle("denetim.log", "EFT 1200 TL") == 3, "Bir ekleme daha: 3 satır"\nwith open("denetim.log", encoding="utf-8") as f:\n    assert f.read() == "açılış\\nhavale 500 TL\\nEFT 1200 TL\\n", "Satırlar sırayla, her biri \\\\n ile bitmeli"\n',
@@ -2866,7 +2866,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Comprehension, Üreteçler (b-211…b-220) */
+/* Kesit Python — pratik bankası (orta): Comprehension, Üreteçler (b-211…b-220) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -2985,7 +2985,7 @@ B.push(
     t: 'order',
     kind: 'order',
     title: 'Hatalı satırları atlayan ayrıştırıcı',
-    q: '<p>Anadolu Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
+    q: '<p>Ilgaz Bank işlem satırlarını (<code>"hesap;tutar"</code>) ayrıştırıp sayısal olmayan tutarları atlayan bir üreteç ve onu kullanan toplamı sırala. Program <code>350</code> yazdırmalı.</p>',
     lines: ['def ayristir(kaynak):', '    for s in kaynak:', '        hesap, tutar = s.split(";")', '        if tutar.isdigit():', '            yield hesap, int(tutar)', 'gecerli = ayristir(["TR1;100", "TR2;abc", "TR3;250"])', 'print(sum(t for _, t in gecerli))'],
     expect: '350\n',
     hint: 'Üreteç önce tanımlanmalı; yield, koşulun içinde olmalı ki yalnızca geçerli satırlar üretilsin.',
@@ -3049,7 +3049,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Fonksiyonel, Kapanışlar (b-221…b-230) */
+/* Kesit Python — pratik bankası (orta): Fonksiyonel, Kapanışlar (b-221…b-230) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3186,7 +3186,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'API hız sınırlayıcı',
-    q: '<p>Anadolu Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
+    q: '<p>Ilgaz Bank\'ın dış API\'si "son <code>pencere</code> saniyede en fazla <code>limit</code> istek" kuralı uyguluyor. <code>hiz_siniri(limit, pencere)</code> fonksiyonunu yaz: bir <code>izin(zaman)</code> fonksiyonu döndürsün. <code>izin</code> çağrı anını (saniye, artan sayılar) alır; son <code>pencere</code> saniyede (yani <code>zaman - pencere</code>\'den <b>büyük</b> anlarda) kabul edilmiş istek sayısı <code>limit</code>\'ten azsa isteği kaydedip <code>True</code>, değilse <code>False</code> döndürür. Reddedilen istek kaydedilmez. Her sınırlayıcı kendi durumunu tutmalı.</p>',
     guide: ['Dış fonksiyonda kabul edilen isteklerin zamanlarını tutacak bir <code>deque</code> oluştur.', 'İç <code>izin(zaman)</code> fonksiyonunda önce pencere dışında kalan eski zamanları baştan at (<code>popleft</code>).', 'Kalan sayı <code>limit</code>\'ten küçükse zamanı ekle ve <code>True</code> döndür; değilse <code>False</code>.', 'Dış fonksiyon iç fonksiyonu döndürsün. Deque\'yi yalnızca değiştirdiğin (yeniden atamadığın) için <code>nonlocal</code> gerekmez.'],
     example: 'from collections import deque\n# Kapanışın içinde değişebilir bir kap tutmak\ndef kayit_tutucu(kapasite):\n    son = deque()\n    def ekle(x):\n        son.append(x)\n        if len(son) > kapasite:\n            son.popleft()\n        return list(son)\n    return ekle\n\nk = kayit_tutucu(2)\nk("a"); k("b")\nprint(k("c"))   # [\'b\', \'c\']\n',
     start: 'from collections import deque\n\ndef hiz_siniri(limit, pencere):\n    # TODO 1: kabul edilen zamanlar için deque\n    def izin(zaman):\n        # TODO 2: pencere dışındaki eski kayıtları at\n        # TODO 3: yer varsa kaydet ve True, yoksa False\n        return True\n    return izin\n',
@@ -3233,7 +3233,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Dekoratörler, OOP (b-231…b-240) */
+/* Kesit Python — pratik bankası (orta): Dekoratörler, OOP (b-231…b-240) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3281,7 +3281,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Rol kontrolü yapan dekoratör',
-    q: '<p>Anadolu Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
+    q: '<p>Ilgaz Bank\'ın iç panelinde bazı işlemler yalnızca belirli rollere açık. <code>yetki_gerekli(rol)</code> <b>parametreli</b> dekoratörünü yaz. Sarılan fonksiyonların ilk argümanı her zaman kullanıcı sözlüğüdür: <code>{"ad": "Ece", "roller": ["gise", "onay"]}</code>. Rol kullanıcıda yoksa <code>PermissionError</code> fırlat (mesajda rol adı geçsin), varsa fonksiyonu çağırıp sonucunu döndür. <code>functools.wraps</code> ile fonksiyon adını koru.</p>',
     guide: ['En dış fonksiyon <code>yetki_gerekli(rol)</code> parametreyi alır ve bir dekoratör döndürür.', 'Ortadaki <code>dekorator(fn)</code> sarıcıyı döndürür; sarıcının üstüne <code>@functools.wraps(fn)</code> koy.', 'Sarıcı <code>(kullanici, *args, **kwargs)</code> alsın; <code>rol not in kullanici["roller"]</code> ise <code>PermissionError</code>.', 'Aksi halde <code>return fn(kullanici, *args, **kwargs)</code>.'],
     example: 'import functools\n# Parametreli dekoratör iskeleti: ön ek ekleyen dekoratör\ndef onek(metin):\n    def dekorator(fn):\n        @functools.wraps(fn)\n        def sarici(*args, **kwargs):\n            return metin + str(fn(*args, **kwargs))\n        return sarici\n    return dekorator\n\n@onek("TL ")\ndef fiyat():\n    return 99\nprint(fiyat(), fiyat.__name__)   # TL 99 fiyat\n',
     start: 'import functools\n\ndef yetki_gerekli(rol):\n    # TODO 1: fn alan bir dekorator fonksiyonu tanımla\n    # TODO 2: içinde @functools.wraps(fn) ile sarıcı yaz\n    # TODO 3: rol yoksa PermissionError, varsa fn sonucunu döndür\n    def dekorator(fn):\n        return fn\n    return dekorator\n',
@@ -3418,7 +3418,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): OOP, Kalıtım ve MRO, Dataclass ve Tip (b-241…b-250) */
+/* Kesit Python — pratik bankası (orta): OOP, Kalıtım ve MRO, Dataclass ve Tip (b-241…b-250) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3601,7 +3601,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Dataclass ve Tip, Hata Tasarımı ve Logging, collections/itertools (b-251…b-260) */
+/* Kesit Python — pratik bankası (orta): Dataclass ve Tip, Hata Tasarımı ve Logging, collections/itertools (b-251…b-260) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3666,7 +3666,7 @@ B.push(
     t: 'order',
     kind: 'order',
     title: 'Ödeme hataları hiyerarşisi',
-    q: '<p>Anadolu Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
+    q: '<p>Ilgaz Bank ödeme modülü için bir ata hata sınıfı ve ondan türeyen <code>YetersizBakiye</code> sınıfını tanımlayıp, ata sınıf üzerinden yakalayan programı sırala. Ata sınıf ortak <code>kod</code> özniteliğini taşır, alt sınıf kendi mesajını kurar.</p>',
     lines: ['class OdemeHatasi(Exception):', '    kod = "ODEME"', 'class YetersizBakiye(OdemeHatasi):', '    def __init__(self, eksik):', '        super().__init__(f"{eksik} TL eksik")', 'try:', '    raise YetersizBakiye(30)', 'except OdemeHatasi as e:', '    print(type(e).__name__, e.kod, e)'],
     tests: 'assert "kod" in vars(OdemeHatasi), "kod özniteliği ata sınıfta (OdemeHatasi) tanımlanmalı"\nassert "__init__" in vars(YetersizBakiye), "mesajı kuran __init__ alt sınıfta olmalı"\n',
     expect: 'YetersizBakiye ODEME 30 TL eksik\n',
@@ -3784,7 +3784,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): collections/itertools, Tarih-Saat, Regex (b-261…b-270) */
+/* Kesit Python — pratik bankası (orta): collections/itertools, Tarih-Saat, Regex (b-261…b-270) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3867,7 +3867,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Taksit tarihi: ay ekleme',
-    q: '<p>Anadolu Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
+    q: '<p>Ilgaz Bank kredi taksitleri her ay aynı günde ödenir; ama 31 Ocak\'tan bir ay sonrası 31 Şubat olamaz, o ayın <b>son gününe</b> çekilmelidir. <code>ay_ekle(tarih, n)</code> fonksiyonunu yaz: ISO metni alıp <code>n</code> ay sonrasını ISO metni olarak döndürsün (<code>n</code> 12\'den büyük olabilir). <code>calendar.monthrange</code> kullan. <code>timedelta</code> ay desteklemez!</p>',
     guide: ['Tarihi <code>date.fromisoformat</code> ile ayrıştır.', 'Toplam ay sayısını hesapla: <code>toplam = d.year * 12 + (d.month - 1) + n</code>; yıl = <code>toplam // 12</code>, ay = <code>toplam % 12 + 1</code>.', '<code>calendar.monthrange(yil, ay)[1]</code> o ayın gün sayısını verir.', 'Gün = <code>min(d.day, ayin_son_gunu)</code>; yeni tarihi oluşturup <code>isoformat()</code> döndür.'],
     example: 'import calendar\n# monthrange: (ayın ilk gününün haftanın günü, ayın gün sayısı)\nprint(calendar.monthrange(2024, 2))   # (3, 29)  artık yıl\nprint(calendar.monthrange(2026, 2))   # (6, 28)\n# yıl/ay taşmasını tek sayıyla çözmek\ntoplam = 2026 * 12 + (11 - 1) + 3     # Kasım + 3 ay\nprint(toplam // 12, toplam % 12 + 1)  # 2027 2\n',
     start: 'import calendar\nfrom datetime import date\n\ndef ay_ekle(tarih, n):\n    d = date.fromisoformat(tarih)\n    # TODO 1: yeni yıl ve ayı hesapla\n    # TODO 2: ayın son gününü bul\n    # TODO 3: günü sınırla, yeni tarihi döndür\n    return d.isoformat()\n',
@@ -3967,7 +3967,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Regex, JSON/CSV/YAML, Dosya İşlemleri (b-271…b-280) */
+/* Kesit Python — pratik bankası (orta): Regex, JSON/CSV/YAML, Dosya İşlemleri (b-271…b-280) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -3998,7 +3998,7 @@ B.push(
     diff: 2,
     kind: 'rehberli',
     title: 'Şifre politikası: ileriye bakış',
-    q: '<p>Anadolu Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
+    q: '<p>Ilgaz Bank internet şubesi şifre kuralı: en az 8 karakter, en az bir <b>büyük harf</b> (A-Z), en az bir <b>rakam</b>, en az bir <b>özel karakter</b> (<code>!@#$%*.-</code> içinden), <b>boşluk yok</b>. <code>sifre_gecerli(s)</code> fonksiyonunu tek bir <code>re.fullmatch</code> deseniyle, ileriye bakış (lookahead, <code>(?=...)</code>) kullanarak yaz; <code>True/False</code> döndürsün.</p>',
     guide: ['Her "en az bir" kuralı ayrı bir ileriye bakış olur: <code>(?=.*[A-Z])</code> gibi; bunlar karakter tüketmez.', 'Rakam için <code>(?=.*\\d)</code>, özel karakter için <code>(?=.*[!@#$%*.-])</code>.', 'Uzunluk ve boşluk yasağını tüketen kısım halleder: <code>\\S{8,}</code>.', 'Hepsini birleştirip <code>re.fullmatch(desen, s) is not None</code> döndür.'],
     example: 'import re\n# İleriye bakış: "ileride şu var mı?" diye bakar ama konumu ilerletmez\ndesen = r"(?=.*[aeıioöuü])\\w{3,}"   # en az bir sesli harf, en az 3 harf\nfor k in ["kitap", "krt", "ab"]:\n    print(k, bool(re.fullmatch(desen, k)))\n',
     start: 'import re\n\ndef sifre_gecerli(s):\n    # TODO 1: büyük harf, rakam, özel karakter için üç lookahead\n    # TODO 2: boşluksuz en az 8 karakter\n    desen = r".{8,}"\n    return re.fullmatch(desen, s) is not None\n',
@@ -4152,7 +4152,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Dosya İşlemleri, SQLite, Veri Yapıları (b-281…b-290) */
+/* Kesit Python — pratik bankası (orta): Dosya İşlemleri, SQLite, Veri Yapıları (b-281…b-290) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -4335,7 +4335,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Veri Yapıları, Algoritmalar (b-291…b-300) */
+/* Kesit Python — pratik bankası (orta): Veri Yapıları, Algoritmalar (b-291…b-300) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -4517,7 +4517,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası (orta): Test, Otomasyon (b-301…b-310) */
+/* Kesit Python — pratik bankası (orta): Test, Otomasyon (b-301…b-310) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -4704,7 +4704,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-311 … b-320) */
+/* Kesit Python — pratik bankası: ileri görevler (b-311 … b-320) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -4792,7 +4792,7 @@ B.push(
     kind: 'tamamla',
     needs: ['numpy'],
     title: 'np.select ile müşteri segmenti',
-    q: '<p>Anadolu Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
+    q: '<p>Ilgaz Bank yıllık kart harcamasına göre segment atıyor: 5000 TL ve üstü <b>altın</b>, 1000 TL ve üstü <b>gümüş</b>, kalanı <b>bronz</b>. <code>segment(harcama)</code> fonksiyonundaki <code>___</code> boşluklarını doldur.</p>',
     start: 'import numpy as np\n\ndef segment(harcama):\n    h = np.asarray(harcama)\n    kosullar = [h >= 5000, ___]\n    secenekler = ["altın", "gümüş"]\n    return np.select(kosullar, secenekler, default=___)\n',
     sol: 'import numpy as np\n\ndef segment(harcama):\n    h = np.asarray(harcama)\n    kosullar = [h >= 5000, h >= 1000]\n    secenekler = ["altın", "gümüş"]\n    return np.select(kosullar, secenekler, default="bronz")\n',
     tests: 'r = segment([7200, 5000, 4999, 1000, 999, 0])\nassert r.tolist() == ["altın", "altın", "gümüş", "gümüş", "bronz", "bronz"], "Sınırlar dahil: 5000 altın, 1000 gümüş, 999 bronz"\nassert segment([300]).tolist() == ["bronz"], "Hiçbir koşul tutmazsa default değer (bronz) kullanılır"\n',
@@ -4896,7 +4896,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-321 … b-330) */
+/* Kesit Python — pratik bankası: ileri görevler (b-321 … b-330) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -5022,7 +5022,7 @@ B.push(
     kind: 'yaz',
     needs: ['pandas'],
     title: 'İşlem anındaki geçerli kur (merge_asof)',
-    q: '<p>Anadolu Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
+    q: '<p>Ilgaz Bank USD işlemlerini TL\'ye çevirecek. Kurlar düzensiz zamanlarda yayımlanıyor; her işlem için <b>işlem anında veya ondan önce yayımlanmış en son kur</b> kullanılmalı. <code>try_cevir(islemler, kurlar)</code> fonksiyonunu yaz: <code>islemler</code> (zaman, tutar_usd) ve <code>kurlar</code> (zaman, kur) DataFrame\'leri; zamanlar metin. İşlemler <b>sırasız</b> gelebilir; sonucu işlemlerin <b>orijinal sırasında</b>, 2 ondalık TL listesi olarak döndür.</p>',
     start: 'import pandas as pd\n\ndef try_cevir(islemler, kurlar):\n    pass\n',
     sol: 'import pandas as pd\n\ndef try_cevir(islemler, kurlar):\n    i = islemler.assign(zaman=pd.to_datetime(islemler["zaman"]), _sira=range(len(islemler)))\n    k = kurlar.assign(zaman=pd.to_datetime(kurlar["zaman"]))\n    m = pd.merge_asof(i.sort_values("zaman"), k.sort_values("zaman"), on="zaman", direction="backward")\n    m = m.sort_values("_sira")\n    return (m["tutar_usd"] * m["kur"]).round(2).tolist()\n',
     tests: 'kurlar = pd.DataFrame({"zaman": ["2026-04-01 09:00", "2026-04-01 12:00", "2026-04-01 15:30"],\n                       "kur": [38.10, 38.25, 38.40]})\nislemler = pd.DataFrame({"zaman": ["2026-04-01 16:00", "2026-04-01 09:30", "2026-04-01 12:00", "2026-04-01 11:59"],\n                         "tutar_usd": [100, 10, 20, 1000]})\nr = try_cevir(islemler, kurlar)\nassert len(r) == 4, "Her işlem için bir sonuç"\nassert r == [3840.0, 381.0, 765.0, 38100.0], f"Beklenen [3840.0, 381.0, 765.0, 38100.0] (orijinal sırada); gelen {r}. 12:00 işlemi 12:00 kurunu (dahil) kullanır, 11:59 ise 09:00 kurunu"\n',
@@ -5090,7 +5090,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-331 … b-340) */
+/* Kesit Python — pratik bankası: ileri görevler (b-331 … b-340) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -5250,7 +5250,7 @@ B.push(
     kind: 'yaz',
     needs: ['scikit-learn'],
     title: 'Sahtecilik modeli: precision, recall, F1',
-    q: '<p>Anadolu Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
+    q: '<p>Ilgaz Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
     start: 'def metrikler(y_gercek, y_tahmin):\n    pass\n',
     sol: 'def metrikler(y_gercek, y_tahmin):\n    tp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 1)\n    fp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 0 and t == 1)\n    fn = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 0)\n    p = tp / (tp + fp) if tp + fp else 0.0\n    r = tp / (tp + fn) if tp + fn else 0.0\n    f1 = 2 * p * r / (p + r) if p + r else 0.0\n    return {"precision": round(p, 3), "recall": round(r, 3), "f1": round(f1, 3)}\n',
     tests: 'from sklearn.metrics import precision_score, recall_score, f1_score\ng = [0, 0, 1, 1, 0, 1, 0, 0, 1, 0]\nt = [0, 1, 1, 0, 0, 1, 0, 0, 1, 1]\nm = metrikler(g, t)\nassert m["precision"] == round(precision_score(g, t), 3) == 0.6, f"precision = TP/(TP+FP) = 3/5 = 0.6; gelen {m[\'precision\']}"\nassert m["recall"] == round(recall_score(g, t), 3) == 0.75, f"recall = TP/(TP+FN) = 3/4 = 0.75; gelen {m[\'recall\']}"\nassert m["f1"] == round(f1_score(g, t), 3), f"f1 = 2PR/(P+R) ≈ 0.667; gelen {m[\'f1\']}"\nz = metrikler([0, 0, 1], [0, 0, 0])\nassert z == {"precision": 0.0, "recall": 0.0, "f1": 0.0}, "Hiç pozitif tahmin yoksa sıfıra bölme yerine 0.0"\nassert "sklearn" not in __source__, "Metrikleri kendin hesapla"\n',
@@ -5279,7 +5279,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-341 … b-350) */
+/* Kesit Python — pratik bankası: ileri görevler (b-341 … b-350) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -5466,7 +5466,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-351 … b-360) */
+/* Kesit Python — pratik bankası: ileri görevler (b-351 … b-360) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -5639,7 +5639,7 @@ B.push(
     diff: 3,
     kind: 'rehberli',
     title: 'Havalede kilitlenmeyi (deadlock) önle',
-    q: '<p>Anadolu Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
+    q: '<p>Ilgaz Bank\'ta iki iş parçacığı aynı anda A→B ve B→A havalesi yaparsa, her biri bir hesabın kilidini alıp diğerini beklerse sistem kilitlenir (deadlock). <code>havale(kaynak, hedef, tutar)</code> fonksiyonunu yaz: iki hesabın kilidini <b>her zaman hesap numarası küçük olandan başlayarak</b> alsın, bakiye yetersizse <code>ValueError</code> fırlatsın, değilse parayı aktarsın. <code>Hesap</code> sınıfı verilmiştir.</p>',
     guide: ['İki hesabı <code>no</code> değerine göre sırala: <code>ilk, ikinci = sorted([kaynak, hedef], key=lambda h: h.no)</code>.', 'İç içe iki <code>with</code> bloğuyla önce <code>ilk.kilit</code>, sonra <code>ikinci.kilit</code> al.', 'Kilitlerin içinde bakiye kontrolü yap; yetersizse <code>ValueError</code>.', 'Kaynaktan düş, hedefe ekle.'],
     example: 'import threading\n# Tutarlı kilit sırası: kaynak adlarına göre alfabetik\nkilitler = {"rapor": threading.Lock(), "arsiv": threading.Lock()}\ndef iki_kaynakla_calis(a, b):\n    for ad in sorted([a, b]):\n        print("kilit alınıyor:", ad)\niki_kaynakla_calis("rapor", "arsiv")\niki_kaynakla_calis("arsiv", "rapor")   # aynı sıra!\n',
     start: 'import threading\n\nclass Hesap:\n    def __init__(self, no, bakiye):\n        self.no = no\n        self.bakiye = bakiye\n        self.kilit = threading.Lock()\n\ndef havale(kaynak, hedef, tutar):\n    # TODO 1: hesapları no\'ya göre sırala\n    # TODO 2: kilitleri bu sırayla al (iç içe with)\n    # TODO 3: bakiye yetersizse ValueError\n    # TODO 4: aktarımı yap\n    with kaynak.kilit:\n        with hedef.kilit:\n            kaynak.bakiye -= tutar\n            hedef.bakiye += tutar\n',
@@ -5652,7 +5652,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-361 … b-370) */
+/* Kesit Python — pratik bankası: ileri görevler (b-361 … b-370) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -5832,7 +5832,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-371 … b-380) */
+/* Kesit Python — pratik bankası: ileri görevler (b-371 … b-380) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6015,7 +6015,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-381 … b-390) */
+/* Kesit Python — pratik bankası: ileri görevler (b-381 … b-390) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6204,7 +6204,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-391 … b-400) */
+/* Kesit Python — pratik bankası: ileri görevler (b-391 … b-400) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6386,7 +6386,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — pratik bankası: ileri görevler (b-401 … b-410) */
+/* Kesit Python — pratik bankası: ileri görevler (b-401 … b-410) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6565,7 +6565,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Anadolu Bank (b-431 … b-448) */
+/* Kesit Python — veri seti görevleri: Ilgaz Bank (b-431 … b-448) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6573,16 +6573,16 @@ B.push(
   {
     id: 'b-431',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'Aktif hesapların türlere dağılımı',
-    q: '<p><b>Ürün yönetimi ekibi soruyor:</b> "Şu an açık olan hesapların kaçı vadesiz, kaçı vadeli, kaçı kredi kartı?"</p><p><code>aktif_hesap_turleri(hesaplar)</code> fonksiyonunu yaz. <code>hesaplar</code> = <code>veri.kayitlar("anadolu_bank", "bank_accounts")</code>. Yalnız <code>status == "aktif"</code> olan hesapları say; <code>{account_type: sayı}</code> sözlüğü döndür.</p>',
+    q: '<p><b>Ürün yönetimi ekibi soruyor:</b> "Şu an açık olan hesapların kaçı vadesiz, kaçı vadeli, kaçı kredi kartı?"</p><p><code>aktif_hesap_turleri(hesaplar)</code> fonksiyonunu yaz. <code>hesaplar</code> = <code>veri.kayitlar("ilgaz_bank", "bank_accounts")</code>. Yalnız <code>status == "aktif"</code> olan hesapları say; <code>{account_type: sayı}</code> sözlüğü döndür.</p>',
     guide: ['Boş bir sayaç sözlüğü oluştur.', 'Her hesapta önce durumu kontrol et; aktif değilse <code>continue</code> ile geç.', 'Aktifse <code>account_type</code> anahtarını 1 artır.', 'Sözlüğü döndür.'],
     example: '# Benzer teknik: koşullu sayım (yalnız onaylı başvurular)\nbasvurular = [{"tur": "konut", "onay": True}, {"tur": "taşıt", "onay": False}, {"tur": "konut", "onay": True}]\nsayac = {}\nfor b in basvurular:\n    if not b["onay"]:\n        continue\n    sayac[b["tur"]] = sayac.get(b["tur"], 0) + 1\nprint(sayac)\n',
-    start: 'import veri\n\nhesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")\n\n\ndef aktif_hesap_turleri(hesaplar):\n    sayac = {}\n    for h in hesaplar:\n        # TODO 1: aktif olmayan hesabı atla\n        # TODO 2: h["account_type"] anahtarını 1 artır\n        pass\n    return sayac\n',
-    sol: 'import veri\n\nhesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")\n\n\ndef aktif_hesap_turleri(hesaplar):\n    sayac = {}\n    for h in hesaplar:\n        if h["status"] != "aktif":\n            continue\n        sayac[h["account_type"]] = sayac.get(h["account_type"], 0) + 1\n    return sayac\n\n\nprint(aktif_hesap_turleri(hesaplar))\n',
+    start: 'import veri\n\nhesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")\n\n\ndef aktif_hesap_turleri(hesaplar):\n    sayac = {}\n    for h in hesaplar:\n        # TODO 1: aktif olmayan hesabı atla\n        # TODO 2: h["account_type"] anahtarını 1 artır\n        pass\n    return sayac\n',
+    sol: 'import veri\n\nhesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")\n\n\ndef aktif_hesap_turleri(hesaplar):\n    sayac = {}\n    for h in hesaplar:\n        if h["status"] != "aktif":\n            continue\n        sayac[h["account_type"]] = sayac.get(h["account_type"], 0) + 1\n    return sayac\n\n\nprint(aktif_hesap_turleri(hesaplar))\n',
     tests: 'r = aktif_hesap_turleri(hesaplar)\nassert r == {\'vadesiz\': 479, \'kredi_karti\': 197, \'vadeli\': 130}, "Aktif hesap sayıları tutmuyor; kapalı hesapları atladın mı?"\nassert sum(r.values()) == 806, "806 aktif hesap olmalı (849 hesabın 43\\\'ü kapalı)"\nassert aktif_hesap_turleri([{"status": "kapali", "account_type": "vadeli"}]) == {}, "Yalnız kapalı hesap varsa boş sözlük dönmeli"\n',
     hints: ['Önce süz, sonra say.', '<code>if h["status"] != "aktif": continue</code>', '<code>sayac[t] = sayac.get(t, 0) + 1</code>'],
     why: '<code>continue</code> ile erken atlama, iç içe if bloklarını azaltır ("guard clause"). SQL karşılığı: <code>WHERE status = \'aktif\' GROUP BY account_type</code>. Bankacılık raporlarında kapalı hesapları yanlışlıkla saymak, müşteri ve ürün sayılarını şişiren en yaygın hatadır.',
@@ -6592,14 +6592,14 @@ B.push(
   {
     id: 'b-432',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'Segment başına pazarlama izni oranı',
-    q: '<p><b>KVKK uyum ekibi ve pazarlama soruyor:</b> "Hangi segmentte müşterilerin yüzde kaçı pazarlama iletisi almaya izin verdi?"</p><p><code>izin_orani(musteriler)</code> fonksiyonunu yaz (<code>veri.kayitlar("anadolu_bank", "bank_customers")</code>). <code>kvkk_consent</code> 1 ise izin var. Dönüş: <code>{segment: yüzde}</code>, 1 ondalık.</p>',
-    start: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef izin_orani(musteriler):\n    pass\n',
-    sol: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef izin_orani(musteriler):\n    toplam, izinli = {}, {}\n    for m in musteriler:\n        s = m["segment"]\n        toplam[s] = toplam.get(s, 0) + 1\n        izinli[s] = izinli.get(s, 0) + m["kvkk_consent"]\n    return {s: round(izinli[s] / toplam[s] * 100, 1) for s in toplam}\n\n\nprint(izin_orani(musteriler))\n',
+    q: '<p><b>KVKK uyum ekibi ve pazarlama soruyor:</b> "Hangi segmentte müşterilerin yüzde kaçı pazarlama iletisi almaya izin verdi?"</p><p><code>izin_orani(musteriler)</code> fonksiyonunu yaz (<code>veri.kayitlar("ilgaz_bank", "bank_customers")</code>). <code>kvkk_consent</code> 1 ise izin var. Dönüş: <code>{segment: yüzde}</code>, 1 ondalık.</p>',
+    start: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef izin_orani(musteriler):\n    pass\n',
+    sol: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef izin_orani(musteriler):\n    toplam, izinli = {}, {}\n    for m in musteriler:\n        s = m["segment"]\n        toplam[s] = toplam.get(s, 0) + 1\n        izinli[s] = izinli.get(s, 0) + m["kvkk_consent"]\n    return {s: round(izinli[s] / toplam[s] * 100, 1) for s in toplam}\n\n\nprint(izin_orani(musteriler))\n',
     tests: 'r = izin_orani(musteriler)\nassert set(r) == {"Bireysel", "KOBİ", "Özel Bankacılık"}, "Üç segment olmalı"\nassert r == {\'Bireysel\': 85.5, \'Özel Bankacılık\': 82.7, \'KOBİ\': 87.5}, "Oranlar tutmuyor: payda segmentin kendi müşteri sayısı olmalı"\nornek = [{"segment": "X", "kvkk_consent": 1}, {"segment": "X", "kvkk_consent": 0}, {"segment": "Y", "kvkk_consent": 0}]\nassert izin_orani(ornek) == {"X": 50.0, "Y": 0.0}, "Hiç izni olmayan segment 0.0 görünmeli"\n',
     hints: ['İki sözlük biriktir: segment başına toplam ve izinli sayısı.', '1/0 alanını doğrudan toplamak izinli sayısını verir.', 'Sonda sözlük üreteci: <code>{s: round(izinli[s] / toplam[s] * 100, 1) for s in toplam}</code>'],
     why: '0/1 bayraklarını toplamak koşullu saymanın kısa yoludur. İzinli sayacını da her müşteride (0 eklesen bile) güncellemek, hiç izni olmayan segmentin sonuçta 0.0 olarak görünmesini sağlar; yalnız izinlileri sayarsan o segment KeyError verir. pandas\'ta: <code>df.groupby("segment")["kvkk_consent"].mean() * 100</code>.',
@@ -6609,16 +6609,16 @@ B.push(
   {
     id: 'b-433',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'Şube başına müşteri sayısı',
     q: '<p><b>Şubeler koordinatörü soruyor:</b> "Hangi şubemiz kaç müşteriye bakıyor? Kadro planlaması yapacağız."</p><p><code>sube_yuku(musteriler, subeler)</code> fonksiyonunu yaz. Müşteri tablosunda yalnız <code>branch_id</code> var; şube <b>adını</b> <code>bank_branches</code> tablosundan bul. Dönüş: <code>(sube_adi, musteri_sayisi)</code> listesi; sayıya göre azalan, eşitlikte ada göre artan.</p>',
     guide: ['Şube tablosundan <code>{branch_id: name}</code> arama sözlüğü kur (sözlük üreteciyle).', 'Müşterileri gezip şube adına göre say.', '<code>sorted(sayac.items(), key=...)</code> ile sırala: önce sayı azalan, sonra ad.', 'Listeyi döndür.'],
     example: '# Benzer teknik: kimlikten ada çeviren arama sözlüğü (lookup)\nkategoriler = [{"id": 1, "ad": "Gıda"}, {"id": 2, "ad": "Temizlik"}]\nsatislar = [{"kat": 1}, {"kat": 2}, {"kat": 1}]\nad = {k["id"]: k["ad"] for k in kategoriler}\nprint([ad[s["kat"]] for s in satislar])\n',
-    start: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\nsubeler = veri.kayitlar("anadolu_bank", "bank_branches")\n\n\ndef sube_yuku(musteriler, subeler):\n    # TODO 1: {branch_id: name} sözlüğü\n    ad = {}\n    sayac = {}\n    # TODO 2: her müşterinin şube adına göre say\n    # TODO 3: sayı azalan, ad artan sırala\n    return list(sayac.items())\n',
-    sol: 'import veri\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\nsubeler = veri.kayitlar("anadolu_bank", "bank_branches")\n\n\ndef sube_yuku(musteriler, subeler):\n    ad = {s["branch_id"]: s["name"] for s in subeler}\n    sayac = {}\n    for m in musteriler:\n        sube = ad[m["branch_id"]]\n        sayac[sube] = sayac.get(sube, 0) + 1\n    return sorted(sayac.items(), key=lambda x: (-x[1], x[0]))\n\n\nfor sube, n in sube_yuku(musteriler, subeler):\n    print(f"{sube:<22}{n:>4}")\n',
+    start: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\nsubeler = veri.kayitlar("ilgaz_bank", "bank_branches")\n\n\ndef sube_yuku(musteriler, subeler):\n    # TODO 1: {branch_id: name} sözlüğü\n    ad = {}\n    sayac = {}\n    # TODO 2: her müşterinin şube adına göre say\n    # TODO 3: sayı azalan, ad artan sırala\n    return list(sayac.items())\n',
+    sol: 'import veri\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\nsubeler = veri.kayitlar("ilgaz_bank", "bank_branches")\n\n\ndef sube_yuku(musteriler, subeler):\n    ad = {s["branch_id"]: s["name"] for s in subeler}\n    sayac = {}\n    for m in musteriler:\n        sube = ad[m["branch_id"]]\n        sayac[sube] = sayac.get(sube, 0) + 1\n    return sorted(sayac.items(), key=lambda x: (-x[1], x[0]))\n\n\nfor sube, n in sube_yuku(musteriler, subeler):\n    print(f"{sube:<22}{n:>4}")\n',
     tests: 'r = sube_yuku(musteriler, subeler)\nassert r == [(\'Dijital Şube\', 95), (\'Çankaya Şubesi\', 47), (\'Selçuklu Şubesi\', 42), (\'Alsancak Şubesi\', 41), (\'Bakırköy Şubesi\', 39), (\'Şahinbey Şubesi\', 37), (\'Kadıköy Şubesi\', 36), (\'Muratpaşa Şubesi\', 35), (\'Nilüfer Şubesi\', 35), (\'Levent Ticari Şube\', 32), (\'Seyhan Şubesi\', 32), (\'Kızılay Şubesi\', 29)], "Şube yükleri ya da sıralama tutmuyor"\nassert sum(n for _, n in r) == 500, "Toplam 500 müşteri olmalı"\nassert all(isinstance(a, str) for a, _ in r), "Sonuçta şube numarası değil şube ADI olmalı"\n',
     hints: ['Numarayı ada çevirmek için arama (lookup) sözlüğü kur.', '<code>ad = {s["branch_id"]: s["name"] for s in subeler}</code>', 'Sıralama: <code>sorted(sayac.items(), key=lambda x: (-x[1], x[0]))</code>'],
     why: 'Arama sözlüğü, iki tabloyu birleştirmenin (JOIN) saf Python yoludur: her arama O(1) olduğu için toplam iş O(n + m). İç içe döngüyle (her müşteri için şube listesini gezmek) O(n × m) olurdu. Power Query\'deki "Sorguları birleştir", Excel\'deki DÜŞEYARA ile aynı fikir.',
@@ -6628,14 +6628,14 @@ B.push(
   {
     id: 'b-434',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'bug',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'Kart limiti ortalaması çok düşük',
     q: '<p><b>Kredi kartları birimi itiraz ediyor:</b> "Raporda ortalama kart limiti 7 bin TL civarı görünüyor, bu imkânsız!"</p><p><code>ortalama_limit(hesaplar)</code> yalnız <b>kredi kartı</b> hesaplarının ortalama <code>credit_limit</code> değerini (2 ondalık) döndürmeli. Diğer hesaplarda bu alan boş (<code>None</code>). <b>Hatayı bul ve düzelt.</b></p>',
-    start: 'import veri\n\nhesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")\n\n\ndef ortalama_limit(hesaplar):\n    toplam = 0\n    for h in hesaplar:\n        toplam += h["credit_limit"] or 0\n    return round(toplam / len(hesaplar), 2)\n',
-    sol: 'import veri\n\nhesaplar = veri.kayitlar("anadolu_bank", "bank_accounts")\n\n\ndef ortalama_limit(hesaplar):\n    limitler = [h["credit_limit"] for h in hesaplar\n                if h["account_type"] == "kredi_karti" and h["credit_limit"] is not None]\n    if not limitler:\n        return 0.0\n    return round(sum(limitler) / len(limitler), 2)\n\n\nprint(ortalama_limit(hesaplar))\n',
+    start: 'import veri\n\nhesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")\n\n\ndef ortalama_limit(hesaplar):\n    toplam = 0\n    for h in hesaplar:\n        toplam += h["credit_limit"] or 0\n    return round(toplam / len(hesaplar), 2)\n',
+    sol: 'import veri\n\nhesaplar = veri.kayitlar("ilgaz_bank", "bank_accounts")\n\n\ndef ortalama_limit(hesaplar):\n    limitler = [h["credit_limit"] for h in hesaplar\n                if h["account_type"] == "kredi_karti" and h["credit_limit"] is not None]\n    if not limitler:\n        return 0.0\n    return round(sum(limitler) / len(limitler), 2)\n\n\nprint(ortalama_limit(hesaplar))\n',
     tests: 'r = ortalama_limit(hesaplar)\nassert r == 38537.74, "Ortalama yalnız kredi kartı hesapları üzerinden alınmalı (payda 212 olmalı, 849 değil)"\nornek = [{"account_type": "kredi_karti", "credit_limit": 10000.0}, {"account_type": "vadesiz", "credit_limit": None},\n         {"account_type": "kredi_karti", "credit_limit": 20000.0}]\nassert ortalama_limit(ornek) == 15000.0, "İki kartın ortalaması 15000; vadesiz hesap paydaya girmemeli"\nassert ortalama_limit([{"account_type": "vadesiz", "credit_limit": None}]) == 0.0, "Hiç kart yoksa 0.0 dönmeli"\n',
     hints: ['Pay doğru görünüyor; payda hangi hesapları sayıyor?', 'Boşları 0 yapıp ortalamaya katmak, ortalamayı aşağı çeker.', 'Önce kredi kartı limitlerini bir listeye süz, sonra <code>sum(l) / len(l)</code>.'],
     why: 'Eksik değeri 0 ile doldurmak ortalamayı bozar: 637 kart olmayan hesap paydaya girince ortalama yaklaşık dörtte birine iner. Doğru yaklaşım eksikleri hesaptan çıkarmaktır (SQL\'de AVG zaten NULL\'ları atlar; pandas\'ta <code>mean()</code> NaN\'ları atlar). "Boş" ile "sıfır" farklı anlamlar taşır: limiti 0 olan bir kart ile limiti olmayan bir vadesiz hesap aynı şey değildir.',
@@ -6645,14 +6645,14 @@ B.push(
   {
     id: 'b-435',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'ATM\'lerin en yoğun saatleri',
-    q: '<p><b>Nakit yönetimi ekibi soruyor:</b> "ATM\'lere para yüklemesini hangi saatlerden önce yapmalıyız? En yoğun saatleri bilmek istiyoruz."</p><p><code>yogun_saatler(islemler, n=3)</code> fonksiyonunu yaz. <code>islemler</code> = <code>veri.kayitlar("anadolu_bank", "bank_txns")</code> (42 bin satır). Yalnız <code>txn_type == "atm"</code> işlemleri al; <code>txn_time</code> metni <code>"2024-01-01 07:05:28"</code> biçiminde, saati (0–23, tam sayı) çıkar. Dönüş: işlem sayısına göre azalan (eşitlikte saate göre artan) ilk <code>n</code> <code>(saat, adet)</code> demeti.</p>',
-    start: 'import veri\n\nislemler = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef yogun_saatler(islemler, n=3):\n    pass\n',
-    sol: 'import veri\n\nislemler = veri.kayitlar("anadolu_bank", "bank_txns")\n\n\ndef yogun_saatler(islemler, n=3):\n    sayac = {}\n    for t in islemler:\n        if t["txn_type"] != "atm":\n            continue\n        saat = int(t["txn_time"][11:13])\n        sayac[saat] = sayac.get(saat, 0) + 1\n    return sorted(sayac.items(), key=lambda x: (-x[1], x[0]))[:n]\n\n\nprint(yogun_saatler(islemler, 5))\n',
+    q: '<p><b>Nakit yönetimi ekibi soruyor:</b> "ATM\'lere para yüklemesini hangi saatlerden önce yapmalıyız? En yoğun saatleri bilmek istiyoruz."</p><p><code>yogun_saatler(islemler, n=3)</code> fonksiyonunu yaz. <code>islemler</code> = <code>veri.kayitlar("ilgaz_bank", "bank_txns")</code> (42 bin satır). Yalnız <code>txn_type == "atm"</code> işlemleri al; <code>txn_time</code> metni <code>"2024-01-01 07:05:28"</code> biçiminde, saati (0–23, tam sayı) çıkar. Dönüş: işlem sayısına göre azalan (eşitlikte saate göre artan) ilk <code>n</code> <code>(saat, adet)</code> demeti.</p>',
+    start: 'import veri\n\nislemler = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef yogun_saatler(islemler, n=3):\n    pass\n',
+    sol: 'import veri\n\nislemler = veri.kayitlar("ilgaz_bank", "bank_txns")\n\n\ndef yogun_saatler(islemler, n=3):\n    sayac = {}\n    for t in islemler:\n        if t["txn_type"] != "atm":\n            continue\n        saat = int(t["txn_time"][11:13])\n        sayac[saat] = sayac.get(saat, 0) + 1\n    return sorted(sayac.items(), key=lambda x: (-x[1], x[0]))[:n]\n\n\nprint(yogun_saatler(islemler, 5))\n',
     tests: 'r = yogun_saatler(islemler)\nassert r == [(10, 215), (8, 204), (14, 204)], "İlk 3 saat tutmuyor"\nassert all(isinstance(s, int) for s, _ in r), "Saat tam sayı olmalı (\\"07\\" değil 7)"\nassert yogun_saatler(islemler, 5) == [(10, 215), (8, 204), (14, 204), (16, 199), (15, 194)], "n=5 için ilk 5 saat tutmuyor"\nornek = [{"txn_type": "atm", "txn_time": "2024-03-01 09:15:00"}, {"txn_type": "atm", "txn_time": "2024-03-02 09:59:59"},\n         {"txn_type": "fatura", "txn_time": "2024-03-02 10:00:00"}, {"txn_type": "atm", "txn_time": "2024-03-03 18:01:00"}]\nassert yogun_saatler(ornek, 2) == [(9, 2), (18, 1)], "Yalnız ATM işlemleri sayılmalı"\n',
     hints: ['Metnin 11. ve 12. karakterleri saati verir: <code>t["txn_time"][11:13]</code>.', 'Saat metnini <code>int()</code> ile sayıya çevir; sonra sözlükle say.', 'Sıralama anahtarı <code>(-adet, saat)</code>, sonra <code>[:n]</code>.'],
     why: 'Sabit biçimli tarih metninden parça almak için dilimleme, <code>datetime.strptime</code>\'tan çok daha hızlıdır; 42 bin satırda fark hissedilir. Biçimden emin değilsen strptime daha güvenlidir (hatalı satırda hata verir). Alternatif: <code>Counter(...).most_common(n)</code>; ama eşitlikte sırayı garanti etmek için kendi sıralama anahtarını yazmak daha iyidir.',
@@ -6662,14 +6662,14 @@ B.push(
   {
     id: 'b-436',
     lv: 'temel',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 1,
     kind: 'tamamla',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     title: 'Yüksek riskli müşterilerin şehirleri',
     q: '<p><b>Risk yönetimi soruyor:</b> "Risk puanı yüksek (8 ve üstü) müşteriler en çok hangi şehirlerde?"</p><p><code>riskli_sehirler(musteriler, esik=8)</code> fonksiyonundaki <code>___</code> boşluklarını doldur. <code>Counter</code> ile say, <code>most_common()</code> ile en çoktan aza sırala; dönüş <code>(şehir, sayı)</code> listesi.</p>',
-    start: 'import veri\nfrom collections import Counter\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef riskli_sehirler(musteriler, esik=8):\n    sayac = Counter(m["city"] for m in musteriler if m["risk_score"] ___ esik)\n    return sayac.___()\n',
-    sol: 'import veri\nfrom collections import Counter\n\nmusteriler = veri.kayitlar("anadolu_bank", "bank_customers")\n\n\ndef riskli_sehirler(musteriler, esik=8):\n    sayac = Counter(m["city"] for m in musteriler if m["risk_score"] >= esik)\n    return sayac.most_common()\n\n\nprint(riskli_sehirler(musteriler)[:3])\n',
+    start: 'import veri\nfrom collections import Counter\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef riskli_sehirler(musteriler, esik=8):\n    sayac = Counter(m["city"] for m in musteriler if m["risk_score"] ___ esik)\n    return sayac.___()\n',
+    sol: 'import veri\nfrom collections import Counter\n\nmusteriler = veri.kayitlar("ilgaz_bank", "bank_customers")\n\n\ndef riskli_sehirler(musteriler, esik=8):\n    sayac = Counter(m["city"] for m in musteriler if m["risk_score"] >= esik)\n    return sayac.most_common()\n\n\nprint(riskli_sehirler(musteriler)[:3])\n',
     tests: 'r = riskli_sehirler(musteriler)\nassert r[:3] == [(\'İstanbul\', 56), (\'Ankara\', 20), (\'İzmir\', 19)], "İlk üç şehir tutmuyor"\nassert sum(n for _, n in r) == 141, "Puanı 8 ve üstü (8 dahil) müşteri sayısı tutmuyor: >= kullan"\nassert sum(n for _, n in riskli_sehirler(musteriler, 10)) == 50, "esik=10 iken yalnız 10 puanlılar sayılmalı"\n',
     hints: ['"8 ve üstü" hangi karşılaştırma işleci?', 'Counter\'ın sıralı liste veren yöntemi.', '<code>&gt;=</code> ve <code>most_common()</code>'],
     why: '<code>Counter</code>, sayım sözlüğünün hazır hâlidir; bir üreteç ifadesiyle beslenince süzme ve sayma tek satırda biter. <code>most_common()</code> argümansız çağrılınca tüm elemanları azalan sırada verir; eşitlikte ilk görülen önce gelir. Sınır değer sorularında ("ve üstü") <code>&gt;</code> ile <code>&gt;=</code> farkı en sık hatadır; testlerde sınırın kendisini mutlaka dene.',
@@ -6679,17 +6679,17 @@ B.push(
   {
     id: 'b-437',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Kart harcamalarının kategori payları',
-    q: '<p><b>Kart pazarlama ekibi soruyor:</b> "Müşterilerimiz kartla en çok nereye harcıyor? Kampanya ortaklarını buna göre seçeceğiz."</p><p><code>harcama_paylari(txns)</code> fonksiyonunu yaz (<code>veri.oku("anadolu_bank", "bank_txns")</code>). Yalnız <code>kart_harcama</code> işlemleri; tutarlar eksi işaretli, <b>mutlak değer</b> al. <code>merchant_category</code> başına toplamın genel toplama oranı (%), 1 ondalık, azalan bir <b>Series</b> döndür.</p>',
+    q: '<p><b>Kart pazarlama ekibi soruyor:</b> "Müşterilerimiz kartla en çok nereye harcıyor? Kampanya ortaklarını buna göre seçeceğiz."</p><p><code>harcama_paylari(txns)</code> fonksiyonunu yaz (<code>veri.oku("ilgaz_bank", "bank_txns")</code>). Yalnız <code>kart_harcama</code> işlemleri; tutarlar eksi işaretli, <b>mutlak değer</b> al. <code>merchant_category</code> başına toplamın genel toplama oranı (%), 1 ondalık, azalan bir <b>Series</b> döndür.</p>',
     guide: ['<code>txn_type == "kart_harcama"</code> satırlarını süz.', '<code>amount</code> sütununun mutlak değerini al (<code>.abs()</code>).', 'Kategoriye göre topla; toplamı genel toplama böl, 100 ile çarp.', 'Yuvarla ve azalan sırala.'],
     example: 'import pandas as pd\n# Benzer teknik: grup toplamının genel toplama oranı\ndf = pd.DataFrame({"bolge": ["K", "G", "K"], "tutar": [-30, -50, -20]})\ng = df.assign(tutar=df["tutar"].abs()).groupby("bolge")["tutar"].sum()\nprint((g / g.sum() * 100).round(1))\n',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef harcama_paylari(txns):\n    kart = txns[txns["txn_type"] == "kart_harcama"]\n    # TODO 1: mutlak tutarları kategoriye göre topla\n    # TODO 2: genel toplama bölüp yüzdeye çevir\n    # TODO 3: 1 ondalık, azalan sırala\n    return None\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef harcama_paylari(txns):\n    kart = txns[txns["txn_type"] == "kart_harcama"]\n    toplam = kart["amount"].abs().groupby(kart["merchant_category"]).sum()\n    return (toplam / toplam.sum() * 100).round(1).sort_values(ascending=False)\n\n\nprint(harcama_paylari(txns))\n',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef harcama_paylari(txns):\n    kart = txns[txns["txn_type"] == "kart_harcama"]\n    # TODO 1: mutlak tutarları kategoriye göre topla\n    # TODO 2: genel toplama bölüp yüzdeye çevir\n    # TODO 3: 1 ondalık, azalan sırala\n    return None\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef harcama_paylari(txns):\n    kart = txns[txns["txn_type"] == "kart_harcama"]\n    toplam = kart["amount"].abs().groupby(kart["merchant_category"]).sum()\n    return (toplam / toplam.sum() * 100).round(1).sort_values(ascending=False)\n\n\nprint(harcama_paylari(txns))\n',
     tests: 'r = harcama_paylari(txns)\nassert isinstance(r, pd.Series), "Series döndürmeli"\nassert len(r) == 9, "9 harcama kategorisi olmalı"\nassert r.index[0] == \'elektronik\', "En büyük pay en üstte olmalı"\nassert abs(r.sum() - 100) < 0.5, "Paylar toplamı yaklaşık 100 olmalı"\nfor k, v in {\'elektronik\': 40.7, \'egitim\': 19.9, \'e_ticaret\': 12.7, \'giyim\': 7.7, \'saglik\': 6.6, \'market\': 4.7, \'akaryakit\': 4.6, \'restoran\': 2.5, \'ulasim\': 0.5}.items():\n    assert abs(r[k] - v) < 0.051, f"{k} payı {v} olmalı; mutlak değer aldın mı?"\n',
     hints: ['Harcamalar eksi; toplamadan önce <code>.abs()</code>.', 'Pay = grup toplamı / genel toplam.', '<code>toplam = kart["amount"].abs().groupby(kart["merchant_category"]).sum()</code>'],
     why: 'Bankacılık verisinde çıkışlar eksi işaretlidir; mutlak değer almadan pay hesabı negatif/negatif bölmeyle doğru gibi görünse de karışık işaretli verilerde bozulur. Pay hesabında payda tüm kategorilerin toplamıdır (Power BI\'da DIVIDE(SUM, CALCULATE(SUM, ALL(kategori)))). Alternatif: <code>value_counts(normalize=True)</code> adet payı verir, tutar payı değil; soruyu doğru okumak önemli.',
@@ -6699,15 +6699,15 @@ B.push(
   {
     id: 'b-438',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['sqlite3'],
     title: 'Kanal başına işlem özeti (SQL)',
-    q: '<p><b>Dijital bankacılık müdürü soruyor:</b> "İşlemlerin ne kadarı mobilden, ne kadarı şubeden geliyor ve ortalama işlem tutarları nasıl?"</p><p><code>con = veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code> ile yalnız işlem tablosunu yükle. <code>kanal_ozeti(con)</code> fonksiyonu <code>(channel, islem_sayisi, ortalama_mutlak_tutar)</code> demetlerini döndürsün; ortalama SQL içinde <code>ROUND(..., 2)</code>; işlem sayısına göre azalan.</p>',
-    start: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef kanal_ozeti(con):\n    pass\n',
-    sol: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef kanal_ozeti(con):\n    sql = """\n        SELECT channel, COUNT(*) AS n, ROUND(AVG(ABS(amount)), 2) AS ort\n        FROM bank_txns\n        GROUP BY channel\n        ORDER BY n DESC\n    """\n    return con.execute(sql).fetchall()\n\n\nfor satir in kanal_ozeti(con):\n    print(satir)\n',
+    q: '<p><b>Dijital bankacılık müdürü soruyor:</b> "İşlemlerin ne kadarı mobilden, ne kadarı şubeden geliyor ve ortalama işlem tutarları nasıl?"</p><p><code>con = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code> ile yalnız işlem tablosunu yükle. <code>kanal_ozeti(con)</code> fonksiyonu <code>(channel, islem_sayisi, ortalama_mutlak_tutar)</code> demetlerini döndürsün; ortalama SQL içinde <code>ROUND(..., 2)</code>; işlem sayısına göre azalan.</p>',
+    start: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef kanal_ozeti(con):\n    pass\n',
+    sol: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef kanal_ozeti(con):\n    sql = """\n        SELECT channel, COUNT(*) AS n, ROUND(AVG(ABS(amount)), 2) AS ort\n        FROM bank_txns\n        GROUP BY channel\n        ORDER BY n DESC\n    """\n    return con.execute(sql).fetchall()\n\n\nfor satir in kanal_ozeti(con):\n    print(satir)\n',
     tests: 'r = kanal_ozeti(con)\nassert len(r) == 6, "6 kanal olmalı"\nassert r == [(\'internet\', 14802, 13245.34), (\'mobil\', 12858, 5289.54), (\'pos\', 9150, 3072.65), (\'atm\', 2988, 2112.28), (\'sistem\', 1262, 74.72), (\'sube\', 1224, 15378.84)], "Kanal özeti tutmuyor: AVG(ABS(amount)) ve sayıya göre azalan sıra"\nassert sum(x[1] for x in r) == 42284, "Toplam işlem sayısı 42284"\n',
     hints: ['<code>GROUP BY channel</code> ile <code>COUNT(*)</code>.', 'Ortalama mutlak tutar: <code>AVG(ABS(amount))</code>.', '<code>ORDER BY n DESC</code>'],
     why: '<code>veri.baglan(..., tablolar=[...])</code> yalnız gerekli tabloyu yükler; büyük veri setlerinde açılışı hızlandırır. AVG(amount) giriş ve çıkışları birbirine mahsup eder ve anlamsız (sıfıra yakın) bir sayı verir; işlem büyüklüğü için ABS gerekir. Not: kanal ile işlem türü iç içedir (ör. atm kanalı yalnız atm işlemi); yorum yaparken bunu hesaba kat.',
@@ -6717,17 +6717,17 @@ B.push(
   {
     id: 'b-439',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['sqlite3'],
     title: 'Her ay maaş alan hesap sayısı',
-    q: '<p><b>Maaş müşterisi ekibi soruyor:</b> "Maaşını bankamıza yatıran hesap sayısı ay ay artıyor mu?"</p><p><code>maas_hesaplari(con)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code>). <code>txn_type = \'maas\'</code> olan işlemlerde her ay için <b>benzersiz</b> hesap sayısını bul. Dönüş: <code>("YYYY-MM", hesap_sayisi)</code> listesi, aya göre artan.</p>',
+    q: '<p><b>Maaş müşterisi ekibi soruyor:</b> "Maaşını bankamıza yatıran hesap sayısı ay ay artıyor mu?"</p><p><code>maas_hesaplari(con)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code>). <code>txn_type = \'maas\'</code> olan işlemlerde her ay için <b>benzersiz</b> hesap sayısını bul. Dönüş: <code>("YYYY-MM", hesap_sayisi)</code> listesi, aya göre artan.</p>',
     guide: ['Önce maaş işlemlerini süz (<code>WHERE</code>).', 'Ay için <code>substr(txn_time, 1, 7)</code> ya da <code>strftime(\'%Y-%m\', txn_time)</code>.', 'Aynı hesaba ayda iki maaş yatabilir; <code>COUNT(DISTINCT account_id)</code> kullan.', 'Aya göre grupla ve sırala.'],
     example: 'import sqlite3\n# Benzer teknik: COUNT(DISTINCT ...) ile tekil sayım\ncon = sqlite3.connect(":memory:")\ncon.execute("CREATE TABLE giris(kart, gun)")\ncon.executemany("INSERT INTO giris VALUES (?, ?)", [(1, "Pzt"), (1, "Pzt"), (2, "Pzt"), (1, "Sal")])\nprint(con.execute("SELECT gun, COUNT(*), COUNT(DISTINCT kart) FROM giris GROUP BY gun").fetchall())\n',
-    start: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef maas_hesaplari(con):\n    sql = """\n        SELECT substr(txn_time, 1, 7) AS ay, COUNT(*) AS n\n        FROM bank_txns\n        -- TODO 1: yalnız maaş işlemleri\n        -- TODO 2: aya göre grupla, sırala\n    """\n    # TODO 3: COUNT(*) yerine benzersiz hesap say\n    return con.execute(sql).fetchall()\n',
-    sol: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef maas_hesaplari(con):\n    sql = """\n        SELECT substr(txn_time, 1, 7) AS ay, COUNT(DISTINCT account_id) AS n\n        FROM bank_txns\n        WHERE txn_type = \'maas\'\n        GROUP BY ay\n        ORDER BY ay\n    """\n    return con.execute(sql).fetchall()\n\n\nfor ay, n in maas_hesaplari(con):\n    print(ay, n)\n',
+    start: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef maas_hesaplari(con):\n    sql = """\n        SELECT substr(txn_time, 1, 7) AS ay, COUNT(*) AS n\n        FROM bank_txns\n        -- TODO 1: yalnız maaş işlemleri\n        -- TODO 2: aya göre grupla, sırala\n    """\n    # TODO 3: COUNT(*) yerine benzersiz hesap say\n    return con.execute(sql).fetchall()\n',
+    sol: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef maas_hesaplari(con):\n    sql = """\n        SELECT substr(txn_time, 1, 7) AS ay, COUNT(DISTINCT account_id) AS n\n        FROM bank_txns\n        WHERE txn_type = \'maas\'\n        GROUP BY ay\n        ORDER BY ay\n    """\n    return con.execute(sql).fetchall()\n\n\nfor ay, n in maas_hesaplari(con):\n    print(ay, n)\n',
     tests: 'r = maas_hesaplari(con)\nassert len(r) == 12, "2024\\\'ün 12 ayı olmalı"\nassert r == [(\'2024-01\', 232), (\'2024-02\', 231), (\'2024-03\', 230), (\'2024-04\', 229), (\'2024-05\', 229), (\'2024-06\', 232), (\'2024-07\', 233), (\'2024-08\', 233), (\'2024-09\', 234), (\'2024-10\', 233), (\'2024-11\', 232), (\'2024-12\', 231)], "Aylık benzersiz hesap sayıları tutmuyor (COUNT(DISTINCT account_id))"\nassert sum(n for _, n in r) <= 2779, "Benzersiz sayım, işlem sayısını aşamaz"\n',
     hints: ['Satır değil hesap saymalısın.', '<code>COUNT(DISTINCT account_id)</code>', 'Süzme: <code>WHERE txn_type = \'maas\'</code>, sonra <code>GROUP BY ay ORDER BY ay</code>.'],
     why: 'COUNT(*) satır sayar; aynı hesaba ayda iki maaş (ör. ikramiye) yatarsa iki kez sayılır. COUNT(DISTINCT ...) tekil değerleri sayar. ISO tarih metninde <code>substr(txn_time, 1, 7)</code> ay bilgisini verir ve strftime\'dan biraz hızlıdır. pandas karşılığı: <code>df[df.txn_type == "maas"].groupby(df.txn_time.str[:7])["account_id"].nunique()</code>.',
@@ -6737,15 +6737,15 @@ B.push(
   {
     id: 'b-440',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'bug',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Net akış yerine işlem hacmi',
     q: '<p><b>Hazine ekibi soruyor:</b> "2024\'te hesabına en çok net para girişi olan 3 hesap hangisi?" Analistin kodu hep aynı yoğun hesapları getiriyor, oysa bazıları aslında para çıkışı yapmış. <b>Hatayı bul ve düzelt.</b></p><p><code>en_cok_net_giris(txns, n=3)</code>: hesap başına <code>amount</code> toplamı (giriş +, çıkış −), en büyük <code>n</code> değer; <code>account_id</code> indeksli, 2 ondalıklı Series.</p>',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef en_cok_net_giris(txns, n=3):\n    net = txns["amount"].abs().groupby(txns["account_id"]).sum()\n    return net.nlargest(n).round(2)\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef en_cok_net_giris(txns, n=3):\n    net = txns.groupby("account_id")["amount"].sum()\n    return net.nlargest(n).round(2)\n\n\nprint(en_cok_net_giris(txns))\n',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef en_cok_net_giris(txns, n=3):\n    net = txns["amount"].abs().groupby(txns["account_id"]).sum()\n    return net.nlargest(n).round(2)\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef en_cok_net_giris(txns, n=3):\n    net = txns.groupby("account_id")["amount"].sum()\n    return net.nlargest(n).round(2)\n\n\nprint(en_cok_net_giris(txns))\n',
     tests: 'r = en_cok_net_giris(txns)\nassert r.to_dict() == {100583: 970707.6, 100627: 969906.92, 100017: 945907.34}, "Net akış = işaretli tutarların toplamı; abs() hacmi verir, neti değil"\nassert en_cok_net_giris(txns, 5).index.tolist() == [100583, 100627, 100017, 100480, 100741], "İlk 5 hesap tutmuyor"\nk = pd.DataFrame({"account_id": [1, 1, 2], "amount": [100.0, -90.0, 50.0]})\nassert en_cok_net_giris(k, 1).to_dict() == {2: 50.0}, "Hesap 1\\\'in neti 10, hesap 2\\\'nin 50: lider hesap 2"\n',
     hints: ['<code>abs()</code> neyi ölçer: hacmi mi, neti mi?', 'Çıkışların eksi işaretini korumalısın.', '<code>txns.groupby("account_id")["amount"].sum()</code>'],
     why: 'Mutlak değer toplamı işlem <b>hacmini</b> (ciro) ölçer; net akış için işaretin korunması gerekir. 100 TL giriş + 90 TL çıkış: hacim 190, net 10. İş sorusundaki kelime ("net") formülü belirler; kodu yazmadan önce ölçünün tanımını netleştirmek, en pahalı analiz hatalarını önler.',
@@ -6755,15 +6755,15 @@ B.push(
   {
     id: 'b-441',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Yaş grubuna göre ortalama risk puanı',
     q: '<p><b>Kredi politikası ekibi soruyor:</b> "Risk puanı yaşa göre değişiyor mu?"</p><p><code>yas_risk(musteriler)</code> fonksiyonunu yaz (<code>bank_customers</code> DataFrame). Yaş = <code>2024 − doğum yılı</code> (basit tanım). <code>pd.cut</code> ile gruplar: <code>[18, 30)</code> → <code>"18-29"</code>, <code>[30, 45)</code> → <code>"30-44"</code>, <code>[45, 60)</code> → <code>"45-59"</code>, <code>[60, 120)</code> → <code>"60+"</code> (<code>right=False</code>). Her grubun ortalama <code>risk_score</code> değerini 2 ondalıkla, grup sırasıyla bir Series olarak döndür.</p>',
-    start: 'import veri\nimport pandas as pd\n\nmusteriler = veri.oku("anadolu_bank", "bank_customers")\n\n\ndef yas_risk(musteriler):\n    pass\n',
-    sol: 'import veri\nimport pandas as pd\n\nmusteriler = veri.oku("anadolu_bank", "bank_customers")\n\n\ndef yas_risk(musteriler):\n    yas = 2024 - pd.to_datetime(musteriler["birth_date"]).dt.year\n    grup = pd.cut(yas, bins=[18, 30, 45, 60, 120], right=False, labels=["18-29", "30-44", "45-59", "60+"])\n    return musteriler["risk_score"].groupby(grup, observed=False).mean().round(2)\n\n\nprint(yas_risk(musteriler))\n',
+    start: 'import veri\nimport pandas as pd\n\nmusteriler = veri.oku("ilgaz_bank", "bank_customers")\n\n\ndef yas_risk(musteriler):\n    pass\n',
+    sol: 'import veri\nimport pandas as pd\n\nmusteriler = veri.oku("ilgaz_bank", "bank_customers")\n\n\ndef yas_risk(musteriler):\n    yas = 2024 - pd.to_datetime(musteriler["birth_date"]).dt.year\n    grup = pd.cut(yas, bins=[18, 30, 45, 60, 120], right=False, labels=["18-29", "30-44", "45-59", "60+"])\n    return musteriler["risk_score"].groupby(grup, observed=False).mean().round(2)\n\n\nprint(yas_risk(musteriler))\n',
     tests: 'r = yas_risk(musteriler)\nassert [str(x) for x in r.index] == ["18-29", "30-44", "45-59", "60+"], "Gruplar etiketleriyle ve bu sırayla gelmeli"\nfor k, v in {\'18-29\': 5.28, \'30-44\': 5.48, \'45-59\': 5.04, \'60+\': 5.65}.items():\n    assert abs(r[k] - v) < 0.006, f"{k} grubunun ortalaması {v} olmalı; right=False ile [alt, üst) aralığı kullan"\n',
     hints: ['Doğum yılı: <code>pd.to_datetime(df["birth_date"]).dt.year</code>.', '<code>pd.cut(yas, bins=[18, 30, 45, 60, 120], right=False, labels=[...])</code>', 'Kategorik gruplamada <code>groupby(grup, observed=False).mean()</code>'],
     why: '<code>pd.cut</code> sürekli bir değişkeni aralıklara böler (Power BI\'daki "gruplar/bins", SQL\'de CASE WHEN). <code>right=False</code> aralıkları [alt, üst) yapar; 30 yaşındaki biri "30-44"e girer. Varsayılan right=True olsaydı 30, "18-29"a düşerdi; sınır değerler en sık hata kaynağıdır. Kategorik anahtarla gruplarken <code>observed=False</code> boş grupları da gösterir; pandas sürümleri arasında varsayılan değiştiği için açıkça yazmak iyidir.',
@@ -6773,15 +6773,15 @@ B.push(
   {
     id: 'b-442',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'tamamla',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Kapanan hesapların ömrü',
     q: '<p><b>Müşteri deneyimi ekibi soruyor:</b> "Kapanan hesaplar ortalama kaç gün açık kalmış? Erken kapanışları anlamak istiyoruz."</p><p><code>hesap_omru(hesaplar)</code> fonksiyonundaki <code>___</code> boşluklarını doldur: kapalı hesaplarda <code>closed_date − opened_date</code> farkını gün olarak bul; <code>(ortalama, medyan)</code> demetini 1 ondalıkla döndür.</p>',
-    start: 'import veri\nimport pandas as pd\n\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef hesap_omru(hesaplar):\n    kapali = hesaplar[hesaplar["status"] == "kapali"]\n    acilis = pd.___(kapali["opened_date"])\n    kapanis = pd.___(kapali["closed_date"])\n    gun = (kapanis - acilis).dt.___\n    return round(gun.mean(), 1), round(gun.___(), 1)\n',
-    sol: 'import veri\nimport pandas as pd\n\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef hesap_omru(hesaplar):\n    kapali = hesaplar[hesaplar["status"] == "kapali"]\n    acilis = pd.to_datetime(kapali["opened_date"])\n    kapanis = pd.to_datetime(kapali["closed_date"])\n    gun = (kapanis - acilis).dt.days\n    return round(gun.mean(), 1), round(gun.median(), 1)\n\n\nprint(hesap_omru(hesaplar))\n',
+    start: 'import veri\nimport pandas as pd\n\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef hesap_omru(hesaplar):\n    kapali = hesaplar[hesaplar["status"] == "kapali"]\n    acilis = pd.___(kapali["opened_date"])\n    kapanis = pd.___(kapali["closed_date"])\n    gun = (kapanis - acilis).dt.___\n    return round(gun.mean(), 1), round(gun.___(), 1)\n',
+    sol: 'import veri\nimport pandas as pd\n\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef hesap_omru(hesaplar):\n    kapali = hesaplar[hesaplar["status"] == "kapali"]\n    acilis = pd.to_datetime(kapali["opened_date"])\n    kapanis = pd.to_datetime(kapali["closed_date"])\n    gun = (kapanis - acilis).dt.days\n    return round(gun.mean(), 1), round(gun.median(), 1)\n\n\nprint(hesap_omru(hesaplar))\n',
     tests: 'ort, med = hesap_omru(hesaplar)\nassert (float(ort), float(med)) == (1704.0, 1625.0), "Ortalama ya da medyan gün tutmuyor"\nk = pd.DataFrame({"status": ["kapali", "kapali", "aktif"], "opened_date": ["2024-01-01", "2024-01-01", "2020-01-01"],\n                  "closed_date": ["2024-01-11", "2024-01-31", None]})\nassert hesap_omru(k) == (20.0, 20.0), "10 ve 30 gün → ortalama 20, medyan 20; aktif hesap hesaba katılmamalı"\n',
     hints: ['Metni tarihe çeviren pandas fonksiyonu.', 'İki tarihin farkı Timedelta\'dır; gün sayısı için <code>.dt.days</code>.', '<code>pd.to_datetime</code>, <code>.dt.days</code>, <code>.median()</code>'],
     why: 'Tarih farkı Timedelta döndürür; <code>.dt.days</code> tam gün sayısını verir. Medyanı ortalamanın yanında vermek, birkaç çok uzun ömürlü hesabın ortalamayı nasıl çektiğini gösterir; çarpık dağılımlarda medyan daha temsilîdir. Aynı hesap SQL\'de <code>julianday(closed_date) - julianday(opened_date)</code> olur.',
@@ -6791,15 +6791,15 @@ B.push(
   {
     id: 'b-443',
     lv: 'orta',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 2,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['sqlite3'],
     title: 'Şube başına kart limiti (üç tablo JOIN)',
-    q: '<p><b>Bölge müdürlüğü soruyor:</b> "Her şubenin müşterilerine toplam ne kadar kart limiti tanımlamışız?"</p><p><code>sube_limitleri(con)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])</code>). Yalnız <b>aktif kredi kartı</b> hesapları. Dönüş: <code>(sube_adi, kart_sayisi, toplam_limit)</code> demetleri; toplam limite göre azalan, eşitlikte şube adına göre.</p>',
-    start: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])\n\n\ndef sube_limitleri(con):\n    pass\n',
-    sol: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])\n\n\ndef sube_limitleri(con):\n    sql = """\n        SELECT b.name, COUNT(*) AS kart, SUM(a.credit_limit) AS limit_toplam\n        FROM bank_accounts AS a\n        JOIN bank_customers AS c ON c.customer_id = a.customer_id\n        JOIN bank_branches AS b ON b.branch_id = c.branch_id\n        WHERE a.account_type = \'kredi_karti\' AND a.status = \'aktif\'\n        GROUP BY b.name\n        ORDER BY limit_toplam DESC, b.name\n    """\n    return con.execute(sql).fetchall()\n\n\nfor satir in sube_limitleri(con):\n    print(satir)\n',
+    q: '<p><b>Bölge müdürlüğü soruyor:</b> "Her şubenin müşterilerine toplam ne kadar kart limiti tanımlamışız?"</p><p><code>sube_limitleri(con)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])</code>). Yalnız <b>aktif kredi kartı</b> hesapları. Dönüş: <code>(sube_adi, kart_sayisi, toplam_limit)</code> demetleri; toplam limite göre azalan, eşitlikte şube adına göre.</p>',
+    start: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])\n\n\ndef sube_limitleri(con):\n    pass\n',
+    sol: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_accounts", "bank_customers", "bank_branches"])\n\n\ndef sube_limitleri(con):\n    sql = """\n        SELECT b.name, COUNT(*) AS kart, SUM(a.credit_limit) AS limit_toplam\n        FROM bank_accounts AS a\n        JOIN bank_customers AS c ON c.customer_id = a.customer_id\n        JOIN bank_branches AS b ON b.branch_id = c.branch_id\n        WHERE a.account_type = \'kredi_karti\' AND a.status = \'aktif\'\n        GROUP BY b.name\n        ORDER BY limit_toplam DESC, b.name\n    """\n    return con.execute(sql).fetchall()\n\n\nfor satir in sube_limitleri(con):\n    print(satir)\n',
     tests: 'r = sube_limitleri(con)\nassert r == [(\'Dijital Şube\', 44, 1800000.0), (\'Çankaya Şubesi\', 21, 780000.0), (\'Bakırköy Şubesi\', 18, 700000.0), (\'Alsancak Şubesi\', 16, 640000.0), (\'Şahinbey Şubesi\', 13, 570000.0), (\'Selçuklu Şubesi\', 15, 540000.0), (\'Kadıköy Şubesi\', 11, 490000.0), (\'Seyhan Şubesi\', 13, 485000.0), (\'Nilüfer Şubesi\', 13, 480000.0), (\'Levent Ticari Şube\', 15, 460000.0), (\'Muratpaşa Şubesi\', 11, 455000.0), (\'Kızılay Şubesi\', 7, 195000.0)], "Şube limitleri tutmuyor: üç tabloyu bağlayıp aktif kredi kartlarını süzdün mü?"\nassert sum(x[1] for x in r) == 197, "Aktif kredi kartı sayısı tutmuyor"\n',
     hints: ['Hesap → müşteri → şube zinciri: iki JOIN.', '<code>WHERE a.account_type = \'kredi_karti\' AND a.status = \'aktif\'</code>', '<code>GROUP BY b.name ORDER BY limit_toplam DESC, b.name</code>'],
     why: 'Hesap tablosunda şube bilgisi yok; müşteri tablosu "köprü" görevi görür. JOIN zincirlerinde her adımda satır sayısının beklenmedik biçimde artmadığını (çoğa-çok patlaması) kontrol et. İkinci sıralama anahtarı (şube adı), eşit toplamlarda sonucun her çalıştırmada aynı çıkmasını garanti eder.',
@@ -6809,17 +6809,17 @@ B.push(
   {
     id: 'b-444',
     lv: 'ileri',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 3,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'TL hesaplarında aylık nakit akışı',
     q: '<p><b>Hazine ekibi soruyor:</b> "TL hesaplarda her ay ne kadar para girdi, ne kadar çıktı, net ve yıl içi kümülatif durum ne?"</p><p><code>nakit_akisi(txns, hesaplar)</code> fonksiyonunu yaz. Yalnız <code>currency == "TRY"</code> hesapların işlemleri. Dönüş: index <code>"YYYY-MM"</code>, sütunlar <code>giris</code> (pozitiflerin toplamı), <code>cikis</code> (negatiflerin mutlak toplamı), <code>net</code> (giris − cikis), <code>kumulatif</code> (net\'in yıl içi birikimli toplamı); hepsi 2 ondalık.</p>',
     guide: ['TRY hesap numaralarını bul ve işlemleri <code>isin</code> ile süz.', '<code>ay</code> sütunu: <code>txn_time.str[:7]</code>.', '<code>giris</code> için <code>amount.clip(lower=0)</code>, <code>cikis</code> için <code>(-amount).clip(lower=0)</code> sütunları ekle.', 'Aya göre topla; <code>net</code> ve <code>cumsum()</code> ile <code>kumulatif</code> ekle; yuvarla.'],
     example: 'import pandas as pd\n# Benzer teknik: işaretli değerleri iki sütuna ayırmak (clip) ve birikimli toplam (cumsum)\ndf = pd.DataFrame({"gun": [1, 1, 2, 3], "tutar": [100, -40, -30, 50]})\ndf["giren"] = df["tutar"].clip(lower=0)\ndf["cikan"] = (-df["tutar"]).clip(lower=0)\ng = df.groupby("gun")[["giren", "cikan"]].sum()\ng["net"] = g["giren"] - g["cikan"]\ng["birikimli"] = g["net"].cumsum()\nprint(g)\n',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef nakit_akisi(txns, hesaplar):\n    try_hesap = hesaplar.loc[hesaplar["currency"] == "TRY", "account_id"]\n    df = txns[txns["account_id"].isin(try_hesap)].copy()\n    df["ay"] = df["txn_time"].str[:7]\n    # TODO 1: giris ve cikis sütunları (clip)\n    # TODO 2: aya göre topla\n    # TODO 3: net ve kumulatif sütunları, 2 ondalık\n    return None\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef nakit_akisi(txns, hesaplar):\n    try_hesap = hesaplar.loc[hesaplar["currency"] == "TRY", "account_id"]\n    df = txns[txns["account_id"].isin(try_hesap)].copy()\n    df["ay"] = df["txn_time"].str[:7]\n    df["giris"] = df["amount"].clip(lower=0)\n    df["cikis"] = (-df["amount"]).clip(lower=0)\n    g = df.groupby("ay")[["giris", "cikis"]].sum()\n    g["net"] = g["giris"] - g["cikis"]\n    g["kumulatif"] = g["net"].cumsum()\n    return g.round(2)\n\n\nprint(nakit_akisi(txns, hesaplar))\n',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef nakit_akisi(txns, hesaplar):\n    try_hesap = hesaplar.loc[hesaplar["currency"] == "TRY", "account_id"]\n    df = txns[txns["account_id"].isin(try_hesap)].copy()\n    df["ay"] = df["txn_time"].str[:7]\n    # TODO 1: giris ve cikis sütunları (clip)\n    # TODO 2: aya göre topla\n    # TODO 3: net ve kumulatif sütunları, 2 ondalık\n    return None\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef nakit_akisi(txns, hesaplar):\n    try_hesap = hesaplar.loc[hesaplar["currency"] == "TRY", "account_id"]\n    df = txns[txns["account_id"].isin(try_hesap)].copy()\n    df["ay"] = df["txn_time"].str[:7]\n    df["giris"] = df["amount"].clip(lower=0)\n    df["cikis"] = (-df["amount"]).clip(lower=0)\n    g = df.groupby("ay")[["giris", "cikis"]].sum()\n    g["net"] = g["giris"] - g["cikis"]\n    g["kumulatif"] = g["net"].cumsum()\n    return g.round(2)\n\n\nprint(nakit_akisi(txns, hesaplar))\n',
     tests: 'r = nakit_akisi(txns, hesaplar)\nassert r is not None and list(r.columns) == ["giris", "cikis", "net", "kumulatif"], "Sütunlar: giris, cikis, net, kumulatif"\nassert len(r) == 12, "12 ay olmalı"\noca = r.loc["2024-01"].to_dict()\nfor k, v in {\'giris\': 17078413.0, \'cikis\': 8368086.66, \'net\': 8710326.34, \'kumulatif\': 8710326.34}.items():\n    assert abs(oca[k] - v) < 0.01, f"Ocak {k} değeri {v} olmalı"\nassert abs(r["kumulatif"].iloc[-1] - 124993261.55) < 0.05, "Aralık kümülatif değeri, 12 ayın net toplamı olmalı"\nassert abs(r["kumulatif"].iloc[-1] - r["net"].sum()) < 0.05, "kumulatif = net.cumsum()"\nassert [a for a, v in r["net"].items() if v < 0] == [], "Net akışı eksi olan aylar tutmuyor"\nassert (r["cikis"] >= 0).all(), "cikis pozitif (mutlak) olmalı"\n',
     hints: ['Giriş ve çıkışı ayırmak için <code>clip(lower=0)</code>: negatifleri 0 yapar.', 'Çıkış için önce işareti çevir: <code>(-df["amount"]).clip(lower=0)</code>.', '<code>g["kumulatif"] = g["net"].cumsum()</code>'],
     why: '<code>clip</code> koşullu sütunu döngüsüz ve vektörel üretir (alternatif: <code>np.where(amount &gt; 0, amount, 0)</code>). <code>cumsum</code>, Power BI\'daki "yıl başından bugüne" (TOTALYTD) birikimin pandas karşılığıdır. Döviz hesaplarını süzmek şarttır: farklı para birimlerini kur çevrimi yapmadan toplamak, nakit akış raporunun en tehlikeli hatasıdır.',
@@ -6829,15 +6829,15 @@ B.push(
   {
     id: 'b-445',
     lv: 'ileri',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 3,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Döviz faizinin TL karşılığı (merge_asof)',
-    q: '<p><b>Muhasebe ekibi soruyor:</b> "2024\'te USD ve EUR vadeli hesaplara ödediğimiz faizin TL karşılığı ne kadar?"</p><p><code>faiz_tl(txns, hesaplar, kur)</code> fonksiyonunu yaz. <code>kur</code> = <code>veri.oku("anadolu_bank", "bank_fx")</code>; yalnız <b>iş günleri</b> için kur var. Her <code>faiz</code> işlemini, işlem tarihindeki ya da <b>ondan önceki son</b> iş gününün kuruyla çevir (hafta sonu işlemi cuma kuru alır). Dönüş: <code>{"EUR": tl_toplam, "USD": tl_toplam}</code>, 2 ondalık. İpucu: <code>pd.merge_asof(..., by="currency", direction="backward")</code>.</p>',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\nkur = veri.oku("anadolu_bank", "bank_fx")\n\n\ndef faiz_tl(txns, hesaplar, kur):\n    pass\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\nkur = veri.oku("anadolu_bank", "bank_fx")\n\n\ndef faiz_tl(txns, hesaplar, kur):\n    df = txns[txns["txn_type"] == "faiz"].merge(hesaplar[["account_id", "currency"]], on="account_id")\n    df = df[df["currency"] != "TRY"].copy()\n    df["tarih"] = pd.to_datetime(df["txn_time"].str[:10])\n    k = kur.assign(tarih=pd.to_datetime(kur["rate_date"]))\n    df = pd.merge_asof(df.sort_values("tarih"), k.sort_values("tarih")[["tarih", "currency", "try_rate"]],\n                       on="tarih", by="currency", direction="backward")\n    df["tl"] = df["amount"] * df["try_rate"]\n    return {c: round(float(v), 2) for c, v in df.groupby("currency")["tl"].sum().items()}\n\n\nprint(faiz_tl(txns, hesaplar, kur))\n',
+    q: '<p><b>Muhasebe ekibi soruyor:</b> "2024\'te USD ve EUR vadeli hesaplara ödediğimiz faizin TL karşılığı ne kadar?"</p><p><code>faiz_tl(txns, hesaplar, kur)</code> fonksiyonunu yaz. <code>kur</code> = <code>veri.oku("ilgaz_bank", "bank_fx")</code>; yalnız <b>iş günleri</b> için kur var. Her <code>faiz</code> işlemini, işlem tarihindeki ya da <b>ondan önceki son</b> iş gününün kuruyla çevir (hafta sonu işlemi cuma kuru alır). Dönüş: <code>{"EUR": tl_toplam, "USD": tl_toplam}</code>, 2 ondalık. İpucu: <code>pd.merge_asof(..., by="currency", direction="backward")</code>.</p>',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\nkur = veri.oku("ilgaz_bank", "bank_fx")\n\n\ndef faiz_tl(txns, hesaplar, kur):\n    pass\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\nkur = veri.oku("ilgaz_bank", "bank_fx")\n\n\ndef faiz_tl(txns, hesaplar, kur):\n    df = txns[txns["txn_type"] == "faiz"].merge(hesaplar[["account_id", "currency"]], on="account_id")\n    df = df[df["currency"] != "TRY"].copy()\n    df["tarih"] = pd.to_datetime(df["txn_time"].str[:10])\n    k = kur.assign(tarih=pd.to_datetime(kur["rate_date"]))\n    df = pd.merge_asof(df.sort_values("tarih"), k.sort_values("tarih")[["tarih", "currency", "try_rate"]],\n                       on="tarih", by="currency", direction="backward")\n    df["tl"] = df["amount"] * df["try_rate"]\n    return {c: round(float(v), 2) for c, v in df.groupby("currency")["tl"].sum().items()}\n\n\nprint(faiz_tl(txns, hesaplar, kur))\n',
     tests: 'r = faiz_tl(txns, hesaplar, kur)\nassert set(r) == {"EUR", "USD"}, "Yalnız EUR ve USD anahtarları olmalı (TRY faizleri çevrilmez)"\nfor c, v in {\'EUR\': 333479.88, \'USD\': 311141.34}.items():\n    assert abs(r[c] - v) < 0.05, f"{c} faizinin TL toplamı {v} olmalı; hafta sonu işlemleri önceki iş gününün kurunu almalı"\nfx = pd.DataFrame({"rate_date": ["2024-03-01", "2024-03-04"], "currency": ["USD", "USD"], "try_rate": [32.0, 33.0]})\ntx = pd.DataFrame({"account_id": [1, 1], "txn_time": ["2024-03-02 10:00:00", "2024-03-04 09:00:00"], "amount": [10.0, 10.0], "txn_type": ["faiz", "faiz"]})\nhs = pd.DataFrame({"account_id": [1], "currency": ["USD"]})\nassert faiz_tl(tx, hs, fx) == {"USD": 650.0}, "Cumartesi işlemi cuma kuru (32), pazartesi işlemi pazartesi kuru (33): 320 + 330"\n',
     hints: ['Önce faiz işlemlerine hesabın para birimini ekle (merge), TRY olanları at.', '<code>merge_asof</code> iki tarafın da <code>on</code> sütununa göre sıralı olmasını ister; tarihleri <code>pd.to_datetime</code> ile çevir.', '<code>pd.merge_asof(df.sort_values("tarih"), kur_df.sort_values("tarih"), on="tarih", by="currency", direction="backward")</code>'],
     why: 'Kurlar yalnız iş günlerinde yayımlanır; normal <code>merge</code> hafta sonu işlemlerini eşleştiremez (NaN). <code>merge_asof</code> "en yakın önceki" eşleştirmeyi yapar; <code>by="currency"</code> USD işlemine EUR kuru gelmesini önler. Bu, zaman serilerinde fiyat/kur eşlemenin standart yoludur. SQL\'de aynı iş, ilişkili alt sorguyla (<code>... WHERE rate_date &lt;= t.tarih ORDER BY rate_date DESC LIMIT 1</code>) yapılır ve büyük veride çok daha yavaştır.',
@@ -6847,15 +6847,15 @@ B.push(
   {
     id: 'b-446',
     lv: 'ileri',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 3,
     kind: 'yaz',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['sqlite3'],
     title: 'Peş peşe hızlı işlemler (LAG)',
-    q: '<p><b>Dolandırıcılık önleme ekibi soruyor:</b> "Aynı hesapta bir önceki işlemden çok kısa süre sonra yapılan işlemler kaç tane? Kural motoruna eşik koyacağız."</p><p><code>hizli_islemler(con, saniye)</code> fonksiyonunu yaz (<code>veri.baglan("anadolu_bank", tablolar=["bank_txns"])</code>). Her işlem için aynı hesaptaki <b>bir önceki</b> işlemle arasındaki süreyi saniye cinsinden bul (<code>LAG</code> pencere fonksiyonu; saniye için <code>CAST(strftime(\'%s\', txn_time) AS INTEGER)</code>). Süresi <code>saniye</code> değerinden <b>kısa</b> olan işlemlerin <code>(islem_sayisi, farkli_hesap_sayisi)</code> demetini döndür.</p>',
-    start: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef hizli_islemler(con, saniye):\n    pass\n',
-    sol: 'import veri\n\ncon = veri.baglan("anadolu_bank", tablolar=["bank_txns"])\n\n\ndef hizli_islemler(con, saniye):\n    sql = """\n        WITH t AS (\n            SELECT account_id, CAST(strftime(\'%s\', txn_time) AS INTEGER) AS sn\n            FROM bank_txns\n        ), f AS (\n            SELECT account_id, sn - LAG(sn) OVER (PARTITION BY account_id ORDER BY sn) AS ara\n            FROM t\n        )\n        SELECT COUNT(*), COUNT(DISTINCT account_id) FROM f WHERE ara < ?\n    """\n    return con.execute(sql, (saniye,)).fetchone()\n\n\nfor esik in (60, 600, 3600):\n    print(esik, "sn:", hizli_islemler(con, esik))\n',
+    q: '<p><b>Dolandırıcılık önleme ekibi soruyor:</b> "Aynı hesapta bir önceki işlemden çok kısa süre sonra yapılan işlemler kaç tane? Kural motoruna eşik koyacağız."</p><p><code>hizli_islemler(con, saniye)</code> fonksiyonunu yaz (<code>veri.baglan("ilgaz_bank", tablolar=["bank_txns"])</code>). Her işlem için aynı hesaptaki <b>bir önceki</b> işlemle arasındaki süreyi saniye cinsinden bul (<code>LAG</code> pencere fonksiyonu; saniye için <code>CAST(strftime(\'%s\', txn_time) AS INTEGER)</code>). Süresi <code>saniye</code> değerinden <b>kısa</b> olan işlemlerin <code>(islem_sayisi, farkli_hesap_sayisi)</code> demetini döndür.</p>',
+    start: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef hizli_islemler(con, saniye):\n    pass\n',
+    sol: 'import veri\n\ncon = veri.baglan("ilgaz_bank", tablolar=["bank_txns"])\n\n\ndef hizli_islemler(con, saniye):\n    sql = """\n        WITH t AS (\n            SELECT account_id, CAST(strftime(\'%s\', txn_time) AS INTEGER) AS sn\n            FROM bank_txns\n        ), f AS (\n            SELECT account_id, sn - LAG(sn) OVER (PARTITION BY account_id ORDER BY sn) AS ara\n            FROM t\n        )\n        SELECT COUNT(*), COUNT(DISTINCT account_id) FROM f WHERE ara < ?\n    """\n    return con.execute(sql, (saniye,)).fetchone()\n\n\nfor esik in (60, 600, 3600):\n    print(esik, "sn:", hizli_islemler(con, esik))\n',
     tests: 'assert hizli_islemler(con, 60) == (7, 7), "60 saniye eşiğinde sonuç tutmuyor"\nassert hizli_islemler(con, 600) == (64, 62), "10 dakika eşiğinde sonuç tutmuyor: PARTITION BY account_id ve zamana göre sıralama var mı?"\nassert hizli_islemler(con, 3600) == (413, 287), "1 saat eşiğinde sonuç tutmuyor"\nassert hizli_islemler(con, 0) == (0, 0), "Eşik 0 iken hiç işlem dönmemeli (kesin küçük)"\nassert "LAG" in __source__.upper(), "LAG pencere fonksiyonunu kullan"\n',
     hints: ['Bir önceki satırın değeri için <code>LAG(sn) OVER (PARTITION BY account_id ORDER BY sn)</code>.', 'Her hesabın ilk işleminde LAG NULL döner; <code>NULL &lt; ?</code> doğru olmadığı için kendiliğinden elenir.', 'Pencere sonucunu süzmek için CTE kullan; dışta <code>COUNT(*), COUNT(DISTINCT account_id)</code>.'],
     why: 'LAG, satırı bir önceki satırla karşılaştırmayı kendi kendine birleştirme (self-join) yapmadan sağlar; O(n log n) sıralama maliyetiyle çalışır. PARTITION BY unutulursa farklı hesapların işlemleri birbirine karışır ve sahte "hızlı işlem"ler çıkar. Eşik seçimi bir iş kararıdır: eşiği farklı değerlerde deneyip yakalanan işlem sayısını görmek (duyarlılık analizi), kural motoru tasarımının ilk adımıdır. pandas karşılığı: <code>df.sort_values("txn_time").groupby("account_id")["zaman"].diff()</code>.',
@@ -6865,15 +6865,15 @@ B.push(
   {
     id: 'b-447',
     lv: 'ileri',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 3,
     kind: 'bug',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'Pasif hesap listesi hatalı',
     q: '<p><b>Müşteri kazanımı ekibi soruyor:</b> "Aktif görünen ama son 90 gündür hiç işlem görmeyen hesaplar hangileri? Onları geri kazanma kampanyasına alacağız."</p><p><code>pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90)</code> aktif hesaplardan, son işlem tarihi <code>ref − gun</code> tarihinden önce olanları ve <b>hiç işlemi olmayanları</b> sıralı <code>account_id</code> listesi olarak döndürmeli. Kod neredeyse tüm hesapları pasif sayıyor. <b>Hataları bul ve düzelt</b> (iki tane).</p>',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):\n    sinir = pd.Timestamp(ref) - pd.Timedelta(days=gun)\n    son = pd.to_datetime(txns["txn_time"]).groupby(txns["account_id"]).min()\n    aktif = hesaplar[hesaplar["status"] == "aktif"]\n    df = aktif.merge(son.rename("son").reset_index(), on="account_id")\n    pasif = df[df["son"] < sinir]\n    return sorted(pasif["account_id"].tolist())\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\nhesaplar = veri.oku("anadolu_bank", "bank_accounts")\n\n\ndef pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):\n    sinir = pd.Timestamp(ref) - pd.Timedelta(days=gun)\n    son = pd.to_datetime(txns["txn_time"]).groupby(txns["account_id"]).max()\n    aktif = hesaplar[hesaplar["status"] == "aktif"]\n    df = aktif.merge(son.rename("son").reset_index(), on="account_id", how="left")\n    pasif = df[df["son"].isna() | (df["son"] < sinir)]\n    return sorted(pasif["account_id"].tolist())\n\n\nr = pasif_hesaplar(txns, hesaplar)\nprint(len(r), r[:10])\n',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):\n    sinir = pd.Timestamp(ref) - pd.Timedelta(days=gun)\n    son = pd.to_datetime(txns["txn_time"]).groupby(txns["account_id"]).min()\n    aktif = hesaplar[hesaplar["status"] == "aktif"]\n    df = aktif.merge(son.rename("son").reset_index(), on="account_id")\n    pasif = df[df["son"] < sinir]\n    return sorted(pasif["account_id"].tolist())\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\nhesaplar = veri.oku("ilgaz_bank", "bank_accounts")\n\n\ndef pasif_hesaplar(txns, hesaplar, ref="2024-12-31", gun=90):\n    sinir = pd.Timestamp(ref) - pd.Timedelta(days=gun)\n    son = pd.to_datetime(txns["txn_time"]).groupby(txns["account_id"]).max()\n    aktif = hesaplar[hesaplar["status"] == "aktif"]\n    df = aktif.merge(son.rename("son").reset_index(), on="account_id", how="left")\n    pasif = df[df["son"].isna() | (df["son"] < sinir)]\n    return sorted(pasif["account_id"].tolist())\n\n\nr = pasif_hesaplar(txns, hesaplar)\nprint(len(r), r[:10])\n',
     tests: 'r = pasif_hesaplar(txns, hesaplar)\nassert len(r) == 65, "Pasif hesap sayısı tutmuyor: SON işlem (max) tarihine bakmalısın"\nassert r[:5] == [100024, 100034, 100050, 100052, 100058], "İlk 5 pasif hesap tutmuyor"\nfor h in [100024, 100034, 100050]:\n    assert h in r, f"Hiç işlemi olmayan aktif hesap {h} listede olmalı: merge(how=\\"left\\") ve isna()"\ntx = pd.DataFrame({"account_id": [1, 1, 2], "txn_time": ["2024-01-05 10:00:00", "2024-12-20 10:00:00", "2024-03-01 09:00:00"]})\nhs = pd.DataFrame({"account_id": [1, 2, 3, 4], "status": ["aktif", "aktif", "aktif", "kapali"]})\nassert pasif_hesaplar(tx, hs) == [2, 3], "1: son işlemi 20 Aralık (aktif kullanıyor); 2: son işlemi Mart (pasif); 3: hiç işlemi yok (pasif); 4: kapalı (listeye girmez)"\nassert pasif_hesaplar(tx, hs, ref="2024-03-15", gun=30) == [3], "Referans tarihi ve gün parametresi kullanılmalı"\n',
     hints: ['"Son işlem" için grup içinde hangi toplama fonksiyonu gerekir?', 'Varsayılan merge iç birleştirmedir; işlemi olmayan hesaplar düşer.', '<code>.max()</code>, <code>how="left"</code> ve <code>df["son"].isna() | (df["son"] &lt; sinir)</code>'],
     why: 'İki klasik hata: (1) son işlem için <code>min</code> almak (ilk işlemi verir, yılbaşına yakın olduğu için neredeyse herkes "pasif" görünür), (2) iç birleştirme ile hiç işlemi olmayan hesapları kaybetmek; tam da aradığın en pasif müşteriler bunlardır. Sol birleştirme + <code>isna()</code> bu "hiç yok" durumunu yakalar. RFM analizindeki Recency (yakınlık) ölçüsü de aynı max mantığıyla hesaplanır.',
@@ -6883,17 +6883,17 @@ B.push(
   {
     id: 'b-448',
     lv: 'ileri',
-    topic: 'Veri seti: Anadolu Bank',
+    topic: 'Veri seti: Ilgaz Bank',
     diff: 3,
     kind: 'rehberli',
-    ds: 'anadolu_bank',
+    ds: 'ilgaz_bank',
     needs: ['pandas'],
     title: 'İşlem türü × kanal çapraz tablosu',
     q: '<p><b>Dijital dönüşüm ofisi soruyor:</b> "Her işlem türü hangi kanallardan yapılıyor? Örneğin faturaların yüzde kaçı mobilden ödeniyor?"</p><p><code>tur_kanal_payi(txns)</code> fonksiyonunu yaz: satırlar <code>txn_type</code>, sütunlar <code>channel</code>; her hücre o işlem türündeki işlemlerin yüzde kaçının o kanaldan yapıldığını göstersin (satır toplamı 100). 1 ondalık. <code>pd.crosstab(..., normalize="index")</code> kullan.</p>',
     guide: ['<code>pd.crosstab(index, columns)</code> iki sütunun sıklık tablosunu çıkarır.', '<code>normalize="index"</code> her satırı kendi toplamına böler (0–1 arası).', '100 ile çarp ve <code>round(1)</code>.', 'Satır toplamlarının 100 olduğunu kendin kontrol et.'],
     example: 'import pandas as pd\n# Benzer teknik: satır yüzdeli çapraz tablo\ndf = pd.DataFrame({"sinif": ["A", "A", "B", "B", "B"], "sonuc": ["geçti", "kaldı", "geçti", "geçti", "kaldı"]})\nprint((pd.crosstab(df["sinif"], df["sonuc"], normalize="index") * 100).round(1))\n',
-    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef tur_kanal_payi(txns):\n    # TODO 1: txn_type × channel çapraz tablosu, satıra göre normalize\n    # TODO 2: yüzdeye çevir ve 1 ondalığa yuvarla\n    return None\n',
-    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("anadolu_bank", "bank_txns")\n\n\ndef tur_kanal_payi(txns):\n    t = pd.crosstab(txns["txn_type"], txns["channel"], normalize="index")\n    return (t * 100).round(1)\n\n\nprint(tur_kanal_payi(txns))\n',
+    start: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef tur_kanal_payi(txns):\n    # TODO 1: txn_type × channel çapraz tablosu, satıra göre normalize\n    # TODO 2: yüzdeye çevir ve 1 ondalığa yuvarla\n    return None\n',
+    sol: 'import veri\nimport pandas as pd\n\ntxns = veri.oku("ilgaz_bank", "bank_txns")\n\n\ndef tur_kanal_payi(txns):\n    t = pd.crosstab(txns["txn_type"], txns["channel"], normalize="index")\n    return (t * 100).round(1)\n\n\nprint(tur_kanal_payi(txns))\n',
     tests: 't = tur_kanal_payi(txns)\nassert t is not None, "DataFrame döndürmeli"\nassert t.shape == (8, 6), "Tablo boyutu: 8 işlem türü × 6 kanal"\nassert t.loc["fatura", "mobil"] == 49.1, "Faturaların mobil payı tutmuyor (satıra göre normalize)"\nassert t.loc["kart_harcama", "pos"] == 44.6, "Kart harcamalarının POS payı tutmuyor"\nassert t.loc["havale_cikis", "sube"] == 33.4, "Giden havalelerin şube payı tutmuyor"\nassert t.loc["atm", "atm"] == 100.0, "ATM işlemlerinin tamamı atm kanalından"\nassert ((t.sum(axis=1) - 100).abs() < 0.5).all(), "Her satırın toplamı ~100 olmalı"\n',
     hints: ['Sıklık tablosu için <code>pd.crosstab</code>.', '<code>normalize="index"</code> satır yüzdesi, <code>"columns"</code> sütun yüzdesi, <code>"all"</code> genel yüzde verir.', '<code>(pd.crosstab(txns["txn_type"], txns["channel"], normalize="index") * 100).round(1)</code>'],
     why: '<code>crosstab</code>, iki kategorik değişkenin birlikte görülme sıklığını verir; <code>normalize</code> hangi yönde yüzde alınacağını belirler ve iş sorusunu doğru okumak burada kritiktir: "faturaların yüzde kaçı mobilden" → satır yüzdesi; "mobil işlemlerin yüzde kaçı fatura" → sütun yüzdesi. Aynı tablo <code>pivot_table(aggfunc="size")</code> ya da <code>groupby([...]).size().unstack()</code> ile de kurulur.',
@@ -6902,7 +6902,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
+/* Kesit Python — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -7223,7 +7223,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480) */
+/* Kesit Python — veri seti görevleri: Kirli veri / Power Query adımları (b-466 … b-480) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -7507,7 +7507,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Anadolu Market (b-411 … b-430) */
+/* Kesit Python — veri seti görevleri: Anadolu Market (b-411 … b-430) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -7881,7 +7881,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Pusula İK (b-481 … b-498) */
+/* Kesit Python — veri seti görevleri: Pusula İK (b-481 … b-498) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -8213,7 +8213,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Lezzet Kurye (b-499 … b-516) */
+/* Kesit Python — veri seti görevleri: Lezzet Kurye (b-499 … b-516) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -8546,7 +8546,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Kanat Havayolları (b-517 … b-533) */
+/* Kesit Python — veri seti görevleri: Kanat Havayolları (b-517 … b-533) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -8861,7 +8861,7 @@ B.push(
   }
 );
 })(window);
-/* PythonPatika — veri seti görevleri: Pedal İzmir (b-534 … b-550) */
+/* Kesit Python — veri seti görevleri: Pedal İzmir (b-534 … b-550) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];

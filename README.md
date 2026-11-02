@@ -1,71 +1,35 @@
-# Kesit Python — PythonPatika
+# Kesit Python
 
-Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Türkçe Python öğrenme uygulaması. Kurulum gerektirmez: Python, [Pyodide](https://pyodide.org) (WebAssembly'e derlenmiş CPython 3.12) ile sayfanın içinde çalışır; pandas, numpy, scikit-learn, polars, DuckDB, statsmodels gibi paketler ihtiyaç anında yüklenir.
+**Sıfırdan işe hazır seviyeye Türkçe Python eğitimi. Kurulum yok, hesap yok.** Tarayıcında çalışan gerçek Python motoruyla (Pyodide) kod yazarsın; alıştırmalar otomatik testlerle anında denetlenir.
 
-[Kesit SQL](https://github.com/ysfdurak/kesit-sql) ve [Kesit Power BI](https://github.com/ysfdurak/kesit-powerbi) ile aynı kurgusal şirket verilerini kullanır.
+**Dene:** https://ysfdurak.github.io/kesit-python/
 
-## İçerik
+![Tarayıcıda çalışan Python](ekran/alistirma.png)
 
-| Bölüm | Kapsam |
-|---|---|
-| Dersler | 140 ders, 3.100+ otomatik testli alıştırma (Temel / Orta / İleri) |
-| Patikalar | 10 rol: Python Temelleri, Veri Analisti, Veri Bilimci, Veri Mühendisi, Backend, Makine Öğrenmesi, Web, Yapay Zekâ ile Python, Otomasyon, Sertifika ve Mülakat |
-| Yapay Zekâ | LLM API, istem mühendisliği, embedding ve vektör arama, RAG, ajanlar, LLM değerlendirme, yerel modeller, YZ bitirme projesi + ML dersleri |
-| Pratik | 550 seviyeli görev (140'ı gerçek veri setleriyle) |
-| Kodlama Arenası | 250 HackerRank tarzı problem: stdin/stdout, gizli testler, puan ve rütbe, süreli yarışma |
-| Sınavlar | 17 sınav: seviye tespit, seviye bitirme, kodlama, PCEP/PCAP tarzı deneme, 10 patika sınavı |
-| Mülakat | 321 yalnız Python mülakat sorusu, role göre; model cevap, takip soruları, kart modu ve 45 dk simülasyon |
-| Sık hatalar | 160 katalog kaydı + derslerdeki hata örnekleri (hatalı kod → gerçek çıktı → doğru kod → kural) |
-| Veri setleri | 8 set, 78 tablo: Anadolu Market, Anadolu Bank, Pusula İK, Lezzet Kurye, Kanat Havayolları, Pedal İzmir, Kesit BI modeli, kirli veri |
+## Neler var?
+- **140 ders, 3.101 ders içi alıştırma, 550 pratik görevi.** Kurulumdan pandas'a, otomasyondan web geliştirmeye, makine öğrenmesinden LLM uygulamalarına.
+- **10 rol patikası:** veri analisti, veri bilimci, web geliştirici, yapay zekâ ve diğerleri.
+- **250 arena problemi, 321 Python mülakat sorusu, 160 sık hata kaydı, 17 sınav.**
+- **8 hayali veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
 
-Dersler ve alıştırmalar veri setlerine `import veri` ile erişir:
+| Karşılama | Ders | Yapay zekâ |
+|---|---|---|
+| ![](ekran/karsilama.png) | ![](ekran/ders.png) | ![](ekran/yapay-zeka.png) |
 
-```python
-import veri
-df = veri.oku("anadolu_market", "orders")          # pandas DataFrame
-con = veri.baglan("lezzet_kurye")                  # bellek içi SQLite
-```
+## Nasıl çalışıyor?
+- Sunucu yok: Python kodu CPython'ın WebAssembly sürümü olan Pyodide ile tarayıcıda çalışır.
+- İlerleme yalnızca kullanıcının tarayıcısında saklanır; Profil sayfasından dosyaya kaydedilip başka cihazda yüklenebilir. Site kişisel veri toplamaz. Python motoru ve kütüphaneler jsDelivr'dan iner.
+- Alıştırma çözümleri otomatik testlerle gerçek Python'da doğrulanır; denetim araçları `kaynak` dalındadır.
 
-## Çalıştırma
+## Kaynak kod ve kardeş projeler
+Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)** ve **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**.
 
-Derlenmiş site deponun kökündedir (GitHub Pages: *Settings → Pages → Branch: main, / (root)*). Yerelde:
+## Yapay zekâ kullanımı
+Ürün kararlarını ve kapsamı Yusuf Durak belirledi; kod ve içerik yapay zekâ (Claude) ile geliştirildi.
 
-```bash
-python3 -m http.server 8000
-# http://localhost:8000
-```
+## Sorumluluk notu
+Ücretsiz, ticari olmayan bir eğitim ve portföy projesidir; içerik “olduğu gibi” sunulur. Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir. Python Software Foundation ya da Python Institute ile bağlantılı değildir.
 
-İlerleme tarayıcıda saklanır; Profil'den JSON yedeği alınıp geri yüklenebilir.
-
-## Klasör yapısı
-
-```
-index.html, *.js              derlenmiş site (tools/build.py üretir; elle düzenleme, kaynak/ altında değiştir)
-data/                         CSV veri setleri + manifest.json (site ve araçlar ortak kullanır)
-kaynak/
-  index.html, app.js, app2.js arayüz (görünümler, arena, mülakat, sık hatalar, veri setleri, yapay zekâ)
-  engine.js                   Pyodide motoru: uyumluluk katmanı (asyncio, thread, polars), test çalıştırıcı
-  levels.js, paths.js         seviyeler, ders sırası, patikalar, müfredat
-  c_*.js, bank.js, exams.js   çekirdek dersler, pratik bankası, sınavlar
-  v2/                         ek dersler (n*, t*, o*, i*), ders uzantıları (e*, x*), pratik görevleri (b*)
-  v3/                         arena (a*), mülakat (m*), sık hatalar (h*), veri seti görevleri (d*), patika sınavları (s1)
-tools/                        derleme ve doğrulama araçları; tools/pylib/veri.py
-belgeler/                     içerik şemaları ve uzman denetim raporu
-```
-
-## Derleme ve doğrulama
-
-```bash
-python3 tools/build.py                 # kaynak/ parçalarını birleştirir → kök (site)
-python3 tools/verify.py <dosyalar>     # her alıştırmayı CPython'da çalıştırır (çözüm geçmeli, başlangıç kodu kalmalı)
-python3 tools/examples.py <dosyalar>   # ders gövdesindeki örnek kodları çalıştırır
-npm install                            # pyodide
-node tools/pyodide_verify.mjs <dosya>  # aynı denetimi gerçek tarayıcı motoruyla yapar
-node tools/pyodide_examples.mjs <dosya>
-python3 tools/uitest.py                # Playwright ile tüm görünümleri açar
-node tools/gen_exams.mjs > kaynak/v3/s1/sinav_roller.js   # patika sınavlarını doğrulanmış alıştırmalardan derler
-```
-
-`pyodide_verify.mjs` pandas gibi paketleri Pyodide CDN'inden indirir; ağ yoksa tam Pyodide sürümünü ([0.27.8](https://github.com/pyodide/pyodide/releases/tag/0.27.8)) indirip `.whl` dosyalarını `node_modules/pyodide/` içine kopyalayın.
-
-Yayımlanan içeriğin tamamı iki ortamda doğrulanmıştır: yerel CPython ve tarayıcıdaki Pyodide.
+## Lisans
+- Uygulama kodu: [MIT](LICENSE)
+- Ders içerikleri ve veri setleri: [CC BY-NC 4.0](LICENSE-ICERIK.md)

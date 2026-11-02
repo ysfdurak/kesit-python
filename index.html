@@ -2,17 +2,28 @@
 <html lang="tr">
 <head>
 <meta charset="utf-8">
-<title>PythonPatika</title>
+<title>Kesit Python</title>
+<meta name="theme-color" content="#3B6FD6">
+<link rel="icon" href="favicon.svg" type="image/svg+xml">
+<link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="manifest" href="manifest.webmanifest">
+<meta property="og:type" content="website">
+<meta property="og:locale" content="tr_TR">
+<meta property="og:site_name" content="Kesit Python">
+<meta property="og:title" content="Kesit Python: sıfırdan işe hazır Python">
+<meta property="og:description" content="Kurulum yok, hesap yok. Python'ı tarayıcında çalıştırarak öğren: dersler, otomatik testli alıştırmalar, rol patikaları, mülakat ve kodlama arenası.">
+<meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png">
+<meta property="og:url" content="https://ysfdurak.github.io/kesit-python/">
+<meta name="twitter:card" content="summary_large_image">
+
 <meta name="viewport" content="width=device-width,initial-scale=1">
 <meta name="description" content="Python’ı Türkçe, sıfırdan işe hazır seviyeye: tarayıcıda çalışan gerçek Python motoru, otomatik testli alıştırmalar, rol patikaları, pratik bankası ve sınavlar.">
-<meta name="claude:viewport-fit-sides" content="cover">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,500;12..96,700;12..96,800&family=IBM+Plex+Sans:ital,wght@0,400;0,500;0,600;1,400&family=JetBrains+Mono:wght@400;600&display=swap">
+<link rel="stylesheet" href="vendor/fonts.css">
 <style>
 
 /* Düzen: solda patika menüsü, sağda çalışma alanı; telefonda alt sekme çubuğu.
-   Kimlik: SQLPatika ile aynı patika dili; işaret boyası Python mavisi, ikincil sarı; logo yılan kıvrımı yerine üç çubuk. */
+   Kimlik: Kesit ailesi; işaret boyası Python mavisi, ikincil sarı. */
 :root{
   --bg:#F1F0EC; --surface:#FFFFFF; --surface-2:#F7F6F2; --ink:#1B1A16; --muted:#625F55; --line:#DEDBD2;
   --accent:#3B6FD6; --accent-text:#2A56B5; --accent-soft:#E3EBFB; --accent-ink:#FFFFFF; --accent2:#F2C230;
@@ -446,7 +457,7 @@ svg.viz text{pointer-events:none}
   @keyframes pop{from{opacity:0; transform:translate(-50%,8px)}}
 }
 
-/* ---------- PythonPatika eklemeleri ---------- */
+/* ---------- Kesit Python eklemeleri ---------- */
 /* Müfredat haritası */
 .cur-wrap{overflow-x:auto} .cur{min-width:860px} .cur td{vertical-align:top} .cur .pc{text-align:center; white-space:nowrap; font-size:.78rem}
 .cv{font-size:1rem} .cv.c2{color:var(--ok)} .cv.c1{color:var(--warn)} .cv.c0{color:var(--muted); opacity:.6}
@@ -596,6 +607,28 @@ pre.outbox{background:var(--surface-2); border:1px solid var(--line); border-rad
 .navic{background:var(--accent); color:var(--accent-ink,#fff)} .navic svg{width:20px; height:20px}
 .quick{display:flex; flex-wrap:wrap; gap:8px; margin:0 0 4px}
 .quick .btn svg{width:16px; height:16px; vertical-align:-3px; margin-right:4px}
+
+/* Portföy sürümü */
+.boot{max-width:420px; margin:18vh auto 0; padding:0 20px; display:flex; flex-direction:column; gap:10px; font-size:.9rem}
+.boot b{font-family:var(--f-display); font-size:1.15rem}
+.boot-bar{height:6px; border-radius:6px; background:var(--line); overflow:hidden}
+.boot-bar i{display:block; height:100%; width:4%; background:var(--accent); transition:width .2s}
+.marker.k{background:none; border:0; display:block; overflow:visible; border-radius:0}
+.marker.k svg{display:block}
+.welcome{padding:20px; display:flex; flex-direction:column; gap:14px; border:1.5px solid var(--accent); margin-bottom:16px}
+.doors{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px}
+.door{display:flex; flex-direction:column; gap:6px; text-align:left; padding:16px; border:1px solid var(--line); border-radius:12px; background:var(--surface); color:var(--ink); cursor:pointer; font:inherit; transition:border-color .15s, transform .15s}
+.door:hover,.door:focus-visible{border-color:var(--accent-text); transform:translateY(-1px)}
+.door b{font-family:var(--f-display); font-size:1.08rem}
+.door small{color:var(--muted); line-height:1.45}
+.door-ic{display:grid; place-items:center; width:30px; height:30px; border-radius:8px; background:var(--accent); color:var(--accent-ink); font-weight:800; font-family:var(--f-display)}
+@media (max-width:760px){.doors{grid-template-columns:minmax(0,1fr)}}
+.bkcard{display:flex; gap:12px; align-items:center; padding:14px 16px; flex-wrap:wrap; margin-bottom:16px} .bkcard .grow{display:flex; flex-direction:column; gap:3px; min-width:0; flex:1}
+.about{display:flex; flex-direction:column; gap:18px; max-width:880px}
+.about-card{padding:18px; display:flex; flex-direction:column; gap:10px}
+.about-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px}
+.gs-wrap{padding:18px; display:flex; flex-direction:column; gap:10px; margin-top:12px}
+.lfb{margin:6px 0 0}
 </style>
 </head>
 <body>
@@ -603,35 +636,58 @@ pre.outbox{background:var(--surface-2); border:1px solid var(--line); border-rad
 <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 <div class="app">
   <aside class="side" aria-label="Ana menü">
-    <a class="brand" href="#" data-go="home"><span class="marker" aria-hidden="true"><i></i><i></i><i></i></span><b>Python<span>Patika</span></b></a>
+    <a class="brand" href="#" data-go="home"><span class="marker k" aria-hidden="true"><svg viewBox="0 0 26 26" width="26" height="26"><rect x="0.5" y="0.5" width="25" height="25" rx="7" fill="var(--accent)"/><path d="M0.5 15.5 L15.5 0.5 H20.5 L0.5 20.5 Z" fill="var(--bg)"/><path d="M12.6 12.6 L16.2 15.6 L12.6 18.6" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="17" y="17.6" width="5.2" height="2" rx="1" fill="var(--accent-ink)"/></svg></span><b>Kesit <span>Python</span></b></a>
     <nav class="nav" id="nav"></nav>
     <div class="side-stats" id="sideStats"></div>
   </aside>
   <div class="grow" style="min-width:0">
-    <header class="topbar"><a class="brand" href="#" data-go="home" style="padding:0"><span class="marker" aria-hidden="true"><i></i><i></i><i></i></span><b>Python<span>Patika</span></b></a><div class="mini"><span id="miniStats"></span></div></header>
-    <main id="main" tabindex="-1"></main>
-    <footer class="legal sitefoot"><p><b>PythonPatika</b> bağımsız bir eğitim uygulamasıdır; Python Software Foundation ya da Python Institute ile bağlantılı değildir. Python, PCEP ve PCAP adları ilgili kuruluşların ticari markalarıdır. Tarayıcıdaki Python motoru Pyodide (CPython/WebAssembly) ile çalışır ve ilk açılışta internetten indirilir.</p><p>Sınav ve alıştırma soruları özgün olarak yazılmıştır; gerçek sınav sorusu değildir. Anadolu Market ve Anadolu Bank verileri kurgusaldır. İlerlemen bu tarayıcıda saklanır; Profil sayfasından yedeğini indirebilir ya da silebilirsin.</p></footer>
+    <header class="topbar"><a class="brand" href="#" data-go="home" style="padding:0"><span class="marker k" aria-hidden="true"><svg viewBox="0 0 26 26" width="26" height="26"><rect x="0.5" y="0.5" width="25" height="25" rx="7" fill="var(--accent)"/><path d="M0.5 15.5 L15.5 0.5 H20.5 L0.5 20.5 Z" fill="var(--bg)"/><path d="M12.6 12.6 L16.2 15.6 L12.6 18.6" fill="none" stroke="var(--accent-ink)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/><rect x="17" y="17.6" width="5.2" height="2" rx="1" fill="var(--accent-ink)"/></svg></span><b>Kesit <span>Python</span></b></a><div class="mini"><span id="miniStats"></span></div></header>
+    <main id="main" tabindex="-1"><div class="boot" id="boot"><b>Kesit Python yükleniyor</b><div class="boot-bar"><i id="bootBar"></i></div><span class="muted">İlk açılışta birkaç saniye sürebilir; sonraki açılışlar daha hızlıdır.</span></div></main>
+    <footer class="legal sitefoot"><p><b>Kesit Python</b> bağımsız bir eğitim uygulamasıdır; Python Software Foundation ya da Python Institute ile bağlantılı değildir. Python, PCEP ve PCAP adları ilgili kuruluşların ticari markalarıdır. Tarayıcıdaki Python motoru Pyodide (CPython/WebAssembly) ile çalışır ve ilk açılışta internetten indirilir.</p><p>Sınav ve alıştırma soruları özgün olarak yazılmıştır; gerçek sınav sorusu değildir. Anadolu Market ve Ilgaz Bank verileri kurgusaldır. İlerlemen bu tarayıcıda saklanır; Profil sayfasından yedeğini indirebilir ya da silebilirsin. <a href="#/hakkinda" data-go="hakkinda">Hakkında ve gizlilik</a></p></footer>
   </div>
   <nav class="tabbar" id="tabbar" aria-label="Alt menü"></nav>
 </div>
+<script>function __b(p){var e=document.getElementById("bootBar");if(e)e.style.width=p+"%"}</script>
+<script charset="utf-8" src="config.js"></script>
 <script charset="utf-8" src="levels.js"></script>
+<script>__b(0)</script>
 <script charset="utf-8" src="paths.js"></script>
+<script>__b(0)</script>
 <script charset="utf-8" src="c_temel.js"></script>
+<script>__b(2)</script>
 <script charset="utf-8" src="c_orta.js"></script>
+<script>__b(6)</script>
 <script charset="utf-8" src="c_ileri.js"></script>
+<script>__b(9)</script>
 <script charset="utf-8" src="n_temel.js"></script>
+<script>__b(15)</script>
 <script charset="utf-8" src="n_orta.js"></script>
+<script>__b(26)</script>
 <script charset="utf-8" src="n_ileri.js"></script>
+<script>__b(51)</script>
 <script charset="utf-8" src="x_1.js"></script>
+<script>__b(67)</script>
 <script charset="utf-8" src="x_2.js"></script>
+<script>__b(71)</script>
 <script charset="utf-8" src="bank.js"></script>
+<script>__b(81)</script>
 <script charset="utf-8" src="exams.js"></script>
+<script>__b(83)</script>
 <script charset="utf-8" src="arena.js"></script>
+<script>__b(91)</script>
 <script charset="utf-8" src="interview.js"></script>
+<script>__b(98)</script>
 <script charset="utf-8" src="mistakes.js"></script>
+<script>__b(99)</script>
 <script charset="utf-8" src="engine.js"></script>
+<script>__b(99)</script>
 <script charset="utf-8" src="app.js"></script>
+<script>__b(99)</script>
 <script charset="utf-8" src="app2.js"></script>
-<script charset="utf-8" src="sync.js"></script>
+<script>__b(100)</script>
+<script charset="utf-8" src="portfolio.js"></script>
+<script>__b(100)</script>
+
+<script>if('serviceWorker' in navigator && /^https:|^http:\/\/localhost/.test(location.href) && !/claude|claudeusercontent/.test(location.host)) navigator.serviceWorker.register('sw.js').catch(()=>{});</script>
 </body>
 </html>

@@ -1,4 +1,4 @@
-/* PythonPatika — rol patikaları (kariyer yolları) ve hızlı başvuru kartları */
+/* Kesit Python — rol patikaları (kariyer yolları) ve hızlı başvuru kartları */
 (function (W) {
 'use strict';
 W.PY_PATHS = [
@@ -96,7 +96,7 @@ W.PY_CHEATS = [
   { title: 'pandas', items: [['pd.read_csv(io)', 'oku'], ['df.loc[df.tutar > 100, ["ad"]]', 'filtrele/seç'], ['df.groupby("sehir")["tutar"].sum()', 'grupla'], ['df.merge(df2, on="id", how="left")', 'birleştir'], ['df.pivot_table(index=, columns=, values=, aggfunc=)', 'özet tablo'], ['df.assign(x=lambda d: d.a * 2)', 'yeni sütun']] }
 ];
 })(window);
-/* Müfredat haritası: konu → PythonPatika dersleri ve muadil programlardaki kapsam.
+/* Müfredat haritası: konu → Kesit Python dersleri ve muadil programlardaki kapsam.
    Kaynak: platformların kamuya açık ders/sınav listeleri (Ekim 2026); yaklaşık karşılaştırmadır.
    2 = ayrı ders/bölüm olarak var, 1 = kısmen/değinilir, 0 = yok */
 (function (W) {
