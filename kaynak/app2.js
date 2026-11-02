@@ -336,10 +336,10 @@ VIEWS.data = { html() {
   loadMan().then(man => { const el = $('#dsl', m); if (!el) return; el.innerHTML = Object.entries(man).map(([k, d]) => { const n = Object.values(d.tables).reduce((a, t) => a + t.rows, 0); const tasks = C.BANK.filter(t => t.ds === k).length; return '<button type="button" class="panel pcard" data-go="dataset" data-id="' + k + '"><div class="row" style="justify-content:space-between"><b>' + esc(d.name) + '</b><span class="chip">' + esc(DOMAIN[k] || '') + '</span></div><p>' + esc(d.desc) + '</p><div class="foot"><span>' + Object.keys(d.tables).length + ' tablo · ' + n.toLocaleString('tr-TR') + ' satır</span><span>' + (tasks ? tasks + ' görev' : '') + '</span></div></button>'; }).join(''); const sr = $('#dsr', m); if (sr) sr.innerHTML = sinirHTML(Object.keys(man), man); }).catch(() => { const el = $('#dsl', m); if (el) el.innerHTML = '<p class="muted">Veri seti listesi yüklenemedi.</p>'; });
 } };
 VIEWS.dataset = { html() {
-  return '<div class="lhead"><div class="crumbs"><button data-go="data">Veri setleri</button> › <span>' + esc(V.id || '') + '</span></div><div id="dsv"><p class="muted">Yükleniyor…</p></div></div>';
+  return '<div class="lhead"><div class="crumbs"><button data-go="data">Veri setleri</button> › <span id="dsAd"></span></div><div id="dsv"><p class="muted">Yükleniyor…</p></div></div>';
 }, mount(m) {
   loadMan().then(man => {
-    const k = V.id, d = man[k], el = $('#dsv', m); if (!d) { el.innerHTML = '<p>Veri seti bulunamadı.</p>'; return; }
+    const k = V.id, d = man[k], el = $('#dsv', m); if (d) $('#dsAd', m).textContent = d.name; if (!d) { el.innerHTML = '<p>Veri seti bulunamadı.</p>'; return; }
     const tasks = C.BANK.filter(t => t.ds === k); const arena = ARENA.filter(a => (a.sol || '').includes(k));
     let h = '<div class="row" style="justify-content:space-between"><h1>' + esc(d.name) + '</h1><span class="chip">' + esc(DOMAIN[k] || d.source) + '</span></div><p class="muted">' + esc(d.desc) + '</p>';
     if (tasks.length || arena.length) h += '<div class="panel lvcard"><b>Bu veriyle pratik</b><div class="row">' + (tasks.length ? '<button class="btn sm" data-dsp="' + k + '">' + tasks.length + ' pratik görevi</button>' : '') + arena.slice(0, 6).map(a => '<button class="btn sm ghost" data-go="arena-p" data-id="' + a.id + '">' + esc(a.title) + '</button>').join('') + '</div></div>';
