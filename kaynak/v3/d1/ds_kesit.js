@@ -1,4 +1,4 @@
-/* Kesit Python — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
+/* Kesit Python — veri seti görevleri: Anadolu Market Power BI / Power BI ölçüleri (b-449 … b-465) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6,12 +6,12 @@ B.push(
   {
     id: 'b-449',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'rehberli',
     ds: 'kesit_bi',
     title: '[Net Satış] ölçüsünü yıllara göre hesapla',
-    q: '<p><b>Finans kontrolörü soruyor:</b> "Power BI raporundaki yıllık Net Satış kartlarının doğru olduğunu Python\'la teyit edebilir misin?"</p><p>Kesit BI modelindeki ölçü: <code>Net Satış = CALCULATE(SUM(Satislar[Tutar]), NOT Satislar[Durum] IN {"İptal", "İade"})</code>. <code>net_satis_yillik(satislar)</code> fonksiyonunu yaz: <code>veri.kayitlar("kesit_bi", "Satislar")</code> listesinden <code>{yil: toplam}</code> sözlüğü döndürsün (yıl tam sayı, <code>Tarih</code> metninin ilk 4 karakteri; toplam 2 ondalık).</p>',
+    q: '<p><b>Finans kontrolörü soruyor:</b> "Power BI raporundaki yıllık Net Satış kartlarının doğru olduğunu Python\'la teyit edebilir misin?"</p><p>Anadolu Market Power BI modelindeki ölçü: <code>Net Satış = CALCULATE(SUM(Satislar[Tutar]), NOT Satislar[Durum] IN {"İptal", "İade"})</code>. <code>net_satis_yillik(satislar)</code> fonksiyonunu yaz: <code>veri.kayitlar("kesit_bi", "Satislar")</code> listesinden <code>{yil: toplam}</code> sözlüğü döndürsün (yıl tam sayı, <code>Tarih</code> metninin ilk 4 karakteri; toplam 2 ondalık).</p>',
     guide: ['Boş bir sözlük oluştur.', 'Her satırda önce durumu kontrol et; iptal ya da iadeyse atla (CALCULATE\'in filtre bağlamı bu).', 'Yılı <code>int(s["Tarih"][:4])</code> ile çıkar ve <code>Tutar</code>\'ı o yıla ekle.', 'Sonunda her değeri 2 ondalığa yuvarlayıp döndür.'],
     example: '# Benzer teknik: filtreli toplam (DAX\'taki CALCULATE + SUM fikri)\nfaturalar = [{"ay": "2024-01", "tutar": 100, "iptal": False}, {"ay": "2024-01", "tutar": 50, "iptal": True},\n             {"ay": "2024-02", "tutar": 70, "iptal": False}]\ntoplam = {}\nfor f in faturalar:\n    if f["iptal"]:\n        continue\n    toplam[f["ay"]] = toplam.get(f["ay"], 0) + f["tutar"]\nprint(toplam)\n',
     start: 'import veri\n\nsatislar = veri.kayitlar("kesit_bi", "Satislar")\n\n\ndef net_satis_yillik(satislar):\n    toplam = {}\n    for s in satislar:\n        # TODO 1: İptal ve İade satırlarını atla\n        # TODO 2: yılı çıkar, Tutar\'ı o yıla ekle\n        pass\n    # TODO 3: değerleri 2 ondalığa yuvarla\n    return toplam\n',
@@ -25,7 +25,7 @@ B.push(
   {
     id: 'b-450',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -42,7 +42,7 @@ B.push(
   {
     id: 'b-451',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'tamamla',
     ds: 'kesit_bi',
@@ -59,7 +59,7 @@ B.push(
   {
     id: 'b-452',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'bug',
     ds: 'kesit_bi',
@@ -76,7 +76,7 @@ B.push(
   {
     id: 'b-453',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -96,7 +96,7 @@ B.push(
   {
     id: 'b-454',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -114,7 +114,7 @@ B.push(
   {
     id: 'b-455',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -134,7 +134,7 @@ B.push(
   {
     id: 'b-456',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -152,7 +152,7 @@ B.push(
   {
     id: 'b-457',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'bug',
     ds: 'kesit_bi',
@@ -170,7 +170,7 @@ B.push(
   {
     id: 'b-458',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'tamamla',
     ds: 'kesit_bi',
@@ -188,7 +188,7 @@ B.push(
   {
     id: 'b-459',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -208,7 +208,7 @@ B.push(
   {
     id: 'b-460',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -226,7 +226,7 @@ B.push(
   {
     id: 'b-461',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -246,7 +246,7 @@ B.push(
   {
     id: 'b-462',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -264,7 +264,7 @@ B.push(
   {
     id: 'b-463',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -282,7 +282,7 @@ B.push(
   {
     id: 'b-464',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -302,7 +302,7 @@ B.push(
   {
     id: 'b-465',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',

@@ -378,7 +378,7 @@ print("fark GA:", round(pb - pa - 1.96 * se, 4), "–", round(pb - pa + 1.96 * s
         q: '<p><b>Hedef süre: 4 dk.</b> <code>siparissiz_musteri(con)</code> hiç siparişi olmayan müşteri sayısını döndürsün. NOT IN yerine NULL\'a güvenli bir kalıp kullan.</p>',
         start: 'import veri\n\ncon = veri.baglan("anadolu_market")\n\n\ndef siparissiz_musteri(con):\n    pass\n\n\nprint(siparissiz_musteri(con))\n',
         sol: 'import veri\n\ncon = veri.baglan("anadolu_market")\n\n\ndef siparissiz_musteri(con):\n    sql = """\n    SELECT COUNT(*) FROM customers c\n    WHERE NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)\n    """\n    return con.execute(sql).fetchone()[0]\n\n\nprint(siparissiz_musteri(con))\n',
-        tests: 'assert siparissiz_musteri(con) == 14, "150 müşteriden 14\'ü hiç sipariş vermemiş"\nassert "NOT IN" not in __source__.upper(), "NOT IN yerine NOT EXISTS ya da LEFT JOIN ... IS NULL kullan"\n',
+        tests: 'assert siparissiz_musteri(con) == 14, "150 müşteriden 14\'ü hiç sipariş vermemiş"\nassert "NOT IN" not in __kod__.upper(), "NOT IN yerine NOT EXISTS ya da LEFT JOIN ... IS NULL kullan"\n',
         hints: ['<code>NOT EXISTS (SELECT 1 FROM orders o WHERE o.customer_id = c.customer_id)</code>', 'Alternatif: <code>LEFT JOIN orders o ... WHERE o.order_id IS NULL</code>.'],
         why: 'Anti-join kalıbı (kalıp 4). NOT EXISTS alt sorguda NULL olsa bile doğru çalışır ve çoğu motorda verimli bir plana dönüşür.'
       },

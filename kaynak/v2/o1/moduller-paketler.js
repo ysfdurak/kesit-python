@@ -316,7 +316,7 @@ print(musteriler)                          # orijinal aynı</pre>
       q: '<p><b>Hatayı bul ve düzelt.</b> Analist, fiyat esnekliği 1.4 olan bir ürün için yüzde 10 zamda talebin yüzde 14 düşeceğini hesaplamak istiyor. Ama <code>talep_degisimi(10)</code> 27.18 döndürüyor. Hatayı bul; yıldızlı import kullanmadan düzelt.</p>',
       start: 'e = 1.4   # fiyat esnekliği\nfrom math import *\n\ndef talep_degisimi(fiyat_artis_yuzde):\n    return round(e * fiyat_artis_yuzde, 2)\n\nprint(talep_degisimi(10))\nprint(round(sqrt(2), 3))\n',
       sol: 'import math\n\ne = 1.4   # fiyat esnekliği\n\ndef talep_degisimi(fiyat_artis_yuzde):\n    return round(e * fiyat_artis_yuzde, 2)\n\nprint(talep_degisimi(10))\nprint(round(math.sqrt(2), 3))\n',
-      tests: 'assert talep_degisimi(10) == 14.0, "1.4 * 10 = 14.0 olmalı; 27.18 görüyorsan e adını math.e ezmiş"\nassert e == 1.4, "e değişkeni esneklik (1.4) olarak kalmalı"\nassert "import *" not in __source__, "yıldızlı import kullanma; import math yaz"\n',
+      tests: 'assert talep_degisimi(10) == 14.0, "1.4 * 10 = 14.0 olmalı; 27.18 görüyorsan e adını math.e ezmiş"\nassert e == 1.4, "e değişkeni esneklik (1.4) olarak kalmalı"\nassert "import *" not in __kod__, "yıldızlı import kullanma; import math yaz"\n',
       hints: ['from math import * math modülündeki e (Euler sayısı) adını da getirir.', 'Senin e = 1.4 tanımın importtan önce olduğu için ezildi.', 'import math yaz, sqrt yerine math.sqrt kullan.'],
       why: 'Yıldızlı import, modüldeki tüm alt çizgisiz adları ad alanına döker ve aynı adlı değişkenlerini sessizce ezer. import math ile adlar math. önekiyle ayrı tutulur.' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'moduller-paketler-10', diff: 2,

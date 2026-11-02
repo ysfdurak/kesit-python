@@ -67,9 +67,9 @@ liste_toplam = sys.getsizeof(liste) + sum(sys.getsizeof(x) for x in liste)
 print(f"list : {liste_toplam / 1024:7.0f} KB")
 print(f"array: {sys.getsizeof(dizi) / 1024:7.0f} KB")
 
-tampon = bytearray(b"HDR|ANADOLU-BANK|0001234500|TRY")
+tampon = bytearray(b"HDR|ILGAZ-BANKA|0001234500|TRY")
 gorunum = memoryview(tampon)
-tutar_alani = gorunum[17:27]          # kopya yok, aynı belleğe pencere
+tutar_alani = gorunum[16:26]          # kopya yok, aynı belleğe pencere
 print(bytes(tutar_alani).decode())
 tutar_alani[0:2] = b"99"              # pencereden yazmak kaynağı değiştirir
 print(tampon.decode())

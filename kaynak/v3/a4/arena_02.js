@@ -130,7 +130,7 @@
   mode: 'func',
   fn: 'kanal_memnuniyet',
   ds: 'kesit_bi',
-  statement: '<p>Kesit BI modelindeki <code>Talepler</code> tablosu müşteri destek taleplerini tutar: <code>Kanal</code> (Telefon, E-posta, Canlı destek, Sosyal medya), <code>Memnuniyet</code> (1–5 puan; anket yanıtlanmadıysa boş).</p><p><code>kanal_memnuniyet(kanal)</code>: verilen kanaldaki taleplerin <b>yanıtlanmış</b> memnuniyet puanlarının ortalamasını (2 ondalık) ve yanıt oranını (yüzde, 1 ondalık) <code>(ortalama, yanit_orani)</code> olarak döndür.</p>',
+  statement: '<p>Anadolu Market Power BI modelindeki <code>Talepler</code> tablosu müşteri destek taleplerini tutar: <code>Kanal</code> (Telefon, E-posta, Canlı destek, Sosyal medya), <code>Memnuniyet</code> (1–5 puan; anket yanıtlanmadıysa boş).</p><p><code>kanal_memnuniyet(kanal)</code>: verilen kanaldaki taleplerin <b>yanıtlanmış</b> memnuniyet puanlarının ortalamasını (2 ondalık) ve yanıt oranını (yüzde, 1 ondalık) <code>(ortalama, yanit_orani)</code> olarak döndür.</p>',
   input: '<p><code>kanal</code>: kanal adı (str).</p>',
   output: '<p><code>tuple</code>: <code>(float, float)</code></p>',
   constraints: 'Talepler 270 satır',

@@ -13,13 +13,13 @@ for (const f of files) new Function('window', fs.readFileSync(f, 'utf8'))(window
 const L = window.PY_LESSONS || []; const lm = {}; L.forEach(l => lm[l.id] = l);
 (window.PY_EXT || []).forEach(x => { if (lm[x.id]) lm[x.id].ex = (lm[x.id].ex || []).concat(x.ex || []); else L.push({ id: x.id + '(uzantı)', ex: x.ex || [] }); });
 const items = [];
-L.forEach(l => (l.ex || []).forEach((e, i) => { if (['code', 'predict', 'order'].includes(e.t)) items.push([l.id + '#' + (e.id || i), e]); }));
+L.forEach(l => (l.ex || []).forEach((e, i) => { if (['code', 'predict', 'order'].includes(e.t) && !e.plain) items.push([l.id + '#' + (e.id || i), e]); }));
 (window.PY_BANK || []).forEach(t => items.push(['bank#' + t.id, t]));
 (window.PY_EXAMS || []).forEach(x => x.qs.forEach((q, i) => { if (['code', 'predict', 'order'].includes(q.t)) items.push(['exam ' + x.id + '#' + i, q]); }));
 (window.PY_ARENA || []).forEach(a => { if (a.mode === 'func') items.push(['arena#' + a.id, { t: 'code', sol: a.sol, tests: a.tests, needs: a.needs }]); else [...(a.samples || []), ...(a.hidden || [])].forEach((c, i) => items.push(['arena#' + a.id + '/' + i, { t: 'arena', sol: a.sol, inp: c.in, gen: c.gen, out: c.out, needs: a.needs }])); });
 (window.PY_INTERVIEW || []).forEach(q => { if (q.code) items.push(['mulakat#' + q.id, { t: 'iv', sol: q.code, out: q.out }]); });
 (window.PY_MISTAKES || []).forEach(m => { items.push(['hata#' + m.id + '/bad', { t: 'mist', sol: m.bad, out: m.bad_out, err: m.bad_err }]); items.push(['hata#' + m.id + '/good', { t: 'mist', sol: m.good, out: m.good_out }]); });
-const engine = fs.readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'engine.js'), 'utf8');
+const engine = fs.readFileSync(path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'pyworker.js'), 'utf8');
 const PRELUDE = eval('`' + engine.match(/const PRELUDE = `([\s\S]*?)`;/)[1] + '`');
 const py = await loadPyodide();
 await py.runPythonAsync(PRELUDE);

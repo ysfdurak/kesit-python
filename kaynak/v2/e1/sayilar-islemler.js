@@ -99,7 +99,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: '59.97 + 11.994 = 71.964; ROUND_HALF_UP ile kuruşa yuvarlanınca 71.96. Yuvarlama yalnızca en sonda, genel toplamda yapılır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x6',
         stage: 'Rehberli',
         diff: 1,
@@ -131,7 +131,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: 'Decimal metinden oluşturulduğunda ondalık değer tam temsil edilir ve quantize yuvarlama kuralını açıkça belirlemene izin verir. Sonucun her zaman iki basamaklı olması (10.00) fatura çıktısında da tutarlılık sağlar.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -182,7 +182,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: '%20 KDV, KDV hariç fiyatın %20\'sidir. KDV dahil fiyattan %20 düşmek fazla indirim yapar (120 × 0.8 = 96). Doğrusu ters işlemdir: 120 / 1.2 = 100. Bu, faturalarda gerçekten sık yapılan bir hatadır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x12',
         stage: 'Meydan okuma',
         diff: 3,

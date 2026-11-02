@@ -6,17 +6,17 @@ X.push(
   {
     id: 'mulakat-hazirlik',
     min: 30,
-    html: `<p>Bu ders her rol için ortak çekirdeği veriyor: Python kavramları, algoritma kalıpları, canlı kodlama ve davranışsal sorular. Ama bir veri analisti ile bir backend geliştiricinin mülakatı aynı değildir. Bu bölüm iki şey ekliyor: patikana göre "hangi bölüm sana ne kadar lazım" haritası ve kendi kendine uygulayabileceğin 45 dakikalık bir deneme mülakatı senaryosu.</p>
+    html: `<p>Bu ders her rol için ortak çekirdeği veriyor: Python kavramları, algoritma kalıpları, canlı kodlama ve davranışsal sorular. Ama bir veri analisti ile bir backend geliştiricinin mülakatı aynı değildir. Bu bölüm iki şey ekliyor: öğrenme yoluna göre "hangi bölüm sana ne kadar lazım" haritası ve kendi kendine uygulayabileceğin 45 dakikalık bir deneme mülakatı senaryosu.</p>
 <h2>Patikalara göre harita</h2>
-<div class="tbl-wrap"><table><tr><th>Patika</th><th>Bu dersten öncelik</th><th>Ardından çalış</th><th>Mülakatta ağırlık</th></tr>
+<div class="tbl-wrap"><table><tr><th>Yol</th><th>Bu dersten öncelik</th><th>Ardından çalış</th><th>Mülakatta ağırlık</th></tr>
 <tr><td>Veri analisti</td><td>Kavram soruları, sözlükle sayım, davranışsal sorular</td><td><b>Veri mülakatı</b> (SQL, pandas, metrik, vaka), <b>İş metrikleri</b></td><td>SQL canlı yazım, pandas ile analiz, iş sorusunu metriğe çevirme</td></tr>
 <tr><td>Veri bilimci / ML</td><td>Kavramlar, Big-O, kayan pencere, heap</td><td><b>Veri mülakatı</b>, ML derslerindeki SSS'ler</td><td>İstatistik, model değerlendirme, sızıntı, A/B testi, ev ödevi</td></tr>
 <tr><td>Veri mühendisi</td><td>Kalıpların tamamı, Big-O, ev ödevi</td><td><b>Veri mülakatı</b>, <b>Mülakat kalıpları 2</b>, <b>Sistem tasarımı</b></td><td>SQL, ETL tasarımı, idempotentlik, bölümleme, orkestrasyon</td></tr>
 <tr><td>Backend / web</td><td>Kalıpların tamamı, canlı kodlama ipuçları</td><td><b>Mülakat kalıpları 2</b>, <b>Sistem tasarımı</b></td><td>Algoritma (orta), API ve veritabanı tasarımı, önbellek, güvenlik</td></tr>
 <tr><td>AI mühendisi</td><td>Kavramlar, sözlük/küme kalıpları, ev ödevi</td><td><b>Sistem tasarımı</b> (LLM servisleri), LLM dersleri</td><td>RAG tasarımı, değerlendirme, maliyet ve gecikme</td></tr>
-<tr><td>Otomasyon</td><td>Kavramlar, sayım ve metin kalıpları</td><td>Kodlama Arenası (Kolay/Orta)</td><td>Dosya, Excel, hata yönetimi; çoğunlukla pratik görev</td></tr>
+<tr><td>Otomasyon</td><td>Kavramlar, sayım ve metin kalıpları</td><td>Python Arena (Kolay/Orta)</td><td>Dosya, Excel, hata yönetimi; çoğunlukla pratik görev</td></tr>
 <tr><td>Sertifika (PCEP/PCAP)</td><td>Kavram soruları ve "yanlış ama sık verilen cevaplar"</td><td><b>Mülakat kalıpları 2</b>, sınav bölümü</td><td>Dil ayrıntısı: kapsam, değişebilirlik, istisnalar, OOP</td></tr></table></div>
-<p>Haritayı şöyle kullan: kendi satırındaki ilk sütunu bu derste pekiştir, ikinci sütundaki dersleri sırayla bitir, üçüncü sütunu deneme mülakatlarında ağırlık olarak kullan. Kodlama Arenası'nda patikanın "track" süzgeciyle günde 1-2 soru çözmek, kalıpları otomatikleştirmenin en verimli yoludur.</p>
+<p>Haritayı şöyle kullan: kendi satırındaki ilk sütunu bu derste pekiştir, ikinci sütundaki dersleri sırayla bitir, üçüncü sütunu deneme mülakatlarında ağırlık olarak kullan. Python Arena'da rolüne uygun alan süzgeciyle günde 1-2 soru çözmek, kalıpları otomatikleştirmenin en verimli yoludur.</p>
 <h2>45 dakikalık deneme mülakatı</h2>
 <p>Gerçek teknik mülakatların çoğu 45-60 dakikadır ve benzer bir akışı izler. Bir arkadaşınla rol değiştirerek ya da kendi kendine süre tutarak uygula; ekranını kaydet ve sonra izle. Senaryo Anadolu Market'in backend/veri pozisyonuna göre yazıldı.</p>
 <div class="tbl-wrap"><table><tr><th>Dakika</th><th>Bölüm</th><th>Görüşmeci ne yapar?</th><th>Sen ne yapmalısın?</th></tr>
@@ -51,14 +51,14 @@ print(supheliler(akis))</pre>
 <tr><td>İletişim</td><td>Sessiz yazdı</td><td>Düşündüğünü sesli anlattı, ipucunu kullandı</td></tr>
 <tr><td>Test</td><td>Hiç denemedi</td><td>Kendi örnekleriyle ve kenar durumlarla denedi</td></tr>
 <tr><td>Karmaşıklık</td><td>Bilmiyor</td><td>Zaman ve bellek için doğru O(...) ve gerekçe</td></tr></table></div>
-<div class="tip"><b>Haftalık plan</b>Mülakat sürecindeysen haftada iki deneme yap: biri bu senaryoyla, biri Kodlama Arenası'ndan rastgele bir Orta soruyla. Her denemeden sonra en düşük puanlı ölçüt için bir sonraki haftaya tek bir hedef yaz ("kodlamadan önce iki örnek yazacağım").</div>
+<div class="tip"><b>Haftalık plan</b>Mülakat sürecindeysen haftada iki deneme yap: biri bu senaryoyla, biri Python Arena'dan rastgele bir Orta soruyla. Her denemeden sonra en düşük puanlı ölçüt için bir sonraki haftaya tek bir hedef yaz ("kodlamadan önce iki örnek yazacağım").</div>
 <div class="note"><b>Gerçek işte</b>İşe alım ekipleri adayı tek bir doğru cevaptan çok sürece göre değerlendirir: belirsizlik karşısında soru sorması, takıldığında ilerleyebilmesi ve kendi kodunu test etmesi. Bu yüzden deneme mülakatı, soru ezberlemekten çok daha verimli bir hazırlıktır.</div>`,
     ex: [
       {
         t: 'mc',
         id: 'mulakat-hazirlik-y1',
         stage: 'Isınma',
-        q: 'Veri analisti pozisyonuna hazırlanıyorsun ve iki haftan var. Bu patikanın haritasına göre en verimli öncelik hangisi?',
+        q: 'Veri analisti pozisyonuna hazırlanıyorsun ve iki haftan var. Bu yolun haritasına göre en verimli öncelik hangisi?',
         o: [
           'Dinamik programlama ve graf algoritmalarına ağırlık vermek',
           'SQL ve pandas ile canlı analiz ile iş sorusunu metriğe çevirme',
@@ -131,11 +131,11 @@ print(supheliler(akis))</pre>
         id: 'mulakat-hazirlik-y6',
         stage: 'Kendin yaz',
         diff: 1,
-        q: '<p>Patika haritasını koda dök: <code>calisma_plani(patika, bitenler)</code> yaz. <code>HARITA</code> sözlüğü hazır: her patika için sıralı ders listesi. Patikadaki derslerden <code>bitenler</code> kümesinde olmayanları sırayla döndür. Bilinmeyen patika için <code>ValueError</code> fırlat; mesajda geçerli patikalar alfabetik ve virgülle ayrılmış olsun.</p>',
-        start: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(patika, bitenler):\n    pass\n',
-        sol: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(patika, bitenler):\n    if patika not in HARITA:\n        raise ValueError("Geçerli patikalar: " + ", ".join(sorted(HARITA)))\n    return [d for d in HARITA[patika] if d not in bitenler]\n',
-        tests: 'assert calisma_plani("backend", {"mulakat-hazirlik"}) == ["mulakat-kaliplari-2", "sistem-tasarimi"], "Biten ders çıkarılmalı, sıra korunmalı"\nassert calisma_plani("analist", set()) == ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"], "Hiç bitmemişse tüm liste"\nassert calisma_plani("muhendis", set(HARITA["muhendis"])) == [], "Hepsi bittiyse boş"\ntry:\n    calisma_plani("tasarimci", set())\n    assert False, "Bilinmeyen patika ValueError vermeli"\nexcept ValueError as e:\n    assert str(e) == "Geçerli patikalar: analist, backend, muhendis", f"Mesaj: {e}"\n',
-        hints: ['Önce patika anahtarını denetle.', 'Liste kavrayışı ile sırayı koruyarak süz.', '", ".join(sorted(HARITA))'],
+        q: '<p>Patika haritasını koda dök: <code>calisma_plani(yol, bitenler)</code> yaz. <code>HARITA</code> sözlüğü hazır: her yol için sıralı ders listesi. Yoldaki derslerden <code>bitenler</code> kümesinde olmayanları sırayla döndür. Bilinmeyen yol için <code>ValueError</code> fırlat; mesajda geçerli yollar alfabetik ve virgülle ayrılmış olsun.</p>',
+        start: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(yol, bitenler):\n    pass\n',
+        sol: 'HARITA = {\n    "analist": ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"],\n    "backend": ["mulakat-hazirlik", "mulakat-kaliplari-2", "sistem-tasarimi"],\n    "muhendis": ["mulakat-hazirlik", "veri-mulakat", "mulakat-kaliplari-2", "sistem-tasarimi"],\n}\n\ndef calisma_plani(yol, bitenler):\n    if yol not in HARITA:\n        raise ValueError("Geçerli yollar: " + ", ".join(sorted(HARITA)))\n    return [d for d in HARITA[yol] if d not in bitenler]\n',
+        tests: 'assert calisma_plani("backend", {"mulakat-hazirlik"}) == ["mulakat-kaliplari-2", "sistem-tasarimi"], "Biten ders çıkarılmalı, sıra korunmalı"\nassert calisma_plani("analist", set()) == ["mulakat-hazirlik", "veri-mulakat", "is-metrikleri"], "Hiç bitmemişse tüm liste"\nassert calisma_plani("muhendis", set(HARITA["muhendis"])) == [], "Hepsi bittiyse boş"\ntry:\n    calisma_plani("tasarimci", set())\n    assert False, "Bilinmeyen yol ValueError vermeli"\nexcept ValueError as e:\n    assert str(e) == "Geçerli yollar: analist, backend, muhendis", f"Mesaj: {e}"\n',
+        hints: ['Önce yol anahtarını denetle.', 'Liste kavrayışı ile sırayı koruyarak süz.', '", ".join(sorted(HARITA))'],
         why: 'Basit bir görev, ama mülakatta da beklenen iki alışkanlığı içerir: geçersiz girdide anlamlı hata mesajı ve sırayı koruyan süzme.'
       },
       {
@@ -171,7 +171,7 @@ print(supheliler(akis))</pre>
     faq: [
       {
         q: 'Deneme mülakatı için kimle çalışabilirim?',
-        a: 'Aynı patikadaki bir arkadaşla rol değiştirerek; yoksa süre tutup kendini kaydederek. Görüşmeci rolündeyken puan kartını doldurmak, kendi zayıflıklarını görmek için de etkilidir. Topluluklar ve mentorluk programları da karşılıklı deneme oturumları düzenler.'
+        a: 'Aynı yoldaki bir arkadaşla rol değiştirerek; yoksa süre tutup kendini kaydederek. Görüşmeci rolündeyken puan kartını doldurmak, kendi zayıflıklarını görmek için de etkilidir. Topluluklar ve mentorluk programları da karşılıklı deneme oturumları düzenler.'
       }
     ]
   }

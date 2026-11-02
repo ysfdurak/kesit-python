@@ -1,3 +1,58 @@
+/* Kesit Python — Fonksiyon iskeleti: def görevleri için kısa ön ders */
+(function (W) {
+'use strict';
+const L = W.PY_LESSONS = W.PY_LESSONS || [];
+L.push({
+  id: 'fonksiyon-iskeleti', lv: 'temel', mod: 'Başlangıç', min: 10,
+  title: 'Fonksiyon iskeleti: boşluğu doldur',
+  sum: 'Alıştırmalarda sık göreceğin def ve return kalıbını tanır, hazır iskeletin içini doldurursun. Ayrıntısı Fonksiyonlar dersinde.',
+  goals: ['def ile başlayan bir iskeleti okuyabilirim.', 'İskeletin içine bir satır yazıp sonucu return ile geri verebilirim.', 'print ile return arasındaki farkı söyleyebilirim.'],
+  body: `<p>Alıştırmaların çoğu senden küçük bir <b>fonksiyon</b> (function) ister, çünkü testler fonksiyonu çağırıp sonucu denetler. Şimdilik tüm kuralları bilmen gerekmez: hazır bir kalıbın boşluğunu doldurmak yeter.</p>
+<pre class="py">def kdvli(tutar):
+    sonuc = tutar * 1.2
+    return sonuc
+
+print(kdvli(100))</pre>
+<ul><li><code>def kdvli(tutar):</code> "kdvli adında bir iş tanımlıyorum, ona bir <code>tutar</code> verilecek" demek. Satır iki noktayla biter.</li><li>Alttaki satırlar <b>dört boşluk içeride</b> yazılır. Fonksiyonun gövdesi budur.</li><li><code>return sonuc</code> sonucu çağırana geri verir ve fonksiyonu bitirir.</li><li><code>kdvli(100)</code> fonksiyonu çağırır: <code>tutar</code> o çağrıda 100 olur.</li></ul>
+<h2>return ile print aynı şey değil</h2>
+<p><code>print</code> ekrana yazar, değer geri vermez. <code>return</code> değeri geri verir, ekrana yazmaz. Testler <code>return</code> ile verdiğin değere bakar.</p>
+<pre class="py">def yazdir(x):
+    print(x * 2)
+
+def dondur(x):
+    return x * 2
+
+a = yazdir(5)     # ekrana 10 yazar, a boş kalır (None)
+b = dondur(5)     # ekrana bir şey yazmaz, b 10 olur
+print(a, b)</pre>
+<h2>Alıştırmalarda ne göreceksin?</h2>
+<p>Çoğu görev şöyle hazır gelir. Sen yalnız <code># buraya yaz</code> satırını doldurursun; <code>pass</code> "henüz boş" demektir ve yerine kendi satırın gelir:</p>
+<pre class="code">def indirimli(fiyat):
+    # buraya yaz
+    pass</pre>
+<p>Birden çok değer alan fonksiyonda parametreler virgülle ayrılır: <code>def topla(a, b):</code>. Fonksiyonlar dersinde varsayılan değerleri, kapsamı ve daha fazlasını göreceksin.</p>`,
+  ex: [
+    { t: 'mc', stage: 'Isınma', id: 'fonksiyon-iskeleti-1', q: '<p><code>def alan(en, boy):</code> satırında <code>en</code> ve <code>boy</code> nedir?</p>', o: ['Fonksiyona verilecek değerlerin adları (parametre)', 'Fonksiyonun döndürdüğü sonuçlar', 'Daha önce tanımlanmış zorunlu değişkenler', 'Fonksiyonun adı'], a: 0, why: 'Parantez içindekiler parametredir; fonksiyon çağrılırken değer alırlar.' },
+    { t: 'mc', stage: 'Isınma', id: 'fonksiyon-iskeleti-2', q: '<p>Testler bir fonksiyonun sonucunu görmek istiyor. Gövdede hangisini kullanmalısın?</p>', o: ['<code>print(sonuc)</code>', '<code>return sonuc</code>', '<code>sonuc</code> yazıp bırakmak', '<code>input(sonuc)</code>'], a: 1, why: 'Sonucu çağırana yalnız return geri verir; print yalnız ekrana yazar ve fonksiyon None döndürür.' },
+    { t: 'predict', stage: 'Kodu oku', id: 'fonksiyon-iskeleti-3', q: 'Bu kod ne yazdırır?', code: 'def iki_kat(x):\n    return x * 2\n\nprint(iki_kat(4))\nprint(iki_kat(4) + 1)\n', o: ['8\n9', '4\n5', '8\n8', 'x * 2\n9'], a: 0, why: 'Çağrı, return edilen değere dönüşür: 8, sonra 8 + 1.' },
+    { t: 'predict', stage: 'Kodu oku', id: 'fonksiyon-iskeleti-4', q: 'Bu kod ne yazdırır?', code: 'def selam(ad):\n    print("Merhaba", ad)\n\nsonuc = selam("Ece")\nprint(sonuc)\n', o: ['Merhaba Ece\nNone', 'Merhaba Ece\nMerhaba Ece', 'None\nMerhaba Ece', 'Merhaba Ece'], a: 0, why: 'selam ekrana yazar ama return etmez; bu yüzden sonuc None olur.' },
+    { t: 'order', stage: 'Kodu oku', id: 'fonksiyon-iskeleti-5', q: '<p>Satırları sırala: fonksiyon iki sayıyı toplayıp geri versin, sonra sonuç yazdırılsın.</p>', lines: ['def topla(a, b):', '    sonuc = a + b', '    return sonuc', 'print(topla(2, 3))'], expect: '5\n', why: 'Önce tanım, gövde içeride, sonra çağrı.' },
+    { t: 'code', stage: 'Rehberli', kind: 'tamamla', id: 'fonksiyon-iskeleti-6', diff: 1, q: '<p><code>indirimli(fiyat)</code> fiyatın yüzde 10 indirimli hâlini döndürsün. Örnek: <code>indirimli(200)</code> → <code>180.0</code>.</p>', guide: ['pass satırını sil.', 'sonuc = fiyat * 0.9 yaz.', 'return sonuc yaz.'], start: 'def indirimli(fiyat):\n    # buraya yaz\n    pass\n', sol: 'def indirimli(fiyat):\n    sonuc = fiyat * 0.9\n    return sonuc\n', tests: 'assert indirimli(200) == 180.0, "200 için 180.0 bekleniyor"\nassert indirimli(50) == 45.0, "50 için 45.0 bekleniyor"\nassert indirimli(0) == 0, "0 için 0 bekleniyor"\n', hints: ['Yüzde 10 indirimli: fiyatın 0.9 katı.', 'sonuc = fiyat * 0.9, sonra return sonuc.'], why: 'İskelet aynı kalır, yalnız gövde değişir.' },
+    { t: 'code', stage: 'Rehberli', kind: 'tamamla', id: 'fonksiyon-iskeleti-7', diff: 1, q: '<p><code>toplam_tutar(adet, fiyat)</code> adet ile fiyatın çarpımını döndürsün. Örnek: <code>toplam_tutar(3, 250)</code> → <code>750</code>.</p>', guide: ['İki parametren var: adet ve fiyat.', 'Çarpımı return et.'], start: 'def toplam_tutar(adet, fiyat):\n    # buraya yaz\n    pass\n', sol: 'def toplam_tutar(adet, fiyat):\n    return adet * fiyat\n', tests: 'assert toplam_tutar(3, 250) == 750, "3 ve 250 için 750 bekleniyor"\nassert toplam_tutar(1, 99) == 99, "1 ve 99 için 99 bekleniyor"\n', hints: ['return adet * fiyat yeter; ara değişken şart değil.'], why: 'return bir ifadeyi doğrudan geri verebilir.' },
+    { t: 'code', stage: 'Kendin yaz', kind: 'tamamla', id: 'fonksiyon-iskeleti-8', diff: 1, q: '<p><code>tam_ad(ad, soyad)</code> ad ile soyadı aralarında bir boşlukla birleştirip döndürsün. Örnek: <code>tam_ad("Ece", "Kaya")</code> → <code>"Ece Kaya"</code>.</p>', start: 'def tam_ad(ad, soyad):\n    # buraya yaz\n    pass\n', sol: 'def tam_ad(ad, soyad):\n    return ad + " " + soyad\n', tests: 'assert tam_ad("Ece", "Kaya") == "Ece Kaya", "Araya tek boşluk koy"\nassert tam_ad("Can", "Er") == "Can Er"\n', hints: ['Metinler + ile birleşir.', 'ad + " " + soyad'], why: '+ metinleri yan yana ekler; aradaki boşluğu sen koyarsın.' },
+    { t: 'code', stage: 'Kendin yaz', id: 'fonksiyon-iskeleti-9', diff: 1, q: '<p>İskeleti kendin yaz: <code>kare(n)</code> adında bir fonksiyon <code>n * n</code> değerini döndürsün. Sonra <code>print(kare(7))</code> ile sonucu yazdır.</p>', start: '# def ile başla\n', sol: 'def kare(n):\n    return n * n\n\nprint(kare(7))\n', tests: 'assert kare(3) == 9, "kare(3) 9 olmalı"\nassert kare(0) == 0\n', expect: '49\n', hints: ['İlk satır: def kare(n):', 'Gövde dört boşluk içeride: return n * n'], why: 'Tanım + girinti + return: bütün iskelet bu kadar.' },
+    { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'fonksiyon-iskeleti-10', diff: 1, q: '<p>Bu fonksiyon sonucu ekrana yazıyor ama geri vermiyor; bu yüzden test geçmiyor. Düzelt.</p>', start: 'def yarisi(x):\n    print(x / 2)\n', sol: 'def yarisi(x):\n    return x / 2\n', tests: 'assert yarisi(10) == 5.0, "yarisi(10) 5.0 döndürmeli"\nassert yarisi(3) == 1.5\n', hints: ['print yerine return kullan.'], why: 'Test return edilen değere bakar.' }
+  ],
+  mistakes: [
+    { bad: 'def f(x):\nreturn x + 1\n', good: 'def f(x):\n    return x + 1\n', why: 'Gövde girintili olmalı: girintisiz satır fonksiyonun içinde sayılmaz, IndentationError verir.' },
+    { bad: 'def f(x):\n    print(x + 1)\n\nsonuc = f(2)\nprint(sonuc + 1)\n', good: 'def f(x):\n    return x + 1\n\nsonuc = f(2)\nprint(sonuc + 1)\n', why: 'print değer döndürmez; sonuc None olur ve toplama TypeError verir.' }
+  ],
+  faq: [
+    { q: 'Fonksiyonu henüz görmedim, neden burada?', a: 'Alıştırmaları otomatik denetlemek için. Şimdilik kalıp olarak kullan; Fonksiyonlar dersinde her parçasını öğreneceksin.' },
+    { q: 'pass ne işe yarar?', a: 'Hiçbir şey yapmaz. Python boş gövdeye izin vermediği için yer tutar. Kendi satırını yazınca silebilirsin.' }
+  ]
+});
+})(window);
 /* Kesit Python — v2/t1: jupyter-colab */
 (function (W) {
 'use strict';
@@ -216,8 +271,7 @@ print(bastan_calistir(hucreler[:3]))</pre>
 <p>Arayüz (tarayıcı ya da VS Code) ile çekirdek ayrı süreçlerdir ve mesajlaşma protokolüyle konuşur. Bu yüzden aynı arayüzle R, Julia ya da başka bir Python ortamının çekirdeğine bağlanabilirsin; <code>jupyter kernelspec list</code> kayıtlı çekirdekleri gösterir. "Hangi Python çalışıyor?" sorusunun notebook'taki cevabı bir hücrede <code>import sys; print(sys.executable)</code> çalıştırmaktır.</p>
 </section>
 `,
-  ex: [
-    {
+  ex: [{
       t: 'mc',
       stage: 'Isınma',
       q: 'Bir notebook hücresinde <code>!pip install openpyxl</code> çalıştırdın, kurulum başarılı göründü; ama <code>import openpyxl</code> <code>ModuleNotFoundError</code> veriyor. En olası neden ve çözüm hangisi?',
@@ -255,223 +309,7 @@ print(bastan_calistir(hucreler[:3]))</pre>
       ],
       a: 2,
       why: 'Colab çalışma zamanı geçicidir; oturum bitince /content altındaki her şey silinir. Google Drive bağlandığında /content/drive/MyDrive altındaki dosyalar kalıcıdır. GPU seçimi depolamayı etkilemez.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod, hücrelerin farklı sırada çalıştırıldığı bir çekirdeği taklit ediyor. Ne yazdırır?',
-      code: 'hucreler = ["fiyat = 100", "fiyat = fiyat * 1.2", "print(fiyat)"]\ncekirdek = {}\nfor no in [0, 1, 1, 2]:\n    exec(hucreler[no], cekirdek)\n',
-      o: ['120.0', '144.0', '100', '240.0'],
-      a: 1,
-      why: 'İkinci hücre iki kez çalıştı: 100 → 120.0 → 144.0. Notebook\'ta bir hücreye yanlışlıkla iki kez Shift+Enter basmak tam olarak budur; ekranda kod değişmez ama değişkenin değeri değişir.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Notebook\'taki bir hücrenin JSON kaydını inceleyen bu kod ne yazdırır?',
-      code: 'hucre = {"cell_type": "markdown", "source": ["# Başlık\\n", "Açıklama"]}\nmetin = "".join(hucre["source"])\nprint(hucre["cell_type"] == "code", len(metin.splitlines()))\n',
-      o: ['True 2', 'False 1', 'False 2', 'False 3'],
-      a: 2,
-      why: 'Hücre markdown olduğu için ilk karşılaştırma False. source listesindeki parçalar kendi satır sonlarını taşır; "".join ile birleştirince "# Başlık\\nAçıklama" çıkar ve iki satırdır. Parçaları "\\n".join ile birleştirmek fazladan boş satır üretirdi.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Sihirli komut satırlarını ayıklayan bu kod ne yazdırır?',
-      code: 'kod = "%matplotlib inline\\nimport math\\n!pip install -q rich\\n  %time x = math.sqrt(16)\\nprint(\'hazır\')"\ntemiz = [s for s in kod.splitlines() if not s.startswith(("%", "!"))]\nprint(len(temiz))\nprint(temiz[-2].strip())\n',
-      o: ['2\nimport math', '3\n%time x = math.sqrt(16)', '3\nimport math', '4\n%time x = math.sqrt(16)'],
-      a: 1,
-      why: 'startswith baştaki boşluklara dikkat etmez: "  %time ..." boşlukla başladığı için elenmez. Kalan üç satır: import math, "  %time ...", print(...). Sondan ikincisi strip ile "%time x = math.sqrt(16)". Doğru filtre s.lstrip().startswith(...) olurdu.'
-    },
-    {
-      t: 'order',
-      stage: 'Kodu oku',
-      q: '<p>En küçük geçerli notebook\'u Python ile oluşturup diske yazan ve geri okuyan betiği sırala. Önce başlık (markdown) hücresi, sonra kod hücresi eklenmeli.</p>',
-      lines: [
-        'import json',
-        'nb = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": []}',
-        'nb["cells"].append({"cell_type": "markdown", "metadata": {}, "source": ["# Satış analizi"]})',
-        'nb["cells"].append({"cell_type": "code", "metadata": {}, "execution_count": None, "outputs": [], "source": ["print(42)"]})',
-        'with open("analiz.ipynb", "w", encoding="utf-8") as f:',
-        '    json.dump(nb, f, ensure_ascii=False, indent=1)',
-        'okunan = json.load(open("analiz.ipynb", encoding="utf-8"))',
-        'print(len(okunan["cells"]), okunan["cells"][0]["cell_type"])'
-      ],
-      expect: '2 markdown\n',
-      hint: 'Notebook sözlüğü hücre eklenmeden önce var olmalı; dosya yazılmadan okunamaz. İlk hücre markdown.',
-      why: 'json içe aktarılır, boş notebook iskeleti kurulur, hücreler sırayla eklenir, dosyaya yazılır ve geri okunur. Bu sayede .ipynb dosyasının sadece bir JSON belgesi olduğunu görürsün; Jupyter bu dosyayı açabilir.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'jupyter-colab-1',
-      diff: 1,
-      q: '<p><code>kod_hucreleri(nb_metni)</code> fonksiyonunu yaz: <code>.ipynb</code> dosyasının JSON metnini alıp yalnız <b>kod</b> hücrelerinin kaynağını, sırasıyla, metin listesi olarak döndürsün. <code>source</code> alanı satır listesi ya da tek metin olabilir; liste ise parçaları <code>""</code> ile birleştir (parçalar kendi satır sonlarını taşır). Boş kod hücrelerini (yalnız boşluk içerenler dahil) atla.</p>',
-      guide: [
-        'json.loads ile metni sözlüğe çevir.',
-        'nb["cells"] listesinde dön; cell_type "code" değilse atla.',
-        'source liste ise "".join, metin ise olduğu gibi kullan.',
-        'strip() sonrası boşsa atla; değilse listeye ekle (orijinal metni ekle).'
-      ],
-      example: 'siparisler = [{"tur": "iade", "notlar": ["kutu ", "hasarlı"]}, {"tur": "satis", "notlar": "hızlı"}]\nfor s in siparisler:\n    n = s["notlar"]\n    metin = "".join(n) if isinstance(n, list) else n\n    print(s["tur"], "->", metin)\n',
-      start: 'import json\n\ndef kod_hucreleri(nb_metni):\n    nb = json.loads(nb_metni)\n    kodlar = []\n    for hucre in nb["cells"]:\n        # TODO: kod hücresi değilse atla\n        # TODO: source liste ise birleştir\n        # TODO: boş değilse kodlar\'a ekle\n        pass\n    return kodlar\n',
-      sol: 'import json\n\ndef kod_hucreleri(nb_metni):\n    nb = json.loads(nb_metni)\n    kodlar = []\n    for hucre in nb["cells"]:\n        if hucre.get("cell_type") != "code":\n            continue\n        kaynak = hucre.get("source", "")\n        if isinstance(kaynak, list):\n            kaynak = "".join(kaynak)\n        if kaynak.strip():\n            kodlar.append(kaynak)\n    return kodlar\n',
-      tests: 'nb = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [\n    {"cell_type": "markdown", "metadata": {}, "source": ["# Rapor\\n", "Ekim"]},\n    {"cell_type": "code", "execution_count": 1, "metadata": {}, "outputs": [{"output_type": "stream", "name": "stdout", "text": ["42\\n"]}], "source": ["import math\\n", "print(42)"]},\n    {"cell_type": "raw", "metadata": {}, "source": "ham"},\n    {"cell_type": "code", "execution_count": 3, "metadata": {}, "outputs": [], "source": "x = 1"},\n    {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": []},\n]}\nimport json\nnb["cells"].append({"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": ["  \\n"]})\nassert kod_hucreleri(json.dumps(nb)) == ["import math\\nprint(42)", "x = 1"], "Yalnız dolu kod hücreleri, satır listesi \\"\\".join ile birleşmiş"\nassert kod_hucreleri(\'{"cells": []}\') == [], "Hücresiz notebook boş liste"\n',
-      hints: ['Hücre türünü hucre["cell_type"] ile kontrol et.', 'isinstance(kaynak, list) ise "".join(kaynak)', 'if kaynak.strip(): kodlar.append(kaynak)'],
-      why: 'nbformat, source alanını genellikle satır listesi olarak yazar ama tek metin de geçerlidir; sağlam kod ikisini de kabul eder. "".join doğru birleştirmedir çünkü her parça kendi \\n karakterini taşır.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'jupyter-colab-2',
-      diff: 2,
-      q: '<p>Notebook hücrelerini VS Code\'un çalıştırabildiği <b>yüzde biçimine</b> çeviren <code>py_formatina_cevir(hucreler)</code> fonksiyonunu yaz. <code>hucreler</code>, <code>(tur, kaynak)</code> demetlerinin listesidir.</p><ul><li>Kod hücresi: <code>"# %%\n" + kaynak</code></li><li>Markdown hücresi: <code>"# %% [markdown]\n"</code> + kaynağın her satırının başına <code>"# "</code> eklenmiş hâli (boş satır için yalnız <code>"#"</code>).</li><li>Diğer türler atlanır.</li><li>Parçaları <b>bir boş satırla</b> (<code>"\n\n"</code>) birleştir ve sonuna tek <code>"\n"</code> ekle.</li></ul>',
-      guide: [
-        'Boş bir parcalar listesi oluştur.',
-        'Her (tur, kaynak) için türe göre dal: code / markdown / diğer.',
-        'Markdown satırlarını tek tek dönüştür: boşsa "#", değilse "# " + satır.',
-        '"\\n\\n".join(parcalar) + "\\n" döndür.'
-      ],
-      example: 'satirlar = ["Toplam ciro", "", "Şehir bazında"]\nyorumlu = ["#" if s == "" else "# " + s for s in satirlar]\nprint("\\n".join(yorumlu))\n',
-      start: 'def py_formatina_cevir(hucreler):\n    parcalar = []\n    for tur, kaynak in hucreler:\n        # TODO: code ise "# %%" başlığıyla ekle\n        # TODO: markdown ise satırları yorum yapıp "# %% [markdown]" başlığıyla ekle\n        pass\n    return "\\n\\n".join(parcalar) + "\\n"\n',
-      sol: 'def py_formatina_cevir(hucreler):\n    parcalar = []\n    for tur, kaynak in hucreler:\n        if tur == "code":\n            parcalar.append("# %%\\n" + kaynak)\n        elif tur == "markdown":\n            satirlar = ["#" if s == "" else "# " + s for s in kaynak.splitlines()]\n            parcalar.append("# %% [markdown]\\n" + "\\n".join(satirlar))\n    return "\\n\\n".join(parcalar) + "\\n"\n',
-      tests: 'h = [("markdown", "# İade raporu\\n\\nEkim 2026"), ("code", "iade = 41\\nprint(iade)"), ("raw", "ham metin"), ("code", "x = 2")]\nbeklenen = "# %% [markdown]\\n# # İade raporu\\n#\\n# Ekim 2026\\n\\n# %%\\niade = 41\\nprint(iade)\\n\\n# %%\\nx = 2\\n"\nassert py_formatina_cevir(h) == beklenen, "Biçim: markdown satırları \'# \' ile, boş satır \'#\', raw atlanır, parçalar arasında bir boş satır"\nimport io, contextlib\ntampon = io.StringIO()\nwith contextlib.redirect_stdout(tampon):\n    exec(py_formatina_cevir(h), {})\nassert tampon.getvalue() == "41\\n", "Üretilen betik geçerli Python olmalı ve çalışmalı"\nassert py_formatina_cevir([("code", "a = 1")]) == "# %%\\na = 1\\n", "Tek kod hücresi"\n',
-      hints: [
-        'Markdown kaynağını splitlines() ile böl, her satırı liste üreteciyle dönüştür.',
-        'Boş satır için "#" yaz ki sonda boşluk kalmasın: "#" if s == "" else "# " + s',
-        'parcalar.append("# %% [markdown]\\n" + "\\n".join(satirlar))'
-      ],
-      why: 'Yüzde biçimi, notebook\'un hücre yapısını korurken düz bir .py dosyası üretir: git farkları okunur, Ruff ve testler çalışır, VS Code yine hücre hücre çalıştırır. Markdown\'ı yorum yapmak dosyanın geçerli Python kalmasını sağlar.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'jupyter-colab-3',
-      diff: 1,
-      q: '<p>Notebook\'tan kopyalanan kod betikte çalışsın diye <code>sihirleri_temizle(kod)</code> fonksiyonunu yaz: baş boşlukları atıldığında <code>%</code> ya da <code>!</code> ile başlayan her satırın başına <code>"# "</code> ekleyerek yorum yapsın (girintiyi koru: <code>"    !ls"</code> → <code>"    # !ls"</code>). Diğer satırlar aynen kalsın. Satırları <code>"\n"</code> ile birleştirip döndür.</p>',
-      guide: [
-        'kod.splitlines() ile satırlarda dön.',
-        'satir.lstrip() ile baştaki boşlukları atılmış hâlini al; % ya da ! ile mi başlıyor bak.',
-        'Girintiyi korumak için: girinti = satir[:len(satir) - len(satir.lstrip())]',
-        'Sihirli satırı girinti + "# " + satir.lstrip() olarak ekle; sonunda "\\n".join.'
-      ],
-      example: 'satir = "    return toplam"\nduz = satir.lstrip()\ngirinti = satir[:len(satir) - len(duz)]\nprint(repr(girinti), "|", duz)\n',
-      start: 'def sihirleri_temizle(kod):\n    sonuc = []\n    for satir in kod.splitlines():\n        # TODO: sihirli satırı girintisini koruyarak yorum yap\n        sonuc.append(satir)\n    return "\\n".join(sonuc)\n',
-      sol: 'def sihirleri_temizle(kod):\n    sonuc = []\n    for satir in kod.splitlines():\n        duz = satir.lstrip()\n        if duz.startswith(("%", "!")):\n            girinti = satir[:len(satir) - len(duz)]\n            sonuc.append(girinti + "# " + duz)\n        else:\n            sonuc.append(satir)\n    return "\\n".join(sonuc)\n',
-      tests: 'k = "%matplotlib inline\\nimport math\\nif True:\\n    !ls veri\\n    x = math.sqrt(9)\\n%%time\\nprint(x)"\nbeklenen = "# %matplotlib inline\\nimport math\\nif True:\\n    # !ls veri\\n    x = math.sqrt(9)\\n# %%time\\nprint(x)"\nassert sihirleri_temizle(k) == beklenen, "%, %% ve ! satırları yorum olmalı; girinti korunmalı"\nassert sihirleri_temizle("a = 5 % 2\\nprint(\'!\')") == "a = 5 % 2\\nprint(\'!\')", "Satır ortasındaki % ve ! dokunulmamalı"\ncompile(sihirleri_temizle(k), "<betik>", "exec")\n',
-      hints: ['startswith bir demet alabilir: duz.startswith(("%", "!"))', 'Girinti = satırın başındaki boşluklar = satir[:len(satir) - len(duz)]'],
-      why: 'Sihirli komutlar Python sözdizimi değildir; betikte SyntaxError verir. Girintiyi korumak önemlidir: if bloğunun içindeki bir satırı girintisiz yorum yapmak bloğu bozmaz ama okuyucuyu yanıltır. Yalnız satır başına bakmak, mod operatörü (%) gibi meşru kullanımları korur.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'jupyter-colab-4',
-      diff: 1,
-      q: '<p><code>sira_bozuk_mu(nb)</code> fonksiyonunu yaz. <code>nb</code>, notebook sözlüğüdür. Kod hücrelerinin <code>execution_count</code> değerlerine (<code>None</code> olanları atlayarak) hücre sırasıyla bak; değerler <b>kesin artan</b> değilse <code>True</code>, artıyorsa (ya da hiç değer yoksa) <code>False</code> döndür.</p>',
-      start: 'def sira_bozuk_mu(nb):\n    pass\n',
-      sol: 'def sira_bozuk_mu(nb):\n    sayaclar = [h.get("execution_count") for h in nb.get("cells", []) if h.get("cell_type") == "code"]\n    sayaclar = [s for s in sayaclar if s is not None]\n    return any(a >= b for a, b in zip(sayaclar, sayaclar[1:]))\n',
-      tests: 'def nb_yap(*sayaclar):\n    return {"cells": [{"cell_type": "code", "execution_count": s, "source": ""} for s in sayaclar]}\nassert sira_bozuk_mu(nb_yap(1, 2, 3)) is False, "1, 2, 3 temiz"\nassert sira_bozuk_mu(nb_yap(4, 2, 7)) is True, "4\'ten sonra 2: bozuk"\nassert sira_bozuk_mu(nb_yap(1, 5, 9)) is False, "Atlamalar sorun değil (arada silinmiş hücreler olabilir); önemli olan artış"\nassert sira_bozuk_mu(nb_yap(1, None, 2)) is False, "Çalıştırılmamış hücre (None) atlanır"\nassert sira_bozuk_mu(nb_yap(3, 3)) is True, "Aynı sayaç iki kez: kesin artan değil"\nm = {"cells": [{"cell_type": "markdown", "source": ""}, {"cell_type": "code", "execution_count": 2, "source": ""}, {"cell_type": "code", "execution_count": 1, "source": ""}]}\nassert sira_bozuk_mu(m) is True, "Markdown hücreleri yok sayılır; 2 sonra 1 bozuk"\nassert sira_bozuk_mu({"cells": []}) is False, "Boş notebook"\n',
-      hints: ['Önce kod hücrelerinin None olmayan sayaçlarını sırayla bir listeye topla.', 'zip(liste, liste[1:]) ardışık çiftleri verir; any(a >= b ...) bozuk çift var mı söyler.'],
-      why: 'zip(liste, liste[1:]) ardışık eleman çiftlerini dolaşmanın Python\'daki kısa yoludur. Bu küçük denetim, CI\'da "karışık sırada çalıştırılmış notebook" uyarısı vermek için kullanılabilir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'jupyter-colab-5',
-      diff: 2,
-      q: '<p><code>ciktilari_temizle(nb)</code> fonksiyonunu yaz (nbstripout\'un yaptığı iş): her kod hücresinin <code>outputs</code> alanını boş listeye, <code>execution_count</code> alanını <code>None</code>\'a çeviren <b>yeni</b> bir notebook sözlüğü döndür. Orijinal sözlük <b>değişmemeli</b>. Markdown ve raw hücreler aynen kalır.</p>',
-      start: 'import copy\n\ndef ciktilari_temizle(nb):\n    pass\n',
-      sol: 'import copy\n\ndef ciktilari_temizle(nb):\n    yeni = copy.deepcopy(nb)\n    for hucre in yeni.get("cells", []):\n        if hucre.get("cell_type") == "code":\n            hucre["outputs"] = []\n            hucre["execution_count"] = None\n    return yeni\n',
-      tests: 'nb = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [\n    {"cell_type": "markdown", "metadata": {}, "source": ["# Rapor\\n", "Ekim"]},\n    {"cell_type": "code", "execution_count": 1, "metadata": {}, "outputs": [{"output_type": "stream", "name": "stdout", "text": ["42\\n"]}], "source": ["import math\\n", "print(42)"]},\n    {"cell_type": "raw", "metadata": {}, "source": "ham"},\n    {"cell_type": "code", "execution_count": 3, "metadata": {}, "outputs": [], "source": "x = 1"},\n    {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": []},\n]}\nimport copy\norijinal = copy.deepcopy(nb)\nt = ciktilari_temizle(nb)\nassert nb == orijinal, "Orijinal notebook değişmemeli: deepcopy kullan"\nkodlar = [h for h in t["cells"] if h["cell_type"] == "code"]\nassert all(h["outputs"] == [] and h["execution_count"] is None for h in kodlar), "Tüm kod hücrelerinde çıktı ve sayaç temizlenmeli"\nassert t["cells"][0] == nb["cells"][0] and t["cells"][2] == nb["cells"][2], "Markdown ve raw hücreler aynen kalmalı"\nassert t["cells"][1]["source"] == ["import math\\n", "print(42)"], "Kaynak kod korunmalı"\nassert t["cells"][1] is not nb["cells"][1], "Yeni sözlük, eski hücre nesnelerini paylaşmamalı"\n',
-      hints: ['Sığ kopya (dict(nb) ya da nb.copy()) hücre listesini paylaşır; iç içe yapı için copy.deepcopy gerekir.', 'Kopya üzerinde dön ve yalnız code hücrelerini değiştir.'],
-      why: 'Notebook iç içe sözlük ve listelerden oluşur; sığ kopyayı değiştirmek orijinali de değiştirir. deepcopy tüm yapıyı kopyalar. Çıktısız ve sayaçsız notebook git\'te küçük ve okunur farklar üretir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'jupyter-colab-6',
-      diff: 2,
-      q: '<p>Basit bir conda <code>environment.yml</code> dosyasını ayrıştıran <code>conda_ortami_oku(metin)</code> fonksiyonunu yaz. Biçim:</p><pre>name: analiz\nchannels:\n  - conda-forge\ndependencies:\n  - python=3.12\n  - pandas\n  - pip\n  - pip:\n    - rich==13.7.1</pre><p>Sözlük döndür: <code>{"ad": "analiz", "kanallar": ["conda-forge"], "conda": ["python=3.12", "pandas", "pip"], "pip": ["rich==13.7.1"]}</code>. Kurallar: <code>- pip:</code> satırından sonraki <b>daha derin girintili</b> öğeler pip listesine gider; boş ve <code>#</code> ile başlayan satırlar atlanır; eksik bölümler boş liste, ad yoksa <code>None</code>.</p>',
-      start: 'def conda_ortami_oku(metin):\n    pass\n',
-      sol: 'def conda_ortami_oku(metin):\n    sonuc = {"ad": None, "kanallar": [], "conda": [], "pip": []}\n    bolum = None\n    pip_girinti = None\n    for satir in metin.splitlines():\n        duz = satir.strip()\n        if not duz or duz.startswith("#"):\n            continue\n        girinti = len(satir) - len(satir.lstrip())\n        if girinti == 0:\n            anahtar, _, deger = duz.partition(":")\n            deger = deger.strip()\n            if anahtar == "name":\n                sonuc["ad"] = deger or None\n            bolum = anahtar\n            pip_girinti = None\n            continue\n        if not duz.startswith("- "):\n            continue\n        oge = duz[2:].strip()\n        if bolum == "channels":\n            sonuc["kanallar"].append(oge)\n        elif bolum == "dependencies":\n            if oge == "pip:":\n                pip_girinti = girinti\n            elif pip_girinti is not None and girinti > pip_girinti:\n                sonuc["pip"].append(oge)\n            else:\n                pip_girinti = None\n                sonuc["conda"].append(oge)\n    return sonuc\n',
-      tests: 'm = """name: analiz\nchannels:\n  - conda-forge\n  - defaults\n# yorum\ndependencies:\n  - python=3.12\n  - pandas>=2.2\n\n  - pip\n  - pip:\n    - rich==13.7.1\n    - papermill\n"""\nassert conda_ortami_oku(m) == {"ad": "analiz", "kanallar": ["conda-forge", "defaults"], "conda": ["python=3.12", "pandas>=2.2", "pip"], "pip": ["rich==13.7.1", "papermill"]}, "Tam örnek: \'- pip\' conda paketi, \'- pip:\' altındakiler pip listesi"\nm2 = "dependencies:\\n  - pip:\\n    - httpx\\n  - numpy\\n"\nassert conda_ortami_oku(m2) == {"ad": None, "kanallar": [], "conda": ["numpy"], "pip": ["httpx"]}, "pip bloğundan sonra aynı girintide gelen öğe tekrar conda\'ya aittir; ad yoksa None"\nassert conda_ortami_oku("") == {"ad": None, "kanallar": [], "conda": [], "pip": []}, "Boş dosya"\n',
-      hints: [
-        'Satırın girintisi = len(satir) - len(satir.lstrip()); girintisi 0 olan satırlar bölüm başlığıdır (partition(":") ile böl).',
-        '"- pip:" görünce girintisini hatırla; sonraki öğelerden girintisi daha büyük olanlar pip\'e, eşit olan ilk öğe pip bloğunu kapatır.'
-      ],
-      why: 'YAML gibi girintiye dayalı biçimlerde anlam girinti seviyesindedir; bu yüzden durum (hangi bölümdeyim, pip bloğu açık mı) tutarak satır satır ilerlemek gerekir. Gerçek projede pyyaml kullanırsın; ama bu alıştırma "- pip" (conda paketi) ile "- pip:" (alt liste) farkını netleştirir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'jupyter-colab-7',
-      diff: 2,
-      q: '<p><code>sihir_ayristir(satir)</code> fonksiyonunu yaz. Baş/son boşlukları atılmış satıra göre demet döndür:</p><ul><li><code>%%</code> ile başlıyorsa <code>("hucre", ad, arguman)</code>: <code>"%%time"</code> → <code>("hucre", "time", "")</code></li><li><code>%</code> ile başlıyorsa <code>("satir", ad, arguman)</code>: <code>"%timeit sum(x)"</code> → <code>("satir", "timeit", "sum(x)")</code></li><li><code>!</code> ile başlıyorsa <code>("kabuk", komut, arguman)</code>: <code>"!pip install -q rich"</code> → <code>("kabuk", "pip", "install -q rich")</code></li><li>Hiçbiri değilse <code>None</code>.</li></ul><p>Ad ile argüman ilk boşluktan ayrılır; argümanın baş/son boşlukları atılır.</p>',
-      start: 'def sihir_ayristir(satir):\n    pass\n',
-      sol: 'def sihir_ayristir(satir):\n    s = satir.strip()\n    for onek, tur in (("%%", "hucre"), ("%", "satir"), ("!", "kabuk")):\n        if s.startswith(onek):\n            govde = s[len(onek):]\n            ad, _, arguman = govde.partition(" ")\n            return (tur, ad, arguman.strip())\n    return None\n',
-      tests: 'assert sihir_ayristir("%%time") == ("hucre", "time", ""), "Hücre sihri, argümansız"\nassert sihir_ayristir("%timeit sum(x)") == ("satir", "timeit", "sum(x)"), "Satır sihri"\nassert sihir_ayristir("  !pip install -q rich  ") == ("kabuk", "pip", "install -q rich"), "Kabuk komutu; boşluklar kırpılır"\nassert sihir_ayristir("%%writefile rapor.py") == ("hucre", "writefile", "rapor.py"), "%% kontrolü % kontrolünden önce yapılmalı"\nassert sihir_ayristir("%pip   install pandas") == ("satir", "pip", "install pandas"), "Argümandaki fazla baş boşluk atılır"\nassert sihir_ayristir("x = 10 % 3") is None, "Normal Python satırı"\n',
-      hints: ['Önek kontrol sırası önemli: "%%" önce, sonra "%", sonra "!". Aksi hâlde "%%time" satır sihri sanılır.', 'str.partition(" ") ilk boşluktan böler ve boşluk yoksa üçüncü parça "" olur.'],
-      why: 'Daha uzun önekin önce denenmesi, ayrıştırıcılardaki "en uzun eşleşme" ilkesinin basit bir örneğidir. partition, split\'ten farklı olarak her zaman üç parça döndürdüğü için argümansız durumda hata vermez.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'jupyter-colab-8',
-      diff: 1,
-      q: '<p>Hatayı bul ve düzelt. <code>hucre_sayilari(nb)</code> notebook\'taki hücre türlerini saymalı ve <code>{"code": 2, "markdown": 1, ...}</code> gibi bir sözlük döndürmeli. Kod çöküyor; düzeltilse bile ilk hücreyi saymıyor.</p>',
-      start: 'def hucre_sayilari(nb):\n    sayac = {}\n    for hucre in nb["cells"][1:]:\n        sayac[hucre["cell_type"]] += 1\n    return sayac\n',
-      sol: 'def hucre_sayilari(nb):\n    sayac = {}\n    for hucre in nb["cells"]:\n        tur = hucre["cell_type"]\n        sayac[tur] = sayac.get(tur, 0) + 1\n    return sayac\n',
-      tests: 'nb = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [\n    {"cell_type": "markdown", "metadata": {}, "source": ["# Rapor\\n", "Ekim"]},\n    {"cell_type": "code", "execution_count": 1, "metadata": {}, "outputs": [{"output_type": "stream", "name": "stdout", "text": ["42\\n"]}], "source": ["import math\\n", "print(42)"]},\n    {"cell_type": "raw", "metadata": {}, "source": "ham"},\n    {"cell_type": "code", "execution_count": 3, "metadata": {}, "outputs": [], "source": "x = 1"},\n    {"cell_type": "code", "execution_count": None, "metadata": {}, "outputs": [], "source": []},\n]}\nassert hucre_sayilari(nb) == {"markdown": 1, "code": 3, "raw": 1}, "Tüm hücreler sayılmalı (ilki dahil)"\nassert hucre_sayilari({"cells": []}) == {}, "Boş notebook boş sözlük"\nassert hucre_sayilari({"cells": [{"cell_type": "markdown"}]}) == {"markdown": 1}, "Tek hücre de sayılmalı"\n',
-      hints: ['Var olmayan anahtara += uygulamak KeyError verir; get(tur, 0) + 1 kullan (ya da collections.Counter).', '[1:] dilimi ilk hücreyi atlar; çoğu notebook\'ta bu başlık hücresidir.'],
-      why: 'Sayma kalıbında anahtar ilk kez görüldüğünde değeri yoktur; dict.get(anahtar, 0) ya da Counter bu durumu çözer. "İlk satır başlıktır" alışkanlığıyla yazılan [1:] dilimi, CSV\'de doğru olabilir ama notebook hücrelerinde veri kaybettirir.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'jupyter-colab-9',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>calistir(hucreler)</code>, kod hücrelerini sırayla <b>yeni ve boş bir çekirdekte</b> çalıştırmalı ve kullanıcı değişkenlerini (<code>__</code> ile başlamayan adlar) sözlük olarak döndürmeli. Her çağrı temiz başlamalı; ama ikinci çağrı birincinin değişkenlerini görüyor. Bu tam olarak notebook\'lardaki gizli durum hatasıdır.</p>',
-      start: 'def calistir(hucreler, cekirdek={}):\n    for kod in hucreler:\n        exec(kod, cekirdek)\n    return {k: v for k, v in cekirdek.items() if not k.startswith("__")}\n',
-      sol: 'def calistir(hucreler, cekirdek=None):\n    if cekirdek is None:\n        cekirdek = {}\n    for kod in hucreler:\n        exec(kod, cekirdek)\n    return {k: v for k, v in cekirdek.items() if not k.startswith("__")}\n',
-      tests: 'assert calistir(["a = 1", "b = a + 1"]) == {"a": 1, "b": 2}, "Hücreler sırayla aynı çekirdekte çalışmalı"\nassert calistir(["c = 10"]) == {"c": 10}, "İkinci çağrı temiz başlamalı; önceki a ve b görünmemeli"\ntry:\n    calistir(["print(a)"])\n    assert False, "Yeni çekirdekte a tanımsız olmalı (NameError)"\nexcept NameError:\n    pass\nortak = {}\ncalistir(["x = 5"], ortak)\nassert calistir(["y = x * 2"], ortak) == {"x": 5, "y": 10}, "Açıkça verilen çekirdek paylaşılabilmeli"\n',
-      hints: ['Varsayılan parametre değeri fonksiyon tanımlanırken BİR KEZ oluşturulur; değiştirilebilir {} tüm çağrılarda paylaşılır.', 'cekirdek=None yap ve fonksiyonun içinde if cekirdek is None: cekirdek = {}'],
-      why: 'Değiştirilebilir varsayılan argüman Python\'un en bilinen tuzaklarındandır ve burada notebook\'un gizli durumunu birebir taklit eder: önceki çalıştırmanın kalıntıları sonraki sonucu sessizce etkiler. None nöbetçisi her çağrıda yeni bir sözlük oluşturur.'
-    },
-    {
-      t: 'code',
-      stage: 'Meydan okuma',
-      id: 'jupyter-colab-10',
-      diff: 3,
-      q: '<p>CI\'da kullanılacak <code>bastan_calistir(nb)</code> fonksiyonunu yaz ("Restart and Run All" denetimi). <code>nb</code> notebook sözlüğüdür.</p><ul><li>Kod hücrelerini (source liste ya da metin olabilir) sırayla, tek bir yeni ad alanında <code>exec</code> ile çalıştır.</li><li>Baş boşlukları atıldığında <code>%</code> ya da <code>!</code> ile başlayan satırları atla (<code>%%</code> ile başlayan bir hücre sihri varsa <b>hücrenin tamamını</b> atla).</li><li>Çalıştırma sırasında yazdırılanlar ekrana çıkmasın; yakala.</li><li>Başarılıysa <code>{"durum": "temiz", "cikti": &lt;toplam stdout&gt;}</code>.</li><li>Bir hücre hata verirse dur ve <code>{"durum": "hata", "hucre": &lt;notebook içindeki hücre indeksi, markdown dahil&gt;, "hata": &lt;hata sınıfının adı&gt;, "cikti": &lt;o ana kadarki stdout&gt;}</code> döndür.</li></ul>',
-      start: 'import io, contextlib\n\ndef bastan_calistir(nb):\n    pass\n',
-      sol: 'import io, contextlib\n\ndef bastan_calistir(nb):\n    ad_alani = {"__name__": "__main__"}\n    tampon = io.StringIO()\n    for i, hucre in enumerate(nb.get("cells", [])):\n        if hucre.get("cell_type") != "code":\n            continue\n        kaynak = hucre.get("source", "")\n        if isinstance(kaynak, list):\n            kaynak = "".join(kaynak)\n        if kaynak.lstrip().startswith("%%"):\n            continue\n        satirlar = [s for s in kaynak.splitlines() if not s.lstrip().startswith(("%", "!"))]\n        try:\n            with contextlib.redirect_stdout(tampon):\n                exec("\\n".join(satirlar), ad_alani)\n        except Exception as e:\n            return {"durum": "hata", "hucre": i, "hata": type(e).__name__, "cikti": tampon.getvalue()}\n    return {"durum": "temiz", "cikti": tampon.getvalue()}\n',
-      tests: 'def h(tur, src):\n    return {"cell_type": tur, "metadata": {}, "source": src}\nnb = {"cells": [\n    h("markdown", "# Ciro"),\n    h("code", ["%matplotlib inline\\n", "import statistics\\n", "!pip install -q rich\\n", "ciro = [120, 80, 100]"]),\n    h("code", "%%time\\nbu_hucre_atlanir()"),\n    h("code", "ort = statistics.mean(ciro)\\nprint(\'ortalama\', ort)"),\n]}\nr = bastan_calistir(nb)\nassert r == {"durum": "temiz", "cikti": "ortalama 100\\n"}, "Sihirli satırlar ve %% hücresi atlanmalı; çıktı yakalanmalı"\nnb2 = {"cells": [\n    h("code", "print(\'başla\')"),\n    h("markdown", "ara"),\n    h("code", "toplam = sum(satislar)"),\n    h("code", "print(\'buraya gelinmez\')"),\n]}\nr2 = bastan_calistir(nb2)\nassert r2 == {"durum": "hata", "hucre": 2, "hata": "NameError", "cikti": "başla\\n"}, "Gizli durum: satislar tanımsız; hücre indeksi markdown dahil sayılır, sonrası çalışmaz"\nassert bastan_calistir({"cells": [h("code", "1/0")]})["hata"] == "ZeroDivisionError", "Hata sınıfının adı"\nassert bastan_calistir({"cells": []}) == {"durum": "temiz", "cikti": ""}, "Boş notebook temizdir"\n',
-      hints: [
-        'enumerate ile tüm hücrelerde dön ki indeks markdown hücrelerini de saysın; kod olmayanları continue ile geç.',
-        'contextlib.redirect_stdout(tampon) bloğu içindeki print\'leri bir StringIO\'ya yönlendirir.',
-        'Hücre kaynağı lstrip() sonrası "%%" ile başlıyorsa tüm hücreyi atla; değilse satır satır filtrele.'
-      ],
-      why: 'Bu, nbconvert --execute ve papermill\'in yaptığı denetimin küçük bir modelidir: tek ad alanı, sıralı çalıştırma, ilk hatada durma ve hatanın konumunu raporlama. Gizli duruma dayanan bir notebook burada hemen NameError verir.'
-    },
-    {
-      t: 'code',
-      stage: 'Mini proje',
-      id: 'jupyter-colab-11',
-      diff: 3,
-      q: '<p>Ekibin notebook\'larını inceleyen <code>notebook_raporu(nb_metni)</code> fonksiyonunu yaz. JSON metnini okuyup sözlük döndür:</p><ul><li><code>"hucreler"</code>: tür → adet sözlüğü.</li><li><code>"kod_satiri"</code>: kod hücrelerindeki boş olmayan satır sayısı (sihirli satırlar dahil).</li><li><code>"sihirler"</code>: kullanılan satır/hücre sihirlerinin adları (<code>%</code>/<code>%%</code> sonrası ilk kelime), tekrarsız, alfabetik.</li><li><code>"pip_paketleri"</code>: <code>!pip install</code> ya da <code>%pip install</code> satırlarındaki paketler; <code>shlex.split</code> ile parçala, <code>-</code> ile başlayan seçenekleri atla; tekrarsız, ilk görülme sırasıyla.</li><li><code>"sira_bozuk"</code>: kod hücrelerinin None olmayan sayaçları kesin artan değilse True.</li><li><code>"cikti_sayisi"</code>: tüm kod hücrelerindeki <code>outputs</code> öğelerinin toplamı.</li><li><code>"uyarilar"</code>: alfabetik liste; <code>"BANG_PIP"</code> (<code>!pip</code> kullanılmışsa), <code>"SIRA"</code> (sıra bozuksa), <code>"CIKTI"</code> (çıktı sayısı 0\'dan büyükse; git\'e çıktılı notebook girmesin).</li></ul>',
-      start: 'import json, shlex\n\ndef notebook_raporu(nb_metni):\n    pass\n',
-      sol: 'import json, shlex\n\ndef notebook_raporu(nb_metni):\n    nb = json.loads(nb_metni)\n    hucreler, sihirler, paketler = {}, set(), []\n    kod_satiri = cikti = 0\n    sayaclar = []\n    bang_pip = False\n    for h in nb.get("cells", []):\n        tur = h.get("cell_type")\n        hucreler[tur] = hucreler.get(tur, 0) + 1\n        if tur != "code":\n            continue\n        cikti += len(h.get("outputs", []))\n        if h.get("execution_count") is not None:\n            sayaclar.append(h["execution_count"])\n        kaynak = h.get("source", "")\n        if isinstance(kaynak, list):\n            kaynak = "".join(kaynak)\n        for satir in kaynak.splitlines():\n            s = satir.strip()\n            if not s:\n                continue\n            kod_satiri += 1\n            if s.startswith("%"):\n                ad = s.lstrip("%").split()[0] if s.lstrip("%") else ""\n                if ad:\n                    sihirler.add(ad)\n            parcalar = shlex.split(s.lstrip("%!"))\n            if s[0] in "%!" and parcalar[:2] == ["pip", "install"]:\n                if s.startswith("!"):\n                    bang_pip = True\n                for p in parcalar[2:]:\n                    if not p.startswith("-") and p not in paketler:\n                        paketler.append(p)\n    sira_bozuk = any(a >= b for a, b in zip(sayaclar, sayaclar[1:]))\n    uyarilar = []\n    if bang_pip:\n        uyarilar.append("BANG_PIP")\n    if sira_bozuk:\n        uyarilar.append("SIRA")\n    if cikti > 0:\n        uyarilar.append("CIKTI")\n    return {\n        "hucreler": hucreler,\n        "kod_satiri": kod_satiri,\n        "sihirler": sorted(sihirler),\n        "pip_paketleri": paketler,\n        "sira_bozuk": sira_bozuk,\n        "cikti_sayisi": cikti,\n        "uyarilar": sorted(uyarilar),\n    }\n',
-      tests: 'import json\ndef kod(src, sayac=None, ciktilar=0):\n    return {"cell_type": "code", "metadata": {}, "execution_count": sayac, "outputs": [{"output_type": "stream", "text": "x"}] * ciktilar, "source": src}\nnb = {"nbformat": 4, "nbformat_minor": 5, "metadata": {}, "cells": [\n    {"cell_type": "markdown", "metadata": {}, "source": ["# İade analizi"]},\n    kod(["!pip install -q pandas \'openpyxl>=3.1\'\\n", "%matplotlib inline\\n", "\\n", "import pandas as pd"], 3, 1),\n    kod("%%time\\nx = 1\\n%pip install pandas rich", 2, 0),\n    kod(["%timeit sum(range(9))"], None, 2),\n]}\nr = notebook_raporu(json.dumps(nb))\nassert r["hucreler"] == {"markdown": 1, "code": 3}, "Hücre türleri"\nassert r["kod_satiri"] == 7, "Boş olmayan kod satırları: 3 + 3 + 1"\nassert r["sihirler"] == ["matplotlib", "pip", "time", "timeit"], "Sihir adları tekrarsız ve alfabetik (%pip de satır sihridir)"\nassert r["pip_paketleri"] == ["pandas", "openpyxl>=3.1", "rich"], "Seçenekler (-q) atlanır, tırnaklı belirteç tek parça, tekrar yok, ilk görülme sırası"\nassert r["sira_bozuk"] is True, "3\'ten sonra 2: sıra bozuk"\nassert r["cikti_sayisi"] == 3, "1 + 0 + 2 çıktı"\nassert r["uyarilar"] == ["BANG_PIP", "CIKTI", "SIRA"], "Üç uyarı, alfabetik"\ntemiz = {"cells": [kod("%pip install httpx\\nimport httpx", 1), kod("print(1)", 2)]}\nr2 = notebook_raporu(json.dumps(temiz))\nassert r2["uyarilar"] == [] and r2["pip_paketleri"] == ["httpx"] and r2["sira_bozuk"] is False, "Temiz notebook: %pip uyarı değildir"\nassert notebook_raporu(\'{"cells": []}\')["kod_satiri"] == 0, "Boş notebook"\n',
-      hints: [
-        'Hücre başına: türü say; kod hücresinde çıktıları ve sayacı topla; source\'u birleştirip satır satır işle.',
-        'Sihir adı: s.lstrip("%").split()[0]; pip satırı: shlex.split(s.lstrip("%!")) ilk iki parçası ["pip", "install"] ise sonrakilerden - ile başlamayanları al.',
-        'Uyarıları ayrı bayraklarla topla ve en sonda sorted ile döndür.'
-      ],
-      why: 'Bu rapor, dersin tüm konularını bir araya getirir: .ipynb JSON yapısı, source alanının iki biçimi, sihirli komutlar, !pip ile %pip farkı, çalıştırma sırası ve çıktıların git\'e girmesi. Ekipler benzer betikleri pre-commit kancası ya da CI adımı olarak çalıştırır.'
-    }
-  ],
+    }],
   faq: [
     {
       q: 'JupyterLab mı klasik Notebook mu, yoksa VS Code mu?',
@@ -717,8 +555,7 @@ for satir in ["#!/usr/bin/env python3", "#!/usr/bin/python3.12 -u", "#!/usr/bin/
 <p><code>pip3</code>, PATH'te ilk bulunan pip'tir ve başka bir Python'a ait olabilir; Homebrew, pyenv ve sistem Python'ı bir arada olduğunda bu sık olur. <code>python3.12 -m pip</code> ise paketin hangi yorumlayıcıya gideceğini kesinleştirir. Venv etkinken <code>pip</code> güvenlidir çünkü venv'in <code>bin</code> klasörü PATH'in en başına eklenmiştir.</p>
 </section>
 `,
-  ex: [
-    {
+  ex: [{
       t: 'mc',
       stage: 'Isınma',
       q: 'Ubuntu 24.04\'te <code>pip install pandas</code> yazınca <code>error: externally-managed-environment</code> alıyorsun. Bir analiz projesi için en doğru hareket hangisi?',
@@ -751,222 +588,7 @@ for satir in ["#!/usr/bin/env python3", "#!/usr/bin/python3.12 -u", "#!/usr/bin/
       ],
       a: 0,
       why: 'pipx her komut satırı aracını kendi gizli venv\'ine kurar ve yalnızca komutu ~/.local/bin\'e bağlar; PEP 668 ile çatışmaz, araçların bağımlılıkları birbirine karışmaz. sudo pip sistem Python\'ını kirletir.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: '/etc/os-release benzeri bir metni ayrıştıran bu kod ne yazdırır?',
-      code: 'metin = \'NAME="Ubuntu"\\nVERSION_ID="24.04"\\nID=ubuntu\'\nbilgi = {}\nfor satir in metin.splitlines():\n    anahtar, deger = satir.split("=", 1)\n    bilgi[anahtar] = deger.strip(\'"\')\nprint(bilgi["ID"], bilgi["VERSION_ID"], len(bilgi))\n',
-      o: ['ubuntu "24.04" 3', 'ubuntu 24.04 3', 'Ubuntu 24.04 3', 'ubuntu 24.04 2'],
-      a: 1,
-      why: 'strip(\'"\') değerin başındaki ve sonundaki çift tırnakları atar; tırnaksız ID değeri olduğu gibi kalır. Üç satır üç anahtar üretir. NAME "Ubuntu", ID ise küçük harfli "ubuntu"dur; programlar ID\'ye bakar.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod <code>which -a python3</code> komutunu taklit ediyor. Ne yazdırır?',
-      code: 'yollar = "/opt/homebrew/bin:/usr/local/bin:/usr/bin".split(":")\ndiskte = {"/usr/bin/python3", "/opt/homebrew/bin/python3", "/usr/local/bin/pip3"}\nbulunan = [y + "/python3" for y in yollar if y + "/python3" in diskte]\nprint(bulunan[0])\nprint(len(bulunan))\n',
-      o: ['/usr/bin/python3\n2', '/opt/homebrew/bin/python3\n3', '/opt/homebrew/bin/python3\n2', '/usr/local/bin/python3\n2'],
-      a: 2,
-      why: 'Liste PATH sırasıyla kurulur: önce /opt/homebrew/bin, sonra /usr/local/bin (orada yalnız pip3 var), sonra /usr/bin. İki python3 bulunur ve çalışacak olan ilkidir. Kümenin kendi sırası sonucu etkilemez.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'pyenv\'in sürüm seçme mantığını taklit eden bu kod ne yazdırır?',
-      code: 'def surum_sec(ortam, yerel, genel):\n    return ortam or yerel or genel or "system"\n\nprint(surum_sec(None, "3.11.9", "3.12.4"))\nprint(surum_sec("", None, None))\n',
-      o: ['3.12.4\nsystem', '3.11.9\nsystem', '3.11.9\n', 'None\nsystem'],
-      a: 1,
-      why: 'or zinciri ilk "doğru sayılan" değeri döndürür. None ve boş metin yanlış sayılır; ilk çağrıda yerel dosya (3.11.9) global\'den önce gelir. İkinci çağrıda hepsi boş olduğu için "system" döner.'
-    },
-    {
-      t: 'order',
-      stage: 'Kodu oku',
-      q: '<p>Yeni bir Ubuntu sunucuda projeyi hazırlayan komut zincirini (CI ve Dockerfile\'larda böyle tek satır yazılır) üreten betiği sırala. Her komut bir öncekine bağlıdır.</p>',
-      lines: [
-        'adimlar = ["sudo apt update"]',
-        'adimlar.append("sudo apt install -y python3 python3-venv python3-pip")',
-        'adimlar.append("python3 -m venv .venv")',
-        'adimlar.append("source .venv/bin/activate")',
-        'adimlar.append("pip install -r requirements.txt")',
-        'print(" && ".join(adimlar))'
-      ],
-      expect: 'sudo apt update && sudo apt install -y python3 python3-venv python3-pip && python3 -m venv .venv && source .venv/bin/activate && pip install -r requirements.txt\n',
-      hint: 'Paket listesi güncellenmeden apt kurulum yapamaz; python3-venv olmadan venv oluşmaz.',
-      why: 'apt update paket listesini yeniler, ardından python3-venv kurulur; venv oluşturulur ve etkinleştirilir; pip en son çalışır ki paketler venv\'e gitsin. && zinciri bir adım başarısız olursa sonrakileri çalıştırmaz.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-macos-linux-1',
-      diff: 1,
-      q: '<p>Linux\'ta dağıtım bilgisi <code>/etc/os-release</code> dosyasındadır. <code>os_release_oku(metin)</code> fonksiyonunu yaz: her <code>ANAHTAR=DEGER</code> satırını sözlüğe koysun.</p><ul><li>Boş satırları ve <code>#</code> ile başlayan yorumları atla.</li><li>Yalnız <b>ilk</b> <code>=</code> işaretinden böl (değerde <code>=</code> olabilir).</li><li>Değerin etrafındaki çift ya da tek tırnakları at.</li></ul>',
-      guide: [
-        'Boş bir sözlük oluştur.',
-        'metin.splitlines() ile satırlarda dön; satırı strip() ile temizle.',
-        'Satır boşsa ya da "#" ile başlıyorsa continue.',
-        'split("=", 1) ile anahtar ve değeri ayır; değeri strip(\'"\\\'\') ile tırnaklardan arındır.',
-        'Sözlüğü döndür.'
-      ],
-      example: 'ayarlar = "renk=mavi\\n# yorum\\n\\nbaslik=\'Anadolu Market\'"\nsonuc = {}\nfor satir in ayarlar.splitlines():\n    satir = satir.strip()\n    if not satir or satir.startswith("#"):\n        continue\n    k, v = satir.split("=", 1)\n    sonuc[k] = v.strip("\'\\"")\nprint(sonuc)\n',
-      start: 'def os_release_oku(metin):\n    bilgi = {}\n    # TODO: satırlarda dön, boş ve yorum satırlarını atla\n    # TODO: yalnız ilk "=" işaretinden böl\n    # TODO: değerin tırnaklarını atıp sözlüğe koy\n    return bilgi\n',
-      sol: 'def os_release_oku(metin):\n    bilgi = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        if not satir or satir.startswith("#"):\n            continue\n        anahtar, deger = satir.split("=", 1)\n        bilgi[anahtar] = deger.strip("\\"\'")\n    return bilgi\n',
-      tests: 'm = """PRETTY_NAME="Ubuntu 24.04.1 LTS"\nNAME="Ubuntu"\nVERSION_ID="24.04"\n# yorum satırı\n\nID=ubuntu\nID_LIKE=debian\nHOME_URL="https://www.ubuntu.com/?ref=os"\n"""\nb = os_release_oku(m)\nassert b["PRETTY_NAME"] == "Ubuntu 24.04.1 LTS", "Çift tırnaklar atılmalı, içteki boşluklar kalmalı"\nassert b["ID"] == "ubuntu" and b["ID_LIKE"] == "debian", "Tırnaksız değerler olduğu gibi kalır"\nassert b["HOME_URL"] == "https://www.ubuntu.com/?ref=os", "Değerdeki = işareti korunmalı: split(\\"=\\", 1)"\nassert len(b) == 6, "Yorum ve boş satır sözlüğe girmemeli: 6 anahtar"\nassert os_release_oku("NAME=\'Fedora Linux\'")["NAME"] == "Fedora Linux", "Tek tırnaklar da atılmalı"\nassert os_release_oku("") == {}, "Boş metin boş sözlük"\n',
-      hints: ['Satırı temizleyip boş/yorum kontrolünü en başta yap.', 'anahtar, deger = satir.split("=", 1)', 'bilgi[anahtar] = deger.strip("\\"\'")  # iki tırnak türünü birden atar'],
-      why: 'os-release biçimi basit görünse de değerler tırnaklı ya da tırnaksız, URL\'ler = içerebilir. maxsplit=1 ve strip ile iki tırnak türünü atmak bu farklılıkları tek kalıpta çözer.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-macos-linux-2',
-      diff: 2,
-      q: '<p>Kurulum betiği, dağıtıma göre doğru komutu önermeli. <code>kurulum_komutu(bilgi)</code> fonksiyonunu yaz; <code>bilgi</code> os-release sözlüğüdür (<code>ID</code> ve isteğe bağlı <code>ID_LIKE</code> anahtarları). <code>ID_LIKE</code> boşlukla ayrılmış birden çok ad içerebilir (ör. <code>"rhel centos fedora"</code>).</p><ul><li>ID ya da ID_LIKE içinde <code>debian</code> veya <code>ubuntu</code> varsa → <code>"sudo apt install python3 python3-venv python3-pip"</code></li><li><code>fedora</code> veya <code>rhel</code> → <code>"sudo dnf install python3 python3-pip"</code></li><li><code>arch</code> → <code>"sudo pacman -S python python-pip"</code></li><li>Hiçbiri → <code>"uv python install 3.12"</code></li></ul>',
-      guide: [
-        'ID ve ID_LIKE değerlerini bilgi.get(..., "") ile al, küçük harfe çevir.',
-        'İkisini boşlukla birleştirip split() ile bir "adlar" kümesi oluştur.',
-        'Sırayla kümede debian/ubuntu, fedora/rhel, arch var mı kontrol et (küme kesişimi ya da any).',
-        'Hiçbiri yoksa uv komutunu döndür.'
-      ],
-      example: 'etiketler = set("Elektronik Telefon".lower().split()) | {"kampanya"}\nif etiketler & {"telefon", "tablet"}:\n    print("Mobil kategori")\nelse:\n    print("Diğer")\n',
-      start: 'def kurulum_komutu(bilgi):\n    # TODO: ID ve ID_LIKE\'tan küçük harfli bir adlar kümesi oluştur\n    adlar = set()\n    # TODO: sırayla apt, dnf, pacman ailelerini kontrol et\n    return ""\n',
-      sol: 'def kurulum_komutu(bilgi):\n    adlar = set((bilgi.get("ID", "") + " " + bilgi.get("ID_LIKE", "")).lower().split())\n    if adlar & {"debian", "ubuntu"}:\n        return "sudo apt install python3 python3-venv python3-pip"\n    if adlar & {"fedora", "rhel"}:\n        return "sudo dnf install python3 python3-pip"\n    if "arch" in adlar:\n        return "sudo pacman -S python python-pip"\n    return "uv python install 3.12"\n',
-      tests: 'assert kurulum_komutu({"ID": "ubuntu", "ID_LIKE": "debian"}) == "sudo apt install python3 python3-venv python3-pip", "Ubuntu apt kullanır"\nassert kurulum_komutu({"ID": "linuxmint", "ID_LIKE": "ubuntu debian"}) == "sudo apt install python3 python3-venv python3-pip", "Mint, ID_LIKE üzerinden apt ailesindedir"\nassert kurulum_komutu({"ID": "rocky", "ID_LIKE": "rhel centos fedora"}) == "sudo dnf install python3 python3-pip", "Rocky Linux, rhel ailesi: dnf"\nassert kurulum_komutu({"ID": "Fedora"}) == "sudo dnf install python3 python3-pip", "ID_LIKE olmayabilir; büyük harf de gelebilir"\nassert kurulum_komutu({"ID": "arch"}) == "sudo pacman -S python python-pip", "Arch: pacman"\nassert kurulum_komutu({"ID": "alpine"}) == "uv python install 3.12", "Tanınmayan dağıtım: uv önerisi"\nassert kurulum_komutu({}) == "uv python install 3.12", "Boş sözlükte de çökmemeli"\n',
-      hints: ['bilgi.get("ID_LIKE", "") anahtar yoksa boş metin verir.', 'set(metin.lower().split()) & {"debian", "ubuntu"} boş değilse apt ailesidir.', 'Kontrol sırası: apt, dnf, pacman, en sonda uv.'],
-      why: 'Türev dağıtımlar (Mint, Pop!_OS, Rocky, AlmaLinux) kendi ID\'lerini taşır ama ID_LIKE ile ailelerini bildirir. İkisini tek kümede toplamak, yüzlerce dağıtımı birkaç kuralla kapsar.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-macos-linux-3',
-      diff: 2,
-      q: '<p>pyenv\'in sürüm seçimini taklit eden <code>pyenv_surumu(ortam, yerel, genel)</code> fonksiyonunu yaz.</p><ul><li><code>ortam</code>: ortam değişkenleri sözlüğü; <code>"PYENV_VERSION"</code> anahtarı olabilir.</li><li><code>yerel</code>: <code>.python-version</code> dosyasının içeriği ya da <code>None</code>.</li><li><code>genel</code>: <code>~/.pyenv/version</code> içeriği ya da <code>None</code>.</li></ul><p>Sırayla ilk <b>dolu</b> kaynağı kullan ve <code>(surum, kaynak)</code> döndür; kaynak <code>"PYENV_VERSION"</code>, <code>".python-version"</code>, <code>"global"</code> ya da hepsi boşsa <code>("system", "sistem")</code>. Dosya içeriğinde yorum satırları (<code>#</code>) ve boş satırlar olabilir; ilk gerçek satırı al ve boşluklarını temizle.</p>',
-      guide: [
-        'Dosya içeriğinden ilk anlamlı satırı veren küçük bir yardımcı yaz (ilk_satir).',
-        'Yardımcı: None ise None döndür; satırlarda dön, strip et, boş ya da # ile başlayanı atla.',
-        'Adayları (kaynak, değer) listesi olarak sırala.',
-        'İlk dolu değeri bulunca (değer, kaynak) döndür; döngü biterse ("system", "sistem").'
-      ],
-      example: 'def ilk_dolu(*degerler):\n    for d in degerler:\n        if d:\n            return d\n    return "yok"\nprint(ilk_dolu(None, "", "kargo", "iade"))\n',
-      start: 'def ilk_satir(icerik):\n    # TODO: None ise None; değilse ilk boş olmayan ve # ile başlamayan satır\n    return None\n\n\ndef pyenv_surumu(ortam, yerel, genel):\n    adaylar = [\n        ("PYENV_VERSION", ortam.get("PYENV_VERSION")),\n        # TODO: yerel ve genel dosyaları ilk_satir ile ekle\n    ]\n    # TODO: ilk dolu adayı döndür\n    return ("system", "sistem")\n',
-      sol: 'def ilk_satir(icerik):\n    if icerik is None:\n        return None\n    for satir in icerik.splitlines():\n        satir = satir.strip()\n        if satir and not satir.startswith("#"):\n            return satir\n    return None\n\n\ndef pyenv_surumu(ortam, yerel, genel):\n    adaylar = [\n        ("PYENV_VERSION", (ortam.get("PYENV_VERSION") or "").strip()),\n        (".python-version", ilk_satir(yerel)),\n        ("global", ilk_satir(genel)),\n    ]\n    for kaynak, deger in adaylar:\n        if deger:\n            return (deger, kaynak)\n    return ("system", "sistem")\n',
-      tests: 'assert pyenv_surumu({}, "3.11.9\\n", "3.12.4\\n") == ("3.11.9", ".python-version"), "Klasördeki .python-version global\'den önce gelir"\nassert pyenv_surumu({"PYENV_VERSION": "3.13.0"}, "3.11.9", "3.12.4") == ("3.13.0", "PYENV_VERSION"), "Ortam değişkeni her şeyi ezer"\nassert pyenv_surumu({"PYENV_VERSION": ""}, None, "# yorum\\n\\n  3.12.4  \\n") == ("3.12.4", "global"), "Boş ortam değişkeni sayılmaz; yorum ve boş satır atlanır"\nassert pyenv_surumu({}, "\\n# boş\\n", None) == ("system", "sistem"), "Yalnız yorum içeren dosya boş sayılır"\nassert pyenv_surumu({}, None, None) == ("system", "sistem"), "Hiçbiri yoksa sistem Python\'ı"\n',
-      hints: [
-        'Boş metin ve None, if koşulunda yanlış sayılır; "ilk dolu" kontrolü için yeterli.',
-        'ilk_satir içinde: for satir in icerik.splitlines(): satir = satir.strip(); if satir and not satir.startswith("#"): return satir',
-        'Adaylara (".python-version", ilk_satir(yerel)) ve ("global", ilk_satir(genel)) ekle; döngüde if deger: return (deger, kaynak)'
-      ],
-      why: 'Öncelik zincirleri yapılandırma sistemlerinde çok yaygındır (ortam değişkeni → proje dosyası → kullanıcı ayarı → varsayılan). Adayları sıralı bir listede tutmak, kuralı okunur ve genişletilebilir yapar.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-macos-linux-4',
-      diff: 1,
-      q: '<p><code>homebrew_python_yolu(makine, surum="3.12", isletim="macos")</code> fonksiyonunu yaz. Homebrew öneki: macOS\'ta <code>makine == "arm64"</code> ise <code>/opt/homebrew</code>, <code>"x86_64"</code> ise <code>/usr/local</code>; Linux\'ta (Linuxbrew) makineden bağımsız <code>/home/linuxbrew/.linuxbrew</code>. Dönüş: <code>&lt;önek&gt;/bin/python&lt;surum&gt;</code>. macOS\'ta tanınmayan makinede <code>ValueError</code> fırlat.</p>',
-      start: 'def homebrew_python_yolu(makine, surum="3.12", isletim="macos"):\n    pass\n',
-      sol: 'def homebrew_python_yolu(makine, surum="3.12", isletim="macos"):\n    if isletim == "linux":\n        onek = "/home/linuxbrew/.linuxbrew"\n    elif makine == "arm64":\n        onek = "/opt/homebrew"\n    elif makine == "x86_64":\n        onek = "/usr/local"\n    else:\n        raise ValueError(f"Bilinmeyen makine: {makine}")\n    return f"{onek}/bin/python{surum}"\n',
-      tests: 'assert homebrew_python_yolu("arm64") == "/opt/homebrew/bin/python3.12", "Apple Silicon: /opt/homebrew"\nassert homebrew_python_yolu("x86_64", "3.11") == "/usr/local/bin/python3.11", "Intel Mac: /usr/local"\nassert homebrew_python_yolu("x86_64", "3.13", "linux") == "/home/linuxbrew/.linuxbrew/bin/python3.13", "Linuxbrew öneki"\ntry:\n    homebrew_python_yolu("ppc")\n    assert False, "Tanınmayan makinede ValueError beklenir"\nexcept ValueError:\n    pass\n',
-      hints: ['Önce işletim sistemini, sonra makineyi kontrol et.', 'f"{onek}/bin/python{surum}"'],
-      why: 'Aynı formül iki farklı önekte yaşar; kurulum betikleri ve VS Code yapılandırmaları bu farkı bilmezse Intel ve Apple Silicon makinelerde farklı davranır.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-macos-linux-5',
-      diff: 2,
-      q: '<p>Ekip wiki\'sindeki komutları denetleyen <code>pip_komutu_denetle(komut)</code> fonksiyonunu yaz. <code>shlex.split</code> ile parçala ve şu sırayla uyarı kodlarının listesini döndür:</p><ul><li>İlk parça <code>sudo</code> ise <code>"SUDO"</code> (sonraki kontroller sudo\'dan sonraki parçalara bakar).</li><li>Komut doğrudan <code>pip</code> ya da <code>pip3</code> ile başlıyorsa <code>"DOGRUDAN_PIP"</code> (öneri: python3 -m pip). <code>python3 -m pip</code> ya da <code>python3.12 -m pip</code> biçimi uyarı almaz.</li><li>Parçalarda <code>--break-system-packages</code> varsa <code>"PEP668_DELME"</code>.</li></ul><p>Sorun yoksa boş liste.</p>',
-      start: 'import shlex\n\ndef pip_komutu_denetle(komut):\n    pass\n',
-      sol: 'import shlex\n\ndef pip_komutu_denetle(komut):\n    parcalar = shlex.split(komut)\n    uyarilar = []\n    if parcalar and parcalar[0] == "sudo":\n        uyarilar.append("SUDO")\n        parcalar = parcalar[1:]\n    if parcalar and parcalar[0] in ("pip", "pip3"):\n        uyarilar.append("DOGRUDAN_PIP")\n    if "--break-system-packages" in parcalar:\n        uyarilar.append("PEP668_DELME")\n    return uyarilar\n',
-      tests: 'assert pip_komutu_denetle("sudo pip3 install pandas --break-system-packages") == ["SUDO", "DOGRUDAN_PIP", "PEP668_DELME"], "Üç sorun da yakalanmalı, sırayla"\nassert pip_komutu_denetle("python3 -m pip install pandas") == [], "python3 -m pip doğru kullanım"\nassert pip_komutu_denetle("pip install \'pandas>=2.2\'") == ["DOGRUDAN_PIP"], "Tırnaklı sürüm belirteci tek parça kalır"\nassert pip_komutu_denetle("sudo python3.12 -m pip install requests") == ["SUDO"], "sudo tek başına uyarı"\nassert pip_komutu_denetle("python3 -m pip install x --break-system-packages") == ["PEP668_DELME"], "Bayrak her yerde yakalanır"\nassert pip_komutu_denetle("") == [], "Boş komut"\n',
-      hints: ['shlex.split, tırnaklı \'pandas&gt;=2.2\' parçasını tek parça yapar.', 'sudo\'yu gördükten sonra parcalar = parcalar[1:] ile kalan komuta bak.'],
-      why: 'Komutları str.split ile değil shlex ile parçalamak tırnaklı argümanları doğru işler. sudo pip ve --break-system-packages, Linux\'ta sistem Python\'ını bozmanın en kısa iki yoludur; doğrudan pip ise yanlış yorumlayıcıya kurulum riskidir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-macos-linux-6',
-      diff: 2,
-      q: '<p><code>venv_aktivasyon(kabuk, klasor=".venv")</code> fonksiyonunu yaz. <code>kabuk</code> ya <code>"zsh"</code> gibi bir ad ya da <code>$SHELL</code> değeri gibi tam yol (<code>"/bin/zsh"</code>) olabilir; adı yoldan çıkar. Dönüşler:</p><ul><li><code>bash</code>, <code>zsh</code>, <code>sh</code> → <code>"source .venv/bin/activate"</code></li><li><code>fish</code> → <code>"source .venv/bin/activate.fish"</code></li><li><code>csh</code>, <code>tcsh</code> → <code>"source .venv/bin/activate.csh"</code></li><li><code>pwsh</code> → <code>".venv/bin/Activate.ps1"</code></li><li>Diğerleri → <code>ValueError</code></li></ul><p><code>.venv</code> yerine <code>klasor</code> parametresini kullan.</p>',
-      start: 'def venv_aktivasyon(kabuk, klasor=".venv"):\n    pass\n',
-      sol: 'import posixpath\n\ndef venv_aktivasyon(kabuk, klasor=".venv"):\n    ad = posixpath.basename(kabuk)\n    if ad in ("bash", "zsh", "sh"):\n        return f"source {klasor}/bin/activate"\n    if ad == "fish":\n        return f"source {klasor}/bin/activate.fish"\n    if ad in ("csh", "tcsh"):\n        return f"source {klasor}/bin/activate.csh"\n    if ad == "pwsh":\n        return f"{klasor}/bin/Activate.ps1"\n    raise ValueError(f"Desteklenmeyen kabuk: {kabuk}")\n',
-      tests: 'assert venv_aktivasyon("/bin/zsh") == "source .venv/bin/activate", "Tam yoldan kabuk adı çıkarılmalı"\nassert venv_aktivasyon("bash", "env") == "source env/bin/activate", "klasor parametresi kullanılmalı"\nassert venv_aktivasyon("/usr/bin/fish") == "source .venv/bin/activate.fish", "fish kendi betiğini kullanır"\nassert venv_aktivasyon("tcsh") == "source .venv/bin/activate.csh", "tcsh: activate.csh"\nassert venv_aktivasyon("/usr/local/bin/pwsh") == ".venv/bin/Activate.ps1", "Linux/macOS\'ta PowerShell de bin altındadır"\ntry:\n    venv_aktivasyon("nushell")\n    assert False, "Desteklenmeyen kabukta ValueError"\nexcept ValueError:\n    pass\n',
-      hints: ['posixpath.basename("/bin/zsh") → "zsh"', 'Her kabuk ailesi için bir if; f-string içinde klasor kullan.'],
-      why: 'venv her kabuk için ayrı etkinleştirme betiği üretir, çünkü kabukların sözdizimi farklıdır. $SHELL tam yol verdiği için basename ile adı ayırmak gerekir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-macos-linux-7',
-      diff: 2,
-      q: '<p><code>shebang_yorumla(ilk_satir)</code> fonksiyonunu yaz: betiğin ilk satırına bakıp hangi yorumlayıcının çağrılacağını döndürsün.</p><ul><li><code>#!</code> ile başlamıyorsa <code>None</code>.</li><li><code>#!</code> sonrasını <code>shlex.split</code> ile parçala (<code>#! /usr/bin/python3</code> gibi boşluklu yazım da olur).</li><li>İlk parçanın son bileşeni <code>env</code> ise, <code>-</code> ile başlamayan ilk sonraki parçayı döndür (<code>#!/usr/bin/env -S python3 -u</code> → <code>"python3"</code>).</li><li>Değilse ilk parçayı (tam yolu) döndür.</li></ul>',
-      start: 'import shlex\n\ndef shebang_yorumla(ilk_satir):\n    pass\n',
-      sol: 'import shlex, posixpath\n\ndef shebang_yorumla(ilk_satir):\n    if not ilk_satir.startswith("#!"):\n        return None\n    parcalar = shlex.split(ilk_satir[2:])\n    if not parcalar:\n        return None\n    if posixpath.basename(parcalar[0]) == "env":\n        for p in parcalar[1:]:\n            if not p.startswith("-"):\n                return p\n        return None\n    return parcalar[0]\n',
-      tests: 'assert shebang_yorumla("#!/usr/bin/env python3") == "python3", "env ile PATH\'teki python3"\nassert shebang_yorumla("#!/usr/bin/python3.12 -u") == "/usr/bin/python3.12", "Doğrudan yol; seçenekler önemsiz"\nassert shebang_yorumla("#! /usr/bin/python3") == "/usr/bin/python3", "#! sonrası boşluk olabilir"\nassert shebang_yorumla("#!/usr/bin/env -S python3 -X utf8") == "python3", "env seçenekleri (-S) atlanmalı"\nassert shebang_yorumla("#!/home/ayse/rapor/.venv/bin/python") == "/home/ayse/rapor/.venv/bin/python", "venv yorumlayıcısı"\nassert shebang_yorumla("import sys") is None, "Shebang değil"\nassert shebang_yorumla("#!") is None, "Boş shebang"\n',
-      hints: ['ilk_satir[2:] ile #! işaretinden sonrasını al.', 'posixpath.basename(parcalar[0]) == "env" ise sonraki parçalarda - ile başlamayan ilkini bul.'],
-      why: 'env, PATH\'te arama yaparak yorumlayıcıyı bulur; bu yüzden etkin venv ya da pyenv sürümü kullanılır. Doğrudan yol ise hep aynı yorumlayıcıyı çağırır. Teşhiste ilk soru budur: betik hangi Python ile başlıyor?'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'kurulum-macos-linux-8',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>dagitim_adi(metin)</code> os-release metninden <code>PRETTY_NAME</code> değerini (tırnaksız) döndürmeli; anahtar yoksa <code>NAME</code>, o da yoksa <code>"Linux"</code>. Gerçek dosyalarda kod çöküyor ya da tırnaklı sonuç veriyor.</p>',
-      start: 'def dagitim_adi(metin):\n    bilgi = {}\n    for satir in metin.splitlines():\n        anahtar, deger = satir.split("=")\n        bilgi[anahtar] = deger\n    return bilgi.get("PRETTY_NAME", bilgi["NAME"])\n',
-      sol: 'def dagitim_adi(metin):\n    bilgi = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        if not satir or satir.startswith("#") or "=" not in satir:\n            continue\n        anahtar, deger = satir.split("=", 1)\n        bilgi[anahtar] = deger.strip("\\"\'")\n    return bilgi.get("PRETTY_NAME") or bilgi.get("NAME") or "Linux"\n',
-      tests: 'm = \'PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"\\nNAME="Debian GNU/Linux"\\n\\nHOME_URL="https://www.debian.org/?a=b"\\n\'\nassert dagitim_adi(m) == "Debian GNU/Linux 12 (bookworm)", "Boş satır ve = içeren URL çökertmemeli, tırnaklar atılmalı"\nassert dagitim_adi(\'NAME="Alpine Linux"\\nID=alpine\') == "Alpine Linux", "PRETTY_NAME yoksa NAME"\nassert dagitim_adi("ID=bilinmeyen") == "Linux", "İkisi de yoksa Linux; KeyError değil"\nassert dagitim_adi("# yorum\\nPRETTY_NAME=\'Fedora Linux 40\'") == "Fedora Linux 40", "Yorum satırı atlanmalı; tek tırnak da atılmalı"\n',
-      hints: [
-        'Dört sorun var: boş/yorum satırı atlanmıyor, split("=") maxsplit olmadan URL\'de patlıyor, tırnaklar atılmıyor ve bilgi["NAME"] varsayılan bile kullanılmasa önce değerlendirilip KeyError veriyor.',
-        'bilgi.get("PRETTY_NAME") or bilgi.get("NAME") or "Linux" zinciri hiç KeyError vermez.'
-      ],
-      why: 'dict.get(k, varsayilan) çağrısında varsayılan ifade her durumda önce hesaplanır; bilgi["NAME"] anahtar yoksa çağrıdan önce KeyError verir. or zinciri ise tembeldir. Gerçek dosyalarda boş satır, yorum ve = içeren değerler bulunur.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'kurulum-macos-linux-9',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>ortam_etiketi(prefix, base_prefix)</code>, terminal isteminde gösterilecek etiketi üretiyor: sanal ortamdaysan (prefix ile base_prefix farklıysa) ortam klasörünün adı, değilsen <code>"sistem"</code>. Kod tersini yapıyor ve sonunda <code>/</code> olan yollarda boş etiket veriyor.</p>',
-      start: 'import posixpath\n\ndef ortam_etiketi(prefix, base_prefix):\n    if prefix == base_prefix:\n        return posixpath.basename(prefix)\n    return "sistem"\n',
-      sol: 'import posixpath\n\ndef ortam_etiketi(prefix, base_prefix):\n    if posixpath.normpath(prefix) == posixpath.normpath(base_prefix):\n        return "sistem"\n    return posixpath.basename(posixpath.normpath(prefix))\n',
-      tests: 'assert ortam_etiketi("/home/ayse/rapor/.venv", "/usr") == ".venv", "Farklı önek: venv içindesin, klasör adı .venv"\nassert ortam_etiketi("/usr", "/usr") == "sistem", "Aynı önek: sistem Python\'ı"\nassert ortam_etiketi("/opt/proje/env/", "/opt/homebrew/opt/python@3.12") == "env", "Sondaki / basename\'i boşaltmamalı: normpath kullan"\nassert ortam_etiketi("/usr/", "/usr") == "sistem", "Sondaki / farkı venv sanılmamalı"\n',
-      hints: ['Koşul ters: prefix != base_prefix ise venv içindesin.', 'posixpath.basename("/a/b/") boş metin döner; önce posixpath.normpath ile sondaki /\'i at.'],
-      why: 'sys.prefix çalışan ortamın kökü, sys.base_prefix onun türediği kurulumdur; ikisi farklıysa venv içindesin. Yolları karşılaştırmadan ve bileşen almadan önce normalleştirmek, sondaki ayırıcı gibi biçim farklarını ortadan kaldırır.'
-    },
-    {
-      t: 'code',
-      stage: 'Meydan okuma',
-      id: 'kurulum-macos-linux-10',
-      diff: 3,
-      q: '<p>Yıllar içinde <code>~/.zshrc</code>\'ye eklenen satırlar PATH\'i karmakarışık yaptı. <code>path_temizle(path_metni, ev)</code> fonksiyonunu yaz (ayırıcı <code>:</code>):</p><ul><li>Boş girdileri at.</li><li>Başta <code>~</code> varsa <code>ev</code> klasörüyle değiştir (<code>~</code> tek başına ya da <code>~/...</code>).</li><li>Her girdiyi <code>posixpath.normpath</code> ile normalleştir (<code>/usr//bin/</code> → <code>/usr/bin</code>).</li><li><b>Göreli</b> girdileri (<code>.</code>, <code>bin</code> gibi <code>/</code> ile başlamayanlar) güvenlik nedeniyle at.</li><li>Tekrarları at; <b>ilk</b> görüleni tut (sıra önemlidir!).</li></ul><p>Temizlenmiş PATH\'i yine <code>:</code> ile birleştirilmiş metin olarak döndür.</p>',
-      start: 'import posixpath\n\ndef path_temizle(path_metni, ev):\n    pass\n',
-      sol: 'import posixpath\n\ndef path_temizle(path_metni, ev):\n    sonuc = []\n    gorulen = set()\n    for girdi in path_metni.split(":"):\n        girdi = girdi.strip()\n        if not girdi:\n            continue\n        if girdi == "~" or girdi.startswith("~/"):\n            girdi = ev + girdi[1:]\n        if not girdi.startswith("/"):\n            continue\n        girdi = posixpath.normpath(girdi)\n        if girdi in gorulen:\n            continue\n        gorulen.add(girdi)\n        sonuc.append(girdi)\n    return ":".join(sonuc)\n',
-      tests: 'p = "~/.local/bin:/opt/homebrew/bin::/usr//bin/:/home/ayse/.local/bin:.:/usr/bin:bin:/opt/homebrew/bin/:~"\nassert path_temizle(p, "/home/ayse") == "/home/ayse/.local/bin:/opt/homebrew/bin:/usr/bin:/home/ayse", "~ açılmalı, normalleştirilmeli, göreli ve tekrarlar atılmalı; ilk görülen sırası korunmalı"\nassert path_temizle("", "/home/x") == "", "Boş PATH"\nassert path_temizle("/a/../b:/b", "/h") == "/b", "normpath /a/../b\'yi /b yapar; ikinci /b tekrardır"\nassert path_temizle("~user/bin:/usr/bin", "/h") == "/usr/bin", "~user başka kullanıcıdır; açılmaz ve göreli sayılıp atılır"\n',
-      hints: [
-        'Kontrol sırası önemli: boş → ~ açma → göreli mi → normpath → tekrar mı.',
-        'Sırayı korumak için hem bir liste (sonuc) hem bir küme (gorulen) tut.',
-        '"~user/bin" ~ ile başlar ama "~/" ile başlamaz; açma, göreli olduğu için atılır.'
-      ],
-      why: 'PATH\'te sıra anlam taşır; tekrarları atarken ilk görüleni tutmak davranışı değiştirmez. Göreli girdiler (özellikle ".") güvenlik açığıdır: bulunduğun klasördeki "python3" adlı kötü niyetli bir dosya gerçek Python\'ın yerine çalışabilir.'
-    },
-    {
-      t: 'code',
-      stage: 'Mini proje',
-      id: 'kurulum-macos-linux-11',
-      diff: 3,
-      q: '<p>Anadolu Lojistik\'in sunucu envanteri için <code>ortam_raporu(os_release_metni, path_metni, diskteki)</code> fonksiyonunu yaz. Sözlük döndür:</p><ul><li><code>"dagitim"</code>: PRETTY_NAME (yoksa NAME, o da yoksa <code>"Linux"</code>), tırnaksız.</li><li><code>"kurulum"</code>: ID/ID_LIKE ailesine göre komut (apt: <code>"sudo apt install python3 python3-venv python3-pip"</code>, dnf: <code>"sudo dnf install python3 python3-pip"</code>, diğer: <code>"uv python install 3.12"</code>).</li><li><code>"pep668"</code>: ID <code>ubuntu</code> ve VERSION_ID ≥ 23.04, ya da ID <code>debian</code> ve VERSION_ID ≥ 12 ise <code>True</code>; aksi hâlde <code>False</code>. Sürümleri sayı demeti olarak karşılaştır.</li><li><code>"python3"</code>: PATH (<code>:</code> ayırıcı) sırasıyla <code>diskteki</code> kümesinde bulunan ilk <code>&lt;klasör&gt;/python3</code>; yoksa <code>None</code>.</li><li><code>"oneri"</code>: python3 yoksa kurulum komutu; varsa ve pep668 True ise <code>"python3 -m venv .venv"</code>; değilse <code>"python3 -m pip install --user"</code>.</li></ul>',
-      start: 'def ortam_raporu(os_release_metni, path_metni, diskteki):\n    pass\n',
-      sol: 'import posixpath\n\ndef _oku(metin):\n    bilgi = {}\n    for satir in metin.splitlines():\n        satir = satir.strip()\n        if not satir or satir.startswith("#") or "=" not in satir:\n            continue\n        k, v = satir.split("=", 1)\n        bilgi[k] = v.strip("\\"\'")\n    return bilgi\n\ndef _surum(metin):\n    try:\n        return tuple(int(p) for p in metin.split("."))\n    except ValueError:\n        return ()\n\ndef ortam_raporu(os_release_metni, path_metni, diskteki):\n    b = _oku(os_release_metni)\n    adlar = set((b.get("ID", "") + " " + b.get("ID_LIKE", "")).lower().split())\n    if adlar & {"debian", "ubuntu"}:\n        kurulum = "sudo apt install python3 python3-venv python3-pip"\n    elif adlar & {"fedora", "rhel"}:\n        kurulum = "sudo dnf install python3 python3-pip"\n    else:\n        kurulum = "uv python install 3.12"\n    kimlik = b.get("ID", "").lower()\n    surum = _surum(b.get("VERSION_ID", ""))\n    pep668 = (kimlik == "ubuntu" and surum >= (23, 4)) or (kimlik == "debian" and surum >= (12,))\n    python3 = None\n    for klasor in path_metni.split(":"):\n        if klasor and posixpath.join(klasor, "python3") in diskteki:\n            python3 = posixpath.join(klasor, "python3")\n            break\n    if python3 is None:\n        oneri = kurulum\n    elif pep668:\n        oneri = "python3 -m venv .venv"\n    else:\n        oneri = "python3 -m pip install --user"\n    return {\n        "dagitim": b.get("PRETTY_NAME") or b.get("NAME") or "Linux",\n        "kurulum": kurulum,\n        "pep668": pep668,\n        "python3": python3,\n        "oneri": oneri,\n    }\n',
-      tests: 'u = \'PRETTY_NAME="Ubuntu 24.04.1 LTS"\\nID=ubuntu\\nID_LIKE=debian\\nVERSION_ID="24.04"\'\nr = ortam_raporu(u, "/usr/local/bin:/usr/bin", {"/usr/bin/python3"})\nassert r == {"dagitim": "Ubuntu 24.04.1 LTS", "kurulum": "sudo apt install python3 python3-venv python3-pip", "pep668": True, "python3": "/usr/bin/python3", "oneri": "python3 -m venv .venv"}, "Ubuntu 24.04: PEP 668 açık, venv önerilir"\nu22 = \'PRETTY_NAME="Ubuntu 22.04.4 LTS"\\nID=ubuntu\\nVERSION_ID="22.04"\'\nr = ortam_raporu(u22, "/usr/bin", {"/usr/bin/python3"})\nassert r["pep668"] is False and r["oneri"] == "python3 -m pip install --user", "22.04 < 23.04: PEP 668 yok"\nd = \'PRETTY_NAME="Debian GNU/Linux 12 (bookworm)"\\nID=debian\\nVERSION_ID="12"\'\nr = ortam_raporu(d, "/usr/bin", set())\nassert r["pep668"] is True and r["python3"] is None and r["oneri"] == "sudo apt install python3 python3-venv python3-pip", "Debian 12: PEP 668; python3 yoksa öneri kurulum komutudur"\nf = \'NAME="Fedora Linux"\\nID=fedora\\nVERSION_ID=40\'\nr = ortam_raporu(f, "/home/u/.local/bin:/usr/bin", {"/usr/bin/python3", "/home/u/.local/bin/python3"})\nassert r["dagitim"] == "Fedora Linux" and r["kurulum"] == "sudo dnf install python3 python3-pip" and r["python3"] == "/home/u/.local/bin/python3" and r["pep668"] is False, "Fedora: dnf, PATH\'teki ilk python3"\na = \'ID=alpine\\nVERSION_ID=3.20.1\'\nr = ortam_raporu(a, "", set())\nassert r["dagitim"] == "Linux" and r["kurulum"] == "uv python install 3.12" and r["oneri"] == "uv python install 3.12", "Tanınmayan dağıtım"\nassert ortam_raporu(\'ID=ubuntu\\nVERSION_ID="23.10"\', "", set())["pep668"] is True, "23.10 >= 23.04: (23, 10) >= (23, 4)"\n',
-      hints: [
-        'Önce os-release ayrıştırıcısını (_oku) ve sürüm demeti çeviricisini (_surum) yardımcı fonksiyon olarak yaz.',
-        '"24.04" → (24, 4); (24, 4) >= (23, 4) doğru, metin karşılaştırmasına güvenme.',
-        'PATH\'te ilk bulunan python3 için döngüde break kullan; öneriyi en sonda üç durumla seç.'
-      ],
-      why: 'Küçük ve test edilebilir yardımcılar (ayrıştırma, sürüm çevirme) büyük kararı okunur kılar. Bu fonksiyon, derste öğrendiğin her şeyi birleştirir: os-release, dağıtım aileleri, PEP 668, PATH sırası ve doğru kurulum önerisi.'
-    }
-  ],
+    }],
   faq: [
     {
       q: 'Mac\'te python.org mu Homebrew mu?',
@@ -1187,7 +809,7 @@ winget uninstall Python.Python.3.11</pre>
 </table></div>
 <div class="warn"><b>Hata mesajının ilk satırı değil son satırı</b>pip ve Python hatalarında asıl neden genellikle en alttaki satırdadır. Uzun bir kırmızı metin gördüğünde aşağıdan yukarı oku ve son satırı aynen arat.</div>
 
-<div class="note"><b>Gerçek işte</b>Kurumsal bilgisayarlarda çoğu zaman yönetici iznin olmaz, internet bir vekil sunucu (proxy) üzerinden geçer ve trafik kurum sertifikasıyla incelenir. Bu yüzden ekipler kurulum adımlarını README'ye yazar: "python.org 3.12, Install Now, PATH kutusu işaretli; ardından <code>py -3.12 -m venv .venv</code>". Yeni gelen kişi bu listeyi izler, sorun çıkarsa <code>where python</code>, <code>py --list</code> ve <code>python -m pip config list</code> çıktılarını destek kanalına yapıştırır. Bu üç çıktı, sorunların büyük kısmını uzaktan teşhis etmeye yeter.</div>
+<div class="note"><b>Gerçek işte</b>Kurumsal bilgisayarlarda çoğu zaman yönetici iznin olmaz, internet bir vekil sunucu (proxy) üzerinden geçer ve trafik kurum sertifikasıyla incelenir. Bu yüzden ekipler kurulum adımlarını README'ye yazar: "python.org 3.14, kurulum adımları, ardından <code>py -3.14 -m venv .venv</code>". Yeni gelen kişi bu listeyi izler, sorun çıkarsa <code>where python</code>, <code>py --list</code> ve <code>python -m pip config list</code> çıktılarını destek kanalına yapıştırır. Bu üç çıktı, sorunların büyük kısmını uzaktan teşhis etmeye yeter.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Sessiz kurulum ve otomasyon</h3>
@@ -1210,11 +832,10 @@ print(shlex.split(r"TargetDir=C:\\Python312"))   # tırnaksız: ters bölü kayb
 <h3>Sanal ortamda olup olmadığını anlamak</h3>
 <p><code>sys.prefix</code> çalışan ortamın kökünü, <code>sys.base_prefix</code> o ortamın türetildiği Python kurulumunu gösterir. İkisi farklıysa bir venv içindesin. Her venv'in kökünde <code>pyvenv.cfg</code> dosyası vardır; içindeki <code>home = C:\\Python312</code> satırı ortamın hangi Python'dan oluşturulduğunu söyler. Bu yüzden Python'ı kaldırıp yeniden kurduğunda eski venv'ler bozulur: <code>home</code> artık var olmayan bir yeri gösterir. Çözüm venv'i silip yeniden oluşturmaktır; venv taşınabilir bir şey değildir.</p>
 <h3>PYTHONUTF8 ve kodlama</h3>
-<p>Python 3.15 ile UTF-8 modu varsayılan olacak; o zamana kadar Windows'ta <code>open()</code> varsayılan olarak sistemin kod sayfasını kullanır. Türkçe veriyle çalışıyorsan her zaman <code>open(yol, encoding="utf-8")</code> yaz ya da <code>PYTHONUTF8=1</code> değişkenini kalıcı olarak ayarla.</p>
+<p>Python 3.15 ile UTF-8 modu varsayılan oldu (Ekim 2026). 3.14 ve öncesinde Windows'ta <code>open()</code> varsayılan olarak sistemin kod sayfasını kullanır. Türkçe veriyle çalışıyorsan her zaman <code>open(yol, encoding="utf-8")</code> yaz ya da <code>PYTHONUTF8=1</code> değişkenini kalıcı olarak ayarla.</p>
 </section>
 `,
-  ex: [
-    {
+  ex: [{
       t: 'mc',
       stage: 'Isınma',
       q: '<code>where python</code> komutu şu iki satırı yazdırıyor:<br><code>C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe</code><br><code>C:\\Users\\ayse\\AppData\\Local\\Programs\\Python\\Python312\\python.exe</code><br>Terminale <code>python</code> yazınca ne olur?',
@@ -1252,219 +873,7 @@ print(shlex.split(r"TargetDir=C:\\Python312"))   # tırnaksız: ters bölü kayb
       ],
       a: 2,
       why: 'py başlatıcısı PATH\'e bakmaz, kayıt defterindeki kurulumlardan istenen sürümü seçer. -m pip o sürümün kendi pip modülünü çalıştırır; böylece paket tam olarak 3.11\'e gider. "pip install" yazmak ise PATH\'te ilk bulunan pip\'e, yani belki de başka bir sürüme kurar.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'path_metni = r"C:\\Windows;C:\\Python312;;C:\\Python312\\Scripts"\nparcalar = path_metni.split(";")\nprint(len(parcalar), parcalar[-1])\n',
-      o: ['3 C:\\Python312\\Scripts', '4 C:\\Python312\\Scripts', '4 C:\\Python312', '3 C:\\Python312'],
-      a: 1,
-      why: 'Art arda iki noktalı virgül arasında boş bir metin vardır; split onu da bir parça sayar. Bu yüzden 4 parça çıkar ve sonuncusu Scripts klasörüdür. Gerçek PATH\'lerde boş girdiler sık görülür; ayrıştırırken atlaman gerekir.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır? (ntpath, Windows yol kurallarını her işletim sisteminde uygular.)',
-      code: 'import ntpath\nyol = ntpath.join("C:\\\\dev\\\\rapor", ".venv", "Scripts", "python.exe")\nprint(yol)\nprint(ntpath.basename(ntpath.dirname(yol)))\n',
-      o: ['C:\\dev\\rapor\\.venv\\Scripts\\python.exe\nScripts', 'C:\\dev\\rapor/.venv/Scripts/python.exe\nScripts', 'C:\\dev\\rapor\\.venv\\Scripts\\python.exe\npython.exe', 'C:\\dev\\rapor\\.venv\\bin\\python\nbin'],
-      a: 0,
-      why: 'ntpath.join parçaları ters bölüyle birleştirir. dirname son parçayı (python.exe) atar ve Scripts klasörüne kadar olan yolu verir; basename o yolun son parçası olan Scripts\'i döndürür. bin yalnızca macOS/Linux venv\'lerinde kullanılır.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Ekip arkadaşın en yeni Python\'ı metin karşılaştırmasıyla seçmeye çalışıyor. Bu kod ne yazdırır?',
-      code: 'surumler = ["3.9.18", "3.12.4", "3.11.9"]\nprint(max(surumler))\nprint(max(surumler, key=lambda s: tuple(int(p) for p in s.split("."))))\n',
-      o: ['3.12.4\n3.12.4', '3.9.18\n3.9.18', '3.9.18\n3.12.4', '3.11.9\n3.12.4'],
-      a: 2,
-      why: 'Metinler karakter karakter karşılaştırılır: "3.9" ile "3.1" karşılaştırmasında "9" büyük olduğu için "3.9.18" en büyük metin olur. Sayı demetine çevirince (3, 12, 4) &gt; (3, 9, 18) doğru sonucu verir.'
-    },
-    {
-      t: 'order',
-      stage: 'Kodu oku',
-      q: '<p>Yeni bir Windows bilgisayarında projeyi sıfırdan hazırlayan komut listesini oluşturan betiği sırala. Her komut bir öncekinin sonucuna ihtiyaç duyar: önce Python kurulmalı, sonra kurulduğu doğrulanmalı, sonra sanal ortam oluşturulup etkinleştirilmeli, en son paket kurulmalı.</p>',
-      lines: [
-        'komutlar = []',
-        'komutlar.append("winget install Python.Python.3.12")',
-        'komutlar.append("py --list")',
-        'komutlar.append("py -3.12 -m venv .venv")',
-        'komutlar.append(".venv\\\\Scripts\\\\Activate.ps1")',
-        'komutlar.append("python -m pip install requests")',
-        'for sira, komut in enumerate(komutlar, start=1):',
-        '    print(f"{sira}. {komut}")'
-      ],
-      expect: '1. winget install Python.Python.3.12\n2. py --list\n3. py -3.12 -m venv .venv\n4. .venv\\Scripts\\Activate.ps1\n5. python -m pip install requests\n',
-      hint: 'Var olmayan bir Python ile venv oluşturamazsın; etkin olmayan venv\'e kurulan paket de ana Python\'a gider.',
-      why: 'Kurulum → doğrulama → venv oluşturma → etkinleştirme → paket kurma. Etkinleştirmeden önce pip install yazarsan paket global Python\'a kurulur; venv oluşturmadan etkinleştirme dosyası yoktur.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-windows-1',
-      diff: 1,
-      q: '<p>Ilgaz Bank\'ın rapor betiği en az Python 3.10 istiyor (match ifadesi kullanıyor). <code>surum_kontrol(surum, en_az=(3, 10))</code> fonksiyonunu yaz. <code>surum</code>, <code>(3, 12, 4)</code> gibi üç sayılık bir demettir (sys.version_info[:3] de böyle bir demet verir).</p><ul><li>Sürüm yeterliyse <code>"Uygun: 3.12.4"</code> döndür.</li><li>Yeterli değilse <code>"Eski sürüm: 3.9.18 (en az 3.10 gerekli)"</code> döndür.</li></ul>',
-      guide: [
-        'Demetteki sayıları noktayla birleştirip "3.12.4" metnini üret (map(str, ...) ve ".".join).',
-        'en_az demetini de aynı yolla "3.10" metnine çevir.',
-        'Karşılaştırmayı metinlerle değil demetlerle yap: surum &gt;= en_az.',
-        'Koşula göre iki mesajdan birini f-string ile döndür.'
-      ],
-      example: 'import sys\nhedef = (3, 8)\nsimdiki = sys.version_info[:2]\nmetin = ".".join(str(s) for s in simdiki)\nprint(metin, "yeterli" if simdiki >= hedef else "eski")\n',
-      start: 'def surum_kontrol(surum, en_az=(3, 10)):\n    # TODO: surum demetini "3.12.4" biçiminde metne çevir\n    surum_metni = ""\n    # TODO: en_az demetini metne çevir\n    en_az_metni = ""\n    # TODO: demetleri karşılaştır ve uygun mesajı döndür\n    return ""\n',
-      sol: 'def surum_kontrol(surum, en_az=(3, 10)):\n    surum_metni = ".".join(map(str, surum))\n    en_az_metni = ".".join(map(str, en_az))\n    if tuple(surum) >= tuple(en_az):\n        return f"Uygun: {surum_metni}"\n    return f"Eski sürüm: {surum_metni} (en az {en_az_metni} gerekli)"\n',
-      tests: 'import sys\nassert surum_kontrol((3, 12, 4)) == "Uygun: 3.12.4", "3.12.4 en az 3.10 koşulunu sağlar"\nassert surum_kontrol((3, 9, 18)) == "Eski sürüm: 3.9.18 (en az 3.10 gerekli)", "3.9.18 eski sayılmalı; metin karşılaştırması burada yanlış sonuç verir"\nassert surum_kontrol((3, 10, 0)) == "Uygun: 3.10.0", "Sınır değer (tam 3.10) uygundur: >= kullan"\nassert surum_kontrol((3, 11, 2), en_az=(3, 12)) == "Eski sürüm: 3.11.2 (en az 3.12 gerekli)", "en_az parametresine uymalısın"\nassert surum_kontrol(sys.version_info[:3]).startswith("Uygun"), "Çalışan Python 3.10+ olduğundan Uygun dönmeli"\n',
-      hints: [
-        'Sürüm karşılaştırması için demetler kullan; Python demetleri soldan sağa sayı sayı karşılaştırır.',
-        '".".join(map(str, (3, 12, 4))) ifadesi "3.12.4" verir.',
-        'if tuple(surum) &gt;= tuple(en_az): return f"Uygun: {surum_metni}"'
-      ],
-      why: 'Demet karşılaştırması 3.12 ile 3.9\'u doğru sıralar; metin karşılaştırması "3.9" &gt; "3.12" der. sys.version_info da demet gibi davrandığı için aynı fonksiyon gerçek sürümle de çalışır.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-windows-2',
-      diff: 2,
-      q: '<p>Destek ekibine gelen PATH metinlerinde Python ile ilgili klasörleri bulan <code>python_klasorleri(path_metni, ayirici)</code> fonksiyonunu yaz. <code>ayirici</code> parametresi Windows\'ta <code>";"</code>, macOS/Linux\'ta <code>":"</code> olur (gerçek kodda <code>os.pathsep</code> verilir).</p><ul><li>Metni ayırıcıyla böl, her parçanın baş/son boşluklarını at.</li><li>Boş parçaları atla.</li><li>İçinde büyük/küçük harf fark etmeksizin <code>python</code> geçenleri, PATH\'teki sırayla, bir liste olarak döndür.</li></ul>',
-      guide: [
-        'Sonuç için boş bir liste oluştur.',
-        'path_metni.split(ayirici) ile parçalar üzerinde dön.',
-        'Her parçayı strip() ile temizle; boşsa continue.',
-        'parca.lower() içinde "python" geçiyorsa listeye ekle.',
-        'Döngüden sonra listeyi döndür.'
-      ],
-      example: 'satir = "elma, ,Armut,  kiraz "\nmeyveler = []\nfor p in satir.split(","):\n    p = p.strip()\n    if not p:\n        continue\n    if "a" in p.lower():\n        meyveler.append(p)\nprint(meyveler)\n',
-      start: 'def python_klasorleri(path_metni, ayirici):\n    sonuc = []\n    # TODO: path_metni\'ni ayirici ile böl ve parçalarda dön\n    # TODO: boşlukları temizle, boş parçayı atla\n    # TODO: "python" geçen parçayı sonuca ekle\n    return sonuc\n',
-      sol: 'def python_klasorleri(path_metni, ayirici):\n    sonuc = []\n    for parca in path_metni.split(ayirici):\n        parca = parca.strip()\n        if not parca:\n            continue\n        if "python" in parca.lower():\n            sonuc.append(parca)\n    return sonuc\n',
-      tests: 'w = r"C:\\Windows;C:\\Users\\ayse\\AppData\\Local\\Programs\\Python\\Python312\\Scripts\\; ;C:\\Users\\ayse\\AppData\\Local\\Programs\\Python\\Python312\\;;C:\\Program Files\\Git\\cmd"\nkok = r"C:\\Users\\ayse\\AppData\\Local\\Programs\\Python\\Python312"\nassert python_klasorleri(w, ";") == [kok + "\\\\Scripts\\\\", kok + "\\\\"], "Windows PATH\'inde iki Python klasörü PATH sırasıyla dönmeli"\nl = "/usr/local/bin:/usr/bin:/home/ayse/.pyenv/shims:/opt/homebrew/opt/python@3.12/bin"\nassert python_klasorleri(l, ":") == ["/opt/homebrew/opt/python@3.12/bin"], "Linux/macOS metninde ayırıcı \':\' olmalı; .pyenv içinde \'python\' geçmez"\nassert python_klasorleri("", ";") == [], "Boş PATH boş liste döndürmeli"\nassert python_klasorleri("C:\\\\PYTHON39", ";") == ["C:\\\\PYTHON39"], "Büyük/küçük harf fark etmemeli: lower() kullan"\n',
-      hints: ['Ayırıcıyı sabit yazma; parametreden gelen ayirici\'yi kullan.', 'for parca in path_metni.split(ayirici): ve içinde parca = parca.strip()', 'if "python" in parca.lower(): sonuc.append(parca)'],
-      why: 'Ayırıcıyı parametre yapmak aynı fonksiyonun her işletim sisteminde çalışmasını sağlar; gerçek kodda os.pathsep verilir. strip ve boş parça kontrolü, elle düzenlenmiş PATH\'lerdeki boşlukları ve çift ayırıcıları tolere eder.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'kurulum-windows-3',
-      diff: 2,
-      q: '<p><code>where</code> komutunu taklit eden <code>where_simule(klasorler, diskteki, komut)</code> fonksiyonunu yaz.</p><ul><li><code>klasorler</code>: PATH klasörlerinin sıralı listesi.</li><li><code>diskteki</code>: diskte var olan dosyaların tam yollarını içeren küme.</li><li>Her klasör için <code>ntpath.join(klasor, komut + ".exe")</code> adayını oluştur; kümede varsa sonuca ekle.</li><li>Bulunan tam yolların listesini PATH sırasıyla döndür (bulunamazsa boş liste).</li></ul>',
-      guide: ['ntpath modülünü içe aktar.', 'Boş bir bulunanlar listesi oluştur.', 'klasorler listesinde sırayla dön ve aday yolu ntpath.join ile kur.', 'aday in diskteki ise listeye ekle; sonunda listeyi döndür.'],
-      example: 'import posixpath\nraflar = ["/depo/a", "/depo/b"]\nvar = {"/depo/b/vida.txt"}\nfor r in raflar:\n    aday = posixpath.join(r, "vida" + ".txt")\n    print(aday, aday in var)\n',
-      start: 'import ntpath\n\ndef where_simule(klasorler, diskteki, komut):\n    bulunanlar = []\n    # TODO: her klasör için komut + ".exe" adayını oluştur\n    # TODO: aday diskte varsa bulunanlar\'a ekle\n    return bulunanlar\n',
-      sol: 'import ntpath\n\ndef where_simule(klasorler, diskteki, komut):\n    bulunanlar = []\n    for klasor in klasorler:\n        aday = ntpath.join(klasor, komut + ".exe")\n        if aday in diskteki:\n            bulunanlar.append(aday)\n    return bulunanlar\n',
-      tests: 'k = [r"C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps", r"C:\\Python311", r"C:\\Python312", r"C:\\Python312\\Scripts"]\nd = {r"C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe", r"C:\\Python311\\python.exe", r"C:\\Python312\\python.exe", r"C:\\Python312\\Scripts\\pip.exe"}\nassert where_simule(k, d, "python") == [r"C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe", r"C:\\Python311\\python.exe", r"C:\\Python312\\python.exe"], "Üç python.exe PATH sırasıyla bulunmalı; ilk satır çalışacak olandır"\nassert where_simule(k, d, "pip") == [r"C:\\Python312\\Scripts\\pip.exe"], "pip yalnızca Scripts klasöründe"\nassert where_simule(k, d, "git") == [], "Bulunamayan komut için boş liste dönmeli (where \'INFO: Could not find\' der)"\nassert where_simule(["C:\\\\Python312\\\\"], d, "python") == [r"C:\\Python312\\python.exe"], "Sonda ters bölü olan klasörde ntpath.join çift ters bölü üretmez"\n',
-      hints: ['ntpath.join, Windows yollarını Linux\'ta bile doğru birleştirir.', 'aday = ntpath.join(klasor, komut + ".exe")', 'if aday in diskteki: bulunanlar.append(aday)'],
-      why: 'Windows komutu ararken tam olarak bunu yapar: PATH klasörlerini sırayla dener. where hepsini listeler, ama çalışan her zaman ilk eşleşmedir; bu yüzden takma ad ya da eski bir kurulum öndeyse yanlış Python çalışır.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-windows-4',
-      diff: 1,
-      q: '<p><code>venv_python_yolu(proje, isletim)</code> fonksiyonunu yaz. <code>isletim</code> <code>"windows"</code>, <code>"macos"</code> ya da <code>"linux"</code> olabilir (büyük/küçük harf duyarsız). Proje kökündeki <code>.venv</code> ortamının Python yolunu döndür:</p><ul><li>Windows: <code>ntpath.join(proje, ".venv", "Scripts", "python.exe")</code></li><li>macOS/Linux: <code>posixpath.join(proje, ".venv", "bin", "python")</code></li><li>Başka bir değerde <code>ValueError</code> fırlat.</li></ul>',
-      start: 'def venv_python_yolu(proje, isletim):\n    pass\n',
-      sol: 'import ntpath, posixpath\n\ndef venv_python_yolu(proje, isletim):\n    isletim = isletim.lower()\n    if isletim == "windows":\n        return ntpath.join(proje, ".venv", "Scripts", "python.exe")\n    if isletim in ("macos", "linux"):\n        return posixpath.join(proje, ".venv", "bin", "python")\n    raise ValueError(f"Bilinmeyen işletim sistemi: {isletim}")\n',
-      tests: 'assert venv_python_yolu(r"C:\\dev\\rapor", "windows") == r"C:\\dev\\rapor\\.venv\\Scripts\\python.exe", "Windows\'ta Scripts klasörü ve python.exe"\nassert venv_python_yolu("/home/ayse/rapor", "linux") == "/home/ayse/rapor/.venv/bin/python", "Linux\'ta bin/python"\nassert venv_python_yolu("/Users/ayse/rapor", "macOS") == "/Users/ayse/rapor/.venv/bin/python", "macOS da bin kullanır; büyük/küçük harf duyarsız olmalı"\ntry:\n    venv_python_yolu("x", "amiga")\n    assert False, "Bilinmeyen sistemde ValueError fırlatmalısın"\nexcept ValueError:\n    pass\n',
-      hints: ['ntpath ve posixpath modüllerini içe aktar.', 'isletim.lower() ile karşılaştır; macos ve linux aynı kalıbı kullanır.'],
-      why: 'Windows ve POSIX venv düzenleri farklıdır (Scripts/python.exe ve bin/python). İki yol modülünü açıkça kullanmak, kodun hangi sistemde çalıştığından bağımsız doğru sonuç verir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-windows-5',
-      diff: 2,
-      q: '<p><code>python --version</code> çıktısını ayrıştıran <code>surum_ayristir(cikti)</code> fonksiyonunu yaz. Çıktı <code>"Python 3.12.4"</code> gibidir; sonunda boşluk/satır sonu olabilir, ön sürümlerde <code>"Python 3.13.0rc1"</code> gibi ekler bulunabilir.</p><ul><li><code>(3, 12, 4)</code> gibi üç tam sayılık demet döndür (ekleri yok say: 3.13.0rc1 → (3, 13, 0)).</li><li>Metin <code>Python</code> ile başlamıyorsa (ör. Store takma adının "Python was not found" mesajı) <code>None</code> döndür.</li></ul>',
-      start: 'import re\n\ndef surum_ayristir(cikti):\n    pass\n',
-      sol: 'import re\n\ndef surum_ayristir(cikti):\n    eslesme = re.match(r"Python (\\d+)\\.(\\d+)\\.(\\d+)", cikti.strip())\n    if not eslesme:\n        return None\n    return tuple(int(p) for p in eslesme.groups())\n',
-      tests: 'assert surum_ayristir("Python 3.12.4") == (3, 12, 4), "Temel durum: (3, 12, 4)"\nassert surum_ayristir("Python 3.9.18\\r\\n") == (3, 9, 18), "Windows satır sonu (\\\\r\\\\n) temizlenmeli"\nassert surum_ayristir("Python 3.13.0rc1") == (3, 13, 0), "Ön sürüm eki yok sayılmalı"\nassert surum_ayristir("Python was not found; run without arguments to install from the Microsoft Store") is None, "Store takma adı mesajı sürüm değildir: None"\nassert surum_ayristir("") is None, "Boş çıktı None"\nassert all(isinstance(x, int) for x in surum_ayristir("Python 3.11.9")), "Parçalar int olmalı"\n',
-      hints: ['Düzenli ifade (regex) ile üç sayı grubunu yakala: (\\d+)\\.(\\d+)\\.(\\d+)', 're.match eşleşmezse None döner; groups() metin verir, int\'e çevir.'],
-      why: 'Komut çıktısı insan için yazılmıştır; programda kullanmadan önce sağlam biçimde ayrıştırmak gerekir. re.match yalnızca baştan eşleştirdiği için "Python was not found" metni sayı içermese bile güvenle reddedilir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-windows-6',
-      diff: 2,
-      q: '<p><code>py --list</code> çıktısını ayrıştıran <code>py_list_ayristir(cikti)</code> fonksiyonunu yaz. Örnek çıktı:</p><pre> -V:3.12 *        Python 3.12 (64-bit)\n -V:3.11          Python 3.11 (64-bit)\n -V:3.9           Python 3.9 (64-bit)</pre><p>Sözlük döndür: <code>{"surumler": ["3.12", "3.11", "3.9"], "varsayilan": "3.12"}</code>. Sürümler çıktıdaki sırayla gelsin. Yıldız yoksa varsayılan <code>None</code> olsun. <code>-V:</code> ile başlamayan satırları atla.</p>',
-      start: 'def py_list_ayristir(cikti):\n    pass\n',
-      sol: 'def py_list_ayristir(cikti):\n    surumler = []\n    varsayilan = None\n    for satir in cikti.splitlines():\n        parcalar = satir.split()\n        if not parcalar or not parcalar[0].startswith("-V:"):\n            continue\n        surum = parcalar[0][3:]\n        surumler.append(surum)\n        if len(parcalar) > 1 and parcalar[1] == "*":\n            varsayilan = surum\n    return {"surumler": surumler, "varsayilan": varsayilan}\n',
-      tests: 'c = " -V:3.12 *        Python 3.12 (64-bit)\\n -V:3.11          Python 3.11 (64-bit)\\n -V:3.9           Python 3.9 (64-bit)\\n"\nassert py_list_ayristir(c) == {"surumler": ["3.12", "3.11", "3.9"], "varsayilan": "3.12"}, "Üç sürüm ve yıldızlı varsayılan"\nc2 = "Installed Pythons found by py Launcher for Windows\\n -V:3.13          Python 3.13 (64-bit)\\n -V:3.12 *        Python 3.12 (64-bit)\\n"\nassert py_list_ayristir(c2) == {"surumler": ["3.13", "3.12"], "varsayilan": "3.12"}, "Başlık satırı atlanmalı; yıldız ikinci satırda olabilir"\nassert py_list_ayristir(" -V:3.12          Python 3.12 (64-bit)") == {"surumler": ["3.12"], "varsayilan": None}, "Yıldız yoksa varsayılan None"\nassert py_list_ayristir("") == {"surumler": [], "varsayilan": None}, "Boş çıktı"\n',
-      hints: ['splitlines() ile satırlara, split() ile kelimelere ayır.', 'İlk kelime "-V:3.12" ise [3:] dilimi "3.12" verir; ikinci kelime "*" ise varsayılandır.'],
-      why: 'split() argümansız çağrılınca birden çok boşluğu tek ayırıcı sayar; hizalama için konmuş boşluklar sorun olmaz. Başlık satırları -V: ile başlamadığı için kolayca elenir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'kurulum-windows-7',
-      diff: 2,
-      q: '<p>BT ekibinin sessiz kurulum komutunu inceleyen <code>kurulum_komutu_ayristir(komut)</code> fonksiyonunu yaz. Örnek:</p><pre>python-3.12.4-amd64.exe /quiet InstallAllUsers=0 PrependPath=1 TargetDir="C:\\Python 312"</pre><p><code>shlex.split(komut)</code> ile parçala: çift tırnak içindeki boşluklu değer tek parça kalır, tırnaklar atılır ve tırnak içindeki ters bölü korunur. Sözlük döndür:</p><ul><li><code>"dosya"</code>: ilk parça.</li><li><code>"bayraklar"</code>: <code>/</code> ile başlayan parçaların listesi.</li><li><code>"ayarlar"</code>: <code>ANAHTAR=DEGER</code> parçalarından sözlük (yalnız ilk <code>=</code> işaretinden böl).</li></ul>',
-      start: 'import shlex\n\ndef kurulum_komutu_ayristir(komut):\n    pass\n',
-      sol: 'import shlex\n\ndef kurulum_komutu_ayristir(komut):\n    parcalar = shlex.split(komut)\n    sonuc = {"dosya": parcalar[0], "bayraklar": [], "ayarlar": {}}\n    for p in parcalar[1:]:\n        if p.startswith("/"):\n            sonuc["bayraklar"].append(p)\n        elif "=" in p:\n            anahtar, deger = p.split("=", 1)\n            sonuc["ayarlar"][anahtar] = deger\n    return sonuc\n',
-      tests: 'k = \'python-3.12.4-amd64.exe /quiet InstallAllUsers=0 PrependPath=1 TargetDir="C:\\\\Python 312"\'\nr = kurulum_komutu_ayristir(k)\nassert r["dosya"] == "python-3.12.4-amd64.exe", "İlk parça yükleyici dosyası"\nassert r["bayraklar"] == ["/quiet"], "/ ile başlayanlar bayraktır"\nassert r["ayarlar"] == {"InstallAllUsers": "0", "PrependPath": "1", "TargetDir": "C:\\\\Python 312"}, "Tırnaklı değer boşluğuyla tek parça kalmalı; shlex tırnakları atar, tırnak içindeki ters bölüyü korur"\nr2 = kurulum_komutu_ayristir("python-3.13.0-amd64.exe /passive /log kurulum.log Include_test=0 X=a=b")\nassert r2["bayraklar"] == ["/passive", "/log"] and r2["ayarlar"] == {"Include_test": "0", "X": "a=b"}, "Birden çok bayrak; = içermeyen düz parça (kurulum.log) yok sayılır; yalnız ilk = işaretinden böl"\n',
-      hints: ['shlex.split tırnaklı değeri tek parça yapar: TargetDir="C:\\Python 312" → TargetDir=C:\\Python 312.', 'p.startswith("/") bayraktır; değilse "=" in p kontrolü ve p.split("=", 1).'],
-      why: 'Basit str.split() tırnak içindeki boşlukta bölünürdü. shlex kabuk kurallarına göre ayırır. Dikkat: POSIX modunda tırnak DIŞINDAKİ ters bölü kaçış sayılıp silinir; Windows yollarını komutlarda her zaman tırnakla yazmak bu yüzden iyi alışkanlıktır.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'kurulum-windows-8',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>scripts_eksik_mi(path_metni, ayirici)</code> fonksiyonu PATH\'te bir Python klasörü olup da yanındaki <code>Scripts</code> klasörü olmadığında <code>True</code> döndürmeli (pip tanınmıyor hatasının nedeni budur). Karşılaştırma büyük/küçük harf duyarsız olmalı ve sondaki ters bölü fark yaratmamalı. Kod Windows yollarında yanlış sonuç veriyor.</p>',
-      start: 'def scripts_eksik_mi(path_metni, ayirici):\n    klasorler = [k for k in path_metni.split(":") if k]\n    python_kokleri = [k for k in klasorler if k.lower().endswith("python312")]\n    for kok in python_kokleri:\n        if kok + "\\\\Scripts" not in klasorler:\n            return True\n    return False\n',
-      sol: 'def scripts_eksik_mi(path_metni, ayirici):\n    klasorler = [k.strip().rstrip("\\\\").lower() for k in path_metni.split(ayirici) if k.strip()]\n    python_kokleri = [k for k in klasorler if k.rsplit("\\\\", 1)[-1].startswith("python")]\n    for kok in python_kokleri:\n        if kok + "\\\\scripts" not in klasorler:\n            return True\n    return False\n',
-      tests: 'a = r"C:\\Windows;C:\\Python312\\;C:\\Python312\\Scripts" + "\\\\"\nassert scripts_eksik_mi(a, ";") is False, "Sonda ters bölü olsa da Scripts mevcut: False"\nb = r"C:\\Windows;C:\\Users\\ayse\\AppData\\Local\\Programs\\Python\\Python311"\nassert scripts_eksik_mi(b, ";") is True, "Python311 var ama Scripts yok: True (sürümü sabit yazma)"\nc = r"c:\\python312;C:\\PYTHON312\\SCRIPTS"\nassert scripts_eksik_mi(c, ";") is False, "Windows yolları büyük/küçük harf duyarsızdır"\nassert scripts_eksik_mi(r"C:\\Windows;C:\\Program Files\\Git\\cmd", ";") is False, "Python klasörü yoksa eksik de yoktur"\n',
-      hints: [
-        'Üç sorun var: ayırıcı sabit ":" yazılmış (C: sürücü harfini böler), sürüm "python312" sabit, harf ve sondaki ters bölü normalleştirilmemiş.',
-        'Her klasörü strip().rstrip("\\\\").lower() ile normalleştir; kök klasörü son parçası "python" ile başlayan klasör olarak tanı.'
-      ],
-      why: 'Windows yollarında ":" sürücü harfinin parçasıdır; PATH ayırıcısı ";"dir ve bu yüzden parametre olarak alınmalıdır. Windows yolları büyük/küçük harf duyarsızdır ve elle eklenen girdilerde sondaki ters bölü sık görülür; karşılaştırmadan önce normalleştirmek gerekir.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'kurulum-windows-9',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>en_yeni_surum(surumler)</code> kurulu sürüm metinleri listesinden en yenisini döndürmeli; liste boşsa <code>None</code>. Kod 3.9 ile 3.12 arasında yanlış seçim yapıyor ve boş listede çöküyor.</p>',
-      start: 'def en_yeni_surum(surumler):\n    en_yeni = surumler[0]\n    for s in surumler:\n        if s > en_yeni:\n            en_yeni = s\n    return en_yeni\n',
-      sol: 'def en_yeni_surum(surumler):\n    if not surumler:\n        return None\n    return max(surumler, key=lambda s: tuple(int(p) for p in s.split(".")))\n',
-      tests: 'assert en_yeni_surum(["3.9.18", "3.12.4", "3.11.9"]) == "3.12.4", "3.12.4 en yenisi; metin karşılaştırması 3.9\'u seçer"\nassert en_yeni_surum(["3.10", "3.9"]) == "3.10", "3.10 > 3.9 (sayı olarak)"\nassert en_yeni_surum(["3.12.10", "3.12.9"]) == "3.12.10", "Yama numarası da sayı olarak karşılaştırılmalı"\nassert en_yeni_surum([]) is None, "Boş listede None dönmeli, IndexError değil"\n',
-      hints: ['"3.9" &gt; "3.12" metin olarak True\'dur; parçaları int\'e çevirip demet karşılaştır.', 'max(..., key=lambda s: tuple(int(p) for p in s.split("."))) ve önce boş liste kontrolü.'],
-      why: 'Sürüm numaraları metin değil sayı dizisidir. Demet anahtarı ile max hem 3.10/3.9 hem 3.12.10/3.12.9 durumlarını doğru çözer. Boş liste kontrolü olmadan surumler[0] IndexError verir.'
-    },
-    {
-      t: 'code',
-      stage: 'Meydan okuma',
-      id: 'kurulum-windows-10',
-      diff: 3,
-      q: '<p>Destek ekibi için <code>path_teshis(path_metni, ayirici, diskteki)</code> fonksiyonunu yaz. <code>diskteki</code>, var olan dosyaların tam yollarını içeren kümedir. Sözlük döndür:</p><ul><li><code>"calisan"</code>: PATH sırasına göre ilk bulunan <code>python.exe</code> tam yolu (yoksa <code>None</code>).</li><li><code>"store_tuzagi"</code>: çalışan yol <code>\\WindowsApps\\</code> içeriyorsa <code>True</code> (harf duyarsız).</li><li><code>"pip_var"</code>: herhangi bir klasörde <code>pip.exe</code> varsa <code>True</code>.</li><li><code>"bos_girdi"</code>: boş (ya da yalnız boşluk) girdi sayısı.</li><li><code>"tekrarlar"</code>: birden çok kez geçen klasörler; harf duyarsız ve sondaki ters bölü yok sayılarak karşılaştır; ilk görüldüğü biçimiyle (sondaki ters bölü atılmış), tekrarın fark edildiği sırayla listele.</li></ul><p>Diskteki dosya yollarını da harf duyarsız karşılaştır.</p>',
-      start: 'import ntpath\n\ndef path_teshis(path_metni, ayirici, diskteki):\n    pass\n',
-      sol: 'import ntpath\n\ndef path_teshis(path_metni, ayirici, diskteki):\n    disk = {d.lower() for d in diskteki}\n    sonuc = {"calisan": None, "store_tuzagi": False, "pip_var": False, "bos_girdi": 0, "tekrarlar": []}\n    gorulen = {}\n    for ham in path_metni.split(ayirici):\n        klasor = ham.strip().rstrip("\\\\")\n        if not klasor:\n            sonuc["bos_girdi"] += 1\n            continue\n        anahtar = klasor.lower()\n        if anahtar in gorulen:\n            if gorulen[anahtar] not in sonuc["tekrarlar"]:\n                sonuc["tekrarlar"].append(gorulen[anahtar])\n            continue\n        gorulen[anahtar] = klasor\n        py = ntpath.join(klasor, "python.exe")\n        if sonuc["calisan"] is None and py.lower() in disk:\n            sonuc["calisan"] = py\n        if ntpath.join(klasor, "pip.exe").lower() in disk:\n            sonuc["pip_var"] = True\n    if sonuc["calisan"]:\n        sonuc["store_tuzagi"] = "\\\\windowsapps\\\\" in sonuc["calisan"].lower()\n    return sonuc\n',
-      tests: 'p = r"C:\\Windows;C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps;;C:\\Python312\\; ;c:\\python312;C:\\Python312\\Scripts;C:\\WINDOWS" + "\\\\"\nd = {r"C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe", r"C:\\Python312\\python.exe", r"C:\\Python312\\Scripts\\pip.exe"}\nr = path_teshis(p, ";", d)\nassert r["calisan"] == r"C:\\Users\\ayse\\AppData\\Local\\Microsoft\\WindowsApps\\python.exe", "İlk eşleşme WindowsApps takma adı"\nassert r["store_tuzagi"] is True, "Çalışan yol WindowsApps içinde: Store tuzağı"\nassert r["pip_var"] is True, "Scripts klasöründe pip.exe var"\nassert r["bos_girdi"] == 2, "Bir boş ve bir yalnız boşluk girdi var: 2"\nassert r["tekrarlar"] == [r"C:\\Python312", r"C:\\Windows"], "c:\\\\python312 ve C:\\\\WINDOWS\\\\ tekrar sayılır; ilk görülen biçimle, fark edilme sırasıyla"\nr2 = path_teshis(r"C:\\Python312;C:\\Tools", ";", {r"c:\\python312\\PYTHON.EXE"})\nassert r2 == {"calisan": r"C:\\Python312\\python.exe", "store_tuzagi": False, "pip_var": False, "bos_girdi": 0, "tekrarlar": []}, "Disk karşılaştırması harf duyarsız; Store tuzağı yok"\nassert path_teshis("", ";", set())["calisan"] is None, "Boş PATH: çalışan yok"\n',
-      hints: [
-        'Her girdiyi strip().rstrip("\\\\") ile normalleştir; karşılaştırma anahtarı için lower() kullan.',
-        'Görülen klasörleri {anahtar: ilk_biçim} sözlüğünde tut; tekrar edince ilk biçimi tekrarlar listesine (bir kez) ekle.',
-        'Diski de lower() ile bir kümeye çevir; calisan yalnızca ilk eşleşmede atanır.'
-      ],
-      why: 'Gerçek PATH\'ler yıllar içinde elle düzenlenir: boş girdiler, tekrarlar ve farklı yazımlar birikir. Windows dosya sistemi harf duyarsız olduğundan tüm karşılaştırmalar normalleştirilmiş anahtarla yapılır; ama kullanıcıya gösterilen değer ilk görülen biçimdir.'
-    },
-    {
-      t: 'code',
-      stage: 'Mini proje',
-      id: 'kurulum-windows-11',
-      diff: 3,
-      q: '<p>Anadolu Market destek kanalına gelen kurulum hatalarını sınıflandıran küçük bir araç yaz.</p><p><b>1)</b> <code>teshis(mesaj)</code>: hata metnine bakıp bir kod döndürsün (harf duyarsız, kontroller bu sırayla):</p><ul><li><code>"running scripts is disabled"</code> geçiyorsa → <code>"YURUTME_ILKESI"</code></li><li><code>"certificate_verify_failed"</code> → <code>"SSL"</code></li><li><code>"python was not found"</code> → <code>"STORE_TAKMA_AD"</code></li><li><code>"\'pip\' is not recognized"</code> → <code>"PIP_PATH"</code></li><li><code>"is not recognized"</code> ya da <code>"tanınmıyor"</code> → <code>"PATH"</code></li><li><code>"access is denied"</code> ya da <code>"permissionerror"</code> → <code>"IZIN"</code></li><li><code>"unicodeencodeerror"</code> → <code>"KODLAMA"</code></li><li>hiçbiri → <code>"BILINMIYOR"</code></li></ul><p><b>2)</b> <code>cozum(kod)</code>: koda karşılık kısa çözüm metni döndürsün; en az şu eşlemeler olsun: <code>"YURUTME_ILKESI"</code> için metin <code>Set-ExecutionPolicy</code> içermeli, <code>"PIP_PATH"</code> için <code>python -m pip</code>, <code>"STORE_TAKMA_AD"</code> için <code>App execution aliases</code>. Bilinmeyen kod için <code>"Hata metninin son satırını arat."</code></p><p><b>3)</b> <code>rapor(mesajlar)</code>: kod → adet sözlüğü döndürsün; en sık kod önce, eşitlikte koda göre alfabetik.</p>',
-      start: 'def teshis(mesaj):\n    pass\n\n\ndef cozum(kod):\n    pass\n\n\ndef rapor(mesajlar):\n    pass\n',
-      sol: 'KURALLAR = [\n    (("running scripts is disabled",), "YURUTME_ILKESI"),\n    (("certificate_verify_failed",), "SSL"),\n    (("python was not found",), "STORE_TAKMA_AD"),\n    (("\'pip\' is not recognized",), "PIP_PATH"),\n    (("is not recognized", "tanınmıyor"), "PATH"),\n    (("access is denied", "permissionerror"), "IZIN"),\n    (("unicodeencodeerror",), "KODLAMA"),\n]\n\nCOZUMLER = {\n    "YURUTME_ILKESI": "Set-ExecutionPolicy -Scope CurrentUser RemoteSigned çalıştır.",\n    "SSL": "Kurum sertifikasını pip config set global.cert ile tanıt.",\n    "STORE_TAKMA_AD": "App execution aliases ekranında python.exe takma adını kapat.",\n    "PIP_PATH": "pip yerine python -m pip kullan.",\n    "PATH": "Yükleyiciyi Modify ile çalıştırıp PATH\'e ekle ya da py kullan.",\n    "IZIN": "venv kullan, açık programları kapatıp tekrar dene.",\n    "KODLAMA": "PYTHONUTF8=1 ayarla, Windows Terminal kullan.",\n}\n\n\ndef teshis(mesaj):\n    kucuk = mesaj.lower()\n    for anahtarlar, kod in KURALLAR:\n        if any(a in kucuk for a in anahtarlar):\n            return kod\n    return "BILINMIYOR"\n\n\ndef cozum(kod):\n    return COZUMLER.get(kod, "Hata metninin son satırını arat.")\n\n\ndef rapor(mesajlar):\n    sayac = {}\n    for m in mesajlar:\n        k = teshis(m)\n        sayac[k] = sayac.get(k, 0) + 1\n    return dict(sorted(sayac.items(), key=lambda kv: (-kv[1], kv[0])))\n',
-      tests: 'assert teshis("File .venv\\\\Scripts\\\\Activate.ps1 cannot be loaded because running scripts is disabled on this system.") == "YURUTME_ILKESI", "Yürütme ilkesi"\nassert teshis("SSL: CERTIFICATE_VERIFY_FAILED certificate verify failed") == "SSL", "SSL hatası (harf duyarsız)"\nassert teshis("Python was not found; run without arguments to install from the Microsoft Store") == "STORE_TAKMA_AD", "Store takma adı"\nassert teshis("\'pip\' is not recognized as an internal or external command") == "PIP_PATH", "pip kontrolü genel PATH kontrolünden ÖNCE yapılmalı"\nassert teshis("\'python\' is not recognized as an internal or external command") == "PATH", "python tanınmıyor: PATH"\nassert teshis("python : \'python\' terimi bir cmdlet adı olarak tanınmıyor") == "PATH", "Türkçe PowerShell mesajı"\nassert teshis("ERROR: [WinError 5] Access is denied") == "IZIN", "Erişim reddedildi"\nassert teshis("UnicodeEncodeError: \'charmap\' codec can\'t encode") == "KODLAMA", "Kodlama"\nassert teshis("Segmentation fault") == "BILINMIYOR", "Bilinmeyen"\nassert "Set-ExecutionPolicy" in cozum("YURUTME_ILKESI"), "Yürütme ilkesi çözümü Set-ExecutionPolicy içermeli"\nassert "python -m pip" in cozum("PIP_PATH"), "pip çözümü python -m pip içermeli"\nassert "App execution aliases" in cozum("STORE_TAKMA_AD"), "Store çözümü"\nassert cozum("XYZ") == "Hata metninin son satırını arat.", "Bilinmeyen kod"\nr = rapor(["\'pip\' is not recognized", "Access is denied", "\'pip\' is not recognized", "bilinmeyen", "PermissionError: [Errno 13]"])\nassert r == {"IZIN": 2, "PIP_PATH": 2, "BILINMIYOR": 1}, "Adet çoktan aza, eşitlikte alfabetik: IZIN, PIP_PATH, BILINMIYOR"\nassert list(r) == ["IZIN", "PIP_PATH", "BILINMIYOR"], "Sözlük sırası da önemli"\n',
-      hints: [
-        'Kuralları (anahtar_kelimeler, kod) çiftlerinden oluşan bir listede tut ve sırayla dene; ilk eşleşen kazanır.',
-        'pip kuralı genel "is not recognized" kuralından önce gelmeli, yoksa pip hatası PATH sayılır.',
-        'sorted(sayac.items(), key=lambda kv: (-kv[1], kv[0])) çoktan aza, eşitlikte alfabetik sıralar.'
-      ],
-      why: 'Kural tablosunu veri olarak tutmak, yeni bir hata türü eklemeyi tek satıra indirir ve sıralamanın önemini görünür kılar: özel kural (pip) genel kuraldan (is not recognized) önce gelmelidir. Bu yapı derste gördüğün belirti → neden → çözüm tablosunun koda dökülmüş hâlidir.'
-    }
-  ],
+    }],
   faq: [
     {
       q: 'Install Now mı Customize installation mı seçmeliyim?',
@@ -1736,8 +1145,7 @@ print("Sonuç:", sonuc)</pre>
 <p><code>python.testing.pytestEnabled</code> açıkken Test panelinde tüm testler ağaç olarak görünür; tek bir testin yanındaki düğmeyle onu çalıştırabilir ya da hata ayıklayıcıyla içine girebilirsin. Test yazmayı <b>Test yazma</b> dersinde göreceksin.</p>
 </section>
 `,
-  ex: [
-    {
+  ex: [{
       t: 'mc',
       stage: 'Isınma',
       q: 'Terminalde <code>pip install pandas</code> başarıyla bitti. Ama VS Code editörde <code>import pandas</code> satırının altını çizip <code>Import "pandas" could not be resolved</code> diyor. En olası neden ne?',
@@ -1770,222 +1178,7 @@ print("Sonuç:", sonuc)</pre>
       ],
       a: 1,
       why: 'Ayar katmanları sırasıyla varsayılan → kullanıcı → çalışma alanıdır ve daha özel katman kazanır. Bu sayede proje kuralları (biçimlendirme, satır uzunluğu) herkeste aynı uygulanır.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'settings.json üreten bu kod ne yazdırır?',
-      code: 'import json\nayar = {"editor.formatOnSave": True, "editor.rulers": [88]}\nprint(json.dumps(ayar))\n',
-      o: [
-        '{"editor.formatOnSave": True, "editor.rulers": [88]}',
-        '{\'editor.formatOnSave\': True, \'editor.rulers\': [88]}',
-        '{"editor.formatOnSave": true, "editor.rulers": [88]}',
-        '{"editor.formatOnSave": "true", "editor.rulers": ["88"]}'
-      ],
-      a: 2,
-      why: 'json.dumps Python değerlerini JSON karşılıklarına çevirir: True → true, anahtarlar çift tırnaklı. Tek tırnaklı çıktı print(ayar)\'ın (Python temsili) çıktısıdır ve geçersiz JSON\'dur.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'VS Code ayar katmanlarını taklit eden bu kod ne yazdırır?',
-      code: 'kullanici = {"editor.fontSize": 14, "editor.formatOnSave": False}\ncalisma_alani = {"editor.formatOnSave": True}\netkin = {**kullanici, **calisma_alani}\nprint(etkin["editor.formatOnSave"], len(etkin))\n',
-      o: ['False 2', 'True 3', 'True 2', 'False 3'],
-      a: 2,
-      why: 'Sözlük açma ({**a, **b}) sırasında aynı anahtar ikinci kez gelince değeri güncellenir; sonraki (çalışma alanı) kazanır. Anahtar sayısı artmaz: iki farklı anahtar vardır.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Çalışma dizini tuzağı: bu kod ne yazdırır?',
-      code: 'from pathlib import PurePosixPath\nbetik = PurePosixPath("/proje/src/rapor.py")\ncwd = PurePosixPath("/proje")\nprint(cwd / "veri.csv")\nprint(betik.parent / "veri.csv")\n',
-      o: ['/proje/src/veri.csv\n/proje/src/veri.csv', '/proje/veri.csv\n/proje/src/veri.csv', '/proje/veri.csv\n/proje/src/rapor.py/veri.csv', '/proje/veri.csv\n/proje/veri.csv'],
-      a: 1,
-      why: 'Göreli bir dosya adı çalışma dizinine (cwd) göre çözülür; betiğin yeri önemsizdir. betik.parent ise betiğin klasörünü (/proje/src) verir. İkisi farklı olduğu için "bende çalışıyor, düğmeyle çalışmıyor" sorunu doğar.'
-    },
-    {
-      t: 'order',
-      stage: 'Kodu oku',
-      q: '<p>Hata ayıklama yapılandırmasını (launch.json) Python ile üreten betiği sırala. Çıktıdaki anahtar sırası, satırların sırasını ele verir.</p>',
-      lines: [
-        'import json',
-        'ayar = {"name": "Rapor", "type": "debugpy", "request": "launch"}',
-        'ayar["program"] = "${file}"',
-        'ayar["args"] = ["--ay", "2026-10"]',
-        'launch = {"version": "0.2.0", "configurations": [ayar]}',
-        'print(json.dumps(launch))'
-      ],
-      expect: '{"version": "0.2.0", "configurations": [{"name": "Rapor", "type": "debugpy", "request": "launch", "program": "${file}", "args": ["--ay", "2026-10"]}]}\n',
-      hint: 'Sözlükler ekleme sırasını korur; program anahtarı args\'tan önce eklenmiş.',
-      why: 'json modülü içe aktarılır, yapılandırma sözlüğü oluşturulup alanları sırayla eklenir, sonra launch sözlüğüne yerleştirilip yazdırılır. Python sözlükleri ekleme sırasını koruduğu için JSON çıktısındaki sıra kodun sırasını yansıtır.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'vscode-1',
-      diff: 1,
-      q: '<p>Ekibin ayar şablonunu üreten <code>ayarlar_uret(formatlayici, satir_uzunlugu=88)</code> fonksiyonunu yaz. <code>formatlayici</code> <code>"ruff"</code> ya da <code>"black"</code> olabilir (büyük/küçük harf duyarsız); başka değerde <code>ValueError</code> fırlat. Şu sözlüğü döndür:</p><pre>{\n    "[python]": {\n        "editor.defaultFormatter": &lt;eklenti kimliği&gt;,\n        "editor.formatOnSave": True\n    },\n    "editor.rulers": [satir_uzunlugu],\n    "python.terminal.activateEnvironment": True\n}</pre><p>Kimlikler: ruff → <code>"charliermarsh.ruff"</code>, black → <code>"ms-python.black-formatter"</code>.</p>',
-      guide: [
-        'Biçimlendirici adlarını eklenti kimliklerine eşleyen bir sözlük tanımla.',
-        'formatlayici.lower() sözlükte yoksa ValueError fırlat.',
-        'İç içe sözlüğü kur: "[python]" anahtarının değeri de bir sözlük.',
-        'editor.rulers bir liste olmalı: [satir_uzunlugu].'
-      ],
-      example: 'RENKLER = {"kirmizi": "#ff0000", "mavi": "#0000ff"}\ndef tema(renk):\n    if renk.lower() not in RENKLER:\n        raise ValueError(renk)\n    return {"[markdown]": {"renk": RENKLER[renk.lower()]}, "kenar": [80]}\nprint(tema("Mavi"))\n',
-      start: 'KIMLIKLER = {\n    # TODO: "ruff" ve "black" için eklenti kimlikleri\n}\n\n\ndef ayarlar_uret(formatlayici, satir_uzunlugu=88):\n    # TODO: bilinmeyen biçimlendiricide ValueError\n    # TODO: iç içe ayar sözlüğünü döndür\n    return {}\n',
-      sol: 'KIMLIKLER = {\n    "ruff": "charliermarsh.ruff",\n    "black": "ms-python.black-formatter",\n}\n\n\ndef ayarlar_uret(formatlayici, satir_uzunlugu=88):\n    ad = formatlayici.lower()\n    if ad not in KIMLIKLER:\n        raise ValueError(f"Bilinmeyen biçimlendirici: {formatlayici}")\n    return {\n        "[python]": {\n            "editor.defaultFormatter": KIMLIKLER[ad],\n            "editor.formatOnSave": True,\n        },\n        "editor.rulers": [satir_uzunlugu],\n        "python.terminal.activateEnvironment": True,\n    }\n',
-      tests: 'import json\nr = ayarlar_uret("ruff")\nassert r["[python]"] == {"editor.defaultFormatter": "charliermarsh.ruff", "editor.formatOnSave": True}, "[python] bölümü Ruff kimliğini ve formatOnSave True içermeli"\nassert r["editor.rulers"] == [88], "Varsayılan satır uzunluğu 88, liste içinde"\nassert r["python.terminal.activateEnvironment"] is True, "Terminalde venv otomatik etkinleşmeli"\nassert ayarlar_uret("Black", 100)["[python]"]["editor.defaultFormatter"] == "ms-python.black-formatter", "Büyük harfli Black de kabul edilmeli"\nassert ayarlar_uret("black", 100)["editor.rulers"] == [100], "satir_uzunlugu parametresi kullanılmalı"\nassert \'"editor.formatOnSave": true\' in json.dumps(r), "Sözlük JSON\'a çevrilebilmeli (True → true)"\ntry:\n    ayarlar_uret("autopep8")\n    assert False, "Bilinmeyen biçimlendiricide ValueError beklenir"\nexcept ValueError:\n    pass\n',
-      hints: [
-        'Eşleme sözlüğü: {"ruff": "charliermarsh.ruff", "black": "ms-python.black-formatter"}',
-        'if ad not in KIMLIKLER: raise ValueError(...)',
-        '"[python]": {"editor.defaultFormatter": KIMLIKLER[ad], "editor.formatOnSave": True}'
-      ],
-      why: 'Ayar şablonunu kodla üretmek, ekipteki tüm projelerin aynı kurallarla başlamasını sağlar. Python sözlüğü doğrudan JSON\'a çevrilebildiği için settings.json\'u elle yazmaya gerek kalmaz.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'vscode-2',
-      diff: 2,
-      q: '<p>VS Code ayar dosyaları JSONC\'dir: tam satır <code>//</code> yorumları ve kapanış parantezinden önce sondaki virgül içerebilir. <code>jsonc_oku(metin)</code> fonksiyonunu yaz:</p><ul><li>Baş boşlukları atıldığında <code>//</code> ile başlayan satırları çıkar (satır içindeki <code>"https://..."</code> gibi metinlere dokunma).</li><li><code>,</code> ardından yalnız boşluk ve <code>}</code> ya da <code>]</code> geliyorsa virgülü sil.</li><li><code>json.loads</code> ile sözlüğe çevirip döndür.</li></ul>',
-      guide: [
-        'metin.splitlines() ile satırlara ayır; strip().startswith("//") olanları ele.',
-        'Kalan satırları "\\n".join ile birleştir.',
-        're.sub(r",\\s*([}\\]])", r"\\1", metin) sondaki virgülleri siler.',
-        'json.loads ile çözümle ve döndür.'
-      ],
-      example: 'import re\nliste_metni = "[1, 2, 3,  ]"\nprint(re.sub(r",\\s*\\]", "]", liste_metni))\nsatirlar = ["# yorum", "a=1", "  # girintili yorum", "b=2"]\nprint([s for s in satirlar if not s.strip().startswith("#")])\n',
-      start: 'import json, re\n\ndef jsonc_oku(metin):\n    # TODO: // ile başlayan satırları çıkar\n    # TODO: sondaki virgülleri sil\n    # TODO: json.loads ile döndür\n    return json.loads(metin)\n',
-      sol: 'import json, re\n\ndef jsonc_oku(metin):\n    satirlar = [s for s in metin.splitlines() if not s.strip().startswith("//")]\n    temiz = "\\n".join(satirlar)\n    temiz = re.sub(r",\\s*([}\\]])", r"\\1", temiz)\n    return json.loads(temiz)\n',
-      tests: 'm = """{\n    // biçimlendirme\n    "[python]": {\n        "editor.formatOnSave": true,\n    },\n        // girintili yorum\n    "editor.rulers": [88, 120,],\n    "json.schemaDownload.enable": false,\n    "workbench.startupEditor": "https://anadolu.example/baslangic",\n}"""\nr = jsonc_oku(m)\nassert r["[python]"] == {"editor.formatOnSave": True}, "İç sözlükteki sondaki virgül silinmeli"\nassert r["editor.rulers"] == [88, 120], "Listedeki sondaki virgül silinmeli"\nassert r["workbench.startupEditor"] == "https://anadolu.example/baslangic", "Metin içindeki // korunmalı: yalnız tam satır yorumlar silinir"\nassert len(r) == 4, "Dört üst düzey anahtar"\nassert jsonc_oku(\'{"a": 1}\') == {"a": 1}, "Temiz JSON olduğu gibi okunmalı"\n',
-      hints: [
-        'Yorum satırlarını filtrelemek için liste üreteci: [s for s in metin.splitlines() if not s.strip().startswith("//")]',
-        'Düzenli ifade: virgül, ardından sıfır ya da daha çok boşluk (\\s*), ardından } veya ] yakalanır; yerine yalnız parantez konur.',
-        'temiz = re.sub(r",\\s*([}\\]])", r"\\1", temiz)'
-      ],
-      why: 'Tam satır yorumlarını satır bazında silmek, metin içindeki "https://" gibi değerlere dokunmaz; basit bir replace("//", "") URL\'leri bozardı. Düzenli ifadedeki \\s* satır sonlarını da kapsadığı için virgül ile parantez farklı satırlarda olsa da çalışır.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'vscode-3',
-      diff: 1,
-      q: '<p>VS Code bir klasörü açınca sanal ortamı otomatik bulmaya çalışır. <code>yorumlayici_bul(klasorler, isletim)</code> fonksiyonunu yaz: <code>klasorler</code>, proje kökündeki klasör adlarının kümesidir. Sırayla <code>.venv</code>, <code>venv</code>, <code>env</code> adlarına bak; ilk bulunanın Python yolunu döndür:</p><ul><li><code>isletim == "windows"</code>: <code>&lt;ad&gt;\\Scripts\\python.exe</code></li><li>Diğerleri: <code>&lt;ad&gt;/bin/python</code></li></ul><p>Hiçbiri yoksa <code>None</code>.</p>',
-      guide: ['Aday adları öncelik sırasıyla bir listeye koy.', 'Listede dön; ad klasorler içinde varsa yolu oluştur.', 'Windows\'ta ntpath.join, diğerlerinde posixpath.join kullan.', 'Döngü biterse None döndür.'],
-      example: 'import posixpath\nraflar = {"b-raf", "c-raf"}\nfor aday in ["a-raf", "b-raf", "c-raf"]:\n    if aday in raflar:\n        print("İlk dolu raf:", posixpath.join(aday, "kutu"))\n        break\n',
-      start: 'import ntpath, posixpath\n\nADAYLAR = [".venv", "venv", "env"]\n\n\ndef yorumlayici_bul(klasorler, isletim):\n    # TODO: adaylarda sırayla dön, ilk bulunanın yolunu döndür\n    return None\n',
-      sol: 'import ntpath, posixpath\n\nADAYLAR = [".venv", "venv", "env"]\n\n\ndef yorumlayici_bul(klasorler, isletim):\n    for ad in ADAYLAR:\n        if ad in klasorler:\n            if isletim == "windows":\n                return ntpath.join(ad, "Scripts", "python.exe")\n            return posixpath.join(ad, "bin", "python")\n    return None\n',
-      tests: 'assert yorumlayici_bul({"src", ".venv", "tests"}, "linux") == ".venv/bin/python", "Linux\'ta bin/python"\nassert yorumlayici_bul({"venv", "env"}, "windows") == "venv\\\\Scripts\\\\python.exe", "venv, env\'den önce gelir; Windows\'ta Scripts\\\\python.exe"\nassert yorumlayici_bul({"env", ".venv"}, "macos") == ".venv/bin/python", "Öncelik sırası kümeden bağımsız: .venv önce"\nassert yorumlayici_bul({"src", "docs"}, "linux") is None, "Sanal ortam yoksa None"\n',
-      hints: ['for ad in ADAYLAR: if ad in klasorler: ...', 'ntpath.join(ad, "Scripts", "python.exe") ve posixpath.join(ad, "bin", "python")'],
-      why: 'Küme üyelik testi hızlıdır ama sırası yoktur; önceliği belirleyen, dolaştığın aday listesidir. VS Code da benzer bir arama yapar ve bulduğu ortamı önerir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'vscode-4',
-      diff: 1,
-      q: '<p>Eğitim dokümanındaki Windows kısayollarını macOS\'a çeviren <code>mac_kisayolu(kisayol)</code> fonksiyonunu yaz. Kısayol <code>+</code> ile ayrılmış tuşlardan oluşur. Basitleştirilmiş kural: <code>Ctrl</code> → <code>Cmd</code>, <code>Alt</code> → <code>Option</code>, diğer tuşlar aynen kalır. Birden çok kısayol virgül ve boşlukla verilebilir (<code>"Ctrl+K, Ctrl+S"</code>); her birini çevir ve aynı biçimde birleştir.</p>',
-      start: 'def mac_kisayolu(kisayol):\n    pass\n',
-      sol: 'ESLEME = {"Ctrl": "Cmd", "Alt": "Option"}\n\n\ndef mac_kisayolu(kisayol):\n    parcalar = []\n    for akor in kisayol.split(", "):\n        tuslar = [ESLEME.get(t, t) for t in akor.split("+")]\n        parcalar.append("+".join(tuslar))\n    return ", ".join(parcalar)\n',
-      tests: 'assert mac_kisayolu("Ctrl+Shift+P") == "Cmd+Shift+P", "Komut paleti"\nassert mac_kisayolu("Shift+Alt+F") == "Shift+Option+F", "Biçimlendirme: Alt → Option"\nassert mac_kisayolu("F5") == "F5", "Tek tuş aynen kalır"\nassert mac_kisayolu("Ctrl+K, Ctrl+S") == "Cmd+K, Cmd+S", "Akor dizisi: her parça ayrı çevrilir"\nassert mac_kisayolu("Ctrl+Alt+Down") == "Cmd+Option+Down", "Birden çok değiştirici tuş"\n',
-      hints: ['Önce ", " ile akorlara, sonra "+" ile tuşlara böl.', 'ESLEME.get(t, t) eşlemede yoksa tuşun kendisini verir.'],
-      why: 'dict.get(anahtar, varsayılan) ile "eşlemede varsa çevir, yoksa aynen bırak" kalıbı tek satırda kurulur. İç içe ayırma (önce akor, sonra tuş) yapılandırılmış metinleri ayrıştırmanın temel tekniğidir.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'vscode-5',
-      diff: 2,
-      q: '<p><code>eksik_eklentiler(extensions_json, kurulu)</code> fonksiyonunu yaz. <code>extensions_json</code>, <code>.vscode/extensions.json</code> içeriğidir (geçerli JSON metni, <code>"recommendations"</code> listesi içerir; anahtar olmayabilir). <code>kurulu</code>, kurulu eklenti kimliklerinin listesidir. Önerilip kurulu olmayanları, <b>önerideki yazımıyla</b> ve alfabetik sırada döndür. Eklenti kimlikleri büyük/küçük harf duyarsızdır; aynı eklenti öneride iki kez geçerse bir kez say.</p>',
-      start: 'import json\n\ndef eksik_eklentiler(extensions_json, kurulu):\n    pass\n',
-      sol: 'import json\n\ndef eksik_eklentiler(extensions_json, kurulu):\n    oneriler = json.loads(extensions_json).get("recommendations", [])\n    kurulu_kucuk = {k.lower() for k in kurulu}\n    eksik = {}\n    for e in oneriler:\n        if e.lower() not in kurulu_kucuk and e.lower() not in eksik:\n            eksik[e.lower()] = e\n    return sorted(eksik.values(), key=str.lower)\n',
-      tests: 'm = \'{"recommendations": ["ms-python.python", "charliermarsh.ruff", "ms-toolsai.jupyter", "MS-Python.vscode-pylance"]}\'\nassert eksik_eklentiler(m, ["ms-python.python", "ms-python.vscode-pylance"]) == ["charliermarsh.ruff", "ms-toolsai.jupyter"], "Kurulu olanlar (harf duyarsız) çıkarılmalı, kalanlar alfabetik"\nassert eksik_eklentiler(m, []) == ["charliermarsh.ruff", "ms-python.python", "MS-Python.vscode-pylance", "ms-toolsai.jupyter"], "Hiçbiri kurulu değil: önerideki yazımla, harf duyarsız alfabetik"\nassert eksik_eklentiler(\'{"recommendations": ["a.b", "A.B"]}\', []) == ["a.b"], "Tekrar eden öneri bir kez sayılır (ilk yazım)"\nassert eksik_eklentiler("{}", ["x.y"]) == [], "recommendations anahtarı yoksa boş liste"\n',
-      hints: ['Kurulu kimlikleri küçük harfli bir kümeye çevir.', 'Tekrarları elemek için küçük harfli anahtar → ilk yazım sözlüğü tut; sorted(..., key=str.lower).'],
-      why: 'Kimlikleri karşılaştırırken normalleştirmek (lower) ama kullanıcıya özgün yazımı göstermek, veri temizliğinde çok sık kullanılan bir kalıptır. Sözlük anahtarı normalleştirilmiş değer, değeri özgün değer olur.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'vscode-6',
-      diff: 2,
-      q: '<p>VS Code ayar katmanlarını birleştiren <code>ayar_birlestir(*katmanlar)</code> fonksiyonunu yaz. Katmanlar soldan sağa uygulanır (varsayılan, kullanıcı, çalışma alanı...); sonraki önceki değeri ezer. <b>İstisna:</b> bir anahtarın hem eski hem yeni değeri sözlükse (ör. <code>"[python]"</code>), iki sözlüğü bir seviye derinlikte birleştir. Girdi sözlüklerini <b>değiştirme</b>; yeni sözlük döndür.</p>',
-      start: 'def ayar_birlestir(*katmanlar):\n    pass\n',
-      sol: 'def ayar_birlestir(*katmanlar):\n    sonuc = {}\n    for katman in katmanlar:\n        for anahtar, deger in katman.items():\n            eski = sonuc.get(anahtar)\n            if isinstance(eski, dict) and isinstance(deger, dict):\n                sonuc[anahtar] = {**eski, **deger}\n            elif isinstance(deger, dict):\n                sonuc[anahtar] = dict(deger)\n            else:\n                sonuc[anahtar] = deger\n    return sonuc\n',
-      tests: 'v = {"editor.tabSize": 4, "[python]": {"editor.formatOnSave": False, "editor.tabSize": 4}}\nk = {"editor.fontSize": 15, "[python]": {"editor.formatOnSave": True}}\nc = {"[python]": {"editor.defaultFormatter": "charliermarsh.ruff"}, "editor.tabSize": 2}\nr = ayar_birlestir(v, k, c)\nassert r["[python]"] == {"editor.formatOnSave": True, "editor.tabSize": 4, "editor.defaultFormatter": "charliermarsh.ruff"}, "[python] bölümleri bir seviye derin birleşmeli"\nassert r["editor.tabSize"] == 2 and r["editor.fontSize"] == 15, "Düz anahtarlarda son katman kazanır"\nassert v["[python]"] == {"editor.formatOnSave": False, "editor.tabSize": 4}, "Girdi sözlükleri değişmemeli"\nr["[python]"]["x"] = 1\nassert "x" not in k["[python]"] and "x" not in c["[python]"], "Sonuçtaki iç sözlük girdilerle paylaşılmamalı (kopya olmalı)"\nassert ayar_birlestir() == {}, "Katman yoksa boş sözlük"\nassert ayar_birlestir({"a": {"b": 1}}, {"a": 5}) == {"a": 5}, "Yeni değer sözlük değilse doğrudan ezer"\n',
-      hints: ['İki sözlüğü birleştirmek için {**eski, **yeni} yeni bir sözlük üretir.', 'Yalnız biri sözlükse ve yeni değer sözlükse dict(deger) ile kopyala; böylece girdiyle aynı nesneyi paylaşmazsın.'],
-      why: 'Sığ birleştirme (dict.update) "[python]" gibi bölümleri bütünüyle ezerdi ve kullanıcının diğer Python ayarları kaybolurdu. Bir seviye derin birleştirme ve kopyalama, VS Code\'un gerçek davranışına yakındır ve yan etki bırakmaz.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'vscode-7',
-      diff: 2,
-      q: '<p>Editörler hata çıktısındaki dosya ve satıra tıklayınca oraya atlar. <code>hata_konumu(traceback_metni)</code> fonksiyonunu yaz: metindeki <b>son</b> <code>File "...", line N</code> kaydını bulsun ve <code>(dosya, satir_no, hata)</code> demeti döndürsün. <code>satir_no</code> int olsun; <code>hata</code>, metnin son boş olmayan satırıdır (ör. <code>"ZeroDivisionError: division by zero"</code>). Hiç <code>File</code> kaydı yoksa <code>None</code>.</p>',
-      start: 'import re\n\ndef hata_konumu(traceback_metni):\n    pass\n',
-      sol: 'import re\n\ndef hata_konumu(traceback_metni):\n    kayitlar = re.findall(r\'File "([^"]+)", line (\\d+)\', traceback_metni)\n    if not kayitlar:\n        return None\n    dosya, satir = kayitlar[-1]\n    satirlar = [s.strip() for s in traceback_metni.splitlines() if s.strip()]\n    return (dosya, int(satir), satirlar[-1])\n',
-      tests: 't = """Traceback (most recent call last):\n  File "/home/ayse/anadolu-rapor/src/rapor/main.py", line 42, in <module>\n    ozet = ortalama(tutarlar)\n  File "/home/ayse/anadolu-rapor/src/rapor/hesap.py", line 7, in ortalama\n    return sum(liste) / len(liste)\n           ~~~~~~~~~~^~~~~~~~~~~~\nZeroDivisionError: division by zero\n"""\nassert hata_konumu(t) == ("/home/ayse/anadolu-rapor/src/rapor/hesap.py", 7, "ZeroDivisionError: division by zero"), "Son kayıt hatanın gerçekten oluştuğu yerdir"\nw = \'Traceback (most recent call last):\\n  File "C:\\\\dev\\\\rapor\\\\main.py", line 3, in <module>\\n    import pandas\\nModuleNotFoundError: No module named \\\'pandas\\\'\\n\\n\'\nassert hata_konumu(w) == ("C:\\\\dev\\\\rapor\\\\main.py", 3, "ModuleNotFoundError: No module named \'pandas\'"), "Windows yolu ve sondaki boş satırlar"\nassert isinstance(hata_konumu(t)[1], int), "Satır numarası int olmalı"\nassert hata_konumu("SyntaxError olmayan düz metin") is None, "File kaydı yoksa None"\n',
-      hints: ['re.findall(r\'File "([^"]+)", line (\\d+)\', metin) tüm (dosya, satır) çiftlerini verir; son eleman en içteki çağrıdır.', 'Son boş olmayan satır için satırları strip edip boşları ele, [-1] al.'],
-      why: 'Python izleme kaydı (traceback) en dıştaki çağrıdan en içtekine doğru yazılır; hatanın oluştuğu yer son File kaydıdır, hata türü ve mesajı ise en alttaki satırdır. Editörlerin "tıkla, hataya git" özelliği tam olarak bu ayrıştırmayı yapar.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'vscode-8',
-      diff: 1,
-      q: '<p>Hatayı bul ve düzelt. <code>veri_yolu(betik_yolu, dosya_adi)</code>, betiğin <b>bulunduğu klasördeki</b> veri dosyasının yolunu metin olarak döndürmeli; böylece betik hangi çalışma dizininden başlatılırsa başlatılsın dosya bulunur. Kod yanlış yol üretiyor.</p>',
-      start: 'from pathlib import PurePosixPath\n\ndef veri_yolu(betik_yolu, dosya_adi):\n    return PurePosixPath(betik_yolu) / dosya_adi\n',
-      sol: 'from pathlib import PurePosixPath\n\ndef veri_yolu(betik_yolu, dosya_adi):\n    return str(PurePosixPath(betik_yolu).parent / dosya_adi)\n',
-      tests: 'assert veri_yolu("/proje/src/rapor.py", "veri.csv") == "/proje/src/veri.csv", "Betiğin klasörü + dosya adı; betik dosyasının kendisi klasör değildir"\nassert veri_yolu("/proje/src/rapor.py", "veri/ekim.csv") == "/proje/src/veri/ekim.csv", "Alt klasörlü göreli ad"\nassert isinstance(veri_yolu("/a/b.py", "c.txt"), str), "Sonuç metin (str) olmalı"\n',
-      hints: ['PurePosixPath("/proje/src/rapor.py") / "veri.csv" sonucu "/proje/src/rapor.py/veri.csv" olur.', '.parent ile klasöre çık, str() ile metne çevir.'],
-      why: 'Gerçek kodda bunun karşılığı Path(__file__).resolve().parent / "veri.csv" kalıbıdır. Göreli yol çalışma dizinine bağlıdır; betiğin klasörüne dayalı yol ise VS Code\'un Çalıştır düğmesinde, terminalde ve zamanlanmış görevde aynı dosyayı bulur.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'vscode-9',
-      diff: 2,
-      q: '<p>Hatayı bul ve düzelt. <code>ayar_metni(ayarlar)</code>, sözlükten VS Code\'un okuyabileceği geçerli bir settings.json metni üretmeli: 4 boşluk girinti, Türkçe karakterler kaçışsız (<code>ensure_ascii=False</code>). Mevcut kod f-string ile elle birleştiriyor; üretilen dosyayı VS Code okuyamıyor.</p>',
-      start: 'def ayar_metni(ayarlar):\n    satirlar = []\n    for anahtar, deger in ayarlar.items():\n        satirlar.append(f\'    "{anahtar}": {deger}\')\n    return "{\\n" + ",\\n".join(satirlar) + "\\n}"\n',
-      sol: 'import json\n\ndef ayar_metni(ayarlar):\n    return json.dumps(ayarlar, indent=4, ensure_ascii=False)\n',
-      tests: 'import json\na = {"editor.formatOnSave": True, "python.defaultInterpreterPath": ".venv/bin/python", "editor.rulers": [88], "[python]": {"editor.tabSize": 4}, "rapor.baslik": "Şube özeti"}\nm = ayar_metni(a)\ntry:\n    geri = json.loads(m)\nexcept json.JSONDecodeError as e:\n    raise AssertionError(f"Üretilen metin geçerli JSON değil: {e}")\nassert geri == a, "JSON\'dan geri okununca aynı sözlük çıkmalı"\nassert "true" in m and "True" not in m, "Python True, JSON\'da true olmalı"\nassert "Şube özeti" in m, "Türkçe karakterler kaçışsız yazılmalı (ensure_ascii=False)"\nassert m.splitlines()[1].startswith(\'    "\'), "4 boşluk girinti"\n',
-      hints: ['f-string Python temsilini yazar: True, tek tırnaklı metinler, tırnaksız metin değerleri. Bunlar JSON değildir.', 'json.dumps(ayarlar, indent=4, ensure_ascii=False)'],
-      why: 'Veri biçimlerini (JSON, CSV, XML) asla metin birleştirerek üretme; tırnak, kaçış ve tür çevirisi hataları kaçınılmazdır. json.dumps tüm bunları doğru yapar; indent okunabilirlik, ensure_ascii=False Türkçe karakterler içindir.'
-    },
-    {
-      t: 'code',
-      stage: 'Meydan okuma',
-      id: 'vscode-10',
-      diff: 3,
-      q: '<p>Yeni projeleri inceleyen <code>calisma_alani_denetle(dosyalar)</code> fonksiyonunu yaz. <code>dosyalar</code>, proje kökünden göreli yol (<code>/</code> ayırıcılı) → içerik sözlüğüdür. Uyarı kodlarının <b>alfabetik</b> listesini döndür:</p><ul><li><code>"BAGIMLILIK_YOK"</code>: ne <code>requirements.txt</code> ne <code>pyproject.toml</code> var.</li><li><code>"AYAR_YOK"</code>: <code>.vscode/settings.json</code> yok.</li><li><code>"AYAR_BOZUK"</code>: settings.json var ama JSONC olarak okunamıyor (tam satır <code>//</code> yorumları ve sondaki virgüller geçerlidir).</li><li><code>"VENV_IZLENIYOR"</code>: <code>.venv/</code> ile başlayan bir yol var ve <code>.gitignore</code> (yoksa boş say) <code>.venv</code>\'i yok saymıyor. Kabul edilen satırlar: <code>.venv</code>, <code>.venv/</code>, <code>/.venv</code>, <code>/.venv/</code> (baş/son boşluk ve <code>#</code> yorum satırları göz ardı).</li><li><code>"PYCACHE"</code>: yolunda <code>__pycache__/</code> geçen bir dosya var ve .gitignore\'da <code>__pycache__</code> ya da <code>__pycache__/</code> satırı yok.</li><li><code>"TEST_YOK"</code>: <code>tests/</code> ile başlayan ya da dosya adı <code>test_</code> ile başlayan <code>.py</code> dosyası yok.</li></ul>',
-      start: 'import json, re\n\ndef calisma_alani_denetle(dosyalar):\n    pass\n',
-      sol: 'import json, re, posixpath\n\n\ndef _jsonc(metin):\n    satirlar = [s for s in metin.splitlines() if not s.strip().startswith("//")]\n    return json.loads(re.sub(r",\\s*([}\\]])", r"\\1", "\\n".join(satirlar)))\n\n\ndef calisma_alani_denetle(dosyalar):\n    uyarilar = []\n    yoksay = {s.strip() for s in dosyalar.get(".gitignore", "").splitlines()\n              if s.strip() and not s.strip().startswith("#")}\n    if "requirements.txt" not in dosyalar and "pyproject.toml" not in dosyalar:\n        uyarilar.append("BAGIMLILIK_YOK")\n    if ".vscode/settings.json" not in dosyalar:\n        uyarilar.append("AYAR_YOK")\n    else:\n        try:\n            _jsonc(dosyalar[".vscode/settings.json"])\n        except ValueError:\n            uyarilar.append("AYAR_BOZUK")\n    if any(y.startswith(".venv/") for y in dosyalar) and not yoksay & {".venv", ".venv/", "/.venv", "/.venv/"}:\n        uyarilar.append("VENV_IZLENIYOR")\n    if any("__pycache__/" in y for y in dosyalar) and not yoksay & {"__pycache__", "__pycache__/"}:\n        uyarilar.append("PYCACHE")\n    testler = [y for y in dosyalar if y.endswith(".py") and (y.startswith("tests/") or posixpath.basename(y).startswith("test_"))]\n    if not testler:\n        uyarilar.append("TEST_YOK")\n    return sorted(uyarilar)\n',
-      tests: 'iyi = {\n    "pyproject.toml": "[project]\\nname = \'rapor\'",\n    ".gitignore": "# ortam\\n.venv/\\n__pycache__/\\n",\n    ".vscode/settings.json": \'{\\n  // ayar\\n  "editor.formatOnSave": true,\\n}\',\n    ".venv/bin/python": "",\n    "src/rapor/__pycache__/main.cpython-312.pyc": "",\n    "src/rapor/main.py": "print(1)",\n    "tests/test_main.py": "def test(): pass",\n}\nassert calisma_alani_denetle(iyi) == [], "Düzgün projede uyarı olmamalı (JSONC yorum ve sondaki virgül geçerli)"\nkotu = {\n    ".vscode/settings.json": \'{"editor.formatOnSave": True}\',\n    ".venv/bin/python": "",\n    "app/__pycache__/x.pyc": "",\n    "app/main.py": "",\n    "app/testler.py": "",\n}\nassert calisma_alani_denetle(kotu) == ["AYAR_BOZUK", "BAGIMLILIK_YOK", "PYCACHE", "TEST_YOK", "VENV_IZLENIYOR"], "True geçersiz JSON; .gitignore yok; testler.py test dosyası sayılmaz"\nk2 = {"requirements.txt": "", ".gitignore": "  /.venv  \\n# __pycache__/\\n", ".venv/x": "", "a/__pycache__/b.pyc": "", "src/test_hesap.py": ""}\nassert calisma_alani_denetle(k2) == ["AYAR_YOK", "PYCACHE"], "/.venv kabul; yorumdaki __pycache__ sayılmaz; test_hesap.py test dosyasıdır"\nassert calisma_alani_denetle({}) == ["AYAR_YOK", "BAGIMLILIK_YOK", "TEST_YOK"], "Boş proje"\n',
-      hints: [
-        '.gitignore satırlarını strip edip boş ve # ile başlayanları atarak bir kümeye çevir; kabul edilen kalıplarla kesişimine bak.',
-        'JSONC okuma için önceki görevdeki yaklaşımı yardımcı fonksiyona koy; json.JSONDecodeError, ValueError\'ın alt sınıfıdır.',
-        'Test dosyası: .py ile bitmeli VE (tests/ ile başlamalı YA DA posixpath.basename(y) test_ ile başlamalı).'
-      ],
-      why: 'Gerçek denetim araçları (linter, CI kontrolleri) tam olarak böyle küçük kuralların toplamıdır. Her kuralı bağımsız bir if ile yazmak, sonuçları sıralamak ve kenar durumları (yorum satırları, farklı yazımlar) test etmek, aracı güvenilir kılar.'
-    },
-    {
-      t: 'code',
-      stage: 'Mini proje',
-      id: 'vscode-11',
-      diff: 3,
-      q: '<p>Anadolu Market\'in proje şablonu için <code>vscode_hazirla(isletim, formatlayici)</code> fonksiyonunu yaz. Dosya yolu → JSON metni (4 boşluk girinti, <code>ensure_ascii=False</code>) sözlüğü döndür:</p><ul><li><code>".vscode/settings.json"</code>: <code>"python.defaultInterpreterPath"</code> (Windows: <code>"${workspaceFolder}/.venv/Scripts/python.exe"</code>, diğer: <code>"${workspaceFolder}/.venv/bin/python"</code>), <code>"[python]"</code> bölümünde <code>editor.defaultFormatter</code> (ruff → <code>charliermarsh.ruff</code>, black → <code>ms-python.black-formatter</code>) ve <code>editor.formatOnSave: true</code>, ayrıca <code>"python.testing.pytestEnabled": true</code>.</li><li><code>".vscode/extensions.json"</code>: <code>{"recommendations": ["ms-python.python", "ms-python.vscode-pylance", &lt;biçimlendirici kimliği&gt;]}</code></li><li><code>".vscode/launch.json"</code>: <code>version "0.2.0"</code> ve tek yapılandırma: <code>name "Geçerli dosya"</code>, <code>type "debugpy"</code>, <code>request "launch"</code>, <code>program "${file}"</code>, <code>console "integratedTerminal"</code>, <code>justMyCode true</code>.</li></ul><p>Bilinmeyen biçimlendirici ya da işletim sisteminde (<code>windows</code>, <code>macos</code>, <code>linux</code> dışında) <code>ValueError</code>.</p>',
-      start: 'import json\n\ndef vscode_hazirla(isletim, formatlayici):\n    pass\n',
-      sol: 'import json\n\nKIMLIKLER = {"ruff": "charliermarsh.ruff", "black": "ms-python.black-formatter"}\n\n\ndef _json(veri):\n    return json.dumps(veri, indent=4, ensure_ascii=False)\n\n\ndef vscode_hazirla(isletim, formatlayici):\n    if formatlayici not in KIMLIKLER:\n        raise ValueError(f"Bilinmeyen biçimlendirici: {formatlayici}")\n    if isletim == "windows":\n        yorumlayici = "${workspaceFolder}/.venv/Scripts/python.exe"\n    elif isletim in ("macos", "linux"):\n        yorumlayici = "${workspaceFolder}/.venv/bin/python"\n    else:\n        raise ValueError(f"Bilinmeyen işletim sistemi: {isletim}")\n    kimlik = KIMLIKLER[formatlayici]\n    ayarlar = {\n        "python.defaultInterpreterPath": yorumlayici,\n        "[python]": {"editor.defaultFormatter": kimlik, "editor.formatOnSave": True},\n        "python.testing.pytestEnabled": True,\n    }\n    eklentiler = {"recommendations": ["ms-python.python", "ms-python.vscode-pylance", kimlik]}\n    launch = {\n        "version": "0.2.0",\n        "configurations": [{\n            "name": "Geçerli dosya",\n            "type": "debugpy",\n            "request": "launch",\n            "program": "${file}",\n            "console": "integratedTerminal",\n            "justMyCode": True,\n        }],\n    }\n    return {\n        ".vscode/settings.json": _json(ayarlar),\n        ".vscode/extensions.json": _json(eklentiler),\n        ".vscode/launch.json": _json(launch),\n    }\n',
-      tests: 'import json\nd = vscode_hazirla("windows", "ruff")\nassert set(d) == {".vscode/settings.json", ".vscode/extensions.json", ".vscode/launch.json"}, "Üç dosya üretilmeli"\nassert all(isinstance(v, str) for v in d.values()), "Değerler JSON metni (str) olmalı"\ns = json.loads(d[".vscode/settings.json"])\nassert s["python.defaultInterpreterPath"] == "${workspaceFolder}/.venv/Scripts/python.exe", "Windows yorumlayıcı yolu Scripts/python.exe"\nassert s["[python]"] == {"editor.defaultFormatter": "charliermarsh.ruff", "editor.formatOnSave": True}, "[python] bölümü"\nassert s["python.testing.pytestEnabled"] is True, "pytest açık"\ne = json.loads(d[".vscode/extensions.json"])\nassert e == {"recommendations": ["ms-python.python", "ms-python.vscode-pylance", "charliermarsh.ruff"]}, "Önerilen eklentiler"\nl = json.loads(d[".vscode/launch.json"])\nassert l["version"] == "0.2.0" and len(l["configurations"]) == 1, "launch.json sürümü ve tek yapılandırma"\nassert l["configurations"][0] == {"name": "Geçerli dosya", "type": "debugpy", "request": "launch", "program": "${file}", "console": "integratedTerminal", "justMyCode": True}, "Yapılandırma alanları"\nassert "Geçerli dosya" in d[".vscode/launch.json"], "ensure_ascii=False: Türkçe karakter kaçışsız"\nassert d[".vscode/launch.json"].splitlines()[1].startswith(\'    "version"\'), "4 boşluk girinti"\nm = vscode_hazirla("macos", "black")\nassert json.loads(m[".vscode/settings.json"])["python.defaultInterpreterPath"].endswith("/.venv/bin/python"), "macOS: bin/python"\nassert json.loads(m[".vscode/extensions.json"])["recommendations"][-1] == "ms-python.black-formatter", "Black kimliği"\nfor kotu in [("windows", "yapf"), ("amiga", "ruff")]:\n    try:\n        vscode_hazirla(*kotu)\n        assert False, f"{kotu} için ValueError beklenir"\n    except ValueError:\n        pass\n',
-      hints: [
-        'Üç sözlüğü ayrı ayrı kur, sonra her birini aynı json.dumps(..., indent=4, ensure_ascii=False) yardımcısıyla metne çevir.',
-        '"${workspaceFolder}" ve "${file}" Python için sıradan metindir (f-string değil, düz metin kullan).',
-        'Doğrulamaları (ValueError) en başta yap; böylece yarım dosya üretilmez.'
-      ],
-      why: 'Bu fonksiyon dersin tüm parçalarını birleştirir: yorumlayıcı yolu (işletim sistemine göre), biçimlendirici ve kaydederken biçimlendirme, önerilen eklentiler ve hata ayıklama yapılandırması. Proje şablonlarını kodla üretmek (cookiecutter, copier gibi araçlar) ekiplerde standart bir uygulamadır.'
-    }
-  ],
+    }],
   faq: [
     {
       q: 'Ruff mu Black mı?',
@@ -2274,7 +1467,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
       expect: 'Adet (1-99): on iki\nLütfen tam sayı gir.\nAdet (1-99): 0\n1 ile 99 arasında olmalı.\nAdet (1-99): 150\n1 ile 99 arasında olmalı.\nAdet (1-99): 2.5\nLütfen tam sayı gir.\nAdet (1-99): 12\nSepete 12 adet eklendi.\n',
       hints: ['Dönüşüm hatası ile iş kuralı hatası ayrı mesajlar alıyor: önce try/except, sonra if.', 'continue döngünün başına döner; break döngüden çıkar.', 'if 1 <= adet <= 99: break'],
       why: 'Doğrulama döngüsünün iki katmanı vardır: biçim (int\'e dönüşüyor mu?) ve iş kuralı (aralıkta mı?). Her birine ayrı ve yol gösterici mesaj vermek kullanıcının neyi düzelteceğini anlamasını sağlar.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'girdi-donusum-4',
       stage: 'Rehberli',
       diff: 1,
@@ -2287,7 +1480,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
       expect: 'Üç günün satışı: 120  85 140 \nToplam: 345 | Ortalama: 115.0\n',
       hints: ['split(" ") ardışık boşluklarda boş parçalar üretir; split() üretmez.', 'Parçalar str\'dir; sum için int\'e çevir.', 'sayilar = [int(p) for p in satir.split()]'],
       why: 'split() argümansızken her türlü boşluk dizisini tek ayırıcı sayar ve baştaki/sondaki boşlukları yok sayar; kullanıcı girdisi için en güvenli bölme yoludur. Ardından her parçayı ayrı ayrı dönüştürmek gerekir.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'girdi-donusum-5',
       stage: 'Kendin yaz',
       diff: 2,
@@ -2356,7 +1549,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
       expect: 'Yaş: otuz\nGeçersiz yaş.\nYaş: -3\nGeçersiz yaş.\nYaş: 34\nKayıt: 34 yaş\n',
       hints: ['yas.isdigit metodu çağırmaz, metodun kendisini verir; fonksiyon nesneleri her zaman truthy\'dir.', 'Parantez ekle: yas.isdigit() — ya da daha güvenlisi isdecimal().', 'if yas.isdecimal():'],
       why: 'Parantezsiz metot adı bir "bound method" nesnesidir ve if içinde her zaman True sayılır; bu yüzden int("otuz") çalışıp çöküyordu. isdecimal() ayrıca ² gibi int\'e çevrilemeyen karakterleri de reddeder.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'girdi-donusum-11',
       stage: 'Meydan okuma',
       diff: 3,
@@ -2649,7 +1842,7 @@ while (satir := satirlar[i]) != "":
       tests: 'assert gorunen_ad("aysem", "Ayşe Kaya", "ayse@ornek.com") == "aysem", "Takma ad öncelikli"\nassert gorunen_ad("", "Ayşe Kaya", "ayse@ornek.com") == "Ayşe Kaya", "Takma ad boşsa gerçek ad"\nassert gorunen_ad("   ", "", "mehmet.y@ornek.com") == "mehmet.y", "Yalnız boşluk da boş sayılır; e-posta öneki dönmeli"\nassert gorunen_ad("", "", "") == "anonim", "Hiçbiri yoksa anonim"\n',
       hints: ['or ilk truthy değeri döndürür; boş metin falsy\'dir.', '"   ".strip() boş metin verir.', 'return takma_ad.strip() or ad.strip() or kullanici or "anonim"'],
       why: 'or zinciri "ilk dolu değeri seç" kalıbının en kısa yazımıdır. Değerler metin olduğu ve 0 gibi geçerli-ama-falsy bir değer olmadığı için burada güvenlidir.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-4',
       stage: 'Rehberli',
       diff: 2,
@@ -2661,7 +1854,7 @@ while (satir := satirlar[i]) != "":
       tests: 'assert ":=" in __source__, "Mors operatörü := kullanılmalı"\nkodlar = ["  AM-417 ", "AM-9", " AM-10022  ", ""]\nassert uzun_kodlar(kodlar, 6) == [("AM-417", 6), ("AM-10022", 8)], "Eşik dahil (>=) olmalı ve kodlar kırpılmalı"\nassert uzun_kodlar(kodlar, 9) == [], "9 karakterlik kod yok"\nassert uzun_kodlar([], 1) == [], "Boş liste boş döner"\n',
       hints: ['Mors ifadesi bir değer döndürür; o değeri başka bir ifadenin içinde kullanabilirsin.', 'İç içe mors: len(t := k.strip()) önce t\'yi atar sonra uzunluğu hesaplar.', 'Koşul: if (n := len(t := k.strip())) >= esik'],
       why: 'Mors operatörü, comprehension içinde aynı hesabı iki kez yapmaktan kurtarır. Önceliği en düşük olduğu için (n := ...) >= esik parantezi zorunludur; yoksa n\'ye karşılaştırmanın bool sonucu atanır.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-5',
       stage: 'Kendin yaz',
       diff: 1,
@@ -2678,10 +1871,10 @@ while (satir := satirlar[i]) != "":
       q: '<p>Web sitesinin tema rengi <code>0xRRGGBB</code> biçiminde tek bir tam sayı olarak saklanıyor (ör. <code>0x1E90FF</code>). İki fonksiyon yaz:</p><ul><li><code>rgb_ayir(renk)</code> → <code>(r, g, b)</code> demeti (her biri 0-255)</li><li><code>rgb_birlestir(r, g, b)</code> → tek tam sayı</li></ul><p>Yalnızca bit operatörleri (<code>&gt;&gt;</code>, <code>&lt;&lt;</code>, <code>&amp;</code>, <code>|</code>) kullan; metne çevirme.</p>',
       start: 'def rgb_ayir(renk):\n    pass\n\ndef rgb_birlestir(r, g, b):\n    pass\n',
       sol: 'def rgb_ayir(renk):\n    r = (renk >> 16) & 0xFF\n    g = (renk >> 8) & 0xFF\n    b = renk & 0xFF\n    return (r, g, b)\n\ndef rgb_birlestir(r, g, b):\n    return (r << 16) | (g << 8) | b\n',
-      tests: 'assert rgb_ayir(0x1E90FF) == (30, 144, 255), "0x1E90FF -> (30, 144, 255)"\nassert rgb_ayir(0x000000) == (0, 0, 0), "Siyah"\nassert rgb_ayir(0xFF0000) == (255, 0, 0), "Kırmızı"\nassert rgb_birlestir(30, 144, 255) == 0x1E90FF, "Birleştirme ayırmanın tersi olmalı"\nassert rgb_birlestir(*rgb_ayir(0xABCDEF)) == 0xABCDEF, "Gidiş-dönüş aynı rengi vermeli"\nassert "str(" not in __source__ and "hex(" not in __source__, "Metne çevirmeden, bit operatörleriyle çöz"\n',
+      tests: 'assert rgb_ayir(0x1E90FF) == (30, 144, 255), "0x1E90FF -> (30, 144, 255)"\nassert rgb_ayir(0x000000) == (0, 0, 0), "Siyah"\nassert rgb_ayir(0xFF0000) == (255, 0, 0), "Kırmızı"\nassert rgb_birlestir(30, 144, 255) == 0x1E90FF, "Birleştirme ayırmanın tersi olmalı"\nassert rgb_birlestir(*rgb_ayir(0xABCDEF)) == 0xABCDEF, "Gidiş-dönüş aynı rengi vermeli"\nassert "str(" not in __kod__ and "hex(" not in __kod__, "Metne çevirmeden, bit operatörleriyle çöz"\n',
       hints: ['Her renk kanalı 8 bittir; kırmızı en üstteki 8 bit.', 'Sağa 16 kaydırınca kırmızı en alta iner; & 0xFF ile yalnız alttaki 8 bit kalır.', 'Birleştirme: (r << 16) | (g << 8) | b'],
       why: 'Kaydırma bitleri yerine taşır, & 0xFF maskesi istenmeyen bitleri siler, | parçaları birleştirir. Bu kalıp renklerde, ağ adreslerinde ve ikili dosya biçimlerinde aynen kullanılır.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-7',
       stage: 'Kendin yaz',
       diff: 2,
@@ -2691,7 +1884,7 @@ while (satir := satirlar[i]) != "":
       tests: 'assert degisen_izinler(0b0011, 0b0110) == {"eklenen": ["ONAY"], "kaldirilan": ["GORUNTULE"]}, "3 -> 6: ONAY eklendi, GORUNTULE kaldırıldı"\nassert degisen_izinler(5, 5) == {"eklenen": [], "kaldirilan": []}, "Değişiklik yoksa iki liste de boş"\nassert degisen_izinler(0, 15) == {"eklenen": ["GORUNTULE", "HAVALE", "ONAY", "LIMIT"], "kaldirilan": []}, "Hepsi eklendi"\nassert "^" in __source__, "XOR (^) kullanılmalı"\n',
       hints: ['eski ^ yeni, yalnız değişen bitlerde 1 olan bir sayı verir.', 'Değişen bir bit yeni\'de 1 ise eklenmiş, 0 ise kaldırılmıştır.', 'for ad, bit in IZINLER.items(): if fark & bit: ...'],
       why: 'XOR "farklı olan bitleri" bulmanın en doğrudan yoludur. Ardından yeni değere bakarak değişimin yönü (ekleme/kaldırma) anlaşılır. Sözlük sırası Python 3.7+\'ta korunur.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-8',
       stage: 'Kendin yaz',
       diff: 1,
@@ -2701,7 +1894,7 @@ while (satir := satirlar[i]) != "":
       tests: 'assert [kademe(p) for p in (100, 90, 89.5, 75, 74, 60, 59, 0)] == ["A", "A", "B", "B", "C", "C", "D", "D"], "Sınırlar: 90 A, 75 B, 60 C dahil"\ntry:\n    kademe(101)\n    assert False, "101 için ValueError beklenirdi"\nexcept ValueError:\n    pass\ntry:\n    kademe(-1)\n    assert False, "-1 için ValueError beklenirdi"\nexcept ValueError:\n    pass\n',
       hints: ['Zincirleme: 75 <= puan < 90 tek ifadede iki sınırı birden denetler.', 'Hiçbir aralığa uymayan puan en sona düşer; orada raise ValueError(...) yaz.', 'Sınırlarda dahil/hariç ayrımına dikkat: 90 A\'dır, B değil.'],
       why: 'Zincirleme karşılaştırma aralık kontrolünü matematikteki gibi okunur yazar ve her sınırı açıkça gösterir. Aralık dışını sessizce "D" yapmak yerine hata fırlatmak, bozuk veriyi erken yakalar.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-9',
       stage: 'Hata avı',
       kind: 'bug',
@@ -2723,7 +1916,7 @@ while (satir := satirlar[i]) != "":
       tests: 'assert limit_asildi(int("5000"), int("5000")) is True, "5000 >= 5000 True olmalı; is kimlik karşılaştırır, değer değil"\nassert limit_asildi(int("7500"), 5000) is True, "7500 limiti aşar"\nassert limit_asildi(10, 10) is True, "Küçük sayılarda da eşitlik True"\nassert limit_asildi(4999, 5000) is False, "4999 aşmaz"\n',
       hints: ['is iki adın aynı nesne olup olmadığını sorar. Küçük tam sayılar (-5..256) önbellekte olduğu için tesadüfen çalışır.', 'tutar > limit is True bir zincirdir: (tutar > limit) and (limit is True). limit hiçbir zaman True nesnesi değildir.', 'Tek karşılaştırma yeter: return tutar >= limit'],
       why: 'is değer eşitliği için kullanılmaz; Python yalnız küçük tam sayıları önbelleğe aldığından hata sadece büyük tutarlarda ortaya çıkar. "x > y is True" ise karşılaştırma zinciridir ve beklenmedik biçimde limit is True\'ya dönüşür.' },
-    { t: 'code',
+    { erken: true, t: 'code',
       id: 'operatorler-11',
       stage: 'Meydan okuma',
       diff: 3,
@@ -2953,8 +2146,7 @@ print("Çıkış kodu:", kod)
 <p>Ekibinle bir tablo üzerinde anlaş: 0 başarı, 1 iş hatası (veri bozuk), 2 kullanım hatası, 3 dış sistem erişilemiyor gibi. Zamanlayıcı kuralları ("kod 3 ise 10 dakika sonra yeniden dene") bu sözleşmeye dayanır. Unix'te 126-255 arası kodlar kabuğa ayrılmıştır; kendi kodlarını küçük tut.</p>
 </section>
 `,
-  ex: [
-    { t: 'mc',
+  ex: [{ t: 'mc',
       stage: 'Isınma',
       q: 'Terminalde <code>/home/ayse/proje</code> klasöründesin ve <code>cd ..</code> yazıyorsun. Ardından <code>pwd</code> ne gösterir?',
       o: ['/home/ayse/proje/..', '/home/ayse', '/home', 'Hata verir; .. bir klasör adı değildir'],
@@ -2971,156 +2163,7 @@ print("Çıkış kodu:", kod)
       q: 'Gece çalışan bir betik bitince zamanlayıcı "başarısız" alarmı veriyor. Zamanlayıcı başarıyı genellikle neye bakarak anlar?',
       o: ['Çıkış kodunun 0 olmasına', 'Ekrana "Bitti" yazılmasına', 'stderr\'in boş olmasına', 'Betiğin 1 dakikadan kısa sürmesine'],
       a: 0,
-      why: 'İşletim sistemi ve zamanlayıcılar çıkış koduna bakar: 0 başarı, diğerleri hata. stderr\'e uyarı yazan ama 0 ile biten program başarılı sayılır.' },
-    { t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'argv = ["topla.py", "5", "3"]\nprint(argv[1] + argv[2], len(argv))\n',
-      o: ['8 3', '53 3', '53 2', '8 2'],
-      a: 1,
-      why: 'Argümanlar metindir; "5" + "3" metin birleştirmesidir ve "53" verir. Liste betik adını da içerdiği için uzunluk 3\'tür.' },
-    { t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'import posixpath\nyol = posixpath.join("/home/ayse/proje", "../veri/./satis.csv")\nprint(posixpath.normpath(yol))\n',
-      o: ['/home/ayse/proje/veri/satis.csv', '/home/ayse/proje/../veri/./satis.csv', '/home/ayse/veri/satis.csv', '/home/veri/satis.csv'],
-      a: 2,
-      why: 'join iki parçayı birleştirir; normpath ".." ile bir üst klasöre çıkar (proje düşer) ve "." parçalarını siler. Sonuç /home/ayse/veri/satis.csv olur.' },
-    { t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'import sys\n\ndef calis(n):\n    if n < 0:\n        sys.exit(2)\n    return n * 2\n\ntry:\n    print(calis(4))\n    print(calis(-1))\nexcept SystemExit as e:\n    print("kod", e.code)\n',
-      o: ['8\nkod 2', '8\n-2', 'kod 2', '8\nkod 1'],
-      a: 0,
-      why: 'İlk çağrı 8 yazar. İkincisinde sys.exit(2) SystemExit fırlatır; print çalışmadan except bloğuna geçilir ve e.code 2\'dir.' },
-    { t: 'order',
-      stage: 'Kodu oku',
-      q: '<p>Argüman sayısını denetleyip çıkış kodu döndüren <code>main(argv)</code> fonksiyonunun ve çağrısının satırlarını sırala. Çıktı <code>Bursa raporu</code> ve <code>0</code> olmalı.</p>',
-      lines: ['def main(argv):', '    if len(argv) < 2:', '        return 2', '    print(argv[1], "raporu")', '    return 0', 'print(main(["rapor.py", "Bursa"]))'],
-      expect: 'Bursa raporu\n0\n',
-      hint: 'Önce argüman eksikliğini kontrol et (erken dönüş), sonra asıl işi yap ve 0 döndür.',
-      why: 'Erken dönüş (guard clause) kalıbı: hatalı kullanımda hemen 2 ile çık; geri kalan kod "argüman var" varsayımıyla rahatça yazılır.' },
-    { t: 'code',
-      id: 'terminal-temelleri-1',
-      stage: 'Rehberli',
-      diff: 1,
-      q: '<p>Anadolu Market rapor betiği şöyle çağrılıyor: <code>python rapor.py &lt;şehir&gt; [gün]</code>. <code>rapor_argumanlari(argv)</code> fonksiyonunu yaz:</p><ul><li>Şehir yoksa (argv yalnızca betik adını içeriyorsa) <code>None</code> döndür.</li><li>Gün verilmemişse varsayılan <b>7</b> olsun.</li><li>Gün verilmişse <b>int</b>\'e çevir.</li><li>Sonuç <code>(sehir, gun)</code> demeti olsun.</li></ul>',
-      guide: ['argv uzunluğu 2\'den küçükse None döndür.', 'Şehri argv[1]\'den al.', 'Uzunluk 2\'den büyükse argv[2]\'yi int\'e çevir, değilse 7 kullan.', '(sehir, gun) demetini döndür.'],
-      example: 'def kullanici_ve_rol(argv):\n    if len(argv) < 2:\n        return None\n    kullanici = argv[1]\n    rol = argv[2] if len(argv) > 2 else "okuyucu"\n    return (kullanici, rol)\n\nprint(kullanici_ve_rol(["yetki.py", "ayse"]))\nprint(kullanici_ve_rol(["yetki.py", "ayse", "admin"]))\n',
-      start: 'def rapor_argumanlari(argv):\n    # TODO: şehir yoksa None döndür\n    sehir = argv[1]\n    # TODO: gün verilmişse int\'e çevir, verilmemişse 7 kullan\n    gun = argv[2]\n    return (sehir, gun)\n',
-      sol: 'def rapor_argumanlari(argv):\n    if len(argv) < 2:\n        return None\n    sehir = argv[1]\n    gun = int(argv[2]) if len(argv) > 2 else 7\n    return (sehir, gun)\n',
-      tests: 'assert rapor_argumanlari(["rapor.py"]) is None, "Şehir verilmezse None dönmeli (IndexError değil)"\nassert rapor_argumanlari(["rapor.py", "İzmir"]) == ("İzmir", 7), "Gün verilmezse varsayılan 7 olmalı"\nassert rapor_argumanlari(["rapor.py", "Ankara", "30"]) == ("Ankara", 30), "Gün \'30\' metni int 30\'a çevrilmeli"\nassert isinstance(rapor_argumanlari(["r.py", "Bursa", "5"])[1], int), "Gün int türünde olmalı: argümanlar str gelir"\n',
-      hints: ['Önce len(argv) ile kaç argüman geldiğini kontrol et.', 'Koşullu ifade: deger = int(argv[2]) if len(argv) > 2 else 7', 'İlk satır: if len(argv) < 2: return None'],
-      why: 'Argüman listesini fonksiyona parametre olarak vermek, sys.argv\'ye dokunmadan her senaryoyu test etmeyi sağlar. Eksik argüman kontrolü IndexError yerine anlamlı bir sonuç üretir.' },
-    { t: 'code',
-      id: 'terminal-temelleri-2',
-      stage: 'Rehberli',
-      diff: 2,
-      q: '<p><code>yolu_coz(cwd, yol)</code> fonksiyonunu yaz. Terminalin yaptığı gibi bir yolu çalışma dizinine göre çözsün ve sadeleşmiş mutlak yolu <b>str</b> olarak döndürsün:</p><ul><li><code>yol</code> mutlaksa (<code>/</code> ile başlıyorsa) cwd yok sayılır.</li><li>Göreliyse cwd ile birleştirilir.</li><li><code>.</code> ve <code>..</code> parçaları sadeleştirilir.</li></ul><p>Deterministik olması için <code>PurePosixPath</code> ve <code>posixpath.normpath</code> kullan.</p>',
-      guide: ['PurePosixPath(yol).is_absolute() ile mutlak olup olmadığını öğren.', 'Göreliyse PurePosixPath(cwd) / yol ile birleştir.', 'Sonucu str\'ye çevirip posixpath.normpath ile sadeleştir.', 'Sadeleşmiş metni döndür.'],
-      example: 'import posixpath\nfrom pathlib import PurePosixPath\n\nkok = PurePosixPath("/srv/uygulama")\nprint((kok / "loglar/../ayarlar.ini"))\nprint(posixpath.normpath(str(kok / "loglar/../ayarlar.ini")))\nprint(PurePosixPath("/tmp/x").is_absolute())\n',
-      start: 'import posixpath\nfrom pathlib import PurePosixPath\n\ndef yolu_coz(cwd, yol):\n    # TODO: yol mutlaksa cwd\'yi kullanma\n    tam = PurePosixPath(cwd) / yol\n    # TODO: .. ve . parçalarını sadeleştir\n    return str(tam)\n',
-      sol: 'import posixpath\nfrom pathlib import PurePosixPath\n\ndef yolu_coz(cwd, yol):\n    p = PurePosixPath(yol)\n    tam = p if p.is_absolute() else PurePosixPath(cwd) / p\n    return posixpath.normpath(str(tam))\n',
-      tests: 'assert yolu_coz("/home/ayse", "veri/satis.csv") == "/home/ayse/veri/satis.csv", "Göreli yol cwd\'ye eklenmeli"\nassert yolu_coz("/home/ayse/proje", "../arsiv/eski.csv") == "/home/ayse/arsiv/eski.csv", ".. bir üst klasöre çıkmalı"\nassert yolu_coz("/home/ayse", "./a/./b.txt") == "/home/ayse/a/b.txt", ". parçaları silinmeli"\nassert yolu_coz("/home/ayse", "/etc/hosts") == "/etc/hosts", "Mutlak yol cwd\'den bağımsızdır"\nassert yolu_coz("/a/b/c", "../../x") == "/a/x", "İki kez .. iki seviye çıkmalı"\nassert isinstance(yolu_coz("/a", "b"), str), "Sonuç str olmalı"\n',
-      hints: ['Mutlak/göreli ayrımı için is_absolute() metodu var.', 'Aslında PurePosixPath(cwd) / "/etc/hosts" zaten mutlak yolu verir; yine de açıkça kontrol etmek okunurluğu artırır.', 'return posixpath.normpath(str(tam))'],
-      why: 'PurePosixPath yalnızca yol metniyle çalışır, diski okumaz; testler her işletim sisteminde aynı sonucu verir. normpath ".." ve "." parçalarını terminalin yaptığı gibi çözer.' },
-    { t: 'code',
-      id: 'terminal-temelleri-3',
-      stage: 'Rehberli',
-      diff: 1,
-      q: '<p>Bir veri yükleme betiği bitince şu sözleşmeye göre çıkış kodu üretmeli. <code>cikis_kodu(okunan, hatali)</code> fonksiyonunu yaz:</p><ul><li><code>okunan == 0</code> ise (hiç satır yok) <b>2</b></li><li>Hatalı satır oranı (<code>hatali / okunan</code>) %10\'dan büyükse <b>1</b></li><li>Aksi hâlde <b>0</b></li></ul>',
-      guide: ['Önce okunan == 0 durumunu kontrol et; yoksa sıfıra bölme hatası alırsın.', 'Oranı hatali / okunan ile hesapla.', 'Oran 0.10\'dan büyükse 1 döndür.', 'Hiçbiri değilse 0 döndür.'],
-      example: 'def sinav_kodu(cevaplanan, yanlis):\n    if cevaplanan == 0:\n        return 3\n    if yanlis / cevaplanan > 0.5:\n        return 1\n    return 0\n\nprint(sinav_kodu(0, 0), sinav_kodu(10, 6), sinav_kodu(10, 2))\n',
-      start: 'def cikis_kodu(okunan, hatali):\n    # TODO: hiç satır yoksa 2 döndür\n    oran = hatali / okunan\n    # TODO: oran %10\'dan büyükse 1 döndür\n    return 0\n',
-      sol: 'def cikis_kodu(okunan, hatali):\n    if okunan == 0:\n        return 2\n    oran = hatali / okunan\n    if oran > 0.10:\n        return 1\n    return 0\n',
-      tests: 'assert cikis_kodu(0, 0) == 2, "Hiç satır okunmadıysa 2 dönmeli (ZeroDivisionError değil)"\nassert cikis_kodu(100, 5) == 0, "%5 hata kabul edilebilir: 0 dönmeli"\nassert cikis_kodu(100, 10) == 0, "Tam %10 sınırı aşmaz: 0 dönmeli"\nassert cikis_kodu(100, 11) == 1, "%11 hata oranı 1 döndürmeli"\nassert cikis_kodu(3, 3) == 1, "Tüm satırlar hatalıysa 1 dönmeli"\n',
-      hints: ['Koşulların sırası önemli: bölmeden önce sıfır kontrolü.', '"Büyükse" diyor: > kullan, >= değil.', 'if oran > 0.10: return 1'],
-      why: 'Çıkış kodu, zamanlayıcının ve diğer programların betiğinle konuştuğu dildir. Sıfıra bölme gibi kenar durumları ayrı bir kodla işaretlemek sorunun kaynağını ilk bakışta gösterir.' },
-    { t: 'code',
-      id: 'terminal-temelleri-4',
-      stage: 'Rehberli',
-      diff: 2,
-      q: '<p><code>stok_bildir(stoklar, out, err)</code> fonksiyonunu yaz. <code>stoklar</code> bir sözlük: ürün → adet. Her ürün için:</p><ul><li>Adet 0 ise <code>err</code> akışına <code>UYARI: &lt;ürün&gt; tükendi</code> yaz.</li><li>Değilse <code>out</code> akışına <code>&lt;ürün&gt;,&lt;adet&gt;</code> yaz (CSV satırı).</li></ul><p>Yazmak için <code>print(..., file=akis)</code> kullan. Fonksiyon tükenen ürün sayısını döndürsün.</p>',
-      guide: ['Sayaç için tukenen = 0 ile başla.', 'stoklar.items() üzerinde dön.', 'Adet 0 ise print(..., file=err) ile uyar ve sayacı artır.', 'Değilse print(f"{urun},{adet}", file=out) yaz.', 'Sayacı döndür.'],
-      example: 'import io, sys\n\ndef notlari_yaz(notlar, out, err):\n    for ad, puan in notlar.items():\n        if puan < 50:\n            print(f"KALDI: {ad}", file=err)\n        else:\n            print(f"{ad};{puan}", file=out)\n\nkutu = io.StringIO()\nnotlari_yaz({"Ali": 70, "Ece": 40}, sys.stdout, kutu)\nprint("stderr kutusu:", kutu.getvalue())\n',
-      start: 'def stok_bildir(stoklar, out, err):\n    tukenen = 0\n    for urun, adet in stoklar.items():\n        # TODO: adet 0 ise err\'e UYARI yaz ve sayacı artır\n        # TODO: değilse out\'a "urun,adet" yaz\n        print(urun, adet)\n    return tukenen\n',
-      sol: 'def stok_bildir(stoklar, out, err):\n    tukenen = 0\n    for urun, adet in stoklar.items():\n        if adet == 0:\n            print(f"UYARI: {urun} tükendi", file=err)\n            tukenen += 1\n        else:\n            print(f"{urun},{adet}", file=out)\n    return tukenen\n',
-      tests: 'import io\no, e = io.StringIO(), io.StringIO()\nn = stok_bildir({"çay": 40, "kahve": 0, "şeker": 12, "un": 0}, o, e)\nassert o.getvalue() == "çay,40\\nşeker,12\\n", "out yalnız CSV satırlarını içermeli, geldi: " + repr(o.getvalue())\nassert e.getvalue() == "UYARI: kahve tükendi\\nUYARI: un tükendi\\n", "err yalnız uyarıları içermeli, geldi: " + repr(e.getvalue())\nassert n == 2, "Tükenen ürün sayısı 2 dönmeli"\no2, e2 = io.StringIO(), io.StringIO()\nassert stok_bildir({}, o2, e2) == 0 and o2.getvalue() == "", "Boş sözlükte hiçbir şey yazılmamalı"\n',
-      hints: ['print\'in file parametresi yazılacak akışı seçer.', 'Veri out\'a, mesaj err\'e: python stok.py > stok.csv yapan kişi CSV\'de uyarı görmemeli.', 'print(f"UYARI: {urun} tükendi", file=err)'],
-      why: 'Veri ile mesajları ayrı akışlara yazmak betiği boru hattına uygun kılar: stdout dosyaya yönlendirilince temiz CSV kalır, uyarılar ekranda ya da log dosyasında görünür.' },
-    { t: 'code',
-      id: 'terminal-temelleri-5',
-      stage: 'Kendin yaz',
-      diff: 1,
-      q: '<p><code>ortam_ayari(env, anahtar, varsayilan)</code> fonksiyonunu yaz. <code>env</code> bir sözlük (os.environ gibi). Anahtar yoksa <b>ya da</b> değeri boşluklardan ibaretse <code>varsayilan</code> döndür; aksi hâlde değerin baştaki/sondaki boşlukları kırpılmış hâlini döndür.</p>',
-      start: 'def ortam_ayari(env, anahtar, varsayilan):\n    pass\n',
-      sol: 'def ortam_ayari(env, anahtar, varsayilan):\n    deger = env.get(anahtar, "").strip()\n    return deger if deger else varsayilan\n',
-      tests: 'env = {"ANADOLU_ORTAM": " canli ", "LOG_SEVIYE": "   ", "DB": "sqlite"}\nassert ortam_ayari(env, "ANADOLU_ORTAM", "gelistirme") == "canli", "Değer kırpılmalı: \' canli \' -> \'canli\'"\nassert ortam_ayari(env, "LOG_SEVIYE", "INFO") == "INFO", "Yalnız boşluk içeren değer yok sayılmalı"\nassert ortam_ayari(env, "YOK", "x") == "x", "Olmayan anahtarda varsayılan dönmeli (KeyError değil)"\nassert ortam_ayari(env, "DB", "postgres") == "sqlite", "Var olan değer dönmeli"\n',
-      hints: ['dict.get(anahtar, "") yoksa boş metin verir.', 'Boş metin falsy\'dir: if deger: ...', 'return deger if deger else varsayilan'],
-      why: 'Ortam değişkenleri elle ayarlanır ve sık sık yanlışlıkla boş bırakılır. get + strip + varsayılan üçlüsü bu kirli girdiye karşı sağlam bir ayar okuyucu üretir.' },
-    { t: 'code',
-      id: 'terminal-temelleri-6',
-      stage: 'Kendin yaz',
-      diff: 2,
-      q: '<p><code>bayraklari_ayir(argv)</code> fonksiyonunu yaz. <code>argv[0]</code> betik adıdır, atla. Kalan argümanlar için:</p><ul><li><code>--anahtar=deger</code> biçimindekiler sözlüğe <code>"anahtar": "deger"</code> olarak girsin.</li><li><code>--anahtar</code> (eşittir yok) biçimindekiler <code>"anahtar": True</code> olsun.</li><li><code>--</code> ile başlamayanlar <code>"_konum"</code> anahtarındaki listeye sırayla eklensin.</li></ul><p>Sözlük her zaman <code>"_konum"</code> anahtarını içersin (boş liste olabilir).</p>',
-      start: 'def bayraklari_ayir(argv):\n    pass\n',
-      sol: 'def bayraklari_ayir(argv):\n    sonuc = {"_konum": []}\n    for arg in argv[1:]:\n        if arg.startswith("--"):\n            govde = arg[2:]\n            if "=" in govde:\n                anahtar, deger = govde.split("=", 1)\n                sonuc[anahtar] = deger\n            else:\n                sonuc[govde] = True\n        else:\n            sonuc["_konum"].append(arg)\n    return sonuc\n',
-      tests: 'r = bayraklari_ayir(["rapor.py", "İzmir", "--gun=30", "--detay", "Ankara"])\nassert r == {"_konum": ["İzmir", "Ankara"], "gun": "30", "detay": True}, "Beklenen sözlük farklı, geldi: " + repr(r)\nassert bayraklari_ayir(["rapor.py"]) == {"_konum": []}, "Argüman yoksa yalnız boş _konum olmalı"\nassert bayraklari_ayir(["x.py", "--filtre=a=b"])["filtre"] == "a=b", "Yalnız ilk = ayırmalı: split(\'=\', 1)"\n',
-      hints: ['startswith("--") ile bayrak mı diye bak, arg[2:] ile başını at.', 'split("=", 1) yalnızca ilk eşittirden böler.', 'Eşittir yoksa değer True olur.'],
-      why: 'argparse\'ın temel işi budur: konumsal argümanları ve bayrakları ayırmak. split("=", 1) değerin kendisi = içerse bile doğru çalışır.' },
-    { t: 'code',
-      id: 'terminal-temelleri-7',
-      stage: 'Kendin yaz',
-      diff: 2,
-      q: '<p>Ekipte Windows kullananlarla Linux sunucu arasında köprü kuracaksın. <code>komut_cevir(komut)</code> fonksiyonu Windows cmd komutunu macOS/Linux karşılığına çevirsin. İlk kelime şu tabloya göre değişir, geri kalan argümanlar aynen kalır:</p><p><code>dir→ls</code>, <code>type→cat</code>, <code>copy→cp</code>, <code>move→mv</code>, <code>del→rm</code>, <code>cls→clear</code>, <code>findstr→grep</code>. Tabloda olmayan komut (ör. <code>cd</code>, <code>mkdir</code>) aynen kalsın. Komut adı büyük/küçük harf duyarsız eşleşsin (<code>DIR</code> da <code>ls</code> olur). Fazla boşlukları tek boşluğa indir.</p>',
-      start: 'def komut_cevir(komut):\n    pass\n',
-      sol: 'ESLEME = {"dir": "ls", "type": "cat", "copy": "cp", "move": "mv", "del": "rm", "cls": "clear", "findstr": "grep"}\n\ndef komut_cevir(komut):\n    parcalar = komut.split()\n    if not parcalar:\n        return ""\n    ad = parcalar[0].lower()\n    parcalar[0] = ESLEME.get(ad, parcalar[0])\n    return " ".join(parcalar)\n',
-      tests: 'assert komut_cevir("type satis.csv") == "cat satis.csv", "type -> cat"\nassert komut_cevir("DIR") == "ls", "Büyük harf DIR de ls olmalı"\nassert komut_cevir("findstr HATA stok.log") == "grep HATA stok.log", "findstr -> grep, argümanlar aynı"\nassert komut_cevir("mkdir rapor") == "mkdir rapor", "Tabloda olmayan komut aynen kalmalı"\nassert komut_cevir("copy   a.txt    b.txt") == "cp a.txt b.txt", "Fazla boşluk tek boşluğa inmeli"\nassert komut_cevir("") == "", "Boş komut boş dönmeli"\n',
-      hints: ['Eşlemeyi bir sözlükte tut.', 'split() argümansız çağrılınca birden fazla boşluğu tek ayırıcı sayar.', 'ESLEME.get(ad.lower(), ad) yoksa orijinali döndürür.'],
-      why: 'Sözlük tabanlı eşleme if/elif zincirinden kısa ve genişletilebilirdir. split() + join() ikilisi boşluk normalizasyonunu bedavaya verir.' },
-    { t: 'code',
-      id: 'terminal-temelleri-8',
-      stage: 'Kendin yaz',
-      diff: 2,
-      q: '<p>Linux\'ta <code>cat stok.log | grep HATA | wc -l</code> komutu log içinde "HATA" geçen satır sayısını verir. Aynı boru hattını Python\'da taklit et: <code>boru_say(metin, kelime)</code> çok satırlı metni satırlara böler, <code>kelime</code>\'yi içeren satırları süzer ve <b>sayısını</b> döndürür. Ayrıca <code>boru_suz(metin, kelime)</code> aynı satırları liste olarak döndürsün (sıra korunarak). Eşleşme büyük/küçük harf duyarlı.</p>',
-      start: 'def boru_suz(metin, kelime):\n    pass\n\ndef boru_say(metin, kelime):\n    pass\n',
-      sol: 'def boru_suz(metin, kelime):\n    return [satir for satir in metin.splitlines() if kelime in satir]\n\ndef boru_say(metin, kelime):\n    return len(boru_suz(metin, kelime))\n',
-      tests: 'log = "02:00 BILGI basladi\\n02:01 HATA depo=Gebze\\n02:02 BILGI 120 urun\\n02:03 HATA depo=Izmir\\n02:04 hata degil\\n"\nassert boru_suz(log, "HATA") == ["02:01 HATA depo=Gebze", "02:03 HATA depo=Izmir"], "Yalnız HATA içeren iki satır kalmalı"\nassert boru_say(log, "HATA") == 2, "grep büyük/küçük harf duyarlıdır: \'hata\' sayılmaz"\nassert boru_say(log, "Gebze") == 1, "Gebze 1 satırda geçiyor"\nassert boru_say("", "HATA") == 0, "Boş metinde 0"\n',
-      hints: ['splitlines() satırlara böler ve son boş satırı üretmez.', 'Süzme için comprehension: [s for s in ... if kelime in s]', 'Saymak için len(boru_suz(...)): fonksiyonlar da boru gibi birleşir.'],
-      why: 'Her fonksiyonun tek iş yapması ve birinin çıktısının diğerine girdi olması, Unix borusunun Python\'daki karşılığıdır. boru_say, boru_suz\'u yeniden kullanır.' },
-    { t: 'code',
-      id: 'terminal-temelleri-9',
-      stage: 'Hata avı',
-      kind: 'bug',
-      diff: 2,
-      q: '<p><b>Hatayı bul ve düzelt.</b> <code>python topla.py 10 20 30</code> çağrısını taklit eden <code>topla(argv)</code> fonksiyonu betik adından sonraki tüm sayıları toplamalı: <code>topla(["topla.py", "10", "20", "30"])</code> → <code>60</code>. Mevcut kod hata veriyor.</p>',
-      start: 'def topla(argv):\n    toplam = 0\n    for arg in argv:\n        toplam += arg\n    return toplam\n',
-      sol: 'def topla(argv):\n    toplam = 0\n    for arg in argv[1:]:\n        toplam += int(arg)\n    return toplam\n',
-      tests: 'assert topla(["topla.py", "10", "20", "30"]) == 60, "10+20+30 = 60 olmalı"\nassert topla(["topla.py"]) == 0, "Argüman yoksa toplam 0"\nassert topla(["topla.py", "-5", "5"]) == 0, "Negatif sayılar da çalışmalı"\n',
-      hints: ['İki hata var: biri hangi elemanların toplandığıyla ilgili.', 'argv[0] betiğin adıdır, sayı değildir; argv[1:] ile atla.', 'Argümanlar str gelir: int(arg) ile çevir.'],
-      why: 'sys.argv iki klasik tuzak taşır: ilk eleman betik adıdır ve tüm elemanlar metindir. int + str TypeError verir; "topla.py" ise int\'e çevrilemez.' },
-    { t: 'code',
-      id: 'terminal-temelleri-10',
-      stage: 'Hata avı',
-      kind: 'bug',
-      diff: 2,
-      q: '<p><b>Hatayı bul ve düzelt.</b> <code>zaman_asimi(env)</code>, <code>ZAMAN_ASIMI</code> ortam değişkenini saniye olarak <b>int</b> döndürmeli; değişken tanımlı değilse varsayılan <b>30</b> olmalı. Mevcut kod tanımsız değişkende çöküyor ve tanımlıyken yanlış türde değer döndürüyor.</p>',
-      start: 'def zaman_asimi(env):\n    deger = env["ZAMAN_ASIMI"]\n    return deger\n',
-      sol: 'def zaman_asimi(env):\n    deger = env.get("ZAMAN_ASIMI", "30")\n    return int(deger)\n',
-      tests: 'assert zaman_asimi({}) == 30, "Değişken yoksa 30 dönmeli (KeyError değil)"\nassert zaman_asimi({"ZAMAN_ASIMI": "45"}) == 45, "\'45\' metni int 45 olmalı"\nassert isinstance(zaman_asimi({"ZAMAN_ASIMI": "5"}), int), "Dönüş türü int olmalı: ortam değişkenleri hep str\'dir"\n',
-      hints: ['env["X"] anahtar yoksa KeyError fırlatır.', '.get(anahtar, varsayilan) kullan; varsayılanı da metin ver ki tek dönüşüm yetsin.', 'return int(env.get("ZAMAN_ASIMI", "30"))'],
-      why: 'Ortam değişkenleri her zaman metindir ve tanımsız olabilir. get ile varsayılan vermek ve tek noktada int\'e çevirmek iki hatayı birden çözer.' },
-    { t: 'code',
-      id: 'terminal-temelleri-11',
-      stage: 'Meydan okuma',
-      diff: 3,
-      q: '<p>Tam bir komut satırı aracı yaz: <code>main(argv, env, out, err)</code>. Kullanım: <code>kargo.py &lt;şehir&gt; &lt;desi&gt;</code>. Kurallar:</p><ul><li>Argüman sayısı tam 2 değilse <code>err</code>\'e <code>Kullanım: kargo.py &lt;şehir&gt; &lt;desi&gt;</code> yaz, <b>2</b> döndür.</li><li>Desi sayı değilse ya da 0 veya negatifse <code>err</code>\'e <code>Hata: desi pozitif sayı olmalı</code> yaz, <b>1</b> döndür. (Ondalık olabilir: <code>"2.5"</code>)</li><li>Birim fiyat <code>env</code>\'deki <code>KARGO_BIRIM</code> değeridir (yoksa <code>"12"</code>), float\'a çevir.</li><li>Şehir <code>İstanbul</code> ise ücret 1.0 katsayılı, başka şehir ise 1.25 katsayılıdır. Ücret = desi × birim × katsayı, 2 basamağa yuvarla.</li><li><code>out</code>\'a <code>&lt;şehir&gt;: &lt;ücret&gt; TL</code> yaz (ücreti <code>:.2f</code> ile), <b>0</b> döndür.</li></ul>',
-      start: 'def main(argv, env, out, err):\n    pass\n',
-      sol: 'def main(argv, env, out, err):\n    if len(argv) != 3:\n        print("Kullanım: kargo.py <şehir> <desi>", file=err)\n        return 2\n    sehir = argv[1]\n    try:\n        desi = float(argv[2])\n    except ValueError:\n        desi = 0\n    if desi <= 0:\n        print("Hata: desi pozitif sayı olmalı", file=err)\n        return 1\n    birim = float(env.get("KARGO_BIRIM", "12"))\n    katsayi = 1.0 if sehir == "İstanbul" else 1.25\n    ucret = round(desi * birim * katsayi, 2)\n    print(f"{sehir}: {ucret:.2f} TL", file=out)\n    return 0\n',
-      tests: 'import io\ndef calistir(argv, env=None):\n    o, e = io.StringIO(), io.StringIO()\n    kod = main(argv, env or {}, o, e)\n    return kod, o.getvalue(), e.getvalue()\n\nk, o, e = calistir(["kargo.py", "İstanbul", "3"])\nassert (k, o, e) == (0, "İstanbul: 36.00 TL\\n", ""), "3 desi x 12 x 1.0 = 36.00, geldi: " + repr((k, o, e))\nk, o, e = calistir(["kargo.py", "İzmir", "2.5"], {"KARGO_BIRIM": "10"})\nassert (k, o) == (0, "İzmir: 31.25 TL\\n"), "2.5 x 10 x 1.25 = 31.25 olmalı, geldi: " + repr(o)\nk, o, e = calistir(["kargo.py", "İzmir"])\nassert k == 2 and e.startswith("Kullanım:") and o == "", "Eksik argümanda 2 dönmeli, mesaj err\'e gitmeli"\nk, o, e = calistir(["kargo.py", "Ankara", "abc"])\nassert k == 1 and "desi pozitif" in e and o == "", "Sayı olmayan desi 1 döndürmeli (ValueError ile çökmemeli)"\nk, o, e = calistir(["kargo.py", "Ankara", "-4"])\nassert k == 1, "Negatif desi 1 döndürmeli"\nk, o, e = calistir(["kargo.py", "Ankara", "1", "fazla"])\nassert k == 2, "Fazla argüman da kullanım hatasıdır: 2"\n',
-      hints: ['Sıra: önce argüman sayısı (2), sonra desi doğrulama (1), en son hesap (0).', 'float("abc") ValueError fırlatır; try/except ile yakala ve hata yoluna yönlendir.', 'Ücret formatı: f"{sehir}: {ucret:.2f} TL"'],
-      why: 'Bu, profesyonel CLI iskeletidir: tüm girdiler parametre (argv, env, akışlar), sonuç çıkış kodu. Kenar durumlar (eksik/fazla argüman, sayı olmayan desi, negatif değer) ayrı kodlarla ve stderr mesajlarıyla raporlanır; stdout yalnız temiz sonucu içerir.' }
-  ],
+      why: 'İşletim sistemi ve zamanlayıcılar çıkış koduna bakar: 0 başarı, diğerleri hata. stderr\'e uyarı yazan ama 0 ile biten program başarılı sayılır.' }],
   faq: [
     { q: 'python mu yazmalıyım, python3 mü, py mi?',
       a: 'macOS ve Linux\'ta sistemde eski Python 2 kalıntıları olabildiği için genellikle <code>python3</code> yazılır. Windows\'ta resmi kurulum <code>py</code> başlatıcısını getirir; <code>py -3.12</code> ile sürüm de seçebilirsin. Sanal ortam etkinken üçü de aynı Python\'ı gösterir; emin olmak için <code>python -c "import sys; print(sys.executable)"</code> yaz.' },
@@ -3769,10 +2812,10 @@ print(butce_ikilisi([10, 20], 100))</pre>
       example: 'urunler = [("çay", 120), ("kahve", 350), ("şeker", 45)]\nen_pahali = urunler[0]\nfor u in urunler[1:]:\n    if u[1] > en_pahali[1]:\n        en_pahali = u\nprint(en_pahali)\n',
       start: 'def en_dusuk_bakiye(hesaplar):\n    # TODO: boş liste kontrolü\n    aday = None  # TODO: ilk elemanla başlat\n    for hesap in hesaplar:\n        # TODO: daha düşük bakiye gelirse adayı değiştir\n        pass\n    return aday\n',
       sol: 'def en_dusuk_bakiye(hesaplar):\n    if not hesaplar:\n        return None\n    aday = hesaplar[0]\n    for hesap in hesaplar:\n        if hesap[1] < aday[1]:\n            aday = hesap\n    return aday\n',
-      tests: 'assert en_dusuk_bakiye([("H-1", 500), ("H-2", -120), ("H-3", 40)]) == ("H-2", -120), "en düşük bakiye H-2 (-120)"\nassert en_dusuk_bakiye([("H-1", 300), ("H-2", 100), ("H-3", 100)]) == ("H-2", 100), "eşitlikte ilk görülen (H-2) seçilmeli: < kullan, <= değil"\nassert en_dusuk_bakiye([("H-1", 50), ("H-2", 80)]) == ("H-1", 50), "hepsi pozitifken de doğru çalışmalı (0 ile başlatma tuzağı)"\nassert en_dusuk_bakiye([]) is None, "boş liste None döndürmeli"\nassert "min(" not in __source__, "min kullanmadan kalıbı kendin yaz"\n',
+      tests: 'assert en_dusuk_bakiye([("H-1", 500), ("H-2", -120), ("H-3", 40)]) == ("H-2", -120), "en düşük bakiye H-2 (-120)"\nassert en_dusuk_bakiye([("H-1", 300), ("H-2", 100), ("H-3", 100)]) == ("H-2", 100), "eşitlikte ilk görülen (H-2) seçilmeli: < kullan, <= değil"\nassert en_dusuk_bakiye([("H-1", 50), ("H-2", 80)]) == ("H-1", 50), "hepsi pozitifken de doğru çalışmalı (0 ile başlatma tuzağı)"\nassert en_dusuk_bakiye([]) is None, "boş liste None döndürmeli"\nassert "min(" not in __kod__, "min kullanmadan kalıbı kendin yaz"\n',
       hints: ['En iyi değer kalıbı: aday = ilk eleman, sonra karşılaştır.', 'Bakiye demetin 1. indeksinde: hesap[1] < aday[1]', 'if hesap[1] < aday[1]: aday = hesap'],
       why: 'İlk elemanla başlamak değişmezi baştan doğru kurar; kesin küçüktür (<) eşitlikte ilk görüleni korur.' },
-    { id: 'dongu-kaliplari-2',
+    { erken: true, id: 'dongu-kaliplari-2',
       t: 'code',
       stage: 'Rehberli',
       diff: 2,
@@ -3806,14 +2849,14 @@ print(butce_ikilisi([10, 20], 100))</pre>
       tests: 'assert kac_ay(10000, 0.03, 15000) == 14, "10000 TL %3 ile 14. ayda 15000\'i geçer"\nassert kac_ay(1000, 0.0, 2000, 250) == 4, "faizsiz, ayda 250 ek ile 4 ay"\nassert kac_ay(5000, 0.05, 5000) == 0, "zaten hedefteyse 0 ay"\nassert kac_ay(1000, 0.0, 2000) is None, "faiz ve ek yoksa hedefe ulaşılamaz: None (sonsuz döngü olmamalı)"\nassert kac_ay(1000, 0.01, 1100, 0) == 10, "1000 × 1.01^10 ≈ 1104.6"\n',
       hints: ['while bakiye < hedef: ve döngü içinde ay sayacı.', 'Sonsuz döngüyü önlemek için ay 1200\'e ulaşınca None döndür.'],
       why: 'Kaç tur süreceği bilinmeyen tekrar while ister; üst sınır, hedefe hiç ulaşılamayan girdilerde programın donmasını engeller.' },
-    { id: 'dongu-kaliplari-5',
+    { erken: true, id: 'dongu-kaliplari-5',
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
       q: '<p><code>en_cok_satan(satislar)</code> fonksiyonunu yaz. <code>satislar</code>, satılan ürün adlarının listesidir. Önce frekansları say, sonra en çok satan ürünü <code>(urun, adet)</code> olarak döndür. Eşitlikte <b>alfabetik olarak önce gelen</b> ürünü seç. Liste boşsa <code>None</code> döndür. <code>max</code> ve <code>Counter</code> kullanma.</p>',
       start: 'def en_cok_satan(satislar):\n    pass\n',
       sol: 'def en_cok_satan(satislar):\n    frekans = {}\n    for u in satislar:\n        frekans[u] = frekans.get(u, 0) + 1\n    en_iyi = None\n    for urun, adet in frekans.items():\n        if en_iyi is None or adet > en_iyi[1] or (adet == en_iyi[1] and urun < en_iyi[0]):\n            en_iyi = (urun, adet)\n    return en_iyi\n',
-      tests: 'assert en_cok_satan(["çay", "kahve", "çay", "su", "kahve", "çay"]) == ("çay", 3), "çay 3 kez satıldı"\nassert en_cok_satan(["su", "kahve", "su", "kahve"]) == ("kahve", 2), "eşitlikte alfabetik önce gelen (kahve) seçilmeli"\nassert en_cok_satan(["limon"]) == ("limon", 1), "tek ürün"\nassert en_cok_satan([]) is None, "boş liste None"\nassert "max(" not in __source__ and "Counter" not in __source__, "max ve Counter kullanmadan yaz"\n',
+      tests: 'assert en_cok_satan(["çay", "kahve", "çay", "su", "kahve", "çay"]) == ("çay", 3), "çay 3 kez satıldı"\nassert en_cok_satan(["su", "kahve", "su", "kahve"]) == ("kahve", 2), "eşitlikte alfabetik önce gelen (kahve) seçilmeli"\nassert en_cok_satan(["limon"]) == ("limon", 1), "tek ürün"\nassert en_cok_satan([]) is None, "boş liste None"\nassert "max(" not in __kod__ and "Counter" not in __kod__, "max ve Counter kullanmadan yaz"\n',
       hints: ['İki kalıp art arda: önce frekans sözlüğü, sonra en iyi değer.', 'Eşitlik kuralı: adet > en_iyi[1] ya da (adet eşit ve urun < en_iyi[0]).'],
       why: 'Frekans kalıbı veriyi özetler, en iyi değer kalıbı özetten seçim yapar; eşitlik kuralını karşılaştırmaya eklemek sonucu deterministik kılar.' },
     { id: 'dongu-kaliplari-6',
@@ -3868,14 +2911,14 @@ print(butce_ikilisi([10, 20], 100))</pre>
       tests: 'assert en_uzun_artis([5, 1, 2, 3, 2, 4, 6, 8, 1]) == (4, 4), "2,4,6,8 serisi indeks 4\'ten başlar, uzunluk 4"\nassert en_uzun_artis([1, 2, 2, 3]) == (0, 2), "eşit değer seriyi kırar; ilk eşit uzunluktaki seri (0, 2) seçilir"\nassert en_uzun_artis([9, 7, 5]) == (0, 1), "hiç artış yoksa ilk eleman tek başına seridir"\nassert en_uzun_artis([1, 2, 3, 4]) == (0, 4), "liste sonuna kadar süren seri de sayılmalı"\nassert en_uzun_artis([7]) == (0, 1), "tek eleman"\nassert en_uzun_artis([]) == (-1, 0), "boş liste (-1, 0)"\nassert en_uzun_artis([3, 1, 2, 0, 5]) == (1, 2), "eşitlikte ilk seri"\n',
       hints: ['İki durum tut: şu anki seri (başlangıç, uzunluk) ve en iyi seri.', 'Artış yoksa yeni seri bu indekste başlar: bas, uzun = i, 1.', 'En iyiyi döngünün içinde, her adımda güncelle; böylece sona kadar süren seri de yakalanır. Eşitlikte güncelleme yapma (> kullan).'],
       why: 'Komşu karşılaştırma (seri) ile en iyi değer kalıbı birleşir. En iyiyi her turda kontrol etmek, liste sonunda biten seriyi kaçırma hatasını önler; kesin büyüktür eşitlikte ilk seriyi korur.' },
-    { id: 'dongu-kaliplari-11',
+    { erken: true, id: 'dongu-kaliplari-11',
       t: 'code',
       stage: 'Mini proje',
       diff: 3,
       q: '<p>Anadolu Market şube müdürü için aylık satış raporu: <code>aylik_rapor(gunluk, hedef)</code> fonksiyonunu yaz. <code>gunluk</code>, günlük ciro listesidir (gün 1\'den başlar). Tek geçişte şu anahtarlarla bir sözlük döndür:</p><ul><li><code>"toplam"</code>: toplam ciro</li><li><code>"ortalama"</code>: 2 ondalığa yuvarlanmış ortalama (boş listede 0)</li><li><code>"en_iyi_gun"</code>: en yüksek cirolu günün numarası (eşitlikte ilki; boşsa None)</li><li><code>"artis_gunu"</code>: bir önceki güne göre ciro artan gün sayısı</li><li><code>"hedef_gunu"</code>: kümülatif cironun ilk kez <code>hedef</code>\'e ulaştığı (<code>&gt;=</code>) gün numarası; ulaşılmadıysa None</li></ul><p><code>sum</code>, <code>max</code>, <code>min</code> kullanma.</p>',
       start: 'def aylik_rapor(gunluk, hedef):\n    # TODO: tek döngüde tüm kalıpları birleştir\n    pass\n',
       sol: 'def aylik_rapor(gunluk, hedef):\n    toplam = 0\n    en_iyi_gun = None\n    en_iyi = None\n    artis = 0\n    hedef_gunu = None\n    onceki = None\n    for gun, ciro in enumerate(gunluk, start=1):\n        toplam += ciro\n        if en_iyi is None or ciro > en_iyi:\n            en_iyi, en_iyi_gun = ciro, gun\n        if onceki is not None and ciro > onceki:\n            artis += 1\n        if hedef_gunu is None and toplam >= hedef:\n            hedef_gunu = gun\n        onceki = ciro\n    ortalama = round(toplam / len(gunluk), 2) if gunluk else 0\n    return {"toplam": toplam, "ortalama": ortalama, "en_iyi_gun": en_iyi_gun,\n            "artis_gunu": artis, "hedef_gunu": hedef_gunu}\n',
-      tests: 'r = aylik_rapor([1200, 900, 1500, 1500, 800, 2100], 4000)\nassert r is not None, "fonksiyon sözlük döndürmeli"\nassert r["toplam"] == 8000, "toplam 8000"\nassert r["ortalama"] == 1333.33, "ortalama 8000/6 = 1333.33"\nassert r["en_iyi_gun"] == 6, "en yüksek ciro 6. gün (2100)"\nassert r["artis_gunu"] == 2, "artış: 900→1500 ve 800→2100; eşit gün artış sayılmaz"\nassert r["hedef_gunu"] == 4, "kümülatif: 1200, 2100, 3600, 5100 → 4. gün hedefe ulaşır"\nr2 = aylik_rapor([500, 500], 5000)\nassert r2["en_iyi_gun"] == 1 and r2["hedef_gunu"] is None, "eşitlikte ilk gün; hedefe ulaşılmazsa None"\nassert aylik_rapor([], 100) == {"toplam": 0, "ortalama": 0, "en_iyi_gun": None, "artis_gunu": 0, "hedef_gunu": None}, "boş ay için sıfır rapor"\nfor yasak in ("sum(", "max(", "min("):\n    assert yasak not in __source__, f"{yasak} kullanmadan kalıpları kendin yaz"\n',
+      tests: 'r = aylik_rapor([1200, 900, 1500, 1500, 800, 2100], 4000)\nassert r is not None, "fonksiyon sözlük döndürmeli"\nassert r["toplam"] == 8000, "toplam 8000"\nassert r["ortalama"] == 1333.33, "ortalama 8000/6 = 1333.33"\nassert r["en_iyi_gun"] == 6, "en yüksek ciro 6. gün (2100)"\nassert r["artis_gunu"] == 2, "artış: 900→1500 ve 800→2100; eşit gün artış sayılmaz"\nassert r["hedef_gunu"] == 4, "kümülatif: 1200, 2100, 3600, 5100 → 4. gün hedefe ulaşır"\nr2 = aylik_rapor([500, 500], 5000)\nassert r2["en_iyi_gun"] == 1 and r2["hedef_gunu"] is None, "eşitlikte ilk gün; hedefe ulaşılmazsa None"\nassert aylik_rapor([], 100) == {"toplam": 0, "ortalama": 0, "en_iyi_gun": None, "artis_gunu": 0, "hedef_gunu": None}, "boş ay için sıfır rapor"\nfor yasak in ("sum(", "max(", "min("):\n    assert yasak not in __kod__, f"{yasak} kullanmadan kalıpları kendin yaz"\n',
       hints: ['Tek döngüde beş kalıp: biriktirici (toplam), en iyi değer, komşu karşılaştırma (onceki değişkeni), ilk kez olan olay (hedef_gunu None ise kontrol et).', 'onceki değişkenini None ile başlat ve her turun sonunda güncelle.', 'Ortalamayı döngüden sonra hesapla; boş liste için sıfıra bölmeyi önle.'],
       why: 'Gerçek raporlar tek bir kalıptan değil, aynı geçişte birlikte çalışan birkaç kalıptan oluşur. Her kalıbın kendi başlangıç değeri ve güncelleme kuralı olduğunu bilmek, bunları karıştırmadan tek döngüde birleştirmeni sağlar.' }
   ],
@@ -4620,7 +3663,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       tests: 'assert http_durum(200) == "Başarılı" and http_durum(201) == "Başarılı", "200 ve 201 Başarılı"\nassert http_durum(302) == "Yönlendirme", "302 Yönlendirme"\nassert http_durum(404) == "Bulunamadı", "404 kendi özel dalına girmeli; aralık dalından önce yaz"\nassert http_durum(403) == "İstemci hatası", "403 istemci hatası"\nassert http_durum(503) == "Sunucu hatası", "503 sunucu hatası"\nassert http_durum(100) == "Bilinmiyor" and http_durum(600) == "Bilinmiyor", "aralık dışı kodlar Bilinmiyor"\nassert "match" in __source__, "çözümü match-case ile yaz"\n',
       hints: ['Aralıklar için yakalama + guard: case k if 400 <= k <= 499:', '404 özel dalı, 4xx aralık dalının üstünde olmalı.'],
       why: 'Sabit değerler birleşik desenle, aralıklar guard ile ifade edilir; özel değer (404) genel aralıktan önce gelmelidir.' },
-    { id: 'match-case-5',
+    { erken: true, id: 'match-case-5',
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
@@ -4650,7 +3693,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       tests: 'olaylar = [\n    {"tip": "giris", "kullanici": "ayse"},\n    {"tip": "satin_alma", "tutar": 149.9, "urun": "Çay"},\n    {"tip": "hata", "kod": 500},\n    {"tip": "giris", "kullanici": "can"},\n    {"tip": "satin_alma", "tutar": 50.15},\n    {"tip": "cikis", "kullanici": "ayse"},\n    {"tip": "giris"},\n    "bozuk kayıt",\n    {"tip": "hata", "kod": 404},\n]\nr = olay_ozeti(olaylar)\nassert r["giris"] == 2, f"kullanıcısı olan 2 giriş var; gelen {r[\'giris\']}"\nassert r["ciro"] == 200.05, f"ciro 149.9 + 50.15 = 200.05 olmalı; gelen {r[\'ciro\']}"\nassert r["hatalar"] == [500, 404], "hata kodları sırayla toplanmalı"\nassert olay_ozeti([]) == {"giris": 0, "ciro": 0, "hatalar": []}, "boş günlükte sıfır özet"\n',
       hints: ['Döngünün içinde her olayı match ile yönlendir.', 'Eşleşmeyen olaylar için case _ yazmana gerek yok; match hiçbir şey yapmaz.'],
       why: 'match, döngü içinde her olayın türüne göre doğru biriktiriciye yönlendirme yapar; bozuk ya da bilinmeyen kayıtlar hiçbir desenle eşleşmediği için sessizce atlanır.' },
-    { id: 'match-case-8',
+    { erken: true, id: 'match-case-8',
       t: 'code',
       stage: 'Hata avı',
       kind: 'bug',
@@ -5028,7 +4071,7 @@ print(toplam_boyut_yigin(disk))</pre>
       example: 'def basamak_sayisi(n):\n    if n < 10:\n        return 1\n    return 1 + basamak_sayisi(n // 10)\n\nprint(basamak_sayisi(4071), basamak_sayisi(7))\n',
       start: 'def basamak_toplami(n):\n    # TODO: temel durum (tek basamak)\n    # TODO: son basamak + kalan sayının basamak toplamı\n    pass\n',
       sol: 'def basamak_toplami(n):\n    if n < 10:\n        return n\n    return n % 10 + basamak_toplami(n // 10)\n',
-      tests: 'assert basamak_toplami(4071) == 12, "4 + 0 + 7 + 1 = 12"\nassert basamak_toplami(7) == 7, "tek basamaklı sayı temel durumdur, kendisini döndürür"\nassert basamak_toplami(0) == 0, "0 için 0"\nassert basamak_toplami(99999) == 45, "99999 için 45"\nassert "for " not in __source__ and "while " not in __source__ and "str(" not in __source__, "döngü ve str kullanmadan özyinelemeyle çöz"\n',
+      tests: 'assert basamak_toplami(4071) == 12, "4 + 0 + 7 + 1 = 12"\nassert basamak_toplami(7) == 7, "tek basamaklı sayı temel durumdur, kendisini döndürür"\nassert basamak_toplami(0) == 0, "0 için 0"\nassert basamak_toplami(99999) == 45, "99999 için 45"\nassert "for " not in __kod__ and "while " not in __kod__ and "str(" not in __kod__, "döngü ve str kullanmadan özyinelemeyle çöz"\n',
       hints: ['n % 10 son basamağı, n // 10 son basamağı atılmış sayıyı verir.', 'Temel durum: if n < 10: return n', 'return n % 10 + basamak_toplami(n // 10)'],
       why: 'Her çağrı sayıdan bir basamak atar, böylece tek basamağa (temel duruma) mutlaka ulaşılır; dönüşte basamaklar toplanır.' },
     { id: 'ozyineleme-2',
@@ -5062,7 +4105,7 @@ print(toplam_boyut_yigin(disk))</pre>
       q: '<p><code>fib(n, memo=None)</code> fonksiyonunu özyineleme ve sözlükle memoization kullanarak yaz (<code>fib(0) = 0</code>, <code>fib(1) = 1</code>). <code>fib(90)</code> anında hesaplanabilmeli. Değişebilir varsayılan tuzağına düşme: <code>memo={}</code> yerine <code>None</code> ile başla. (lru_cache kullanma; tekniği elle kur.)</p>',
       start: 'def fib(n, memo=None):\n    pass\n',
       sol: 'def fib(n, memo=None):\n    if memo is None:\n        memo = {}\n    if n < 2:\n        return n\n    if n in memo:\n        return memo[n]\n    memo[n] = fib(n - 1, memo) + fib(n - 2, memo)\n    return memo[n]\n',
-      tests: 'assert [fib(i) for i in range(8)] == [0, 1, 1, 2, 3, 5, 8, 13], "ilk sekiz değer 0, 1, 1, 2, 3, 5, 8, 13 olmalı"\nassert fib(90) == 2880067194370816120, "fib(90) memoization ile anında hesaplanmalı"\nassert "lru_cache" not in __source__ and "cache" not in __source__.replace("memo", ""), "lru_cache kullanmadan sözlükle yaz"\nassert "memo={})" not in __source__.replace(" ", ""), "değişebilir varsayılan kullanma; None ile başla"\n',
+      tests: 'assert [fib(i) for i in range(8)] == [0, 1, 1, 2, 3, 5, 8, 13], "ilk sekiz değer 0, 1, 1, 2, 3, 5, 8, 13 olmalı"\nassert fib(90) == 2880067194370816120, "fib(90) memoization ile anında hesaplanmalı"\nassert "lru_cache" not in __kod__ and "cache" not in __kod__.replace("memo", ""), "lru_cache kullanmadan sözlükle yaz"\nassert "memo={})" not in __kod__.replace(" ", ""), "değişebilir varsayılan kullanma; None ile başla"\n',
       hints: ['Önce memo None ise boş sözlük oluştur, sonra temel durum, sonra sözlükte var mı kontrolü.', 'Hesaplanan değeri memo[n] = ... ile sakla ve memo\'yu özyinelemeli çağrılara aktar.'],
       why: 'Her n değeri bir kez hesaplanıp sözlükte saklandığı için çağrı sayısı üstelden doğrusala iner; memo\'yu parametreyle taşımak tüm çağrıların aynı sözlüğü paylaşmasını sağlar.' },
     { id: 'ozyineleme-5',
@@ -5072,7 +4115,7 @@ print(toplam_boyut_yigin(disk))</pre>
       q: '<p><code>ikili_ara(liste, hedef, bas=0, son=None)</code> fonksiyonunu <b>özyinelemeli</b> yaz. <code>liste</code> küçükten büyüğe sıralı müşteri numaralarıdır. Hedef bulunursa indeksini, yoksa <code>-1</code> döndür. Listeyi dilimleme (kopya oluşturma); <code>bas</code> ve <code>son</code> indekslerini taşı.</p>',
       start: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    pass\n',
       sol: 'def ikili_ara(liste, hedef, bas=0, son=None):\n    if son is None:\n        son = len(liste) - 1\n    if bas > son:\n        return -1\n    orta = (bas + son) // 2\n    if liste[orta] == hedef:\n        return orta\n    if hedef < liste[orta]:\n        return ikili_ara(liste, hedef, bas, orta - 1)\n    return ikili_ara(liste, hedef, orta + 1, son)\n',
-      tests: 'nolar = [101, 115, 220, 318, 402, 517, 640, 777, 812, 905]\nfor i, n in enumerate(nolar):\n    assert ikili_ara(nolar, n) == i, f"{n} indeks {i}\'de bulunmalı"\nassert ikili_ara(nolar, 300) == -1, "olmayan numara -1"\nassert ikili_ara(nolar, 1) == -1 and ikili_ara(nolar, 9999) == -1, "aralık dışı değerler -1"\nassert ikili_ara([], 5) == -1, "boş liste -1"\nbuyuk = list(range(0, 2_000_000, 2))\nassert ikili_ara(buyuk, 1_234_566) == 617_283, "büyük listede de hızlı ve doğru çalışmalı"\nassert __source__.count("ikili_ara(") >= 2, "fonksiyon kendini çağırmalı (özyinelemeli)"\nassert "while" not in __source__, "döngü değil özyineleme kullan"\n',
+      tests: 'nolar = [101, 115, 220, 318, 402, 517, 640, 777, 812, 905]\nfor i, n in enumerate(nolar):\n    assert ikili_ara(nolar, n) == i, f"{n} indeks {i}\'de bulunmalı"\nassert ikili_ara(nolar, 300) == -1, "olmayan numara -1"\nassert ikili_ara(nolar, 1) == -1 and ikili_ara(nolar, 9999) == -1, "aralık dışı değerler -1"\nassert ikili_ara([], 5) == -1, "boş liste -1"\nbuyuk = list(range(0, 2_000_000, 2))\nassert ikili_ara(buyuk, 1_234_566) == 617_283, "büyük listede de hızlı ve doğru çalışmalı"\nassert __source__.count("ikili_ara(") >= 2, "fonksiyon kendini çağırmalı (özyinelemeli)"\nassert "while" not in __kod__, "döngü değil özyineleme kullan"\n',
       hints: ['Temel durum: bas > son ise aralık boştur, -1 döndür.', 'Ortadaki değerle karşılaştır; küçükse (bas, orta - 1), büyükse (orta + 1, son) aralığında kendini çağır ve sonucu return et.'],
       why: 'Her çağrı aralığı yarıya indirir; bir milyon elemanda en fazla yaklaşık 20 çağrı olduğundan yığın sınırına yaklaşılmaz. İndeks taşımak kopya maliyetini ortadan kaldırır.' },
     { id: 'ozyineleme-6',
@@ -5578,7 +4621,7 @@ for i, k in enumerate(kayitlar):
       q: '<p><b>Hatayı bul ve düzelt.</b> <code>sepet_ozeti(sepetler)</code> her sepetin toplamını ve genel toplamı <code>(liste, genel)</code> olarak döndürmeli. Çalıştırınca <code>TypeError: \'int\' object is not callable</code> alıyorsun. Değişkene anlamlı ve yerleşik fonksiyonları gölgelemeyen bir ad ver.</p>',
       start: 'def sepet_ozeti(sepetler):\n    """Her sepetin toplamını ve genel toplamı döndürür."""\n    sonuc = []\n    for sepet in sepetler:\n        sum = 0\n        for fiyat in sepet:\n            sum += fiyat\n        sonuc.append(sum)\n    genel = sum(sonuc)\n    return sonuc, genel\n',
       sol: 'def sepet_ozeti(sepetler):\n    """Her sepetin toplamını ve genel toplamı döndürür."""\n    sonuc = []\n    for sepet in sepetler:\n        sepet_toplami = 0\n        for fiyat in sepet:\n            sepet_toplami += fiyat\n        sonuc.append(sepet_toplami)\n    genel = sum(sonuc)\n    return sonuc, genel\n',
-      tests: 'assert sepet_ozeti([[10, 20], [5], [1, 2, 3]]) == ([30, 5, 6], 41), "([30, 5, 6], 41) bekleniyor"\nassert sepet_ozeti([]) == ([], 0), "Boş girdide ([], 0) dönmeli"\nassert "sum =" not in __source__ and "sum +=" not in __source__, "sum yerleşik bir fonksiyondur; değişkene bu adı verme"\n',
+      tests: 'assert sepet_ozeti([[10, 20], [5], [1, 2, 3]]) == ([30, 5, 6], 41), "([30, 5, 6], 41) bekleniyor"\nassert sepet_ozeti([]) == ([], 0), "Boş girdide ([], 0) dönmeli"\nassert "sum =" not in __kod__ and "sum +=" not in __kod__, "sum yerleşik bir fonksiyondur; değişkene bu adı verme"\n',
       hints: [
         'Hata mesajı "int çağrılamaz" diyor: hangi ad hem sayı hem fonksiyon olarak kullanılıyor?',
         'Fonksiyon içinde sum\'a atama yapınca o ad yerelde bir sayıya dönüşür ve yerleşik sum() gizlenir.'
@@ -6023,7 +5066,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
       q: '<p><b>DRY refactor.</b> Ekipteki bir rapor betiği aynı bloğu her şehir için kopyalamış:</p><pre class="out">izmir_adet = 0\nizmir_toplam = 0\nfor s in siparisler:\n    if s["sehir"] == "İzmir":\n        izmir_adet += 1\n        izmir_toplam += s["tutar"]\nprint("İzmir: " + str(izmir_adet) + " sipariş, " + str(round(izmir_toplam, 2)) + " TL")\n# ... aynısı Ankara ve Bursa için ...</pre><p>Bunun yerine iki fonksiyon yaz:</p><ul><li><code>sehir_raporu(siparisler, sehir)</code> → <code>"İzmir: 2 sipariş, 420.50 TL"</code> biçiminde metin (tutar her zaman 2 ondalık)</li><li><code>tum_raporlar(siparisler, sehirler)</code> → her şehir için bir satır içeren liste</li></ul><p>Kodunda şehir adı (İzmir, Ankara, Bursa) <b>hiç geçmemeli</b>.</p>',
       start: 'def sehir_raporu(siparisler, sehir):\n    pass\n\n\ndef tum_raporlar(siparisler, sehirler):\n    pass\n',
       sol: 'def sehir_raporu(siparisler, sehir):\n    """Bir şehrin sipariş sayısını ve cirosunu tek satırlık metin olarak döndürür."""\n    adet = 0\n    toplam = 0\n    for siparis in siparisler:\n        if siparis["sehir"] == sehir:\n            adet += 1\n            toplam += siparis["tutar"]\n    return f"{sehir}: {adet} sipariş, {toplam:.2f} TL"\n\n\ndef tum_raporlar(siparisler, sehirler):\n    """Her şehir için rapor satırlarını liste olarak döndürür."""\n    return [sehir_raporu(siparisler, sehir) for sehir in sehirler]\n',
-      tests: 'sip = [\n    {"sehir": "İzmir", "tutar": 300},\n    {"sehir": "Ankara", "tutar": 150.25},\n    {"sehir": "İzmir", "tutar": 120.5},\n]\nassert sehir_raporu(sip, "İzmir") == "İzmir: 2 sipariş, 420.50 TL", "Biçim: \'İzmir: 2 sipariş, 420.50 TL\'; gelen " + repr(sehir_raporu(sip, "İzmir"))\nassert sehir_raporu(sip, "Bursa") == "Bursa: 0 sipariş, 0.00 TL", "Siparişi olmayan şehir: 0 sipariş, 0.00 TL"\nassert tum_raporlar(sip, ["Ankara", "Bursa"]) == ["Ankara: 1 sipariş, 150.25 TL", "Bursa: 0 sipariş, 0.00 TL"], "tum_raporlar her şehir için bir satır döndürmeli"\nfor ad in ["İzmir", "Ankara", "Bursa"]:\n    assert ad not in __source__, ad + " kodda geçmemeli: şehir bir parametredir, sabit kodlanmamalı"\n',
+      tests: 'sip = [\n    {"sehir": "İzmir", "tutar": 300},\n    {"sehir": "Ankara", "tutar": 150.25},\n    {"sehir": "İzmir", "tutar": 120.5},\n]\nassert sehir_raporu(sip, "İzmir") == "İzmir: 2 sipariş, 420.50 TL", "Biçim: \'İzmir: 2 sipariş, 420.50 TL\'; gelen " + repr(sehir_raporu(sip, "İzmir"))\nassert sehir_raporu(sip, "Bursa") == "Bursa: 0 sipariş, 0.00 TL", "Siparişi olmayan şehir: 0 sipariş, 0.00 TL"\nassert tum_raporlar(sip, ["Ankara", "Bursa"]) == ["Ankara: 1 sipariş, 150.25 TL", "Bursa: 0 sipariş, 0.00 TL"], "tum_raporlar her şehir için bir satır döndürmeli"\nfor ad in ["İzmir", "Ankara", "Bursa"]:\n    assert ad not in __kod__, ad + " kodda geçmemeli: şehir bir parametredir, sabit kodlanmamalı"\n',
       hints: ['Değişen tek şey şehir adı: onu parametre yap.', 'f-string\'te {toplam:.2f} her zaman 2 ondalık yazar.'],
       why: 'Tekrarlanan blok bir fonksiyona dönüşünce yeni şehir eklemek tek kelimelik bir değişiklik olur ve biçim değişikliği tek yerden yapılır.' },
     { id: 'kod-stili-b1',
@@ -6034,7 +5077,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
       q: '<p><b>Hatayı bul ve düzelt.</b> KDV oranı geçen yıl %18\'den %20\'ye çıktı. Muhasebe, sepet toplamı ile ürün fiyatlarının toplamının tutmadığını bildirdi. Sorunu düzelt ve bir daha olmaması için oranı tek bir <code>KDV_ORANI = 0.20</code> sabitine taşı; üç fonksiyon da onu kullansın.</p>',
       start: 'def urun_fiyati(net):\n    return round(net * 1.20, 2)\n\n\ndef sepet_toplami(netler):\n    return round(sum(netler) * 1.18, 2)\n\n\ndef fatura_satiri(urun, net):\n    return f"{urun}: {round(net * 1.20, 2)} TL"\n',
       sol: 'KDV_ORANI = 0.20\n\n\ndef urun_fiyati(net):\n    return round(net * (1 + KDV_ORANI), 2)\n\n\ndef sepet_toplami(netler):\n    return round(sum(netler) * (1 + KDV_ORANI), 2)\n\n\ndef fatura_satiri(urun, net):\n    return f"{urun}: {urun_fiyati(net)} TL"\n',
-      tests: 'assert sepet_toplami([100, 50]) == 180.0, "150 TL net, %20 KDV ile 180.0 olmalı"\nassert urun_fiyati(100) == 120.0, "100 TL net ürün 120.0 olmalı"\nassert fatura_satiri("Çay", 50) == "Çay: 60.0 TL", "Fatura satırı \'Çay: 60.0 TL\' olmalı"\nassert KDV_ORANI == 0.20, "KDV_ORANI sabiti 0.20 olmalı"\nassert "1.18" not in __source__ and "1.20" not in __source__ and "1.2)" not in __source__, "Oran sayı olarak tekrar yazılmamalı; KDV_ORANI sabitini kullan"\n',
+      tests: 'assert sepet_toplami([100, 50]) == 180.0, "150 TL net, %20 KDV ile 180.0 olmalı"\nassert urun_fiyati(100) == 120.0, "100 TL net ürün 120.0 olmalı"\nassert fatura_satiri("Çay", 50) == "Çay: 60.0 TL", "Fatura satırı \'Çay: 60.0 TL\' olmalı"\nassert KDV_ORANI == 0.20, "KDV_ORANI sabiti 0.20 olmalı"\nassert "1.18" not in __kod__ and "1.20" not in __kod__ and "1.2)" not in __kod__, "Oran sayı olarak tekrar yazılmamalı; KDV_ORANI sabitini kullan"\n',
       hints: [
         'Üç fonksiyondaki çarpanları karşılaştır: biri farklı.',
         'Sabiti dosyanın başında tanımla ve çarpanı (1 + KDV_ORANI) olarak yaz.'
@@ -6048,7 +5091,7 @@ select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırm
       q: '<p><b>Hatayı bul ve düzelt.</b> IBAN\'ın ülke kodunu kontrol eden fonksiyon <code>"TR33..."</code> için bazen "yurt dışı" diyor, <code>eksik_mi</code> ise PEP 8 denetiminden geçmiyor. PEP 8 kuralı: <code>is</code> yalnızca <code>None</code> gibi tekil nesnelerle, değer karşılaştırması <code>==</code> ile yapılır.</p>',
       start: 'def iban_bolgesi(iban):\n    """TR ile başlayan IBAN\'ları yurt içi sayar."""\n    ulke = iban.replace(" ", "")[:2].upper()\n    if ulke is "TR":\n        return "yurt içi"\n    return "yurt dışı"\n\n\ndef eksik_mi(deger):\n    return deger == None or deger == ""\n',
       sol: 'def iban_bolgesi(iban):\n    """TR ile başlayan IBAN\'ları yurt içi sayar."""\n    ulke = iban.replace(" ", "")[:2].upper()\n    if ulke == "TR":\n        return "yurt içi"\n    return "yurt dışı"\n\n\ndef eksik_mi(deger):\n    return deger is None or deger == ""\n',
-      tests: 'assert iban_bolgesi("tr33 0006 1005 1978 6457 8413 26") == "yurt içi", "Küçük harfli TR IBAN da yurt içi olmalı"\nassert iban_bolgesi("TR33 0006 1005 1978 6457 8413 26") == "yurt içi", "TR IBAN yurt içi olmalı"\nassert iban_bolgesi("DE89 3704 0044 0532 0130 00") == "yurt dışı", "DE IBAN yurt dışı olmalı"\nassert eksik_mi(None) and eksik_mi("") and not eksik_mi(0), "None ve boş metin eksik, 0 eksik değil"\nassert \'is "\' not in __source__, "Metinleri is ile karşılaştırma; == kullan"\nassert "== None" not in __source__, "None ile karşılaştırma is None ile yapılır"\n',
+      tests: 'assert iban_bolgesi("tr33 0006 1005 1978 6457 8413 26") == "yurt içi", "Küçük harfli TR IBAN da yurt içi olmalı"\nassert iban_bolgesi("TR33 0006 1005 1978 6457 8413 26") == "yurt içi", "TR IBAN yurt içi olmalı"\nassert iban_bolgesi("DE89 3704 0044 0532 0130 00") == "yurt dışı", "DE IBAN yurt dışı olmalı"\nassert eksik_mi(None) and eksik_mi("") and not eksik_mi(0), "None ve boş metin eksik, 0 eksik değil"\nassert \'is "\' not in __kod__, "Metinleri is ile karşılaştırma; == kullan"\nassert "== None" not in __kod__, "None ile karşılaştırma is None ile yapılır"\n',
       hints: [
         'is "aynı nesne mi?" diye sorar; upper() her seferinde YENİ bir metin nesnesi üretir.',
         'ulke == "TR" ve deger is None'

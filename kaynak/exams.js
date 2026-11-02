@@ -1,9 +1,9 @@
-/* Kesit Python — sınavlar: seviye tespit, bitirme, kodlama ve PCEP/PCAP tarzı deneme */
+/* Kesit Python — sınavlar: seviye testi, bitirme, kodlama ve PCEP/PCAP tarzı deneme */
 (function (W) {
 'use strict';
 const E = W.PY_EXAMS = W.PY_EXAMS || [];
 E.push(
-  { id: 'seviye-tespit', title: 'Seviye tespit sınavı', lv: 'temel', kind: 'quiz', min: 20, pass: 0,
+  { id: 'seviye-tespit', title: 'Seviye testi', lv: 'temel', kind: 'quiz', min: 20, pass: 0,
     desc: 'Hangi seviyeden başlamalısın? 20 çoktan seçmeli soru: 8 temel, 7 orta, 5 ileri. Geçme notu yok; sonuçta sana uygun başlangıç seviyesi önerilir.',
     qs: [
       { t: 'mc', lv: 'temel', topic: 'Değişkenler ve Türler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">x = 7\ny = 2\nprint(x // y, x % y)</pre>',
@@ -80,7 +80,7 @@ E.push(
         o: ['2.5 2 6', '2.5 2 8', '2 2 8', '2.5 2.0 8'], a: 1,
         why: '/ her zaman float verir (2.5), // tam bölme (2), ** üs alma (2 üzeri 3 = 8).' },
       { t: 'mc', topic: 'Metinler', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "  Ilgaz Bank  "\nprint(s.strip().lower().replace("bank", "market"))</pre>',
-        o: ['anadolu market', '  anadolu market  ', 'Anadolu market', 'ilgaz bank'], a: 0,
+        o: ['ilgaz market', '  ilgaz market  ', 'Ilgaz market', 'ilgaz bank'], a: 0,
         why: 'strip boşlukları kırpar, lower küçük harfe çevirir, replace "bank" parçasını "market" yapar. Metin yöntemleri yeni metin döndürür, zincirlenebilir.' },
       { t: 'mc', topic: 'Metinler', q: '<code>"python"[-2:]</code> ifadesinin değeri nedir?',
         o: ['"py"', '"on"', '"ytho"', '"n"'], a: 1,
@@ -432,8 +432,8 @@ E.push(
         o: ['False False False True', 'False True False True', 'False False True True', 'True True False True'], a: 1,
         why: 'Boş metin ve 0.0 falsy; "False" boş olmayan bir metindir (True); [0] tek elemanlı liste de True.' },
       { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">s = "Kesit Python"\nprint(s[::-1][:3], s[6:], s[-3:-1])</pre>',
-        o: ['aki Patika ik', 'aki Patika ka', 'akitaP Patika ik', 'Pyt Python ik'], a: 0,
-        why: '[::-1] ters çevirir ("akitaPnohtyP"), ilk 3: "aki". s[6:] "Patika". s[-3:-1] sondan 3. ve 2. karakterler: "ik".' },
+        o: ['noh Python ho', 'noh Python on', 'nohtyP Python ho', 'Pyt Python ho'], a: 0,
+        why: '[::-1] ters çevirir ("nohtyP tiseK"), ilk 3: "noh". s[6:] "Python". s[-3:-1] sondan 3. ve 2. karakterler: "ho".' },
       { t: 'mc', topic: 'Dilimleme', q: 'Aşağıdaki kodun çıktısı nedir?<pre class="code">L = [0, 1, 2, 3, 4, 5]\nprint(L[1:5:2], L[::3], L[10:])</pre>',
         o: ['[1, 3] [0, 3] []', '[1, 3, 5] [0, 3] IndexError', '[1, 3] [0, 3] IndexError', '[1, 2, 3, 4] [0, 3] []'], a: 0,
         why: 'Adım 2 ile 1 ve 3 alınır; [::3] 0 ve 3; aralık dışı dilim hata vermez, boş liste döner.' },

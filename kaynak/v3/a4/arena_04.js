@@ -421,7 +421,7 @@
 },
 {
   id: 'a-247',
-  title: 'Kategori kârlılığı (Kesit BI)',
+  title: 'Kategori kârlılığı (Anadolu Market Power BI)',
   track: 'SQL + Python',
   diff: 'Orta',
   pts: 30,
@@ -431,7 +431,7 @@
   fn: 'kategori_karlilik',
   ds: 'kesit_bi',
   needs: ['sqlite3'],
-  statement: '<p>Kesit BI modelinde <code>Satislar</code> (<code>Tarih, UrunNo, Durum, Tutar, Maliyet</code>; Maliyet satırın toplam maliyetidir) ve <code>Urunler</code> (<code>UrunNo, Kategori</code>) var. Power BI\'daki "Kâr Marjı %" ölçüsünü SQL + Python ile yeniden üret.</p><p><code>kategori_karlilik(yil)</code>: <code>Durum</code> değeri <code>"İptal"</code> ya da <code>"İade"</code> <b>olmayan</b> ve <code>Tarih</code>\'i verilen yılda olan satırlar için kategori başına <code>SUM(Tutar)</code> ve <code>SUM(Maliyet)</code> değerlerini SQL ile al. Python\'da marj = <code>(tutar − maliyet) / tutar * 100</code> hesapla ve <code>[(kategori, marj), ...]</code> listesini marja göre azalan sırada döndür (1 ondalık).</p>',
+  statement: '<p>Anadolu Market Power BI modelinde <code>Satislar</code> (<code>Tarih, UrunNo, Durum, Tutar, Maliyet</code>; Maliyet satırın toplam maliyetidir) ve <code>Urunler</code> (<code>UrunNo, Kategori</code>) var. Power BI\'daki "Kâr Marjı %" ölçüsünü SQL + Python ile yeniden üret.</p><p><code>kategori_karlilik(yil)</code>: <code>Durum</code> değeri <code>"İptal"</code> ya da <code>"İade"</code> <b>olmayan</b> ve <code>Tarih</code>\'i verilen yılda olan satırlar için kategori başına <code>SUM(Tutar)</code> ve <code>SUM(Maliyet)</code> değerlerini SQL ile al. Python\'da marj = <code>(tutar − maliyet) / tutar * 100</code> hesapla ve <code>[(kategori, marj), ...]</code> listesini marja göre azalan sırada döndür (1 ondalık).</p>',
   input: '<p><code>yil</code>: int.</p>',
   output: '<p><code>list</code> of <code>(str, float)</code></p>',
   constraints: 'Satislar 1620, Urunler 40 satır',

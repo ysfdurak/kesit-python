@@ -71,7 +71,7 @@ print(json.dumps(kayit.kosular[0], ensure_ascii=False))
 </pre>
 
 <h2>Model kayıt defteri, aşamalar ve imza</h2>
-<p>Deney takibi "ne denedik?" sorusunu, <b>model kayıt defteri</b> (model registry) "canlıda ne var?" sorusunu cevaplar. Her kayıtlı model bir ad ve artan sürüm numarası taşır; her sürümün bir aşaması (stage) vardır: <code>None → Staging → Production → Archived</code>. Yeni bir sürüm Production'a alındığında eskisi otomatik Archived olur; geri dönmek (rollback) bir aşama değişikliğinden ibarettir. MLflow'un yeni sürümleri aşamalar yerine <b>takma ad</b> (alias, ör. <code>champion</code>, <code>challenger</code>) önerir; fikir aynıdır.</p>
+<p>Deney takibi "ne denedik?" sorusunu, <b>model kayıt defteri</b> (model registry) "canlıda ne var?" sorusunu cevaplar. Her kayıtlı model bir ad ve artan sürüm numarası taşır; sürümlere <b>takma ad</b> (alias) verilir: canlıdaki sürüm <code>@champion</code>, deneme kuyruğundaki <code>@challenger</code>. Servis modeli <code>models:/talep@champion</code> adresinden yükler; yeni sürüme geçmek ya da geri dönmek (rollback) takma adı başka sürüme taşımaktan ibarettir, kod değişmez. Eski anlatımlarda <code>None → Staging → Production → Archived</code> aşamalarını (stages) görürsün: MLflow bunları 2.9'dan beri kullanımdan kaldırıyor, yeni projede alias kullan.</p>
 <p><b>Model imzası</b> (signature) modelin beklediği girdi sütunlarını, türlerini ve çıktısını kaydeder. Servis tarafı gelen isteği bu imzayla karşılaştırır; sütun sırası ya da türü kayarsa model sessizce yanlış tahmin üretmek yerine açık bir hata verir. Bu, <b>eğitim-servis çarpıklığına</b> (training-serving skew) karşı ilk savunma hattıdır.</p>
 
 <h2>Veri ve model sürümleme</h2>
@@ -260,15 +260,15 @@ assert oran == 1.0, "yön testi başarısız"
       t: 'predict',
       stage: 'Kodu oku',
       q: 'Model kayıt defterinde terfi sonrası ne yazdırılır?',
-      code: 'kayit = {1: "Archived", 2: "Production", 3: "Staging"}\n\ndef terfi(kayit, surum):\n    for s, asama in kayit.items():\n        if asama == "Production":\n            kayit[s] = "Archived"\n    kayit[surum] = "Production"\n\nterfi(kayit, 3)\nprint(kayit)\nprint([s for s, a in kayit.items() if a == "Production"])\n',
+      code: 'takma = {"champion": 2, "challenger": 3}\n\ndef terfi(takma):\n    takma["onceki"] = takma["champion"]\n    takma["champion"] = takma.pop("challenger")\n\nterfi(takma)\nprint(takma)\nprint(takma["champion"], takma["onceki"])\n',
       o: [
-        '{1: \'Archived\', 2: \'Production\', 3: \'Production\'}\n[2, 3]',
-        '{1: \'Archived\', 2: \'Staging\', 3: \'Production\'}\n[3]',
-        '{1: \'Archived\', 2: \'Archived\', 3: \'Production\'}\n[3]',
-        '{1: \'Archived\', 2: \'Archived\', 3: \'Staging\'}\n[]'
+        '{\'champion\': 3, \'onceki\': 2}\n3 2',
+        '{\'champion\': 2, \'challenger\': 3, \'onceki\': 2}\n2 2',
+        '{\'champion\': 3, \'challenger\': 3, \'onceki\': 2}\n3 2',
+        '{\'champion\': 3}\n3 3'
       ],
-      a: 2,
-      why: 'Terfi önce mevcut Production sürümünü (2) arşivler, sonra 3\'ü Production yapar. Aynı anda tek bir Production sürümü olur. Sözlük döngüde değiştiriliyor ama yalnız değerler değiştiği (anahtar eklenip silinmediği) için güvenlidir.'
+      a: 0,
+      why: 'Terfi eski champion sürümünü (2) onceki adıyla saklar, challenger sürümünü (3) champion yapar ve challenger takma adını siler. Geri dönmek için onceki değerini yeniden champion yapmak yeter.'
     },
     {
       t: 'order',
@@ -363,23 +363,23 @@ assert oran == 1.0, "yön testi başarısız"
       stage: 'Rehberli',
       id: 'mlops-yasam-dongusu-4',
       diff: 2,
-      q: '<p>Mini bir <b>model kayıt defteri</b> yaz: <code>ModelKaydi</code>.</p><ul><li><code>kaydet(ad, model, metrikler)</code>: o ad için sürümü 1\'den başlayarak artır; <code>{"surum", "model", "metrikler", "asama": "None"}</code> kaydını sakla; sürüm numarasını döndür.</li><li><code>asama_degistir(ad, surum, asama)</code>: aşamayı değiştir. Yeni aşama <code>"Production"</code> ise o addaki önceki Production sürümü <code>"Archived"</code> olsun. Geçersiz aşamada (<code>None, Staging, Production, Archived</code> dışında) <code>ValueError</code> fırlat.</li><li><code>getir(ad, asama="Production")</code>: o aşamadaki kaydı döndür; yoksa <code>LookupError</code>.</li></ul>',
+      q: '<p>Mini bir <b>model kayıt defteri</b> yaz: <code>ModelKaydi</code>.</p><ul><li><code>kaydet(ad, model, metrikler)</code>: o ad için sürümü 1\'den başlayarak artır; <code>{"surum", "model", "metrikler"}</code> kaydını sakla; sürüm numarasını döndür.</li><li><code>takma_ad_ata(ad, surum, takma)</code>: takma adı (ör. <code>"champion"</code>) o sürüme bağla; takma ad başka sürümdeyse taşınır. Olmayan sürümde <code>ValueError</code> fırlat.</li><li><code>getir(ad, takma="champion")</code>: o takma addaki kaydı döndür; yoksa <code>LookupError</code>.</li></ul>',
       guide: [
-        'self.kayitlar = {} : ad → kayıt listesi.',
+        'self.kayitlar = {} : ad → kayıt listesi; self.takmalar = {} : (ad, takma) → sürüm.',
         'kaydet: surum = len(liste) + 1.',
-        'asama_degistir: önce doğrula, Production ise diğerlerini arşivle, sonra hedef sürümü güncelle.',
-        'getir: uygun kaydı ara; bulamazsan LookupError.'
+        'takma_ad_ata: önce sürümü doğrula, sonra sözlüğe yaz.',
+        'getir: sözlükten sürümü bul, liste[surum - 1] döndür; yoksa LookupError.'
       ],
       example: '# Benzer teknik: ad başına sürüm listesi\nkayit = {}\nfor ad in ["churn", "eta", "churn"]:\n    liste = kayit.setdefault(ad, [])\n    liste.append({"surum": len(liste) + 1})\nprint(kayit)\n',
-      start: 'ASAMALAR = {"None", "Staging", "Production", "Archived"}\n\n\nclass ModelKaydi:\n    def __init__(self):\n        self.kayitlar = {}\n\n    def kaydet(self, ad, model, metrikler):\n        # TODO\n        pass\n\n    def asama_degistir(self, ad, surum, asama):\n        # TODO\n        pass\n\n    def getir(self, ad, asama="Production"):\n        # TODO\n        pass\n',
-      sol: 'ASAMALAR = {"None", "Staging", "Production", "Archived"}\n\n\nclass ModelKaydi:\n    def __init__(self):\n        self.kayitlar = {}\n\n    def kaydet(self, ad, model, metrikler):\n        liste = self.kayitlar.setdefault(ad, [])\n        liste.append({"surum": len(liste) + 1, "model": model, "metrikler": dict(metrikler), "asama": "None"})\n        return len(liste)\n\n    def asama_degistir(self, ad, surum, asama):\n        if asama not in ASAMALAR:\n            raise ValueError(f"Geçersiz aşama: {asama}")\n        for k in self.kayitlar[ad]:\n            if asama == "Production" and k["asama"] == "Production":\n                k["asama"] = "Archived"\n        self.kayitlar[ad][surum - 1]["asama"] = asama\n\n    def getir(self, ad, asama="Production"):\n        for k in self.kayitlar.get(ad, []):\n            if k["asama"] == asama:\n                return k\n        raise LookupError(f"{ad} için {asama} aşamasında model yok")\n',
-      tests: 'from sklearn.linear_model import Ridge\nimport numpy as np\nX = np.arange(20.0).reshape(10, 2); y = X.sum(axis=1)\nmk = ModelKaydi()\nassert mk.kaydet("talep", Ridge(alpha=1).fit(X, y), {"mae": 15.3}) == 1, "İlk sürüm 1"\nassert mk.kaydet("talep", Ridge(alpha=10).fit(X, y), {"mae": 14.9}) == 2, "İkinci sürüm 2"\nassert mk.kaydet("churn", Ridge().fit(X, y), {"auc": 0.8}) == 1, "Sürümler model adı başına ayrı sayılmalı"\ntry:\n    mk.getir("talep")\n    assert False, "Production yokken LookupError bekleniyordu"\nexcept LookupError:\n    pass\nmk.asama_degistir("talep", 1, "Production")\nassert mk.getir("talep")["surum"] == 1\nmk.asama_degistir("talep", 2, "Production")\nassert mk.getir("talep")["surum"] == 2, "Yeni Production sürüm 2"\nassert mk.kayitlar["talep"][0]["asama"] == "Archived", "Eski Production otomatik arşivlenmeli"\nassert mk.getir("talep")["model"].alpha == 10, "Kayıtta model nesnesi saklanmalı"\nassert mk.getir("churn", "None")["surum"] == 1, "Yeni kayıt None aşamasında başlar"\ntry:\n    mk.asama_degistir("talep", 1, "Canli")\n    assert False, "Geçersiz aşamada ValueError bekleniyordu"\nexcept ValueError:\n    pass\nmk.asama_degistir("talep", 1, "Production")\nassert [k["asama"] for k in mk.kayitlar["talep"]] == ["Production", "Archived"], "Geri alma (rollback): 1 yeniden Production, 2 Archived"\n',
+      start: 'class ModelKaydi:\n    def __init__(self):\n        self.kayitlar = {}\n        self.takmalar = {}\n\n    def kaydet(self, ad, model, metrikler):\n        # TODO\n        pass\n\n    def takma_ad_ata(self, ad, surum, takma):\n        # TODO\n        pass\n\n    def getir(self, ad, takma="champion"):\n        # TODO\n        pass\n',
+      sol: 'class ModelKaydi:\n    def __init__(self):\n        self.kayitlar = {}\n        self.takmalar = {}\n\n    def kaydet(self, ad, model, metrikler):\n        liste = self.kayitlar.setdefault(ad, [])\n        liste.append({"surum": len(liste) + 1, "model": model, "metrikler": dict(metrikler)})\n        return len(liste)\n\n    def takma_ad_ata(self, ad, surum, takma):\n        if not 1 <= surum <= len(self.kayitlar.get(ad, [])):\n            raise ValueError(f"{ad} için {surum} sürümü yok")\n        self.takmalar[(ad, takma)] = surum\n\n    def getir(self, ad, takma="champion"):\n        if (ad, takma) not in self.takmalar:\n            raise LookupError(f"{ad}@{takma} yok")\n        return self.kayitlar[ad][self.takmalar[(ad, takma)] - 1]\n',
+      tests: 'from sklearn.linear_model import Ridge\nimport numpy as np\nX = np.arange(20.0).reshape(10, 2); y = X.sum(axis=1)\nmk = ModelKaydi()\nassert mk.kaydet("talep", Ridge(alpha=1).fit(X, y), {"mae": 15.3}) == 1, "İlk sürüm 1"\nassert mk.kaydet("talep", Ridge(alpha=10).fit(X, y), {"mae": 14.9}) == 2, "İkinci sürüm 2"\nassert mk.kaydet("churn", Ridge().fit(X, y), {"auc": 0.8}) == 1, "Sürümler model adı başına ayrı sayılmalı"\ntry:\n    mk.getir("talep")\n    assert False, "champion yokken LookupError bekleniyordu"\nexcept LookupError:\n    pass\nmk.takma_ad_ata("talep", 1, "champion")\nassert mk.getir("talep")["surum"] == 1\nmk.takma_ad_ata("talep", 2, "champion")\nassert mk.getir("talep")["surum"] == 2, "champion yeni sürüme taşınmalı"\nassert mk.getir("talep")["model"].alpha == 10, "Kayıtta model nesnesi saklanmalı"\nmk.takma_ad_ata("talep", 2, "challenger")\nassert mk.getir("talep", "challenger")["surum"] == 2, "Bir sürümün birden çok takma adı olabilir"\ntry:\n    mk.takma_ad_ata("talep", 9, "champion")\n    assert False, "Olmayan sürümde ValueError bekleniyordu"\nexcept ValueError:\n    pass\nmk.takma_ad_ata("talep", 1, "champion")\nassert mk.getir("talep")["surum"] == 1, "Geri alma (rollback): champion yeniden 1"\n',
       hints: [
         'liste = self.kayitlar.setdefault(ad, []) sonra append; sürüm = len(liste)',
-        'asama_degistir içinde önce if asama not in ASAMALAR: raise ValueError(...)',
-        'getir: for k in self.kayitlar.get(ad, []): if k["asama"] == asama: return k; döngü bitince raise LookupError'
+        'takma_ad_ata içinde önce sürüm aralığını denetle, geçersizse raise ValueError(...)',
+        'getir: anahtar (ad, takma) sözlükte yoksa raise LookupError; varsa listeden kaydı döndür'
       ],
-      why: 'Kayıt defterinin değeri tek bir kuraldadır: aynı anda bir Production. Geri alma (rollback) yeni bir eğitim değil, bir aşama değişikliğidir; dakikalar sürer. MLflow\'da bu işlem MlflowClient().transition_model_version_stage ya da yeni sürümlerde set_registered_model_alias ile yapılır.'
+      why: 'Kayıt defterinin değeri tek bir kuraldadır: servis kodu sürüm numarası değil takma ad bilir. Geri alma (rollback) yeni bir eğitim değil, takma adı taşımaktır; dakikalar sürer. MLflow\'da bu işlem MlflowClient().set_registered_model_alias ile yapılır; eski transition_model_version_stage kullanımdan kalktı.'
     },
     {
       t: 'code',

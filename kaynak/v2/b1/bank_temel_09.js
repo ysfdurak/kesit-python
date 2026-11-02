@@ -163,7 +163,7 @@ B.push(
     q: '<p><code>us_al(taban, us)</code> fonksiyonunu <b>özyinelemeli</b> yaz: <code>taban ** us</code> değerini döndürsün (us ≥ 0 tam sayı). <code>**</code> operatörü ve <code>pow</code> kullanma. İpucu: taban<sup>0</sup> = 1 ve taban<sup>n</sup> = taban × taban<sup>n−1</sup>.</p>',
     start: 'def us_al(taban, us):\n    # buraya yaz\n    pass\n',
     sol: 'def us_al(taban, us):\n    if us == 0:\n        return 1\n    return taban * us_al(taban, us - 1)\n',
-    tests: 'assert us_al(2, 10) == 1024, "2^10 = 1024"\nassert us_al(5, 0) == 1, "Her sayının 0. kuvveti 1 (temel durum)"\nassert us_al(3, 1) == 3, "3^1 = 3"\nassert us_al(1.05, 2) == 1.05 * 1.05, "Ondalık taban da çalışmalı"\nassert __source__.count("us_al(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\nassert "**" not in __source__ and "pow(" not in __source__, "** ve pow kullanmadan çöz"\n',
+    tests: 'assert us_al(2, 10) == 1024, "2^10 = 1024"\nassert us_al(5, 0) == 1, "Her sayının 0. kuvveti 1 (temel durum)"\nassert us_al(3, 1) == 3, "3^1 = 3"\nassert us_al(1.05, 2) == 1.05 * 1.05, "Ondalık taban da çalışmalı"\nassert __source__.count("us_al(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\nassert "**" not in __kod__ and "pow(" not in __kod__, "** ve pow kullanmadan çöz"\n',
     hints: ['Temel durum: us 0 ise 1 döndür.', 'Özyinelemeli adım: taban * us_al(taban, us - 1)'],
     why: 'Her özyinelemeli fonksiyonun iki parçası vardır: temel durum (us == 0 → 1) ve problemi küçülten adım (us - 1). Her çağrı us\'u bir azalttığı için sonunda temel duruma ulaşılır. Bu sürüm us adet çağrı yapar; daha hızlı "hızlı üs alma" yönteminde us çiftse us_al(taban * taban, us // 2) kullanılır ve çağrı sayısı log(us)\'e iner.',
     tags: ['özyineleme', 'temel durum', 'üs'],

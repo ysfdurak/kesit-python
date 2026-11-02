@@ -7,8 +7,7 @@ const C = window.PY_CORE; if (!C) return;
 const P = C.P, esc = C.esc, VIEWS = C.VIEWS;
 const CFG = () => window.KESIT_CONFIG || {};
 
-function feedbackUrl(ders) { const u = String(CFG().feedbackFormUrl || '').trim(); if (!u) return ''; return u.indexOf('{ders}') >= 0 ? u.replace('{ders}', encodeURIComponent(ders || 'Genel')) : u; }
-const fbBtn = (ders, label) => feedbackUrl('x') ? '<a class="btn sm ghost" href="' + esc(feedbackUrl(ders)) + '" target="_blank" rel="noopener">' + (label || 'Geri bildirim') + '</a>' : '';
+const fbBtn = (ders, label) => C.issueLink(ders, 'Konu: ' + ders + '\n\nGeri bildirim:\n', label);
 
 /* Ders yorumları: Giscus */
 function giscusOn() { const g = CFG().giscus || {}; return !!(g.repo && g.repoId && g.category && g.categoryId); }
@@ -39,13 +38,13 @@ let persistAsked = false;
 window.addEventListener('py-saved', () => { if (persistAsked) return; persistAsked = true; try { if (navigator.storage && navigator.storage.persist) navigator.storage.persisted().then(ok => ok || navigator.storage.persist()).catch(() => {}); } catch (e) {} });
 
 /* Ana sayfa: karşılama kapıları ve yedekleme hatırlatması */
-const doneCount = () => Object.keys(P.done || {}).length;
+const doneCount = () => C.validDone();
 function welcomeHTML() {
   const door = (k, n, t, d) => '<button type="button" class="door" data-kdoor="' + k + '"><span class="door-ic" aria-hidden="true">' + n + '</span><b>' + t + '</b><small>' + d + '</small></button>';
-  return '<section class="panel welcome"><div><span class="eyebrow">Hoş geldin</span><h2>Nereden başlayalım?</h2><p class="muted" style="margin:6px 0 0;max-width:70ch">Üç yoldan birini seç; istediğin zaman değiştirebilirsin. Kurulum ve hesap gerekmez.</p></div><div class="doors">' +
+  return '<section class="panel welcome"><div><span class="eyebrow">Hoş geldin</span><h2>Nereden başlayalım?</h2><p class="muted" style="margin:6px 0 0;max-width:70ch">Birini seç; istediğin zaman değiştirebilirsin. Kurulum ve hesap gerekmez.</p></div><div class="doors">' +
     door('yeni', '1', 'Hiç bilmiyorum', 'İlk dersle başla. Kodu tarayıcında çalıştırarak adım adım ilerle.') +
-    door('biraz', '2', 'Biraz biliyorum', 'Seviye tespit sınavıyla nereden devam edeceğini bul.') +
-    door('is', '3', 'İşim için lazım', 'Rolünü seç: veri analisti, veri bilimci, web geliştirici, yapay zekâ ve diğerleri.') +
+    door('biraz', '2', 'Biraz biliyorum', 'Seviye testiyle nereden devam edeceğini bul.') +
+    door('is', '3', 'İşim için lazım', 'Öğrenme yolunu seç: veri analisti, veri bilimci, web geliştirici, yapay zekâ ve diğerleri.') +
     '</div></section>';
 }
 function backupHTML() {
@@ -59,7 +58,6 @@ VIEWS.home.html = function () { const show = !P.welcomed && doneCount() === 0; r
 const lessonBase = VIEWS.lesson.html, lessonMount = VIEWS.lesson.mount;
 VIEWS.lesson.html = function () {
   let h = lessonBase.call(this); const l = C.LMAP[C.V.id]; if (!l) return h;
-  if (feedbackUrl('x')) { const i = h.indexOf('</h1>'); if (i > 0) h = h.slice(0, i + 5) + '<p class="lfb">' + fbBtn(l.title + ' (' + l.id + ')', 'Bu ders hakkında geri bildirim') + '</p>' + h.slice(i + 5); }
   if (giscusOn()) h += '<section class="panel gs-wrap"><div class="sec-head"><h3>Yorumlar</h3><span class="muted" style="font-size:.82rem">GitHub hesabınla yorum yapabilirsin</span></div><div id="gsBox"><div class="muted">Yorumlar yükleniyor…</div></div></section>';
   return h;
 };
@@ -73,14 +71,16 @@ VIEWS.hakkinda = { html() {
   const kpi = (v, t) => '<div class="panel kpi"><b class="num">' + Number(v).toLocaleString('tr-TR') + '</b><span>' + t + '</span></div>';
   const card = (t, body) => '<section class="panel about-card"><div class="sec-head"><h3>' + t + '</h3></div>' + body + '</section>';
   let h = '<div class="about"><div><span class="eyebrow">Hakkında</span><h1>Kesit Python</h1><p class="muted" style="max-width:68ch;margin:6px 0 0">Sıfırdan işe hazır seviyeye Türkçe Python eğitimi. Kurulum yok, hesap yok: tarayıcında çalışan gerçek bir Python motoruyla kod yazarsın, alıştırmalar otomatik testlerle anında denetlenir.</p></div>';
-  h += '<div class="about-kpis">' + kpi(C.LESSONS.length, 'ders') + kpi(ex, 'ders içi alıştırma') + kpi(C.BANK.length, 'pratik görevi') + kpi((window.PY_ARENA || []).length, 'arena problemi') + kpi(C.PATHS.length, 'rol patikası') + '</div>';
+  h += '<div class="about-kpis">' + kpi(C.LESSONS.length, 'ders') + kpi(ex, 'ders içi alıştırma') + kpi(C.BANK.length, 'pratik görevi') + kpi((window.PY_ARENA || []).length, 'arena problemi') + kpi(C.PATHS.length, 'öğrenme yolu') + '</div>';
   if (A.name) h += card('Yapan', '<p style="margin:0"><b style="font-size:1.1rem">' + esc(A.name) + '</b>' + (A.title ? '<br><span class="muted">' + esc(A.title) + '</span>' : '') + '</p>' + (A.bio ? '<p style="margin:0">' + esc(A.bio) + '</p>' : '') + '<div class="row" style="gap:8px;flex-wrap:wrap">' + link(A.linkedin, 'LinkedIn') + link(A.github, 'GitHub') + link(A.repo, 'Kaynak kod') + '</div>');
   if (c.story) h += card('Nasıl yapıldı', '<p style="margin:0">' + esc(c.story) + '</p>');
-  h += card('Görüşün önemli', '<p style="margin:0">Bu ücretsiz bir paylaşım ve portföy projesi. Bir hata gördüysen, anlatımı eksik bulduğun bir ders varsa ya da bir fikrin varsa yaz.</p>' + (feedbackUrl('x') ? '<div class="row" style="gap:8px">' + fbBtn('Genel', 'Geri bildirim formu') + '</div>' : (A.repo ? '<div class="row" style="gap:8px">' + link(A.repo + '/issues', 'GitHub’da bildir') + '</div>' : '')));
-  const sib = [c.sqlUrl ? '<a href="' + esc(c.sqlUrl) + '" target="_blank" rel="noopener">Kesit SQL</a>' : '', c.pbiUrl ? '<a href="' + esc(c.pbiUrl) + '" target="_blank" rel="noopener">Kesit Power BI</a>' : ''].filter(Boolean);
-  if (sib.length) h += card('Kardeş uygulamalar', '<p style="margin:0">Aynı mantıkla hazırlanmış diğer eğitimler: ' + sib.join(' ve ') + '. Veri setlerinin çoğu üç uygulamada ortak.</p>');
-  h += card('Sorumluluk notu', '<p style="margin:0">Kesit Python ücretsiz, ticari olmayan bir eğitim ve bilgi paylaşımı projesidir. İçerik özenle hazırlandı ve alıştırmalar otomatik testlerden geçirildi; yine de hatasız olduğu garanti edilmez ve içerik “olduğu gibi” sunulur. Profesyonel bir eğitim, danışmanlık ya da resmî bir sertifika yerine geçmez.</p><p style="margin:0">Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir; gerçek kişi ve kurumlarla benzerlik tesadüftür. Python Software Foundation ya da Python Institute ile bir bağımız yoktur; Python, PCEP ve PCAP adları ilgili kuruluşların markalarıdır. Sınav denemeleri özgün olarak yazılmıştır, gerçek sınav soruları değildir.</p>');
-  h += card('Gizlilik', '<p style="margin:0">Hesap yok ve site kişisel veri toplamaz. İlerlemen yalnızca kendi tarayıcında saklanır; istersen Profil sayfasından dosyaya kaydedip başka cihazda yükleyebilirsin. Yazı tipleri bu sitenin kendi dosyalarından yüklenir.</p><p style="margin:0">Python motoru (Pyodide) ve kullandığın kütüphaneler, kodu ilk çalıştırdığında jsDelivr’dan iner; bu sırada tarayıcın o sunucuya bağlanır ve IP adresin gibi standart bağlantı bilgileri ona iletilir. Yazdığın kod ve ilerlemen bu sunucuya gönderilmez.' + (giscusOn() ? ' Yorumlar GitHub Discussions üzerinden (Giscus) yapılır ve GitHub’ın koşullarına tabidir.' : '') + (feedbackUrl('x') ? ' Geri bildirim formu harici bir form hizmetiyle toplanır; formda yalnızca yazdıklarını paylaşırsın.' : '') + (GC.code ? ' Ziyaretler GoatCounter ile çerezsiz ve anonim olarak sayılır; kişiyi tanımlayan bir kimlik tutulmaz.' : '') + '</p>');
+  h += card('Görüşün önemli', '<p style="margin:0">Bu ücretsiz bir paylaşım ve portföy projesi. Bir hata gördüysen, anlatımı eksik bulduğun bir ders varsa ya da bir fikrin varsa yaz.</p>' + '<div class="row" style="gap:8px"><a class="btn sm" href="' + esc(C.issueUrl('Geri bildirim', 'Geri bildirim:\n')) + '" target="_blank" rel="noopener">Geri bildirim gönder</a></div>');
+  const sib = [c.sqlUrl ? '<a href="' + esc(c.sqlUrl) + '">Kesit SQL</a>' : '', c.pbiUrl ? '<a href="' + esc(c.pbiUrl) + '">Kesit Power BI</a>' : ''].filter(Boolean);
+  if (sib.length) h += card('Kardeş uygulamalar', '<p style="margin:0">Aynı mantıkla hazırlanmış diğer eğitimler: ' + sib.join(' ve ') + '. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market\'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.</p>');
+  h += card('Sorumluluk notu', '<p style="margin:0">Kesit Python ücretsiz, ticari olmayan bir eğitim ve bilgi paylaşımı projesidir. İçerik özenle hazırlandı ve alıştırmalar otomatik testlerden geçirildi; yine de hatasız olduğu garanti edilmez ve içerik “olduğu gibi” sunulur. Profesyonel bir eğitim, danışmanlık ya da resmî bir sertifika yerine geçmez; bu uygulamada tamamlama belgesi yoktur, sınav sonuçların Profil\'de durur.</p><p style="margin:0">Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir; gerçek kişi ve kurumlarla benzerlik tesadüftür. Python Software Foundation ya da Python Institute ile bir bağımız yoktur; Python, PCEP ve PCAP adları ilgili kuruluşların markalarıdır. Sınav denemeleri özgün olarak yazılmıştır, gerçek sınav soruları değildir.</p>');
+  h += card('Gizlilik', '<p style="margin:0">Hesap yok ve site kişisel veri toplamaz. İlerlemen yalnızca kendi tarayıcında saklanır; istersen Profil sayfasından dosyaya kaydedip başka cihazda yükleyebilirsin. Yazı tipleri bu sitenin kendi dosyalarından yüklenir. Site dosyaları ilk ziyarette tarayıcı önbelleğine alınır; yeni sürüm gelince eski önbellek silinir.</p><p style="margin:0">Python motoru (Pyodide) ve kullandığın kütüphaneler, kodu ilk çalıştırdığında jsDelivr’dan iner; bu sırada tarayıcın o sunucuya bağlanır ve IP adresin gibi standart bağlantı bilgileri ona iletilir. Yazdığın kod ve ilerlemen bu sunucuya gönderilmez.' + (giscusOn() ? ' Yorumlar GitHub Discussions üzerinden (Giscus) yapılır ve GitHub’ın koşullarına tabidir.' : '') + ' Geri bildirim bağlantıları GitHub Issues\'a (ya da ayarlanmışsa bir form hizmetine) gider; yalnızca yazdıklarını paylaşırsın.' + (GC.code ? ' Ziyaretler GoatCounter ile çerezsiz ve anonim olarak sayılır; kişiyi tanımlayan bir kimlik tutulmaz.' : '') + '</p>');
+  h += card('Bilinen sınırlar', '<ul style="margin:0;padding-left:18px"><li>Python tarayıcıda çalışır (Pyodide, Python 3.12). Temel dil birebir aynıdır; gerçek iş parçacığı, süreç ve ağ yoktur. Bu derslerde ne beklemen gerektiği yazar, bilgisayarında dene görevleri verilir.</li><li>Flask, Django, Docker, Spark gibi araçların alıştırmaları taklit eder; gerçeği için "Kendi bilgisayarında" görevleri var.</li><li>input() girdileri çalıştırmadan önce verilir.</li><li>Çok uzun süren kod 60 saniyede durdurulur; Durdur düğmesi her zaman çalışır, motor yeniden başlar.</li></ul>');
+  h += '<details class="panel about-card"><summary><b>Müfredat haritası</b></summary>' + C.curriculumHTML() + '</details>';
   h += card('Lisans', '<p style="margin:0">' + esc(c.license || 'Ders içerikleri ve veri setleri CC BY-NC 4.0 (kaynak göstererek, ticari olmayan amaçlarla paylaşılabilir); uygulama kodu MIT lisansıyla sunulur.') + '</p>');
   return h + '</div>';
 } };

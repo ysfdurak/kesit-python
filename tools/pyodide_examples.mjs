@@ -14,7 +14,7 @@ const items = [];
 const unesc = s => s.replace(/&#x([0-9a-f]+);/gi, (_, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&#(\d+);/g, (_, d) => String.fromCodePoint(+d))
   .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&#39;/g, "'").replace(/&apos;/g, "'").replace(/&nbsp;/g, ' ').replace(/&amp;/g, '&');
 const root = path.join(path.dirname(new URL(import.meta.url).pathname), '..');
-const engine = fs.readFileSync(path.join(root, 'engine.js'), 'utf8');
+const engine = fs.readFileSync(path.join(root, 'pyworker.js'), 'utf8');
 const PRELUDE = eval('`' + engine.match(/const PRELUDE = `([\s\S]*?)`;/)[1] + '`');
 const py = await loadPyodide();
 await py.runPythonAsync(PRELUDE);

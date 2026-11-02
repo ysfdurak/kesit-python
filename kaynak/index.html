@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <title>Kesit Python</title>
 <meta name="viewport" content="width=device-width,initial-scale=1">
-<meta name="description" content="Python’ı Türkçe, sıfırdan işe hazır seviyeye: tarayıcıda çalışan gerçek Python motoru, otomatik testli alıştırmalar, rol patikaları, pratik bankası ve sınavlar.">
+<meta name="description" content="Python’ı Türkçe, sıfırdan işe hazır seviyeye: tarayıcıda çalışan gerçek Python motoru, otomatik testli alıştırmalar, öğrenme yolları, pratik görevleri ve sınavlar.">
 <meta name="claude:viewport-fit-sides" content="cover">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -618,6 +618,35 @@ pre.outbox{background:var(--surface-2); border:1px solid var(--line); border-rad
 .about-kpis{display:grid; grid-template-columns:repeat(auto-fit,minmax(120px,1fr)); gap:10px}
 .gs-wrap{padding:18px; display:flex; flex-direction:column; gap:10px; margin-top:12px}
 .lfb{margin:6px 0 0}
+
+/* --- düzeltme turu --- */
+.navsep{display:block; height:1px; background:var(--line); margin:10px 6px 6px}
+.side .family, .family{display:flex; flex-direction:column; gap:1px; margin-top:6px}
+.family a{font-size:.8rem; color:var(--muted); padding:4px 10px; border-radius:6px; text-decoration:none}
+.family a:hover{background:var(--surface-2); color:var(--ink)}
+.plotimg{display:block; max-width:100%; height:auto; background:#fff; border-radius:8px; margin:8px 0; border:1px solid var(--line)}
+.busy{display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.spin{width:14px; height:14px; border-radius:50%; border:2px solid var(--line); border-top-color:var(--accent); animation:ppspin .8s linear infinite; flex:none}
+@keyframes ppspin{to{transform:rotate(360deg)}}
+@media (prefers-reduced-motion: reduce){.spin{animation:none}}
+.stagebox{margin:0}
+.stagebox > summary{cursor:pointer; list-style:none}
+.stagebox > summary::-webkit-details-marker{display:none}
+.stagebox > summary h2::before{content:"▸ "; color:var(--muted)}
+.stagebox[open] > summary h2::before{content:"▾ "}
+.lacts{gap:8px; margin-top:8px; align-items:center}
+.ospick{display:flex; gap:12px; align-items:center; flex-wrap:wrap; padding:10px 14px; background:var(--surface-2); border-bottom:1px solid var(--line)}
+.pathlinks{margin:0}
+.optnone{opacity:.85; border-style:dashed}
+.menugrid{margin:0 0 6px}
+.pflist{margin:8px 0 0; padding-left:18px; display:flex; flex-direction:column; gap:6px}
+.lsteps{margin:0; padding-left:20px; display:flex; flex-direction:column; gap:4px; list-style:decimal}
+.lsteps label{display:flex; gap:8px; align-items:flex-start; cursor:pointer}
+.warn-chip{background:var(--warn-soft); color:var(--warn)}
+.exhead{display:flex; justify-content:space-between; align-items:center; gap:8px; flex-wrap:wrap}
+a.lk, button.lk{color:var(--accent-text); background:none; border:0; padding:0; font:inherit; cursor:pointer; text-decoration:underline; text-underline-offset:2px}
+button.chip.lk{text-decoration:none; padding:2px 8px; border:1px solid var(--line); border-radius:99px; background:var(--accent-soft); font-size:.78rem}
+.olines code{white-space:pre-wrap}
 </style>
 </head>
 <body>
@@ -644,6 +673,8 @@ pre.outbox{background:var(--surface-2); border:1px solid var(--line); border-rad
 <script charset="utf-8" src="bank.js"></script>
 <script charset="utf-8" src="exams.js"></script>
 <!--EXTRA-->
+<script charset="utf-8" src="ex_anahtar.js"></script>
+<script charset="utf-8" src="bilinen-sinirlar.js"></script>
 <script charset="utf-8" src="engine.js"></script>
 <script charset="utf-8" src="app.js"></script>
 <script charset="utf-8" src="app2.js"></script>

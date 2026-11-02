@@ -232,7 +232,7 @@ for deneme in range(1, 4):
           'except Exception as e: bloğunda ad = type(e).__name__ ve ozet[ad] = ozet.get(ad, 0) + 1'
         ],
         why: 'Toplu işte tek bozuk kayıt tüm işi durdurmamalı. Hataları ada göre saymak sabah raporunda "hangi sorun ne sıklıkta" sorusunu cevaplar. else bloğu başarı yolunu try\'dan ayırır.' },
-      { t: 'code',
+      { erken: true, t: 'code',
         id: 'hatalar-x3',
         stage: 'Rehberli',
         diff: 2,

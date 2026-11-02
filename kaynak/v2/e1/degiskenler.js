@@ -99,7 +99,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'Metni içerik olarak yorumlamak için açık bir karşılaştırma gerekir. in operatörü zaten True/False döndürdüğünden if yazmaya gerek yoktur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x7',
         stage: 'Rehberli',
         diff: 1,
@@ -113,7 +113,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'Açma, kayit[0], kayit[1] gibi anlamsız indeksler yerine her alana anlamlı bir ad verir. Kayıt beklenmedik sayıda alan içerirse ValueError ile hemen fark edersin.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -127,7 +127,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'bool, int\'in alt sınıfı olduğundan isinstance(True, int) True verir. Özel olanı (bool) genel olandan (int) önce kontrol etmek, tür ayrımında genel bir kuraldır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x9',
         stage: 'Kendin yaz',
         diff: 2,
@@ -159,12 +159,12 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         q: '<p>Sepet toplamını hesaplayan fonksiyon <code>TypeError: \'int\' object is not callable</code> veriyor. <b>Hatayı bul ve düzelt.</b></p>',
         start: 'def sepet_toplami(fiyatlar):\n    sum = 0\n    toplam = sum(fiyatlar)\n    return toplam\n',
         sol: 'def sepet_toplami(fiyatlar):\n    toplam = sum(fiyatlar)\n    return toplam\n',
-        tests: 'assert sepet_toplami([100, 250, 75]) == 425, "Toplam 425 olmalı"\nassert sepet_toplami([]) == 0, "Boş sepetin toplamı 0"\nassert "sum = " not in __source__, "Hazır sum fonksiyonunun adını değişken olarak kullanma"\n',
+        tests: 'assert sepet_toplami([100, 250, 75]) == 425, "Toplam 425 olmalı"\nassert sepet_toplami([]) == 0, "Boş sepetin toplamı 0"\nassert "sum = " not in __kod__, "Hazır sum fonksiyonunun adını değişken olarak kullanma"\n',
         hints: ['Hata mesajı "int çağrılamaz" diyor: hangi ad bir int\'e bağlandı?', 'sum hazır bir fonksiyondur; ona 0 atayınca fonksiyonu kaybettin.', 'sum = 0 satırını kaldır ya da değişkene başka bir ad ver.'],
         why: 'sum = 0 yazınca sum adı artık hazır fonksiyonu değil 0 sayısını gösterir (gölgeleme, shadowing). sum(...) çağrısı 0(...) olur ve TypeError verir. list, str, type, id, input gibi adlar için de aynı tuzak geçerlidir.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x12',
         stage: 'Meydan okuma',
         diff: 3,

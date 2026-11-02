@@ -18,7 +18,7 @@ L.push({
   ],
   body: `<h2>Neden önemli? Gece 02:09'daki 80 bin liralık harcama</h2>
 <p>Ilgaz Bank'ın işlem tablosunda (<code>bank_txns</code>) gece yarısından sonra internetten yapılmış, 45 ile 94 bin lira arasında kart harcamaları var. Bunları ertesi sabah toplu (batch) raporda görmek, dolandırıcılık ekibi için "çok geç" demektir: kart çoktan boşalmıştır. Bu derste olaylar <b>geldiği anda</b> işlenir: işlem gerçekleşir, mesaj bir kuyruğa yazılır, saniyeler içinde bir tüketici onu okur, kuralı uygular, dakikalık sayacı günceller ve gerekirse alarm üretir. Bu dünyanın merkezinde Apache Kafka vardır; bankacılık, e-ticaret, lojistik ve oyun şirketlerinin çoğu olay akışlarını Kafka ya da benzeri bir sistemle taşır.</p>
-<p>Kafka bir küme ve ağ ister, tarayıcıda çalışmaz. Gerçek kodu <code>&lt;pre class="code"&gt;</code> kutularında göreceksin; kavramları ise <b>bellek içi bir log</b> ve <code>asyncio.Queue</code> ile kendin kuracaksın: topic, partition, offset, tüketici grubu, teslim garantileri, pencereleme ve watermark. <b>orkestrasyon</b> dersinde zamanlanmış toplu işleri, <b>async</b> dersinde kuyruk ve işçi havuzunu gördün; burada ikisini birleştirip sürekli akan veriye geçiyoruz.</p>
+<p>Kafka bir küme ve ağ ister, tarayıcıda çalışmaz. Gerçek kodu gri kutularda göreceksin; kavramları ise <b>bellek içi bir log</b> ve <code>asyncio.Queue</code> ile kendin kuracaksın: topic, partition, offset, tüketici grubu, teslim garantileri, pencereleme ve watermark. <b>orkestrasyon</b> dersinde zamanlanmış toplu işleri, <b>async</b> dersinde kuyruk ve işçi havuzunu gördün; burada ikisini birleştirip sürekli akan veriye geçiyoruz.</p>
 
 <h2>Toplu, mikro-toplu ve akış; olay zamanı ile işlem zamanı</h2>
 <div class="tbl-wrap"><table>

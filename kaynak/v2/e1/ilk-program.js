@@ -122,7 +122,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'sep ve end print\'in iki temel ayarıdır. end=" " satır sonunu boşlukla değiştirdiği için sonraki print aynı satıra yazar; bu, bir satırı parça parça oluşturmanın yoludur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x7',
         stage: 'Rehberli',
         diff: 1,
@@ -137,7 +137,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'stderr\'e yazılan satır standart çıktıda görünmez; bu yüzden beklenen çıktıda yalnızca iki satır var. Terminalde > ile yönlendirme yapınca uyarı ekranda kalır, rapor dosyası temiz olur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -194,7 +194,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'input her zaman metin döndürür. Metin * sayı hata vermez, metni tekrar eder; bu yüzden "333...3" gibi bir çıktı oluşur. Sessiz hatalar en tehlikelileridir; girdiyi kullanmadan önce int() ile çevir.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x12',
         stage: 'Meydan okuma',
         diff: 3,

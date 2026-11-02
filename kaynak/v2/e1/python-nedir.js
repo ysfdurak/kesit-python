@@ -97,7 +97,7 @@ print(keyword.kwlist[:6])            # listenin ilk birkaç elemanı</pre><div c
         why: 'sep, değerlerin arasına varsayılan boşluk yerine istediğin metni koyar. Sayıyı metinle + ile birleştirmek için str() ile çevirmen gerekir; Python bunu senin yerine yapmaz.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'python-nedir-x7',
         stage: 'Rehberli',
         diff: 1,

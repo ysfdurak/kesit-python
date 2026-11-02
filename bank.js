@@ -1240,7 +1240,7 @@ B.push(
     q: '<p><code>0.1 + 0.2</code> Python\'da <code>0.30000000000000004</code> verir; parayı float ile toplamak kuruş kaydırır. Ilgaz Bank kasası fiyatları metin olarak alıyor: <code>"19.90"</code>, <code>"5.05"</code>, <code>"100"</code>, <code>"7.5"</code>.</p><p><code>kurus_topla(fiyatlar)</code> fonksiyonunu yaz: listedeki tüm fiyatların toplamını <b>tam sayı kuruş</b> olarak döndürsün. <code>float()</code> kullanma; metni noktadan böl, lira ve kuruş kısmını ayrı ayrı tam sayıya çevir. Tek haneli kuruş <code>"7.5"</code> → 50 kuruş demektir.</p>',
     start: 'def kurus_topla(fiyatlar):\n    # buraya yaz\n    pass\n',
     sol: 'def kurus_topla(fiyatlar):\n    toplam = 0\n    for f in fiyatlar:\n        if "." in f:\n            lira, kurus = f.split(".")\n            kurus = kurus.ljust(2, "0")\n        else:\n            lira, kurus = f, "0"\n        toplam += int(lira) * 100 + int(kurus)\n    return toplam\n',
-    tests: 'assert kurus_topla(["0.10", "0.20"]) == 30, "0.10 + 0.20 tam 30 kuruş olmalı (float hatası yok)"\nassert kurus_topla(["19.90", "5.05", "100"]) == 12495, "19.90 + 5.05 + 100 = 124.95 TL = 12495 kuruş"\nassert kurus_topla(["7.5"]) == 750, "\\"7.5\\" 7 lira 50 kuruştur: 750"\nassert kurus_topla([]) == 0, "Boş liste için toplam 0 olmalı"\nassert "float(" not in __source__, "Bu görevde float() kullanmadan çözmelisin"\n',
+    tests: 'assert kurus_topla(["0.10", "0.20"]) == 30, "0.10 + 0.20 tam 30 kuruş olmalı (float hatası yok)"\nassert kurus_topla(["19.90", "5.05", "100"]) == 12495, "19.90 + 5.05 + 100 = 124.95 TL = 12495 kuruş"\nassert kurus_topla(["7.5"]) == 750, "\\"7.5\\" 7 lira 50 kuruştur: 750"\nassert kurus_topla([]) == 0, "Boş liste için toplam 0 olmalı"\nassert "float(" not in __kod__, "Bu görevde float() kullanmadan çözmelisin"\n',
     hints: ['"19.90".split(".") → ["19", "90"]. Nokta yoksa tüm metin liradır.', '"5".ljust(2, "0") → "50": tek haneli kuruşu sağdan sıfırla doldur.', 'toplam += int(lira) * 100 + int(kurus)'],
     why: 'Float ikilik tabanda 0.1\'i tam gösteremez; bu yüzden finans yazılımları parayı tam sayı kuruş ya da decimal.Decimal ile tutar. Metni bölüp tam sayılarla çalışmak her zaman kesin sonuç verir. ljust ile "5" → "50" yapmak "7.5" tuzağını çözer. Alternatif: from decimal import Decimal; int(sum(Decimal(f) for f in fiyatlar) * 100) — Decimal metinden oluşturulduğunda kesindir.',
     tags: ['float hassasiyeti', 'split', 'int', 'bankacılık'],
@@ -1347,7 +1347,7 @@ B.push(
     q: '<p>Bazı ülkelerde 1 ve 2 kuruşluk madeni para kullanılmaz; kasada nakit tutar en yakın 5 kuruşa yuvarlanır. Kuralda kalan 0, 1, 2 kuruş ise aşağı; 3, 4 kuruş ise yukarı yuvarlanır.</p><p><code>nakit_yuvarla(kurus)</code> fonksiyonunu yaz: tam sayı kuruşu alıp yuvarlanmış tam sayı kuruşu döndürsün. <code>round()</code> kullanma; <code>%</code> ve aritmetik yeter.</p>',
     start: 'def nakit_yuvarla(kurus):\n    # buraya yaz\n    pass\n',
     sol: 'def nakit_yuvarla(kurus):\n    kalan = kurus % 5\n    if kalan <= 2:\n        return kurus - kalan\n    return kurus + (5 - kalan)\n',
-    tests: 'assert nakit_yuvarla(1232) == 1230, "1232: kalan 2 → aşağı, 1230"\nassert nakit_yuvarla(1233) == 1235, "1233: kalan 3 → yukarı, 1235"\nassert nakit_yuvarla(1235) == 1235, "Zaten 5\'in katıysa değişmez"\nassert nakit_yuvarla(1239) == 1240, "1239: kalan 4 → yukarı, 1240"\nassert nakit_yuvarla(0) == 0, "0 kuruş 0 kalır"\nassert "round(" not in __source__, "Bu görevde round() kullanmadan % ile çöz"\n',
+    tests: 'assert nakit_yuvarla(1232) == 1230, "1232: kalan 2 → aşağı, 1230"\nassert nakit_yuvarla(1233) == 1235, "1233: kalan 3 → yukarı, 1235"\nassert nakit_yuvarla(1235) == 1235, "Zaten 5\'in katıysa değişmez"\nassert nakit_yuvarla(1239) == 1240, "1239: kalan 4 → yukarı, 1240"\nassert nakit_yuvarla(0) == 0, "0 kuruş 0 kalır"\nassert "round(" not in __kod__, "Bu görevde round() kullanmadan % ile çöz"\n',
     hints: ['kurus % 5 sayının 5\'in katından ne kadar fazla olduğunu verir.', 'Kalan küçükse kalanı çıkar, büyükse (5 - kalan) ekle.'],
     why: '% 5 ile 5\'in bir önceki katına olan uzaklığı bulunur; kalan ≤ 2 ise o kata iner, değilse bir sonraki kata çıkılır. Tek satırlık alternatif: (kurus + 2) // 5 * 5 — 2 eklemek "yarıdan sonrası yukarı" etkisini verir. round(kurus / 5) * 5 de çalışır gibi görünür ama Python round\'u .5 durumlarında en yakın çift sayıya yuvarlar (banker\'s rounding) ve float bölme içerir.',
     tags: ['%', '//', 'yuvarlama', 'kasa'],
@@ -1744,7 +1744,7 @@ B.push(
     q: '<p>İki şubenin işlem saatleri ayrı ayrı <b>sıralı</b> listelerde tutuluyor. <code>sirali_birlestir(a, b)</code> fonksiyonunu yaz: iki listeyi tek bir sıralı listede birleştirsin. <code>sort()</code>/<code>sorted()</code> KULLANMA; iki işaretçi (two pointers) yöntemiyle her adımda iki listenin önündeki küçük elemanı al.</p>',
     start: 'def sirali_birlestir(a, b):\n    # buraya yaz\n    pass\n',
     sol: 'def sirali_birlestir(a, b):\n    sonuc = []\n    i = j = 0\n    while i < len(a) and j < len(b):\n        if a[i] <= b[j]:\n            sonuc.append(a[i])\n            i += 1\n        else:\n            sonuc.append(b[j])\n            j += 1\n    sonuc.extend(a[i:])\n    sonuc.extend(b[j:])\n    return sonuc\n',
-    tests: 'assert sirali_birlestir([1, 4, 9], [2, 3, 10, 12]) == [1, 2, 3, 4, 9, 10, 12], "Karışık birleşim sıralı olmalı"\nassert sirali_birlestir([], [5, 6]) == [5, 6], "Bir liste boşsa diğeri aynen dönmeli"\nassert sirali_birlestir([2, 2], [2]) == [2, 2, 2], "Eşit elemanların hepsi korunmalı"\nassert sirali_birlestir([], []) == [], "İki boş liste: boş sonuç"\nassert "sort" not in __source__, "Bu görevde sort/sorted kullanmadan çöz"\n',
+    tests: 'assert sirali_birlestir([1, 4, 9], [2, 3, 10, 12]) == [1, 2, 3, 4, 9, 10, 12], "Karışık birleşim sıralı olmalı"\nassert sirali_birlestir([], [5, 6]) == [5, 6], "Bir liste boşsa diğeri aynen dönmeli"\nassert sirali_birlestir([2, 2], [2]) == [2, 2, 2], "Eşit elemanların hepsi korunmalı"\nassert sirali_birlestir([], []) == [], "İki boş liste: boş sonuç"\nassert "sort" not in __kod__, "Bu görevde sort/sorted kullanmadan çöz"\n',
     hints: ['i ve j adlı iki indeks tut; ikisi de 0\'dan başlar.', 'Döngü biri bitince durur; kalan elemanları extend ile sona ekle.', 'if a[i] <= b[j]: sonuc.append(a[i]); i += 1'],
     why: 'Her adımda yalnızca iki listenin ön elemanı karşılaştırılır, bu yüzden toplam iş O(len(a) + len(b)) olur; sorted(a + b) ise O(n log n). Döngü bittiğinde listelerden birinde kalan elemanlar zaten sıralı olduğundan doğrudan eklenir. Bu, birleştirmeli sıralamanın (merge sort) çekirdeğidir. Hazır alternatif: heapq.merge(a, b) aynı işi tembel (lazy) yapar.',
     tags: ['two pointers', 'while', 'algoritma', 'merge'],
@@ -1851,7 +1851,7 @@ B.push(
     q: '<p>Ilgaz Bank\'ın gün sonu dosyasında bazı işlem numaraları birden fazla kez geçiyor (mükerrer kayıt). <code>mukerrerler(islem_nolari)</code> fonksiyonunu yaz: birden fazla geçen numaraları <b>küçükten büyüğe sıralı liste</b> olarak döndürsün; her numara sonuçta bir kez yer alsın. Kümelerle çöz (<code>count()</code> kullanma; büyük listelerde çok yavaştır).</p>',
     start: 'def mukerrerler(islem_nolari):\n    # buraya yaz\n    pass\n',
     sol: 'def mukerrerler(islem_nolari):\n    gorulen = set()\n    tekrar = set()\n    for no in islem_nolari:\n        if no in gorulen:\n            tekrar.add(no)\n        else:\n            gorulen.add(no)\n    return sorted(tekrar)\n',
-    tests: 'assert mukerrerler([501, 502, 501, 503, 502, 501]) == [501, 502], "501 ve 502 tekrar ediyor; her biri bir kez, sıralı"\nassert mukerrerler([1, 2, 3]) == [], "Tekrar yoksa boş liste"\nassert mukerrerler([]) == [], "Boş liste için boş sonuç"\nassert mukerrerler([9, 9]) == [9], "İki kez geçen tek numara"\nassert ".count(" not in __source__, "count() kullanmadan, görülenler kümesiyle çöz"\n',
+    tests: 'assert mukerrerler([501, 502, 501, 503, 502, 501]) == [501, 502], "501 ve 502 tekrar ediyor; her biri bir kez, sıralı"\nassert mukerrerler([1, 2, 3]) == [], "Tekrar yoksa boş liste"\nassert mukerrerler([]) == [], "Boş liste için boş sonuç"\nassert mukerrerler([9, 9]) == [9], "İki kez geçen tek numara"\nassert ".count(" not in __kod__, "count() kullanmadan, görülenler kümesiyle çöz"\n',
     hints: ['İki küme tut: şimdiye kadar görülenler ve tekrar edenler.', 'Bir numara görülenlerdeyse tekrar kümesine ekle, değilse görülenlere ekle.'],
     why: 'Kümede üyelik testi (in) ortalama O(1) olduğu için liste tek geçişte (O(n)) taranır. [x for x in liste if liste.count(x) > 1] çözümü her eleman için listeyi baştan saydığından O(n²)\'dir; 100 bin kayıtta saniyeler sürer. Tekrar kümesi aynı numarayı bir kez tuttuğu için sonuçta mükerrer yazım olmaz. Alternatif: collections.Counter ile sayıp sayısı > 1 olanları seçmek (orta seviyede).',
     tags: ['set', 'tekrar', 'performans', 'bankacılık'],
@@ -2689,7 +2689,7 @@ B.push(
     q: '<p><code>us_al(taban, us)</code> fonksiyonunu <b>özyinelemeli</b> yaz: <code>taban ** us</code> değerini döndürsün (us ≥ 0 tam sayı). <code>**</code> operatörü ve <code>pow</code> kullanma. İpucu: taban<sup>0</sup> = 1 ve taban<sup>n</sup> = taban × taban<sup>n−1</sup>.</p>',
     start: 'def us_al(taban, us):\n    # buraya yaz\n    pass\n',
     sol: 'def us_al(taban, us):\n    if us == 0:\n        return 1\n    return taban * us_al(taban, us - 1)\n',
-    tests: 'assert us_al(2, 10) == 1024, "2^10 = 1024"\nassert us_al(5, 0) == 1, "Her sayının 0. kuvveti 1 (temel durum)"\nassert us_al(3, 1) == 3, "3^1 = 3"\nassert us_al(1.05, 2) == 1.05 * 1.05, "Ondalık taban da çalışmalı"\nassert __source__.count("us_al(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\nassert "**" not in __source__ and "pow(" not in __source__, "** ve pow kullanmadan çöz"\n',
+    tests: 'assert us_al(2, 10) == 1024, "2^10 = 1024"\nassert us_al(5, 0) == 1, "Her sayının 0. kuvveti 1 (temel durum)"\nassert us_al(3, 1) == 3, "3^1 = 3"\nassert us_al(1.05, 2) == 1.05 * 1.05, "Ondalık taban da çalışmalı"\nassert __source__.count("us_al(") >= 2, "Fonksiyon kendini çağırmalı (özyineleme)"\nassert "**" not in __kod__ and "pow(" not in __kod__, "** ve pow kullanmadan çöz"\n',
     hints: ['Temel durum: us 0 ise 1 döndür.', 'Özyinelemeli adım: taban * us_al(taban, us - 1)'],
     why: 'Her özyinelemeli fonksiyonun iki parçası vardır: temel durum (us == 0 → 1) ve problemi küçülten adım (us - 1). Her çağrı us\'u bir azalttığı için sonunda temel duruma ulaşılır. Bu sürüm us adet çağrı yapar; daha hızlı "hızlı üs alma" yönteminde us çiftse us_al(taban * taban, us // 2) kullanılır ve çağrı sayısı log(us)\'e iner.',
     tags: ['özyineleme', 'temel durum', 'üs'],
@@ -4003,7 +4003,7 @@ B.push(
     example: 'import re\n# İleriye bakış: "ileride şu var mı?" diye bakar ama konumu ilerletmez\ndesen = r"(?=.*[aeıioöuü])\\w{3,}"   # en az bir sesli harf, en az 3 harf\nfor k in ["kitap", "krt", "ab"]:\n    print(k, bool(re.fullmatch(desen, k)))\n',
     start: 'import re\n\ndef sifre_gecerli(s):\n    # TODO 1: büyük harf, rakam, özel karakter için üç lookahead\n    # TODO 2: boşluksuz en az 8 karakter\n    desen = r".{8,}"\n    return re.fullmatch(desen, s) is not None\n',
     sol: 'import re\n\nDESEN = re.compile(r"(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%*.-])\\S{8,}")\n\ndef sifre_gecerli(s):\n    return DESEN.fullmatch(s) is not None\n',
-    tests: 'assert sifre_gecerli("Anadolu.2026") is True, "tüm kuralları sağlayan şifre geçerli"\nassert sifre_gecerli("anadolu.2026") is False, "büyük harf yok"\nassert sifre_gecerli("Anadolu.Bank") is False, "rakam yok"\nassert sifre_gecerli("Anadolu2026") is False, "özel karakter yok"\nassert sifre_gecerli("An.2026") is False, "8 karakterden kısa"\nassert sifre_gecerli("Anadolu 2026!") is False, "boşluk içeremez"\n',
+    tests: 'assert sifre_gecerli("Anadolu.2026") is True, "tüm kuralları sağlayan şifre geçerli"\nassert sifre_gecerli("anadolu.2026") is False, "büyük harf yok"\nassert sifre_gecerli("Ilgaz.Banka") is False, "rakam yok"\nassert sifre_gecerli("Anadolu2026") is False, "özel karakter yok"\nassert sifre_gecerli("An.2026") is False, "8 karakterden kısa"\nassert sifre_gecerli("Anadolu 2026!") is False, "boşluk içeremez"\n',
     hints: ['Lookahead\'ler desenin başında arka arkaya yazılır; sıraları önemli değildir.', 'Karakter sınıfında <code>-</code> en sonda olursa aralık değil düz tire sayılır.', '<code>r"(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%*.-])\\S{8,}"</code>'],
     why: 'İleriye bakışlar konumu değiştirmeden "metnin bir yerinde X var mı?" diye sorar; bu yüzden birden fazla koşul tek desende VE ile birleşir, asıl tüketimi <code>\\S{8,}</code> yapar. Alternatif ve çoğu ekipte daha okunur çözüm: her kuralı ayrı kontrol etmek (<code>any(c.isupper() for c in s)</code> ...); bu, kullanıcıya hangi kuralın eksik olduğunu söylemeyi de kolaylaştırır. Tek desen ise HTML <code>pattern</code> özniteliği gibi yalnızca regex kabul eden yerlerde kazanır.',
     tags: ['lookahead', 'fullmatch', 'doğrulama'],
@@ -4813,7 +4813,7 @@ B.push(
     q: '<p>Anadolu Market lojistik ekibi her müşteriyi en yakın depoya atamak istiyor. <code>en_yakin_depo(musteriler, depolar)</code> fonksiyonunu yaz: <code>musteriler</code> (n, 2), <code>depolar</code> (m, 2) koordinat listesi. Her müşteri için <b>en yakın deponun indeksini</b> ve <b>Öklid mesafesini</b> (2 ondalık) döndür: <code>(indeks_listesi, mesafe_listesi)</code>. Döngü kullanmadan broadcasting ile (n, m) mesafe matrisi kur.</p>',
     start: 'import numpy as np\n\ndef en_yakin_depo(musteriler, depolar):\n    pass\n',
     sol: 'import numpy as np\n\ndef en_yakin_depo(musteriler, depolar):\n    M = np.asarray(musteriler, dtype=float)\n    D = np.asarray(depolar, dtype=float)\n    fark = M[:, None, :] - D[None, :, :]        # (n, m, 2)\n    mesafe = np.sqrt((fark ** 2).sum(axis=2))    # (n, m)\n    idx = mesafe.argmin(axis=1)\n    en_kisa = mesafe[np.arange(len(M)), idx]\n    return idx.tolist(), np.round(en_kisa, 2).tolist()\n',
-    tests: 'musteri = [[0, 0], [10, 10], [6, 1], [3, 4]]\ndepo = [[1, 1], [9, 9], [6, 0]]\nidx, mes = en_yakin_depo(musteri, depo)\nassert idx == [0, 1, 2, 0], f"Beklenen indeksler [0, 1, 2, 0], gelen {idx}"\nassert np.allclose(mes, [1.41, 1.41, 1.0, 3.61]), f"Mesafeler 2 ondalık: [1.41, 1.41, 1.0, 3.61], gelen {mes}"\nidx2, _ = en_yakin_depo([[5, 5]], [[0, 0]])\nassert idx2 == [0], "Tek depo varsa herkes 0. depoya gider"\nassert "for " not in __source__, "Döngü kullanma: M[:, None, :] - D[None, :, :] ile (n, m, 2) fark tensörü kur"\n',
+    tests: 'musteri = [[0, 0], [10, 10], [6, 1], [3, 4]]\ndepo = [[1, 1], [9, 9], [6, 0]]\nidx, mes = en_yakin_depo(musteri, depo)\nassert idx == [0, 1, 2, 0], f"Beklenen indeksler [0, 1, 2, 0], gelen {idx}"\nassert np.allclose(mes, [1.41, 1.41, 1.0, 3.61]), f"Mesafeler 2 ondalık: [1.41, 1.41, 1.0, 3.61], gelen {mes}"\nidx2, _ = en_yakin_depo([[5, 5]], [[0, 0]])\nassert idx2 == [0], "Tek depo varsa herkes 0. depoya gider"\nassert "for " not in __kod__, "Döngü kullanma: M[:, None, :] - D[None, :, :] ile (n, m, 2) fark tensörü kur"\n',
     hints: ['Müşterilere yeni eksen ekle: <code>M[:, None, :]</code> (n,1,2); depolara <code>D[None, :, :]</code> (1,m,2). Fark (n,m,2) olur.', 'Kareleri son eksende topla, karekök al → (n, m) mesafe matrisi; <code>argmin(axis=1)</code> her satırın en küçüğünün yeri.', 'Seçilen mesafeler: <code>mesafe[np.arange(n), idx]</code>'],
     why: 'Broadcasting ile tüm çiftlerin mesafesi tek ifadede hesaplanır: zaman O(n·m), bellek O(n·m). Çok büyük n·m için bellek patlar; o zaman parçalara bölerek (chunk) ya da scipy.spatial.cKDTree ile O((n+m) log m) sorgulama yapılır. scipy.spatial.distance.cdist de aynı matrisi hazır verir.',
     tags: ['broadcasting', 'argmin', 'mesafe matrisi'],
@@ -5142,7 +5142,7 @@ B.push(
     q: '<p>Reklam harcaması ile satış arasındaki ilişkide bir aykırı kampanya Pearson katsayısını bozuyor; ekip sıra tabanlı Spearman korelasyonunu kullanmaya karar verdi. <code>spearman(x, y)</code> fonksiyonunu <b>scipy.stats.spearmanr kullanmadan</b> yaz: iki diziyi sıralara (rank) çevir — eşit değerlere <b>ortalama sıra</b> ver — ve sıralar arasındaki Pearson korelasyonunu 4 ondalık döndür. <code>scipy.stats.rankdata</code> ve <code>np.corrcoef</code> kullanabilirsin.</p>',
     start: 'import numpy as np\nfrom scipy import stats\n\ndef spearman(x, y):\n    pass\n',
     sol: 'import numpy as np\nfrom scipy import stats\n\ndef spearman(x, y):\n    rx = stats.rankdata(x)          # eşitlere ortalama sıra\n    ry = stats.rankdata(y)\n    return round(float(np.corrcoef(rx, ry)[0, 1]), 4)\n',
-    tests: 'from scipy import stats as _st\nreklam = [10, 20, 30, 40, 50, 60]\nsatis = [100, 180, 260, 300, 330, 5000]\nr = spearman(reklam, satis)\nassert r == 1.0, f"Satış reklamla tam monoton artıyor → Spearman 1.0; gelen {r}"\np = _st.pearsonr(reklam, satis)[0]\nassert p < 0.8, "(Bilgi) Pearson aykırı değer yüzünden 1\'den çok uzak"\nx = [3, 1, 4, 1, 5, 9, 2, 6]\ny = [2, 7, 1, 8, 2, 8, 1, 8]\nbeklenen = round(float(_st.spearmanr(x, y)[0]), 4)\nassert spearman(x, y) == beklenen, f"Eşitlikli veride {beklenen} olmalı; eşit değerlere ortalama sıra verdin mi (rankdata)?"\nassert "spearmanr" not in __source__, "spearmanr kullanma; sıraları kendin hesapla"\n',
+    tests: 'from scipy import stats as _st\nreklam = [10, 20, 30, 40, 50, 60]\nsatis = [100, 180, 260, 300, 330, 5000]\nr = spearman(reklam, satis)\nassert r == 1.0, f"Satış reklamla tam monoton artıyor → Spearman 1.0; gelen {r}"\np = _st.pearsonr(reklam, satis)[0]\nassert p < 0.8, "(Bilgi) Pearson aykırı değer yüzünden 1\'den çok uzak"\nx = [3, 1, 4, 1, 5, 9, 2, 6]\ny = [2, 7, 1, 8, 2, 8, 1, 8]\nbeklenen = round(float(_st.spearmanr(x, y)[0]), 4)\nassert spearman(x, y) == beklenen, f"Eşitlikli veride {beklenen} olmalı; eşit değerlere ortalama sıra verdin mi (rankdata)?"\nassert "spearmanr" not in __kod__, "spearmanr kullanma; sıraları kendin hesapla"\n',
     hints: ['Spearman katsayısı = sıraların Pearson korelasyonu.', '<code>stats.rankdata([10, 20, 20])</code> → <code>[1., 2.5, 2.5]</code> (eşitlere ortalama sıra).', '<code>np.corrcoef(rx, ry)[0, 1]</code> iki dizi arasındaki korelasyonu verir.'],
     why: 'Spearman verinin büyüklüğünü değil sırasını kullandığı için aykırı değerlere dayanıklıdır ve doğrusal olmayan ama monoton ilişkileri yakalar (burada 1.0), Pearson ise 5000’lik kampanya yüzünden düşer. Sıralama O(n log n), korelasyon O(n). Eşitlik yoksa kısa formül 1 − 6Σd² / (n(n²−1)) de kullanılabilir ama eşitlikte yanlış verir; sıraların Pearson’ı her durumda doğrudur. Alternatifler: stats.spearmanr, pandas df.corr(method="spearman"), Kendall tau (stats.kendalltau).',
     tags: ['Spearman', 'rankdata', 'korelasyon', 'aykırı değer'],
@@ -5253,7 +5253,7 @@ B.push(
     q: '<p>Ilgaz Bank sahte işlem modelinin sonuçlarını raporluyor (1 = sahte). <code>metrikler(y_gercek, y_tahmin)</code> fonksiyonunu <b>sklearn.metrics kullanmadan</b> yaz: TP, FP, FN sayılarından <code>{"precision", "recall", "f1"}</code> sözlüğünü 3 ondalık döndürsün. Payda 0 olursa ilgili metrik 0.0 olsun.</p>',
     start: 'def metrikler(y_gercek, y_tahmin):\n    pass\n',
     sol: 'def metrikler(y_gercek, y_tahmin):\n    tp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 1)\n    fp = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 0 and t == 1)\n    fn = sum(1 for g, t in zip(y_gercek, y_tahmin) if g == 1 and t == 0)\n    p = tp / (tp + fp) if tp + fp else 0.0\n    r = tp / (tp + fn) if tp + fn else 0.0\n    f1 = 2 * p * r / (p + r) if p + r else 0.0\n    return {"precision": round(p, 3), "recall": round(r, 3), "f1": round(f1, 3)}\n',
-    tests: 'from sklearn.metrics import precision_score, recall_score, f1_score\ng = [0, 0, 1, 1, 0, 1, 0, 0, 1, 0]\nt = [0, 1, 1, 0, 0, 1, 0, 0, 1, 1]\nm = metrikler(g, t)\nassert m["precision"] == round(precision_score(g, t), 3) == 0.6, f"precision = TP/(TP+FP) = 3/5 = 0.6; gelen {m[\'precision\']}"\nassert m["recall"] == round(recall_score(g, t), 3) == 0.75, f"recall = TP/(TP+FN) = 3/4 = 0.75; gelen {m[\'recall\']}"\nassert m["f1"] == round(f1_score(g, t), 3), f"f1 = 2PR/(P+R) ≈ 0.667; gelen {m[\'f1\']}"\nz = metrikler([0, 0, 1], [0, 0, 0])\nassert z == {"precision": 0.0, "recall": 0.0, "f1": 0.0}, "Hiç pozitif tahmin yoksa sıfıra bölme yerine 0.0"\nassert "sklearn" not in __source__, "Metrikleri kendin hesapla"\n',
+    tests: 'from sklearn.metrics import precision_score, recall_score, f1_score\ng = [0, 0, 1, 1, 0, 1, 0, 0, 1, 0]\nt = [0, 1, 1, 0, 0, 1, 0, 0, 1, 1]\nm = metrikler(g, t)\nassert m["precision"] == round(precision_score(g, t), 3) == 0.6, f"precision = TP/(TP+FP) = 3/5 = 0.6; gelen {m[\'precision\']}"\nassert m["recall"] == round(recall_score(g, t), 3) == 0.75, f"recall = TP/(TP+FN) = 3/4 = 0.75; gelen {m[\'recall\']}"\nassert m["f1"] == round(f1_score(g, t), 3), f"f1 = 2PR/(P+R) ≈ 0.667; gelen {m[\'f1\']}"\nz = metrikler([0, 0, 1], [0, 0, 0])\nassert z == {"precision": 0.0, "recall": 0.0, "f1": 0.0}, "Hiç pozitif tahmin yoksa sıfıra bölme yerine 0.0"\nassert "sklearn" not in __kod__, "Metrikleri kendin hesapla"\n',
     hints: ['TP: gerçek 1, tahmin 1; FP: gerçek 0, tahmin 1; FN: gerçek 1, tahmin 0.', 'precision = TP/(TP+FP), recall = TP/(TP+FN), F1 bunların harmonik ortalaması.', 'Paydaları <code>if tp + fp else 0.0</code> gibi koşullu ifadeyle koru.'],
     why: 'Dengesiz veride (sahte işlem nadir) doğruluk (accuracy) yanıltıcıdır: hep "0" diyen model %99 doğru çıkar. Precision "alarm verdiklerimizin ne kadarı gerçekten sahte", recall "sahtelerin ne kadarını yakaladık" sorusunu yanıtlar; F1 ikisini dengeler. Tek geçiş O(n). Alternatif: sklearn.metrics.precision_recall_fscore_support(zero_division=0) ya da classification_report; eşik seçimi için precision_recall_curve.',
     tags: ['precision', 'recall', 'F1', 'karışıklık matrisi'],
@@ -5772,7 +5772,7 @@ B.push(
     q: '<p>Kodda bir performans hatası var, bul ve düzelt. <code>sirayla_isle(isler)</code> işleri geliş sırasıyla (FIFO) işleyip her işin sonucunu listeye ekliyor; mantık doğru ama 60 bin işte saniyeler sürüyor. Sorun kuyruk veri yapısında.</p>',
     start: 'def sirayla_isle(isler):\n    kuyruk = list(isler)\n    sonuc = []\n    while kuyruk:\n        is_ = kuyruk.pop(0)\n        sonuc.append(is_ * 2)\n    return sonuc\n',
     sol: 'from collections import deque\n\ndef sirayla_isle(isler):\n    kuyruk = deque(isler)\n    sonuc = []\n    while kuyruk:\n        is_ = kuyruk.popleft()\n        sonuc.append(is_ * 2)\n    return sonuc\n',
-    tests: 'import time\nassert sirayla_isle([3, 1, 2]) == [6, 2, 4], "FIFO sırası korunmalı"\nassert sirayla_isle([]) == [], "Boş kuyruk"\nt0 = time.perf_counter()\nr = sirayla_isle(range(60000))\nsure = time.perf_counter() - t0\nassert r[-1] == 119998, "Son iş yanlış işlendi"\nassert "pop(0)" not in __source__, "list.pop(0) her çağrıda tüm elemanları kaydırır (O(n)); deque.popleft() kullan"\nassert sure < (1.0 * (4 if __import__("sys").platform == "emscripten" else 1)), f"60 bin iş < 1 sn sürmeli; {sure:.2f} sn sürdü"\n',
+    tests: 'import time\nassert sirayla_isle([3, 1, 2]) == [6, 2, 4], "FIFO sırası korunmalı"\nassert sirayla_isle([]) == [], "Boş kuyruk"\nt0 = time.perf_counter()\nr = sirayla_isle(range(60000))\nsure = time.perf_counter() - t0\nassert r[-1] == 119998, "Son iş yanlış işlendi"\nassert "pop(0)" not in __kod__, "list.pop(0) her çağrıda tüm elemanları kaydırır (O(n)); deque.popleft() kullan"\nassert sure < (1.0 * (4 if __import__("sys").platform == "emscripten" else 1)), f"60 bin iş < 1 sn sürmeli; {sure:.2f} sn sürdü"\n',
     hints: ['Liste dizi tabanlıdır: baştan eleman silmek kalan tüm elemanları bir sola kaydırır.', '<code>collections.deque</code> iki uçtan da O(1) ekleme/çıkarma yapar.', '<code>kuyruk = deque(isler)</code> ve <code>kuyruk.popleft()</code>'],
     why: 'list.pop(0) O(n) olduğu için n işlik döngü O(n²) olur; deque.popleft() O(1) ile toplam O(n). Bu, BFS ve iş kuyruklarında en sık görülen gizli darboğazdır. Burada sıra değişmediği için doğrudan [x * 2 for x in isler] de yeterliydi; kuyruk gerçekten gerekiyorsa (işlerken yeni iş ekleniyorsa) deque doğru yapıdır. Thread’ler arası kuyruk için queue.Queue, asenkron için asyncio.Queue kullanılır.',
     tags: ['deque', 'pop(0)', 'O(n²)'],
@@ -5900,7 +5900,7 @@ B.push(
     q: '<p><code>dataclasses</code> modülünü kullanmadan bir sınıf dekoratörü yaz: <code>kayit(cls)</code>, sınıfın tip açıklamalarından (<code>cls.__annotations__</code>, tanım sırasıyla) alan listesini alıp sınıfa üç metot eklesin ve sınıfı döndürsün: <code>__init__</code> (alanları sırayla konumsal ya da adla alır; sınıfta varsayılan değeri olan alan verilmezse o değeri kullanır, verilmeyen zorunlu alanda <code>TypeError</code>), <code>__repr__</code> → <code>Musteri(ad=\'Ayşe\', puan=0)</code>, <code>__eq__</code> (aynı sınıf ve aynı alan değerleri).</p>',
     start: 'def kayit(cls):\n    pass\n',
     sol: 'def kayit(cls):\n    alanlar = list(cls.__dict__.get("__annotations__", {}))\n    yok = object()\n    varsayilan = {a: cls.__dict__.get(a, yok) for a in alanlar}\n\n    def __init__(self, *args, **kwargs):\n        if len(args) > len(alanlar):\n            raise TypeError("Fazla argüman")\n        degerler = dict(zip(alanlar, args))\n        for k, v in kwargs.items():\n            if k not in alanlar:\n                raise TypeError(f"Bilinmeyen alan: {k}")\n            if k in degerler:\n                raise TypeError(f"{k} iki kez verildi")\n            degerler[k] = v\n        for a in alanlar:\n            if a not in degerler:\n                if varsayilan[a] is yok:\n                    raise TypeError(f"Eksik alan: {a}")\n                degerler[a] = varsayilan[a]\n            setattr(self, a, degerler[a])\n\n    def __repr__(self):\n        ic = ", ".join(f"{a}={getattr(self, a)!r}" for a in alanlar)\n        return f"{type(self).__name__}({ic})"\n\n    def __eq__(self, other):\n        if type(other) is not type(self):\n            return NotImplemented\n        return all(getattr(self, a) == getattr(other, a) for a in alanlar)\n\n    cls.__init__ = __init__\n    cls.__repr__ = __repr__\n    cls.__eq__ = __eq__\n    return cls\n',
-    tests: '@kayit\nclass Musteri:\n    ad: str\n    sehir: str = "Ankara"\n    puan: int = 0\n\nm = Musteri("Ayşe", puan=5)\nassert (m.ad, m.sehir, m.puan) == ("Ayşe", "Ankara", 5), "Konumsal + adlı argüman ve varsayılan değer"\nassert repr(m) == "Musteri(ad=\'Ayşe\', sehir=\'Ankara\', puan=5)", f"repr yanlış: {m!r}"\nassert Musteri("Can") == Musteri(ad="Can"), "Aynı değerli nesneler eşit olmalı"\nassert Musteri("Can") != Musteri("Can", "İzmir"), "Farklı alan değeri → eşit değil"\ntry:\n    Musteri()\n    assert False, "Zorunlu alan (ad) eksikse TypeError"\nexcept TypeError:\n    pass\ntry:\n    Musteri("A", yas=3)\n    assert False, "Bilinmeyen alan adı TypeError"\nexcept TypeError:\n    pass\nassert "dataclass" not in __source__, "dataclasses kullanma; metotları kendin üret"\n',
+    tests: '@kayit\nclass Musteri:\n    ad: str\n    sehir: str = "Ankara"\n    puan: int = 0\n\nm = Musteri("Ayşe", puan=5)\nassert (m.ad, m.sehir, m.puan) == ("Ayşe", "Ankara", 5), "Konumsal + adlı argüman ve varsayılan değer"\nassert repr(m) == "Musteri(ad=\'Ayşe\', sehir=\'Ankara\', puan=5)", f"repr yanlış: {m!r}"\nassert Musteri("Can") == Musteri(ad="Can"), "Aynı değerli nesneler eşit olmalı"\nassert Musteri("Can") != Musteri("Can", "İzmir"), "Farklı alan değeri → eşit değil"\ntry:\n    Musteri()\n    assert False, "Zorunlu alan (ad) eksikse TypeError"\nexcept TypeError:\n    pass\ntry:\n    Musteri("A", yas=3)\n    assert False, "Bilinmeyen alan adı TypeError"\nexcept TypeError:\n    pass\nassert "dataclass" not in __kod__, "dataclasses kullanma; metotları kendin üret"\n',
     hints: ['Alan sırası: <code>list(cls.__dict__.get("__annotations__", {}))</code>; sözlükler ekleme sırasını korur.', 'Varsayılan değer sınıf niteliği olarak durur: <code>cls.__dict__.get(ad, YOK)</code>; "yok" için özel bir nöbetçi nesne kullan (None geçerli bir varsayılan olabilir).', 'İç fonksiyonları tanımlayıp <code>cls.__init__ = __init__</code> gibi sınıfa ata, sonra <code>return cls</code>.'],
     why: 'Sınıf dekoratörü sınıf oluştuktan sonra onu alıp değiştirir; metaprogramlamanın metaclass’a göre en okunur yoludur. Fonksiyonlar kapanış (closure) ile alan listesini hatırlar. Nöbetçi object() None’u geçerli varsayılan olarak ayırt eder. Gerçek dataclasses kaynak kod üretip exec eder (daha hızlı __init__) ve kalıtım, frozen, order, slots gibi seçenekleri destekler; üretimde onu ya da attrs/pydantic’i kullan. Her işlem alan sayısıyla doğrusal: O(k).',
     tags: ['sınıf dekoratörü', '__annotations__', 'metaprogramlama', 'closure'],
@@ -6902,7 +6902,7 @@ B.push(
   }
 );
 })(window);
-/* Kesit Python — veri seti görevleri: Kesit BI / Power BI ölçüleri (b-449 … b-465) */
+/* Kesit Python — veri seti görevleri: Anadolu Market Power BI / Power BI ölçüleri (b-449 … b-465) */
 (function (W) {
 'use strict';
 const B = W.PY_BANK = W.PY_BANK || [];
@@ -6910,12 +6910,12 @@ B.push(
   {
     id: 'b-449',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'rehberli',
     ds: 'kesit_bi',
     title: '[Net Satış] ölçüsünü yıllara göre hesapla',
-    q: '<p><b>Finans kontrolörü soruyor:</b> "Power BI raporundaki yıllık Net Satış kartlarının doğru olduğunu Python\'la teyit edebilir misin?"</p><p>Kesit BI modelindeki ölçü: <code>Net Satış = CALCULATE(SUM(Satislar[Tutar]), NOT Satislar[Durum] IN {"İptal", "İade"})</code>. <code>net_satis_yillik(satislar)</code> fonksiyonunu yaz: <code>veri.kayitlar("kesit_bi", "Satislar")</code> listesinden <code>{yil: toplam}</code> sözlüğü döndürsün (yıl tam sayı, <code>Tarih</code> metninin ilk 4 karakteri; toplam 2 ondalık).</p>',
+    q: '<p><b>Finans kontrolörü soruyor:</b> "Power BI raporundaki yıllık Net Satış kartlarının doğru olduğunu Python\'la teyit edebilir misin?"</p><p>Anadolu Market Power BI modelindeki ölçü: <code>Net Satış = CALCULATE(SUM(Satislar[Tutar]), NOT Satislar[Durum] IN {"İptal", "İade"})</code>. <code>net_satis_yillik(satislar)</code> fonksiyonunu yaz: <code>veri.kayitlar("kesit_bi", "Satislar")</code> listesinden <code>{yil: toplam}</code> sözlüğü döndürsün (yıl tam sayı, <code>Tarih</code> metninin ilk 4 karakteri; toplam 2 ondalık).</p>',
     guide: ['Boş bir sözlük oluştur.', 'Her satırda önce durumu kontrol et; iptal ya da iadeyse atla (CALCULATE\'in filtre bağlamı bu).', 'Yılı <code>int(s["Tarih"][:4])</code> ile çıkar ve <code>Tutar</code>\'ı o yıla ekle.', 'Sonunda her değeri 2 ondalığa yuvarlayıp döndür.'],
     example: '# Benzer teknik: filtreli toplam (DAX\'taki CALCULATE + SUM fikri)\nfaturalar = [{"ay": "2024-01", "tutar": 100, "iptal": False}, {"ay": "2024-01", "tutar": 50, "iptal": True},\n             {"ay": "2024-02", "tutar": 70, "iptal": False}]\ntoplam = {}\nfor f in faturalar:\n    if f["iptal"]:\n        continue\n    toplam[f["ay"]] = toplam.get(f["ay"], 0) + f["tutar"]\nprint(toplam)\n',
     start: 'import veri\n\nsatislar = veri.kayitlar("kesit_bi", "Satislar")\n\n\ndef net_satis_yillik(satislar):\n    toplam = {}\n    for s in satislar:\n        # TODO 1: İptal ve İade satırlarını atla\n        # TODO 2: yılı çıkar, Tutar\'ı o yıla ekle\n        pass\n    # TODO 3: değerleri 2 ondalığa yuvarla\n    return toplam\n',
@@ -6929,7 +6929,7 @@ B.push(
   {
     id: 'b-450',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -6946,7 +6946,7 @@ B.push(
   {
     id: 'b-451',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'tamamla',
     ds: 'kesit_bi',
@@ -6963,7 +6963,7 @@ B.push(
   {
     id: 'b-452',
     lv: 'temel',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 1,
     kind: 'bug',
     ds: 'kesit_bi',
@@ -6980,7 +6980,7 @@ B.push(
   {
     id: 'b-453',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -7000,7 +7000,7 @@ B.push(
   {
     id: 'b-454',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -7018,7 +7018,7 @@ B.push(
   {
     id: 'b-455',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -7038,7 +7038,7 @@ B.push(
   {
     id: 'b-456',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -7056,7 +7056,7 @@ B.push(
   {
     id: 'b-457',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'bug',
     ds: 'kesit_bi',
@@ -7074,7 +7074,7 @@ B.push(
   {
     id: 'b-458',
     lv: 'orta',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 2,
     kind: 'tamamla',
     ds: 'kesit_bi',
@@ -7092,7 +7092,7 @@ B.push(
   {
     id: 'b-459',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -7112,7 +7112,7 @@ B.push(
   {
     id: 'b-460',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -7130,7 +7130,7 @@ B.push(
   {
     id: 'b-461',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -7150,7 +7150,7 @@ B.push(
   {
     id: 'b-462',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -7168,7 +7168,7 @@ B.push(
   {
     id: 'b-463',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',
@@ -7186,7 +7186,7 @@ B.push(
   {
     id: 'b-464',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'rehberli',
     ds: 'kesit_bi',
@@ -7206,7 +7206,7 @@ B.push(
   {
     id: 'b-465',
     lv: 'ileri',
-    topic: 'Veri seti: Kesit BI',
+    topic: 'Veri seti: Anadolu Market (Power BI modeli)',
     diff: 3,
     kind: 'yaz',
     ds: 'kesit_bi',

@@ -294,7 +294,7 @@
   fn: 'yillik_buyume',
   ds: 'kesit_bi',
   needs: ['pandas'],
-  statement: '<p>Kesit BI\'ın <code>Satislar</code> tablosunda her satırın <code>Tarih</code>, <code>Kanal</code> (Web, Mobil, Mağaza), <code>Durum</code> ve <code>Tutar</code> değeri var. Yönetim, kanalların yıldan yıla büyümesini görmek istiyor (Power BI\'daki "geçen yıla göre %" ölçüsünün pandas karşılığı).</p><p><code>yillik_buyume(kanal)</code>: <code>Durum == "İptal"</code> satırlarını at; verilen kanalın yıllık <code>Tutar</code> toplamını bul ve bir önceki yıla göre yüzde değişimi <code>{yil: yuzde}</code> olarak döndür (1 ondalık). İlk yılın önceki yılı olmadığı için sözlükte yer almaz.</p>',
+  statement: '<p>Anadolu Market Power BI\'ın <code>Satislar</code> tablosunda her satırın <code>Tarih</code>, <code>Kanal</code> (Web, Mobil, Mağaza), <code>Durum</code> ve <code>Tutar</code> değeri var. Yönetim, kanalların yıldan yıla büyümesini görmek istiyor (Power BI\'daki "geçen yıla göre %" ölçüsünün pandas karşılığı).</p><p><code>yillik_buyume(kanal)</code>: <code>Durum == "İptal"</code> satırlarını at; verilen kanalın yıllık <code>Tutar</code> toplamını bul ve bir önceki yıla göre yüzde değişimi <code>{yil: yuzde}</code> olarak döndür (1 ondalık). İlk yılın önceki yılı olmadığı için sözlükte yer almaz.</p>',
   input: '<p><code>kanal</code>: <code>"Web"</code>, <code>"Mobil"</code> ya da <code>"Mağaza"</code>.</p>',
   output: '<p><code>dict</code>: yıl (int) → yüzde (float).</p>',
   constraints: 'Satislar 1620 satır (2022-06 … 2024-12)',

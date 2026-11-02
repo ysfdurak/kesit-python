@@ -11,6 +11,7 @@ html = open('index.html', encoding='utf-8').read()
 tags = re.findall(r'<script charset="utf-8" src="([^"]+)"></script>', html)
 tags = [t for t in tags if t != 'sync.js']
 for t in tags: shutil.copy(t, O + '/' + t)
+shutil.copy('pyworker.js', O + '/pyworker.js')
 tot = sum(os.path.getsize(t) for t in tags); seen = 0
 def tag(m):
     global seen
@@ -33,7 +34,7 @@ meta = '''<meta name="theme-color" content="#3B6FD6">
 <meta property="og:locale" content="tr_TR">
 <meta property="og:site_name" content="Kesit Python">
 <meta property="og:title" content="Kesit Python: sıfırdan işe hazır Python">
-<meta property="og:description" content="Kurulum yok, hesap yok. Python'ı tarayıcında çalıştırarak öğren: dersler, otomatik testli alıştırmalar, rol patikaları, mülakat ve kodlama arenası.">
+<meta property="og:description" content="Kurulum yok, hesap yok. Python'ı tarayıcında çalıştırarak öğren: dersler, otomatik testli alıştırmalar, öğrenme yolları, mülakat ve Python Arena.">
 <meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png">
 <meta property="og:url" content="https://ysfdurak.github.io/kesit-python/">
 <meta name="twitter:card" content="summary_large_image">
@@ -46,6 +47,14 @@ open(O + '/index.html', 'w', encoding='utf-8').write(html)
 shutil.copytree('data', O + '/data')
 for f in ['config.js', 'LICENSE', 'LICENSE-ICERIK.md']: shutil.copy('kaynak/gh/' + f, O + '/' + f)
 shutil.copytree('kaynak/gh/static', O, dirs_exist_ok=True)
+# Service worker: içerik özetiyle sürümlenir, ilk ziyarette çekirdek dosyaları önbelleğe alır, eski sürümü siler
+import hashlib
+_pre = ['./', 'index.html', 'config.js', 'pyworker.js', 'vendor/fonts.css', 'data/manifest.json'] + tags
+_h = hashlib.sha256()
+for f in sorted(set(x for x in _pre if x != './')):
+    _h.update(open(O + '/' + f, 'rb').read())
+_sw = open(O + '/sw.js', encoding='utf-8').read().replace('__SURUM__', _h.hexdigest()[:12]).replace('__ONBELLEK__', json.dumps(_pre, ensure_ascii=False))
+open(O + '/sw.js', 'w', encoding='utf-8').write(_sw)
 if os.path.isdir('kaynak/gh/ekran'): shutil.copytree('kaynak/gh/ekran', O + '/ekran')
 open(O + '/.nojekyll', 'w').close()
 r = subprocess.run(['node', 'tools/readme.js'], check=True, capture_output=True, text=True)

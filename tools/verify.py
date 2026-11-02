@@ -4,11 +4,13 @@ Tüm alıştırmaları gerçek CPython ile denetler:
   code    : sol + tests çalışır, expect varsa çıktı birebir eşleşir; start testleri GEÇMEMELİ (görev boş olmasın)
   predict : code çalıştırılır; çıktı o[a] ile birebir aynı olmalı (raises: true ise hata adı o[a] olmalı)
   order   : lines sırasıyla birleştirilip çalıştırılır; tests/expect varsa denetlenir
-  mc      : a indeksi geçerli; doğru şık belirgin biçimde en uzun şık olmasın (uyarı)
+  mc      : a indeksi geçerli; soruda kod (<pre>) ya da satır içi ifade varsa ve soru çıktıyı soruyorsa çalıştırılır, işaretli şıkla karşılaştırılır
+  order   : plain: true ise kod değil adım listesidir, çalıştırılmaz
+  local   : kendi bilgisayarında görevi: yönerge dolu olmalı; .py dosyası varsa sözdizimi denetlenir
 Ders uzantıları (window.PY_EXT = [{id, ex:[...]}]) ilgili derse eklenerek denetlenir.
 Kullanım: python3 verify.py dosya1.js [dosya2.js ...]   (-q: yalnız özet ve hatalar)
 """
-import json, subprocess, sys, textwrap, os
+import json, subprocess, sys, textwrap, os, re
 from concurrent.futures import ThreadPoolExecutor
 
 DUMP = r'''
@@ -47,8 +49,38 @@ try:
     import matplotlib; matplotlib.use("Agg")
 except Exception:
     pass
+def _pp_kaynak(code):
+    """__source__ için: yorumları ayıklar; öğrencinin yorumu kaynak denetimlerini bozmasın."""
+    import tokenize, io as _io
+    try:
+        satirlar = code.splitlines(keepends=True)
+        toks = list(tokenize.generate_tokens(_io.StringIO(code).readline))
+        for t in sorted((t for t in toks if t.type == tokenize.COMMENT), key=lambda t: t.start, reverse=True):
+            s = satirlar[t.start[0] - 1]
+            satirlar[t.start[0] - 1] = s[:t.start[1]] + s[t.end[1]:]
+        return "".join(satirlar)
+    except Exception:
+        return code
+
+def _pp_kod(code):
+    """__kod__ için: yorumları ve metin içlerini ayıklar; yalnız gerçek kod kalır ("for" yasak denetimi print metnine takılmaz)."""
+    import tokenize, io as _io
+    try:
+        satirlar = code.splitlines(keepends=True)
+        bas = [0]
+        for s in satirlar: bas.append(bas[-1] + len(s))
+        off = lambda p: bas[p[0] - 1] + p[1]
+        adlar = {tokenize.COMMENT, tokenize.STRING}
+        for ad in ("FSTRING_MIDDLE", "TSTRING_MIDDLE"):
+            if hasattr(tokenize, ad): adlar.add(getattr(tokenize, ad))
+        toks = [t for t in tokenize.generate_tokens(_io.StringIO(code).readline) if t.type in adlar]
+        for t in sorted(toks, key=lambda t: t.start, reverse=True):
+            code = code[:off(t.start)] + ('""' if t.type == tokenize.STRING else "") + code[off(t.end):]
+        return code
+    except Exception:
+        return code
 buf = io.StringIO(); sys.stdout = buf
-ns = {"__name__": "__main__", "__source__": cfg["code"]}
+ns = {"__name__": "__main__", "__source__": _pp_kaynak(cfg["code"]), "__kod__": _pp_kod(cfg["code"])}
 err = None; etype = None
 try:
     exec(compile(cfg["code"], "<cozum>", "exec"), ns)
@@ -104,10 +136,65 @@ def check_predict(e):
         if i != a and norm(x) == norm(r['out']): return False, f'yanlış şık {i} de gerçek çıktıya eşit'
     return True, ''
 
+def check_local(e):
+    if not e.get('q'): return False, 'q yok'
+    if not (e.get('steps') or e.get('cmd') or e.get('file')): return False, 'yönerge yok (steps/cmd/file)'
+    if e.get('file') and str(e.get('fname', '')).endswith('.py'):
+        try: compile(e['file'], e['fname'], 'exec')
+        except SyntaxError as x: return False, 'dosya sözdizimi: ' + str(x)
+    return True, ''
+
+def _untag(s):
+    import html, re
+    return html.unescape(re.sub(r'<[^>]+>', '', str(s)))
+
+def _mcnorm(s):
+    import re
+    return re.sub(r'\s+', ' ', str(s).replace('"', "'").replace('`', '')).strip()
+
+def mc_code(e):
+    """Sorudaki kodu ve çıktı soruluyor mu bilgisini çıkarır. Çalıştırılacak yoksa None."""
+    import re, html
+    q = str(e.get('q') or '')
+    asks = re.search(r'çıktı|yazdırır|yazdırılır|değeri nedir|değeri ne|ne döndürür|ne olur|sonucu nedir|sonucu ne|hangi değer', _untag(q), re.I)
+    m = re.search(r'<pre[^>]*>(.*?)</pre>', q, re.S)
+    if e.get('code'): code = e['code']
+    elif m: code = _untag(m.group(1))
+    else:
+        c = re.search(r'<code>([^<]{3,120})</code>\s*(?:ifadesinin|ifadesi|ne döndürür|ne yazdırır|çağrısı|sonucu)', q)
+        if not c or not asks: return None
+        ex = html.unescape(c.group(1))
+        try: compile(ex, 'x', 'eval')
+        except SyntaxError: return None
+        code = 'print(' + ex + ')'
+    if not asks or 'print' not in code: return None
+    return code
+
+MC_PRE = 'import re, json, math, datetime, collections, itertools, functools, csv, os, sys, decimal, string\nfrom collections import Counter, defaultdict, deque\nfrom datetime import date, timedelta\n'
+
+def check_mc(e):
+    o = e.get('o') or []; a = e.get('a')
+    if not isinstance(a, int) or not (0 <= a < len(o)): return False, 'mc a indeksi geçersiz'
+    code = mc_code(e)
+    if code is None: return True, ''
+    r = py(MC_PRE + code)
+    raw = _untag(o[a]); want = _mcnorm(raw)
+    if r['err']:
+        if r['etype'] in ('NameError', 'ModuleNotFoundError', 'ImportError'): return True, ''   # bağlam metinde; tek başına çalışmaz
+        ok = (r['etype'] and r['etype'] in raw) or re.search(r'hata|error|exception|çalışmaz', raw, re.I)
+        return (True, '') if ok else (False, f"kod hata verdi ({r['etype']}), doğru şık: {o[a]}")
+    got = _mcnorm(r['out'])
+    tok = lambda t: re.findall(r"[\wçğıöşüÇĞİÖŞÜ.'-]+", t)
+    tw, tg = tok(want), tok(got)
+    if want == got or (got and got in want) or (want and want in got) or (tw and tg and (all(x in tg for x in tw) or all(x in tw for x in tg))): return True, ''
+    if tg and tg[0] in tw and len([x for x in tw if x not in tg]) >= 3: return True, ''   # açıklamalı şık: "False, çünkü ..."
+    return False, f"çıktı işaretli şıkla uyuşmuyor:\n--- şık ---\n{want}\n--- gerçek ---\n{got}"
+
 def check_order(e):
     lines = e.get('lines') or []
     if len(lines) < 3: return False, 'en az 3 satır olmalı'
     if len(set(lines)) != len(lines): return False, 'aynı satır iki kez var (sıralama belirsizleşir)'
+    if e.get('plain'): return True, ''
     code = '\n'.join(lines) + '\n'
     if not e.get('tests') and e.get('expect') is None: return False, 'tests/expect yok'
     r = py(code, e.get('tests') or '', e.get('stdin'))
@@ -173,7 +260,7 @@ def mc_warn(name, e):
     o = e.get('o') or []; a = e.get('a')
     if not isinstance(a, int) or not (0 <= a < len(o)): return 'mc a indeksi geçersiz'
     L = sorted(len(x) for x in o)
-    if len(o) > 1 and len(o[a]) == L[-1] and L[-1] > L[-2] + 12: print(f"UYARI {name}: doğru şık en uzun şık")
+    if os.environ.get('MCWARN') and len(o) > 1 and len(o[a]) == L[-1] and L[-1] > L[-2] + 12: print(f"UYARI {name}: doğru şık en uzun şık")
     return None
 
 def collect(data):
@@ -188,9 +275,11 @@ def collect(data):
             if t == 'code': items.append((name, 'code', e))
             elif t == 'predict': items.append((name, 'predict', e))
             elif t == 'order': items.append((name, 'order', e))
+            elif t == 'local': items.append((name, 'local', e))
             elif t == 'mc':
                 m = mc_warn(name, e)
                 if m: items.append((name, 'bad', m))
+                items.append((name, 'mc', e))
             else: items.append((name, 'bad', 'bilinmeyen tür: ' + str(t)))
     seen = set()
     for t in data['bank']:
@@ -203,6 +292,7 @@ def collect(data):
             elif q.get('t') == 'mc':
                 m = mc_warn(f"exam {ex.get('id')}#{i}", q)
                 if m: items.append((f"exam {ex.get('id')}#{i}", 'bad', m))
+                items.append((f"exam {ex.get('id')}#{i}", 'mc', q))
     seen2 = set()
     for a in data.get('arena', []):
         if a.get('id') in seen2: items.append(('arena#' + str(a.get('id')), 'bad', 'tekrarlanan arena id'))
@@ -221,7 +311,7 @@ def run_item(it):
     name, kind, e = it
     try:
         if kind == 'bad': return name, False, e
-        return (name,) + {'code': check_code, 'predict': check_predict, 'order': check_order, 'arena': check_arena, 'interview': check_interview, 'mistake': check_mistake}[kind](e)
+        return (name,) + {'mc': check_mc, 'local': check_local, 'code': check_code, 'predict': check_predict, 'order': check_order, 'arena': check_arena, 'interview': check_interview, 'mistake': check_mistake}[kind](e)
     except subprocess.TimeoutExpired: return name, False, 'zaman aşımı (60 sn)'
 
 def main():

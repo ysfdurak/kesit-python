@@ -112,7 +112,7 @@ uv run python rapor.py            # ortamı etkinleştirmeden çalıştır
 uv tool install ruff              # pipx karşılığı</pre>
 <h3>6. poetry</h3>
 <pre class="code">pipx install poetry
-poetry new anadolu-bank   # ya da mevcut projede: poetry init
+poetry new ilgaz-bank   # ya da mevcut projede: poetry init
 poetry add pandas@^2.2    # ^2.2 = &gt;=2.2,&lt;3.0
 poetry add --group dev pytest
 poetry install            # poetry.lock'tan kur

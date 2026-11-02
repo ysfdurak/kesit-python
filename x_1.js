@@ -99,7 +99,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'Metni içerik olarak yorumlamak için açık bir karşılaştırma gerekir. in operatörü zaten True/False döndürdüğünden if yazmaya gerek yoktur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x7',
         stage: 'Rehberli',
         diff: 1,
@@ -113,7 +113,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'Açma, kayit[0], kayit[1] gibi anlamsız indeksler yerine her alana anlamlı bir ad verir. Kayıt beklenmedik sayıda alan içerirse ValueError ile hemen fark edersin.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -127,7 +127,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         why: 'bool, int\'in alt sınıfı olduğundan isinstance(True, int) True verir. Özel olanı (bool) genel olandan (int) önce kontrol etmek, tür ayrımında genel bir kuraldır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x9',
         stage: 'Kendin yaz',
         diff: 2,
@@ -159,12 +159,12 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         q: '<p>Sepet toplamını hesaplayan fonksiyon <code>TypeError: \'int\' object is not callable</code> veriyor. <b>Hatayı bul ve düzelt.</b></p>',
         start: 'def sepet_toplami(fiyatlar):\n    sum = 0\n    toplam = sum(fiyatlar)\n    return toplam\n',
         sol: 'def sepet_toplami(fiyatlar):\n    toplam = sum(fiyatlar)\n    return toplam\n',
-        tests: 'assert sepet_toplami([100, 250, 75]) == 425, "Toplam 425 olmalı"\nassert sepet_toplami([]) == 0, "Boş sepetin toplamı 0"\nassert "sum = " not in __source__, "Hazır sum fonksiyonunun adını değişken olarak kullanma"\n',
+        tests: 'assert sepet_toplami([100, 250, 75]) == 425, "Toplam 425 olmalı"\nassert sepet_toplami([]) == 0, "Boş sepetin toplamı 0"\nassert "sum = " not in __kod__, "Hazır sum fonksiyonunun adını değişken olarak kullanma"\n',
         hints: ['Hata mesajı "int çağrılamaz" diyor: hangi ad bir int\'e bağlandı?', 'sum hazır bir fonksiyondur; ona 0 atayınca fonksiyonu kaybettin.', 'sum = 0 satırını kaldır ya da değişkene başka bir ad ver.'],
         why: 'sum = 0 yazınca sum adı artık hazır fonksiyonu değil 0 sayısını gösterir (gölgeleme, shadowing). sum(...) çağrısı 0(...) olur ve TypeError verir. list, str, type, id, input gibi adlar için de aynı tuzak geçerlidir.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'degiskenler-x12',
         stage: 'Meydan okuma',
         diff: 3,
@@ -328,7 +328,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'sep ve end print\'in iki temel ayarıdır. end=" " satır sonunu boşlukla değiştirdiği için sonraki print aynı satıra yazar; bu, bir satırı parça parça oluşturmanın yoludur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x7',
         stage: 'Rehberli',
         diff: 1,
@@ -343,7 +343,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'stderr\'e yazılan satır standart çıktıda görünmez; bu yüzden beklenen çıktıda yalnızca iki satır var. Terminalde > ile yönlendirme yapınca uyarı ekranda kalır, rapor dosyası temiz olur.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -400,7 +400,7 @@ NameError: name 'komisyn' is not defined. Did you mean: 'komisyon'?</pre><p>Okum
         why: 'input her zaman metin döndürür. Metin * sayı hata vermez, metni tekrar eder; bu yüzden "333...3" gibi bir çıktı oluşur. Sessiz hatalar en tehlikelileridir; girdiyi kullanmadan önce int() ile çevir.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'ilk-program-x12',
         stage: 'Meydan okuma',
         diff: 3,
@@ -446,13 +446,13 @@ X.push(
   {
     id: 'kurulum-araclar',
     min: 25,
-    html: `<p>Bu ders artık kurulum dizisinin genel bakış dersi. Adım adım kurulum için <b>Windows</b> ve <b>macOS / Linux</b> derslerine, editör için <b>VS Code</b>, defter ortamı için <b>Jupyter ve Colab</b> derslerine bak. Burada hangi işletim sisteminde olursan ol geçerli kararları ve araçları ele alıyoruz: hangi sürüm, hangi Python, REPL'den nasıl daha çok verim alınır, <code>python -m</code> neden bu kadar önemli ve pip ile ilk paket nasıl kurulur.</p><h2>Sürüm seçimi ve Python'ın sürüm döngüsü</h2><p>Python sürümleri <code>3.12.4</code> gibi üç parçalıdır: <b>3</b> ana sürüm (major), <b>12</b> özellik sürümü (minor), <b>4</b> düzeltme sürümü (micro / patch). Önemli olan ortadaki sayıdır; yeni söz dizimi ve modüller orada gelir. Sondaki sayı yalnızca hata ve güvenlik düzeltmesi içerir, bu yüzden 3.12.3'ten 3.12.4'e geçmek her zaman güvenlidir.</p><p>PEP 602 ile Python yıllık bir takvime geçti: her yıl Ekim ayında yeni bir 3.x çıkar (3.12 → 2023, 3.13 → 2024, 3.14 → 2025). Her sürüm yaklaşık 2 yıl tam destek (hata düzeltmeleri) alır, ardından yalnızca güvenlik düzeltmeleriyle toplam 5 yıl yaşar. Örneğin 3.9 Ekim 2025'te, 3.10 Ekim 2026'da destek dışı kaldı. Destek dışı bir sürüm çalışmaya devam eder ama artık güvenlik açıkları kapatılmaz; kurum sunucularında bu kabul edilmez.</p><div class="tbl-wrap"><table><tr><th>Aşama</th><th>Süre</th><th>Ne gelir?</th><th>Ne zaman kullanılır?</th></tr><tr><td>alpha / beta / rc</td><td>Yayın öncesi ~1 yıl</td><td>Deneme sürümleri, özellikler değişebilir</td><td>Yalnız kütüphane yazarları test için</td></tr><tr><td>Tam destek (bugfix)</td><td>İlk ~2 yıl</td><td>Hata ve güvenlik düzeltmeleri, düzenli 3.x.y sürümleri</td><td>Yeni projeler için ideal</td></tr><tr><td>Güvenlik desteği</td><td>Sonraki ~3 yıl</td><td>Yalnız güvenlik yamaları, çoğunlukla kaynak kodu olarak</td><td>Mevcut projeler; göç planı yap</td></tr><tr><td>Destek dışı (EOL)</td><td>5 yıldan sonra</td><td>Hiçbir şey</td><td>Kullanma; acilen yükselt</td></tr></table></div><div class="tip"><b>Hangi sürümü kurmalıyım?</b>Pratik kural: <b>en yeni sürümün bir öncesi</b>. Yeni çıkmış bir sürümde pandas, numpy gibi paketlerin hazır derlenmiş dosyaları (wheel) birkaç ay gecikebilir. Ekibin bir sürüm kullanıyorsa onunla aynısını kur; bu uygulama tarayıcıda Python 3.12 kullanır ve öğrendiğin her şey 3.10 ve üstünde çalışır.</div><h2>CPython, PyPy ve diğerleri</h2><p>"Python" aslında bir dil tanımıdır; onu çalıştıran programa uygulama (implementation) denir. python.org'dan indirdiğin sürüm <b>CPython</b>'dır: C ile yazılmış, referans kabul edilen uygulama. Bu uygulamadaki tarayıcı motoru Pyodide da WebAssembly'ye derlenmiş CPython'dır. Kendin kontrol et:</p><pre class="py">import sys
+    html: `<p>Bu bölümde kurulumun büyük resmini görürsün. Adım adım kurulum için <b>Windows</b> ve <b>macOS / Linux</b> derslerine, editör için <b>VS Code</b>, defter ortamı için <b>Jupyter ve Colab</b> derslerine bak. Burada hangi işletim sisteminde olursan ol geçerli kararları ve araçları ele alıyoruz: hangi sürüm, hangi Python, REPL'den nasıl daha çok verim alınır, <code>python -m</code> neden bu kadar önemli ve pip ile ilk paket nasıl kurulur.</p><h2>Sürüm seçimi ve Python'ın sürüm döngüsü</h2><p>Python sürümleri <code>3.12.4</code> gibi üç parçalıdır: <b>3</b> ana sürüm (major), <b>12</b> özellik sürümü (minor), <b>4</b> düzeltme sürümü (micro / patch). Önemli olan ortadaki sayıdır; yeni söz dizimi ve modüller orada gelir. Sondaki sayı yalnızca hata ve güvenlik düzeltmesi içerir, bu yüzden 3.12.3'ten 3.12.4'e geçmek her zaman güvenlidir.</p><p>PEP 602 ile Python yıllık bir takvime geçti: her yıl Ekim ayında yeni bir 3.x çıkar (3.12 → 2023, 3.13 → 2024, 3.14 → 2025). Her sürüm yaklaşık 2 yıl tam destek (hata düzeltmeleri) alır, ardından yalnızca güvenlik düzeltmeleriyle toplam 5 yıl yaşar. Örneğin 3.9 Ekim 2025'te, 3.10 Ekim 2026'da destek dışı kaldı. Destek dışı bir sürüm çalışmaya devam eder ama artık güvenlik açıkları kapatılmaz; kurum sunucularında bu kabul edilmez.</p><div class="tbl-wrap"><table><tr><th>Aşama</th><th>Süre</th><th>Ne gelir?</th><th>Ne zaman kullanılır?</th></tr><tr><td>alpha / beta / rc</td><td>Yayın öncesi ~1 yıl</td><td>Deneme sürümleri, özellikler değişebilir</td><td>Yalnız kütüphane yazarları test için</td></tr><tr><td>Tam destek (bugfix)</td><td>İlk ~2 yıl</td><td>Hata ve güvenlik düzeltmeleri, düzenli 3.x.y sürümleri</td><td>Yeni projeler için ideal</td></tr><tr><td>Güvenlik desteği</td><td>Sonraki ~3 yıl</td><td>Yalnız güvenlik yamaları, çoğunlukla kaynak kodu olarak</td><td>Mevcut projeler; göç planı yap</td></tr><tr><td>Destek dışı (EOL)</td><td>5 yıldan sonra</td><td>Hiçbir şey</td><td>Kullanma; acilen yükselt</td></tr></table></div><div class="tip"><b>Hangi sürümü kurmalıyım?</b>Pratik kural: <b>en yeni sürümün bir öncesi</b>. Yeni çıkmış bir sürümde pandas, numpy gibi paketlerin hazır derlenmiş dosyaları (wheel) birkaç ay gecikebilir. Ekibin bir sürüm kullanıyorsa onunla aynısını kur; bu uygulama tarayıcıda Python 3.12 kullanır ve öğrendiğin her şey 3.10 ve üstünde çalışır.</div><h2>CPython, PyPy ve diğerleri</h2><p>"Python" aslında bir dil tanımıdır; onu çalıştıran programa uygulama (implementation) denir. python.org'dan indirdiğin sürüm <b>CPython</b>'dır: C ile yazılmış, referans kabul edilen uygulama. Bu uygulamadaki tarayıcı motoru Pyodide da WebAssembly'ye derlenmiş CPython'dır. Kendin kontrol et:</p><pre class="py">import sys
 import platform
 print("Uygulama:", platform.python_implementation())
 print("İç adı:", sys.implementation.name)
 print("Sürüm:", platform.python_version())
 print("Sürüm demeti:", sys.version_info[:3])
-print("En az 3.10 mu?", sys.version_info &gt;= (3, 10))</pre><div class="tbl-wrap"><table><tr><th>Uygulama</th><th>Nedir?</th><th>Ne zaman?</th></tr><tr><td>CPython</td><td>Referans uygulama, C ile yazılmış</td><td>Varsayılan; hemen her iş</td></tr><tr><td>PyPy</td><td>JIT derleyicili uygulama</td><td>Uzun çalışan saf Python döngüleri; C eklentili paketlerde uyumluluk sınırlı olabilir</td></tr><tr><td>MicroPython</td><td>Mikrodenetleyiciler için küçük Python</td><td>Sensör, ESP32, Raspberry Pi Pico</td></tr><tr><td>Pyodide</td><td>Tarayıcıda çalışan CPython</td><td>Bu uygulama, JupyterLite</td></tr></table></div><p>CPython'ın son sürümlerinde iki deneysel yenilik var: GIL'siz (free-threaded) derleme ve bir JIT derleyici. İkisi de varsayılan olarak kapalıdır; Eşzamanlılık ve Performans derslerinde konuşacağız.</p><h2>REPL'i iyi kullanmak</h2><p>Terminalde <code>python</code> (macOS/Linux'ta <code>python3</code>, Windows'ta <code>py</code> da olur) yazınca açılan REPL, en hızlı deneme alanındır. Birkaç numara verimini katlar:</p><pre class="code">&gt;&gt;&gt; 1499.9 * 3
+print("En az 3.10 mu?", sys.version_info &gt;= (3, 10))</pre><div class="tbl-wrap"><table><tr><th>Uygulama</th><th>Nedir?</th><th>Ne zaman?</th></tr><tr><td>CPython</td><td>Referans uygulama, C ile yazılmış</td><td>Varsayılan; hemen her iş</td></tr><tr><td>PyPy</td><td>JIT derleyicili uygulama</td><td>Uzun çalışan saf Python döngüleri; C eklentili paketlerde uyumluluk sınırlı olabilir</td></tr><tr><td>MicroPython</td><td>Mikrodenetleyiciler için küçük Python</td><td>Sensör, ESP32, Raspberry Pi Pico</td></tr><tr><td>Pyodide</td><td>Tarayıcıda çalışan CPython</td><td>Bu uygulama, JupyterLite</td></tr></table></div><p>CPython'ın son sürümlerinde iki yenilik var: GIL'siz (free-threaded) derleme (3.13'te deneysel, 3.14'te resmî destekli, ama ayrı bir derleme ve varsayılan değil) ve hâlâ deneysel olan JIT derleyici. İkisi de varsayılan olarak kapalıdır; Eşzamanlılık ve Performans derslerinde konuşacağız.</p><h2>REPL'i iyi kullanmak</h2><p>Terminalde <code>python</code> (macOS/Linux'ta <code>python3</code>, Windows'ta <code>py</code> da olur) yazınca açılan REPL, en hızlı deneme alanındır. Birkaç numara verimini katlar:</p><pre class="code">&gt;&gt;&gt; 1499.9 * 3
 4499.700000000001
 &gt;&gt;&gt; round(_, 2)          # _ son sonucu tutar (yalnız REPL'de)
 4499.7
@@ -477,8 +477,7 @@ python -m pip uninstall requests</pre><div class="tbl-wrap"><table><tr><th>Belir
 uv init rapor &amp;&amp; cd rapor     # pyproject.toml ile proje başlat
 uv add pandas                 # paketi ekle (ortamı kendisi kurar)
 uv run main.py                # projenin ortamında çalıştır</pre><p>Ekibin pip kullanıyorsa pip, uv kullanıyorsa uv; ikisinin de mantığı aynı: projeye özel ortam ve kayıtlı bağımlılık listesi.</p><h2>Kurulum doğrulama kontrol listesi</h2><p>Yeni bir bilgisayarda ya da sunucuda işe başlamadan önce bu listeyi sırayla geç. Her satır bir öncekinin varsayımını doğrular:</p><div class="steps-list"><ol><li><code>python --version</code> (ya da <code>python3</code>, <code>py</code>): beklenen sürüm mü?</li><li><code>where python</code> (Windows) / <code>which -a python3</code> (macOS/Linux): kaç Python var, ilki hangisi?</li><li><code>python -c "import sys; print(sys.executable)"</code>: çalışan yorumlayıcının tam yolu.</li><li><code>python -m pip --version</code>: pip aynı yolu mu gösteriyor?</li><li><code>python -c "import ssl, sqlite3, venv; print('tamam')"</code>: ağ, veritabanı ve sanal ortam modülleri sağlam mı?</li><li><code>python -m venv deneme</code>, etkinleştir, <code>python -m pip install requests</code>: tüm zincir çalışıyor mu? Sonra klasörü sil.</li><li>Editörde (VS Code) seçili yorumlayıcı 3. adımdaki yolla aynı mı?</li></ol></div><div class="note"><b>Gerçek işte</b>Kurumlarda "bende çalışıyor, sunucuda çalışmıyor" sorunlarının çoğu bu listedeki bir adımın atlanmasından çıkar: sunucuda farklı bir minor sürüm, paketin yanlış Python'a kurulması ya da proxy yüzünden yarım kalmış bir kurulum. Projenin README dosyasına "Python 3.12, <code>python -m pip install -r requirements.txt</code>" gibi iki satır eklemek, ekibe katılan her yeni kişiye saatler kazandırır.</div>`,
-    ex: [
-      {
+    ex: [{
         t: 'mc',
         id: 'kurulum-araclar-x1',
         stage: 'Isınma',
@@ -492,7 +491,7 @@ uv run main.py                # projenin ortamında çalıştır</pre><p>Ekibin 
         a: 0,
         why: 'PEP 602 ile özellik sürümleri yıllık ve Ekim ayındadır; yaklaşık 2 yıl tam destek, ardından güvenlik yamalarıyla toplam 5 yıl. Sondaki sayı yalnız düzeltme içerir; yeni özellikler ortadaki sayıyla gelir.'
       },
-      {
+    {
         t: 'mc',
         id: 'kurulum-araclar-x2',
         stage: 'Isınma',
@@ -505,152 +504,7 @@ uv run main.py                # projenin ortamında çalıştır</pre><p>Ekibin 
         ],
         a: 1,
         why: 'Makinede birden çok Python varsa PATH\'teki ilk pip başka bir Python\'a ait olabilir. python -m pip, "bu Python\'ın pip modülünü çalıştır" demektir; kurulum ile kodu çalıştıran yorumlayıcı aynı olur. Hız ve yalıtım sağlamaz.'
-      },
-      {
-        t: 'predict',
-        id: 'kurulum-araclar-x3',
-        stage: 'Kodu oku',
-        q: 'Bu kod (Python 3.10 veya üstünde) ne yazdırır?',
-        code: 'import sys\nprint(sys.version_info[:2] >= (3, 8), sys.version_info.major)\n',
-        o: ['True 3', 'False 3', '(3, 12) 3', 'True 12'],
-        a: 0,
-        why: 'sys.version_info[:2] (3, 12) gibi bir demettir; demetler soldan sağa eleman eleman karşılaştırılır ve (3, 12) >= (3, 8) doğrudur. major ana sürümdür, yani 3.'
-      },
-      {
-        t: 'predict',
-        id: 'kurulum-araclar-x4',
-        stage: 'Kodu oku',
-        q: 'Bu kod bir dosyaya yazılıp <code>python rapor.py</code> ile doğrudan çalıştırılırsa ne yazdırır?',
-        code: 'print(__name__)\n',
-        o: ['rapor', '__main__', 'rapor.py', '__name__'],
-        a: 1,
-        why: 'Doğrudan çalıştırılan dosyada __name__ her zaman "__main__" olur. Aynı dosya başka bir yerden import rapor ile içe aktarılsaydı "rapor" yazardı. Bu fark, if __name__ == "__main__": kalıbının temelidir.'
-      },
-      {
-        t: 'predict',
-        id: 'kurulum-araclar-x5',
-        stage: 'Kodu oku',
-        q: 'Bu uygulamada (tarayıcıdaki Pyodide) ya da python.org\'dan kurduğun Python\'da bu kod ne yazdırır?',
-        code: 'import platform\nprint(platform.python_implementation())\n',
-        o: ['Python', 'Pyodide', 'CPython', 'PyPy'],
-        a: 2,
-        why: 'python.org sürümü de Pyodide da C ile yazılmış referans uygulama CPython\'dır; Pyodide onun WebAssembly\'ye derlenmiş hâlidir. PyPy ayrı bir uygulamadır ve orada "PyPy" yazar.'
-      },
-      {
-        t: 'order',
-        id: 'kurulum-araclar-x6',
-        stage: 'Kodu oku',
-        q: '<p>Kurulum doğrulama betiğinin satırlarını sırala: betik çalışan sürümü <code>"3.12"</code> gibi bir metne çevirip uygunluk notuyla birlikte yazdırmalı (ör. <code>Python 3.12 (uygun)</code>).</p>',
-        lines: ['import sys', 'surum = sys.version_info[:2]', 'metin = ".".join(str(p) for p in surum)', 'rapor = f"Python {metin}"', 'rapor += " (uygun)" if surum >= (3, 10) else " (eski)"', 'print(rapor)'],
-        tests: 'assert rapor.startswith("Python 3."), "Rapor Python 3.x ile başlamalı"\nassert rapor.endswith("(uygun)") or rapor.endswith("(eski)"), "Rapor uygunluk notuyla bitmeli"\n',
-        hint: 'Her satır bir önceki satırda oluşan bir adı kullanıyor; o adın nerede tanımlandığını izle.',
-        why: 'sys önce içe aktarılmalı; surum ondan, metin surum\'dan, rapor metin\'den türetilir. += ile not ekleme rapor oluştuktan sonra, print en sonda gelir.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x7',
-        stage: 'Rehberli',
-        diff: 1,
-        q: '<p><code>pip_komutu(paket, surum=None)</code> fonksiyonunu yaz. Ekip arkadaşlarına gönderilecek kurulum komutunu metin olarak döndürsün:</p><ul><li><code>pip_komutu("requests")</code> → <code>"python -m pip install requests"</code></li><li><code>pip_komutu("pandas", "2.2.3")</code> → <code>"python -m pip install pandas==2.2.3"</code></li></ul>',
-        guide: ['Sabit kısmı bir değişkende tut: "python -m pip install ".', 'surum None ise yalnızca paket adını ekle.', 'surum verilmişse paket adının arkasına == ve sürümü ekle (boşluksuz).', 'Oluşan metni döndür.'],
-        example: 'def selam(ad, unvan=None):\n    if unvan is None:\n        return f"Merhaba {ad}"\n    return f"Merhaba {unvan} {ad}"\n\nprint(selam("Ayşe"))\nprint(selam("Kaya", "Dr."))\n',
-        start: 'def pip_komutu(paket, surum=None):\n    komut = "python -m pip install "\n    # TODO: surum yoksa yalnız paket adını ekle\n    # TODO: surum varsa paket==surum biçiminde ekle\n    return komut\n',
-        sol: 'def pip_komutu(paket, surum=None):\n    komut = "python -m pip install "\n    if surum is None:\n        return komut + paket\n    return f"{komut}{paket}=={surum}"\n',
-        tests: 'assert pip_komutu("requests") == "python -m pip install requests", "Sürüm verilmeyince yalnız paket adı eklenmeli"\nassert pip_komutu("pandas", "2.2.3") == "python -m pip install pandas==2.2.3", "Sürüm == ile, boşluksuz eklenmeli"\nassert pip_komutu("numpy", "1.26.4").count(" ") == 4, "Komutta fazladan boşluk olmamalı: pandas == 2.2 yazımı pip\'te hata verir"\n',
-        hints: ['None kontrolü için "is None" kullan.', 'f-string ile f"{komut}{paket}=={surum}" yazabilirsin.', 'if surum is None: return komut + paket'],
-        why: '== tam sürüm sabitler ve boşluk içermemelidir. Varsayılan değeri None olan parametre "verilmedi" durumunu ayırt etmenin standart yoludur.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x8',
-        stage: 'Rehberli',
-        diff: 2,
-        q: '<p>Python 3.x sürümleri her yıl Ekim\'de çıkar: 3.8 → 2019, 3.9 → 2020, ... yani yayın yılı = 2011 + minor. Destek yaklaşık olarak yayından sonraki ilk 2 takvim yılı (yayın yılı dahil) tam, 5. yıla kadar güvenlik desteğidir. <code>surum_durumu(minor, yil)</code> fonksiyonunu yaz; yıl bazında yaklaşık şu metinlerden birini döndürsün:</p><ul><li><code>yil &lt; yayın</code> → <code>"henüz çıkmadı"</code></li><li><code>yil &lt;= yayın + 1</code> → <code>"tam destek"</code></li><li><code>yil &lt;= yayın + 5</code> → <code>"güvenlik desteği"</code></li><li>aksi hâlde → <code>"destek bitti"</code></li></ul>',
-        guide: [
-          'Önce yayın yılını hesapla: yayin = 2011 + minor.',
-          'Koşulları küçükten büyüğe sırayla yaz: önce yil &lt; yayin.',
-          'Sonra yayin + 1 ve yayin + 5 sınırlarını if/elif ile dene.',
-          'Hiçbiri tutmazsa "destek bitti" döndür.'
-        ],
-        example: 'def kargo_durumu(gun):\n    if gun < 1:\n        return "hazırlanıyor"\n    elif gun <= 3:\n        return "yolda"\n    return "gecikti"\n\nprint(kargo_durumu(0), kargo_durumu(2), kargo_durumu(5))\n',
-        start: 'def surum_durumu(minor, yil):\n    # TODO: yayın yılını hesapla\n    yayin = 0\n    # TODO: koşulları sırayla dene\n    return "destek bitti"\n',
-        sol: 'def surum_durumu(minor, yil):\n    yayin = 2011 + minor\n    if yil < yayin:\n        return "henüz çıkmadı"\n    elif yil <= yayin + 1:\n        return "tam destek"\n    elif yil <= yayin + 5:\n        return "güvenlik desteği"\n    return "destek bitti"\n',
-        tests: 'assert surum_durumu(12, 2024) == "tam destek", "3.12 2023\'te çıktı; 2024 tam destek döneminde"\nassert surum_durumu(9, 2025) == "güvenlik desteği", "3.9 (2020) için 2025 son güvenlik yılı"\nassert surum_durumu(8, 2025) == "destek bitti", "3.8 (2019) 2024\'te destek dışı kaldı"\nassert surum_durumu(16, 2026) == "henüz çıkmadı", "3.16 2027\'de çıkacak"\nassert surum_durumu(13, 2024) == "tam destek", "Yayın yılının kendisi de tam destektir"\n',
-        hints: ['Yayın yılı formülü: 2011 + minor (3.12 → 2023).', 'if / elif / elif / return zinciri kur; sıralama önemli.', 'elif yil <= yayin + 5: return "güvenlik desteği"'],
-        why: 'Koşulları dar aralıktan geniş aralığa sıraladığında her yıl tam olarak bir dala düşer. Gerçek destek tarihleri ay bazındadır; bu fonksiyon yıl bazında yaklaşık bir tablo üretir.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x9',
-        stage: 'Rehberli',
-        diff: 2,
-        q: '<p><code>python --version</code> komutu <code>"Python 3.12.4"</code> gibi bir satır yazar. <code>surum_ayikla(cikti)</code> fonksiyonunu yaz: bu metinden <code>(3, 12, 4)</code> biçiminde tam sayılardan oluşan bir demet (tuple) döndürsün. Baştaki ve sondaki boşluklar ile satır sonu temizlenmeli.</p>',
-        guide: [
-          'strip() ile metnin iki ucundaki boşluk ve satır sonlarını sil.',
-          'split() ile "Python" ve "3.12.4" parçalarına ayır; sürüm ikinci parçadır.',
-          'Sürümü "." ile böl; üç metin parçası elde edersin.',
-          'Her parçayı int() ile çevirip (a, b, c) demetini döndür.'
-        ],
-        example: 'tarih = " 2025-03-14\\n".strip()\nyil, ay, gun = tarih.split("-")\nprint((int(yil), int(ay), int(gun)))\n',
-        start: 'def surum_ayikla(cikti):\n    # TODO: uçları temizle ve sürüm parçasını al\n    surum = cikti\n    # TODO: noktadan böl ve sayılara çevir\n    return surum\n',
-        sol: 'def surum_ayikla(cikti):\n    surum = cikti.strip().split()[1]\n    ana, alt, duzeltme = surum.split(".")\n    return (int(ana), int(alt), int(duzeltme))\n',
-        tests: 'assert surum_ayikla("Python 3.12.4") == (3, 12, 4), "Python 3.12.4 → (3, 12, 4)"\nassert surum_ayikla("Python 3.9.18\\n") == (3, 9, 18), "Sondaki satır sonu temizlenmeli"\nassert surum_ayikla("  Python 3.13.0  ") == (3, 13, 0), "Baştaki ve sondaki boşluklar temizlenmeli"\nassert surum_ayikla("Python 3.9.18") < surum_ayikla("Python 3.10.1"), "Sayı demetleri doğru karşılaştırılır: 9 < 10"\n',
-        hints: ['split() ayraçsız çağrılırsa boşluklardan böler.', 'surum.split(".") üç parça verir: "3", "12", "4".', 'return (int(ana), int(alt), int(duzeltme))'],
-        why: 'Sürümleri metin olarak karşılaştırmak yanlıştır ("3.9" > "3.10" doğru çıkar). Sayı demetine çevirdiğinde (3, 9) < (3, 10) olur ve karşılaştırma doğru çalışır.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x10',
-        stage: 'Kendin yaz',
-        diff: 1,
-        q: '<p>Yeni başlayanlar terminal komutlarını REPL\'e, Python kodunu terminale yazıp karıştırır. <code>nereye_yazilir(satir)</code> fonksiyonunu yaz:</p><ul><li>satır <code>"&gt;&gt;&gt; "</code> ile başlıyorsa <code>"REPL"</code></li><li>satır <code>"python"</code>, <code>"py "</code> ya da <code>"pip"</code> ile başlıyorsa <code>"terminal"</code></li><li>aksi hâlde <code>"bilinmiyor"</code></li></ul><p>Baştaki boşlukları yok say.</p>',
-        sol: 'def nereye_yazilir(satir):\n    s = satir.lstrip()\n    if s.startswith(">>> "):\n        return "REPL"\n    if s.startswith("python") or s.startswith("py ") or s.startswith("pip"):\n        return "terminal"\n    return "bilinmiyor"\n',
-        tests: 'assert nereye_yazilir(">>> print(1)") == "REPL", ">>> REPL istemidir"\nassert nereye_yazilir("python -m pip list") == "terminal", "python komutu terminalde çalışır"\nassert nereye_yazilir("  pip install pandas") == "terminal", "Baştaki boşluk yok sayılmalı"\nassert nereye_yazilir("py -3.12 rapor.py") == "terminal", "Windows py başlatıcısı da terminal komutudur"\nassert nereye_yazilir("print(1)") == "bilinmiyor", "Ne istem ne komut: bilinmiyor"\nassert nereye_yazilir("pyenv versions") == "bilinmiyor", "py ile başlayan her şey py başlatıcısı değildir; boşluğa dikkat"\n',
-        hints: ['lstrip() yalnızca soldaki boşlukları siler.', 'startswith birden çok kez kullanılabilir; or ile bağla. "py " sonundaki boşluk önemli.'],
-        why: 'startswith ile önek kontrolü, metni bölmeden sınıflandırmanın en okunur yoludur. "py " önekindeki boşluk, pyenv gibi başka araçların yanlışlıkla eşleşmesini engeller.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x11',
-        stage: 'Hata avı',
-        kind: 'bug',
-        diff: 2,
-        q: '<p>Bu fonksiyon sabitlenmiş sürümle kurulum komutu üretmeli, ama ürettiği komut pip\'te hata veriyor ve yanlış Python\'a kurabiliyor. <b>Hatayı bul ve düzelt.</b> Beklenen: <code>kur("pandas", "2.2.3")</code> → <code>"python -m pip install pandas==2.2.3"</code>.</p>',
-        start: 'def kur(paket, surum):\n    return "pip install " + paket + " = " + surum\n',
-        sol: 'def kur(paket, surum):\n    return "python -m pip install " + paket + "==" + surum\n',
-        tests: 'assert kur("pandas", "2.2.3") == "python -m pip install pandas==2.2.3", "Komut python -m pip ile başlamalı ve sürüm == ile boşluksuz eklenmeli"\nassert kur("rich", "13.7.1") == "python -m pip install rich==13.7.1", "Başka paketle de doğru çalışmalı"\n',
-        hints: ['pip\'te sürüm sabitleme operatörü tek = değil, iki eşittir: ==', 'Operatörün etrafında boşluk olursa kabuk onu ayrı argüman sayar.', 'Doğru Python\'a kurmak için komut "python -m pip" ile başlamalı.'],
-        why: '"pandas = 2.2.3" kabukta üç ayrı argüman olur ve pip "=" adlı paketi bulamaz. Sürüm belirteci == olmalı ve paket adına bitişik yazılmalı. python -m pip ise paketin tam bu yorumlayıcıya gitmesini sağlar.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x12',
-        stage: 'Hata avı',
-        kind: 'bug',
-        diff: 2,
-        q: '<p>Sanal ortamda olup olmadığını anlamanın yolu: <code>sys.prefix</code> (çalışan ortamın klasörü) ile <code>sys.base_prefix</code> (ana Python kurulumunun klasörü) <b>farklıysa</b> bir sanal ortamın içindesin. Aşağıdaki fonksiyon ters sonuç veriyor. <b>Hatayı bul ve düzelt.</b></p>',
-        start: 'def sanal_ortamda_mi(prefix, base_prefix):\n    return prefix == base_prefix\n\n\ndef ortam_mesaji(prefix, base_prefix):\n    if sanal_ortamda_mi(prefix, base_prefix):\n        return "Sanal ortam: " + base_prefix\n    return "Global Python: " + base_prefix\n',
-        sol: 'def sanal_ortamda_mi(prefix, base_prefix):\n    return prefix != base_prefix\n\n\ndef ortam_mesaji(prefix, base_prefix):\n    if sanal_ortamda_mi(prefix, base_prefix):\n        return "Sanal ortam: " + prefix\n    return "Global Python: " + base_prefix\n',
-        tests: 'assert sanal_ortamda_mi("/proje/.venv", "/usr") is True, "prefix ile base_prefix farklıysa sanal ortamdasın"\nassert sanal_ortamda_mi("/usr", "/usr") is False, "İkisi aynıysa global Python çalışıyor"\nassert ortam_mesaji("/proje/.venv", "/usr") == "Sanal ortam: /proje/.venv", "Sanal ortam mesajı ortamın kendi klasörünü (prefix) göstermeli"\nassert ortam_mesaji("/usr", "/usr") == "Global Python: /usr", "Global mesajı doğru olmalı"\n',
-        hints: ['Karşılaştırma operatörü ters: "farklıysa" demek != demektir.', 'İkinci bir hata daha var: sanal ortam mesajında hangi klasör gösterilmeli?', 'Sanal ortamın yolu prefix\'tir; base_prefix ana kurulumdur.'],
-        why: 'venv etkinken sys.prefix .venv klasörünü, sys.base_prefix ise ortamın türetildiği ana kurulumu gösterir. Eşitlik global Python demektir. Mesajda da ortamın kendi yolu (prefix) gösterilmeli, yoksa kullanıcı yanlış klasöre bakar.'
-      },
-      {
-        t: 'code',
-        id: 'kurulum-araclar-x13',
-        stage: 'Meydan okuma',
-        diff: 3,
-        q: '<p>requirements.txt dosyasındaki tek bir satırı ayrıştıran <code>paket_ayir(satir)</code> fonksiyonunu yaz. <code>(paket_adi, surum_kosulu)</code> demeti döndürsün; paket adı küçük harfe çevrilsin:</p><ul><li><code>"pandas==2.2.3"</code> → <code>("pandas", "==2.2.3")</code></li><li><code>"numpy &gt;= 1.26"</code> → <code>("numpy", "&gt;=1.26")</code> (boşlukları temizle)</li><li><code>"Requests"</code> → <code>("requests", None)</code></li><li><code>"rich==13.7.1  # renkli çıktı"</code> → <code>("rich", "==13.7.1")</code> (yorumu at)</li><li>Boş satır ya da yalnız yorum (<code>"# test araçları"</code>) → <code>None</code></li></ul><p>Yalnızca <code>==</code> ve <code>&gt;=</code> operatörlerini desteklemen yeterli.</p>',
-        sol: 'def paket_ayir(satir):\n    satir = satir.split("#")[0].replace(" ", "").strip()\n    if not satir:\n        return None\n    if "==" in satir:\n        ad, surum = satir.split("==", 1)\n        return (ad.lower(), "==" + surum)\n    if ">=" in satir:\n        ad, surum = satir.split(">=", 1)\n        return (ad.lower(), ">=" + surum)\n    return (satir.lower(), None)\n',
-        tests: 'assert paket_ayir("pandas==2.2.3") == ("pandas", "==2.2.3"), "== ile sabitlenmiş satır"\nassert paket_ayir("numpy >= 1.26") == ("numpy", ">=1.26"), "Boşluklar temizlenmeli"\nassert paket_ayir("Requests") == ("requests", None), "Sürümsüz paket: koşul None, ad küçük harf"\nassert paket_ayir("rich==13.7.1  # renkli çıktı") == ("rich", "==13.7.1"), "Satır sonu yorumu atılmalı"\nassert paket_ayir("# test araçları") is None, "Yalnız yorum satırı None döndürmeli"\nassert paket_ayir("   ") is None, "Boş satır None döndürmeli"\n',
-        hints: [
-          'Önce yorumu at: satir.split("#")[0]. Sonra boşlukları sil.',
-          'Kalan metin boşsa None döndür. Sonra "==" ve ">=" için in ile kontrol et.',
-          'satir.split("==", 1) ad ve sürümü verir; operatörü sürümün önüne geri ekle.'
-        ],
-        why: 'Ayrıştırmada sıra önemlidir: önce gürültüyü (yorum, boşluk) temizle, sonra boşluğu kontrol et, en son yapıyı böl. split("==", 1) yalnızca ilk eşleşmede böler. Gerçek projelerde bu iş için packaging kütüphanesinin Requirement sınıfı kullanılır; ama mantık aynıdır.'
-      }
-    ],
+      }],
     faq: [
       {
         q: 'Bilgisayarımda Python 3.9 var, bu kursu takip edebilir miyim?',
@@ -1217,7 +1071,7 @@ print(keyword.kwlist[:6])            # listenin ilk birkaç elemanı</pre><div c
         why: 'sep, değerlerin arasına varsayılan boşluk yerine istediğin metni koyar. Sayıyı metinle + ile birleştirmek için str() ile çevirmen gerekir; Python bunu senin yerine yapmaz.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'python-nedir-x7',
         stage: 'Rehberli',
         diff: 1,
@@ -1429,7 +1283,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: '59.97 + 11.994 = 71.964; ROUND_HALF_UP ile kuruşa yuvarlanınca 71.96. Yuvarlama yalnızca en sonda, genel toplamda yapılır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x6',
         stage: 'Rehberli',
         diff: 1,
@@ -1461,7 +1315,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: 'Decimal metinden oluşturulduğunda ondalık değer tam temsil edilir ve quantize yuvarlama kuralını açıkça belirlemene izin verir. Sonucun her zaman iki basamaklı olması (10.00) fatura çıktısında da tutarlılık sağlar.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x8',
         stage: 'Rehberli',
         diff: 2,
@@ -1512,7 +1366,7 @@ print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, i
         why: '%20 KDV, KDV hariç fiyatın %20\'sidir. KDV dahil fiyattan %20 düşmek fazla indirim yapar (120 × 0.8 = 96). Doğrusu ters işlemdir: 120 / 1.2 = 100. Bu, faturalarda gerçekten sık yapılan bir hatadır.'
       },
       {
-        t: 'code',
+        erken: true, t: 'code',
         id: 'sayilar-islemler-x12',
         stage: 'Meydan okuma',
         diff: 3,
@@ -1771,7 +1625,7 @@ print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
       q: '<p>Anadolu Market "birlikte alınan ürünler" analizi: <code>tekrar_eden_ikililer(sepetler)</code> fonksiyonunu yaz. Her sepet ürün adlarından oluşan bir listedir (aynı ürün bir sepette birden fazla geçebilir). Bir sepette birlikte bulunan iki <b>farklı</b> ürün bir ikili oluşturur. <b>En az iki farklı sepette</b> birlikte görülen ikilileri <code>(a, b)</code> demetleri olarak (<code>a &lt; b</code>), sıralı bir listede döndür. Sözlük kullanmadan, iki küme ile çöz.</p>',
       start: 'def tekrar_eden_ikililer(sepetler):\n    pass\n',
       sol: 'def tekrar_eden_ikililer(sepetler):\n    gorulen = set()\n    tekrar = set()\n    for sepet in sepetler:\n        urunler = sorted(set(sepet))\n        ikililer = set()\n        for i in range(len(urunler)):\n            for j in range(i + 1, len(urunler)):\n                ikililer.add((urunler[i], urunler[j]))\n        for ikili in ikililer:\n            if ikili in gorulen:\n                tekrar.add(ikili)\n            else:\n                gorulen.add(ikili)\n    return sorted(tekrar)\n',
-      tests: 's = [["çay", "şeker", "ekmek"], ["şeker", "çay"], ["ekmek", "süt", "ekmek"], ["süt", "ekmek", "peynir"]]\nr = tekrar_eden_ikililer(s)\nassert r == [("ekmek", "süt"), ("çay", "şeker")], f"çay-şeker ve ekmek-süt ikişer sepette; gelen {r}"\nassert tekrar_eden_ikililer([["a", "b", "a", "b"]]) == [], "aynı sepetteki tekrarlar ikinci sepet sayılmaz"\nassert tekrar_eden_ikililer([["x"], ["x"]]) == [], "tek ürünlü sepette ikili yok"\nassert tekrar_eden_ikililer([]) == [], "boş liste"\nassert "dict" not in __source__ and "{}" not in __source__ and "Counter" not in __source__, "sözlük kullanmadan iki kümeyle çöz"\n',
+      tests: 's = [["çay", "şeker", "ekmek"], ["şeker", "çay"], ["ekmek", "süt", "ekmek"], ["süt", "ekmek", "peynir"]]\nr = tekrar_eden_ikililer(s)\nassert r == [("ekmek", "süt"), ("çay", "şeker")], f"çay-şeker ve ekmek-süt ikişer sepette; gelen {r}"\nassert tekrar_eden_ikililer([["a", "b", "a", "b"]]) == [], "aynı sepetteki tekrarlar ikinci sepet sayılmaz"\nassert tekrar_eden_ikililer([["x"], ["x"]]) == [], "tek ürünlü sepette ikili yok"\nassert tekrar_eden_ikililer([]) == [], "boş liste"\nassert "dict" not in __kod__ and "{}" not in __kod__ and "Counter" not in __kod__, "sözlük kullanmadan iki kümeyle çöz"\n',
       hints: ['Önce sepeti tekilleştir ve sırala: sorted(set(sepet)); böylece her ikili (küçük, büyük) sırasında oluşur.', 'İkili için iç içe döngü: j, i + 1\'den başlar.', 'İki küme: gorulen (en az bir kez) ve tekrar (en az iki kez). İkili gorulen\'deyse tekrar\'a ekle, değilse gorulen\'e.'],
       why: 'Sepeti önce tekilleştirmek aynı sepetteki tekrarların ikinci kez sayılmasını, sıralamak da ikililerin tek biçimde (a < b) yazılmasını sağlar. "Görülen/tekrar" iki küme kalıbı, "en az iki kez" sorusunu sayaç tutmadan çözer.' }
   ],
@@ -2468,7 +2322,7 @@ print(round(statistics.stdev(sureler), 2))</pre>
       q: '<p>Hatayı bul ve düzelt. <code>gun_raporu(tutarlar)</code> toplam ve ortalama cironun bulunduğu demeti <code>(toplam, ortalama)</code> döndürmeli. Kod <code>TypeError: \'int\' object is not callable</code> veriyor.</p>',
       start: 'def gun_raporu(tutarlar):\n    sum = 0\n    for t in tutarlar:\n        sum += t\n    ortalama = sum(tutarlar) / len(tutarlar)\n    return (sum, ortalama)\n',
       sol: 'def gun_raporu(tutarlar):\n    toplam = 0\n    for t in tutarlar:\n        toplam += t\n    ortalama = toplam / len(tutarlar)\n    return (toplam, ortalama)\n',
-      tests: 'assert gun_raporu([100, 200, 300]) == (600, 200.0), f"gelen {gun_raporu([100, 200, 300])}"\nassert gun_raporu([50]) == (50, 50.0), "tek değer"\nassert "sum =" not in __source__ and "sum +=" not in __source__, "yerleşik sum adını değişken olarak kullanma"\n',
+      tests: 'assert gun_raporu([100, 200, 300]) == (600, 200.0), f"gelen {gun_raporu([100, 200, 300])}"\nassert gun_raporu([50]) == (50, 50.0), "tek değer"\nassert "sum =" not in __kod__ and "sum +=" not in __kod__, "yerleşik sum adını değişken olarak kullanma"\n',
       hints: ['sum = 0 satırı fonksiyonun içinde yerleşik sum\'ı gölgeliyor.', 'Değişkeni toplam olarak yeniden adlandır; ortalama için toplam / len(...) yeterli.'],
       why: 'Yerel sum değişkeni, fonksiyon kapsamında yerleşik sum fonksiyonunu gizler. Yerleşik adları değişkene vermemek bu tür hataları kökten önler.' },
     { id: 'kapsam-moduller-x7',
@@ -2479,7 +2333,7 @@ print(round(statistics.stdev(sureler), 2))</pre>
       q: '<p>Hatayı bul ve düzelt. <code>kontrol_kodu(hesap_no)</code> hesap numarasının küpünün 97\'ye göre modunu (yerleşik <code>pow(taban, us, mod)</code>) döndürmeli; <code>kare_kok(x)</code> ise karekökü 2 ondalığa yuvarlamalı. <code>from math import *</code> yüzünden yerleşik <code>pow</code> gölgelendi ve <code>TypeError</code> alınıyor. <code>import *</code>\'ı kaldırıp düzgün import kullan.</p>',
       start: 'from math import *\n\ndef kontrol_kodu(hesap_no):\n    return pow(hesap_no, 3, 97)\n\ndef kare_kok(x):\n    return round(sqrt(x), 2)\n',
       sol: 'import math\n\ndef kontrol_kodu(hesap_no):\n    return pow(hesap_no, 3, 97)\n\ndef kare_kok(x):\n    return round(math.sqrt(x), 2)\n',
-      tests: 'assert kontrol_kodu(123456) == pow(123456, 3, 97), "yerleşik üç argümanlı pow kullanılmalı"\nassert kontrol_kodu(10) == 30, "10³ = 1000, 1000 mod 97 = 30"\nassert kare_kok(2) == 1.41, "√2 ≈ 1.41"\nassert "import *" not in __source__, "import * kullanma"\n',
+      tests: 'assert kontrol_kodu(123456) == pow(123456, 3, 97), "yerleşik üç argümanlı pow kullanılmalı"\nassert kontrol_kodu(10) == 30, "10³ = 1000, 1000 mod 97 = 30"\nassert kare_kok(2) == 1.41, "√2 ≈ 1.41"\nassert "import *" not in __kod__, "import * kullanma"\n',
       hints: ['math modülünün de pow adında (2 argümanlı) bir fonksiyonu var; import * onu yerleşik pow\'un üstüne yazar.', 'import math yaz ve sqrt\'yi math.sqrt olarak çağır.'],
       why: 'import * modüldeki tüm adları dosyana döker ve aynı adlı yerleşikleri sessizce ezer. import math ile her adın kaynağı belli olur, yerleşik pow da korunur.' },
     { id: 'kapsam-moduller-x8',
@@ -2627,7 +2481,7 @@ if (n := len(sepet)) &gt; 3:
       expect: '0.1 0.0\n',
       hint: 'return 0.0 döngünün dışında (fonksiyon seviyesinde) olmalı; yoksa ilk eşik tutmazsa hemen 0.0 döner.',
       why: 'İlk uyan eşikte return ile çıkılır. Döngü hiç return etmeden biterse hiçbir eşik tutmamıştır; o zaman 0.0 döner.' },
-    { id: 'kosullar-x1',
+    { erken: true, id: 'kosullar-x1',
       t: 'code',
       stage: 'Rehberli',
       diff: 1,
@@ -2636,7 +2490,7 @@ if (n := len(sepet)) &gt; 3:
       example: 'hafta_sonu = {"Cumartesi", "Pazar"}\ngun = " Pazar "\nif gun.strip() in hafta_sonu:\n    print("tatil")\nelse:\n    print("mesai")\n',
       start: 'def teslimat_suresi(sehir):\n    ayni_gun = {"İstanbul", "Ankara", "İzmir"}\n    ertesi_gun = {"Bursa", "Kocaeli", "Manisa", "Eskişehir"}\n    # TODO: boşlukları temizle ve kümelerle karar ver\n    return "2-3 gün"\n',
       sol: 'def teslimat_suresi(sehir):\n    ayni_gun = {"İstanbul", "Ankara", "İzmir"}\n    ertesi_gun = {"Bursa", "Kocaeli", "Manisa", "Eskişehir"}\n    sehir = sehir.strip()\n    if sehir in ayni_gun:\n        return "aynı gün"\n    elif sehir in ertesi_gun:\n        return "ertesi gün"\n    else:\n        return "2-3 gün"\n',
-      tests: 'assert teslimat_suresi("İzmir") == "aynı gün", "İzmir aynı gün"\nassert teslimat_suresi("  Manisa ") == "ertesi gün", "boşluklar temizlenmeli: Manisa ertesi gün"\nassert teslimat_suresi("Van") == "2-3 gün", "listede olmayan şehir 2-3 gün"\nassert " or " not in __source__, "zincirleme or yerine in kullan"\n',
+      tests: 'assert teslimat_suresi("İzmir") == "aynı gün", "İzmir aynı gün"\nassert teslimat_suresi("  Manisa ") == "ertesi gün", "boşluklar temizlenmeli: Manisa ertesi gün"\nassert teslimat_suresi("Van") == "2-3 gün", "listede olmayan şehir 2-3 gün"\nassert " or " not in __kod__, "zincirleme or yerine in kullan"\n',
       hints: ['Küme üyeliği: sehir in ayni_gun', 'Önce strip, sonra karşılaştır.', 'elif sehir in ertesi_gun: return "ertesi gün"'],
       why: 'Kümeye üyelik testi hem okunaklı hem hızlıdır; kural listesini değişkende tutmak, şehir eklemeyi koşul satırlarına dokunmadan yapmanı sağlar.' },
     { id: 'kosullar-x2',
@@ -2660,10 +2514,10 @@ if (n := len(sepet)) &gt; 3:
       example: 'olcum, hedef = 9.9999999, 10.0\nif abs(olcum - hedef) < 0.001:\n    print("hedefte")\nelif olcum < hedef:\n    print("altında")\nelse:\n    print("üstünde")\n',
       start: 'def mutabakat(beklenen, gelen):\n    fark = gelen - beklenen\n    # TODO: önce tolerans, sonra yön\n    if gelen == beklenen:\n        return "tamam"\n',
       sol: 'def mutabakat(beklenen, gelen):\n    fark = gelen - beklenen\n    if abs(fark) < 0.005:\n        return "tamam"\n    if fark < 0:\n        return "eksik"\n    return "fazla"\n',
-      tests: 'assert mutabakat(0.3, 0.1 + 0.2) == "tamam", "0.1 + 0.2 ile 0.3 kuruş toleransında eşittir"\nassert mutabakat(1500.0, 1499.0) == "eksik", "1 TL eksik"\nassert mutabakat(1500.0, 1500.01) == "fazla", "1 kuruş fazla tolerans dışıdır"\nassert mutabakat(100, 100) == "tamam", "tam eşit"\nassert "==" not in __source__, "ondalıklı sayılarda == yerine tolerans kullan"\n',
+      tests: 'assert mutabakat(0.3, 0.1 + 0.2) == "tamam", "0.1 + 0.2 ile 0.3 kuruş toleransında eşittir"\nassert mutabakat(1500.0, 1499.0) == "eksik", "1 TL eksik"\nassert mutabakat(1500.0, 1500.01) == "fazla", "1 kuruş fazla tolerans dışıdır"\nassert mutabakat(100, 100) == "tamam", "tam eşit"\nassert "==" not in __kod__, "ondalıklı sayılarda == yerine tolerans kullan"\n',
       hints: ['Toleranslı eşitlik: abs(fark) < 0.005', 'Eşit değilse fark\'ın işaretine bak.'],
       why: 'Kayan nokta hataları 0.30000000000000004 gibi küçük farklar üretir; kuruş toleransı bunları yok sayarken gerçek farkları (1 kuruş ve üstü) yakalar.' },
-    { id: 'kosullar-x4',
+    { erken: true, id: 'kosullar-x4',
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
@@ -2673,7 +2527,7 @@ if (n := len(sepet)) &gt; 3:
       tests: 'assert gunluk_ucret(8, 100) == 800, "8 saat normal"\nassert gunluk_ucret(10, 100) == 1100, "8 normal + 2 × 150 = 1100"\nassert gunluk_ucret(10, 100, "hafta_sonu") == 1500, "hafta sonu tüm saatler 1.5 kat"\nassert gunluk_ucret(5, 120, "resmi_tatil") == 1200, "resmi tatil 2 kat"\nassert gunluk_ucret(0, 100) == 0, "0 saat 0 TL"\nfor kotu in [(-1, 100, "normal"), (5, 100, "bayram")]:\n    try:\n        gunluk_ucret(*kotu)\n        assert False, f"{kotu} için ValueError bekleniyordu"\n    except ValueError:\n        pass\n',
       hints: ['Önce geçersiz girdileri ele (koruma koşulu): saat < 0 or gun_turu not in {...}', 'Mesai fazlası yalnız normal günde: 8 * u + (saat - 8) * u * 1.5'],
       why: 'Geçersiz girdiyi en başta reddetmek (guard clause) geri kalan dalları sadeleştirir. Özel günler önce kontrol edilir; mesai fazlası hesabı yalnız normal güne kalır.' },
-    { id: 'kosullar-x5',
+    { erken: true, id: 'kosullar-x5',
       t: 'code',
       stage: 'Kendin yaz',
       diff: 2,
@@ -2705,7 +2559,7 @@ if (n := len(sepet)) &gt; 3:
       tests: 'assert hesap_kapanabilir([0.1, 0.2, -0.3]) is True, "0.1 + 0.2 - 0.3 kayan nokta hatasıyla 5.5e-17 çıkar; tolerans içinde sıfırdır"\nassert hesap_kapanabilir([100, -99.99]) is False, "1 kuruş bakiye varken kapanamaz"\nassert hesap_kapanabilir([]) is True, "hareket yoksa bakiye 0"\nassert hesap_kapanabilir([-0.004]) is True, "yarım kuruşun altı yuvarlama farkıdır"\n',
       hints: ['sum([0.1, 0.2, -0.3]) tam 0 değil, çok küçük bir sayıdır.', 'abs(toplam) < 0.005 ile kuruş toleransı kullan.'],
       why: 'Ondalıklı toplamlar küçük temsil hataları biriktirir; para hesaplarında tam eşitlik yerine tolerans (ya da Decimal) kullanılır.' },
-    { id: 'kosullar-x8',
+    { erken: true, id: 'kosullar-x8',
       t: 'code',
       stage: 'Meydan okuma',
       diff: 3,
@@ -3118,7 +2972,7 @@ print(textwrap.shorten(aciklama, width=40, placeholder="..."))</pre>
       q: '<p>Pazarlama ekibinin yazdığı SMS şablonlarını dolduran <code>sms_hazirla(sablon_metni, veri, limit=160)</code> fonksiyonunu yaz. <code>string.Template</code> ve <code>safe_substitute</code> kullan (eksik alanlar hata vermesin, olduğu gibi kalsın). Sonuç <code>limit</code> karakteri aşıyorsa ilk <code>limit - 3</code> karakteri alıp sonuna <code>"..."</code> ekle. <code>str.format</code> ya da f-string ile şablon doldurma.</p>',
       start: 'def sms_hazirla(sablon_metni, veri, limit=160):\n    pass\n',
       sol: 'from string import Template\n\ndef sms_hazirla(sablon_metni, veri, limit=160):\n    metin = Template(sablon_metni).safe_substitute(veri)\n    if len(metin) > limit:\n        metin = metin[:limit - 3] + "..."\n    return metin\n',
-      tests: 's = "Sayın $ad, $kod kodlu siparişiniz yola çıktı."\nassert sms_hazirla(s, {"ad": "Ayşe", "kod": "AM-42"}) == "Sayın Ayşe, AM-42 kodlu siparişiniz yola çıktı.", "alanlar doldurulmalı"\nassert sms_hazirla(s, {"ad": "Can"}) == "Sayın Can, $kod kodlu siparişiniz yola çıktı.", "eksik alan olduğu gibi kalmalı"\nr = sms_hazirla("$x " * 100, {"x": "kampanya"})\nassert len(r) == 160 and r.endswith("..."), "160 karakteri aşan metin kısaltılmalı"\nassert sms_hazirla("{musteri.__class__} $ad", {"ad": "A"}) == "{musteri.__class__} A", "süslü parantezler şablon olarak işlenmemeli"\nassert ".format(" not in __source__, "str.format kullanma"\n',
+      tests: 's = "Sayın $ad, $kod kodlu siparişiniz yola çıktı."\nassert sms_hazirla(s, {"ad": "Ayşe", "kod": "AM-42"}) == "Sayın Ayşe, AM-42 kodlu siparişiniz yola çıktı.", "alanlar doldurulmalı"\nassert sms_hazirla(s, {"ad": "Can"}) == "Sayın Can, $kod kodlu siparişiniz yola çıktı.", "eksik alan olduğu gibi kalmalı"\nr = sms_hazirla("$x " * 100, {"x": "kampanya"})\nassert len(r) == 160 and r.endswith("..."), "160 karakteri aşan metin kısaltılmalı"\nassert sms_hazirla("{musteri.__class__} $ad", {"ad": "A"}) == "{musteri.__class__} A", "süslü parantezler şablon olarak işlenmemeli"\nassert ".format(" not in __kod__, "str.format kullanma"\n',
       hints: ['from string import Template', 'Template(sablon_metni).safe_substitute(veri)', 'Kısaltma: metin[:limit - 3] + "..."'],
       why: 'Template yalnız $ad yer tutucularını tanır; kullanıcı yazımı şablonlarda nesne niteliklerine erişemez. safe_substitute eksik alanda programı düşürmez; uzunluk sınırı SMS maliyetini sabit tutar.' },
     { id: 'string-bicimleme-x5',
@@ -4401,7 +4255,7 @@ for deneme in range(1, 4):
           'except Exception as e: bloğunda ad = type(e).__name__ ve ozet[ad] = ozet.get(ad, 0) + 1'
         ],
         why: 'Toplu işte tek bozuk kayıt tüm işi durdurmamalı. Hataları ada göre saymak sabah raporunda "hangi sorun ne sıklıkta" sorusunu cevaplar. else bloğu başarı yolunu try\'dan ayırır.' },
-      { t: 'code',
+      { erken: true, t: 'code',
         id: 'hatalar-x3',
         stage: 'Rehberli',
         diff: 2,
@@ -4792,7 +4646,7 @@ print(list(ust()))
         q: '<p><b>Hatayı bul ve düzelt.</b> <code>akis_ozeti(tutarlar)</code> herhangi bir yinelenebilir (üreteç dahil) alıp pozitif tutarların <code>(adet, toplam)</code> demetini döndürmeli. Veri çok büyük olabilir: <b>liste oluşturmadan tek geçişte</b> çöz. Şu an TypeError veriyor; len düzeltilse bile toplam yanlış çıkıyor.</p>',
         start: 'def akis_ozeti(tutarlar):\n    pozitif = (t for t in tutarlar if t > 0)\n    return len(pozitif), sum(pozitif)\n',
         sol: 'def akis_ozeti(tutarlar):\n    adet, toplam = 0, 0\n    for t in tutarlar:\n        if t > 0:\n            adet += 1\n            toplam += t\n    return adet, toplam\n',
-        tests: 'assert akis_ozeti([100, -5, 250, 0, 50]) == (3, 400), "3 pozitif, toplam 400"\nassert akis_ozeti(x for x in [10, 20, -1]) == (2, 30), "Üreteç girdiyle de doğru çalışmalı (tek geçiş)"\nassert akis_ozeti([]) == (0, 0)\nimport ast as _ast\n_agac = _ast.parse(__source__)\nassert not any(isinstance(n, (_ast.ListComp, _ast.List)) for n in _ast.walk(_agac)) and "list(" not in __source__, "Liste oluşturmadan tek geçişte çöz"\n',
+        tests: 'assert akis_ozeti([100, -5, 250, 0, 50]) == (3, 400), "3 pozitif, toplam 400"\nassert akis_ozeti(x for x in [10, 20, -1]) == (2, 30), "Üreteç girdiyle de doğru çalışmalı (tek geçiş)"\nassert akis_ozeti([]) == (0, 0)\nimport ast as _ast\n_agac = _ast.parse(__source__)\nassert not any(isinstance(n, (_ast.ListComp, _ast.List)) for n in _ast.walk(_agac)) and "list(" not in __kod__, "Liste oluşturmadan tek geçişte çöz"\n',
         hints: ['Üretecin uzunluğu yoktur (len TypeError) ve bir kez tüketilir: sum ile len aynı akışı paylaşamaz.', 'İki sayacı tek bir for döngüsünde birlikte güncelle.'],
         why: 'Tek geçiş zorunluluğu varsa (akış, büyük dosya) tüm istatistikleri aynı döngüde biriktirirsin. list() ile çözmek çalışır ama tüm veriyi belleğe alır.' },
       { t: 'code',
@@ -4801,7 +4655,7 @@ print(list(ust()))
         diff: 3,
         q: '<p><b>Sıralı akışları birleştir.</b> Her şube, işlem saatine göre <b>sıralı</b> bir akış gönderiyor. <code>sirali_birlestir(*akislar)</code> üreteç fonksiyonu, tüm akışları tek bir sıralı akış olarak versin. Kurallar:</p><ul><li>Akışlar sonsuz olabilir: hiçbirini listeye çevirme, <code>sorted</code> ya da <code>heapq</code> kullanma.</li><li>Her adımda her akıştan yalnız bir "sıradaki" eleman bekletebilirsin.</li><li>Eşit değerlerde önce verilen akışın elemanı önce gelsin.</li></ul>',
         sol: 'def sirali_birlestir(*akislar):\n    BOS = object()\n    its = [iter(a) for a in akislar]\n    basta = [next(it, BOS) for it in its]\n    while True:\n        secim = None\n        for i, deger in enumerate(basta):\n            if deger is not BOS and (secim is None or deger < basta[secim]):\n                secim = i\n        if secim is None:\n            return\n        yield basta[secim]\n        basta[secim] = next(its[secim], BOS)\n',
-        tests: 'import itertools, types\nassert list(sirali_birlestir([1, 4, 9], [2, 3, 10], [5])) == [1, 2, 3, 4, 5, 9, 10]\nassert list(sirali_birlestir()) == [] and list(sirali_birlestir([], [])) == []\ng = sirali_birlestir(itertools.count(0, 3), itertools.count(1, 3), [2, 5])\nassert isinstance(g, types.GeneratorType), "Üreteç fonksiyonu olmalı"\nassert list(itertools.islice(g, 8)) == [0, 1, 2, 3, 4, 5, 6, 7], "Sonsuz akışlarla tembel çalışmalı"\nr = list(sirali_birlestir(iter([("09:00", "A"), ("09:05", "A")]), iter([("09:00", "B"), ("09:01", "B")])))\nassert r == [("09:00", "A"), ("09:00", "B"), ("09:01", "B"), ("09:05", "A")], "Eşitlikte ilk akış önce: " + str(r)\nassert "sorted" not in __source__ and "heapq" not in __source__, "sorted/heapq kullanma"\n',
+        tests: 'import itertools, types\nassert list(sirali_birlestir([1, 4, 9], [2, 3, 10], [5])) == [1, 2, 3, 4, 5, 9, 10]\nassert list(sirali_birlestir()) == [] and list(sirali_birlestir([], [])) == []\ng = sirali_birlestir(itertools.count(0, 3), itertools.count(1, 3), [2, 5])\nassert isinstance(g, types.GeneratorType), "Üreteç fonksiyonu olmalı"\nassert list(itertools.islice(g, 8)) == [0, 1, 2, 3, 4, 5, 6, 7], "Sonsuz akışlarla tembel çalışmalı"\nr = list(sirali_birlestir(iter([("09:00", "A"), ("09:05", "A")]), iter([("09:00", "B"), ("09:01", "B")])))\nassert r == [("09:00", "A"), ("09:00", "B"), ("09:01", "B"), ("09:05", "A")], "Eşitlikte ilk akış önce: " + str(r)\nassert "sorted" not in __kod__ and "heapq" not in __kod__, "sorted/heapq kullanma"\n',
         hints: [
           'Her akışın "baştaki" elemanını bir listede tut; next(it, BOS) ile tükenmeyi işaretle (BOS = object()).',
           'Her turda baştakiler arasından en küçüğünü bul (eşitlikte küçük indeks kazanır: yalnız kesin küçükse değiştir), yield et ve o akıştan bir sonrakini çek.',
@@ -5597,7 +5451,7 @@ print(list(zip(["Pzt", "Sal", "Çar", "Per"], cycle(["Ayşe", "Can"]))))</pre>
     { t: 'code', stage: 'Rehberli', id: 'collections-itertools-x2', diff: 2, q: '<p>Katmanlı ayar. <code>ayar_yukle(varsayilan, ortam, kullanici)</code> bir <code>ChainMap</code> döndürsün (öncelik: kullanici &gt; ortam &gt; varsayilan). <code>kaynak(ayar, anahtar)</code> ise değerin hangi katmandan geldiğini <code>"kullanici"</code>, <code>"ortam"</code> ya da <code>"varsayilan"</code> olarak versin; hiçbirinde yoksa <code>KeyError</code>.</p>', guide: ['from collections import ChainMap', 'ayar_yukle: return ChainMap(kullanici, ortam, varsayilan)', 'kaynak: ayar.maps listesini katman adlarıyla zip\'le.', 'Anahtarı içeren ilk katmanın adını döndür; döngü biterse raise KeyError(anahtar).'], example: 'from collections import ChainMap\n\nc = ChainMap({"x": 1}, {"x": 2, "y": 3})\nprint(c.maps)\nfor i, m in enumerate(c.maps):\n    print(i, "y" in m)\n', start: 'from collections import ChainMap\n\n\ndef ayar_yukle(varsayilan, ortam, kullanici):\n    # TODO: öncelik sırasına dikkat\n    return ChainMap(varsayilan, ortam, kullanici)\n\n\ndef kaynak(ayar, anahtar):\n    # TODO\n    pass\n', sol: 'from collections import ChainMap\n\n\ndef ayar_yukle(varsayilan, ortam, kullanici):\n    return ChainMap(kullanici, ortam, varsayilan)\n\n\ndef kaynak(ayar, anahtar):\n    for ad, katman in zip(["kullanici", "ortam", "varsayilan"], ayar.maps):\n        if anahtar in katman:\n            return ad\n    raise KeyError(anahtar)\n', tests: 'v = {"dil": "tr", "sayfa": 20, "birim": "TRY"}\no = {"sayfa": 50}\nk = {"dil": "en"}\na = ayar_yukle(v, o, k)\nassert isinstance(a, ChainMap), "ChainMap döndürmeli"\nassert (a["dil"], a["sayfa"], a["birim"]) == ("en", 50, "TRY"), "öncelik kullanici > ortam > varsayilan"\nassert [kaynak(a, x) for x in ("dil", "sayfa", "birim")] == ["kullanici", "ortam", "varsayilan"], "kaynak katman adını vermeli"\no["zaman"] = 30\nassert a["zaman"] == 30 and kaynak(a, "zaman") == "ortam", "katmandaki sonraki değişiklik görünmeli (kopya değil)"\na["sayfa"] = 5\nassert k["sayfa"] == 5 and o["sayfa"] == 50, "yazma yalnız kullanici katmanına gitmeli"\ntry:\n    kaynak(a, "yok")\n    assert False, "olmayan anahtar KeyError vermeli"\nexcept KeyError:\n    pass\n', hints: ['ChainMap\'te soldaki sözlük en yüksek önceliklidir.', 'ayar.maps katmanları sırasıyla verir.', 'for ad, katman in zip([...], ayar.maps): if anahtar in katman: return ad'], why: 'ChainMap kopyalamadan katmanları birleştirir; maps üzerinden hangi katmanın kazandığı izlenebilir.' },
     { t: 'code', stage: 'Rehberli', id: 'collections-itertools-x3', diff: 2, q: '<p>Ilgaz Bank döviz kuru analizi. <code>gunluk_degisim(kapanislar)</code> ardışık günler arasındaki farkları (<code>round(b - a, 2)</code>) liste olarak döndürsün. <code>en_buyuk_artis(gunler, kapanislar)</code> ise en büyük artışın gerçekleştiği <b>günün adını</b> (artışın vardığı gün) ve artışı <code>(gun, fark)</code> olarak döndürsün; hiç artış yoksa <code>None</code>. <code>itertools.pairwise</code> kullan.</p>', guide: ['from itertools import pairwise', 'gunluk_degisim: [round(b - a, 2) for a, b in pairwise(kapanislar)]', 'en_buyuk_artis: farkları gunler[1:] ile zip\'le.', 'Pozitif olanlar arasından max(..., key=fark); yoksa None.'], example: 'from itertools import pairwise\n\nsaatler = [9, 11, 12, 16]\nprint([b - a for a, b in pairwise(saatler)])\n', start: 'from itertools import pairwise\n\n\ndef gunluk_degisim(kapanislar):\n    # TODO\n    return []\n\n\ndef en_buyuk_artis(gunler, kapanislar):\n    # TODO\n    return None\n', sol: 'from itertools import pairwise\n\n\ndef gunluk_degisim(kapanislar):\n    return [round(b - a, 2) for a, b in pairwise(kapanislar)]\n\n\ndef en_buyuk_artis(gunler, kapanislar):\n    artislar = [(g, f) for g, f in zip(gunler[1:], gunluk_degisim(kapanislar)) if f > 0]\n    if not artislar:\n        return None\n    return max(artislar, key=lambda x: x[1])\n', tests: 'k = [32.10, 32.45, 32.30, 32.95, 33.00]\ng = ["Pzt", "Sal", "Çar", "Per", "Cum"]\nassert gunluk_degisim(k) == [0.35, -0.15, 0.65, 0.05], "ardışık farklar 2 basamak"\nassert en_buyuk_artis(g, k) == ("Per", 0.65), "en büyük artış Perşembe 0.65"\nassert en_buyuk_artis(["a", "b", "c"], [3.0, 2.0, 1.0]) is None, "hiç artış yoksa None"\nassert gunluk_degisim([5.0]) == [], "tek değerde fark yok"\n', hints: ['pairwise(x) (x0,x1), (x1,x2)... çiftlerini verir.', 'Fark i, gunler[i+1]\'e aittir: zip(gunler[1:], farklar).', 'max(artislar, key=lambda x: x[1])'], why: 'pairwise indeks hesabı (i, i+1) yapmadan ardışık karşılaştırmayı okunur kılar.' },
     { t: 'code', stage: 'Kendin yaz', id: 'collections-itertools-x4', diff: 2, q: '<p><code>sehir_kategori_ciro(satislar)</code> yaz: <code>satislar</code> <code>(sehir, kategori, tutar)</code> demetleri listesi. Sonuç iç içe <b>düz</b> sözlük olsun: <code>{sehir: {kategori: toplam}}</code>, toplamlar <code>round(..., 2)</code>. İç içe <code>defaultdict</code> kullan.</p>', sol: 'from collections import defaultdict\n\n\ndef sehir_kategori_ciro(satislar):\n    ciro = defaultdict(lambda: defaultdict(float))\n    for sehir, kategori, tutar in satislar:\n        ciro[sehir][kategori] += tutar\n    return {s: {k: round(t, 2) for k, t in ic.items()} for s, ic in ciro.items()}\n', tests: 's = [("Ankara", "Elektronik", 1200.0), ("İzmir", "Gıda", 85.5), ("Ankara", "Gıda", 40.1), ("Ankara", "Elektronik", 300.0), ("İzmir", "Gıda", 14.6)]\nr = sehir_kategori_ciro(s)\nassert r == {"Ankara": {"Elektronik": 1500.0, "Gıda": 40.1}, "İzmir": {"Gıda": 100.1}}, "iki seviyeli toplamlar"\nassert type(r) is dict and all(type(v) is dict for v in r.values()), "dış ve iç sözlükler düz dict olmalı"\nassert sehir_kategori_ciro([]) == {}, "boş girdi"\n', hints: ['Dış fabrika çağrılabilir olmalı: lambda: defaultdict(float).', 'ciro[sehir][kategori] += tutar', 'Dönüşte iki seviyeli dict comprehension ile düzleştir ve yuvarla.'], why: 'İç içe defaultdict ara seviyelerin varlık kontrolünü kaldırır; çıkışta düz dict\'e çevirmek beklenmeyen anahtar oluşturmayı engeller.' },
-    { t: 'code', stage: 'Kendin yaz', id: 'collections-itertools-x5', diff: 2, q: '<p>Her Python sürümünde çalışan parçalama. <code>partilere_bol(kayitlar, n)</code> herhangi bir yinelenebilir (liste ya da üreteç) alıp <code>n</code>\'lik <b>listeler</b> listesi döndürsün; son parti eksik kalabilir. <code>n</code> 1\'den küçükse <code>ValueError</code>. <code>itertools.islice</code> kullan (<code>batched</code> değil).</p>', sol: 'from itertools import islice\n\n\ndef partilere_bol(kayitlar, n):\n    if n < 1:\n        raise ValueError("n en az 1 olmalı")\n    it = iter(kayitlar)\n    sonuc = []\n    while parca := list(islice(it, n)):\n        sonuc.append(parca)\n    return sonuc\n', tests: 'assert partilere_bol([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]], "ikişerli, son parti eksik"\nassert partilere_bol((x for x in range(6)), 3) == [[0, 1, 2], [3, 4, 5]], "üreteçle de çalışmalı"\nassert partilere_bol([], 4) == [], "boş girdi boş liste"\ntry:\n    partilere_bol([1], 0)\n    assert False, "n=0 ValueError vermeli"\nexcept ValueError:\n    pass\nassert "batched" not in __source__, "bu görevde islice kullan"\n', hints: ['Önce it = iter(kayitlar) ile tek bir yineleyici oluştur; yoksa listede hep baştan alırsın.', 'islice(it, n) her çağrıda kaldığı yerden n eleman alır.', 'while parca := list(islice(it, n)): sonuc.append(parca)'], why: 'Tek yineleyici üzerinde tekrar tekrar islice çağırmak veriyi sırayla tüketir; boş liste döngüyü bitirir.' },
+    { t: 'code', stage: 'Kendin yaz', id: 'collections-itertools-x5', diff: 2, q: '<p>Her Python sürümünde çalışan parçalama. <code>partilere_bol(kayitlar, n)</code> herhangi bir yinelenebilir (liste ya da üreteç) alıp <code>n</code>\'lik <b>listeler</b> listesi döndürsün; son parti eksik kalabilir. <code>n</code> 1\'den küçükse <code>ValueError</code>. <code>itertools.islice</code> kullan (<code>batched</code> değil).</p>', sol: 'from itertools import islice\n\n\ndef partilere_bol(kayitlar, n):\n    if n < 1:\n        raise ValueError("n en az 1 olmalı")\n    it = iter(kayitlar)\n    sonuc = []\n    while parca := list(islice(it, n)):\n        sonuc.append(parca)\n    return sonuc\n', tests: 'assert partilere_bol([1, 2, 3, 4, 5], 2) == [[1, 2], [3, 4], [5]], "ikişerli, son parti eksik"\nassert partilere_bol((x for x in range(6)), 3) == [[0, 1, 2], [3, 4, 5]], "üreteçle de çalışmalı"\nassert partilere_bol([], 4) == [], "boş girdi boş liste"\ntry:\n    partilere_bol([1], 0)\n    assert False, "n=0 ValueError vermeli"\nexcept ValueError:\n    pass\nassert "batched" not in __kod__, "bu görevde islice kullan"\n', hints: ['Önce it = iter(kayitlar) ile tek bir yineleyici oluştur; yoksa listede hep baştan alırsın.', 'islice(it, n) her çağrıda kaldığı yerden n eleman alır.', 'while parca := list(islice(it, n)): sonuc.append(parca)'], why: 'Tek yineleyici üzerinde tekrar tekrar islice çağırmak veriyi sırayla tüketir; boş liste döngüyü bitirir.' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'collections-itertools-x6', diff: 2, q: '<p>Hatayı bul ve düzelt. <code>sehir_sayilari(siparisler)</code> her şehrin sipariş sayısını sözlük olarak vermeli. Ankara 3 sipariş olduğu hâlde sonuç 1 çıkıyor.</p>', start: 'from itertools import groupby\n\n\ndef sehir_sayilari(siparisler):\n    sonuc = {}\n    for sehir, grup in groupby(siparisler, key=lambda s: s["sehir"]):\n        sonuc[sehir] = len(list(grup))\n    return sonuc\n', sol: 'from itertools import groupby\n\n\ndef sehir_sayilari(siparisler):\n    anahtar = lambda s: s["sehir"]\n    sonuc = {}\n    for sehir, grup in groupby(sorted(siparisler, key=anahtar), key=anahtar):\n        sonuc[sehir] = len(list(grup))\n    return sonuc\n', tests: 'sp = [{"sehir": "Ankara"}, {"sehir": "İzmir"}, {"sehir": "Ankara"}, {"sehir": "Bursa"}, {"sehir": "Ankara"}]\nassert sehir_sayilari(sp) == {"Ankara": 3, "İzmir": 1, "Bursa": 1}, "Ankara 3 olmalı: groupby yalnız ardışık eşitleri gruplar"\nassert sehir_sayilari([]) == {}, "boş girdi"\n', hints: ['groupby yalnız ardışık eşit anahtarları birleştirir.', 'Ankara üç ayrı grup olarak geliyor ve sonuncusu öncekilerin üzerine yazıyor.', 'groupby(sorted(siparisler, key=anahtar), key=anahtar)'], why: 'Sıralanmamış veride aynı şehir birden çok grup üretir ve sözlükte son grup kazanır. Önce aynı anahtarla sıralamak gerekir (ya da doğrudan Counter kullanılır).' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'collections-itertools-x7', diff: 2, q: '<p>Hatayı bul ve düzelt. <code>zam_uygula(urunler, oran)</code> namedtuple ürünlerin fiyatını artırılmış <b>yeni</b> bir liste döndürmeli; orijinal liste değişmemeli. Kod <code>AttributeError: can\'t set attribute</code> veriyor.</p>', start: 'from collections import namedtuple\n\nUrun = namedtuple("Urun", ["sku", "fiyat"])\n\n\ndef zam_uygula(urunler, oran):\n    for u in urunler:\n        u.fiyat = round(u.fiyat * (1 + oran), 2)\n    return urunler\n', sol: 'from collections import namedtuple\n\nUrun = namedtuple("Urun", ["sku", "fiyat"])\n\n\ndef zam_uygula(urunler, oran):\n    return [u._replace(fiyat=round(u.fiyat * (1 + oran), 2)) for u in urunler]\n', tests: 'eski = [Urun("K-1", 100.0), Urun("F-2", 49.9)]\nyeni = zam_uygula(eski, 0.1)\nassert yeni == [Urun("K-1", 110.0), Urun("F-2", 54.89)], "fiyatlar %10 artmalı"\nassert eski == [Urun("K-1", 100.0), Urun("F-2", 49.9)], "orijinal liste değişmemeli"\nassert all(isinstance(u, Urun) for u in yeni), "sonuç yine Urun kayıtları olmalı"\n', hints: ['namedtuple değiştirilemez (immutable).', 'Bir alanı değiştirilmiş yeni kayıt üreten metot hangisi?', 'u._replace(fiyat=...) ile list comprehension'], why: 'namedtuple alanlarına atama yapılamaz; _replace yeni kayıt döndürür ve orijinal veri korunur.' },
     { t: 'code', stage: 'Meydan okuma', id: 'collections-itertools-x8', diff: 3, q: '<p>Anadolu Market web oturum analizi. <code>oturumlar(olaylar, esik=30)</code>: <code>olaylar</code> <code>(kullanici, dakika)</code> demetleri listesi, <b>sırasız</b> gelebilir. Aynı kullanıcının iki ardışık olayı arasında <code>esik</code> dakikadan <b>fazla</b> boşluk varsa yeni oturum başlar. Sonuç: <code>{kullanici: (oturum_sayisi, en_uzun_oturum_suresi)}</code>; süre bir oturumdaki son ve ilk olay farkıdır (tek olaylı oturum 0). <code>groupby</code> ve <code>pairwise</code> kullan.</p>', sol: 'from itertools import groupby, pairwise\n\n\ndef oturumlar(olaylar, esik=30):\n    sonuc = {}\n    for kul, grup in groupby(sorted(olaylar), key=lambda x: x[0]):\n        dakikalar = [d for _, d in grup]\n        baslar = [dakikalar[0]]\n        sureler = []\n        bas = dakikalar[0]\n        for a, b in pairwise(dakikalar):\n            if b - a > esik:\n                sureler.append(a - bas)\n                bas = b\n        sureler.append(dakikalar[-1] - bas)\n        sonuc[kul] = (len(sureler), max(sureler))\n    return sonuc\n', tests: 'ol = [("ece", 10), ("can", 5), ("ece", 0), ("ece", 30), ("ece", 75), ("can", 36), ("ece", 80), ("can", 66), ("ali", 7)]\nr = oturumlar(ol)\nassert r["ece"] == (2, 30), "ece: [0,10,30] (30 dk) ve [75,80] (5 dk) -> 2 oturum, en uzun 30"\nassert r["can"] == (2, 30), "can: 5 -> 36 boşluk 31 > 30 yeni oturum; [36,66] boşluk tam 30 aynı oturum"\nassert r["ali"] == (1, 0), "tek olay: 1 oturum, süre 0"\nassert set(r) == {"ece", "can", "ali"}, "tüm kullanıcılar"\nassert oturumlar(ol, esik=60) == {"ali": (1, 0), "can": (1, 61), "ece": (1, 80)}, "eşik 60 ile herkes tek oturum"\nassert oturumlar([]) == {}, "boş girdi"\n', hints: ['Önce sorted(olaylar): kullanıcıya, sonra dakikaya göre sıralanır; groupby artık doğru çalışır.', 'Her kullanıcının dakika listesinde pairwise ile boşlukları gez; boşluk > esik ise mevcut oturumu kapat.', 'Oturum süresi = oturumun son dakikası - başlangıç dakikası; döngüden sonra son oturumu da eklemeyi unutma.'], why: 'sorted + groupby kullanıcıları ayırır, pairwise ardışık boşlukları verir. Döngü sonrası son oturumu kapatmak klasik "son grup" kenar durumudur.' }
@@ -6067,7 +5921,7 @@ except TypeError as e:
     { t: 'code', stage: 'Rehberli', id: 'kalitim-polimorfizm-x1', diff: 2, q: '<p>Şablon metot. <code>Bildirim</code> üst sınıfı hazır: <code>gonder(mesaj)</code>, <code>"[KANAL] bicimlenmis_mesaj"</code> döndürür ve <code>self.KANAL</code> ile <code>self.bicimle(mesaj)</code> kullanır. İki alt sınıf yaz:</p><ul><li><code>Sms</code>: <code>KANAL = "SMS"</code>; <code>bicimle</code> mesajın ilk 20 karakterini döndürsün, mesaj 20 karakterden uzunsa ilk 17 karakter + <code>"..."</code>.</li><li><code>Eposta</code>: <code>KANAL = "E-POSTA"</code>; <code>bicimle</code> <code>"Sayın müşterimiz, " + mesaj</code> döndürsün.</li></ul><p><code>gonder</code>\'i alt sınıflarda yeniden yazma.</p>', guide: ['Her alt sınıfın gövdesinde KANAL sınıf niteliğini tanımla.', 'Yalnız bicimle metodunu ez.', 'Sms\'te uzunluğu len(mesaj) > 20 ile kontrol et.', 'Kısaltırken mesaj[:17] + "..." kullan.'], example: 'class Selam:\n    DIL = "?"\n    def soyle(self, ad):\n        return f"({self.DIL}) {self.kalip(ad)}"\n    def kalip(self, ad):\n        return ad\n\nclass Ingilizce(Selam):\n    DIL = "EN"\n    def kalip(self, ad):\n        return "Hello " + ad\n\nprint(Ingilizce().soyle("Ece"))\n', start: 'class Bildirim:\n    KANAL = "?"\n\n    def gonder(self, mesaj):\n        return f"[{self.KANAL}] {self.bicimle(mesaj)}"\n\n    def bicimle(self, mesaj):\n        return mesaj\n\n\nclass Sms(Bildirim):\n    # TODO: KANAL ve bicimle\n    pass\n\n\nclass Eposta(Bildirim):\n    # TODO: KANAL ve bicimle\n    pass\n', sol: 'class Bildirim:\n    KANAL = "?"\n\n    def gonder(self, mesaj):\n        return f"[{self.KANAL}] {self.bicimle(mesaj)}"\n\n    def bicimle(self, mesaj):\n        return mesaj\n\n\nclass Sms(Bildirim):\n    KANAL = "SMS"\n\n    def bicimle(self, mesaj):\n        if len(mesaj) > 20:\n            return mesaj[:17] + "..."\n        return mesaj\n\n\nclass Eposta(Bildirim):\n    KANAL = "E-POSTA"\n\n    def bicimle(self, mesaj):\n        return "Sayın müşterimiz, " + mesaj\n', tests: 'assert Sms().gonder("Kodunuz 4821") == "[SMS] Kodunuz 4821", "kısa SMS olduğu gibi gitmeli"\nassert Sms().gonder("Siparişiniz kargoya verildi") == "[SMS] Siparişiniz kargo...", "20 karakterden uzun SMS 17 karakter + ... olmalı"\nassert len(Sms().bicimle("x" * 20)) == 20, "tam 20 karakterlik mesaj kısaltılmamalı"\nassert Eposta().gonder("faturanız hazır.") == "[E-POSTA] Sayın müşterimiz, faturanız hazır.", "e-posta öneki eklenmeli"\nassert "gonder" not in vars(Sms) and "gonder" not in vars(Eposta), "gonder üst sınıfta kalmalı; alt sınıfta yeniden yazma"\nassert Bildirim().gonder("x") == "[?] x", "üst sınıf değişmemeli"\n', hints: ['Üst sınıf iskeleti çalıştırır; sen yalnız kanca (bicimle) ve sabiti (KANAL) ver.', 'class Sms(Bildirim): içinde KANAL = "SMS" ve def bicimle(self, mesaj) tanımla.', 'Sms.bicimle: return mesaj[:17] + "..." if len(mesaj) > 20 else mesaj'], why: 'gonder self.KANAL ve self.bicimle\'yi dinamik olarak çözer; alt sınıflar yalnız farkı tanımlar.' },
     { t: 'code', stage: 'Rehberli', id: 'kalitim-polimorfizm-x2', diff: 2, q: '<p>Sonucu genişletme. <code>Urun(ad, fiyat)</code> hazır: <code>son_fiyat()</code> fiyatı, <code>etiket()</code> ise <code>"Ad - 100.00 TL"</code> döndürür. <code>IndirimliUrun(ad, fiyat, oran)</code> alt sınıfını yaz:</p><ul><li>Kurucu <code>super().__init__</code> kullansın, <code>oran</code> (ör. 0.2) eklesin.</li><li><code>son_fiyat()</code>: <code>round(fiyat * (1 - oran), 2)</code>.</li><li><code>etiket()</code>: üst sınıfın etiketine <code>" (%20 indirim)"</code> biçiminde ek koysun (yüzde tam sayı).</li></ul>', guide: ['Kurucuda önce super().__init__(ad, fiyat), sonra self.oran.', 'son_fiyat\'ı ez.', 'etiket içinde super().etiket() çağır ve sonuna ekle.', 'Yüzdeyi round(self.oran * 100) ile tam sayıya çevir.'], example: 'class Hesap:\n    def ozet(self):\n        return "Hesap"\n\nclass Vip(Hesap):\n    def ozet(self):\n        return super().ozet() + " (VIP)"\n\nprint(Vip().ozet())\n', start: 'class Urun:\n    def __init__(self, ad, fiyat):\n        self.ad, self.fiyat = ad, fiyat\n\n    def son_fiyat(self):\n        return self.fiyat\n\n    def etiket(self):\n        return f"{self.ad} - {self.son_fiyat():.2f} TL"\n\n\nclass IndirimliUrun(Urun):\n    def __init__(self, ad, fiyat, oran):\n        # TODO: super ve oran\n        pass\n\n    # TODO: son_fiyat ve etiket\n', sol: 'class Urun:\n    def __init__(self, ad, fiyat):\n        self.ad, self.fiyat = ad, fiyat\n\n    def son_fiyat(self):\n        return self.fiyat\n\n    def etiket(self):\n        return f"{self.ad} - {self.son_fiyat():.2f} TL"\n\n\nclass IndirimliUrun(Urun):\n    def __init__(self, ad, fiyat, oran):\n        super().__init__(ad, fiyat)\n        self.oran = oran\n\n    def son_fiyat(self):\n        return round(self.fiyat * (1 - self.oran), 2)\n\n    def etiket(self):\n        return super().etiket() + f" (%{round(self.oran * 100)} indirim)"\n', tests: 'u = IndirimliUrun("Kulaklık", 1000, 0.2)\nassert u.son_fiyat() == 800.0, "1000 * 0.8 = 800.0 olmalı"\nassert u.etiket() == "Kulaklık - 800.00 TL (%20 indirim)", "etiket üst sınıf etiketi + indirim notu olmalı (fiyat indirimli görünmeli)"\nassert IndirimliUrun("Kablo", 89.9, 0.15).etiket() == "Kablo - 76.42 TL (%15 indirim)", "89.9 * 0.85 = 76.415 -> 76.42"\nassert isinstance(u, Urun), "IndirimliUrun, Urun\'dan türemeli"\nassert "etiket" in vars(IndirimliUrun) and "super()" in __source__, "etiket ezilmeli ve super() kullanılmalı"\nassert Urun("Fare", 300).etiket() == "Fare - 300.00 TL", "üst sınıf değişmemeli"\n', hints: ['Üst sınıfın etiketi self.son_fiyat() çağırıyor; ezdiğin son_fiyat orada da kullanılır.', 'super().etiket() + f" (%{round(self.oran * 100)} indirim)"', 'Kurucu: super().__init__(ad, fiyat); self.oran = oran'], why: 'super().etiket() üst sınıfın biçimini yeniden kullanır; içindeki self.son_fiyat() dinamik bağlama sayesinde indirimli fiyatı verir.' },
     { t: 'code', stage: 'Rehberli', id: 'kalitim-polimorfizm-x3', diff: 2, q: '<p>Anadolu Market şehir adlarını anahtar olarak tutan bir sözlük istiyor; anahtarlar her yoldan (kurucu, <code>[]=</code>, <code>update</code>, okuma) <b>boşlukları kırpılmış ve küçük harfli</b> olsun. <code>collections.UserDict</code>\'ten türeyen <code>SehirSozlugu</code> yaz: <code>__setitem__</code> ve <code>__getitem__</code> metotlarını ez; anahtarı <code>anahtar.strip().lower()</code> ile normalleştir.</p>', guide: ['from collections import UserDict', 'Normalleştirmeyi ayrı bir yardımcı metotta yaz (ör. _norm).', '__setitem__ içinde super().__setitem__(self._norm(k), v).', '__getitem__ içinde super().__getitem__(self._norm(k)).'], example: 'from collections import UserList\n\nclass PozitifListe(UserList):\n    def append(self, x):\n        if x <= 0:\n            raise ValueError("pozitif olmalı")\n        super().append(x)\n\np = PozitifListe([1, 2])\np.append(5)\nprint(p)\n', start: 'from collections import UserDict\n\n\nclass SehirSozlugu(dict):   # TODO: doğru temel sınıf\n    def __setitem__(self, k, v):\n        # TODO: normalleştir\n        super().__setitem__(k, v)\n', sol: 'from collections import UserDict\n\n\nclass SehirSozlugu(UserDict):\n    def _norm(self, k):\n        return k.strip().lower()\n\n    def __setitem__(self, k, v):\n        super().__setitem__(self._norm(k), v)\n\n    def __getitem__(self, k):\n        return super().__getitem__(self._norm(k))\n', tests: 's = SehirSozlugu({" Ankara ": 120})\nassert dict(s) == {"ankara": 120}, "kurucu da anahtarı normalleştirmeli (UserDict kullan)"\ns["IZMIR "] = 80\ns.update({"BURSA ": 40})\nassert dict(s) == {"ankara": 120, "izmir": 80, "bursa": 40}, "[]= ve update de normalleştirmeli"\nassert s["  ANKARA"] == 120, "okurken de anahtar normalleşmeli"\nassert "Bursa" in s or "bursa" in s, "bursa bulunmalı"\ntry:\n    s["Konya"]\n    assert False, "olmayan şehir KeyError vermeli"\nexcept KeyError:\n    pass\n', hints: ['dict\'ten türetince kurucu ve update senin __setitem__\'ını atlar.', 'class SehirSozlugu(UserDict) ve iki metot: __setitem__, __getitem__.', 'def __getitem__(self, k): return super().__getitem__(k.strip().lower())'], why: 'UserDict saf Python olduğu için kurucu ve update de __setitem__ üzerinden geçer; normalleştirme tek yerde yapılır.' },
-    { t: 'code', stage: 'Kendin yaz', id: 'kalitim-polimorfizm-x4', diff: 2, q: '<p>Lojistik ücretlendirme. <code>abc</code> ile soyut <code>Gonderi(desi)</code> sınıfı yaz; soyut <code>ucret()</code> metodu olsun. Alt sınıflar:</p><ul><li><code>Standart</code>: <code>30 + 5 * desi</code></li><li><code>Hizli(Standart)</code>: standart ücretin 1.5 katı, <code>round(..., 2)</code> (standart hesabı <code>super()</code> ile al)</li><li><code>Iade</code>: her zaman 0</li></ul><p>Ayrıca <code>toplam_ucret(gonderiler)</code> fonksiyonu tür kontrolü yapmadan toplamı döndürsün. <code>Gonderi(3)</code> doğrudan oluşturulamamalı.</p>', sol: 'from abc import ABC, abstractmethod\n\n\nclass Gonderi(ABC):\n    def __init__(self, desi):\n        self.desi = desi\n\n    @abstractmethod\n    def ucret(self):\n        ...\n\n\nclass Standart(Gonderi):\n    def ucret(self):\n        return 30 + 5 * self.desi\n\n\nclass Hizli(Standart):\n    def ucret(self):\n        return round(super().ucret() * 1.5, 2)\n\n\nclass Iade(Gonderi):\n    def ucret(self):\n        return 0\n\n\ndef toplam_ucret(gonderiler):\n    return sum(g.ucret() for g in gonderiler)\n', tests: 'assert Standart(4).ucret() == 50, "30 + 5*4 = 50"\nassert Hizli(4).ucret() == 75.0, "50 * 1.5 = 75.0"\nassert Iade(10).ucret() == 0, "iade ücretsiz"\nassert isinstance(Hizli(1), Standart), "Hizli, Standart\'tan türemeli"\nassert toplam_ucret([Standart(2), Hizli(2), Iade(5)]) == 40 + 60.0, "toplam 100 olmalı"\nassert toplam_ucret([]) == 0, "boş liste 0"\ntry:\n    Gonderi(3)\n    assert False, "Gonderi soyut olmalı (ABC + abstractmethod)"\nexcept TypeError:\n    pass\nassert "isinstance" not in __source__, "toplam_ucret polimorfik olmalı; tür kontrolü yapma"\n', hints: ['from abc import ABC, abstractmethod; class Gonderi(ABC) içinde @abstractmethod def ucret(self).', 'Hizli.ucret: return round(super().ucret() * 1.5, 2)', 'toplam_ucret: sum(g.ucret() for g in gonderiler)'], why: 'Her sınıf kendi ücret kuralını taşır; toplam_ucret yeni gönderi türleri eklense de değişmez (açık-kapalı ilkesi).' },
+    { t: 'code', stage: 'Kendin yaz', id: 'kalitim-polimorfizm-x4', diff: 2, q: '<p>Lojistik ücretlendirme. <code>abc</code> ile soyut <code>Gonderi(desi)</code> sınıfı yaz; soyut <code>ucret()</code> metodu olsun. Alt sınıflar:</p><ul><li><code>Standart</code>: <code>30 + 5 * desi</code></li><li><code>Hizli(Standart)</code>: standart ücretin 1.5 katı, <code>round(..., 2)</code> (standart hesabı <code>super()</code> ile al)</li><li><code>Iade</code>: her zaman 0</li></ul><p>Ayrıca <code>toplam_ucret(gonderiler)</code> fonksiyonu tür kontrolü yapmadan toplamı döndürsün. <code>Gonderi(3)</code> doğrudan oluşturulamamalı.</p>', sol: 'from abc import ABC, abstractmethod\n\n\nclass Gonderi(ABC):\n    def __init__(self, desi):\n        self.desi = desi\n\n    @abstractmethod\n    def ucret(self):\n        ...\n\n\nclass Standart(Gonderi):\n    def ucret(self):\n        return 30 + 5 * self.desi\n\n\nclass Hizli(Standart):\n    def ucret(self):\n        return round(super().ucret() * 1.5, 2)\n\n\nclass Iade(Gonderi):\n    def ucret(self):\n        return 0\n\n\ndef toplam_ucret(gonderiler):\n    return sum(g.ucret() for g in gonderiler)\n', tests: 'assert Standart(4).ucret() == 50, "30 + 5*4 = 50"\nassert Hizli(4).ucret() == 75.0, "50 * 1.5 = 75.0"\nassert Iade(10).ucret() == 0, "iade ücretsiz"\nassert isinstance(Hizli(1), Standart), "Hizli, Standart\'tan türemeli"\nassert toplam_ucret([Standart(2), Hizli(2), Iade(5)]) == 40 + 60.0, "toplam 100 olmalı"\nassert toplam_ucret([]) == 0, "boş liste 0"\ntry:\n    Gonderi(3)\n    assert False, "Gonderi soyut olmalı (ABC + abstractmethod)"\nexcept TypeError:\n    pass\nassert "isinstance" not in __kod__, "toplam_ucret polimorfik olmalı; tür kontrolü yapma"\n', hints: ['from abc import ABC, abstractmethod; class Gonderi(ABC) içinde @abstractmethod def ucret(self).', 'Hizli.ucret: return round(super().ucret() * 1.5, 2)', 'toplam_ucret: sum(g.ucret() for g in gonderiler)'], why: 'Her sınıf kendi ücret kuralını taşır; toplam_ucret yeni gönderi türleri eklense de değişmez (açık-kapalı ilkesi).' },
     { t: 'code', stage: 'Kendin yaz', id: 'kalitim-polimorfizm-x5', diff: 2, q: '<p>İK izin sistemi. <code>Calisan(ad)</code> sınıfında sınıf niteliği <code>IZIN_GUNU = 14</code> olsun; <code>kalan_izin(kullanilan)</code> metodu <code>IZIN_GUNU - kullanilan</code> döndürsün ama 0\'ın altına inmesin. <code>__repr__</code>, <code>"Calisan(\'Ayşe\')"</code> biçiminde <b>gerçek sınıf adını</b> kullansın. Alt sınıflar <b>yalnız sınıf niteliğini</b> ezsin: <code>Yonetici</code> 20 gün, <code>Stajyer</code> 0 gün. Alt sınıflarda metot yazma.</p>', sol: 'class Calisan:\n    IZIN_GUNU = 14\n\n    def __init__(self, ad):\n        self.ad = ad\n\n    def kalan_izin(self, kullanilan):\n        return max(0, self.IZIN_GUNU - kullanilan)\n\n    def __repr__(self):\n        return f"{type(self).__name__}({self.ad!r})"\n\n\nclass Yonetici(Calisan):\n    IZIN_GUNU = 20\n\n\nclass Stajyer(Calisan):\n    IZIN_GUNU = 0\n', tests: 'assert Calisan("Ayşe").kalan_izin(5) == 9, "14 - 5 = 9"\nassert Yonetici("Mert").kalan_izin(5) == 15, "yönetici 20 gün: 20 - 5 = 15"\nassert Stajyer("Can").kalan_izin(0) == 0, "stajyerin izni yok"\nassert Calisan("Ayşe").kalan_izin(30) == 0, "kalan izin eksiye inmemeli"\nassert repr(Yonetici("Mert")) == "Yonetici(\'Mert\')", "repr gerçek sınıf adını göstermeli"\nassert repr(Calisan("Ayşe")) == "Calisan(\'Ayşe\')", "Calisan repr biçimi"\nassert set(vars(Yonetici)) & {"kalan_izin", "__repr__", "__init__"} == set(), "alt sınıflarda metot yazma; yalnız IZIN_GUNU"\n', hints: ['Üst sınıf metodu self.IZIN_GUNU okumalı (Calisan.IZIN_GUNU değil).', 'max(0, ...) eksiye inmeyi engeller; type(self).__name__ gerçek sınıf adını verir.', 'Alt sınıf gövdesi tek satır: IZIN_GUNU = 20'], why: 'Yalnız bir sabit farklıysa metot ezmek yerine sınıf niteliğini ezmek en sade çözümdür; self üzerinden okununca doğru değer bulunur.' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'kalitim-polimorfizm-x6', diff: 1, q: '<p>Hatayı bul ve düzelt. <code>Kredili</code> hesapta para çekince <code>AttributeError: \'Kredili\' object has no attribute \'islemler\'</code> alınıyor.</p>', start: 'class Hesap:\n    def __init__(self, no, bakiye=0):\n        self.no = no\n        self.bakiye = bakiye\n        self.islemler = []\n\n    def cek(self, tutar):\n        self.bakiye -= tutar\n        self.islemler.append(-tutar)\n\n\nclass Kredili(Hesap):\n    def __init__(self, no, bakiye=0, limit=1000):\n        self.limit = limit\n\n    def cek(self, tutar):\n        if tutar > self.bakiye + self.limit:\n            raise ValueError("limit aşıldı")\n        super().cek(tutar)\n', sol: 'class Hesap:\n    def __init__(self, no, bakiye=0):\n        self.no = no\n        self.bakiye = bakiye\n        self.islemler = []\n\n    def cek(self, tutar):\n        self.bakiye -= tutar\n        self.islemler.append(-tutar)\n\n\nclass Kredili(Hesap):\n    def __init__(self, no, bakiye=0, limit=1000):\n        super().__init__(no, bakiye)\n        self.limit = limit\n\n    def cek(self, tutar):\n        if tutar > self.bakiye + self.limit:\n            raise ValueError("limit aşıldı")\n        super().cek(tutar)\n', tests: 'k = Kredili("TR09", 200, limit=500)\nk.cek(600)\nassert k.bakiye == -400 and k.islemler == [-600], "çekme sonrası bakiye -400, işlem kaydı [-600] olmalı"\nassert k.no == "TR09", "no üst sınıf kurucusunda atanmalı"\ntry:\n    k.cek(200)\n    assert False, "limit aşımı ValueError vermeli"\nexcept ValueError:\n    pass\n', hints: ['Alt sınıf __init__ yazınca üst sınıfınki otomatik çağrılmaz.', 'no, bakiye ve islemler üst sınıfın kurucusunda atanıyor.', 'Kredili.__init__ ilk satırı: super().__init__(no, bakiye)'], why: 'super().__init__ çağrılmadığı için no, bakiye ve islemler hiç oluşmuyordu.' },
     { t: 'code', stage: 'Hata avı', kind: 'bug', id: 'kalitim-polimorfizm-x7', diff: 2, q: '<p>Hatayı bul ve düzelt. <code>vadeli_toplam(hesaplar)</code> tüm vadeli hesapların bakiye toplamını vermeli. Yeni eklenen <code>DovizVadeli</code> (Vadeli\'nin alt sınıfı) toplama hiç girmiyor.</p>', start: 'class Hesap:\n    def __init__(self, bakiye):\n        self.bakiye = bakiye\n\nclass Vadeli(Hesap):\n    pass\n\nclass DovizVadeli(Vadeli):\n    pass\n\n\ndef vadeli_toplam(hesaplar):\n    return sum(h.bakiye for h in hesaplar if type(h) == Vadeli)\n', sol: 'class Hesap:\n    def __init__(self, bakiye):\n        self.bakiye = bakiye\n\nclass Vadeli(Hesap):\n    pass\n\nclass DovizVadeli(Vadeli):\n    pass\n\n\ndef vadeli_toplam(hesaplar):\n    return sum(h.bakiye for h in hesaplar if isinstance(h, Vadeli))\n', tests: 'hs = [Hesap(100), Vadeli(1000), DovizVadeli(500), Vadeli(250)]\nassert vadeli_toplam(hs) == 1750, "Vadeli ve alt sınıfları (DovizVadeli) toplanmalı: 1000 + 500 + 250"\nassert vadeli_toplam([Hesap(5)]) == 0, "vadeli olmayan sayılmamalı"\n', hints: ['type(h) == Vadeli alt sınıfları dışlar.', 'Alt sınıfları da kapsayan kontrol hangisi?', 'isinstance(h, Vadeli)'], why: 'type karşılaştırması tam eşleşme ister; isinstance kalıtım hiyerarşisini dikkate alır. Bir DovizVadeli de bir Vadelidir.' },
@@ -6604,8 +6458,7 @@ for baslik, maddeler in gruplar.items():
 <div class="tip"><b>README, LICENSE, CHANGELOG</b>İyi bir depoda kökte en az şunlar bulunur: ne işe yaradığını ve nasıl kurulup çalıştırılacağını anlatan <code>README.md</code>, kullanım hakkını belirten <code>LICENSE</code> (şirket içi kodda genellikle "tescilli"), sürüm farklarını anlatan <code>CHANGELOG.md</code>, örnek ayar <code>.env.example</code> ve satır sonu kuralı için <code>.gitattributes</code>.</div>
 <div class="note"><b>Gerçek işte</b>Ilgaz Bank'ta ana dal korumalıdır: doğrudan push yasaktır, her değişiklik PR ile gelir, en az bir onay ve yeşil CI gerekir, birleştirme "squash" ile tek commit'e indirilir. Canlıda hata çıkınca önce <code>git revert</code> ile hızla geri dönülür, sonra kök neden ayrı bir dalda düzeltilir. Sürüm etiketleri ve CHANGELOG, Conventional Commits mesajlarından otomatik üretilir; bu yüzden commit mesajı kuralı PR kontrolünde denetlenir.</div>
 `,
-  ex: [
-    {
+  ex: [{
       t: 'mc',
       stage: 'Isınma',
       q: 'Ana dala (main) push edilmiş ve ekipçe çekilmiş bir commit hatalı çıktı. Hatalı değişikliği geri almanın en güvenli yolu hangisidir?',
@@ -6620,148 +6473,7 @@ for baslik, maddeler in gruplar.items():
       o: ['Dosya UTF-8 değil, UTF-16 kaydedilmiş', 'Satır sonları LF yerine CRLF olmuş', 'Dosya izinleri (chmod) değişmiş', 'Git önbelleği bozulmuş'],
       a: 1,
       why: 'Windows editörleri satır sonunu CRLF yazabilir; LF beklenen depoda her satır farklı görünür. .gitattributes içinde "* text=auto eol=lf" ve core.autocrlf ayarı bunu ekip genelinde çözer.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'porcelain = " M src/rapor.py\\nA  tests/test_yeni.py\\n?? notlar.txt\\nMM README.md\\n"\nhazir = [s[3:] for s in porcelain.splitlines() if s[0] not in " ?"]\nprint(hazir)\n',
-      o: ['[\'tests/test_yeni.py\', \'README.md\']', '[\'src/rapor.py\', \'tests/test_yeni.py\', \'README.md\']', '[\'tests/test_yeni.py\']', '[\'A  tests/test_yeni.py\', \'MM README.md\']'],
-      a: 0,
-      why: 'git status --porcelain çıktısında ilk sütun hazırlık alanı (staged), ikinci sütun çalışma dizini durumudur. İlk harfi boşluk ya da ? olmayanlar hazırlıktadır: A (eklendi) ve MM (hazırlıkta değişiklik var, sonrasında yine değişti). Dosya adı 3. karakterden başlar.'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'import re\ndesen = r"^(feat|fix|docs)(\\([a-z-]+\\))?!?: \\S"\nfor m in ["feat(rapor): şehir eklendi", "Fix: yazım", "fix!: api değişti", "docs:eksik boşluk"]:\n    print(bool(re.match(desen, m)), end=" ")\n',
-      o: ['True False True False', 'True True True False', 'True False False False', 'True False True True'],
-      a: 0,
-      why: 'Tür küçük harf olmalı ("Fix" eşleşmez), kapsam (scope) parantez içinde isteğe bağlı, ! isteğe bağlı; iki noktadan sonra bir boşluk ve boşluk olmayan bir karakter şart ("docs:eksik" düşer).'
-    },
-    {
-      t: 'predict',
-      stage: 'Kodu oku',
-      q: 'Bu kod ne yazdırır?',
-      code: 'from fnmatch import fnmatch\nkurallar = ["*.log", "!hata.log", "logs/*", "*.log"]\ndef yok_say(yol):\n    sonuc = False\n    for k in kurallar:\n        istisna = k.startswith("!")\n        if fnmatch(yol, k.lstrip("!")):\n            sonuc = not istisna\n    return sonuc\nprint(yok_say("hata.log"), yok_say("logs/a.txt"), yok_say("rapor.txt"))\n',
-      o: ['False True False', 'True True False', 'False False False', 'True False False'],
-      a: 1,
-      why: 'Son eşleşen kural kazanır: hata.log önce *.log ile yok sayılır, !hata.log ile geri alınır, ama son satırdaki *.log yeniden yok sayar. logs/a.txt "logs/*" ile eşleşir; rapor.txt hiçbir kurala uymaz.'
-    },
-    {
-      t: 'order',
-      stage: 'Kodu oku',
-      q: '<p><code>git log --oneline</code> çıktısından yazar sayısı değil, <b>commit türlerinin sayısını</b> çıkaran <code>tur_say</code> fonksiyonunun satırlarını sırala.</p>',
-      lines: ['from collections import Counter', 'def tur_say(log):', '    sayac = Counter()', '    for satir in log.strip().splitlines():', '        mesaj = satir.split(" ", 1)[1]', '        sayac[mesaj.split(":")[0].split("(")[0]] += 1', '    return dict(sayac)'],
-      tests: 'assert tur_say("a1 feat: x\\nb2 fix(api): y\\nc3 feat(ui): z\\n") == {"feat": 2, "fix": 1}, "feat 2, fix 1 olmalı"\n',
-      hint: 'Sayaç döngüden önce; döngüde önce hash\'i ayırıp mesajı al, sonra türü say.',
-      why: 'split(" ", 1) yalnızca ilk boşluktan böler ve hash\'i mesajdan ayırır. Tür, iki noktaya ve varsa kapsam parantezine kadar olan kısımdır.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'git-proje-yapisi-x1',
-      diff: 2,
-      q: '<p>CI için çakışma işareti denetimi yaz: <code>cakisma_satirlari(metin)</code>, dosya metninde <b>satır başında</b> <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code>, <code>=======</code> ya da <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> ile başlayan satırların <b>1 tabanlı</b> numaralarını liste olarak döndürsün. <code>=======</code> yalnızca satırın tamamıysa (sonrasında boşluk dışında karakter yoksa) sayılsın; böylece Markdown başlık çizgisi <code>==========</code> gibi daha uzun satırlar yanlış alarm vermesin. <code>&lt;</code> ve <code>&gt;</code> işaretlerinde ise 7 karakterden sonra boşluk ya da satır sonu gelmeli.</p>',
-      guide: ['enumerate(metin.splitlines(), start=1) ile dön.', 'satir.rstrip() == "=======" kontrolü ayraç satırını yakalar.', 'İşaret satırları için: satir.startswith("&lt;&lt;&lt;&lt;&lt;&lt;&lt;") ve satir[7:8] in ("", " ").', 'Eşleşen numaraları listeye ekle ve döndür.'],
-      example: '# Benzer teknik: TODO içeren satırların numaraları\nkod = "x = 1\\n# TODO: test\\ny = 2\\n# TODO"\nprint([no for no, s in enumerate(kod.splitlines(), start=1) if s.lstrip().startswith("# TODO")])\n',
-      start: 'def cakisma_satirlari(metin):\n    sonuc = []\n    for no, satir in enumerate(metin.splitlines(), start=1):\n        # TODO: <<<<<<< ve >>>>>>> işaret satırlarını yakala (8. karakter boşluk ya da yok)\n        # TODO: tam olarak ======= olan satırı yakala\n        pass\n    return sonuc\n',
-      sol: 'def cakisma_satirlari(metin):\n    sonuc = []\n    for no, satir in enumerate(metin.splitlines(), start=1):\n        if satir[:7] in ("<<<<<<<", ">>>>>>>") and satir[7:8] in ("", " "):\n            sonuc.append(no)\n        elif satir.rstrip() == "=======":\n            sonuc.append(no)\n    return sonuc\n',
-      tests: '_m = "a = 1\\n<<<<<<< HEAD\\nb = 2\\n=======\\nb = 3\\n>>>>>>> kargo\\nc = 4\\n"\nassert cakisma_satirlari(_m) == [2, 4, 6], f"2, 4 ve 6. satırlar işaret: {cakisma_satirlari(_m)}"\n_md = "Başlık\\n==========\\nmetin <<<<<<< ortada\\n>>>>>>>>> fazla ok\\n"\nassert cakisma_satirlari(_md) == [], "Markdown çizgisi, satır ortası ve 9 karakterlik ok işaret sayılmamalı"\nassert cakisma_satirlari("=======   \\n>>>>>>>") == [1, 2], "sondaki boşluk ve dal adsız kapanış da yakalanmalı"\n',
-      hints: ['satir[:7] ilk yedi karakteri, satir[7:8] sekizinci karakteri (yoksa "") verir.', 'Ayraç için satir.rstrip() == "=======".', 'if satir[:7] in ("&lt;&lt;&lt;&lt;&lt;&lt;&lt;", "&gt;&gt;&gt;&gt;&gt;&gt;&gt;") and satir[7:8] in ("", " "):'],
-      why: 'Git\'in işaretleri tam 7 karakterdir ve satır başında durur; ardından boşluk ve dal adı ya da satır sonu gelir. Kesin kalıp aramak hem unutulmuş çakışmayı yakalar hem de Markdown gibi benzer görünen içerikte yanlış alarmı önler.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'git-proje-yapisi-x2',
-      diff: 2,
-      q: '<p>Sürüm otomasyonu: <code>sonraki_surum(surum, mesajlar)</code> yaz. <code>surum</code> <code>"v1.4.2"</code> ya da <code>"1.4.2"</code> biçiminde; <code>mesajlar</code> son sürümden beri gelen commit mesajları. Conventional Commits kuralı: herhangi bir mesajın türünden sonra <code>!</code> varsa (<code>feat!:</code>, <code>fix(api)!:</code>) ya da mesajda <code>BREAKING CHANGE</code> geçiyorsa <b>major</b> artar; yoksa <code>feat</code> varsa <b>minor</b>; yoksa <code>fix</code> varsa <b>patch</b>; hiçbiri yoksa sürüm değişmez. Artırılan parçadan sonrakiler sıfırlanır. Sonuç girişle aynı önek biçiminde dönsün (<code>v</code> varsa <code>v</code>\'li).</p>',
-      guide: ['Öneki ayır: v ile başlıyorsa önek = "v", sayıları kalan kısımdan al.', 'Her mesaj için türü re.match(r"(\\w+)(\\([^)]*\\))?(!)?:", m) ile çöz.', 'En yüksek seviyeyi bul: 3 major, 2 minor, 1 patch, 0 hiçbiri.', 'Seviyeye göre (major+1, 0, 0), (major, minor+1, 0) ya da patch+1 üret.'],
-      example: 'import re\nfor m in ["feat(ui)!: yeni tema", "fix: x", "chore: y"]:\n    g = re.match(r"(\\w+)(\\([^)]*\\))?(!)?:", m)\n    print(g.group(1), bool(g.group(3)))\n',
-      start: 'import re\n\ndef sonraki_surum(surum, mesajlar):\n    onek = "v" if surum.startswith("v") else ""\n    major, minor, patch = (int(x) for x in surum.lstrip("v").split("."))\n    seviye = 0\n    for m in mesajlar:\n        # TODO: türü ve ! işaretini çöz, seviyeyi güncelle\n        pass\n    # TODO: seviyeye göre yeni sürümü üret\n    return surum\n',
-      sol: 'import re\n\ndef sonraki_surum(surum, mesajlar):\n    onek = "v" if surum.startswith("v") else ""\n    major, minor, patch = (int(x) for x in surum.lstrip("v").split("."))\n    seviye = 0\n    for m in mesajlar:\n        g = re.match(r"(\\w+)(\\([^)]*\\))?(!)?:", m)\n        if "BREAKING CHANGE" in m or (g and g.group(3)):\n            seviye = 3\n        elif g and g.group(1) == "feat":\n            seviye = max(seviye, 2)\n        elif g and g.group(1) == "fix":\n            seviye = max(seviye, 1)\n    if seviye == 3:\n        major, minor, patch = major + 1, 0, 0\n    elif seviye == 2:\n        minor, patch = minor + 1, 0\n    elif seviye == 1:\n        patch += 1\n    return f"{onek}{major}.{minor}.{patch}"\n',
-      tests: 'assert sonraki_surum("v1.4.2", ["fix: kdv", "docs: readme"]) == "v1.4.3", "yalnız fix -> patch"\nassert sonraki_surum("1.4.2", ["fix: a", "feat(rapor): b"]) == "1.5.0", "feat -> minor, patch sıfırlanır, önek yok"\nassert sonraki_surum("v1.4.2", ["feat: a", "fix(api)!: imza değişti"]) == "v2.0.0", "! -> major"\nassert sonraki_surum("v0.9.9", ["refactor: x\\n\\nBREAKING CHANGE: ayar adı değişti"]) == "v1.0.0", "BREAKING CHANGE gövdede de olabilir"\nassert sonraki_surum("v2.1.0", ["chore: bağımlılık", "docs: x"]) == "v2.1.0", "yayın gerektiren değişiklik yoksa sürüm aynı"\nassert sonraki_surum("v1.0.0", ["feature: x", "fixed: y"]) == "v1.0.0", "tür adı birebir feat/fix olmalı"\n',
-      hints: ['re.match yalnız metnin başında eşleşir; group(1) tür, group(3) "!" ya da None.', 'seviye = max(seviye, 2) ile daha düşük bir tür daha yükseği ezmesin.', 'major artınca minor ve patch, minor artınca patch sıfırlanır.'],
-      why: 'Anlamsal sürümleme (semver) değişikliğin etkisini numaraya yansıtır: kırıcı değişiklik major, yeni özellik minor, düzeltme patch. Conventional Commits bu kararı mesajlardan otomatik vermeyi sağlar; semantic-release, release-please gibi araçlar tam olarak bunu yapar.'
-    },
-    {
-      t: 'code',
-      stage: 'Rehberli',
-      id: 'git-proje-yapisi-x3',
-      diff: 2,
-      q: '<p>Ekip dal adı kuralı: <code>&lt;tür&gt;/&lt;açıklama&gt;</code>; tür <code>feature</code>, <code>bugfix</code>, <code>hotfix</code>, <code>release</code> ya da <code>chore</code>; açıklama yalnızca küçük ASCII harf, rakam ve tek tireden oluşur (tire ile başlayıp bitmez, art arda iki tire yok), en az 3 en çok 40 karakter. İsteğe bağlı olarak tür ile açıklama arasında iş kaydı numarası olabilir: <code>feature/ANB-123-sehir-raporu</code> (büyük harf proje kodu, tire, sayı, tire, açıklama). <code>dal_gecerli_mi(ad)</code> True/False döndürsün; <code>main</code> ve <code>develop</code> da geçerli.</p>',
-      guide: ['Önce özel adları (main, develop) kontrol et.', 'Türleri (feature|bugfix|...) bir gruba yaz.', 'İş kaydı kısmı: (?:[A-Z]+-\\d+-)? isteğe bağlı grup.', 'Açıklama: [a-z0-9]+(?:-[a-z0-9]+)* ve uzunluğu ayrıca kontrol et; re.fullmatch kullan.'],
-      example: 'import re\ndesen = r"[a-z]+(?:_[a-z]+)*"     # snake_case kelimeler\nfor s in ["sehir_raporu", "_kotu", "iki__alt", "tamam"]:\n    print(s, bool(re.fullmatch(desen, s)))\n',
-      start: 'import re\n\nDESEN = r"(feature|bugfix)/(.+)"   # TODO: tüm türler, iş kaydı ve açıklama kuralı\n\ndef dal_gecerli_mi(ad):\n    # TODO: main/develop, fullmatch ve açıklama uzunluğu\n    return re.fullmatch(DESEN, ad) is not None\n',
-      sol: 'import re\n\nDESEN = r"(feature|bugfix|hotfix|release|chore)/(?:[A-Z]+-\\d+-)?([a-z0-9]+(?:-[a-z0-9]+)*)"\n\ndef dal_gecerli_mi(ad):\n    if ad in ("main", "develop"):\n        return True\n    m = re.fullmatch(DESEN, ad)\n    return bool(m) and 3 <= len(m.group(2)) <= 40\n',
-      tests: 'for _a in ["main", "develop", "feature/sehir-raporu", "hotfix/kdv-yuvarlama", "feature/ANB-123-sehir-raporu", "release/v1-4", "chore/abc"]:\n    assert dal_gecerli_mi(_a), f"{_a} geçerli olmalı"\nfor _a in ["feature/Sehir", "feature/-kotu", "feature/kotu-", "feature/iki--tire", "feat/x-y-z", "feature/ab", "feature/" + "a" * 41, "sehir-raporu", "feature/şehir"]:\n    assert not dal_gecerli_mi(_a), f"{_a} geçersiz olmalı"\n',
-      hints: ['re.fullmatch tüm metnin desene uymasını ister; match yalnız başını denetler.', 'Açıklama deseni: [a-z0-9]+(?:-[a-z0-9]+)* tek tireyi ve uçları kendiliğinden yönetir.', 'Uzunluğu desende değil m.group(2) ile ayrıca ölç.'],
-      why: 'Dal adı kuralları CI\'da otomatik denetlenir ve iş kaydı numarası sayesinde PR ile görev takibi birbirine bağlanır. "Kelime(-kelime)*" kalıbı, tireyle başlama/bitme ve art arda tire durumlarını tek desende dışlar.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'git-proje-yapisi-x4',
-      diff: 2,
-      q: '<p>Commit öncesi gizli bilgi taraması: <code>sizinti_bul(diff)</code>, <code>git diff</code> çıktısında <b>yalnızca eklenen satırlara</b> (<code>+</code> ile başlayan, ama <code>+++</code> dosya başlığı olmayan) bakıp şüpheli satırları <code>(dosya, satir_metni)</code> demetleri olarak döndürsün. Dosya adı en son görülen <code>+++ b/&lt;yol&gt;</code> satırından gelir; satır metni baştaki <code>+</code> olmadan ve kırpılmış olsun. Şüpheli: <code>AKIA</code> ile başlayan 20 karakterlik büyük harf/rakam anahtarı, <code>-----BEGIN</code> ile başlayan özel anahtar, ya da <code>password</code>, <code>parola</code>, <code>secret</code>, <code>api_key</code> kelimelerinden biri (harf duyarsız) ardından <code>=</code> ya da <code>:</code> ve tırnak içinde boş olmayan değer.</p>',
-      start: 'import re\n\ndef sizinti_bul(diff):\n    pass\n',
-      sol: 'import re\n\nDESENLER = [\n    re.compile(r"AKIA[0-9A-Z]{16}"),\n    re.compile(r"-----BEGIN [A-Z ]*PRIVATE KEY"),\n    re.compile(r"(password|parola|secret|api_key)\\s*[=:]\\s*[\'\\"][^\'\\"]+[\'\\"]", re.I),\n]\n\ndef sizinti_bul(diff):\n    dosya, sonuc = None, []\n    for satir in diff.splitlines():\n        if satir.startswith("+++ "):\n            dosya = satir[4:].removeprefix("b/")\n        elif satir.startswith("+"):\n            metin = satir[1:].strip()\n            if any(d.search(metin) for d in DESENLER):\n                sonuc.append((dosya, metin))\n    return sonuc\n',
-      tests: '_d = """diff --git a/ayar.py b/ayar.py\n--- a/ayar.py\n+++ b/ayar.py\n@@ -1,2 +1,4 @@\n-PASSWORD = "eski-parola-123"\n+PASSWORD = os.environ["DB_PAROLA"]\n DEBUG = False\n+API_KEY = "sk-canli-9f8e7d"\n+aws = "AKIAIOSFODNN7EXAMPLE"\ndiff --git a/anahtar.pem b/anahtar.pem\n+++ b/anahtar.pem\n+-----BEGIN RSA PRIVATE KEY-----\n+parola: ""\n"""\n_r = sizinti_bul(_d)\nassert _r == [("ayar.py", \'API_KEY = "sk-canli-9f8e7d"\'), ("ayar.py", \'aws = "AKIAIOSFODNN7EXAMPLE"\'), ("anahtar.pem", "-----BEGIN RSA PRIVATE KEY-----")], f"yanlış: {_r}"\nassert sizinti_bul("") == [], "boş diff"\n',
-      hints: ['Satırları sırayla işle; "+++ " satırı yalnızca dosya adını günceller.', 'Silinen (-) satırlar ve bağlam (boşlukla başlayan) satırları yok say.', 'Üç deseni bir listeye koy ve any(d.search(metin) ...) kullan.'],
-      why: 'Gizli bilgi taraması yalnızca eklenen satırlara odaklanmalı: silinen eski parola zaten geçmiştedir (onun için anahtar iptal edilir), ortam değişkeninden okuma ise güvenli bir kalıptır. gitleaks, detect-secrets gibi araçlar bu fikri yüzlerce desenle uygular ve pre-commit kancasına bağlanır.'
-    },
-    {
-      t: 'code',
-      stage: 'Kendin yaz',
-      id: 'git-proje-yapisi-x5',
-      diff: 2,
-      q: '<p><code>git log --format="%h|%an|%ad|%s" --date=short</code> çıktısını işleyen <code>yazar_ozeti(log)</code> fonksiyonunu yaz. Her yazar için <code>{"commit": sayı, "ilk": "YYYY-AA-GG", "son": "YYYY-AA-GG"}</code> içeren bir sözlük döndürsün (yazar adına göre sözlük). Mesaj (<code>%s</code>) içinde de <code>|</code> geçebilir; yalnızca ilk üç <code>|</code>\'den böl. Boş satırları atla.</p>',
-      start: 'def yazar_ozeti(log):\n    pass\n',
-      sol: 'def yazar_ozeti(log):\n    ozet = {}\n    for satir in log.splitlines():\n        if not satir.strip():\n            continue\n        _, yazar, tarih, _ = satir.split("|", 3)\n        o = ozet.setdefault(yazar, {"commit": 0, "ilk": tarih, "son": tarih})\n        o["commit"] += 1\n        o["ilk"] = min(o["ilk"], tarih)\n        o["son"] = max(o["son"], tarih)\n    return ozet\n',
-      tests: '_l = "a1|Ayşe Yılmaz|2026-03-15|feat: rapor | özet\\nb2|Can Demir|2026-03-10|fix: kdv\\n\\nc3|Ayşe Yılmaz|2026-02-01|docs: readme\\nd4|Ayşe Yılmaz|2026-03-01|test: x\\n"\n_o = yazar_ozeti(_l)\nassert _o == {"Ayşe Yılmaz": {"commit": 3, "ilk": "2026-02-01", "son": "2026-03-15"}, "Can Demir": {"commit": 1, "ilk": "2026-03-10", "son": "2026-03-10"}}, f"yanlış: {_o}"\nassert yazar_ozeti("") == {}, "boş log"\n',
-      hints: ['split("|", 3) en fazla 4 parça üretir; mesajdaki | korunur.', 'ISO tarih metinleri (YYYY-AA-GG) min/max ile doğru karşılaştırılır.'],
-      why: 'Git\'in --format seçeneği çıktıyı makine dostu yapar; ayırıcı içeriğin içinde de geçebileceği için bölme sayısını sınırlamak gerekir. ISO tarih biçimi sayesinde metin karşılaştırması kronolojik sonuç verir.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'git-proje-yapisi-x6',
-      diff: 2,
-      q: '<p>Yeni proje iskeleti oluşturan <code>iskelet_dosyalari(paket)</code> fonksiyonu, kök <code>.gitignore</code> ve <code>.gitattributes</code> içeriklerini üretiyor. Ama ekip şikâyetçi: <code>.env</code> dosyaları depoya giriyor, <code>.env.example</code> ise hiç girmiyor; Windows\'tan gelen dosyalarda da satır sonu farkı devam ediyor. <b>Hataları bul ve düzelt.</b> Beklenen: <code>.env</code> ve <code>.env.*</code> yok sayılsın ama <code>.env.example</code> izlensin (istisna, ilgili kuraldan <b>sonra</b> gelmeli); <code>.gitattributes</code> ilk satırı <code>* text=auto eol=lf</code> olsun.</p>',
-      start: 'def iskelet_dosyalari(paket):\n    gitignore = "\\n".join([\n        ".venv/",\n        "__pycache__/",\n        "!.env.example",\n        ".env*",\n        "*.log",\n    ]) + "\\n"\n    gitattributes = "* text=auto eol=crlf\\n*.bat text eol=crlf\\n"\n    return {".gitignore": gitignore, ".gitattributes": gitattributes, f"src/{paket}/__init__.py": ""}\n',
-      sol: 'def iskelet_dosyalari(paket):\n    gitignore = "\\n".join([\n        ".venv/",\n        "__pycache__/",\n        ".env",\n        ".env.*",\n        "!.env.example",\n        "*.log",\n    ]) + "\\n"\n    gitattributes = "* text=auto eol=lf\\n*.bat text eol=crlf\\n"\n    return {".gitignore": gitignore, ".gitattributes": gitattributes, f"src/{paket}/__init__.py": ""}\n',
-      tests: 'from fnmatch import fnmatch as _fn\ndef _yok(yol, kurallar):\n    s = False\n    for k in kurallar:\n        ist = k.startswith("!")\n        if _fn(yol, k[1:] if ist else k):\n            s = not ist\n    return s\n_i = iskelet_dosyalari("anadolu_rapor")\n_k = [x for x in _i[".gitignore"].splitlines() if x and not x.endswith("/")]\nassert _yok(".env", _k), ".env yok sayılmalı"\nassert _yok(".env.prod", _k), ".env.prod yok sayılmalı"\nassert not _yok(".env.example", _k), ".env.example izlenmeli (istisna kuraldan sonra gelmeli)"\nassert _i[".gitattributes"].splitlines()[0] == "* text=auto eol=lf", "depoda satır sonu LF olmalı"\nassert "src/anadolu_rapor/__init__.py" in _i, "paket klasörü korunmalı"\n',
-      hints: ['.gitignore\'da son eşleşen kural kazanır.', 'İstisna (!) kendisini ezecek kuraldan önce yazılırsa etkisiz kalır.', 'Ekip genelinde depoda LF tutulur; yalnızca .bat gibi Windows betikleri CRLF.'],
-      why: 'Git kuralları yukarıdan aşağı uygular ve son eşleşen kazanır; bu yüzden "!.env.example" ".env.*" kuralından sonra gelmelidir. Depoda tek bir satır sonu (LF) tutmak platformlar arası gürültülü diff\'leri bitirir.'
-    },
-    {
-      t: 'code',
-      stage: 'Hata avı',
-      kind: 'bug',
-      id: 'git-proje-yapisi-x7',
-      diff: 2,
-      q: '<p>PR kontrol aracı, değişen dosyaları <code>git status --porcelain</code> çıktısından okuyor ve yalnızca <b>Python dosyalarını</b> lint\'e gönderiyor. Ama yeniden adlandırılan dosyalar (<code>R  eski.py -&gt; yeni.py</code>) ve adında boşluk olan dosyalar bozuk geliyor, silinen dosyalar (<code>D</code>) da lint\'e gönderilip araç çöküyor. <code>lint_listesi(porcelain)</code> fonksiyonundaki <b>hataları bul ve düzelt</b>: yeniden adlandırmada yeni ad alınmalı, silinenler atlanmalı, sonuç sıralı ve tekrarsız olmalı.</p>',
-      start: 'def lint_listesi(porcelain):\n    dosyalar = []\n    for satir in porcelain.splitlines():\n        yol = satir.split()[1]\n        if yol.endswith(".py"):\n            dosyalar.append(yol)\n    return dosyalar\n',
-      sol: 'def lint_listesi(porcelain):\n    dosyalar = set()\n    for satir in porcelain.splitlines():\n        if not satir.strip():\n            continue\n        durum, yol = satir[:2], satir[3:]\n        if "D" in durum:\n            continue\n        if " -> " in yol:\n            yol = yol.split(" -> ", 1)[1]\n        if yol.endswith(".py"):\n            dosyalar.add(yol)\n    return sorted(dosyalar)\n',
-      tests: '_p = " M src/rapor.py\\nR  src/eski.py -> src/yeni.py\\nD  src/kaldirildi.py\\n?? scripts/gece raporu.py\\nA  README.md\\nMM src/rapor.py\\n"\nassert lint_listesi(_p) == ["scripts/gece raporu.py", "src/rapor.py", "src/yeni.py"], f"yanlış: {lint_listesi(_p)}"\nassert lint_listesi("") == [], "boş çıktı"\n',
-      hints: ['split() boşluklu dosya adını ve "a -> b" biçimini parçalar; sabit konumla kes: satir[:2] durum, satir[3:] yol.', 'Durum kodunda D varsa dosya silinmiştir.', 'Tekrarları kaldırmak için küme, sonda sorted.'],
-      why: 'Porcelain biçimi sabit sütunludur: iki karakter durum, bir boşluk, sonra yol. Boşluklu adlar ve yeniden adlandırma için split yerine konumla kesmek gerekir (gerçek araçlar -z seçeneğiyle NUL ayırıcı kullanır). Silinmiş dosyayı lint\'e vermek "dosya yok" hatasına yol açar.'
-    },
-    {
-      t: 'code',
-      stage: 'Meydan okuma',
-      id: 'git-proje-yapisi-x8',
-      diff: 3,
-      q: '<p><code>git bisect</code>\'i taklit et: <code>ilk_kotu(commitler, test)</code>. <code>commitler</code> eskiden yeniye sıralı hash listesi; ilk eleman kesin <b>iyi</b>, son eleman kesin <b>kötü</b>. Bir commit kötüleştikten sonra hep kötü kalır. <code>test(hash)</code> commit iyiyse True döndürür. İkili arama ile <b>ilk kötü</b> commit\'in hash\'ini döndür ve testi en fazla <code>ceil(log2(n))</code> kez çağır (ilk ve son elemanı test etme).</p>',
-      start: 'def ilk_kotu(commitler, test):\n    for c in commitler:\n        if not test(c):\n            return c\n',
-      sol: 'def ilk_kotu(commitler, test):\n    iyi, kotu = 0, len(commitler) - 1\n    while kotu - iyi > 1:\n        orta = (iyi + kotu) // 2\n        if test(commitler[orta]):\n            iyi = orta\n        else:\n            kotu = orta\n    return commitler[kotu]\n',
-      tests: 'import math as _m\nfor _n in (2, 3, 10, 100, 1000):\n    _c = [f"c{i:04d}" for i in range(_n)]\n    for _k in sorted({1, _n // 2, _n - 1, max(1, _n // 3)}):\n        _cagri = []\n        def _t(h):\n            _cagri.append(h)\n            return int(h[1:]) < _k\n        _r = ilk_kotu(_c, _t)\n        assert _r == _c[_k], f"n={_n}: ilk kötü {_c[_k]} olmalı, gelen {_r}"\n        assert len(_cagri) <= _m.ceil(_m.log2(_n)), f"n={_n}: {len(_cagri)} test çok fazla; ikili arama kullan"\n        assert _c[0] not in _cagri and _c[-1] not in _cagri, "bilinen iyi/kötü uçlar test edilmemeli"\n',
-      hints: ['İki işaretçi tut: iyi (bilinen son iyi) ve kotu (bilinen ilk kötü).', 'Aralarında commit kaldıkça ortadakini test et ve işaretçiyi ona taşı.', 'Döngü kotu - iyi == 1 olunca biter; cevap commitler[kotu].'],
-      why: 'Kötüleşme tek yönlü olduğu için iyi/kötü sınırı ikili aramayla log2(n) adımda bulunur: 1000 commit\'te en fazla 10 test. git bisect run aynı algoritmayı test komutunun çıkış koduyla otomatik yürütür.'
-    }
-  ],
+    }],
   faq: [
     {
       q: 'merge mi rebase mi kullanmalıyım?',
@@ -7471,7 +7183,7 @@ uv run python rapor.py            # ortamı etkinleştirmeden çalıştır
 uv tool install ruff              # pipx karşılığı</pre>
 <h3>6. poetry</h3>
 <pre class="code">pipx install poetry
-poetry new anadolu-bank   # ya da mevcut projede: poetry init
+poetry new ilgaz-bank   # ya da mevcut projede: poetry init
 poetry add pandas@^2.2    # ^2.2 = &gt;=2.2,&lt;3.0
 poetry add --group dev pytest
 poetry install            # poetry.lock'tan kur
@@ -8851,7 +8563,7 @@ X.push(
   {
     id: 'eszamanlilik',
     min: 30,
-    html: `<h2>Derinleş: süreç havuzu, Amdahl, kilit disiplini ve Future arayüzü</h2><p>Thread havuzu, GIL, Lock ve queue temellerini gördün. Bu bölüm gerçek projelerde karşına çıkan eksik parçaları tamamlıyor: ProcessPoolExecutor'ı Windows ve macOS'ta çalıştırmanın kuralları, işi süreçlere doğru bölmek, paralelliğin ne kadar hız getirebileceğini önceden hesaplamak (Amdahl yasası), kilitlerde kilitlenme (deadlock) önleme ve Future nesnesinin tam arayüzü.</p><div class="note"><b>Bu ortamda</b>Tarayıcıdaki Python (Pyodide) yeni thread ya da süreç başlatamaz. Bu yüzden thread/süreç başlatan örnekleri aşağıda çalıştırılamaz kod kutusunda veriyoruz; çalıştırılabilir örnekler ve alıştırmalar ise Lock, RLock, Event, Future gibi nesneleri ve iş bölme mantığını thread başlatmadan kullanıyor. Aynı kod kendi bilgisayarında gerçek thread'lerle birebir çalışır.</div><h3>ProcessPoolExecutor'ı doğru kurmak</h3><pre class="code"># fiyat_opt.py — kendi bilgisayarında: python fiyat_opt.py
+    html: `<h2>Derinleş: süreç havuzu, Amdahl, kilit disiplini ve Future arayüzü</h2><p>Thread havuzu, GIL, Lock ve queue temellerini gördün. Bu bölüm gerçek projelerde karşına çıkan eksik parçaları tamamlıyor: ProcessPoolExecutor'ı Windows ve macOS'ta çalıştırmanın kuralları, işi süreçlere doğru bölmek, paralelliğin ne kadar hız getirebileceğini önceden hesaplamak (Amdahl yasası), kilitlerde kilitlenme (deadlock) önleme ve Future nesnesinin tam arayüzü.</p><div class="note"><b>Bu ortamda</b>Tarayıcıdaki Python (Pyodide) yeni thread ya da süreç başlatamaz. Bu yüzden thread/süreç başlatan örnekleri çalıştırılamaz kod kutusunda veriyoruz; çalıştırılabilir örnekler ve alıştırmalar ise Lock, RLock, Event, Future gibi nesneleri ve iş bölme mantığını thread başlatmadan kullanıyor. Aynı kod kendi bilgisayarında gerçek thread'lerle birebir çalışır.</div><h3>ProcessPoolExecutor'ı doğru kurmak</h3><pre class="code"># fiyat_opt.py — kendi bilgisayarında: python fiyat_opt.py
 import os
 from concurrent.futures import ProcessPoolExecutor
 
@@ -8929,7 +8641,7 @@ except TimeoutError as e:
 
 bekleyen = Future()
 print("iptal edildi mi?", bekleyen.cancel(), bekleyen.cancelled())
-</pre><div class="tip"><b>Yürütücüyü parametre yap</b>Fonksiyonların <code>havuz</code> nesnesini dışarıdan alırsa (bağımlılık enjeksiyonu), testte sıralı çalışan sahte bir yürütücü verip deterministik test yazabilir, üretimde gerçek <code>ThreadPoolExecutor</code> ya da <code>ProcessPoolExecutor</code> kullanırsın.</div><div class="warn"><b>GIL'siz Python</b>Python 3.13 ile deneysel "free-threaded" (GIL'siz) bir derleme geldi; saf Python CPU işinde thread'ler gerçekten paralel çalışabiliyor. Henüz varsayılan değil ve birçok paket bu derlemeyi desteklemiyor. Kilit disiplini GIL olsa da olmasa da gerekir: GIL hiçbir zaman <code>sayac += 1</code> gibi işlemleri atomik yapma sözü vermedi.</div><div class="note"><b>Gerçek işte</b>Veri ekiplerinde paralellik çoğunlukla gece çalışan toplu işlerde görülür: dosyalar thread havuzuyla indirilir, ağır hesap süreç havuzunda parçalara bölünerek yapılır, sonuçlar ana süreçte birleştirilir. Bu düzende en pahalı hatalar kilitlenen ve sabaha kadar asılı kalan işler ile Windows sunucuda unutulan <code>__main__</code> korumasıdır. Her bekleme noktasına zaman aşımı koymak ve işi paylaşılan durum yerine "parça → özet → birleştir" biçiminde tasarlamak bu riskleri büyük ölçüde ortadan kaldırır.</div>`,
+</pre><div class="tip"><b>Yürütücüyü parametre yap</b>Fonksiyonların <code>havuz</code> nesnesini dışarıdan alırsa (bağımlılık enjeksiyonu), testte sıralı çalışan sahte bir yürütücü verip deterministik test yazabilir, üretimde gerçek <code>ThreadPoolExecutor</code> ya da <code>ProcessPoolExecutor</code> kullanırsın.</div><div class="warn"><b>GIL'siz Python</b>Python 3.13 ile deneysel gelen "free-threaded" (GIL'siz) derleme 3.14'te resmî destek kazandı; saf Python CPU işinde thread'ler gerçekten paralel çalışabiliyor. Varsayılan değil, ayrıca kurulur ve bazı paketler henüz desteklemiyor. Kilit disiplini GIL olsa da olmasa da gerekir: GIL hiçbir zaman <code>sayac += 1</code> gibi işlemleri atomik yapma sözü vermedi.</div><div class="note"><b>Gerçek işte</b>Veri ekiplerinde paralellik çoğunlukla gece çalışan toplu işlerde görülür: dosyalar thread havuzuyla indirilir, ağır hesap süreç havuzunda parçalara bölünerek yapılır, sonuçlar ana süreçte birleştirilir. Bu düzende en pahalı hatalar kilitlenen ve sabaha kadar asılı kalan işler ile Windows sunucuda unutulan <code>__main__</code> korumasıdır. Her bekleme noktasına zaman aşımı koymak ve işi paylaşılan durum yerine "parça → özet → birleştir" biçiminde tasarlamak bu riskleri büyük ölçüde ortadan kaldırır.</div>`,
     ex: [
       { t: 'mc',
         stage: 'Isınma',
@@ -9452,7 +9164,7 @@ print(adet @ fiyat)                         # şube başına ciro
         example: 'import numpy as np\nsicaklik = np.array([12, 15, 21, 25, 19])\nmaske = sicaklik > 20\nprint(maske.any(), int(np.argmax(maske)))   # ilk 20 üstü gün: 2\n',
         start: 'import numpy as np\n\ndef hedef_gunu(gunluk, hedef):\n    toplam = np.cumsum(gunluk)\n    # TODO: maske kur\n    # TODO: hiç ulaşılmadıysa -1\n    # TODO: ilk True indeksini döndür\n    return None\n',
         sol: 'import numpy as np\n\ndef hedef_gunu(gunluk, hedef):\n    toplam = np.cumsum(gunluk)\n    maske = toplam >= hedef\n    if not maske.any():\n        return -1\n    return int(np.argmax(maske))\n',
-        tests: 'assert hedef_gunu([100, 200, 300, 400], 600) == 2, "100+200+300=600: hedefe 2. indekste ulaşılır (>= dahil)"\nassert hedef_gunu([100, 200], 1000) == -1, "Hedefe ulaşılmazsa -1"\nassert hedef_gunu([700, 10], 500) == 0, "İlk gün yeterliyse 0"\nassert isinstance(hedef_gunu([1, 2], 1), int), "Sonuç int olmalı"\nassert "for " not in __source__, "Döngü yerine cumsum ve argmax kullan"\n',
+        tests: 'assert hedef_gunu([100, 200, 300, 400], 600) == 2, "100+200+300=600: hedefe 2. indekste ulaşılır (>= dahil)"\nassert hedef_gunu([100, 200], 1000) == -1, "Hedefe ulaşılmazsa -1"\nassert hedef_gunu([700, 10], 500) == 0, "İlk gün yeterliyse 0"\nassert isinstance(hedef_gunu([1, 2], 1), int), "Sonuç int olmalı"\nassert "for " not in __kod__, "Döngü yerine cumsum ve argmax kullan"\n',
         hints: ['Yürüyen toplam için np.cumsum.', 'np.argmax bir bool dizide ilk True\'nun konumunu verir; ama hiç True yoksa 0 döner, bu yüzden önce any() kontrolü gerekir.', 'if not maske.any(): return -1'],
         why: 'cumsum + karşılaştırma + argmax üçlüsü "ilk kez eşiği geçtiği an" sorularının vektörleştirilmiş kalıbıdır. argmax\'ın hiç True yokken 0 döndürmesi klasik bir tuzaktır.' },
       { t: 'code',
@@ -9511,7 +9223,7 @@ print(adet @ fiyat)                         # şube başına ciro
         q: '<p><code>hareketli_ortalama(dizi, k)</code> fonksiyonu <code>k</code> günlük hareketli ortalamayı döndürsün: sonuç <code>len(dizi) - k + 1</code> elemanlı float numpy dizisi, i. eleman <code>dizi[i:i+k]</code>\'nın ortalaması. Kurallar: <code>k &lt;= 0</code> ise <code>ValueError</code>; <code>k &gt; len(dizi)</code> ise boş dizi. Python döngüsü kullanma (ipucu: <code>np.cumsum</code> ya da <code>np.convolve</code>).</p>',
         start: 'import numpy as np\n\ndef hareketli_ortalama(dizi, k):\n    pass\n',
         sol: 'import numpy as np\n\ndef hareketli_ortalama(dizi, k):\n    if k <= 0:\n        raise ValueError("k pozitif olmalı")\n    d = np.asarray(dizi, dtype=float)\n    if k > len(d):\n        return np.array([], dtype=float)\n    c = np.cumsum(np.concatenate([[0.0], d]))\n    return (c[k:] - c[:-k]) / k\n',
-        tests: 'import numpy as np\nr = hareketli_ortalama([10, 20, 30, 40, 50], 3)\nassert np.allclose(r, [20, 30, 40]), f"3 günlük ortalama [20, 30, 40] olmalı, gelen {r}"\nassert np.allclose(hareketli_ortalama([5, 7], 1), [5, 7]), "k=1 dizinin kendisi"\nassert hareketli_ortalama([1, 2], 3).shape == (0,), "k > n ise boş dizi"\ntry:\n    hareketli_ortalama([1, 2], 0)\n    assert False, "k=0 ValueError vermeli"\nexcept ValueError:\n    pass\nbuyuk = np.arange(100000, dtype=float)\nassert np.allclose(hareketli_ortalama(buyuk, 10)[:2], [4.5, 5.5]), "Büyük dizide de doğru"\nassert "for " not in __source__ and "while " not in __source__, "Döngü yerine cumsum/convolve kullan"\n',
+        tests: 'import numpy as np\nr = hareketli_ortalama([10, 20, 30, 40, 50], 3)\nassert np.allclose(r, [20, 30, 40]), f"3 günlük ortalama [20, 30, 40] olmalı, gelen {r}"\nassert np.allclose(hareketli_ortalama([5, 7], 1), [5, 7]), "k=1 dizinin kendisi"\nassert hareketli_ortalama([1, 2], 3).shape == (0,), "k > n ise boş dizi"\ntry:\n    hareketli_ortalama([1, 2], 0)\n    assert False, "k=0 ValueError vermeli"\nexcept ValueError:\n    pass\nbuyuk = np.arange(100000, dtype=float)\nassert np.allclose(hareketli_ortalama(buyuk, 10)[:2], [4.5, 5.5]), "Büyük dizide de doğru"\nassert "for " not in __kod__ and "while " not in __kod__, "Döngü yerine cumsum/convolve kullan"\n',
         hints: ['Pencere toplamı = cumsum[i+k] - cumsum[i]; başa 0 eklenmiş cumsum işini kolaylaştırır.', 'np.concatenate([[0.0], d]) ile başa 0 ekle; c[k:] - c[:-k] pencere toplamlarını verir.', 'Alternatif: np.convolve(d, np.ones(k) / k, mode="valid").'],
         why: 'Kümülatif toplam farkı, her pencereyi yeniden toplamadan O(n) hareketli ortalama verir; pandas\'ın rolling().mean() işlemi de aynı fikre dayanır. Kenar durumlar (k<=0, k>n) üretim kodunda açıkça ele alınmalıdır.' }
     ],
@@ -10513,9 +10225,9 @@ liste_toplam = sys.getsizeof(liste) + sum(sys.getsizeof(x) for x in liste)
 print(f"list : {liste_toplam / 1024:7.0f} KB")
 print(f"array: {sys.getsizeof(dizi) / 1024:7.0f} KB")
 
-tampon = bytearray(b"HDR|ANADOLU-BANK|0001234500|TRY")
+tampon = bytearray(b"HDR|ILGAZ-BANKA|0001234500|TRY")
 gorunum = memoryview(tampon)
-tutar_alani = gorunum[17:27]          # kopya yok, aynı belleğe pencere
+tutar_alani = gorunum[16:26]          # kopya yok, aynı belleğe pencere
 print(bytes(tutar_alani).decode())
 tutar_alani[0:2] = b"99"              # pencereden yazmak kaynağı değiştirir
 print(tampon.decode())
@@ -11080,7 +10792,7 @@ print(Counter(sehirler).most_common(2))
         'Hata mesajı "unhashable type: list" diyor: lru_cache argümanları sözlük anahtarı olarak saklar.',
         'Önbellekli iç fonksiyon demet alsın; dıştaki fonksiyon listeyi tuple(...) ile çevirsin.'
       ], why: 'lru_cache argümanları hash\'ler; liste ve sözlük hashlenemez. Değişmez bir türe (tuple, frozenset) çevirip önbellekli yardımcıya geçmek standart çözümdür.' },
-    { t: 'code', stage: 'Hata avı', id: 'performans-x7', kind: 'bug', diff: 2, q: '<p>Hatayı bul ve düzelt. Bellek tasarrufu için listeyi üreteçle değiştiren ekip arkadaşın <code>ozet(tutarlar)</code> fonksiyonunu bozdu: artık <code>ZeroDivisionError</code> veriyor. Fonksiyon <code>{"toplam": ..., "adet": ..., "ortalama": ...}</code> döndürmeli ve girdiyi <b>tek geçişte</b> işlemeli (girdi büyük bir üreteç de olabilir, liste yapmadan çöz). Boş girdide ortalama 0 olsun.</p>', start: 'def ozet(tutarlar):\n    kdvli = (t * 1.2 for t in tutarlar)\n    toplam = sum(kdvli)\n    adet = len(list(kdvli))\n    return {"toplam": round(toplam, 2), "adet": adet, "ortalama": round(toplam / adet, 2)}\n', sol: 'def ozet(tutarlar):\n    toplam = 0.0\n    adet = 0\n    for t in tutarlar:\n        toplam += t * 1.2\n        adet += 1\n    ortalama = toplam / adet if adet else 0\n    return {"toplam": round(toplam, 2), "adet": adet, "ortalama": round(ortalama, 2)}\n', tests: 'assert ozet([100, 200, 300]) == {"toplam": 720.0, "adet": 3, "ortalama": 240.0}, "Üç tutarın KDV dahil özeti yanlış"\nassert ozet(x for x in [50, 50]) == {"toplam": 120.0, "adet": 2, "ortalama": 60.0}, "Girdi üreteç olabilir: tek geçişte topla ve say"\nassert ozet([]) == {"toplam": 0.0, "adet": 0, "ortalama": 0}, "Boş girdide ortalama 0"\nassert "list(" not in __source__, "Bellek için liste oluşturma; tek döngüde topla ve say"\n', hints: [
+    { t: 'code', stage: 'Hata avı', id: 'performans-x7', kind: 'bug', diff: 2, q: '<p>Hatayı bul ve düzelt. Bellek tasarrufu için listeyi üreteçle değiştiren ekip arkadaşın <code>ozet(tutarlar)</code> fonksiyonunu bozdu: artık <code>ZeroDivisionError</code> veriyor. Fonksiyon <code>{"toplam": ..., "adet": ..., "ortalama": ...}</code> döndürmeli ve girdiyi <b>tek geçişte</b> işlemeli (girdi büyük bir üreteç de olabilir, liste yapmadan çöz). Boş girdide ortalama 0 olsun.</p>', start: 'def ozet(tutarlar):\n    kdvli = (t * 1.2 for t in tutarlar)\n    toplam = sum(kdvli)\n    adet = len(list(kdvli))\n    return {"toplam": round(toplam, 2), "adet": adet, "ortalama": round(toplam / adet, 2)}\n', sol: 'def ozet(tutarlar):\n    toplam = 0.0\n    adet = 0\n    for t in tutarlar:\n        toplam += t * 1.2\n        adet += 1\n    ortalama = toplam / adet if adet else 0\n    return {"toplam": round(toplam, 2), "adet": adet, "ortalama": round(ortalama, 2)}\n', tests: 'assert ozet([100, 200, 300]) == {"toplam": 720.0, "adet": 3, "ortalama": 240.0}, "Üç tutarın KDV dahil özeti yanlış"\nassert ozet(x for x in [50, 50]) == {"toplam": 120.0, "adet": 2, "ortalama": 60.0}, "Girdi üreteç olabilir: tek geçişte topla ve say"\nassert ozet([]) == {"toplam": 0.0, "adet": 0, "ortalama": 0}, "Boş girdide ortalama 0"\nassert "list(" not in __kod__, "Bellek için liste oluşturma; tek döngüde topla ve say"\n', hints: [
         'Üreteç sum() ile tüketildikten sonra boştur; ikinci kez gezilemez.',
         'Tek bir for döngüsünde hem toplamı hem adedi biriktir.'
       ], why: 'Üreteçler bellek dostudur ama tek kullanımlıktır. Birden çok istatistik gerekiyorsa tek döngüde biriktirmek hem doğru hem bellek açısından en verimlisidir.' },
@@ -11527,7 +11239,7 @@ x = eski_fn()  # type: ignore[no-untyped-call]   # her zaman hata koduyla sustur
         'bool, int\'in alt sınıfıdır: isinstance(True, int) True döner.',
         'Dönüş ipucunu -> TypeGuard[dict[str, object]] olarak değiştir.'
       ], why: 'JSON\'dan gelen veri object tipindedir; TypeGuard ile yazılmış kontrol fonksiyonu hem çalışma anında süzer hem de mypy\'ye "bundan sonra bu bir sözlük" bilgisini verir.' },
-    { t: 'code', stage: 'Kendin yaz', id: 'tip-sistemi-ileri-x4', diff: 2, q: '<p>Python 3.12 generic sözdizimiyle <code>grupla</code> yaz: <code>def grupla[T, K](ogeler: Iterable[T], anahtar: Callable[[T], K]) -&gt; dict[K, list[T]]</code>. Her öğeyi anahtar fonksiyonunun sonucuna göre gruplasın; grup içindeki sıra korunsun. <code>TypeVar</code> kullanma, köşeli parantezli yeni sözdizimini kullan.</p>', start: 'from collections.abc import Iterable, Callable\n\ndef grupla(ogeler, anahtar):\n    pass\n', sol: 'from collections.abc import Iterable, Callable\n\ndef grupla[T, K](ogeler: Iterable[T], anahtar: Callable[[T], K]) -> dict[K, list[T]]:\n    sonuc: dict[K, list[T]] = {}\n    for x in ogeler:\n        sonuc.setdefault(anahtar(x), []).append(x)\n    return sonuc\n', tests: 'sip = [("İzmir", 100), ("Bursa", 50), ("İzmir", 70)]\nassert grupla(sip, lambda s: s[0]) == {"İzmir": [("İzmir", 100), ("İzmir", 70)], "Bursa": [("Bursa", 50)]}\nassert grupla(range(6), lambda n: n % 2 == 0) == {True: [0, 2, 4], False: [1, 3, 5]}\nassert grupla([], len) == {}\nassert [p.__name__ for p in grupla.__type_params__] == ["T", "K"], "def grupla[T, K](...) sözdizimini kullanmalısın"\nassert "TypeVar" not in __source__, "TypeVar yerine 3.12 sözdizimi"\n', hints: [
+    { t: 'code', stage: 'Kendin yaz', id: 'tip-sistemi-ileri-x4', diff: 2, q: '<p>Python 3.12 generic sözdizimiyle <code>grupla</code> yaz: <code>def grupla[T, K](ogeler: Iterable[T], anahtar: Callable[[T], K]) -&gt; dict[K, list[T]]</code>. Her öğeyi anahtar fonksiyonunun sonucuna göre gruplasın; grup içindeki sıra korunsun. <code>TypeVar</code> kullanma, köşeli parantezli yeni sözdizimini kullan.</p>', start: 'from collections.abc import Iterable, Callable\n\ndef grupla(ogeler, anahtar):\n    pass\n', sol: 'from collections.abc import Iterable, Callable\n\ndef grupla[T, K](ogeler: Iterable[T], anahtar: Callable[[T], K]) -> dict[K, list[T]]:\n    sonuc: dict[K, list[T]] = {}\n    for x in ogeler:\n        sonuc.setdefault(anahtar(x), []).append(x)\n    return sonuc\n', tests: 'sip = [("İzmir", 100), ("Bursa", 50), ("İzmir", 70)]\nassert grupla(sip, lambda s: s[0]) == {"İzmir": [("İzmir", 100), ("İzmir", 70)], "Bursa": [("Bursa", 50)]}\nassert grupla(range(6), lambda n: n % 2 == 0) == {True: [0, 2, 4], False: [1, 3, 5]}\nassert grupla([], len) == {}\nassert [p.__name__ for p in grupla.__type_params__] == ["T", "K"], "def grupla[T, K](...) sözdizimini kullanmalısın"\nassert "TypeVar" not in __kod__, "TypeVar yerine 3.12 sözdizimi"\n', hints: [
         'Tip parametreleri fonksiyon adından hemen sonra: def grupla[T, K](...).',
         'dict.setdefault(k, []).append(x) gruplamanın kısa yoludur.'
       ], why: 'Yeni sözdizimi tip parametresinin kapsamını fonksiyonla sınırlar; modül düzeyinde TypeVar tanımı gerekmez.' },
@@ -11736,7 +11448,7 @@ print(sorted(p.name for p in klasor.iterdir()))
         'sorted(Path(klasor).glob("*.csv")) ada göre sıralı yol listesi verir.',
         'iter(lambda: f.read(65536), b"") dosyayı parçalar hâlinde okur; her parçayla h.update çağır.'
       ], why: 'Kaynak sistem aynı dosyayı farklı adla tekrar gönderebilir. Ada değil içeriğe bakmak mükerrer yüklemeyi kökten engeller; manifest gerçekte bir tabloda saklanır.' },
-    { t: 'code', stage: 'Hata avı', id: 'veri-boru-hatti-x6', kind: 'bug', diff: 1, q: '<p>Hatayı bul ve düzelt. <code>calistir(metin, con)</code> CSV metnini okuyup satır sayısını loglamak için sayıyor, sonra yüklüyor. Log doğru sayıyı gösteriyor ama tabloya <b>hiç</b> satır yazılmıyor. Fonksiyon <code>(okunan, yuklenen)</code> döndürmeli ve iki sayı eşit olmalı; veriyi belleğe tümüyle toplamadan (tek geçişte) çöz.</p>', start: 'import csv, io\n\ndef calistir(metin, con):\n    satirlar = (r for r in csv.DictReader(io.StringIO(metin)))\n    okunan = sum(1 for _ in satirlar)\n    print("okunan satır:", okunan)\n    yuklenen = 0\n    for r in satirlar:\n        con.execute("INSERT INTO satis VALUES (?, ?)", (int(r["no"]), r["sehir"]))\n        yuklenen += 1\n    con.commit()\n    return okunan, yuklenen\n', sol: 'import csv, io\n\ndef calistir(metin, con):\n    satirlar = (r for r in csv.DictReader(io.StringIO(metin)))\n    okunan = yuklenen = 0\n    for r in satirlar:\n        okunan += 1\n        con.execute("INSERT INTO satis VALUES (?, ?)", (int(r["no"]), r["sehir"]))\n        yuklenen += 1\n    con.commit()\n    print("okunan satır:", okunan)\n    return okunan, yuklenen\n', tests: 'import sqlite3\ncon = sqlite3.connect(":memory:")\ncon.execute("CREATE TABLE satis(no INTEGER, sehir TEXT)")\nassert calistir("no,sehir\\n1,İzmir\\n2,Bursa\\n3,Ankara\\n", con) == (3, 3), "Okunan ve yüklenen 3 olmalı"\nassert con.execute("SELECT COUNT(*) FROM satis").fetchone()[0] == 3, "Tabloda 3 satır olmalı"\nassert "list(" not in __source__, "Belleğe toplamadan, tek geçişte say ve yükle"\n', hints: [
+    { t: 'code', stage: 'Hata avı', id: 'veri-boru-hatti-x6', kind: 'bug', diff: 1, q: '<p>Hatayı bul ve düzelt. <code>calistir(metin, con)</code> CSV metnini okuyup satır sayısını loglamak için sayıyor, sonra yüklüyor. Log doğru sayıyı gösteriyor ama tabloya <b>hiç</b> satır yazılmıyor. Fonksiyon <code>(okunan, yuklenen)</code> döndürmeli ve iki sayı eşit olmalı; veriyi belleğe tümüyle toplamadan (tek geçişte) çöz.</p>', start: 'import csv, io\n\ndef calistir(metin, con):\n    satirlar = (r for r in csv.DictReader(io.StringIO(metin)))\n    okunan = sum(1 for _ in satirlar)\n    print("okunan satır:", okunan)\n    yuklenen = 0\n    for r in satirlar:\n        con.execute("INSERT INTO satis VALUES (?, ?)", (int(r["no"]), r["sehir"]))\n        yuklenen += 1\n    con.commit()\n    return okunan, yuklenen\n', sol: 'import csv, io\n\ndef calistir(metin, con):\n    satirlar = (r for r in csv.DictReader(io.StringIO(metin)))\n    okunan = yuklenen = 0\n    for r in satirlar:\n        okunan += 1\n        con.execute("INSERT INTO satis VALUES (?, ?)", (int(r["no"]), r["sehir"]))\n        yuklenen += 1\n    con.commit()\n    print("okunan satır:", okunan)\n    return okunan, yuklenen\n', tests: 'import sqlite3\ncon = sqlite3.connect(":memory:")\ncon.execute("CREATE TABLE satis(no INTEGER, sehir TEXT)")\nassert calistir("no,sehir\\n1,İzmir\\n2,Bursa\\n3,Ankara\\n", con) == (3, 3), "Okunan ve yüklenen 3 olmalı"\nassert con.execute("SELECT COUNT(*) FROM satis").fetchone()[0] == 3, "Tabloda 3 satır olmalı"\nassert "list(" not in __kod__, "Belleğe toplamadan, tek geçişte say ve yükle"\n', hints: [
         'Üreteç bir kez tüketilince boşalır; sum(1 for _ in satirlar) onu bitirdi.',
         'Saymayı yükleme döngüsünün içine taşı.'
       ], why: 'Akış tabanlı boru hatlarında her ölçüm aynı geçişte yapılmalıdır. İkinci kez okumak gerekiyorsa kaynağı yeniden açmak gerekir; üreteci "geri sarmak" mümkün değildir.' },
@@ -12081,7 +11793,7 @@ print(alt_kumeler(["çay", "simit", "peynir"]))</pre>
     { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x7', diff: 2, q: '<p>Monoton yığın. <code>kac_gun_sonra(fiyatlar: list[int]) -&gt; list[int]</code>: her gün için fiyatın kaç gün sonra o günkünden <b>kesin olarak</b> yüksek olacağını döndür; hiç yükselmeyecekse 0. O(n) çözüm bekleniyor.</p>', start: 'def kac_gun_sonra(fiyatlar):\n    pass\n', sol: 'def kac_gun_sonra(fiyatlar):\n    sonuc = [0] * len(fiyatlar)\n    yigin = []\n    for i, f in enumerate(fiyatlar):\n        while yigin and fiyatlar[yigin[-1]] < f:\n            j = yigin.pop()\n            sonuc[j] = i - j\n        yigin.append(i)\n    return sonuc\n', tests: 'assert kac_gun_sonra([73, 74, 75, 71, 69, 72, 76, 73]) == [1, 1, 4, 2, 1, 1, 0, 0], "klasik örnek"\nassert kac_gun_sonra([30, 30, 31]) == [2, 1, 0], "eşit fiyat yükseliş sayılmaz"\nassert kac_gun_sonra([5, 4, 3]) == [0, 0, 0], "sürekli düşüş"\nassert kac_gun_sonra([]) == [], "boş liste"\nimport time\nb = time.perf_counter()\nkac_gun_sonra(list(range(200000, 0, -1)) + [10**9])\nassert time.perf_counter() - b < (2 * (4 if __import__("sys").platform == "emscripten" else 1)), "O(n) olmalı; iç içe tam döngü çok yavaş kalır"\n', hints: ['Cevabı henüz bilinmeyen günlerin indekslerini yığında tut.', 'Yeni gün, yığının tepesindeki günden pahalıysa o günün cevabı bulunmuştur: pop et ve farkı yaz.', 'Her indeks yığına bir kez girer, bir kez çıkar: toplam O(n).'], why: 'Yığındaki fiyatlar her zaman azalan sıradadır (monoton). Yeni bir yüksek fiyat, kendinden ucuz tüm bekleyen günleri tek seferde çözer.' },
     { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x8', diff: 2, q: '<p><code>ada_sayisi(harita: list[str]) -&gt; int</code>: harita satırlardan oluşan bir ızgaradır; <code>"1"</code> kara, <code>"0"</code> su. Yatay ya da dikey komşu karalar aynı adadır (çapraz değil). Ada sayısını döndür. Girdi listesini değiştirme. Özyineleme sınırına takılmamak için yığınla (iteratif) dolaşman önerilir.</p>', start: 'def ada_sayisi(harita):\n    pass\n', sol: 'def ada_sayisi(harita):\n    if not harita:\n        return 0\n    R, C = len(harita), len(harita[0])\n    gorulen = set()\n    adalar = 0\n    for r in range(R):\n        for c in range(C):\n            if harita[r][c] == "1" and (r, c) not in gorulen:\n                adalar += 1\n                yigin = [(r, c)]\n                gorulen.add((r, c))\n                while yigin:\n                    y, x = yigin.pop()\n                    for dy, dx in ((1, 0), (-1, 0), (0, 1), (0, -1)):\n                        ny, nx = y + dy, x + dx\n                        if 0 <= ny < R and 0 <= nx < C and harita[ny][nx] == "1" and (ny, nx) not in gorulen:\n                            gorulen.add((ny, nx))\n                            yigin.append((ny, nx))\n    return adalar\n', tests: 'h = ["11000",\n     "11000",\n     "00100",\n     "00011"]\nassert ada_sayisi(h) == 3, "üç ada"\nassert ada_sayisi(["101", "010", "101"]) == 5, "çapraz komşuluk sayılmaz: 5 ada"\nassert ada_sayisi(["000"]) == 0, "kara yok"\nassert ada_sayisi([]) == 0, "boş harita"\nbuyuk = ["1" * 300] * 300\nassert ada_sayisi(buyuk) == 1, "300x300 tek ada; özyinelemeli DFS burada RecursionError verebilir"\n', hints: ['Her hücreyi gez; ziyaret edilmemiş bir kara bulunca ada sayısını artır ve o adanın tamamını işaretle.', 'İşaretleme için DFS ya da BFS: yığın ya da deque ile komşuları dolaş.', 'Sınır kontrolü: 0 <= ny < R and 0 <= nx < C.'], why: 'Her hücre en fazla bir kez yığına girer: O(R×C). Python\'un varsayılan özyineleme sınırı (~1000) büyük ızgarada özyinelemeli DFS\'i çökertir; iteratif yığın bu riski kaldırır.' },
     { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x9', diff: 2, q: '<p>En uzun ortak alt dizi (LCS). <code>lcs(a: str, b: str) -&gt; int</code>: iki metnin, sırası korunarak (ardışık olması gerekmeden) ortak olan en uzun alt dizisinin uzunluğunu döndür. Örn. <code>"ANADOLU"</code> ve <code>"ANKARA"</code> → <code>"ANA"</code> → 3.</p>', start: 'def lcs(a, b):\n    pass\n', sol: 'def lcs(a, b):\n    onceki = [0] * (len(b) + 1)\n    for ca in a:\n        simdi = [0] * (len(b) + 1)\n        for j, cb in enumerate(b, 1):\n            if ca == cb:\n                simdi[j] = onceki[j - 1] + 1\n            else:\n                simdi[j] = max(onceki[j], simdi[j - 1])\n        onceki = simdi\n    return onceki[-1]\n', tests: 'assert lcs("ANADOLU", "ANKARA") == 3, "ANA ortak: 3"\nassert lcs("abcde", "ace") == 3, "ace -> 3"\nassert lcs("abc", "def") == 0, "ortak karakter yok"\nassert lcs("", "abc") == 0, "boş metin"\nassert lcs("a" * 400, "a" * 400) == 400, "400x400 tablo hızlı çalışmalı (özyinelemeli önbelleksiz çözüm üstel)"\n', hints: ['dp[i][j]: a\'nın ilk i, b\'nin ilk j karakteri için LCS uzunluğu.', 'Karakterler eşitse dp[i-1][j-1] + 1, değilse max(dp[i-1][j], dp[i][j-1]).', 'Bellek için yalnız önceki satırı tutman yeterli.'], why: 'Klasik iki boyutlu DP: O(len(a) × len(b)) zaman; yalnız iki satır tutarak bellek O(len(b)). Diff araçları ve DNA hizalama bu fikre dayanır.' },
-    { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x10', diff: 2, q: '<p><code>kendisi_haric_carpim(sayilar: list[int]) -&gt; list[int]</code>: her konum için <b>o eleman hariç</b> diğer tüm elemanların çarpımını döndür. <b>Bölme kullanma</b> (sıfırlar olabilir); O(n) zaman.</p>', start: 'def kendisi_haric_carpim(sayilar):\n    pass\n', sol: 'def kendisi_haric_carpim(sayilar):\n    n = len(sayilar)\n    sonuc = [1] * n\n    sol = 1\n    for i in range(n):\n        sonuc[i] = sol\n        sol *= sayilar[i]\n    sag = 1\n    for i in range(n - 1, -1, -1):\n        sonuc[i] *= sag\n        sag *= sayilar[i]\n    return sonuc\n', tests: 'assert kendisi_haric_carpim([1, 2, 3, 4]) == [24, 12, 8, 6], "klasik örnek"\nassert kendisi_haric_carpim([2, 0, 5]) == [0, 10, 0], "tek sıfır: yalnız onun konumu sıfırdan farklı"\nassert kendisi_haric_carpim([0, 0, 3]) == [0, 0, 0], "iki sıfır: hepsi 0"\nassert kendisi_haric_carpim([7]) == [1], "tek eleman: boş çarpım 1"\nassert "/" not in __source__, "bölme kullanma"\n', hints: ['Her konumun cevabı = solundakilerin çarpımı × sağındakilerin çarpımı.', 'İlk geçişte soldan sağa sol çarpımları yaz.', 'İkinci geçişte sağdan sola giderek sağ çarpımla çarp.'], why: 'Önek ve sonek çarpımları iki geçişte hesaplanır: O(n) zaman, sonuç listesi dışında O(1) ek bellek. Bölmeli çözüm sıfır içeren girdide çöker ya da yanlış sonuç verir.' },
+    { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x10', diff: 2, q: '<p><code>kendisi_haric_carpim(sayilar: list[int]) -&gt; list[int]</code>: her konum için <b>o eleman hariç</b> diğer tüm elemanların çarpımını döndür. <b>Bölme kullanma</b> (sıfırlar olabilir); O(n) zaman.</p>', start: 'def kendisi_haric_carpim(sayilar):\n    pass\n', sol: 'def kendisi_haric_carpim(sayilar):\n    n = len(sayilar)\n    sonuc = [1] * n\n    sol = 1\n    for i in range(n):\n        sonuc[i] = sol\n        sol *= sayilar[i]\n    sag = 1\n    for i in range(n - 1, -1, -1):\n        sonuc[i] *= sag\n        sag *= sayilar[i]\n    return sonuc\n', tests: 'assert kendisi_haric_carpim([1, 2, 3, 4]) == [24, 12, 8, 6], "klasik örnek"\nassert kendisi_haric_carpim([2, 0, 5]) == [0, 10, 0], "tek sıfır: yalnız onun konumu sıfırdan farklı"\nassert kendisi_haric_carpim([0, 0, 3]) == [0, 0, 0], "iki sıfır: hepsi 0"\nassert kendisi_haric_carpim([7]) == [1], "tek eleman: boş çarpım 1"\nassert "/" not in __kod__, "bölme kullanma"\n', hints: ['Her konumun cevabı = solundakilerin çarpımı × sağındakilerin çarpımı.', 'İlk geçişte soldan sağa sol çarpımları yaz.', 'İkinci geçişte sağdan sola giderek sağ çarpımla çarp.'], why: 'Önek ve sonek çarpımları iki geçişte hesaplanır: O(n) zaman, sonuç listesi dışında O(1) ek bellek. Bölmeli çözüm sıfır içeren girdide çöker ya da yanlış sonuç verir.' },
     { t: 'code', stage: 'Kendin yaz', id: 'mulakat-hazirlik-x11', diff: 3, q: '<p>Geri izleme. <code>kombinasyon_toplam(adaylar: list[int], hedef: int) -&gt; list[list[int]]</code>: toplamı <code>hedef</code> olan tüm kombinasyonları döndür. Her aday sınırsız kez kullanılabilir; adaylar pozitif ve birbirinden farklıdır. Her kombinasyon artan sıralı olsun, liste de sözlük sırasına (lexicographic) göre sıralı olsun; aynı kombinasyon iki kez gelmesin.</p>', start: 'def kombinasyon_toplam(adaylar, hedef):\n    pass\n', sol: 'def kombinasyon_toplam(adaylar, hedef):\n    adaylar = sorted(adaylar)\n    sonuc, secim = [], []\n\n    def gez(bas, kalan):\n        if kalan == 0:\n            sonuc.append(secim.copy())\n            return\n        for i in range(bas, len(adaylar)):\n            a = adaylar[i]\n            if a > kalan:\n                break\n            secim.append(a)\n            gez(i, kalan - a)\n            secim.pop()\n\n    gez(0, hedef)\n    return sonuc\n', tests: 'assert kombinasyon_toplam([2, 3, 6, 7], 7) == [[2, 2, 3], [7]], "klasik örnek"\nassert kombinasyon_toplam([3, 2, 5], 8) == [[2, 2, 2, 2], [2, 3, 3], [3, 5]], "adaylar sırasız gelebilir"\nassert kombinasyon_toplam([4], 3) == [], "çözüm yok"\nassert kombinasyon_toplam([1], 0) == [[]], "hedef 0: boş kombinasyon tek çözümdür"\n', hints: ['Adayları sırala; aynı kombinasyonun farklı sıralarını engellemek için her seviyede yalnız mevcut indeksten ve sonrasından seç.', 'Seç → özyinele (aynı indeksle, tekrar kullanılabildiği için) → geri al (pop).', 'Aday kalandan büyükse döngüyü kır (budama).'], why: 'Bas indeksi, [2,3] ve [3,2] gibi aynı kümenin tekrarlarını önler. Sıralı adaylar sayesinde erken break ile arama ağacı budanır. Sonuca secim.copy() eklenmeli; yoksa tüm sonuçlar aynı (sonunda boşalan) listeyi gösterir.' },
     { t: 'code', stage: 'Hata avı', id: 'mulakat-hazirlik-x12', diff: 2, q: '<p><b>Hatayı bul ve düzelt.</b> <code>ilk_konum(sirali, hedef)</code> artan sıralı listede <code>hedef</code>\'in <b>ilk</b> geçtiği indeksi, yoksa -1 döndürmeli (O(log n), bisect kullanmadan). Mevcut kod tekrarlı elemanlarda rastgele bir kopyanın indeksini veriyor ve tek elemanlı listede hedefi bulamıyor.</p>', start: 'def ilk_konum(sirali, hedef):\n    lo, hi = 0, len(sirali) - 1\n    while lo < hi:\n        mid = (lo + hi) // 2\n        if sirali[mid] == hedef:\n            return mid\n        if sirali[mid] < hedef:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return -1\n', sol: 'def ilk_konum(sirali, hedef):\n    lo, hi = 0, len(sirali) - 1\n    bulunan = -1\n    while lo <= hi:\n        mid = (lo + hi) // 2\n        if sirali[mid] == hedef:\n            bulunan = mid\n            hi = mid - 1\n        elif sirali[mid] < hedef:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return bulunan\n', tests: 'assert ilk_konum([5], 5) == 0, "tek elemanlı listede bulunmalı (lo <= hi)"\nassert ilk_konum([1, 2, 2, 2, 2, 3], 2) == 1, "ilk 2 indeks 1\'de"\nassert ilk_konum([7, 7, 7, 7, 7, 7, 7], 7) == 0, "hepsi aynıysa 0"\nassert ilk_konum([1, 3, 5], 4) == -1, "yoksa -1"\nassert ilk_konum([], 1) == -1, "boş liste"\n', hints: ['İki ayrı hata var: döngü koşulu ve eşitlikte hemen dönmek.', 'lo < hi koşulu, lo == hi olduğunda son adayı hiç kontrol etmez.', 'Eşleşmede indeksi kaydet ve aramaya SOLDA devam et (hi = mid - 1).'], why: 'Alt sınır (lower bound) araması, eşleşmeyi bulunca durmaz; daha soldaki eşleşmeleri arar. bisect.bisect_left aynı işi yapar; mülakatta "hazırı bisect_left" demek artı puandır.' },
     { t: 'code', stage: 'Hata avı', id: 'mulakat-hazirlik-x13', diff: 2, q: '<p><b>Hatayı bul ve düzelt.</b> Bağlı listeyi (linked list) tersine çeviren <code>ters_cevir(bas)</code> fonksiyonu yeni başı döndürmeli. Mevcut kod yalnız ilk düğümü döndürüyor; listenin geri kalanı kayboluyor.</p>', start: 'class Dugum:\n    def __init__(self, deger, sonraki=None):\n        self.deger = deger\n        self.sonraki = sonraki\n\ndef ters_cevir(bas):\n    onceki = None\n    simdiki = bas\n    while simdiki:\n        simdiki.sonraki = onceki\n        onceki = simdiki\n        simdiki = simdiki.sonraki\n    return onceki\n', sol: 'class Dugum:\n    def __init__(self, deger, sonraki=None):\n        self.deger = deger\n        self.sonraki = sonraki\n\ndef ters_cevir(bas):\n    onceki = None\n    simdiki = bas\n    while simdiki:\n        sonraki = simdiki.sonraki\n        simdiki.sonraki = onceki\n        onceki = simdiki\n        simdiki = sonraki\n    return onceki\n', tests: 'def listeye(d):\n    r = []\n    while d:\n        r.append(d.deger)\n        d = d.sonraki\n    return r\nbas = Dugum(1, Dugum(2, Dugum(3, Dugum(4))))\nassert listeye(ters_cevir(bas)) == [4, 3, 2, 1], "1->2->3->4 tersine 4->3->2->1 olmalı"\nassert ters_cevir(None) is None, "boş liste None döndürür"\nassert listeye(ters_cevir(Dugum(9))) == [9], "tek düğüm"\n', hints: ['Bağlantıyı değiştirmeden önce bir sonraki düğümü bir yerde sakla.', 'simdiki.sonraki = onceki yazıldıktan sonra simdiki.sonraki artık eski sonraki değil.', 'Geçici değişken: sonraki = simdiki.sonraki, sonra en sonda simdiki = sonraki.'], why: 'Klasik "referansı kaybetme" hatası: oku yeniden yönlendirdiğin anda ilerideki düğümlere giden tek yolu silersin. Üç işaretçi (onceki, simdiki, sonraki) ile O(n) zaman, O(1) bellek.' },
@@ -15012,6 +14724,227 @@ print(olgu[["TarihKey", "tutar"]].head(3))</pre><div class="tbl-wrap"><table><tr
       { bad: 't = satis.merge(musteri, on="MusteriNo")',
         good: 't = satis.merge(musteri.drop_duplicates("MusteriNo"), on="MusteriNo", validate="many_to_one")',
         why: 'Tekrarlı boyut anahtarı birleştirmede satırları çoğaltır ve toplamları şişirir.' }
+    ] }
+);
+})(window);
+/* Kesit Python — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+  { id: 'fastapi',
+    min: 28,
+    html: `<h2>Derinleş: gerçek zamanlı uç noktalar, sayfalama, hız sınırı ve async veritabanı</h2><p>CRUD uç noktaları bir API'nin iskeletidir; canlıda ise şu sorular gelir: "Sipariş durumu değişince ekran kendiliğinden güncellensin", "910 siparişi sayfa sayfa getir ama yeni sipariş gelince kayma olmasın", "bir istemci saniyede 500 istek atıp sistemi düşürmesin", "veritabanı beklerken sunucu kilitlenmesin". Bu bölüm dört konuyu FastAPI kodu (kendi bilgisayarında) ve tarayıcıda çalışan çekirdek mantıkla anlatıyor; sayfalama örnekleri Anadolu Market'in gerçek <code>orders</code> tablosunu kullanıyor.</p><h3>WebSocket ve SSE</h3><p><b>WebSocket</b> iki yönlü, sürekli açık bir bağlantıdır: sohbet, canlı pano, ortak düzenleme. Sunucu birden çok istemciye aynı mesajı gönderecekse (yayın, broadcast) bağlantıları bir yöneticide tutar; kopan bağlantıyı listeden çıkarmayı unutmamalıdır. <b>SSE</b> ise tek yönlüdür (sunucu → istemci), düz HTTP üzerinden çalışır ve LLM cevabı ya da bildirim akışı için yeterlidir (LLM API dersindeki ek bölüm).</p><pre class="code">from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+
+app = FastAPI()
+
+class Yonetici:
+    def __init__(self):
+        self.baglantilar: set[WebSocket] = set()
+    async def baglan(self, ws: WebSocket):
+        await ws.accept()
+        self.baglantilar.add(ws)
+    def ayril(self, ws: WebSocket):
+        self.baglantilar.discard(ws)
+    async def yayinla(self, mesaj: dict):
+        for ws in list(self.baglantilar):
+            try:
+                await ws.send_json(mesaj)
+            except Exception:
+                self.ayril(ws)          # kopmuş istemciyi temizle
+
+yonetici = Yonetici()
+
+@app.websocket("/ws/siparisler")
+async def siparis_akisi(ws: WebSocket):
+    await yonetici.baglan(ws)
+    try:
+        while True:
+            await ws.receive_text()     # istemciden gelen (ör. ping) mesajları dinle
+    except WebSocketDisconnect:
+        yonetici.ayril(ws)
+
+@app.get("/olaylar")
+async def olaylar():
+    async def uret():
+        for i in range(3):
+            yield f"data: {{\\"sira\\": {i}}}\\n\\n"
+    return StreamingResponse(uret(), media_type="text/event-stream")</pre><p>Birden çok sunucu süreci (worker) çalışıyorsa her sürecin kendi bağlantı listesi olur; yayını tüm süreçlere ulaştırmak için Redis Pub/Sub gibi ortak bir kanal gerekir.</p><h3>Sayfalama: offset mi, cursor mu?</h3><div class="tbl-wrap"><table><tr><th></th><th>Offset (<code>?sayfa=3&amp;boyut=20</code>)</th><th>Cursor / keyset (<code>?imlec=...</code>)</th></tr><tr><td>Sorgu</td><td><code>LIMIT 20 OFFSET 40</code></td><td><code>WHERE (tarih, id) &lt; (?, ?) LIMIT 20</code></td></tr><tr><td>Derin sayfa</td><td>Veritabanı atlanan satırları da okur; yavaşlar</td><td>İndeksle doğrudan konuma gider; hep hızlı</td></tr><tr><td>Araya kayıt girerse</td><td>Satırlar kayar: tekrar ya da atlama</td><td>Kayma yok</td></tr><tr><td>"7. sayfaya git"</td><td>Kolay</td><td>Yok; yalnız sonraki/önceki</td></tr></table></div><p>Cursor sayfalamanın kuralı: sıralama anahtarı <b>benzersiz</b> olmalıdır. Sipariş tarihi tek başına benzersiz değildir (aynı gün 6 sipariş olabiliyor); bu yüzden <code>(order_date, order_id)</code> ikilisi kullanılır. İmleç, son satırın anahtarını taşıyan opak bir metindir (base64 ile kodlanmış JSON).</p><pre class="py">import base64, json
+import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders"])
+
+def imlec_yap(tarih, sid):
+    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()
+
+def sayfa(imlec=None, limit=5):
+    sql, p = "SELECT order_id, order_date FROM orders", []
+    if imlec:
+        tarih, sid = json.loads(base64.urlsafe_b64decode(imlec))
+        sql += " WHERE (order_date, order_id) &lt; (?, ?)"
+        p = [tarih, sid]
+    satirlar = con.execute(sql + " ORDER BY order_date DESC, order_id DESC LIMIT ?", p + [limit]).fetchall()
+    sonraki = imlec_yap(*satirlar[-1][::-1]) if len(satirlar) == limit else None
+    return satirlar, sonraki
+
+s1, im = sayfa()
+print(s1)
+print("imleç:", im)
+s2, _ = sayfa(im)
+print(s2)</pre><p>Filtreleme de aynı uç noktada yapılır (<code>?status=delivered&amp;channel=mobile</code>). Güvenli kalıp: izin verilen filtreleri bir <b>beyaz listede</b> tut, değerleri her zaman <code>?</code> parametresiyle geçir, bilinmeyen parametreye 422 dön. Sütun adını kullanıcıdan alıp SQL'e yapıştırmak SQL enjeksiyonudur.</p><h3>Hız sınırı middleware'i</h3><p>En yaygın algoritma <b>jeton kovası</b>dır (token bucket): her istemcinin kovasında en fazla <code>kapasite</code> jeton vardır, kova saniyede <code>hiz</code> jeton dolar, her istek bir jeton harcar. Jeton yoksa <b>429 Too Many Requests</b> ve <code>Retry-After</code> başlığı dönülür. Kısa ani yüklere (burst) izin verir ama ortalama hızı sınırlar.</p><pre class="py">class Kova:
+    def __init__(self, kapasite, hiz):
+        self.kapasite, self.hiz = kapasite, hiz
+        self.jeton, self.son = float(kapasite), 0.0
+    def izin(self, simdi):
+        self.jeton = min(self.kapasite, self.jeton + (simdi - self.son) * self.hiz)
+        self.son = simdi
+        if self.jeton &gt;= 1:
+            self.jeton -= 1
+            return True
+        return False
+
+k = Kova(kapasite=3, hiz=1)          # 3'lük patlama, saniyede 1 istek
+print([k.izin(t) for t in (0, 0.1, 0.2, 0.3, 1.3, 1.4)])</pre><pre class="code">import time
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+kovalar: dict[str, Kova] = {}
+
+@app.middleware("http")
+async def hiz_siniri(request: Request, call_next):
+    anahtar = request.headers.get("X-API-Key") or request.client.host
+    kova = kovalar.setdefault(anahtar, Kova(kapasite=20, hiz=5))
+    if not kova.izin(time.monotonic()):
+        return JSONResponse({"detail": "Çok fazla istek"}, status_code=429, headers={"Retry-After": "1"})
+    return await call_next(request)</pre><p>Bu sözlük tek süreçte çalışır; çok süreçli üretimde sayaçlar Redis'te tutulur (ya da <code>slowapi</code> gibi bir kütüphane ve API ağ geçidi kullanılır). Zaman için <code>time.monotonic()</code> kullan: sistem saati geri alınsa bile ileri akar.</p><h3>Async veritabanı oturumu</h3><p><code>async def</code> uç noktada senkron veritabanı sürücüsü olay döngüsünü bloklar. SQLAlchemy 2'nin async motoru ve async sürücü (PostgreSQL için <code>asyncpg</code>, SQLite için <code>aiosqlite</code>) bekleme sırasında döngüyü serbest bırakır. Oturum, istek başına açılıp kapanan bir bağımlılıktır:</p><pre class="code"># pip install "sqlalchemy[asyncio]" asyncpg
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+motor = create_async_engine("postgresql+asyncpg://kullanici:sifre@db/market", pool_size=10)
+OturumYap = async_sessionmaker(motor, expire_on_commit=False)
+
+async def oturum_al():
+    async with OturumYap() as oturum:
+        yield oturum                    # istek bitince otomatik kapanır
+
+Oturum = Annotated[AsyncSession, Depends(oturum_al)]
+
+@app.get("/siparisler/{sid}")
+async def siparis(sid: int, oturum: Oturum):
+    sonuc = await oturum.execute(select(Siparis).where(Siparis.id == sid))
+    return sonuc.scalar_one_or_none()</pre><div class="note"><b>Gerçek işte</b>Mobil uygulamadaki sonsuz kaydırmalı listeler cursor sayfalamayla, kurye konumu ve sipariş durumu ekranları WebSocket ya da SSE ile çalışır. Kamuya açık API'lerde hız sınırı hem güvenlik hem maliyet konusudur; sınırı ve kalan kotayı <code>X-RateLimit-Remaining</code> gibi başlıklarla belgelemek iyi bir API tasarımıdır.</div>`,
+    ex: [
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Mobil uygulamada siparişler offset sayfalamayla (<code>LIMIT 20 OFFSET 20</code>) en yeniden eskiye listeleniyor. Kullanıcı 1. sayfayı okurken 3 yeni sipariş geldi. 2. sayfada ne olur?',
+        o: ['Hiçbir şey; veritabanı ilk sorgunun anlık görüntüsünü saklar ve 2. sayfa ona göre gelir', '1. sayfanın son 3 siparişi 2. sayfanın başında tekrar görünür', '2. sayfa boş döner çünkü OFFSET değeri artık geçersiz olur', 'Yeni 3 sipariş 2. sayfanın sonuna eklenir'],
+        a: 1,
+        why: 'Yeni kayıtlar listenin başına girince her şey 3 sıra kayar; OFFSET 20 artık eski 18. sıradan başlar. Cursor sayfalama "şu anahtardan sonrası" dediği için bu kaymadan etkilenmez.' },
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Kurye uygulaması konumunu saniyede bir sunucuya gönderiyor, müşteri ekranı da kurye konumunu canlı izliyor. Kurye tarafı için en uygun teknoloji hangisi?',
+        o: ['SSE, çünkü düz HTTP üzerinden çalışır ve vekil sunucularla uyumludur', 'Her saniye konum için yeni bir POST isteği açıp kapatmak', 'WebSocket, çünkü istemci de sürekli veri gönderiyor', 'Her 10 saniyede bir GET isteğiyle sunucuyu yoklamak (polling)'],
+        a: 2,
+        why: 'SSE tek yönlüdür (sunucudan istemciye). Kurye sürekli veri gönderdiği için iki yönlü ve açık kalan WebSocket bağlantısı uygundur. Müşteri ekranı ise yalnız dinlediği için SSE ile de beslenebilir.' },
+      { t: 'predict',
+        stage: 'Kodu oku',
+        q: 'Jeton kovası (token bucket) simülasyonu. Bu kod ne yazdırır?',
+        code: 'kapasite, hiz = 2, 0.5\njeton, son = 2.0, 0.0\nsonuc = []\nfor t in (0, 0, 0, 2, 3, 4):\n    jeton = min(kapasite, jeton + (t - son) * hiz)\n    son = t\n    if jeton >= 1:\n        jeton -= 1\n        sonuc.append("+")\n    else:\n        sonuc.append("-")\nprint("".join(sonuc))\n',
+        o: ['++-+-+', '++-++-', '+++-+-', '++----'],
+        a: 0,
+        why: 'İlk iki istek kovadaki 2 jetonu harcar, üçüncü reddedilir. t=2\'de 2 sn × 0.5 = 1 jeton dolmuş: kabul. t=3\'te yalnız 0.5 jeton: red. t=4\'te 0.5 + 0.5 = 1: kabul.' },
+      { t: 'code',
+        id: 'fastapi-w1',
+        stage: 'Rehberli',
+        diff: 1,
+        q: '<p>Cursor sayfalama için imleç kodlayıcı yaz. <code>imlec_kodla(tarih, sid)</code>: <code>[tarih, sid]</code> listesini JSON\'a, sonra <code>base64.urlsafe_b64encode</code> ile metne çevirsin (dönüş <code>str</code>). <code>imlec_coz(metin)</code>: tersini yapıp <code>(tarih, sid)</code> demeti döndürsün; bozuk imleçte (<code>binascii.Error</code>, <code>json.JSONDecodeError</code>, <code>UnicodeDecodeError</code>, yanlış yapı) <code>ValueError("geçersiz imleç")</code> fırlatsın. Yapı denetimi: 2 elemanlı liste, ilki <code>str</code>, ikincisi <code>int</code>.</p>',
+        guide: ['Kodlarken: json.dumps → .encode() → urlsafe_b64encode → .decode().', 'Çözerken tersini yap; json.loads bytes da kabul eder.', 'Çözme adımlarını try içine al; yakaladığın hataları ValueError\'a çevir.', 'Yapıyı isinstance ile denetle.'],
+        example: 'import base64\nb = base64.urlsafe_b64encode("merhaba".encode()).decode()\nprint(b, base64.urlsafe_b64decode(b).decode())\n',
+        start: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    # TODO\n    pass\n\ndef imlec_coz(metin):\n    # TODO\n    pass\n',
+        sol: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    try:\n        veri = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) as h:\n        raise ValueError("geçersiz imleç") from h\n    if not (isinstance(veri, list) and len(veri) == 2 and isinstance(veri[0], str) and isinstance(veri[1], int)):\n        raise ValueError("geçersiz imleç")\n    return veri[0], veri[1]\n',
+        tests: 'i = imlec_kodla("2024-12-31", 905)\nassert isinstance(i, str), "Dönüş metin (str) olmalı"\nassert imlec_coz(i) == ("2024-12-31", 905), "Kodlanan imleç geri çözülebilmeli"\nfor bozuk in ("@@@", "bm90IGpzb24=", base64.urlsafe_b64encode(b\'{"a": 1}\').decode()):\n    try:\n        imlec_coz(bozuk)\n        assert False, f"{bozuk!r} için ValueError beklenirdi"\n    except ValueError as h:\n        assert str(h) == "geçersiz imleç"\n',
+        hints: ['base64 metin değil bytes ile çalışır: encode/decode adımlarını unutma.', 'except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) ile yakala; json.JSONDecodeError zaten ValueError alt sınıfıdır.'],
+        why: 'İmleç istemciye opak bir metin olarak verilir; içini kurcalayan ya da bozan istemci 500 değil, 400/422 almalıdır. Bu yüzden çözme hataları tek bir anlamlı hataya çevrilir.' },
+      { t: 'code',
+        id: 'fastapi-w2',
+        stage: 'Rehberli',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Anadolu Market\'in gerçek <code>orders</code> tablosu için cursor sayfalama yaz: <code>siparis_sayfasi(con, imlec=None, limit=20)</code>. Sıralama <code>order_date DESC, order_id DESC</code>. İmleç varsa çöz ve <code>WHERE (order_date, order_id) &lt; (?, ?)</code> uygula. Dönüş: <code>{"ogeler": [order_id, ...], "sonraki": imlec_ya_da_None}</code>. Sonraki imleç, sayfa tam doluysa son satırın <code>(order_date, order_id)</code> değerinden üretilsin. İmleç yardımcıları hazır.</p>',
+        guide: ['Temel SQL\'i ve boş parametre listesini hazırla.', 'İmleç varsa imlec_coz ile çöz, WHERE koşulunu ve iki parametreyi ekle.', 'ORDER BY ... LIMIT ? ile çalıştır.', 'Satır sayısı limit\'e eşitse son satırdan imleç üret, değilse None.'],
+        example: 'import sqlite3\nc = sqlite3.connect(":memory:")\nprint(c.execute("SELECT (1, 5) < (1, 7), (2, 1) < (1, 9)").fetchone())\n',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\n\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    # TODO: imleç koşulu, sıralama, limit, sonraki imleç\n    return {"ogeler": [], "sonraki": None}\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    if imlec:\n        tarih, sid = imlec_coz(imlec)\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        parametreler += [tarih, sid]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, parametreler + [limit]).fetchall()\n    sonraki = imlec_kodla(*satirlar[-1]) if len(satirlar) == limit else None\n    return {"ogeler": [s[1] for s in satirlar], "sonraki": sonraki}\n',
+        tests: 's = siparis_sayfasi(con)\nassert s["ogeler"] == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47], "İlk sayfa en yeni 20 sipariş olmalı"\nassert s["sonraki"] is not None, "Tam dolu sayfada sonraki imleç olmalı"\nhepsi, im, adim = [], None, 0\nwhile True:\n    s = siparis_sayfasi(con, im, limit=50)\n    hepsi += s["ogeler"]\n    im = s["sonraki"]\n    adim += 1\n    if im is None or adim > 30:\n        break\nassert len(hepsi) == 910 and len(set(hepsi)) == 910, f"Tüm sayfalar 910 benzersiz sipariş vermeli, gelen {len(hepsi)} / {len(set(hepsi))}"\nassert hepsi == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47, 397, 427, 770, 674, 437, 206, 597, 836, 566, 475, 797, 718, 344, 131, 63, 625, 517, 908, 535, 390, 842, 81, 18, 368, 335, 201, 127, 327, 302, 110, 654, 183, 803, 272, 102, 627, 582, 139, 881, 779, 740, 431, 487, 51, 209, 72, 910, 353, 284, 116, 46, 17, 680, 596, 205, 835, 604, 371, 238, 68, 750, 426, 150, 849, 516, 460, 217, 822, 653, 903, 534, 122, 24, 430, 568, 436, 769, 756, 581, 165, 130, 673, 453, 301, 887, 505, 237, 796, 343, 109, 727, 143, 101, 739, 515, 465, 204, 533, 425, 389, 595, 707, 652, 208, 182, 838, 768, 326, 271, 200, 749, 688, 525, 129, 565, 349, 57, 717, 514, 429, 138, 16, 342, 656, 607, 435, 45, 821, 841, 504, 198, 777, 532, 767, 886, 866, 325, 820, 121, 23, 564, 334, 471, 909, 679, 795, 455, 452, 434, 341, 802, 651, 603, 524, 424, 270, 128, 100, 590, 713, 181, 834, 687, 254, 170, 62, 538, 164, 441, 44, 50, 367, 513, 388, 115, 531, 626, 314, 80, 837, 748, 236, 300, 74, 708, 203, 672, 778, 594, 885, 99, 766, 580, 650, 142, 686, 523, 880, 720, 459, 329, 738, 324, 207, 726, 805, 678, 340, 197, 137, 548, 108, 43, 212, 15, 451, 819, 133, 22, 366, 348, 246, 613, 387, 186, 765, 503, 352, 149, 649, 685, 467, 848, 865, 716, 269, 433, 428, 281, 833, 794, 775, 617, 747, 671, 512, 71, 42, 884, 737, 180, 98, 14, 120, 907, 840, 339, 299, 628, 450, 163, 126, 530, 470, 593, 67, 235, 818, 432, 522, 423, 440, 563, 97, 41, 883, 537, 648, 323, 864, 764, 511, 479, 253, 202, 624, 268, 136, 21, 199, 793, 498, 234, 49, 13, 298, 844, 684, 589, 529, 502, 486, 386, 283, 879, 216, 179, 56, 832, 602, 746, 396, 817, 365, 313, 592, 474, 370, 567, 338, 185, 61, 579, 670, 736, 497, 677, 141, 804, 755, 763, 528, 510, 79, 12, 701, 521, 322, 267, 776, 233, 712, 536, 878, 816, 715, 73, 148, 119, 449, 337, 902, 612, 351, 297, 40, 616, 96, 162, 831, 439, 792, 647, 385, 606, 591, 801, 578, 266, 196, 168, 527, 464, 815, 328, 520, 496, 735, 509, 877, 683, 411, 501, 706, 588, 562, 66, 422, 20, 95, 70, 762, 333, 135, 321, 774, 11, 265, 167, 118, 39, 232, 347, 734, 682, 140, 364, 847, 245, 791, 336, 178, 473, 761, 485, 495, 296, 161, 60, 719, 601, 547, 700, 577, 669, 830, 107, 561, 876, 646, 526, 448, 384, 19, 410, 278, 38, 611, 395, 125, 814, 519, 508, 458, 10, 714, 463, 790, 745, 211, 906, 320, 264, 94, 725, 252, 231, 65, 760, 37, 645, 711, 147, 48, 623, 587, 134, 280, 132, 560, 494, 478, 295, 699, 177, 184, 363, 829, 681, 319, 843, 421, 383, 93, 875, 500, 409, 350, 195, 839, 69, 800, 230, 518, 36, 9, 615, 346, 215, 160, 705, 846, 644, 332, 507, 733, 676, 166, 600, 469, 318, 484, 813, 773, 263, 438, 176, 244, 106, 759, 472, 576, 668, 901, 559, 294, 92, 362, 282, 55, 610, 698, 8, 382, 447, 493, 369, 420, 317, 277, 499, 828, 789, 605, 78, 35, 812, 408, 546, 732, 643, 229, 124, 312, 262, 667, 159, 874, 279, 758, 91, 492, 419, 293, 407, 7, 34, 381, 64, 175, 724, 666, 642, 558, 457, 575, 331, 251, 811, 757, 406, 316, 276, 228, 731, 609, 6, 905, 462, 345, 827, 158, 788, 772, 380, 33, 599, 261, 898, 697, 446, 873, 641, 491, 90, 315, 292, 174, 5, 622, 418, 194, 640, 379, 214, 897, 227, 723, 54, 826, 260, 157, 275, 696, 405, 59, 675, 574, 730, 89, 545, 361, 190, 787, 259, 810, 173, 477, 404, 4, 394, 665, 291, 32, 896, 378, 863, 146, 88, 557, 704, 639, 490, 825, 744, 710, 695, 156, 483, 403, 226, 573, 311, 445, 786, 729, 586, 468, 3, 872, 225, 189, 845, 553, 544, 290, 330, 31, 824, 417, 904, 53, 862, 809, 799, 360, 377, 274, 258, 243, 87, 728, 621, 614, 895, 638, 572, 289, 188, 900, 771, 77, 155, 402, 694, 172, 105, 86, 393, 785, 556, 871, 664, 722, 257, 242, 861, 637, 571, 30, 58, 308, 224, 894, 754, 552, 114, 543, 376, 2, 416, 273, 193, 808, 187, 256, 85, 743, 693, 444, 288, 798, 154, 476, 401, 598, 359, 375, 29, 169, 307, 1, 250, 171, 807, 784, 551, 52, 663, 570, 860, 482, 542, 636, 104, 893, 585, 223, 703, 692, 84, 145, 870, 709, 555, 287, 28, 742, 550, 635, 443, 192, 306, 892, 222, 400, 489, 76, 859, 374, 415, 634, 691, 153, 620, 392, 869, 27, 305, 783, 286, 753, 358, 899, 541, 891, 633, 549, 662, 83, 221, 310, 103, 399, 554, 304, 26, 569, 373, 690, 249, 584, 858, 632, 398, 113, 144, 82, 303, 372, 285, 191, 782, 890, 241, 442, 481, 357, 220, 857, 152, 868, 25, 75, 631, 661, 540, 752, 414, 219, 741, 488, 689, 856, 660, 889, 112, 630, 855, 151, 309, 781, 218, 659, 413, 356, 867, 583, 854, 751, 355, 480, 702, 888, 853, 619, 240, 658, 111, 852, 391, 248, 412, 780, 851, 354, 657, 618, 850, 247], "Sayfalar birleşince tam sıralı liste çıkmalı"\n',
+        hints: ['SQLite satır değeri karşılaştırması (a, b) < (?, ?) iki sütunlu sözlük sırası karşılaştırmasıdır.', 'Sonraki imleç: imlec_kodla(*satirlar[-1]) — satır zaten (order_date, order_id) sırasında.'],
+        why: 'Tarih tek başına benzersiz olmadığı için order_id eşitlik bozucu (tie-breaker) olarak eklenir. Böylece aynı gündeki 6 sipariş sayfa sınırına denk gelse de hiçbiri atlanmaz ya da tekrarlanmaz.' },
+      { t: 'code',
+        id: 'fastapi-w3',
+        stage: 'Kendin yaz',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Filtre kalıbı: <code>filtre_sorgusu(parametreler)</code> sorgu parametresi sözlüğünü <code>(sql, degerler)</code> demetine çevirsin. Temel: <code>SELECT COUNT(*) FROM orders</code>. İzinli filtreler ve SQL karşılıkları (bu sırayla eklenir): <code>status</code> → <code>status = ?</code>, <code>channel</code> → <code>channel = ?</code>, <code>baslangic</code> → <code>order_date &gt;= ?</code>, <code>bitis</code> → <code>order_date &lt;= ?</code>. Koşullar <code>" WHERE "</code> ve <code>" AND "</code> ile birleşir. İzinsiz anahtar varsa <code>ValueError</code> (mesajda anahtar adı geçsin). Testler sorguyu gerçek <code>orders</code> tablosunda çalıştırır.</p>',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef filtre_sorgusu(parametreler):\n    pass\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\nIZINLI = {"status": "status = ?", "channel": "channel = ?",\n          "baslangic": "order_date >= ?", "bitis": "order_date <= ?"}\n\ndef filtre_sorgusu(parametreler):\n    bilinmeyen = set(parametreler) - set(IZINLI)\n    if bilinmeyen:\n        raise ValueError(f"bilinmeyen filtre: {\', \'.join(sorted(bilinmeyen))}")\n    kosullar, degerler = [], []\n    for anahtar, kosul in IZINLI.items():\n        if anahtar in parametreler:\n            kosullar.append(kosul)\n            degerler.append(parametreler[anahtar])\n    sql = "SELECT COUNT(*) FROM orders"\n    if kosullar:\n        sql += " WHERE " + " AND ".join(kosullar)\n    return sql, degerler\n',
+        tests: 'sql, d = filtre_sorgusu({"channel": "mobile", "status": "delivered"})\nassert sql == "SELECT COUNT(*) FROM orders WHERE status = ? AND channel = ?", f"Sıra izinli listedeki gibi: {sql}"\nassert d == ["delivered", "mobile"]\nassert con.execute(sql, d).fetchone()[0] == 330, "Mobilde teslim edilen 330 sipariş var"\nsql2, d2 = filtre_sorgusu({"baslangic": "2024-01-01", "bitis": "2024-12-31", "status": "returned"})\nassert con.execute(sql2, d2).fetchone()[0] == con.execute("SELECT COUNT(*) FROM orders WHERE status=\'returned\' AND order_date LIKE \'2024%\'").fetchone()[0]\nassert filtre_sorgusu({}) == ("SELECT COUNT(*) FROM orders", [])\ntry:\n    filtre_sorgusu({"status": "x", "1=1; DROP TABLE orders": "1"})\n    assert False, "İzinsiz anahtar reddedilmeli"\nexcept ValueError as h:\n    assert "DROP" in str(h), "Hata mesajında anahtar adı geçmeli"\n',
+        hints: ['İzinli filtreleri sıralı bir sözlükte tut; sözlükler ekleme sırasını korur.', 'Değerleri asla SQL metnine yapıştırma; ? yer tutucusu ve parametre listesi kullan.'],
+        why: 'Beyaz liste hem SQL enjeksiyonunu hem yazım hatası olan parametrelerin sessizce yok sayılmasını önler. FastAPI\'de bu fonksiyon bir bağımlılık (Depends) olarak sorgu parametrelerini toplar.' },
+      { t: 'code',
+        id: 'fastapi-w4',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p>Anahtar başına jeton kovası: <code>Sinirlayici(kapasite, hiz, saat)</code>. <code>saat</code> çağrıldığında saniye döndüren bir fonksiyon (testte sahte saat verilir). <code>izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürsün: jeton varsa <code>(True, 0.0)</code>; yoksa <code>(False, s)</code>, s bir jetonun dolması için gereken saniye (2 basamak). Her anahtarın kovası ilk istekte dolu başlar; kovalar birbirinden bağımsızdır.</p>',
+        start: 'class Sinirlayici:\n    pass\n',
+        sol: 'class Sinirlayici:\n    def __init__(self, kapasite, hiz, saat):\n        self.kapasite, self.hiz, self.saat = kapasite, hiz, saat\n        self.kovalar = {}\n\n    def izin_ver(self, anahtar):\n        simdi = self.saat()\n        jeton, son = self.kovalar.get(anahtar, (float(self.kapasite), simdi))\n        jeton = min(self.kapasite, jeton + (simdi - son) * self.hiz)\n        if jeton >= 1:\n            self.kovalar[anahtar] = (jeton - 1, simdi)\n            return True, 0.0\n        self.kovalar[anahtar] = (jeton, simdi)\n        return False, round((1 - jeton) / self.hiz, 2)\n',
+        tests: 't = [0.0]\ns = Sinirlayici(kapasite=2, hiz=0.5, saat=lambda: t[0])\nassert s.izin_ver("a") == (True, 0.0) and s.izin_ver("a") == (True, 0.0), "İlk iki istek kapasiteden"\nassert s.izin_ver("a") == (False, 2.0), "Jeton bitti: 1 jeton için 1/0.5 = 2 sn beklemeli"\nassert s.izin_ver("b") == (True, 0.0), "Başka anahtarın kovası ayrı"\nt[0] = 1.0\nassert s.izin_ver("a") == (False, 1.0), "1 sn sonra 0.5 jeton var; 1 sn daha gerek"\nt[0] = 2.0\nassert s.izin_ver("a") == (True, 0.0), "2. saniyede 1 jeton dolmuş olmalı"\nt[0] = 100.0\nassert [s.izin_ver("a")[0] for _ in range(3)] == [True, True, False], "Kova kapasiteden fazla dolmamalı"\n',
+        hints: ['Her anahtar için (jeton, son_zaman) sakla.', 'Dolum: min(kapasite, jeton + geçen_süre * hiz).', 'Bekleme: (1 - jeton) / hiz.'],
+        why: 'Retry-After için gereken süreyi hesaplamak istemciye "ne zaman tekrar dene" bilgisini verir; körlemesine yeniden deneme fırtınasını önler. Saat fonksiyonunu dışarıdan almak testi deterministik yapar.' },
+      { t: 'code',
+        id: 'fastapi-w5',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p>WebSocket yayın yöneticisinin mantığını yaz: <code>YayinYoneticisi</code>. <code>baglan(ws)</code> ve <code>ayril(ws)</code> bağlantıyı kümeye ekler/çıkarır (olmayanı çıkarmak hata vermesin). <code>async yayinla(mesaj)</code> her bağlantının <code>await ws.send_json(mesaj)</code> metodunu çağırsın; gönderimde istisna fırlatan bağlantıyı kümeden çıkarsın ve diğerlerine göndermeye devam etsin. Başarılı gönderim sayısını döndürsün. <code>len(yonetici)</code> bağlı istemci sayısını versin.</p>',
+        start: 'class YayinYoneticisi:\n    pass\n',
+        sol: 'class YayinYoneticisi:\n    def __init__(self):\n        self.baglantilar = set()\n\n    def baglan(self, ws):\n        self.baglantilar.add(ws)\n\n    def ayril(self, ws):\n        self.baglantilar.discard(ws)\n\n    def __len__(self):\n        return len(self.baglantilar)\n\n    async def yayinla(self, mesaj):\n        basarili = 0\n        for ws in list(self.baglantilar):\n            try:\n                await ws.send_json(mesaj)\n                basarili += 1\n            except Exception:\n                self.ayril(ws)\n        return basarili\n',
+        tests: 'import asyncio\nclass WS:\n    def __init__(self, kopuk=False):\n        self.kopuk, self.gelen = kopuk, []\n    async def send_json(self, m):\n        if self.kopuk:\n            raise ConnectionError("koptu")\n        self.gelen.append(m)\ny = YayinYoneticisi()\na, b, c = WS(), WS(kopuk=True), WS()\nfor w in (a, b, c):\n    y.baglan(w)\nassert len(y) == 3\nn = asyncio.run(y.yayinla({"siparis": 905, "durum": "kargoda"}))\nassert n == 2, f"İki başarılı gönderim olmalı, gelen {n}"\nassert len(y) == 2 and b not in y.baglantilar, "Kopuk bağlantı çıkarılmalı"\nassert a.gelen == c.gelen == [{"siparis": 905, "durum": "kargoda"}]\ny.ayril(WS())\ny.ayril(a)\nassert len(y) == 1\n',
+        hints: ['Küme üzerinde gezerken ondan eleman çıkarmak RuntimeError verir: list(self.baglantilar) kopyası üzerinde gez.', 'discard, olmayan elemanda hata vermez.'],
+        why: 'Kopan istemciyi temizlemezsen her yayında aynı hata tekrar eder ve bellek sızar. Kopya üzerinde gezmek, döngü sırasında kümeyi güvenle değiştirmeni sağlar.' },
+      { t: 'code',
+        id: 'fastapi-w6',
+        stage: 'Hata avı',
+        kind: 'bug',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Hatayı bul ve düzelt. Mobil ekip "sonsuz kaydırmada bazı siparişler hiç görünmüyor" diyor. <code>sayfa_getir(con, son_tarih=None, limit=50)</code> imleç olarak yalnız son satırın tarihini kullanıyor. Aynı gün birden çok sipariş olduğunda sayfa sınırındaki siparişler atlanıyor. Fonksiyonu <code>(order_date, order_id)</code> ikilisiyle çalışacak şekilde düzelt: parametre adı <code>son</code> olsun (ya <code>None</code> ya da <code>(tarih, id)</code> demeti), dönüş <code>(id_listesi, yeni_son)</code>; sayfa eksik dolarsa <code>yeni_son</code> <code>None</code>.</p>',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE order_date < ?"\n        p.append(son[0])\n    sql += " ORDER BY order_date DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        p += [son[0], son[1]]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
+        tests: 'hepsi, son = [], None\nfor _ in range(40):\n    ids, son = sayfa_getir(con, son, limit=50)\n    hepsi += ids\n    if son is None:\n        break\nassert len(set(hepsi)) == 910, f"910 siparişin hepsi görünmeli; görünen {len(set(hepsi))}"\nassert len(hepsi) == 910, "Hiçbir sipariş iki kez gelmemeli"\nids, _ = sayfa_getir(con, ("2024-11-27", 10**9), limit=6)\nassert len(ids) == 6 and len(set(ids)) == 6\n',
+        hints: ['Sıralama anahtarı benzersiz olmalı: tarih + id.', 'Hem WHERE koşulunda hem ORDER BY\'da ikinci anahtarı kullan.'],
+        why: 'Yalnız tarihe göre "< son_tarih" demek, son tarihle aynı gündeki ama sayfaya sığmamış siparişleri atlar; sıralamada id olmadığı için aynı gündeki siparişlerin sırası da belirsizdir.' },
+      { t: 'code',
+        id: 'fastapi-w7',
+        stage: 'Meydan okuma',
+        diff: 3,
+        q: '<p>Hız sınırı ara katmanını (middleware) yaz. <code>hiz_siniri(uygulama, sinirlayici)</code> bir async fonksiyon döndürsün: <code>async def sarili(istek)</code>. <code>istek</code> sözlüğünde <code>"basliklar"</code> (sözlük) ve <code>"istemci"</code> (IP) var. Anahtar: <code>X-API-Key</code> başlığı varsa o, yoksa IP. <code>sinirlayici.izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürür (önceki görevdeki gibi). İzin yoksa uygulamayı <b>çağırmadan</b> <code>{"durum": 429, "govde": {"detail": "Çok fazla istek"}, "basliklar": {"Retry-After": str(math.ceil(bekle))}}</code> döndür. İzin varsa <code>await uygulama(istek)</code> sonucunu döndür ama yanıt başlıklarına <code>"X-RateLimit-Key"</code> olarak kullanılan anahtar türünü (<code>"api-key"</code> ya da <code>"ip"</code>) ekle (yanıtta <code>basliklar</code> yoksa oluştur; orijinal sözlüğü değiştirme).</p>',
+        start: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    pass\n',
+        sol: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    async def sarili(istek):\n        api_anahtari = istek.get("basliklar", {}).get("X-API-Key")\n        anahtar = api_anahtari or istek["istemci"]\n        izin, bekle = sinirlayici.izin_ver(anahtar)\n        if not izin:\n            return {"durum": 429, "govde": {"detail": "Çok fazla istek"},\n                    "basliklar": {"Retry-After": str(math.ceil(bekle))}}\n        yanit = await uygulama(istek)\n        basliklar = dict(yanit.get("basliklar", {}))\n        basliklar["X-RateLimit-Key"] = "api-key" if api_anahtari else "ip"\n        return {**yanit, "basliklar": basliklar}\n    return sarili\n',
+        tests: 'import asyncio\nclass S:\n    def __init__(self, izinler):\n        self.izinler, self.gorulen = list(izinler), []\n    def izin_ver(self, anahtar):\n        self.gorulen.append(anahtar)\n        return self.izinler.pop(0)\ncagri = []\nSABIT = {"durum": 200, "govde": {"ok": True}}\nasync def uygulama(istek):\n    cagri.append(istek["istemci"])\n    return SABIT\ns = S([(True, 0.0), (False, 1.2), (True, 0.0)])\nm = hiz_siniri(uygulama, s)\nr1 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r1 == {"durum": 200, "govde": {"ok": True}, "basliklar": {"X-RateLimit-Key": "ip"}}, f"Gelen {r1}"\nassert "basliklar" not in SABIT, "Uygulamanın döndürdüğü sözlük değiştirilmemeli"\nr2 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r2["durum"] == 429 and r2["basliklar"] == {"Retry-After": "2"}, "1.2 sn yukarı yuvarlanır: 2"\nassert cagri == ["10.0.0.1"], "Reddedilen istekte uygulama çağrılmamalı"\nr3 = asyncio.run(m({"basliklar": {"X-API-Key": "k-42"}, "istemci": "10.0.0.1"}))\nassert s.gorulen[-1] == "k-42" and r3["basliklar"]["X-RateLimit-Key"] == "api-key"\n',
+        hints: ['Kapanış (closure): dış fonksiyon uygulama ve sinirlayici\'yi yakalar, içteki async fonksiyonu döndürür.', 'Yanıtı kopyalamak için {**yanit, "basliklar": yeni_basliklar} kullan.', 'math.ceil(1.2) == 2'],
+        why: 'Gerçek FastAPI middleware\'i de aynı biçimdedir: isteği alır, ya kısa devre yapar (429) ya da call_next ile zinciri sürdürür ve yanıtı süsler. Orijinal yanıtı değiştirmemek paylaşılan nesnelerde sürpriz hataları önler.' }
+    ],
+    faq: [
+      { q: 'Toplam kayıt sayısını (toplam: 910) cursor sayfalamada da döndürmeli miyim?',
+        a: 'Zorunlu değil ve büyük tablolarda <code>COUNT(*)</code> pahalıdır. Sonsuz kaydırmada yalnız <code>sonraki</code> imleci yeter. Sayı gerekiyorsa ayrı bir uç noktada, önbellekli ya da yaklaşık olarak ver.' },
+      { q: 'Hız sınırını uygulamada mı, ağ geçidinde mi yapmalıyım?',
+        a: 'İkisi birlikte: Nginx, bulut API ağ geçidi ya da CDN kaba sınırları (IP başına) uygular; uygulama ise iş kurallarına bağlı sınırları (plan, kullanıcı, uç nokta) uygular. Çok süreçli uygulamada sayaçları Redis gibi ortak bir depoda tut.' }
+    ],
+    mistakes: [
+      { bad: 'sql += " WHERE order_date < ?"  # imleç = son tarih',
+        good: 'sql += " WHERE (order_date, order_id) < (?, ?)"',
+        why: 'Benzersiz olmayan sıralama anahtarı sayfa sınırındaki kayıtları atlatır; eşitlik bozucu olarak id ekle.' }
     ] }
 );
 })(window);
