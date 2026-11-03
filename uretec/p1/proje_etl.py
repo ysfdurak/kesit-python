@@ -27,6 +27,14 @@ assert GELEN == SATIR + TEKRAR + RED and R2['eklenen'] == 0 and all(K[k] == 0 fo
 KANIT = ns['kanit']()
 assert KANIT['ayni_sonuc'] and KANIT['kalite'] and KANIT['satir_ilk'] == SATIR == KANIT['satir_ikinci']
 # zaman filigranı ne kadar kaybettirir (gün gün gelince)
+_h = sqlite3.connect(':memory:')
+_h.execute('CREATE TABLE o (k, t, z)')
+import veri as _veri
+_h.executemany('INSERT INTO o VALUES (?, ?, ?)', [(r['user_id'], r['event_type'], r['event_time']) for r in _veri.kayitlar('anadolu_market', 'web_events')])
+HAM_HUNI = _h.execute("SELECT COUNT(*) FROM (SELECT k, MIN(CASE WHEN t = 'visit' THEN z END) AS a, MIN(CASE WHEN t = 'product_view' THEN z END) AS b FROM o GROUP BY k) WHERE b < a").fetchone()[0]
+_b5 = sqlite3.connect(':memory:')
+_ilk5 = dict(list(partiler.items())[:5])
+SATIR5 = ns['calistir'](_b5, _ilk5, _log)['eklenen']
 KAYIP_KOD = ZINCIR + r'''
 def artimli_calistir(con, partiler):
     sema_kur(con)
@@ -341,7 +349,7 @@ _c.execute("INSERT INTO calisma_gunlugu VALUES (1, '2024-10-01', 2, 2, 0, 0)")
 assert _d(_c)["anahtar_tekil"]["deger"] == 1, "Çift satır yakalanmalı"
 ''',
       hints=['Her testi tek değer döndüren bir sorgu olarak yaz: tek = lambda q: con.execute(q).fetchone()[0].', 'Çift grup: SELECT COUNT(*) FROM (SELECT 1 FROM olay GROUP BY kullanici, tur, zaman, cihaz HAVING COUNT(*) > 1)', 'Eksik gün: (son gün - ilk gün).days + 1 - farklı gün sayısı.', 'İlk zamanlar: MIN(CASE WHEN tur = \'visit\' THEN zaman END).'],
-      why=f'Kalite testi temiz veride geçtiğini değil, bozulmayı yakaladığını göstermelidir; test bu yüzden veriyi bilerek bozar. Huni sırası hata değil uyarıdır: {K["huni_sirasi"]} kullanıcıda istemci saati kaymıştır, kayıt gerçektir, silinmez, raporlanır.'),
+      why=f'Kalite testi temiz veride geçtiğini değil, bozulmayı yakaladığını göstermelidir; test bu yüzden veriyi bilerek bozar. Huni sırası hata değil uyarıdır: ham tabloda {HAM_HUNI} kullanıcıda ürün görüntüleme ilk ziyaretten önce görünür, burada {K["huni_sirasi"]}, çünkü reddedilen satırlar bazı kullanıcıların sırasını değiştirir. Saat kayması bir açıklamadır, kesin neden değil. Kayıt silinmez, sayılır ve raporlanır.'),
  dict(t='code', id='proje-etl-7', stage='Hata avı', kind='bug', diff=2, needs=['sqlite3'],
       q=f'<p><b>Hatayı bul ve düzelt.</b> <code>artimli_calistir(con, partiler)</code> tek seferde çalıştırılınca doğru, gün gün çalıştırılınca eksik satır bırakıyor: {SATIR} yerine {ZAMAN_SATIR}. Hata mesajı yok. Filigranı olay zamanından değil parti tarihinden okuyacak biçimde düzelt: <code>bekleyen_partiler</code> ile partileri seç, satırları filtrelemeden yükle, filigranı aynı işlemde ilerlet.</p>',
       start=BUG1, sol=BUG1_SOL,
@@ -406,6 +414,11 @@ assert parmak_izi(_a) == parmak_izi(_b), "Parmak izi satır sırasına bağlı o
 _b.execute(_q, (3,))
 assert parmak_izi(_a) != parmak_izi(_b), "Farklı içerik farklı parmak izi vermeli"
 assert isinstance(parmak_izi(_a), str)
+_tum = ham_partiler
+ham_partiler = lambda: dict(list(_tum().items())[:5])
+_k = kanit()
+ham_partiler = _tum
+assert _k["satir_ilk"] == {SATIR5} and _k["satir_ikinci"] == {SATIR5}, "Sonuç sabit yazılmamalı: ilk 5 partide {SATIR5} satır beklenir, gelen: " + repr(_k)
 ''',
       hints=['ORDER BY 1, 2, 3, 4 ile sırala; her satırı repr(r).encode() ile özete ekle.', 'Log gürültüsünü kapat: log.handlers[:] = [logging.NullHandler()], log.propagate = False.', 'Gün gün çalıştırmada biriken sözlüğe her turda bir parti ekle.'],
       why='"Çift satır yok" cümlesi artık bir iddia değil, çalışan bir testtir. İki kez çalıştırma, gün gün çalıştırma ve kalite testleri aynı sonucu veriyor; mülakatta anlatacağın kısım budur.'),
@@ -503,8 +516,8 @@ print("satır:", con.execute("SELECT COUNT(*) FROM t").fetchone()[0])""")}
 <tr><td>Reddedilen</td><td>{RED} (kullanıcı {sayac['kullanici_gecersiz']}, tür {sayac['tur_gecersiz']}, zaman {sayac['zaman_gecersiz']}, cihaz {sayac['cihaz_gecersiz']})</td></tr>
 <tr><td>Geç gelen ve yine de yüklenen</td><td>{GEC}</td></tr>
 <tr><td>İkinci çalıştırma</td><td>{R2['islenen']} parti işlendi, {R2['eklenen']} satır eklendi</td></tr>
-<tr><td>Huni uyarısı</td><td>{K['huni_sirasi']} kullanıcı (silinmez, raporlanır)</td></tr></table></div>
-<section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bu işi gerçek bir ortama taşırken</h3><p>Aynı tasarım PostgreSQL\'de de geçerlidir; <code>ON CONFLICT</code> söz dizimi aynıdır, toplu yüklemede <code>COPY</code> ile geçici tablo kullanılır. Airflow gibi bir orkestratörde parti tarihi görevin veri aralığına karşılık gelir ve geriye dönük çalıştırma (backfill) bu sayede güvenlidir. dbt testleri ve Great Expectations, burada elle yazdığın kalite testlerinin bildirimsel hâlidir. Reddedilen oranına eşik koymak da yaygındır: satırların önemli bir kısmı reddedilmişse yüklemeyi durdurup haber vermek, eksik veriyi sessizce yayımlamaktan iyidir. Bu eşiği iş birimiyle birlikte seç.</p></section>
+<tr><td>Huni uyarısı</td><td>{K['huni_sirasi']} kullanıcı (ham tabloda {HAM_HUNI}; reddedilen satırlar sayıyı değiştirir, silinmez, raporlanır)</td></tr></table></div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bu işi gerçek bir ortama taşırken</h3><p>Aynı tasarım PostgreSQL\'de de geçerlidir; <code>ON CONFLICT</code> söz dizimi aynıdır, toplu yüklemede <code>COPY</code> ile geçici tablo kullanılır. Airflow gibi bir orkestratörde parti tarihi görevin veri aralığına karşılık gelir ve geriye dönük çalıştırma (backfill) bu sayede güvenlidir. dbt testleri ve Great Expectations, burada elle yazdığın kalite testlerinin bildirimsel hâlidir. Reddedilen oranına eşik koymak da yaygındır: satırların önemli bir kısmı reddedilmişse yüklemeyi durdurup haber vermek, eksik veriyi sessizce yayımlamaktan iyidir. Bu eşiği iş birimiyle birlikte seç. Geri bakış penceresinden eski bir parti düzeltilirse bu iş onu kendiliğinden görmez; o tarih için filigranı geri alıp geriye dönük çalıştırman gerekir.</p></section>
 '''
 ders = dict(id='proje-etl', mod='İleri bitirme', min=120, needs=['sqlite3'],
   title='Bitirme projesi: Anadolu Market web olayları ETL',
