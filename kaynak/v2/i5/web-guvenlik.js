@@ -22,19 +22,19 @@ L.push(
 <div class="warn"><b>Etik çizgi</b>Buradaki teknikleri yalnız kendi kodunda, kendi test ortamında ya da yazılı izin aldığın sistemlerde dene. İzinsiz sisteme saldırı denemesi Türkiye'de de suçtur (TCK 243-245).</div>
 
 <h2>OWASP Top 10: haritayı tanı</h2>
-<p>OWASP (Open Worldwide Application Security Project), web uygulamalarında en sık ve en zararlı açık kategorilerini düzenli olarak yayımlar. Aşağıdaki tablo 2021 listesini özetler; yeni sürümler kategorileri yeniden sıralasa da özleri aynı kalır.</p>
+<p>OWASP (Open Worldwide Application Security Project), web uygulamalarında en sık ve en zararlı açık kategorilerini düzenli olarak yayımlar. Aşağıdaki tablo <b>OWASP Top 10:2025</b> listesini özetler (Kasım 2026'da owasp.org/Top10/2025 sayfasından okundu; Türkçe adlar bizim çevirimiz). 2021 listesine göre iki yeni başlık var: A03 tedarik zinciri, A06:2021 "Açıklı ve eski bileşenler" başlığını genişletir; A10 ise tümüyle yenidir. SSRF ayrı başlık olmaktan çıkıp A01 içine alındı. Sıralama da değişti: yanlış yapılandırma 5.'den 2.'ye çıktı, enjeksiyon 3.'den 5.'ye indi. Eski bir rapor ya da sınav sorusu 2021 numaralarını kullanıyorsa kodun yanındaki yılı oku.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Kod</th><th>Kategori</th><th>Python'da tipik örnek</th><th>Temel savunma</th></tr>
-<tr><td>A01</td><td>Bozuk erişim kontrolü</td><td><code>/hesap/42</code> adresinde sahiplik kontrolü yok</td><td>Her istekte "bu kayıt bu kullanıcının mı?"</td></tr>
-<tr><td>A02</td><td>Kriptografik hatalar</td><td>Parolayı MD5 ya da düz metin saklamak</td><td>PBKDF2/bcrypt/argon2, TLS</td></tr>
-<tr><td>A03</td><td>Enjeksiyon (SQL, komut, XSS)</td><td>f-string ile SQL, <code>shell=True</code></td><td>Parametre, kaçış, izin listesi</td></tr>
-<tr><td>A04</td><td>Güvensiz tasarım</td><td>Sınırsız deneme hakkı olan şifre sıfırlama</td><td>Tehdit modelleme, oran sınırı</td></tr>
-<tr><td>A05</td><td>Yanlış yapılandırma</td><td>Üretimde <code>DEBUG=True</code></td><td>Güvenli varsayılan, denetim listesi</td></tr>
-<tr><td>A06</td><td>Açıklı/eski bileşen</td><td>Yıllardır güncellenmemiş paket</td><td><code>pip-audit</code>, sürüm sabitleme</td></tr>
+<tr><td>A01</td><td>Bozuk erişim kontrolü (SSRF dahil)</td><td><code>/hesap/42</code> adresinde sahiplik kontrolü yok; kullanıcının verdiği URL'ye sunucudan istek</td><td>Her istekte "bu kayıt bu kullanıcının mı?"; hedef izin listesi</td></tr>
+<tr><td>A02</td><td>Güvenlik yanlış yapılandırması</td><td>Üretimde <code>DEBUG=True</code></td><td>Güvenli varsayılan, denetim listesi</td></tr>
+<tr><td>A03</td><td>Yazılım tedarik zinciri hataları</td><td>Yıllardır güncellenmemiş ya da doğrulanmadan eklenmiş paket</td><td><code>pip-audit</code>, sürüm sabitleme, güvenilir kaynak</td></tr>
+<tr><td>A04</td><td>Kriptografik hatalar</td><td>Parolayı MD5 ya da düz metin saklamak</td><td>PBKDF2/bcrypt/argon2, TLS</td></tr>
+<tr><td>A05</td><td>Enjeksiyon (SQL, komut, XSS)</td><td>f-string ile SQL, <code>shell=True</code></td><td>Parametre, kaçış, izin listesi</td></tr>
+<tr><td>A06</td><td>Güvensiz tasarım</td><td>Sınırsız deneme hakkı olan şifre sıfırlama</td><td>Tehdit modelleme, oran sınırı</td></tr>
 <tr><td>A07</td><td>Kimlik doğrulama hataları</td><td>Zayıf parola, tahmin edilebilir token</td><td><code>secrets</code>, MFA, kilitleme</td></tr>
-<tr><td>A08</td><td>Yazılım/veri bütünlüğü</td><td>Güvenilmeyen veriyi <code>pickle.loads</code></td><td>JSON, imza doğrulama</td></tr>
-<tr><td>A09</td><td>Günlük ve izleme eksikliği</td><td>Başarısız girişler loglanmıyor</td><td>Yapılandırılmış log, alarm</td></tr>
-<tr><td>A10</td><td>SSRF</td><td>Kullanıcının verdiği URL'ye sunucudan istek</td><td>Hedef izin listesi</td></tr>
+<tr><td>A08</td><td>Yazılım ya da veri bütünlüğü hataları</td><td>Güvenilmeyen veriyi <code>pickle.loads</code></td><td>JSON, imza doğrulama</td></tr>
+<tr><td>A09</td><td>Güvenlik günlüğü ve alarm hataları</td><td>Başarısız girişler loglanmıyor ya da kimse uyarı almıyor</td><td>Yapılandırılmış log, alarm</td></tr>
+<tr><td>A10</td><td>İstisnai durumların yanlış ele alınması</td><td>Yetki servisi hata verince <code>except: pass</code> ile isteği geçirmek; yığın izini kullanıcıya göstermek</td><td>Hata durumunda reddet (fail closed), dar <code>except</code>, merkezi hata işleme</td></tr>
 </table></div>
 
 <h2>SQL enjeksiyonu: görmek ve kapatmak</h2>
