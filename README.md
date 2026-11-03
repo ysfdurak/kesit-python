@@ -8,13 +8,14 @@ Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Tür
 
 | Bölüm | Kapsam |
 |---|---|
-| Dersler | 140 ders, 3.100+ otomatik testli alıştırma (Temel / Orta / İleri) |
+| Dersler | 144 ders, 3.080 otomatik testli alıştırma (Temel / Orta / İleri) |
 | Öğrenme yolları | 11 rol: Python Temelleri, Veri Analisti, Veri Bilimci, Veri Mühendisi, Backend, Makine Öğrenmesi, Web, Yapay Zekâ ile Python, Otomasyon, BT İş Analisti (isteğe bağlı), Sertifika ve Mülakat |
 | Yapay Zekâ | LLM API, istem mühendisliği, embedding ve vektör arama, RAG, ajanlar, LLM değerlendirme, yerel modeller, YZ bitirme projesi + ML dersleri |
-| Pratik | 550 seviyeli görev (140'ı gerçek veri setleriyle) |
+| Pratik | 553 seviyeli görev (140'ı gerçek veri setleriyle) |
 | Kodlama Arenası | 250 HackerRank tarzı problem: stdin/stdout, gizli testler, puan ve rütbe, süreli yarışma |
-| Sınavlar | 17 sınav: seviye tespit, seviye bitirme, kodlama, PCEP/PCAP tarzı deneme, 10 patika sınavı |
-| Mülakat | 321 yalnız Python mülakat sorusu, role göre; model cevap, takip soruları, kart modu ve 45 dk simülasyon |
+| Sınavlar | 18 sınav: seviye testi, seviye bitirme, kodlama, PCEP/PCAP tarzı deneme (resmî değil), 10 yol sınavı |
+| Bitirme projeleri | 11 otomatik denetlenen proje dersi; yeni: Veri Analisti için Kanat gecikme analizi, Veri Mühendisi için web olayları ETL, BT İş Analisti için kupon mutabakatı; role göre portföy önerileri |
+| Mülakat | 281 yalnız Python mülakat sorusu, role göre; model cevap, takip soruları, kart modu ve 45 dk simülasyon |
 | Sık hatalar | 160 katalog kaydı + derslerdeki hata örnekleri (hatalı kod → gerçek çıktı → doğru kod → kural) |
 | Veri setleri | 8 set, 78 tablo: Anadolu Market, Ilgaz Bank, Pusula İK, Lezzet Kurye, Kanat Havayolları, Pedal İzmir, Kesit BI modeli, kirli veri |
 
