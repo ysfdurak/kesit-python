@@ -143,7 +143,7 @@ print(unicodedata.name("ğ"))</pre>
 <h3>Varsayılan kodlamanın geleceği</h3>
 <p>PEP 686 ile Python 3.15'te UTF-8 modu varsayılan oldu; bu sürümden itibaren <code>open()</code> her platformda UTF-8 kullanır. 3.14 ve öncesini destekleyen her kodda <code>encoding="utf-8"</code> yazmak tek güvenli yoldur; açıkça yazmak okuyana da niyetini gösterir. <code>python -X utf8</code> ya da <code>PYTHONUTF8=1</code> ortam değişkeni bu modu eski sürümlerde de açar.</p>
 <h3>Gerçek dilbilimsel sıralama</h3>
-<p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code>icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
+<p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code style="overflow-wrap:anywhere">icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
 </section>
 `,
   ex: [
