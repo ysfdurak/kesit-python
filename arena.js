@@ -158,7 +158,7 @@
   start: 'b, n = map(int, input().split())\nhareketler = list(map(int, input().split()))\n# son, en düşük, eksi gün\n',
   sol: 'b, n = map(int, input().split())\nhareketler = list(map(int, input().split()))\nen_dusuk = None\neksi = 0\nfor h in hareketler:\n    b += h\n    if en_dusuk is None or b < en_dusuk:\n        en_dusuk = b\n    if b < 0:\n        eksi += 1\nprint(b, en_dusuk, eksi)\n',
   editorial: '<p><b>Fikir:</b> Bakiyeyi tek değişkende biriktir. En düşük değeri izlemek için başlangıç değeri önemli: ilk gün sonu bakiyesiyle başla (ya da <code>float(\'inf\')</code> kullan). <b>Gün başı bakiyesi</b> en düşüğe dahil değildir; yalnız gün sonları sayılır.</p><p><b>Alternatif:</b> <code>itertools.accumulate(hareketler, initial=B)</code> birikimli bakiyeleri üretir; ilk elemanı (B) atlayıp <code>min</code> ve <code>sum(x &lt; 0 for x in ...)</code> uygulayabilirsin.</p><p><b>Sık hata:</b> <code>en_dusuk = 0</code> ile başlamak: bakiye hep pozitifse yanlış olarak 0 çıkar. Bakiye tam 0 ise eksi sayılmaz.</p>',
-  hints: ['En düşük değeri izlerken başlangıç değerini 0 seçme; ilk gün sonu bakiyesini ya da sonsuzu kullan.', 'Eksi gün koşulu: bakiye < 0 (0 dahil değil).']
+  hints: ['En düşük değeri izlerken başlangıç değerini 0 seçme; ilk gün sonu bakiyesini ya da sonsuzu kullan.', 'Eksi gün koşulu: bakiye &lt; 0 (0 dahil değil).']
 },
 {
   id: 'a-009',
@@ -199,7 +199,7 @@
   start: 'q = int(input())\nfor _ in range(q):\n    b, r, h = map(int, input().split())\n    # while ile yılları say\n',
   sol: 'q = int(input())\nfor _ in range(q):\n    b, r, h = map(int, input().split())\n    yil = 0\n    sonuc = None\n    while b < h:\n        faiz = b * r // 100\n        if faiz == 0:\n            sonuc = \'ASLA\'\n            break\n        b += faiz\n        yil += 1\n    print(sonuc if sonuc else yil)\n',
   editorial: '<p><b>Fikir:</b> Hedef koşulu sağlanana kadar dönen bir <code>while b &lt; h</code> döngüsü. Her yıl faiz <code>b * r // 100</code> (önce çarp, sonra böl; tersi <code>b // 100 * r</code> kuruş kaybettirir).</p><p><b>Sonsuz döngü tuzağı:</b> Faiz 0 kuruşa yuvarlanırsa bakiye hiç değişmez ve döngü bitmez. Bu durumu yakalayıp <code>break</code> ile çık. <code>while</code> yazarken her zaman "döngü değişkeni her turda ilerliyor mu?" diye sor.</p><p><b>Karmaşıklık:</b> Faiz pozitifse bakiye en az %1 büyür; ama küçük bakiyelerde artış 1 kuruşla sınırlı olabilir. Faiz pozitifken <code>b·r ≥ 100</code> olduğundan her yıl bakiye <code>(1 + r/100)</code> katına yakın büyür, yıl sayısı logaritmiktir (birkaç bin adım).</p><p><b>Sık hata:</b> <code>b * (1 + r / 100)</code> ile float kullanmak: 10^12 düzeyinde yuvarlama farkları yıl sayısını değiştirebilir.</p>',
-  hints: ['while b < h döngüsünde her yıl faizi tam sayı bölmeyle hesapla.', 'Faiz 0 çıkarsa bakiye artmaz; döngüden ASLA ile çık.']
+  hints: ['while b &lt; h döngüsünde her yıl faizi tam sayı bölmeyle hesapla.', 'Faiz 0 çıkarsa bakiye artmaz; döngüden ASLA ile çık.']
 },
 {
   id: 'a-011',
@@ -1493,7 +1493,7 @@
   start: 'from itertools import combinations\n\ndef ikili_paketler(urunler, butce):\n    # kodunu yaz\n    pass\n',
   sol: 'from itertools import combinations\n\ndef ikili_paketler(urunler, butce):\n    return [(a[0], b[0]) for a, b in combinations(urunler, 2) if a[1] + b[1] <= butce]\n',
   editorial: '<p><b>Yaklaşım:</b> <code>combinations(liste, 2)</code> her ikiliyi bir kez ve sıra korunarak üretir (i &lt; j). Liste kavrayışı içinde bütçe koşuluyla süzgeçten geçir.</p><p><b>Karmaşıklık:</b> O(n²) ikili; n = 200 için ~20 bin, sorun değil.</p><p><b>Alternatif:</b> İç içe iki <code>for</code> ile <code>range(i + 1, n)</code> aynı sonucu verir. Yalnız ikili sayısı lazım olsaydı fiyatları sıralayıp iki işaretçi (two pointers) ile O(n log n) çözülebilirdi. Sıra önemli olsaydı <code>permutations</code>, aynı ürün iki kez seçilebilseydi <code>combinations_with_replacement</code> kullanılırdı.</p><p><b>Sık hata:</b> <code>permutations</code> kullanıp her ikiliyi iki kez üretmek; “aşmayan” yerine <code>&lt;</code> yazıp tam bütçeye eşit paketleri kaçırmak.</p>',
-  hints: ['itertools.combinations(urunler, 2) tüm ikilileri verir.', 'Her ikilide fiyatları topla, <= butce olanların adlarını demet olarak al.']
+  hints: ['itertools.combinations(urunler, 2) tüm ikilileri verir.', 'Her ikilide fiyatları topla, &lt;= butce olanların adlarını demet olarak al.']
 },
 {
   id: 'a-075',
@@ -1532,7 +1532,7 @@
   start: 'from itertools import groupby\n\ndef en_uzun_seri(kayit):\n    # kodunu yaz\n    pass\n',
   sol: 'from itertools import groupby\n\ndef en_uzun_seri(kayit):\n    enuzun = {}\n    for harf, grup in groupby(kayit):\n        uzunluk = sum(1 for _ in grup)\n        if uzunluk > enuzun.get(harf, 0):\n            enuzun[harf] = uzunluk\n    return {h: enuzun[h] for h in sorted(enuzun)}\n',
   editorial: '<p><b>Yaklaşım:</b> <code>groupby</code> ardışık eşit elemanları gruplar (sıralama yapmaz!). Her grubun uzunluğunu <code>sum(1 for _ in grup)</code> ile say ve o harfin şimdiye kadarki en büyüğüyle karşılaştır. Sonda anahtarları sıralayıp yeni sözlük kur.</p><p><b>Karmaşıklık:</b> O(n) tek geçiş + O(u log u) anahtar sıralaması.</p><p><b>Alternatif:</b> Elle sayaç: önceki harfi ve mevcut seri uzunluğunu tutan döngü. <code>re.finditer(r\'(.)\\1*\', kayit)</code> de ardışık blokları bulur.</p><p><b>Sık hata:</b> <code>groupby</code>\'ın grubu bir yineleyicidir (iterator); <code>len(grup)</code> çalışmaz. Grubu tüketmeden bir sonraki gruba geçince eski grup boşalır. groupby\'ın sıralama yaptığını sanmak: <code>Counter</code> toplam adet verir, seri değil.</p>',
-  hints: ['groupby(\'ZZG\') → (\'Z\', <grup>), (\'G\', <grup>) gibi ardışık bloklar verir.', 'Grup bir iterator: uzunluğu sum(1 for _ in grup) ile bul.']
+  hints: ['groupby(\'ZZG\') → (\'Z\', &lt;grup>), (\'G\', &lt;grup>) gibi ardışık bloklar verir.', 'Grup bir iterator: uzunluğu sum(1 for _ in grup) ile bul.']
 },
 {
   id: 'a-077',
@@ -1552,7 +1552,7 @@
   start: 'from itertools import accumulate\n\nbaslangic, n = map(int, input().split())\nhareket = list(map(int, input().split()))\n# kodunu yaz\n',
   sol: 'from itertools import accumulate\n\nbaslangic, n = map(int, input().split())\nhareket = list(map(int, input().split()))\nbakiye = list(accumulate(hareket, initial=baslangic))[1:]\nprint(*bakiye)\nen_dusuk = min(bakiye)\nprint(\'EN_DUSUK\', en_dusuk, bakiye.index(en_dusuk) + 1)\nilk = next((i + 1 for i, b in enumerate(bakiye) if b < 0), None)\nprint(\'EKSI\', ilk if ilk is not None else \'YOK\')\n',
   editorial: '<p><b>Yaklaşım:</b> <code>accumulate(hareket, initial=baslangic)</code> önek toplamları üretir; ilk eleman başlangıç bakiyesidir, onu <code>[1:]</code> ile atarsın. En düşük değeri <code>min</code>, ilk görülme gününü <code>index</code> verir. İlk eksi gün için <code>next(üreteç, None)</code> kalıbı: koşulu sağlayan ilk elemanı bulur, yoksa varsayılanı döndürür.</p><p><b>Karmaşıklık:</b> O(n) zaman ve bellek.</p><p><b>Alternatif:</b> <code>initial</code> parametresi Python 3.8+ ile gelir; yoksa <code>accumulate([baslangic] + hareket)</code>. <code>accumulate(veri, max)</code> gibi farklı ikili fonksiyonlarla kayan maksimum da üretebilirsin.</p><p><b>Sık hata:</b> “Sıfırın altı” koşulunu <code>&lt;= 0</code> yazmak. Başlangıç bakiyesini çıktıya eklemek. Gün numarasını 0\'dan başlatmak.</p>',
-  hints: ['accumulate(liste, initial=x) önek toplamları üretir; ilk eleman x\'tir.', 'next((i for i, b in enumerate(...) if b < 0), None) ilk eşleşmeyi bulur.']
+  hints: ['accumulate(liste, initial=x) önek toplamları üretir; ilk eleman x\'tir.', 'next((i for i, b in enumerate(...) if b &lt; 0), None) ilk eşleşmeyi bulur.']
 },
 {
   id: 'a-078',
@@ -1711,7 +1711,7 @@
   start: 'from datetime import date, timedelta\n\ndef is_gunu_ekle(baslangic, n, tatiller=()):\n    # kodunu yaz\n    pass\n',
   sol: 'from datetime import date, timedelta\n\ndef is_gunu_ekle(baslangic, n, tatiller=()):\n    if n < 0:\n        raise ValueError(\'n negatif olamaz\')\n    tatil = {date.fromisoformat(t) for t in tatiller}\n    gun = date.fromisoformat(baslangic)\n    kalan = n\n    while kalan > 0:\n        gun += timedelta(days=1)\n        if gun.weekday() < 5 and gun not in tatil:\n            kalan -= 1\n    return gun.isoformat()\n',
   editorial: '<p><b>Yaklaşım:</b> Tatilleri baştan bir <code>set</code>\'e çevir (üyelik testi O(1)). Sonra günü birer birer ilerlet; hafta içi ve tatil değilse sayacı azalt. Sayaç sıfırlanınca o gün cevaptır.</p><p><b>Karmaşıklık:</b> O(n · 7/5 + t): her iş günü için ortalama 1,4 takvim günü gezilir.</p><p><b>Alternatif:</b> Büyük n için tam haftaları (5 iş günü = 7 takvim günü) tek seferde atlayıp tatilleri ayrıca düzeltebilirsin. Veri biliminde <code>numpy.busday_offset</code> ve <code>pandas.offsets.CustomBusinessDay</code> bu işi hazır yapar.</p><p><b>Sık hata:</b> Başlangıç gününü de saymak (görev “sonraki günlerden” diyor). Tatilleri liste olarak bırakıp her günde O(t) arama yapmak. Tatil metnini <code>date</code> ile karşılaştırmak (\'2026-10-29\' != date(2026, 10, 29)).</p>',
-  hints: ['Tatilleri set içinde date nesnesi olarak tut.', 'Günü timedelta(days=1) ile ilerlet; weekday() < 5 ve tatil değilse bir iş günü say.']
+  hints: ['Tatilleri set içinde date nesnesi olarak tut.', 'Günü timedelta(days=1) ile ilerlet; weekday() &lt; 5 ve tatil değilse bir iş günü say.']
 },
 {
   id: 'a-086',
@@ -2327,7 +2327,7 @@
   start: 'import re\n\ndef telefon_bul(metin):\n    # kodunu yaz\n    pass\n',
   sol: 'import re\n\nAYRAC = r\'[ -]?\'\nDESEN = re.compile(\n    r\'(?<!\\d)(?:\\+?90|0)? ?\'\n    r\'(?:\\((5\\d{2})\\)|(5\\d{2}))\' + AYRAC +\n    r\'(\\d{3})\' + AYRAC + r\'(\\d{2})\' + AYRAC + r\'(\\d{2})(?!\\d)\'\n)\n\ndef telefon_bul(metin):\n    sonuc = []\n    for m in DESEN.finditer(metin):\n        operator = m.group(1) or m.group(2)\n        numara = \'+90\' + operator + m.group(3) + m.group(4) + m.group(5)\n        if numara not in sonuc:\n            sonuc.append(numara)\n    return sonuc\n',
   editorial: '<p><b>Yaklaşım:</b> Parçalara ayır: <code>(?&lt;!\\d)</code> öncesinde rakam yok; ön ek <code>(?:\\+?90|0)?</code> ve isteğe bağlı boşluk; operatör kodu parantezli ya da parantezsiz <code>5\\d{2}</code> (iki ayrı grup); sonra <code>[ -]?</code> ayraçlarıyla 3-2-2 rakam; <code>(?!\\d)</code> sonrasında rakam yok. Eşleşmeden yalnız rakam gruplarını alıp <code>+90</code> ile birleştir: biçim farklılıkları (boşluk, tire, parantez) kendiliğinden yok olur.</p><p><b>Karmaşıklık:</b> O(n).</p><p><b>Alternatif:</b> Önce metindeki tüm rakam dışı karakterleri silip arama yapmak bağlamı (hangi rakamlar yan yana) bozar; doğru yaklaşım eşleşmeyi bulup sonra normalize etmektir. Üretimde <code>phonenumbers</code> kütüphanesi (Google libphonenumber) tüm ülke kurallarını bilir.</p><p><b>Sık hata:</b> <code>(?&lt;!\\d)</code> / <code>(?!\\d)</code> olmadan uzun rakam dizilerinin (sipariş no) ortasından numara çıkarmak. Ayraçta <code>[ -]*</code> kullanıp <code>0532--123</code> gibi bozuk yazımları kabul etmek. Tekrarları kümeyle atıp sırayı kaybetmek.</p>',
-  hints: ['Operatör kodu için iki alternatif grup: \\((5\\d{2})\\) | (5\\d{2}); hangisi doluysa onu al.', 'Başa (?<!\\d), sona (?!\\d) koy; sonucu \'+90\' + rakam grupları olarak kur.']
+  hints: ['Operatör kodu için iki alternatif grup: \\((5\\d{2})\\) | (5\\d{2}); hangisi doluysa onu al.', 'Başa (?&lt;!\\d), sona (?!\\d) koy; sonucu \'+90\' + rakam grupları olarak kur.']
 },
 {
   id: 'a-118',
@@ -2347,7 +2347,7 @@
   start: 'import re\nimport sys\n\nsatirlar = sys.stdin.read().split(\'\\n\')\nn = int(satirlar[0])\n# kodunu yaz\n',
   sol: 'import re\nimport sys\nfrom collections import Counter\n\nDESEN = re.compile(\n    r\'(?P<tarih>\\d{4}-\\d{2}-\\d{2}) (?P<saat>\\d{2}:\\d{2}:\\d{2}) \'\n    r\'\\[(?P<seviye>INFO|WARN|ERROR)\\] (?P<servis>[a-z0-9-]+): (?P<mesaj>.*?)\'\n    r\'(?: \\((?P<ms>\\d+) ms\\))?\'\n)\n\nsatirlar = sys.stdin.read().split(\'\\n\')\nn = int(satirlar[0])\nseviye = Counter()\nhatalar = Counter()\nbozuk = 0\nen_yavas = None\nfor satir in satirlar[1:1 + n]:\n    m = DESEN.fullmatch(satir)\n    if not m:\n        bozuk += 1\n        continue\n    seviye[m[\'seviye\']] += 1\n    if m[\'seviye\'] == \'ERROR\':\n        hatalar[m[\'servis\']] += 1\n    if m[\'ms\'] is not None:\n        ms = int(m[\'ms\'])\n        if en_yavas is None or ms > en_yavas[1]:\n            en_yavas = (m[\'servis\'], ms)\nfor s in (\'INFO\', \'WARN\', \'ERROR\'):\n    print(s, seviye[s])\nprint(\'BOZUK\', bozuk)\nfor servis, adet in sorted(hatalar.items(), key=lambda t: (-t[1], t[0])):\n    print(\'HATA\', servis, adet)\nprint(\'EN_YAVAS\', *(en_yavas if en_yavas else (\'YOK\',)))\n',
   editorial: '<p><b>Yaklaşım:</b> İsimli gruplar (<code>(?P&lt;ad&gt;...)</code>) deseni belgelendirir ve sonucu <code>m[\'seviye\']</code> ile okutur. Mesaj kısmı tembel (<code>.*?</code>) olmalı ki sondaki isteğe bağlı <code>(1200 ms)</code> grubu mesajın içine yutulmasın; <code>fullmatch</code> bütün satırı zorunlu kıldığı için tembel kalıp yine de satır sonuna kadar uzanır. Sayımlar için <code>Counter</code>; en yavaş için tek geçişte maksimum takibi.</p><p><b>Karmaşıklık:</b> O(toplam karakter) + hatalı servislerin sıralaması.</p><p><b>Alternatif:</b> <code>re.VERBOSE</code> bayrağı ile deseni satırlara bölüp yorum ekleyebilirsin. Büyük log dosyalarında dosyayı satır satır okuyup (<code>for satir in dosya</code>) bellek dostu işle. Yapılandırılmış log (JSON) kullanmak, regex ihtiyacını baştan ortadan kaldırır.</p><p><b>Sık hata:</b> Mesajı açgözlü <code>.*</code> ile yazmak: <code>(1200 ms)</code> mesajın parçası olur ve süre hiç yakalanmaz. Seviyeyi <code>\\w+</code> ile alıp DEBUG gibi tanımsız seviyeleri geçerli saymak. Eşitlikte <code>&gt;=</code> kullanıp son görüleni seçmek.</p>',
-  hints: ['Mesaj için tembel .*? ve sonda isteğe bağlı (?: \\((?P<ms>\\d+) ms\\))? kullan; fullmatch ile tüm satırı eşleştir.', 'Seviye ve hata sayıları için Counter; sıralamada key=lambda t: (-t[1], t[0]).']
+  hints: ['Mesaj için tembel .*? ve sonda isteğe bağlı (?: \\((?P&lt;ms>\\d+) ms\\))? kullan; fullmatch ile tüm satırı eşleştir.', 'Seviye ve hata sayıları için Counter; sıralamada key=lambda t: (-t[1], t[0]).']
 },
 {
   id: 'a-119',
@@ -4754,7 +4754,7 @@
   mode: 'func',
   fn: 'aktif_dagilim',
   ds: 'pusula_ik',
-  statement: '<p>Pusula A.Ş. İK ekibi, şu an çalışmakta olan kişileri farklı boyutlarda kırmak istiyor. <code>ik_employees</code> tablosunda işten ayrılmamış çalışanların <code>term_date</code> değeri boştur (<code>veri.kayitlar</code> boş hücreyi <code>None</code> yapar).</p><p><code>aktif_dagilim(alan)</code>: aktif çalışanları <code>alan</code> sütununun değerine göre say ve sözlük döndür. <code>alan</code> örneğin <code>"work_mode"</code>, <code>"education"</code>, <code>"gender"</code> olabilir.</p>',
+  statement: '<p>Pusula A.Ş.\'nin İK ekibi, şu an çalışmakta olan kişileri farklı boyutlarda kırmak istiyor. <code>ik_employees</code> tablosunda işten ayrılmamış çalışanların <code>term_date</code> değeri boştur (<code>veri.kayitlar</code> boş hücreyi <code>None</code> yapar).</p><p><code>aktif_dagilim(alan)</code>: aktif çalışanları <code>alan</code> sütununun değerine göre say ve sözlük döndür. <code>alan</code> örneğin <code>"work_mode"</code>, <code>"education"</code>, <code>"gender"</code> olabilir.</p>',
   input: '<p><code>alan</code>: <code>ik_employees</code> sütun adı (str).</p>',
   output: '<p><code>dict</code>: değer → aktif çalışan sayısı.</p>',
   constraints: 'ik_employees 2199 satır',

@@ -76,7 +76,7 @@ def sepet_api():
         code: 'from jinja2 import Environment\nenv = Environment(autoescape=True)\nt = env.from_string(\'<option value="{{ k }}">{{ k }}</option>\')\nprint(t.render(k=\'Ev & Yaşam\'))\n',
         o: ['<option value="Ev &amp; Yaşam">Ev &amp; Yaşam</option>', '<option value="Ev & Yaşam">Ev & Yaşam</option>', '<option value="Ev &amp; Yaşam">Ev & Yaşam</option>', '<option value="Ev%20%26%20Yaşam">Ev & Yaşam</option>'],
         a: 0,
-        why: 'autoescape her {{ }} çıktısında &, <, >, " ve \' karakterlerini HTML varlığına çevirir; öznitelik içinde de, metin içinde de. Tarayıcı &amp;amp; değerini ekranda & olarak gösterir ve form gönderiminde de & olarak yollar.' },
+        why: 'autoescape her {{ }} çıktısında &, &lt;, >, " ve \' karakterlerini HTML varlığına çevirir; öznitelik içinde de, metin içinde de. Tarayıcı <code>&amp;amp;</code> değerini ekranda & olarak gösterir ve form gönderiminde de & olarak yollar.' },
       { t: 'code',
         id: 'flask-w1',
         stage: 'Rehberli',
@@ -140,7 +140,7 @@ def sepet_api():
         start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\nfrom urllib.parse import urlencode\n\ndef sayfa_parcasi(kategori, sayfa, boyut=5):\n    pass\n',
         sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\nfrom urllib.parse import urlencode\n\ndef sayfa_parcasi(kategori, sayfa, boyut=5):\n    secili = [u for u in urunler if u["category"] == kategori]\n    bas = (sayfa - 1) * boyut\n    if sayfa < 1 or bas >= len(secili):\n        return ""\n    parca = secili[bas:bas + boyut]\n    satirlar = "".join(f"<tr><td>{html.escape(u[\'name\'])}</td></tr>" for u in parca)\n    if bas + boyut < len(secili):\n        adres = "/urunler?" + urlencode({"kategori": kategori, "sayfa": sayfa + 1})\n        satirlar += (f\'<tr hx-get="{html.escape(adres)}" hx-trigger="revealed" hx-swap="outerHTML">\'\n                     "<td>Yükleniyor...</td></tr>")\n    return satirlar\n',
         tests: 'p1 = sayfa_parcasi("Elektronik", 1)\nassert p1.count("<tr><td>") == 5 and "Kablosuz Kulaklık" in p1, "İlk sayfada 5 ürün"\nassert p1.endswith(\'<tr hx-get="/urunler?kategori=Elektronik&amp;sayfa=2" hx-trigger="revealed" hx-swap="outerHTML"><td>Yükleniyor...</td></tr>\'), f"Gözcü satırı hatalı: {p1[-140:]}"\np2 = sayfa_parcasi("Elektronik", 2)\nassert "hx-get" not in p2 and p2.count("<tr>") == 3, "Elektronikte 8 ürün var: 2. sayfa 3 ürün, gözcü yok"\nassert "27&quot; Monitör" in p2, "Ad içindeki tırnak kaçırılmalı"\ne = sayfa_parcasi("Ev & Yaşam", 1)\nassert "kategori=Ev+%26+Ya%C5%9Fam&amp;sayfa=2" in e, "Kategori URL kodlanmalı, & öznitelikte kaçırılmalı"\nassert sayfa_parcasi("Kitap", 3) == "" and sayfa_parcasi("Kitap", 0) == ""\n',
-        hints: ['Dilim başlangıcı (sayfa - 1) * boyut.', 'urlencode boşluğu + ve & karakterini %26 yapar; ardından html.escape adresi öznitelik için güvenli kılar.', 'Gözcü yalnız bas + boyut < toplam ise eklenir.'],
+        hints: ['Dilim başlangıcı (sayfa - 1) * boyut.', 'urlencode boşluğu + ve & karakterini %26 yapar; ardından html.escape adresi öznitelik için güvenli kılar.', 'Gözcü yalnız bas + boyut &lt; toplam ise eklenir.'],
         why: 'hx-trigger="revealed" satır ekranda görünür olunca isteği atar; outerHTML gözcü satırının kendisini yeni satırlarla değiştirir. Böylece JavaScript yazmadan sonsuz kaydırma elde edilir. URL kodlama ve HTML kaçışı iki ayrı katmandır ve ikisi de gerekir.' }
     ],
     faq: [
@@ -487,7 +487,7 @@ for pid, s in enler.items():
         start: 'import veri\nimport pandas as pd\nkalemler = veri.oku("anadolu_market", "order_items")\nsepetler = [set(g) for _, g in kalemler.groupby("order_id")["product_id"]]\n\ndef apriori(sepetler, min_adet, en_buyuk=3):\n    pass\n',
         sol: 'import veri\nimport pandas as pd\nkalemler = veri.oku("anadolu_market", "order_items")\nfrom itertools import combinations\nsepetler = [set(g) for _, g in kalemler.groupby("order_id")["product_id"]]\n\ndef apriori(sepetler, min_adet, en_buyuk=3):\n    sayac = {}\n    for s in sepetler:\n        for u in s:\n            k = frozenset([u])\n            sayac[k] = sayac.get(k, 0) + 1\n    sik = {k: v for k, v in sayac.items() if v >= min_adet}\n    sonuc = dict(sik)\n    boyut = 2\n    while sik and boyut <= en_buyuk:\n        onceki = list(sik)\n        adaylar = set()\n        for i in range(len(onceki)):\n            for j in range(i + 1, len(onceki)):\n                b = onceki[i] | onceki[j]\n                if len(b) == boyut and all(frozenset(alt) in sik for alt in combinations(b, boyut - 1)):\n                    adaylar.add(b)\n        sayac = {a: sum(1 for s in sepetler if a <= s) for a in adaylar}\n        sik = {k: v for k, v in sayac.items() if v >= min_adet}\n        sonuc.update(sik)\n        boyut += 1\n    return sonuc\n',
         tests: 'S = [{"a", "b", "c"}, {"a", "b"}, {"a", "c"}, {"b", "c"}, {"a", "b", "c"}, {"d"}]\nr = apriori(S, 2)\nassert r[frozenset("ab")] == 3 and r[frozenset("abc")] == 2, "ab 3 sepette, abc 2 sepette"\nassert frozenset("d") not in r, "d yalnız 1 sepette; min_adet=2 ile elenmeli"\nassert len(r) == 7, f"a, b, c, ab, ac, bc, abc = 7 sık küme; gelen {len(r)}"\ng = apriori(sepetler, 5)\nassert sum(1 for k in g if len(k) == 2) == 22, \'Gerçek veride en az 5 sepette görülen 22 ikili var\'\nassert max(len(k) for k in g) == 2, \'Gerçek veride 5 sepete ulaşan üçlü yok\'\nassert g[frozenset([10, 13])] == 7, \'(10, 13) ikilisi 7 sepette\'\n',
-        hints: ['Önce tekil sayım, sonra döngüde boyutu bir artırarak ilerle.', 'Aday = iki sık kümenin birleşimi ve boyutu tam k; combinations(aday, k-1) ile alt kümeleri kontrol et.', 'Adayı saymak için alt küme testi: aday <= sepet.'],
+        hints: ['Önce tekil sayım, sonra döngüde boyutu bir artırarak ilerle.', 'Aday = iki sık kümenin birleşimi ve boyutu tam k; combinations(aday, k-1) ile alt kümeleri kontrol et.', 'Adayı saymak için alt küme testi: aday &lt;= sepet.'],
         why: 'Anti-monotonluk sayesinde sık olmayan kümenin üst kümeleri hiç sayılmaz; adayların küçük tutulması algoritmanın büyük veride çalışmasını sağlar.' }
     ],
     faq: [
@@ -772,7 +772,7 @@ print(lgbm.best_iteration_)</pre><div class="warn"><b>Erken durdurmada test sız
         q: 'Lezzet Kurye verisinde 30 değerli <code>restoran</code> sütununu HistGradientBoosting\'e nasıl vermek en uygunudur?',
         o: ['Restoran numarasını tamsayı olarak vermek; ağaç zaten uygun bölmeyi kendisi bulur', 'category tipine çevirip categorical_features ile belirtmek; ağaç kategorileri gruplar', 'One-hot ile 30 sütuna açmak zorunludur; boosting kategorik veri kabul etmez', 'Sütunu tamamen atmak; 30 farklı değer ağaç modelleri için çok fazladır'],
         a: 1,
-        why: 'Tamsayı kodlama yapay bir sıra (7 < 12) varsayar. One-hot çalışır ama her bölmede tek kategoriyi ayırabildiği için verimsizdir. Doğal kategorik destek, kategori kümelerini tek bölmede ayırabilir. 255\'ten az kategori sınırı vardır.' },
+        why: 'Tamsayı kodlama yapay bir sıra (7 &lt; 12) varsayar. One-hot çalışır ama her bölmede tek kategoriyi ayırabildiği için verimsizdir. Doğal kategorik destek, kategori kümelerini tek bölmede ayırabilir. 255\'ten az kategori sınırı vardır.' },
       { t: 'predict',
         stage: 'Kodu oku',
         q: 'Artıklarla düzeltme yapan "boosting" iskeleti. Bu kod ne yazdırır?',
@@ -993,7 +993,7 @@ print(len(rapor), "karakter; görsel gömülü:", "data:image/png;base64," in ra
         diff: 2,
         needs: ['pandas'],
         q: '<p>Pano filtre katmanı: <code>filtrele(df, kanallar=None, ay_bas=None, ay_bit=None)</code>. <code>kanallar</code> liste ise yalnız o kanallar; <code>None</code> ise filtre yok; <b>boş liste</b> hiçbir satır döndürmez (Streamlit multiselect\'te her şey kaldırılınca). <code>ay_bas</code>/<code>ay_bit</code> <code>"YYYY-AA"</code> biçiminde, iki uç dahil. Orijinal tabloyu değiştirme. Gerçek veri hazır.</p>',
-        guide: ['Boolean maske olarak pd.Series(True, index=df.index) ile başla.', 'Her filtre verildiyse maskeyi & ile daralt; kanallar için isin.', 'Ay karşılaştırması metinle yapılabilir: "2024-03" <= "2024-10".', 'df[maske] döndür.'],
+        guide: ['Boolean maske olarak pd.Series(True, index=df.index) ile başla.', 'Her filtre verildiyse maskeyi & ile daralt; kanallar için isin.', 'Ay karşılaştırması metinle yapılabilir: "2024-03" &lt;= "2024-10".', 'df[maske] döndür.'],
         example: 'import pandas as pd\ndf = pd.DataFrame({"k": ["a", "b", "c"], "ay": ["2024-01", "2024-02", "2024-03"]})\nm = pd.Series(True, index=df.index)\nm &= df["k"].isin(["a", "c"])\nm &= df["ay"] >= "2024-02"\nprint(df[m])\n',
         start: 'import veri\nimport pandas as pd\n\ns = veri.oku("kesit_bi", "Satislar")\ns = s[s["Durum"] != "İptal"].copy()\ns["YilAy"] = s["Tarih"].str[:7]\n\ndef filtrele(df, kanallar=None, ay_bas=None, ay_bit=None):\n    maske = pd.Series(True, index=df.index)\n    # TODO: filtreleri uygula\n    return df\n',
         sol: 'import veri\nimport pandas as pd\n\ns = veri.oku("kesit_bi", "Satislar")\ns = s[s["Durum"] != "İptal"].copy()\ns["YilAy"] = s["Tarih"].str[:7]\ndef filtrele(df, kanallar=None, ay_bas=None, ay_bit=None):\n    maske = pd.Series(True, index=df.index)\n    if kanallar is not None:\n        maske &= df["Kanal"].isin(kanallar)\n    if ay_bas is not None:\n        maske &= df["YilAy"] >= ay_bas\n    if ay_bit is not None:\n        maske &= df["YilAy"] <= ay_bit\n    return df[maske]\n',
@@ -1168,7 +1168,7 @@ print(list(TopologicalSorter(gorevler).static_order()))</pre><h3>Kurallar dosyas
         start: 'def indirimli_tutar(tutar, oran):\n    if oran > 1:\n        raise ValueError("oran 0-1 arası olmalı")\n    return round(tutar * oran, 2)\n\n# Ajanın "düzelttiği" test:\n# assert indirimli_tutar(200, 0.25) == 50.0   (önceden: == 150.0)\n',
         sol: 'def indirimli_tutar(tutar, oran):\n    if not 0 <= oran <= 1:\n        raise ValueError("oran 0-1 arası olmalı")\n    return round(tutar * (1 - oran), 2)\n',
         tests: 'assert indirimli_tutar(200, 0.25) == 150.0, "%25 indirimle 200 TL → 150 TL (testin ilk hâli doğruydu)"\nassert indirimli_tutar(320, 0) == 320.0\nassert indirimli_tutar(99.99, 0.1) == 89.99\nfor kotu in (-0.1, 1.5):\n    try:\n        indirimli_tutar(100, kotu); assert False, f"oran={kotu} reddedilmeli"\n    except ValueError:\n        pass\n',
-        hints: ['İndirimli tutar = tutar × (1 − oran).', 'Negatif oran da geçersizdir: 0 <= oran <= 1.'],
+        hints: ['İndirimli tutar = tutar × (1 − oran).', 'Negatif oran da geçersizdir: 0 &lt;= oran &lt;= 1.'],
         why: 'Bu, ajan PR\'larında en sık görülen tuzaktır: kodu değil testi değiştirmek. İncelemede test dosyasındaki beklenen değer değişikliklerine özellikle bak ve "neden değişti?" diye sor.' },
       { t: 'code',
         id: 'yapay-zeka-ile-kod-w6',
@@ -1980,7 +1980,7 @@ print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti 
         start: 'import pandas as pd\n\ndef dilim_kapisi(df, esik=0.05):\n    return []\n',
         sol: 'import pandas as pd\n\ndef dilim_kapisi(df, esik=0.05):\n    d = df.assign(t_dogru=(df["temel"] == df["y"]).astype(float),\n                  a_dogru=(df["aday"] == df["y"]).astype(float))\n    ozet = d.groupby("segment")[["t_dogru", "a_dogru"]].mean()\n    kotu = ozet[ozet["a_dogru"] < ozet["t_dogru"] - esik]\n    return sorted(kotu.index.tolist())\n',
         tests: 'import veri\nimport numpy as np\nm = veri.oku("ilgaz_bank", "bank_customers")\nrng = np.random.default_rng(3)\ny = (m["risk_score"] > m["risk_score"].median()).astype(int).to_numpy()\ntemel = np.where(rng.random(len(m)) < 0.85, y, 1 - y)\naday = temel.copy()\nsegs = m["segment"].to_numpy()\nhedef = sorted(set(segs))[0]\nbozuk = (segs == hedef) & (rng.random(len(m)) < 0.3)\naday[bozuk] = 1 - y[bozuk]\ndf = pd.DataFrame({"segment": segs, "y": y, "temel": temel, "aday": aday})\ngenel_t = (df.temel == df.y).mean(); genel_a = (df.aday == df.y).mean()\nsonuc = dilim_kapisi(df)\nassert sonuc == [hedef], f"Yalnız {hedef!r} segmenti yakalanmalı, gelen {sonuc}"\nassert dilim_kapisi(df.assign(aday=df.temel)) == [], "Aday temel ile aynıysa hiçbir segment düşmez"\nassert dilim_kapisi(df, esik=0.5) == [], "Çok gevşek eşikte hiçbir segment takılmamalı"\n',
-        hints: ['Önce her satır için temel ve adayın doğru olup olmadığını 0/1 sütun olarak ekle.', 'groupby("segment") ile iki sütunun ortalaması segment doğruluğudur.', 'ozet[ozet.a_dogru < ozet.t_dogru - esik].index'],
+        hints: ['Önce her satır için temel ve adayın doğru olup olmadığını 0/1 sütun olarak ekle.', 'groupby("segment") ile iki sütunun ortalaması segment doğruluğudur.', 'ozet[ozet.a_dogru &lt; ozet.t_dogru - esik].index'],
         why: 'Ortalama, küçük bir segmentteki çöküşü gizler; genel doğruluk birkaç puan düşer ama o segmentteki müşteriler için model işe yaramaz hâle gelir. Olgun ML hatlarında kalite kapısı hem genel hem dilim bazında kural içerir (ml-pipeline-degerlendirme dersindeki hata dilimi analizi).'
       }
     ],
@@ -2115,14 +2115,14 @@ print(supheliler(akis))</pre>
         guide: [
           'Siparişleri müşteriye göre grupla (defaultdict(list)).',
           'Her müşterinin zamanlarını sırala.',
-          'İki işaretçi (sol, sağ) ile kayan pencere: sağ ilerlerken zaman[sol] <= zaman[sağ] - pencere oldukça sol\'u ilerlet.',
+          'İki işaretçi (sol, sağ) ile kayan pencere: sağ ilerlerken zaman[sol] &lt;= zaman[sağ] - pencere oldukça sol\'u ilerlet.',
           'Pencere boyu sağ - sol + 1 sınırı aşınca o zamanı kaydet ve o müşteriyi bırak.'
         ],
         example: 'z = [1, 2, 5, 9, 10]\nsol = 0\nfor sag in range(len(z)):\n    while z[sol] <= z[sag] - 4:\n        sol += 1\n    print(z[sag], sag - sol + 1)\n',
         start: 'from collections import defaultdict\n\ndef supheliler_sirasiz(siparisler, pencere=60, sinir=3):\n    gruplar = defaultdict(list)\n    # TODO: grupla\n    sonuc = {}\n    for musteri, zamanlar in gruplar.items():\n        zamanlar.sort()\n        # TODO: iki işaretçili pencere\n    return sonuc\n',
         sol: 'from collections import defaultdict\n\ndef supheliler_sirasiz(siparisler, pencere=60, sinir=3):\n    gruplar = defaultdict(list)\n    for musteri, t in siparisler:\n        gruplar[musteri].append(t)\n    sonuc = {}\n    for musteri, zamanlar in gruplar.items():\n        zamanlar.sort()\n        sol = 0\n        for sag in range(len(zamanlar)):\n            while zamanlar[sol] <= zamanlar[sag] - pencere:\n                sol += 1\n            if sag - sol + 1 > sinir:\n                sonuc[musteri] = zamanlar[sag]\n                break\n    return sonuc\n',
         tests: 'akis = [(7, 62), (9, 70), (7, 30), (7, 0), (9, 12), (7, 55), (7, 10), (7, 61)]\nassert supheliler_sirasiz(akis) == {7: 55}, "Sırasız akışta da müşteri 7 55. saniyede yakalanmalı"\nassert supheliler_sirasiz([(1, 0), (1, 60), (1, 120), (1, 180)]) == {}, "Tam 60 sn aralık pencereye girmez (yarı açık)"\nassert supheliler_sirasiz([(2, 5)] * 4) == {2: 5}, "Aynı saniyede 4 sipariş"\nassert supheliler_sirasiz([]) == {}, "Boş akış"\n',
-        hints: ['Sıralama sonrası problem, sıralı bir dizide kayan pencereye dönüşür.', 'Sol işaretçi yalnız ileri gider; toplam iş O(n log n) (sıralama) + O(n).', 'while zamanlar[sol] <= zamanlar[sag] - pencere: sol += 1'],
+        hints: ['Sıralama sonrası problem, sıralı bir dizide kayan pencereye dönüşür.', 'Sol işaretçi yalnız ileri gider; toplam iş O(n log n) (sıralama) + O(n).', 'while zamanlar[sol] &lt;= zamanlar[sag] - pencere: sol += 1'],
         why: 'Takip sorusunda beklenen, kısıtı değiştirince veri yapısını yeniden seçebilmendir: sırasız ama tam veri varsa sırala + iki işaretçi; sonsuz akışta ise olay zamanına göre tampon ve gecikme sınırı (watermark) gerekir.'
       },
       {
@@ -2496,7 +2496,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         o: ['115 166', '166 166', '115 115', '166 115'],
         a: 0,
         code: 'import veri\nc = veri.baglan("lezzet_kurye", tablolar=["lk_orders"])\na = c.execute("SELECT COUNT(*) FROM lk_orders WHERE placed_at BETWEEN \'2024-10-01\' AND \'2024-10-03\'").fetchone()[0]\nb = c.execute("SELECT COUNT(*) FROM lk_orders WHERE placed_at >= \'2024-10-01\' AND placed_at < \'2024-10-04\'").fetchone()[0]\nprint(a, b)\n',
-        why: 'placed_at metin olarak "2024-10-03 11:20:00" biçimindedir ve "2024-10-03"ten büyüktür; BETWEEN üst sınırı 3 Ekim\'in tüm siparişlerini dışarıda bırakır (62 + 53 = 115). Yarı açık aralık (>= başlangıç, < ertesi gün) üç günü eksiksiz alır: 62 + 53 + 51 = 166.'
+        why: 'placed_at metin olarak "2024-10-03 11:20:00" biçimindedir ve "2024-10-03"ten büyüktür; BETWEEN üst sınırı 3 Ekim\'in tüm siparişlerini dışarıda bırakır (62 + 53 = 115). Yarı açık aralık (>= başlangıç, &lt; ertesi gün) üç günü eksiksiz alır: 62 + 53 + 51 = 166.'
       },
       {
         t: 'order',
@@ -2517,7 +2517,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         guide: [
           'İki metni datetime.strptime(m, "%Y-%m-%d %H:%M") ile çevir.',
           'adim = timedelta(hours=adim_saat).',
-          'while bas + adim <= bit: dilimi ekle, bas\'ı adım kadar ilerlet.',
+          'while bas + adim &lt;= bit: dilimi ekle, bas\'ı adım kadar ilerlet.',
           'Demetleri strftime ile aynı biçime geri çevir.'
         ],
         example: 'from datetime import datetime, timedelta\nt = datetime.strptime("2024-10-01 06:00", "%Y-%m-%d %H:%M")\nprint((t + timedelta(hours=6)).strftime("%Y-%m-%d %H:%M"))\n',
@@ -2526,7 +2526,7 @@ def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından 
         tests: 'assert dilimler("2024-10-01 00:00", "2024-10-03 00:00") == [("2024-10-01 00:00", "2024-10-02 00:00"), ("2024-10-02 00:00", "2024-10-03 00:00")], "İki tam gün"\nassert dilimler("2024-10-01 00:00", "2024-10-02 12:00") == [("2024-10-01 00:00", "2024-10-02 00:00")], "Yarım kalan dilim işlenmez"\nassert len(dilimler("2024-10-01 00:00", "2024-10-02 00:00", adim_saat=6)) == 4, "Günde 4 adet 6 saatlik dilim"\nassert dilimler("2024-10-31 22:00", "2024-11-01 01:00", adim_saat=1)[-1] == ("2024-11-01 00:00", "2024-11-01 01:00"), "Ay geçişi doğru olmalı"\nassert dilimler("2024-10-01 00:00", "2024-10-01 00:00") == [], "Boş aralık"\n',
         hints: [
           'Tarih aritmetiğini metinle değil datetime + timedelta ile yap; ay ve yıl geçişleri kendiliğinden çözülür.',
-          'Koşul bas + adim <= bit: dilimin SONU bitişi geçmemeli.',
+          'Koşul bas + adim &lt;= bit: dilimin SONU bitişi geçmemeli.',
           'sonuc.append((bas.strftime(BICIM), (bas + adim).strftime(BICIM)))'
         ],
         why: 'Airflow\'un zamanlayıcısı ve backfill komutu bu hesabı yapar: tamamlanmamış dilim çalıştırılmaz. Saatlik ve günlük DAG\'larda aynı mantık; yalnız adım değişir.'
@@ -2759,7 +2759,7 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
         start: 'def katlar(n, n_splits, test_size):\n    return []\n',
         sol: 'def katlar(n, n_splits, test_size):\n    ilk_test = n - n_splits * test_size\n    if ilk_test <= 0:\n        raise ValueError("eğitim kümesi boş kalıyor")\n    sonuc = []\n    for i in range(n_splits):\n        tb = ilk_test + i * test_size\n        sonuc.append((0, tb, tb, tb + test_size))\n    return sonuc\n',
         tests: 'from sklearn.model_selection import TimeSeriesSplit\nimport numpy as np\nfor n, k, t in [(85, 3, 7), (20, 4, 3), (10, 2, 4)]:\n    beklenen = [(int(a[0]), int(a[-1]) + 1, int(b[0]), int(b[-1]) + 1) for a, b in TimeSeriesSplit(n_splits=k, test_size=t).split(np.zeros(n))]\n    assert katlar(n, k, t) == beklenen, f"n={n}, k={k}, t={t}: sklearn {beklenen}, gelen {katlar(n, k, t)}"\ntry:\n    katlar(10, 5, 2)\n    assert False, "10 satırda 5x2 test bloğu eğitime yer bırakmaz: ValueError"\nexcept ValueError:\n    pass\n',
-        hints: ['Test blokları sondan geriye dizilir: ilk test bloğu n - n_splits * test_size\'da başlar.', 'i. katın test başı: ilk_test + i * test_size; eğitim 0\'dan test başına kadar.', 'ilk_test <= 0 ise eğitim boştur.'],
+        hints: ['Test blokları sondan geriye dizilir: ilk test bloğu n - n_splits * test_size\'da başlar.', 'i. katın test başı: ilk_test + i * test_size; eğitim 0\'dan test başına kadar.', 'ilk_test &lt;= 0 ise eğitim boştur.'],
         why: 'Genişleyen pencereli ileri yürüyen doğrulama, modelin her tahminde yalnız geçmişi gördüğü gerçek kullanımı taklit eder. Hata katlar boyunca artıyorsa veri dağılımı kayıyordur (drift); bu da zaman serisi tahmini dersinde yeniden eğitim sıklığını belirleyecek.'
       }
     ],
@@ -3150,7 +3150,7 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
         guide: [
           'saat() ile şimdiki zamanı, // ile pencere numarasını hesapla.',
           'Sayaç sözlüğünde (anahtar, no) değerini 1 artır; eski numaralı girdileri temizle.',
-          'sayac <= limit ise izinli.',
+          'sayac &lt;= limit ise izinli.',
           'Değilse retry_after = ceil((no + 1) * pencere_sn - simdi).'
         ],
         example: 'import math\nsimdi, pencere = 125.3, 60\nno = int(simdi // pencere)\nprint(no, math.ceil((no + 1) * pencere - simdi))\n',
@@ -3200,7 +3200,7 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
         tests: 'hata_sayisi = {101: 1, 102: 0, 103: 9, 104: 2}\ndef gonder(i, d):\n    return d > hata_sayisi[i]\nr = isci_calistir([(0, 101), (0, 102), (5, 103), (20, 104)], gonder)\nassert r["basarili"] == [(102, 0, 1), (101, 10, 2), (104, 90, 3)], f"Başarılar: {r[\'basarili\']}"\nassert r["olu"] == [103], "103 dört denemede de başarısız: ölü kuyruğa"\nassert isci_calistir([], gonder) == {"basarili": [], "olu": []}, "Boş kuyruk"\nr2 = isci_calistir([(0, 7)], lambda i, d: False, gecikmeler=())\nassert r2 == {"basarili": [], "olu": [7]}, "Yeniden deneme yoksa ilk hatada ölü"\n',
         hints: [
           'Öncelik kuyruğu: heapq ile (zaman, is_id, deneme) demetleri; en küçük önce çıkar.',
-          'Başarısızlıkta deneme <= len(gecikmeler) ise yeni zamanla geri koy.',
+          'Başarısızlıkta deneme &lt;= len(gecikmeler) ise yeni zamanla geri koy.',
           '104: 20\'de ilk deneme, +10 → 30\'da ikinci, +60 → 90\'da üçüncü (başarılı).'
         ],
         why: 'RQ, Celery ve arq\'ın yeniden deneme mantığı budur: artan gecikmeler geçici hataları (SMTP yoğunluğu) atlatır, sınırlı deneme sayısı kalıcı hataları (geçersiz adres) sonsuz döngüden kurtarır. Ölü kuyruk, elle incelenecek işlerin kaybolmamasını sağlar.'

@@ -1467,7 +1467,7 @@ print(f"Rapor: {sehir}, {gun} gün")</pre>
       sol: 'while True:\n    metin = input("Adet (1-99): ")\n    try:\n        adet = int(metin)\n    except ValueError:\n        print("Lütfen tam sayı gir.")\n        continue\n    if 1 <= adet <= 99:\n        break\n    print("1 ile 99 arasında olmalı.")\nprint(f"Sepete {adet} adet eklendi.")\n',
       stdin: ['on iki', '0', '150', '2.5', '12'],
       expect: 'Adet (1-99): on iki\nLütfen tam sayı gir.\nAdet (1-99): 0\n1 ile 99 arasında olmalı.\nAdet (1-99): 150\n1 ile 99 arasında olmalı.\nAdet (1-99): 2.5\nLütfen tam sayı gir.\nAdet (1-99): 12\nSepete 12 adet eklendi.\n',
-      hints: ['Dönüşüm hatası ile iş kuralı hatası ayrı mesajlar alıyor: önce try/except, sonra if.', 'continue döngünün başına döner; break döngüden çıkar.', 'if 1 <= adet <= 99: break'],
+      hints: ['Dönüşüm hatası ile iş kuralı hatası ayrı mesajlar alıyor: önce try/except, sonra if.', 'continue döngünün başına döner; break döngüden çıkar.', 'if 1 &lt;= adet &lt;= 99: break'],
       why: 'Doğrulama döngüsünün iki katmanı vardır: biçim (int\'e dönüşüyor mu?) ve iş kuralı (aralıkta mı?). Her birine ayrı ve yol gösterici mesaj vermek kullanıcının neyi düzelteceğini anlamasını sağlar.' },
     { erken: true, t: 'code',
       id: 'girdi-donusum-4',
@@ -1874,7 +1874,7 @@ while (satir := satirlar[i]) != "":
       start: 'def rgb_ayir(renk):\n    pass\n\ndef rgb_birlestir(r, g, b):\n    pass\n',
       sol: 'def rgb_ayir(renk):\n    r = (renk >> 16) & 0xFF\n    g = (renk >> 8) & 0xFF\n    b = renk & 0xFF\n    return (r, g, b)\n\ndef rgb_birlestir(r, g, b):\n    return (r << 16) | (g << 8) | b\n',
       tests: 'assert rgb_ayir(0x1E90FF) == (30, 144, 255), "0x1E90FF -> (30, 144, 255)"\nassert rgb_ayir(0x000000) == (0, 0, 0), "Siyah"\nassert rgb_ayir(0xFF0000) == (255, 0, 0), "Kırmızı"\nassert rgb_birlestir(30, 144, 255) == 0x1E90FF, "Birleştirme ayırmanın tersi olmalı"\nassert rgb_birlestir(*rgb_ayir(0xABCDEF)) == 0xABCDEF, "Gidiş-dönüş aynı rengi vermeli"\nassert "str(" not in __kod__ and "hex(" not in __kod__, "Metne çevirmeden, bit operatörleriyle çöz"\n',
-      hints: ['Her renk kanalı 8 bittir; kırmızı en üstteki 8 bit.', 'Sağa 16 kaydırınca kırmızı en alta iner; & 0xFF ile yalnız alttaki 8 bit kalır.', 'Birleştirme: (r << 16) | (g << 8) | b'],
+      hints: ['Her renk kanalı 8 bittir; kırmızı en üstteki 8 bit.', 'Sağa 16 kaydırınca kırmızı en alta iner; & 0xFF ile yalnız alttaki 8 bit kalır.', 'Birleştirme: (r &lt;&lt; 16) | (g &lt;&lt; 8) | b'],
       why: 'Kaydırma bitleri yerine taşır, & 0xFF maskesi istenmeyen bitleri siler, | parçaları birleştirir. Bu kalıp renklerde, ağ adreslerinde ve ikili dosya biçimlerinde aynen kullanılır.' },
     { erken: true, t: 'code',
       id: 'operatorler-7',
@@ -1894,7 +1894,7 @@ while (satir := satirlar[i]) != "":
       start: 'def kademe(puan):\n    pass\n',
       sol: 'def kademe(puan):\n    if 90 <= puan <= 100:\n        return "A"\n    if 75 <= puan < 90:\n        return "B"\n    if 60 <= puan < 75:\n        return "C"\n    if 0 <= puan < 60:\n        return "D"\n    raise ValueError(f"Geçersiz puan: {puan}")\n',
       tests: 'assert [kademe(p) for p in (100, 90, 89.5, 75, 74, 60, 59, 0)] == ["A", "A", "B", "B", "C", "C", "D", "D"], "Sınırlar: 90 A, 75 B, 60 C dahil"\ntry:\n    kademe(101)\n    assert False, "101 için ValueError beklenirdi"\nexcept ValueError:\n    pass\ntry:\n    kademe(-1)\n    assert False, "-1 için ValueError beklenirdi"\nexcept ValueError:\n    pass\n',
-      hints: ['Zincirleme: 75 <= puan < 90 tek ifadede iki sınırı birden denetler.', 'Hiçbir aralığa uymayan puan en sona düşer; orada raise ValueError(...) yaz.', 'Sınırlarda dahil/hariç ayrımına dikkat: 90 A\'dır, B değil.'],
+      hints: ['Zincirleme: 75 &lt;= puan &lt; 90 tek ifadede iki sınırı birden denetler.', 'Hiçbir aralığa uymayan puan en sona düşer; orada raise ValueError(...) yaz.', 'Sınırlarda dahil/hariç ayrımına dikkat: 90 A\'dır, B değil.'],
       why: 'Zincirleme karşılaştırma aralık kontrolünü matematikteki gibi okunur yazar ve her sınırı açıkça gösterir. Aralık dışını sessizce "D" yapmak yerine hata fırlatmak, bozuk veriyi erken yakalar.' },
     { erken: true, t: 'code',
       id: 'operatorler-9',
@@ -1926,7 +1926,7 @@ while (satir := satirlar[i]) != "":
       start: 'def tarih_paketle(yil, ay, gun):\n    pass\n\ndef tarih_coz(paket):\n    pass\n',
       sol: 'def tarih_paketle(yil, ay, gun):\n    if not (1980 <= yil <= 2107 and 1 <= ay <= 12 and 1 <= gun <= 31):\n        raise ValueError("Geçersiz tarih")\n    return ((yil - 1980) << 9) | (ay << 5) | gun\n\ndef tarih_coz(paket):\n    if not 0 <= paket <= 0xFFFF:\n        raise ValueError("16 bit dışında")\n    yil = (paket >> 9) + 1980\n    ay = (paket >> 5) & 0b1111\n    gun = paket & 0b11111\n    return (yil, ay, gun)\n',
       tests: 'p = tarih_paketle(2026, 10, 28)\nassert p == (46 << 9) | (10 << 5) | 28, "Bit yerleşimi: yıl<<9 | ay<<5 | gün"\nassert tarih_coz(p) == (2026, 10, 28), "Çözme paketlemenin tersi olmalı"\nassert tarih_coz(tarih_paketle(1980, 1, 1)) == (1980, 1, 1), "Alt sınır"\nassert tarih_coz(tarih_paketle(2107, 12, 31)) == (2107, 12, 31), "Üst sınır: 7 bit yıl 127\'ye kadar"\nassert tarih_paketle(2107, 12, 31) <= 0xFFFF, "Sonuç 16 bite sığmalı"\nfor kotu in [(1979, 1, 1), (2108, 1, 1), (2000, 0, 1), (2000, 13, 1), (2000, 1, 0), (2000, 1, 32)]:\n    try:\n        tarih_paketle(*kotu)\n        assert False, f"{kotu} için ValueError beklenirdi"\n    except ValueError:\n        pass\nfor kotu in [-1, 65536]:\n    try:\n        tarih_coz(kotu)\n        assert False, f"{kotu} için ValueError beklenirdi"\n    except ValueError:\n        pass\n',
-      hints: ['Gün 5 bit (0-31), ay 4 bit (0-15): ay 5 bit, yıl 9 bit sola kaydırılır.', 'Çözerken önce kaydır sonra maskele: ay = (paket >> 5) & 0b1111.', 'Doğrulama: if not (1980 <= yil <= 2107 and 1 <= ay <= 12 and 1 <= gun <= 31): raise ValueError(...)'],
+      hints: ['Gün 5 bit (0-31), ay 4 bit (0-15): ay 5 bit, yıl 9 bit sola kaydırılır.', 'Çözerken önce kaydır sonra maskele: ay = (paket >> 5) & 0b1111.', 'Doğrulama: if not (1980 &lt;= yil &lt;= 2107 and 1 &lt;= ay &lt;= 12 and 1 &lt;= gun &lt;= 31): raise ValueError(...)'],
       why: 'Bit paketleme, alanların genişliklerini bilerek her alanı kendi yerine kaydırmak ve | ile birleştirmektir; çözme ise kaydırıp & maskesiyle o alanı yalıtmaktır. Zincirleme karşılaştırmalar doğrulamayı tek satırda okunur kılar. Not: "and" önce bağlar, "not" tüm parantezi tersine çevirir.' }
   ],
   faq: [
@@ -2366,7 +2366,7 @@ print(unicodedata.name("ğ"))</pre>
       code: 'print(len("çay"), len("çay".encode("utf-8")), "Zeytin" < "armut")\n',
       o: ['3 3 False', '3 4 True', '4 4 True', '3 4 False'],
       a: 1,
-      why: '"çay" 3 karakterdir; ç UTF-8\'de 2 bayt olduğundan toplam 4 bayt. "Z" (90) "a"dan (97) küçük kod noktasına sahip olduğu için "Zeytin" < "armut" True\'dur.' },
+      why: '"çay" 3 karakterdir; ç UTF-8\'de 2 bayt olduğundan toplam 4 bayt. "Z" (90) "a"dan (97) küçük kod noktasına sahip olduğu için "Zeytin" &lt; "armut" True\'dur.' },
     { t: 'predict',
       stage: 'Kodu oku',
       q: 'Bu kod ne yazdırır?',
@@ -2815,8 +2815,8 @@ print(butce_ikilisi([10, 20], 100))</pre>
       start: 'def en_dusuk_bakiye(hesaplar):\n    # TODO: boş liste kontrolü\n    aday = None  # TODO: ilk elemanla başlat\n    for hesap in hesaplar:\n        # TODO: daha düşük bakiye gelirse adayı değiştir\n        pass\n    return aday\n',
       sol: 'def en_dusuk_bakiye(hesaplar):\n    if not hesaplar:\n        return None\n    aday = hesaplar[0]\n    for hesap in hesaplar:\n        if hesap[1] < aday[1]:\n            aday = hesap\n    return aday\n',
       tests: 'assert en_dusuk_bakiye([("H-1", 500), ("H-2", -120), ("H-3", 40)]) == ("H-2", -120), "en düşük bakiye H-2 (-120)"\nassert en_dusuk_bakiye([("H-1", 300), ("H-2", 100), ("H-3", 100)]) == ("H-2", 100), "eşitlikte ilk görülen (H-2) seçilmeli: < kullan, <= değil"\nassert en_dusuk_bakiye([("H-1", 50), ("H-2", 80)]) == ("H-1", 50), "hepsi pozitifken de doğru çalışmalı (0 ile başlatma tuzağı)"\nassert en_dusuk_bakiye([]) is None, "boş liste None döndürmeli"\nassert "min(" not in __kod__, "min kullanmadan kalıbı kendin yaz"\n',
-      hints: ['En iyi değer kalıbı: aday = ilk eleman, sonra karşılaştır.', 'Bakiye demetin 1. indeksinde: hesap[1] < aday[1]', 'if hesap[1] < aday[1]: aday = hesap'],
-      why: 'İlk elemanla başlamak değişmezi baştan doğru kurar; kesin küçüktür (<) eşitlikte ilk görüleni korur.' },
+      hints: ['En iyi değer kalıbı: aday = ilk eleman, sonra karşılaştır.', 'Bakiye demetin 1. indeksinde: hesap[1] &lt; aday[1]', 'if hesap[1] &lt; aday[1]: aday = hesap'],
+      why: 'İlk elemanla başlamak değişmezi baştan doğru kurar; kesin küçüktür (&lt;) eşitlikte ilk görüleni korur.' },
     { erken: true, id: 'dongu-kaliplari-2',
       t: 'code',
       stage: 'Rehberli',
@@ -2827,7 +2827,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
       start: 'def degisim_raporu(satislar):\n    artis = azalis = sabit = 0\n    en_buyuk_dusus = 0\n    # TODO: komşu çiftleri gez ve sayaçları güncelle\n    return {"artis": artis, "azalis": azalis, "sabit": sabit, "en_buyuk_dusus": en_buyuk_dusus}\n',
       sol: 'def degisim_raporu(satislar):\n    artis = azalis = sabit = 0\n    en_buyuk_dusus = 0\n    for onceki, simdi in zip(satislar, satislar[1:]):\n        if simdi > onceki:\n            artis += 1\n        elif simdi < onceki:\n            azalis += 1\n            if onceki - simdi > en_buyuk_dusus:\n                en_buyuk_dusus = onceki - simdi\n        else:\n            sabit += 1\n    return {"artis": artis, "azalis": azalis, "sabit": sabit, "en_buyuk_dusus": en_buyuk_dusus}\n',
       tests: 'r = degisim_raporu([120, 135, 135, 150, 90, 110, 100])\nassert r == {"artis": 3, "azalis": 2, "sabit": 1, "en_buyuk_dusus": 60}, f"beklenen 3 artış, 2 azalış, 1 sabit, en büyük düşüş 60 (150→90); gelen {r}"\nassert degisim_raporu([5]) == {"artis": 0, "azalis": 0, "sabit": 0, "en_buyuk_dusus": 0}, "tek günde karşılaştırılacak çift yok"\nassert degisim_raporu([])["artis"] == 0, "boş listede hata olmamalı"\nassert degisim_raporu([1, 2, 3])["en_buyuk_dusus"] == 0, "düşüş yoksa 0"\n',
-      hints: ['n günden n-1 çift çıkar; zip(s, s[1:]) bunları verir.', 'Düşüş miktarı onceki - simdi (pozitif).', 'elif simdi < onceki: azalis += 1 ve ardından en büyük düşüş kontrolü'],
+      hints: ['n günden n-1 çift çıkar; zip(s, s[1:]) bunları verir.', 'Düşüş miktarı onceki - simdi (pozitif).', 'elif simdi &lt; onceki: azalis += 1 ve ardından en büyük düşüş kontrolü'],
       why: 'Komşu karşılaştırma kalıbı ile en iyi değer kalıbı tek döngüde birleşir; zip kaydırması ilk günün öncesini okuma hatasını yapısal olarak önler.' },
     { id: 'dongu-kaliplari-3',
       t: 'code',
@@ -2849,7 +2849,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
       start: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    pass\n',
       sol: 'def kac_ay(bakiye, aylik_faiz, hedef, aylik_ek=0):\n    ay = 0\n    while bakiye < hedef:\n        if ay >= 1200:\n            return None\n        bakiye *= 1 + aylik_faiz\n        bakiye += aylik_ek\n        ay += 1\n    return ay\n',
       tests: 'assert kac_ay(10000, 0.03, 15000) == 14, "10000 TL %3 ile 14. ayda 15000\'i geçer"\nassert kac_ay(1000, 0.0, 2000, 250) == 4, "faizsiz, ayda 250 ek ile 4 ay"\nassert kac_ay(5000, 0.05, 5000) == 0, "zaten hedefteyse 0 ay"\nassert kac_ay(1000, 0.0, 2000) is None, "faiz ve ek yoksa hedefe ulaşılamaz: None (sonsuz döngü olmamalı)"\nassert kac_ay(1000, 0.01, 1100, 0) == 10, "1000 × 1.01^10 ≈ 1104.6"\n',
-      hints: ['while bakiye < hedef: ve döngü içinde ay sayacı.', 'Sonsuz döngüyü önlemek için ay 1200\'e ulaşınca None döndür.'],
+      hints: ['while bakiye &lt; hedef: ve döngü içinde ay sayacı.', 'Sonsuz döngüyü önlemek için ay 1200\'e ulaşınca None döndür.'],
       why: 'Kaç tur süreceği bilinmeyen tekrar while ister; üst sınır, hedefe hiç ulaşılamayan girdilerde programın donmasını engeller.' },
     { erken: true, id: 'dongu-kaliplari-5',
       t: 'code',
@@ -2859,7 +2859,7 @@ print(butce_ikilisi([10, 20], 100))</pre>
       start: 'def en_cok_satan(satislar):\n    pass\n',
       sol: 'def en_cok_satan(satislar):\n    frekans = {}\n    for u in satislar:\n        frekans[u] = frekans.get(u, 0) + 1\n    en_iyi = None\n    for urun, adet in frekans.items():\n        if en_iyi is None or adet > en_iyi[1] or (adet == en_iyi[1] and urun < en_iyi[0]):\n            en_iyi = (urun, adet)\n    return en_iyi\n',
       tests: 'assert en_cok_satan(["çay", "kahve", "çay", "su", "kahve", "çay"]) == ("çay", 3), "çay 3 kez satıldı"\nassert en_cok_satan(["su", "kahve", "su", "kahve"]) == ("kahve", 2), "eşitlikte alfabetik önce gelen (kahve) seçilmeli"\nassert en_cok_satan(["limon"]) == ("limon", 1), "tek ürün"\nassert en_cok_satan([]) is None, "boş liste None"\nassert "max(" not in __kod__ and "Counter" not in __kod__, "max ve Counter kullanmadan yaz"\n',
-      hints: ['İki kalıp art arda: önce frekans sözlüğü, sonra en iyi değer.', 'Eşitlik kuralı: adet > en_iyi[1] ya da (adet eşit ve urun < en_iyi[0]).'],
+      hints: ['İki kalıp art arda: önce frekans sözlüğü, sonra en iyi değer.', 'Eşitlik kuralı: adet > en_iyi[1] ya da (adet eşit ve urun &lt; en_iyi[0]).'],
       why: 'Frekans kalıbı veriyi özetler, en iyi değer kalıbı özetten seçim yapar; eşitlik kuralını karşılaştırmaya eklemek sonucu deterministik kılar.' },
     { id: 'dongu-kaliplari-6',
       t: 'code',
@@ -3282,7 +3282,7 @@ for s in siparisler:
       start: 'def tablo_yazdir(satirlar):\n    pass\n\nveri = [\n    {"no": "AM-101", "urun": "Çay", "tutar": 240.0},\n    {"no": "AM-101", "urun": "Bardak", "tutar": 150.0},\n    {"no": "AM-102", "urun": "Kahve", "tutar": 350.0},\n]\ntablo_yazdir(veri)\n',
       sol: 'def tablo_yazdir(satirlar):\n    print(f"{\'Sipariş\':<8} {\'Ürün\':<10} {\'Tutar\':>8}")\n    print("-" * 28)\n    toplam = 0\n    for r in satirlar:\n        print(f"{r[\'no\']:<8} {r[\'urun\']:<10} {r[\'tutar\']:>8.2f}")\n        toplam += r["tutar"]\n    print("-" * 28)\n    print(f"{\'TOPLAM\':<19} {toplam:>8.2f}")\n\nveri = [\n    {"no": "AM-101", "urun": "Çay", "tutar": 240.0},\n    {"no": "AM-101", "urun": "Bardak", "tutar": 150.0},\n    {"no": "AM-102", "urun": "Kahve", "tutar": 350.0},\n]\ntablo_yazdir(veri)\n',
       expect: 'Sipariş  Ürün          Tutar\n----------------------------\nAM-101   Çay          240.00\nAM-101   Bardak       150.00\nAM-102   Kahve        350.00\n----------------------------\nTOPLAM                740.00\n',
-      hints: ['f"{deger:<8}" sola, f"{deger:>8.2f}" sağa yaslar ve 2 ondalık verir.', 'f-string içinde anahtar yazarken tek tırnak kullan: f"{r[\'no\']:<8}"'],
+      hints: ['f"{deger:&lt;8}" sola, f"{deger:>8.2f}" sağa yaslar ve 2 ondalık verir.', 'f-string içinde anahtar yazarken tek tırnak kullan: f"{r[\'no\']:&lt;8}"'],
       why: 'Genişlik ve hizalama belirteçleri, sütunları değer uzunluğundan bağımsız hizalar; metin sola, sayı sağa yaslanır.' },
     { id: 'ic-ice-veri-8',
       t: 'code',
@@ -3663,7 +3663,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       start: 'def http_durum(kod):\n    pass\n',
       sol: 'def http_durum(kod):\n    match kod:\n        case 200 | 201:\n            return "Başarılı"\n        case 301 | 302:\n            return "Yönlendirme"\n        case 404:\n            return "Bulunamadı"\n        case k if 400 <= k <= 499:\n            return "İstemci hatası"\n        case k if 500 <= k <= 599:\n            return "Sunucu hatası"\n        case _:\n            return "Bilinmiyor"\n',
       tests: 'assert http_durum(200) == "Başarılı" and http_durum(201) == "Başarılı", "200 ve 201 Başarılı"\nassert http_durum(302) == "Yönlendirme", "302 Yönlendirme"\nassert http_durum(404) == "Bulunamadı", "404 kendi özel dalına girmeli; aralık dalından önce yaz"\nassert http_durum(403) == "İstemci hatası", "403 istemci hatası"\nassert http_durum(503) == "Sunucu hatası", "503 sunucu hatası"\nassert http_durum(100) == "Bilinmiyor" and http_durum(600) == "Bilinmiyor", "aralık dışı kodlar Bilinmiyor"\nassert "match" in __source__, "çözümü match-case ile yaz"\n',
-      hints: ['Aralıklar için yakalama + guard: case k if 400 <= k <= 499:', '404 özel dalı, 4xx aralık dalının üstünde olmalı.'],
+      hints: ['Aralıklar için yakalama + guard: case k if 400 &lt;= k &lt;= 499:', '404 özel dalı, 4xx aralık dalının üstünde olmalı.'],
       why: 'Sabit değerler birleşik desenle, aralıklar guard ile ifade edilir; özel değer (404) genel aralıktan önce gelmelidir.' },
     { erken: true, id: 'match-case-5',
       t: 'code',
@@ -3735,7 +3735,7 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
       start: 'def durum_tablosu(olaylar):\n    # TODO\n    pass\n\ndef durum_sayilari(tablo):\n    # TODO\n    pass\n',
       sol: 'def durum_tablosu(olaylar):\n    tablo = {}\n    for o in olaylar:\n        match o:\n            case {"olay": "olustu", "no": n, "tutar": t}:\n                tablo[n] = {"tutar": t, "durum": "yeni"}\n            case {"olay": "odeme", "no": n} if n in tablo:\n                tablo[n]["durum"] = "odendi"\n            case {"olay": "kargo", "no": n, "firma": _} if n in tablo:\n                tablo[n]["durum"] = "kargoda"\n            case {"olay": "iade", "no": n, "tutar": t} if n in tablo:\n                tablo[n]["tutar"] -= t\n                if tablo[n]["tutar"] <= 0:\n                    tablo[n]["durum"] = "iade"\n    return tablo\n\ndef durum_sayilari(tablo):\n    sayilar = {}\n    for kayit in tablo.values():\n        sayilar[kayit["durum"]] = sayilar.get(kayit["durum"], 0) + 1\n    return sayilar\n',
       tests: 'olaylar = [\n    {"olay": "olustu", "no": "AM-1", "tutar": 300},\n    {"olay": "olustu", "no": "AM-2", "tutar": 120},\n    {"olay": "olustu", "no": "AM-3", "tutar": 80},\n    {"olay": "odeme", "no": "AM-1"},\n    {"olay": "kargo", "no": "AM-1", "firma": "Yurtiçi"},\n    {"olay": "odeme", "no": "AM-2"},\n    {"olay": "iade", "no": "AM-2", "tutar": 50},\n    {"olay": "iade", "no": "AM-3", "tutar": 80},\n    {"olay": "odeme", "no": "AM-99"},\n    {"olay": "kargo", "no": "AM-2"},\n    {"olay": "puan", "no": "AM-1"},\n]\nt = durum_tablosu(olaylar)\nassert t is not None and set(t) == {"AM-1", "AM-2", "AM-3"}, "tabloda yalnız oluşturulan üç sipariş olmalı; AM-99 eklenmemeli"\nassert t["AM-1"] == {"tutar": 300, "durum": "kargoda"}, f"AM-1 kargoda olmalı: {t[\'AM-1\']}"\nassert t["AM-2"] == {"tutar": 70, "durum": "odendi"}, f"AM-2 kısmi iade: tutar 70, durum odendi (firmasız kargo olayı yok sayılır); gelen {t[\'AM-2\']}"\nassert t["AM-3"] == {"tutar": 0, "durum": "iade"}, "AM-3 tamamen iade edildi"\nassert durum_sayilari(t) == {"kargoda": 1, "odendi": 1, "iade": 1}, f"durum sayıları hatalı: {durum_sayilari(t)}"\nassert durum_sayilari({}) == {}, "boş tablo boş sayım vermeli"\n',
-      hints: ['Her olayı sözlük deseniyle yakala; tabloda olmayan siparişler için if n in tablo guard\'ı ekle.', 'İade dalında önce tutarı düş, sonra <= 0 ise durumu değiştir.', 'durum_sayilari için sözlükler dersindeki sayım kalıbını kullan.'],
+      hints: ['Her olayı sözlük deseniyle yakala; tabloda olmayan siparişler için if n in tablo guard\'ı ekle.', 'İade dalında önce tutarı düş, sonra &lt;= 0 ise durumu değiştir.', 'durum_sayilari için sözlükler dersindeki sayım kalıbını kullan.'],
       why: 'Olay güdümlü sistemlerin özü budur: her olay türü bir case, durum bir sözlükte tutulur. Guard\'lar bilinmeyen siparişlere gelen olayları güvenle eler; eksik alanlı olaylar hiçbir desene uymadığı için kendiliğinden yok sayılır.' }
   ],
   faq: [
@@ -4056,7 +4056,7 @@ print(toplam_boyut_yigin(disk))</pre>
       o: ['1104.08 yazdırır', 'RecursionError hatası verir', '1061.21 yazdırır', 'ValueError hatası verir'],
       a: 1,
       raises: true,
-      why: 'ay 5, 3, 1, -1, -3 ... diye ikişer azalır ve hiçbir zaman tam 0 olmaz; temel duruma ulaşılamaz. Güvenli temel durum if ay <= 0 olurdu.' },
+      why: 'ay 5, 3, 1, -1, -3 ... diye ikişer azalır ve hiçbir zaman tam 0 olmaz; temel duruma ulaşılamaz. Güvenli temel durum if ay &lt;= 0 olurdu.' },
     { t: 'order',
       stage: 'Kodu oku',
       q: '<p>İç içe listedeki tüm sayıları sayan (kaç tane sayı olduğunu bulan) özyinelemeli fonksiyonun satırlarını sırala.</p>',
@@ -4069,12 +4069,12 @@ print(toplam_boyut_yigin(disk))</pre>
       stage: 'Rehberli',
       diff: 1,
       q: '<p><code>basamak_toplami(n)</code> fonksiyonunu <b>özyinelemeyle</b> yaz: negatif olmayan bir tam sayının basamaklarının toplamını döndürsün. Örnek: <code>basamak_toplami(4071)</code> → 12. (Ilgaz Bank hesap numarası kontrol hanesi hesaplarında bu tür işlemler kullanılır.) Döngü ve <code>str</code> dönüşümü kullanma.</p>',
-      guide: ['Temel durumu yaz: n tek basamaklıysa (n < 10) n\'nin kendisini döndür.', 'Son basamağı n % 10 ile al.', 'Geri kalan sayıyı n // 10 ile elde et.', 'Son basamak + basamak_toplami(geri kalan) döndür.'],
+      guide: ['Temel durumu yaz: n tek basamaklıysa (n &lt; 10) n\'nin kendisini döndür.', 'Son basamağı n % 10 ile al.', 'Geri kalan sayıyı n // 10 ile elde et.', 'Son basamak + basamak_toplami(geri kalan) döndür.'],
       example: 'def basamak_sayisi(n):\n    if n < 10:\n        return 1\n    return 1 + basamak_sayisi(n // 10)\n\nprint(basamak_sayisi(4071), basamak_sayisi(7))\n',
       start: 'def basamak_toplami(n):\n    # TODO: temel durum (tek basamak)\n    # TODO: son basamak + kalan sayının basamak toplamı\n    pass\n',
       sol: 'def basamak_toplami(n):\n    if n < 10:\n        return n\n    return n % 10 + basamak_toplami(n // 10)\n',
       tests: 'assert basamak_toplami(4071) == 12, "4 + 0 + 7 + 1 = 12"\nassert basamak_toplami(7) == 7, "tek basamaklı sayı temel durumdur, kendisini döndürür"\nassert basamak_toplami(0) == 0, "0 için 0"\nassert basamak_toplami(99999) == 45, "99999 için 45"\nassert "for " not in __kod__ and "while " not in __kod__ and "str(" not in __kod__, "döngü ve str kullanmadan özyinelemeyle çöz"\n',
-      hints: ['n % 10 son basamağı, n // 10 son basamağı atılmış sayıyı verir.', 'Temel durum: if n < 10: return n', 'return n % 10 + basamak_toplami(n // 10)'],
+      hints: ['n % 10 son basamağı, n // 10 son basamağı atılmış sayıyı verir.', 'Temel durum: if n &lt; 10: return n', 'return n % 10 + basamak_toplami(n // 10)'],
       why: 'Her çağrı sayıdan bir basamak atar, böylece tek basamağa (temel duruma) mutlaka ulaşılır; dönüşte basamaklar toplanır.' },
     { id: 'ozyineleme-2',
       t: 'code',
@@ -4149,8 +4149,8 @@ print(toplam_boyut_yigin(disk))</pre>
       start: 'def taksit_secenekleri(n):\n    if n == 1:\n        return 1\n    return n * taksit_secenekleri(n - 1)\n',
       sol: 'def taksit_secenekleri(n):\n    if n <= 1:\n        return 1\n    return n * taksit_secenekleri(n - 1)\n',
       tests: 'assert taksit_secenekleri(5) == 120, "5! = 120"\nassert taksit_secenekleri(1) == 1, "1! = 1"\ntry:\n    sonuc = taksit_secenekleri(0)\nexcept RecursionError:\n    raise AssertionError("0 için temel duruma hiç ulaşılmıyor (0, -1, -2, ...): temel durumu n <= 1 yap")\nassert sonuc == 1, "0! = 1 olmalı"\n',
-      hints: ['n = 0 ile başlayınca çağrılar 0, -1, -2 diye iner; n == 1 hiç gerçekleşmez.', 'Temel durumu tüm küçük girdileri kapsayacak şekilde genişlet: n <= 1.'],
-      why: 'Temel durum her olası girdi için ulaşılabilir olmalı. Eşitlik (==) yerine aralık (<=) kontrolü, beklenmeyen başlangıç değerlerinde de özyinelemeyi durdurur.' },
+      hints: ['n = 0 ile başlayınca çağrılar 0, -1, -2 diye iner; n == 1 hiç gerçekleşmez.', 'Temel durumu tüm küçük girdileri kapsayacak şekilde genişlet: n &lt;= 1.'],
+      why: 'Temel durum her olası girdi için ulaşılabilir olmalı. Eşitlik (==) yerine aralık (&lt;=) kontrolü, beklenmeyen başlangıç değerlerinde de özyinelemeyi durdurur.' },
     { id: 'ozyineleme-9',
       t: 'code',
       stage: 'Hata avı',
@@ -4500,8 +4500,8 @@ for i, k in enumerate(kayitlar):
       tests: 'assert indirimli_fiyat(200, 0.15) == 170.0, "200 TL %15 indirimle 170.0 olmalı"\nassert indirimli_fiyat(99.9, 0) == 99.9, "oran 0 ise fiyat aynı kalmalı"\ndef _mesaj(f, o):\n    try:\n        indirimli_fiyat(f, o)\n    except AssertionError as e:\n        return str(e)\n    return None\nassert _mesaj(200, 15) == "oran 0 ile 1 arasında olmalı", "oran=15 (yüzde sanılmış) AssertionError vermeli"\nassert _mesaj(200, -0.1) == "oran 0 ile 1 arasında olmalı", "negatif oran AssertionError vermeli"\nassert _mesaj(-5, 0.1) == "fiyat negatif olamaz", "negatif fiyat AssertionError vermeli"\nassert _mesaj(100, 1) is None, "oran tam 1 (yüzde 100 indirim) geçerli bir sınır değeri"\n',
       hints: [
         'assert koşul, "mesaj" biçimi: koşul False ise mesajla AssertionError fırlar.',
-        'Aralık denetimini tek satırda yaz: 0 <= oran <= 1',
-        'assert 0 <= oran <= 1, "oran 0 ile 1 arasında olmalı"'
+        'Aralık denetimini tek satırda yaz: 0 &lt;= oran &lt;= 1',
+        'assert 0 &lt;= oran &lt;= 1, "oran 0 ile 1 arasında olmalı"'
       ],
       why: 'assert, yanlış değeri doğduğu yerde durdurur. oran=15 gibi bir hata, assert olmadan -2800 TL gibi bir fiyat üretip çok sonra fark edilirdi.' },
     { id: 'hata-ayiklama-r3',
@@ -5488,8 +5488,8 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       tests: 'assert tahmini_oku("42") == 42, "\\"42\\" → 42"\nassert tahmini_oku(" 7 ") == 7, "Boşluklar atılmalı"\nassert tahmini_oku("yedi") is None, "Sayı olmayan metin None"\nassert tahmini_oku("3.5") is None, "Ondalıklı metin tam sayı değil: None"\nassert tahmini_oku("0") is None and tahmini_oku("101") is None, "Aralık dışı None"\nassert tahmini_oku("1") == 1 and tahmini_oku("100") == 100, "Sınırlar dahil"\nassert tahmini_oku("15", alt=1, ust=10) is None, "alt/ust parametreleri kullanılmalı"\nassert tahmin_degerlendir(30, 37) == "Daha büyük", "Tahmin küçükse daha büyük denemeli"\nassert tahmin_degerlendir(50, 37) == "Daha küçük", "Tahmin büyükse daha küçük denemeli"\nassert tahmin_degerlendir(37, 37) == "Bildin!", "Eşitse Bildin!"\n',
       hints: [
         'int("3.5") ve int("yedi") ikisi de ValueError verir; ikisini de aynı except yakalar.',
-        'Aralık için: if alt <= sayi <= ust: return sayi',
-        'tahmin < hedef ise oyuncu daha BÜYÜK bir sayı denemeli.'
+        'Aralık için: if alt &lt;= sayi &lt;= ust: return sayi',
+        'tahmin &lt; hedef ise oyuncu daha BÜYÜK bir sayı denemeli.'
       ],
       why: 'Girdiyi okuma ve değerlendirme oyunun beyni; ikisi de saf fonksiyon olduğu için klavye olmadan, birkaç assert ile her durumu denedin. Döngü bunları yalnızca çağıracak.' },
     { id: 'proje-oyunlar-r2',
@@ -5501,7 +5501,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
         'Kelimenin her karakteri için bir parça üret: boşluksa "/", tahmin edildiyse harfin kendisi, değilse "_".',
         'Parçaları " ".join ile birleştir.',
         'kazandi_mi için kelimedeki harflerin kümesini al, boşluğu çıkar.',
-        'Bu küme tahminlerin alt kümesi mi? (<= operatörü ya da issubset)'
+        'Bu küme tahminlerin alt kümesi mi? (&lt;= operatörü ya da issubset)'
       ],
       example: 'kod = "AM-42"\ngosterim = " ".join("#" if k.isdigit() else k for k in kod)\nprint(gosterim)\ngerekli = {"süt", "ekmek"}\nsepet = {"ekmek", "süt", "çay"}\nprint(gerekli <= sepet, gerekli - {"süt"})\n',
       start: 'def maske(kelime, tahminler):\n    parcalar = []\n    for h in kelime:\n        # TODO: boşluk → "/", tahmin edilmiş → h, diğer → "_"\n        pass\n    return " ".join(parcalar)\n\n\ndef kazandi_mi(kelime, tahminler):\n    # TODO: boşluk hariç harf kümesi tahminlerin alt kümesi mi?\n    pass\n',
@@ -5510,7 +5510,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       hints: [
         'Üç dallı bir if/elif/else, her karakter için parçayı belirler.',
         'set(kelime) - {" "} boşluk hariç harf kümesini verir.',
-        'return harfler <= set(tahminler)'
+        'return harfler &lt;= set(tahminler)'
       ],
       why: 'Ekrandaki görüntü (maske) ve oyunun sonucu (kazandi_mi), oyun durumundan (tahmin kümesi) hesaplanır. Ayrı sayaç tutmadığın için "ekranda her şey açık ama oyun bitmedi" gibi tutarsızlıklar oluşamaz.' },
     { id: 'proje-oyunlar-r3',
@@ -5583,7 +5583,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       sol: 'def atm_islem(bakiye, komut, tutar=0):\n    match komut:\n        case "bakiye":\n            return bakiye, f"Bakiye: {bakiye:.2f} TL"\n        case "yatir" | "cek" if tutar <= 0:\n            return bakiye, "Geçersiz tutar"\n        case "yatir":\n            return bakiye + tutar, f"{tutar:.2f} TL yatırıldı"\n        case "cek" if tutar > bakiye:\n            return bakiye, "Yetersiz bakiye"\n        case "cek":\n            return bakiye - tutar, f"{tutar:.2f} TL çekildi"\n        case _:\n            return bakiye, "Bilinmeyen işlem"\n',
       tests: 'assert atm_islem(1500, "bakiye") == (1500, "Bakiye: 1500.00 TL"), "Bakiye sorgusu"\nassert atm_islem(1000, "yatir", 250) == (1250, "250.00 TL yatırıldı"), "Para yatırma"\nassert atm_islem(1000, "cek", 100) == (900, "100.00 TL çekildi"), "Para çekme"\nassert atm_islem(1000, "cek", 1000) == (0, "1000.00 TL çekildi"), "Bakiyenin tamamı çekilebilir"\nassert atm_islem(1000, "cek", 5000) == (1000, "Yetersiz bakiye"), "Yetersiz bakiye"\nassert atm_islem(1000, "yatir", -50) == (1000, "Geçersiz tutar"), "Negatif yatırma geçersiz"\nassert atm_islem(1000, "cek", 0) == (1000, "Geçersiz tutar"), "Sıfır çekme geçersiz (yetersiz bakiye değil)"\nassert atm_islem(1000, "havale", 10) == (1000, "Bilinmeyen işlem"), "Bilinmeyen komut"\nassert "match" in __source__, "match yapısını kullan"\n',
       hints: [
-        'case "yatir" | "cek" if tutar <= 0: iki komutu ve bir koşulu tek case\'te birleştirir.',
+        'case "yatir" | "cek" if tutar &lt;= 0: iki komutu ve bir koşulu tek case\'te birleştirir.',
         'case\'ler yukarıdan aşağı denenir: önce geçersiz tutar, sonra yetersiz bakiye, sonra normal çekme.'
       ],
       why: 'match + koruma koşulu (guard, case ... if ...) iş kurallarını okunur bir tabloya dönüştürür. Sıra önemlidir: daha özel durumlar (geçersiz tutar, yetersiz bakiye) genel durumdan önce gelmelidir.' },
@@ -5599,8 +5599,8 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       expect: 'Tahmin: 50\nDaha küçük\nTahmin: 25\nDaha büyük\nTahmin: 30\nDaha büyük\nHakkın bitti. Sayı 37 idi.\n',
       tests: 'import io, contextlib\n_g = iter(["40", "37"])\nwith contextlib.redirect_stdout(io.StringIO()):\n    _sonuc = oyna(37, 5, girdi=lambda istem: next(_g))\nassert _sonuc == 2, "37\'yi ikinci denemede bilen oyuncu için 2 dönmeli"\n',
       hints: [
-        'input (ve girdi) her zaman METİN döndürür: "50" < 37 karşılaştırması TypeError verir.',
-        'deneme 0\'dan başlıyor; deneme <= hak koşulu 0, 1, 2, 3 için, yani 4 kez doğrudur.'
+        'input (ve girdi) her zaman METİN döndürür: "50" &lt; 37 karşılaştırması TypeError verir.',
+        'deneme 0\'dan başlıyor; deneme &lt;= hak koşulu 0, 1, 2, 3 için, yani 4 kez doğrudur.'
       ],
       why: 'İki klasik hata: input\'tan gelen metni sayıya çevirmemek ve döngü sınırında off-by-one. İkincisi sessizdir; yalnızca oyunu gerçekten oynayan ya da hakkı sayan bir test fark eder. Beklenen çıktı (expect) tam olarak bunu denetler: 3 tahminden sonra oyun bitmeli.' },
     { id: 'proje-oyunlar-b2',
@@ -5614,7 +5614,7 @@ print(atm(1000, lambda istem: next(cevaplar)))</pre>
       tests: 'assert sezar("abc", 1) == "bcd", "Küçük harfler küçük kalmalı: abc +1 → bcd; gelen " + sezar("abc", 1)\nassert sezar("Ankara", 2) == "Cpmctc", "Ankara +2 → Cpmctc"\nassert sezar("Şeker", 1) == "Şflfs", "Ş kaydırılmamalı (yalnızca A-Z, a-z); gelen " + sezar("Şeker", 1)\nassert sezar("İğne", 3) == "İğqh", "İ ve ğ olduğu gibi kalmalı"\nassert coz(sezar("Gizli Mesaj", 5), 5) == "Gizli Mesaj", "coz şifreyi geri almalı"\n',
       hints: [
         'Küçük harf satırında hangi sayı eklenerek harfe dönülüyor? 65 "A"nın, 97 "a"nın kodudur.',
-        'isupper() Türkçe Ş için de True döner; aralık kontrolü ("A" <= h <= "Z") kullan.',
+        'isupper() Türkçe Ş için de True döner; aralık kontrolü ("A" &lt;= h &lt;= "Z") kullan.',
         'Çözmek ters yönde kaydırmaktır.'
       ],
       why: 'isupper/islower Unicode\'un tüm harflerini kapsar, ama formül yalnızca 26 harflik İngilizce alfabe için geçerli: Ş gibi bir harf alfabe dışına taşar. Kopyala-yapıştır ile yazılan küçük harf satırında 65 değişmeden kalmış; çözme ise -k ile yapılır.' },
