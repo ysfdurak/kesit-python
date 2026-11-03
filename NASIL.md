@@ -76,6 +76,12 @@ cp -n pyfull/pyodide/*.whl pyfull/pyodide/*.zip node_modules/pyodide/
 
 Dosya başına toplu çalıştırma betikleri: `uretec/vf/chain.sh cp|pyo <dosyalar>` (verify veya pyodide_verify, her dosya ayrı süreç, log klasörüne yazar) ve `uretec/vf/exchain.sh <dosyalar>` (pyodide_examples). Bu iki betik eski ortamın mutlak yollarını kullanır; çalıştırmadan önce içindeki `V=` ve `cd` yollarını düzeltin.
 
+## Terim parantezi ve süre
+
+`kaynak/app.js` içindeki `termify`, `PY_TERMS` terimlerine ilk geçişte İngilizce karşılık ekler. Yalnız kök + izinli ad eki eşleşir. Çok anlamlı sözcükler (istem, getirme, kapanış) listeye girmez, derste elle yazılır. `tools/metinval.js` her otomatik biçimi `tools/gloss_onayli.json` ile karşılaştırır; yeni biçim çıkınca bağlamı okunup eklenir. `GLOSS_ONLY=1 node tools/metinval.js` yalnız bu denetimi yapar.
+
+Süre: `sureDk`, `dkAralik`, `saatAralik`: okuma (600 karakter/dk, en az 3 dk) + kod görevi başına 2-3 dk + çoktan seçmeli, tahmin ve sıralama başına 0,5-1 dk. Üç uygulamada aynı formül; ölçülmüş değildir.
+
 ## Yayın
 
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.
