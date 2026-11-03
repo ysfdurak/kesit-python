@@ -21,7 +21,7 @@ X.push({
       o: ['Rapor yine bozuk çıkıyor, bugün içinde acil bakılması gerekiyor lütfen', 'Sürüm 1.4: --ay 2024-12 ile toplam 0 çıkıyor, 1.450 bekleniyordu; adımlar ekte', 'Dün çalışıyordu, bugün açınca çalışmıyor, neden olduğunu anlamadım', 'Kod çok kötü yazılmış, bence tamamen baştan yazılması gerekiyor'], a: 1,
       why: 'İyi kayıt, başka birinin sorunu tekrar üretmesini sağlar: sürüm, adımlar, beklenen ve gerçek sonuç.' },
     { t: 'mc', stage: 'Teşhis', id: 'git-proje-yapisi-o2', q: '<p>Pull request\'te inceleyen onay verdi, ama CI\'daki iki test kırmızı. Ne yaparsın?</p>',
-      o: ['Birleştirmem; önce testlerin neden düştüğünü çözerim', 'Onay verildiği için bekletmeden hemen birleştiririm', 'Kırmızı testleri kapatıp ardından birleştiririm', 'Yerelde geçiyorsa CI önemsizdir, birleştiririm'], a: 0,
+      o: ['Birleştirmem; önce testlerin neden düştüğünü çözerim', 'Onay verildiği için hiç bekletmeden hemen birleştiririm', 'Kırmızı testleri kapatıp ardından birleştiririm', 'Yerelde geçiyorsa CI önemsizdir, birleştiririm'], a: 0,
       why: 'Onay ve otomatik testler ayrı sorulara cevap verir. Testler düşerken birleştirmek hatayı herkesin dalına taşır.' },
     { t: 'mc', stage: 'Teşhis', id: 'git-proje-yapisi-o3', q: '<p>İki geliştirici aynı fonksiyonun aynı satırını farklı dallarda değiştirdi. Birleştirmede ne beklersin?</p>',
       o: ['Git en son yazılan satırı otomatik olarak seçer', 'İki satır da dosyaya otomatik olarak eklenir', 'Git çakışma bildirir, kararı kişi verir', 'Dallardan biri kendiliğinden silinip gider'], a: 2,
