@@ -277,7 +277,7 @@ for dosya in track(["ocak.csv", "subat.csv", "mart.csv"], description="İşleniy
       why: 'nargs="+" en az bir değer toplar ve sonucu liste olarak verir. nargs="*" sıfır ya da daha çok, "?" sıfır ya da bir değer demektir. nargs verilmezse seçenek tek değer alır.' },
     { t: 'mc', stage: 'Isınma',
       q: 'Gece çalışan stok betiğin veritabanına bağlanamadı. Zamanlayıcının (cron/CI) hatayı fark etmesi için ne yapmalısın?',
-      o: ['Hatayı stdout\'a yazıp 0 ile çıkmak', 'Hiçbir şey yazmadan 0 ile çıkmak', 'Hata mesajını stderr\'e yazıp 0 dışı bir kodla çıkmak', 'Hata mesajını bir dosyaya yazıp çıkmak'], a: 2,
+      o: ['Hatayı stdout\'a yazıp 0 ile çıkmak', 'Hiçbir şey yazmadan 0 ile çıkmak', 'Hata mesajını stderr\'e yazıp 0 dışı bir kodla çıkmak', 'Hata mesajını bir log dosyasına yazıp 0 çıkış koduyla normal bitirmek'], a: 2,
       why: 'Otomasyon araçları başarıyı çıkış koduna bakarak anlar: 0 başarı, 0 dışı hata. Mesaj stderr\'e gider ki stdout\'taki veri bozulmasın. Yalnızca dosyaya yazmak kimseyi uyarmaz.' },
     { t: 'mc', stage: 'Isınma',
       q: 'Bir ayar hem varsayılanda (5), hem yapılandırma dosyasında (10), hem <code>STOK_ESIK=7</code> ortam değişkeninde, hem de <code>--esik 3</code> argümanında verilmiş. Yaygın öncelik kuralına göre hangisi kullanılır?',

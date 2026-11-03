@@ -40,7 +40,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         id: 'degiskenler-x1',
         stage: 'Isınma',
         q: 'Bir yapılandırma dosyasından <code>"False"</code> metni okundu. <code>bool("False")</code> ne döndürür?',
-        o: ['<code>False</code>, çünkü metnin içeriği False', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
+        o: ['<code>False</code>, çünkü bool() metnin içeriğini okuyup "False" sözcüğünü tanır', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
         a: 1,
         why: 'bool() bir metnin içeriğini yorumlamaz, yalnızca boş olup olmadığına bakar. "False", "0", "hayır" hepsi boş olmayan metinlerdir ve True verir. Ayar metinlerini açıkça karşılaştırman gerekir.'
       },

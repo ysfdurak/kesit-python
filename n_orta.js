@@ -4010,7 +4010,7 @@ print("Toplam ek ücret:", toplam)</pre>
       t: 'mc',
       stage: 'Isınma',
       q: 'Aşağıdakilerden hangisi iyi tasarlanmış bir <b>mixin</b>\'i en iyi tanımlar?',
-      o: ['Tüm iş mantığını içeren ana taban sınıf', 'Tek bir yeteneği ekleyen, tek başına örneklenmeyen küçük sınıf', 'Yalnız soyut metotlardan oluşan arayüz', 'Başka sınıfların nesnelerini içinde tutan kap sınıf'],
+      o: ['Tüm iş mantığını içeren ana taban sınıf', 'Tek bir yeteneği ekleyen, tek başına örneklenmeyen küçük sınıf', 'Yalnız soyut metotlardan oluşan arayüz', 'Başka sınıfların nesnelerini içinde tutup çağrıları onlara ileten kap sınıf'],
       a: 1,
       why: 'Mixin tek bir yeteneği (JSON, log, karşılaştırma) ekler ve başka sınıflarla birlikte kullanılmak üzere tasarlanır. Soyut arayüz ABC\'dir; nesneleri içinde tutmak ise kompozisyondur.'
     },
@@ -5652,7 +5652,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())</pre>
         'Paket içe aktarılınca basicConfig(level=DEBUG) çağırmak',
         'Her modülde getLogger(__name__) kullanıp pakete NullHandler eklemek',
         'Kendi StreamHandler\'ını kök logger\'a eklemek',
-        'Logging yerine print kullanmak; uygulama yönlendirir'
+        'Logging yerine print kullanmak; uygulama stdout\'u istediği yere yönlendirebilir'
       ],
       a: 1,
       why: 'Yapılandırma uygulamanın kararıdır. Kütüphane yalnız adlandırılmış logger\'larla kayıt üretir ve NullHandler ile "handler yok" uyarısını engeller; uygulama köke handler eklediğinde kayıtlar yayılımla oraya akar.'
@@ -8372,7 +8372,7 @@ for dosya in track(["ocak.csv", "subat.csv", "mart.csv"], description="İşleniy
       why: 'nargs="+" en az bir değer toplar ve sonucu liste olarak verir. nargs="*" sıfır ya da daha çok, "?" sıfır ya da bir değer demektir. nargs verilmezse seçenek tek değer alır.' },
     { t: 'mc', stage: 'Isınma',
       q: 'Gece çalışan stok betiğin veritabanına bağlanamadı. Zamanlayıcının (cron/CI) hatayı fark etmesi için ne yapmalısın?',
-      o: ['Hatayı stdout\'a yazıp 0 ile çıkmak', 'Hiçbir şey yazmadan 0 ile çıkmak', 'Hata mesajını stderr\'e yazıp 0 dışı bir kodla çıkmak', 'Hata mesajını bir dosyaya yazıp çıkmak'], a: 2,
+      o: ['Hatayı stdout\'a yazıp 0 ile çıkmak', 'Hiçbir şey yazmadan 0 ile çıkmak', 'Hata mesajını stderr\'e yazıp 0 dışı bir kodla çıkmak', 'Hata mesajını bir log dosyasına yazıp 0 çıkış koduyla normal bitirmek'], a: 2,
       why: 'Otomasyon araçları başarıyı çıkış koduna bakarak anlar: 0 başarı, 0 dışı hata. Mesaj stderr\'e gider ki stdout\'taki veri bozulmasın. Yalnızca dosyaya yazmak kimseyi uyarmaz.' },
     { t: 'mc', stage: 'Isınma',
       q: 'Bir ayar hem varsayılanda (5), hem yapılandırma dosyasında (10), hem <code>STOK_ESIK=7</code> ortam değişkeninde, hem de <code>--esik 3</code> argümanında verilmiş. Yaygın öncelik kuralına göre hangisi kullanılır?',
@@ -11045,7 +11045,7 @@ print(ayar.smtp_port, ayar.dry_run, ayar.smtp_sifre)</pre>
     { t: 'mc',
       stage: 'Isınma',
       q: 'v1 ile yazılmış <code>Musteri.parse_obj(d)</code> ve <code>m.dict()</code> çağrılarının pydantic v2 karşılığı nedir?',
-      o: ['Musteri.model_validate(d) ve m.model_dump()', 'Musteri.from_dict(d) ve m.to_dict()', 'Musteri.validate(d) ve m.json()', 'Musteri(**d).parse() ve dict(m)'],
+      o: ['Musteri.model_validate(d) ve m.model_dump()', 'Musteri.from_dict(d) ve m.to_dict()', 'Musteri.validate(d) ve m.json()', 'Musteri.model_parse_obj(d) ve m.model_to_dict()'],
       a: 0,
       why: 'v2\'de tüm model metotları model_ önekini aldı: parse_obj → model_validate, dict() → model_dump, json() → model_dump_json, parse_raw → model_validate_json.' },
     { t: 'mc',

@@ -40,7 +40,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         id: 'degiskenler-x1',
         stage: 'Isınma',
         q: 'Bir yapılandırma dosyasından <code>"False"</code> metni okundu. <code>bool("False")</code> ne döndürür?',
-        o: ['<code>False</code>, çünkü metnin içeriği False', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
+        o: ['<code>False</code>, çünkü bool() metnin içeriğini okuyup "False" sözcüğünü tanır', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
         a: 1,
         why: 'bool() bir metnin içeriğini yorumlamaz, yalnızca boş olup olmadığına bakar. "False", "0", "hayır" hepsi boş olmayan metinlerdir ve True verir. Ayar metinlerini açıkça karşılaştırman gerekir.'
       },
@@ -800,7 +800,7 @@ print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık dü
         id: 'metinler-x1',
         stage: 'Isınma',
         q: '<code>"SUBE=Konak".partition("=")</code> ne döndürür?',
-        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>"SUBE"</code>'],
+        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>["SUBE", "=", "Konak", ""]</code>'],
         a: 1,
         why: 'partition her zaman üç elemanlı bir demet döndürür: ayraçtan önceki kısım, ayracın kendisi ve sonrası. split ise liste döndürür ve ayracı içermez.'
       },
@@ -2684,7 +2684,7 @@ print(gruplar)</pre>
     { t: 'mc',
       stage: 'Isınma',
       q: '<code>a = {"kargo": 49.9, "kdv": 0.2}</code> ve <code>b = {"kargo": 0}</code> için <code>(a | b)["kargo"]</code> nedir?',
-      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, anahtar çakışıyor'],
+      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, çünkü aynı anahtar iki sözlükte de tanımlı'],
       a: 1,
       why: '| birleştirmesinde aynı anahtar iki tarafta varsa sağdaki sözlüğün değeri kullanılır. Değerler toplanmaz; toplama gerekiyorsa döngü yazarsın.' },
     { t: 'predict',

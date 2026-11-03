@@ -355,7 +355,7 @@ print(rapor)</pre>
       { t: 'mc',
         stage: 'Isınma',
         q: 'Churn oranı %18 olan veriyi eğitim/test olarak bölerken neden <code>stratify=y</code> kullanırsın?',
-        o: ['Eğitimi hızlandırmak için', 'Eğitim ve test setinde churn oranının aynı kalması için', 'Kategorik sütunları otomatik kodlamak için', 'Aykırı değerleri test setinden çıkarmak için'],
+        o: ['Eğitimi hızlandırmak için', 'Eğitim ve test setinde churn oranının aynı kalması için', 'Kategorik sütunları otomatik kodlamak için', 'Aykırı değerleri test setinden çıkarıp eğitim setini dengelemek için'],
         a: 1,
         why: 'Tabakalı (stratified) bölme sınıf oranını her parçada korur; aksi hâlde test seti şans eseri çok az ya da çok fazla churn içerebilir ve skorlar yanıltıcı olur.' },
       { t: 'mc',

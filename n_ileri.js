@@ -3025,7 +3025,7 @@ print(beklenen.round(0), "toplam:", round(beklenen.sum()))
     { t: 'mc',
       stage: 'Isınma',
       q: 'Temerrüt oranı %4 olan portföyde bir model %96 doğruluk alıyor ama recall değeri 0.0. Bu ne anlama gelir?',
-      o: ['Model mükemmel; doğruluk yüksek', 'Model her başvuruya "temerrüt" diyor', 'Model hiçbir temerrüdü yakalamıyor; herkese "öder" diyor', 'Precision da mutlaka 1.0 demektir'],
+      o: ['Model mükemmel; doğruluk yüksek', 'Model her başvuruya "temerrüt" diyor; %96 doğruluk bu yüzden yüksek çıkıyor', 'Model hiçbir temerrüdü yakalamıyor; herkese "öder" diyor', 'Precision da mutlaka 1.0 demektir'],
       a: 2,
       why: 'Recall = TP / (TP + FN); 0 ise hiçbir gerçek temerrüt yakalanmamış. Herkese "öder" demek %96 doğruluk getirir ama işe yaramaz. Herkese "temerrüt" deseydi recall 1.0 olurdu.' },
     { t: 'mc',
@@ -5593,7 +5593,7 @@ print(rapor)</pre>
       { t: 'mc',
         stage: 'Isınma',
         q: 'Churn oranı %18 olan veriyi eğitim/test olarak bölerken neden <code>stratify=y</code> kullanırsın?',
-        o: ['Eğitimi hızlandırmak için', 'Eğitim ve test setinde churn oranının aynı kalması için', 'Kategorik sütunları otomatik kodlamak için', 'Aykırı değerleri test setinden çıkarmak için'],
+        o: ['Eğitimi hızlandırmak için', 'Eğitim ve test setinde churn oranının aynı kalması için', 'Kategorik sütunları otomatik kodlamak için', 'Aykırı değerleri test setinden çıkarıp eğitim setini dengelemek için'],
         a: 1,
         why: 'Tabakalı (stratified) bölme sınıf oranını her parçada korur; aksi hâlde test seti şans eseri çok az ya da çok fazla churn içerebilir ve skorlar yanıltıcı olur.' },
       { t: 'mc',
@@ -14368,7 +14368,7 @@ assert oran == 1.0, "yön testi başarısız"
       t: 'mc',
       stage: 'Isınma',
       q: 'Yeni ETA modeli tüm gerçek istekleri alıyor ve tahminini kaydediyor, ama kullanıcıya hâlâ eski modelin cevabı dönüyor. Bu yayın kalıbının adı nedir?',
-      o: ['Canary yayını', 'A/B testi', 'Mavi-yeşil yayın', 'Shadow (gölge) yayın'],
+      o: ['Canary yayını', 'A/B testi (kullanıcı bölünerek)', 'Mavi-yeşil yayın', 'Shadow (gölge) yayın'],
       a: 3,
       why: 'Shadow modda yeni model kullanıcıyı etkilemeden gerçek trafikle sınanır. Canary\'de kullanıcıların küçük bir kısmı yeni modelin cevabını gerçekten görür; A/B testi iş metriği farkını ölçer; mavi-yeşil iki ortam arasında tüm trafiği bir anda çevirir.'
     },
@@ -16067,7 +16067,7 @@ def test_rapor_mart_katmanina_yazilir():
       stage: 'Isınma',
       q: 'S3 konsolunda <code>ham/kanat/ucuslar/</code> bir klasör gibi görünüyor. Gerçekte nedir?',
       o: [
-        'Diskte ayrı bir dizin; içine dosya taşınabilir',
+        'Diskte gerçekten ayrı bir dizin; içine dosya taşınır ve yetkisi ayrı verilir',
         'Anahtarların ortak öneki; ayrı bir nesne olması gerekmez',
         'Ayrı bir alt kova (sub-bucket)',
         'Yalnızca konsolun tuttuğu bir etiket (tag)'
@@ -17674,7 +17674,7 @@ print(con.execute("""
       o: [
         'Satış satırının tutarı',
         'Ay sonu banka hesap bakiyesi',
-        'Ürünün birim fiyatı',
+        'Ürünün birim fiyatı; satırlar arasında toplanamaz',
         'Satılan adet'
       ],
       a: 1,

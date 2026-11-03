@@ -199,7 +199,7 @@ print(con.execute("""
       o: [
         'Satış satırının tutarı',
         'Ay sonu banka hesap bakiyesi',
-        'Ürünün birim fiyatı',
+        'Ürünün birim fiyatı; satırlar arasında toplanamaz',
         'Satılan adet'
       ],
       a: 1,

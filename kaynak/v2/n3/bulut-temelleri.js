@@ -258,7 +258,7 @@ def test_rapor_mart_katmanina_yazilir():
       stage: 'Isınma',
       q: 'S3 konsolunda <code>ham/kanat/ucuslar/</code> bir klasör gibi görünüyor. Gerçekte nedir?',
       o: [
-        'Diskte ayrı bir dizin; içine dosya taşınabilir',
+        'Diskte gerçekten ayrı bir dizin; içine dosya taşınır ve yetkisi ayrı verilir',
         'Anahtarların ortak öneki; ayrı bir nesne olması gerekmez',
         'Ayrı bir alt kova (sub-bucket)',
         'Yalnızca konsolun tuttuğu bir etiket (tag)'

@@ -222,7 +222,7 @@ for s in siparisler:
     { t: 'mc',
       stage: 'Isınma',
       q: '<code>m.get("adres", {}).get("sehir", "?")</code> ifadesinde ilk get\'e neden <code>{}</code> varsayılanı verilir?',
-      o: ['Boş sözlük daha az bellek kullandığı için', 'Adres yoksa ikinci .get boş sözlükte güvenle çalışsın diye', 'Python get\'te varsayılanı zorunlu tuttuğu için', 'Şehir alanını otomatik olarak oluşturmak için'],
+      o: ['Boş sözlük daha az bellek kullandığı için', 'Adres yoksa ikinci .get boş sözlükte güvenle çalışsın diye', 'Python get\'te varsayılanı zorunlu tuttuğu için', 'Şehir alanını sözlükte otomatik olarak oluşturup "?" ile doldurmak için'],
       a: 1,
       why: 'Adres anahtarı yoksa varsayılansız get None döndürür ve None.get(...) AttributeError verir. {} döndüğünde ikinci get onun üzerinde çalışır ve "?" verir. Varsayılan zorunlu değildir ve hiçbir alan oluşturmaz.' },
     { t: 'predict',

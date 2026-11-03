@@ -133,7 +133,7 @@ for c in dep["spec"]["template"]["spec"]["containers"]:
         id: 'docker-deploy-y2',
         stage: 'Isınma',
         q: 'Uygulama Nginx arkasında çalışıyor ve loglarda her isteğin IP\'si <code>127.0.0.1</code> görünüyor. En olası neden?',
-        o: ['Nginx istekleri önbellekten yanıtlıyor', 'Uygulama X-Forwarded-For başlığını dikkate almıyor', 'gunicorn yanlış porta bağlanmış', 'HTTPS sertifikası süresi dolmuş'],
+        o: ['Nginx istekleri önbellekten yanıtlıyor', 'Uygulama X-Forwarded-For başlığını dikkate almıyor', 'gunicorn yanlış porta bağlanmış, istekler doğrudan yerel adresten geliyor', 'HTTPS sertifikası süresi dolmuş'],
         a: 1,
         why: 'Uygulamanın gördüğü bağlantı Nginx\'ten gelir; gerçek istemci adresi Nginx\'in eklediği X-Forwarded-For / X-Real-IP başlığındadır. uvicorn --proxy-headers ya da Flask ProxyFix ile bu başlıklara güvenmesini söylemen gerekir (yalnız Nginx\'ten geldiğinden eminsen).'
       },

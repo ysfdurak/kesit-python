@@ -278,7 +278,7 @@ print(beklenen.round(0), "toplam:", round(beklenen.sum()))
     { t: 'mc',
       stage: 'Isınma',
       q: 'Temerrüt oranı %4 olan portföyde bir model %96 doğruluk alıyor ama recall değeri 0.0. Bu ne anlama gelir?',
-      o: ['Model mükemmel; doğruluk yüksek', 'Model her başvuruya "temerrüt" diyor', 'Model hiçbir temerrüdü yakalamıyor; herkese "öder" diyor', 'Precision da mutlaka 1.0 demektir'],
+      o: ['Model mükemmel; doğruluk yüksek', 'Model her başvuruya "temerrüt" diyor; %96 doğruluk bu yüzden yüksek çıkıyor', 'Model hiçbir temerrüdü yakalamıyor; herkese "öder" diyor', 'Precision da mutlaka 1.0 demektir'],
       a: 2,
       why: 'Recall = TP / (TP + FN); 0 ise hiçbir gerçek temerrüt yakalanmamış. Herkese "öder" demek %96 doğruluk getirir ama işe yaramaz. Herkese "temerrüt" deseydi recall 1.0 olurdu.' },
     { t: 'mc',

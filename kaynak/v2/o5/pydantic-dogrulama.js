@@ -253,7 +253,7 @@ print(ayar.smtp_port, ayar.dry_run, ayar.smtp_sifre)</pre>
     { t: 'mc',
       stage: 'Isınma',
       q: 'v1 ile yazılmış <code>Musteri.parse_obj(d)</code> ve <code>m.dict()</code> çağrılarının pydantic v2 karşılığı nedir?',
-      o: ['Musteri.model_validate(d) ve m.model_dump()', 'Musteri.from_dict(d) ve m.to_dict()', 'Musteri.validate(d) ve m.json()', 'Musteri(**d).parse() ve dict(m)'],
+      o: ['Musteri.model_validate(d) ve m.model_dump()', 'Musteri.from_dict(d) ve m.to_dict()', 'Musteri.validate(d) ve m.json()', 'Musteri.model_parse_obj(d) ve m.model_to_dict()'],
       a: 0,
       why: 'v2\'de tüm model metotları model_ önekini aldı: parse_obj → model_validate, dict() → model_dump, json() → model_dump_json, parse_raw → model_validate_json.' },
     { t: 'mc',

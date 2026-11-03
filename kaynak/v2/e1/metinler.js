@@ -46,7 +46,7 @@ print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık dü
         id: 'metinler-x1',
         stage: 'Isınma',
         q: '<code>"SUBE=Konak".partition("=")</code> ne döndürür?',
-        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>"SUBE"</code>'],
+        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>["SUBE", "=", "Konak", ""]</code>'],
         a: 1,
         why: 'partition her zaman üç elemanlı bir demet döndürür: ayraçtan önceki kısım, ayracın kendisi ve sonrası. split ise liste döndürür ve ayracı içermez.'
       },

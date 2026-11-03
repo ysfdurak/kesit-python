@@ -275,7 +275,7 @@ print("Toplam ek ücret:", toplam)</pre>
       t: 'mc',
       stage: 'Isınma',
       q: 'Aşağıdakilerden hangisi iyi tasarlanmış bir <b>mixin</b>\'i en iyi tanımlar?',
-      o: ['Tüm iş mantığını içeren ana taban sınıf', 'Tek bir yeteneği ekleyen, tek başına örneklenmeyen küçük sınıf', 'Yalnız soyut metotlardan oluşan arayüz', 'Başka sınıfların nesnelerini içinde tutan kap sınıf'],
+      o: ['Tüm iş mantığını içeren ana taban sınıf', 'Tek bir yeteneği ekleyen, tek başına örneklenmeyen küçük sınıf', 'Yalnız soyut metotlardan oluşan arayüz', 'Başka sınıfların nesnelerini içinde tutup çağrıları onlara ileten kap sınıf'],
       a: 1,
       why: 'Mixin tek bir yeteneği (JSON, log, karşılaştırma) ekler ve başka sınıflarla birlikte kullanılmak üzere tasarlanır. Soyut arayüz ABC\'dir; nesneleri içinde tutmak ise kompozisyondur.'
     },

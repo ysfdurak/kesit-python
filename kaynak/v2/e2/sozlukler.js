@@ -101,7 +101,7 @@ print(gruplar)</pre>
     { t: 'mc',
       stage: 'Isınma',
       q: '<code>a = {"kargo": 49.9, "kdv": 0.2}</code> ve <code>b = {"kargo": 0}</code> için <code>(a | b)["kargo"]</code> nedir?',
-      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, anahtar çakışıyor'],
+      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, çünkü aynı anahtar iki sözlükte de tanımlı'],
       a: 1,
       why: '| birleştirmesinde aynı anahtar iki tarafta varsa sağdaki sözlüğün değeri kullanılır. Değerler toplanmaz; toplama gerekiyorsa döngü yazarsın.' },
     { t: 'predict',

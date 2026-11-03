@@ -100,7 +100,7 @@ print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti 
         id: 'kalite-ci-y2',
         stage: 'Isınma',
         q: 'Yeni bir sürüm prod\'a çıktı ve hata oranı aniden yükseldi. Migration\'lar genişlet-daralt kuralına uygun yazılmış. İlk yapılacak şey?',
-        o: ['Hatayı bulup düzeltme commit\'i yazmak', 'Bir önceki başarılı imaj etiketine geri dönmek', 'Veritabanını yedekten geri yüklemek', 'Staging ortamını silip yeniden kurmak'],
+        o: ['Hatayı bulup düzeltme commit\'i yazmak', 'Bir önceki başarılı imaj etiketine geri dönmek', 'Veritabanını en son yedekten geri yükleyip uygulamayı yeniden başlatmak', 'Staging ortamını silip yeniden kurmak'],
         a: 1,
         why: 'Önce kullanıcıyı kurtar: geri alma dakikalar sürer, düzeltme ise CI süresi ve riski taşır. Migration\'lar geriye uyumlu olduğu için eski kod yeni şemayla çalışır. Veritabanı geri yükleme veri kaybettirir, son çaredir.'
       },

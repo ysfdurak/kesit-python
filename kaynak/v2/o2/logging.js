@@ -259,7 +259,7 @@ logging.getLogger(__name__).addHandler(logging.NullHandler())</pre>
         'Paket içe aktarılınca basicConfig(level=DEBUG) çağırmak',
         'Her modülde getLogger(__name__) kullanıp pakete NullHandler eklemek',
         'Kendi StreamHandler\'ını kök logger\'a eklemek',
-        'Logging yerine print kullanmak; uygulama yönlendirir'
+        'Logging yerine print kullanmak; uygulama stdout\'u istediği yere yönlendirebilir'
       ],
       a: 1,
       why: 'Yapılandırma uygulamanın kararıdır. Kütüphane yalnız adlandırılmış logger\'larla kayıt üretir ve NullHandler ile "handler yok" uyarısını engeller; uygulama köke handler eklediğinde kayıtlar yayılımla oraya akar.'

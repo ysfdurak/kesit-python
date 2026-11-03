@@ -234,7 +234,7 @@ assert oran == 1.0, "yön testi başarısız"
       t: 'mc',
       stage: 'Isınma',
       q: 'Yeni ETA modeli tüm gerçek istekleri alıyor ve tahminini kaydediyor, ama kullanıcıya hâlâ eski modelin cevabı dönüyor. Bu yayın kalıbının adı nedir?',
-      o: ['Canary yayını', 'A/B testi', 'Mavi-yeşil yayın', 'Shadow (gölge) yayın'],
+      o: ['Canary yayını', 'A/B testi (kullanıcı bölünerek)', 'Mavi-yeşil yayın', 'Shadow (gölge) yayın'],
       a: 3,
       why: 'Shadow modda yeni model kullanıcıyı etkilemeden gerçek trafikle sınanır. Canary\'de kullanıcıların küçük bir kısmı yeni modelin cevabını gerçekten görür; A/B testi iş metriği farkını ölçer; mavi-yeşil iki ortam arasında tüm trafiği bir anda çevirir.'
     },
