@@ -3981,7 +3981,7 @@ print("istek başına token:", girdi, "+", cikti)
 print(f"günlük tahmini: {gunluk:.2f} | aylık: {gunluk * 30:.2f}")</pre>
 
 <h2>Basit RAG: belgelerinle cevap ver</h2>
-<p>Model, Ilgaz Bank'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
+<p>Model, Ilgaz Bank'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin (prompt) içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme (retrieval) adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
 <pre class="py">from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 
@@ -20208,7 +20208,7 @@ L.push(
     ],
     body: `
 <h2>Kelimeyle değil anlamla aramak</h2>
-<p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" katmanı bu fikre dayanır.</p>
+<p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" (retrieval) katmanı bu fikre dayanır.</p>
 <p><code>llm-api</code> dersinde TF-IDF ile basit bir RAG kurdun. Bu derste getirme katmanını mühendis gözüyle derinleştireceksin: vektör benzerliği, numpy ile kNN, ANN indeksleri, parçalama stratejileri, BM25 ile hibrit arama, RRF, yeniden sıralama, değerlendirme metrikleri ve yetki filtresi.</p>
 <div class="note"><b>Tarayıcıda sahte embedding</b>Gerçek embedding modelleri (sentence-transformers, OpenAI, Cohere, Voyage...) yüzlerce MB'lık ağlar ya da ağ üzerinden API'lerdir. Alıştırmalarda karakter üçlülerini (trigram) hash'leyen 256 boyutlu bir <b>sahte embedding</b> kullanacağız. Anlamı değil yazım benzerliğini yakalar; ama vektör aramanın tüm mühendisliği (normalizasyon, kNN, indeks, değerlendirme) birebir aynıdır. Sahte modelin hatalarını görmek, gerçek modelin neden gerektiğini de gösterecek.</div>
 
@@ -20392,7 +20392,7 @@ for k in (1, 3):
     print(f"recall@{k}, MRR@{k} =", metrikler(sonuclar, altin, k))</pre>
 
 <h2>8. Metadata filtreleme ve yetki</h2>
-<p>Kurumsal aramada her kullanıcı yalnız görme yetkisi olan belgeleri görmelidir: Ali'nin iade notu Ayşe'nin sonuçlarında çıkmamalı. Filtre <b>sıralamadan önce</b> uygulanmalıdır (pre-filtering). Önce ilk k'yı alıp sonra yetkisizleri atmak (post-filtering) iki sorun yaratır: k'dan az sonuç döner ve hata yapılırsa yetkisiz belge LLM istemine sızar. Vektör veritabanları bu yüzden <code>where</code> koşulunu indeks aramasıyla birlikte uygular. Ayrıca embedding'ler de kişisel veri sayılabilir; silinen bir belgenin vektörü de silinmelidir (KVKK).</p>
+<p>Kurumsal aramada her kullanıcı yalnız görme yetkisi olan belgeleri görmelidir: Ali'nin iade notu Ayşe'nin sonuçlarında çıkmamalı. Filtre <b>sıralamadan önce</b> uygulanmalıdır (pre-filtering). Önce ilk k'yı alıp sonra yetkisizleri atmak (post-filtering) iki sorun yaratır: k'dan az sonuç döner ve hata yapılırsa yetkisiz belge LLM istemine (prompt) sızar. Vektör veritabanları bu yüzden <code>where</code> koşulunu indeks aramasıyla birlikte uygular. Ayrıca embedding'ler de kişisel veri sayılabilir; silinen bir belgenin vektörü de silinmelidir (KVKK).</p>
 
 <h2>9. Kullanım alanları</h2>
 <ul>
@@ -20959,7 +20959,7 @@ for adim in range(1, 11):
 <tr><td>Sağlayıcı SDK'sı (anthropic, openai)</td><td>Ham araç çağırma döngüsü</td><td>Tam kontrol, az bağımlılık; bu dersteki yaklaşım</td></tr>
 <tr><td>LangGraph</td><td>Ajanı durum makinesi/graf olarak modelleme, kalıcı durum, insan onayı düğümleri</td><td>Çok adımlı, dallanan, kesintiye uğrayıp devam eden akışlar</td></tr>
 <tr><td>LangChain</td><td>Hazır bileşenler (yükleyiciler, araç sarmalayıcılar)</td><td>Hızlı prototip; soyutlamaların bedelini bil</td></tr>
-<tr><td>LlamaIndex</td><td>Veri bağlayıcıları ve RAG odaklı ajanlar</td><td>Belge ağırlıklı getirme uygulamaları</td></tr>
+<tr><td>LlamaIndex</td><td>Veri bağlayıcıları ve RAG odaklı ajanlar</td><td>Belge ağırlıklı getirme (retrieval) uygulamaları</td></tr>
 </table></div>
 
 <h2>7. Text-to-SQL ajanı ve değerlendirme seti</h2>
@@ -22816,7 +22816,7 @@ L.push(
     ],
     body: `
 <h2>"Çalışıyor gibi" yetmez</h2>
-<p><code>prompt-muhendisligi</code> dersinde Lezzet Kurye yorumlarını etiketleyen bir hat kurdun. Beş yorumu deneyip "iyi görünüyor" demek yetmez: çıktı serbest metindir, model sürümü değişir, istemdeki tek kelime her şeyi etkileyebilir. Bu derste bir LLM uygulamasını <b>sayıyla</b> ölçmeyi, her değişiklikte <b>otomatik</b> denetlemeyi ve canlıda <b>izlemeyi</b> öğreneceksin.</p>
+<p><code>prompt-muhendisligi</code> dersinde Lezzet Kurye yorumlarını etiketleyen bir hat kurdun. Beş yorumu deneyip "iyi görünüyor" demek yetmez: çıktı serbest metindir, model sürümü değişir, istemdeki (prompt) tek kelime her şeyi etkileyebilir. Bu derste bir LLM uygulamasını <b>sayıyla</b> ölçmeyi, her değişiklikte <b>otomatik</b> denetlemeyi ve canlıda <b>izlemeyi</b> öğreneceksin.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Katman</th><th>Ne ölçer?</th><th>Hız / maliyet</th></tr>
 <tr><td>Kurala dayalı ölçüt</td><td>Tam eşleşme, içerir, JSON şema, regex</td><td>Anında, ücretsiz; ilk tercih</td></tr>
@@ -22982,7 +22982,7 @@ def test_enjeksiyon_reddedilir():
 <div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pytest</code> ile kur ve proje kökünde <code>pytest -q</code> çalıştır. Gerçek API çağıran testler yavaş ve ücretlidir: CI'da model cevaplarını önbellekten oynat (kayıt/oynatma), tam değerlendirmeyi gece ya da istem dosyası değişince çalıştır, eşiği tek sayıya değil son çalıştırmaya göre kıyasla.</div>
 
 <h2>6. RAG değerlendirme</h2>
-<p>RAG'de iki ayrı katmanı ayrı ölç. <b>Getirme</b>: doğru belgeler geldi mi? (recall@k, MRR; <code>embedding-vektor-arama</code> dersinde yazdın). <b>Üretim</b>: cevap yalnız getirilen belgelere mi dayanıyor (<b>sadakat</b>, faithfulness) ve iddialar doğru kaynağa mı atıflı? Getirme mükemmelken cevap uydurma olabilir; tersine getirme kötüyse en iyi model bile doğru cevap veremez.</p>
+<p>RAG'de iki ayrı katmanı ayrı ölç. <b>Getirme</b> (retrieval): doğru belgeler geldi mi? (recall@k, MRR; <code>embedding-vektor-arama</code> dersinde yazdın). <b>Üretim</b>: cevap yalnız getirilen belgelere mi dayanıyor (<b>sadakat</b>, faithfulness) ve iddialar doğru kaynağa mı atıflı? Getirme mükemmelken cevap uydurma olabilir; tersine getirme kötüyse en iyi model bile doğru cevap veremez.</p>
 <pre class="py">import re
 import veri
 
@@ -23505,7 +23505,7 @@ L.push(
 <li>Mesajın <b>niyetini</b> anlamak: sipariş durumu, iade, şikâyet, genel bilgi, selamlaşma ya da anlaşılmayan istek.</li>
 <li>Sipariş sorularında gerçek veritabanına bir <b>araçla</b> bakmak ve <b>yalnız müşterinin kendi siparişini</b> göstermek.</li>
 <li>Kural sorularını (teslimat ücreti, iptal, iade süresi) <b>RAG</b> ile, kaynak göstererek cevaplamak; bilmediğinde "bilmiyorum" deyip devretmek.</li>
-<li>Çıktıyı <b>pydantic</b> ile doğrulamak; kart numarası gibi kişisel verileri maskelemek; istem enjeksiyonunu durdurmak.</li>
+<li>Çıktıyı <b>pydantic</b> ile doğrulamak; kart numarası gibi kişisel verileri maskelemek; istem enjeksiyonunu (prompt injection) durdurmak.</li>
 <li>Her değişiklikten sonra bir <b>değerlendirme setiyle</b> ölçülmek ve rapor üretmek.</li>
 </ul>
 <p>Tüm sistem tarayıcıda, ağ olmadan çalışır: dil modelinin yerinde <b>sahte LLM</b> var. Gerçek modele geçiş tek bir sınıfı değiştirmektir (bölüm sonunda).</p>
@@ -23514,7 +23514,7 @@ L.push(
 <tr><td>Giriş bariyeri</td><td>Kişisel veri maskeleme, enjeksiyon kalıpları, uzunluk</td><td><code>re</code></td><td><code>llm-api</code>, <code>llm-ajanlar</code></td></tr>
 <tr><td>Niyet</td><td>TF-IDF karakter n-gram + lojistik regresyon, güven eşiği</td><td>scikit-learn</td><td><code>nlp-metin</code>, <code>yerel-modeller-hf</code></td></tr>
 <tr><td>Araç</td><td>Sipariş durumu sorgusu, sahiplik kontrolü</td><td><code>sqlite3</code>, <code>veri.baglan</code></td><td><code>sqlite-python</code>, <code>llm-ajanlar</code></td></tr>
-<tr><td>Bilgi</td><td>SSS + veriden üretilen belge, getirme eşiği, kaynak</td><td>TF-IDF, sahte LLM</td><td><code>rag-uygulamasi</code></td></tr>
+<tr><td>Bilgi</td><td>SSS + veriden üretilen belge, getirme (retrieval) eşiği, kaynak</td><td>TF-IDF, sahte LLM</td><td><code>rag-uygulamasi</code></td></tr>
 <tr><td>Çıktı</td><td>Şema, doğrulama, yeniden deneme, devretme</td><td>pydantic</td><td><code>pydantic-dogrulama</code></td></tr>
 <tr><td>Ölçüm</td><td>Değerlendirme seti, metrikler, rapor</td><td>saf Python</td><td><code>llm-degerlendirme</code></td></tr>
 </table></div>
@@ -24233,7 +24233,7 @@ L.push(
     ],
     body: `
 <h2>Demo RAG ile üretim RAG arasındaki fark</h2>
-<p><code>llm-api</code> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme koydun; <code>embedding-vektor-arama</code> dersinde getirme katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
+<p><code>llm-api</code> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme (prompt) koydun; <code>embedding-vektor-arama</code> dersinde getirme (retrieval) katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
 <p>Senaryo: <b>Pusula İK</b> çalışanları izin, çalışma düzeni ve eğitim kurallarını soruyor. Kaynaklar kurgusal bir yönetmelik metni ile gerçek <code>pusula_ik</code> tablolarından üretilen istatistik belgeleri; ürün sorularını da sınamak için <code>anadolu_market</code> ürünlerinden kısa ürün kartları ekliyoruz.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Hat</th><th>Adımlar</th><th>Ne zaman çalışır?</th></tr>
@@ -24517,7 +24517,7 @@ r.sor("  raporsuz HASTALIK izni kaç gün ")
 r.surum += 1                     # indeks güncellendi: eski kayıtlar artık eşleşmez
 r.sor("Raporsuz hastalık izni kaç gün?")
 print(r.isabet, r.iska)</pre>
-<p>Üç katman önbellek vardır: <b>embedding önbelleği</b> (aynı metni iki kez vektörleştirme), <b>getirme önbelleği</b> (soru → parça kimlikleri) ve <b>cevap önbelleği</b>. Cevap önbelleğini kullanıcıya özel içerikte (ör. "benim izin bakiyem") kullanma; anahtara kullanıcı ya da yetki grubunu ekle. Sağlayıcıların <b>istem önbelleği</b> (prompt caching) ise sabit sistem istemini ucuzlatır; ikisi birbirinin yerine geçmez.</p>
+<p>Üç katman önbellek vardır: <b>embedding önbelleği</b> (aynı metin için ikinci kez embedding hesaplanmaz), <b>getirme önbelleği</b> (soru → parça kimlikleri) ve <b>cevap önbelleği</b>. Cevap önbelleğini kullanıcıya özel içerikte (ör. "benim izin bakiyem") kullanma; anahtara kullanıcı ya da yetki grubunu ekle. Sağlayıcıların <b>istem önbelleği</b> (prompt caching) ise sabit sistem istemini ucuzlatır; ikisi birbirinin yerine geçmez.</p>
 
 <h2>7. Güncelleme ve silme</h2>
 <p>Belge değişince en sık yapılan hata yeni parçaları eskilerin üzerine yazmaktır: yeni sürüm daha kısaysa eski parçaların bir kısmı indekste <b>hayalet</b> olarak kalır ve model artık geçerli olmayan kuralı söyler. Doğru yol belge düzeyinde düşünmektir: parmak izi aynıysa hiçbir şey yapma; değiştiyse belgenin <b>tüm</b> eski parçalarını sil, yenilerini ekle, sürümü artır.</p>
@@ -25214,7 +25214,7 @@ print(model.named_steps["tfidfvectorizer"].transform(yeni).nnz, "bilinen kelime"
 <h3>Damıtma (distillation)</h3>
 <p>Büyük modelin etiketlerini (ya da olasılıklarını) öğretmen olarak kullanıp küçük bir modeli eğitirsin. Mini projedeki hibrit yaklaşımın doğal devamıdır: LLM'in etiketlediği zor örnekler zamanla küçük modelin eğitim setine eklenir.</p>
 <h3>Değerlendirme</h3>
-<p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <code>llm-degerlendirme</code> dersinde.</p>
+<p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi (prompt) ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <code>llm-degerlendirme</code> dersinde.</p>
 </section>
 `,
     ex: [

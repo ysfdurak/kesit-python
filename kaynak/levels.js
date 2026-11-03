@@ -327,8 +327,9 @@ W.PY_TITLE_FIX = {
 "mulakat-kaliplari-2": "Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP",
 "mulakat-hazirlik": "Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama"
 };
-/* Terim dili: Türkçe terimin ilk geçtiği yere İngilizcesi eklenir */
-W.PY_TERMS = [['üreteç', 'generator'], ['yineleyici', 'iterator'], ['istem', 'prompt'], ['getirme', 'retrieval'], ['parçalama', 'chunking'], ['pencere fonksiyon', 'window function'], ['dekoratör', 'decorator'], ['kapanış', 'closure'], ['kalıtım', 'inheritance'], ['özyineleme', 'recursion'], ['sanal ortam', 'virtual environment'], ['bağlam yöneticisi', 'context manager'], ['eşzamanlılık', 'concurrency'], ['vektörleştirme', 'vectorization'], ['aşırı öğrenme', 'overfitting'], ['özellik mühendisliği', 'feature engineering'], ['çapraz doğrulama', 'cross-validation'], ['veri sızıntısı', 'data leakage'], ['önbellek', 'cache'], ['boru hattı', 'pipeline'], ['tip ipucu', 'type hint'], ['kod inceleme', 'code review'], ['hata ayıklama', 'debugging']];
+/* Terim dili: Türkçe terimin ilk geçtiği yere İngilizcesi eklenir. Biçim: [kök düzenli ifadesi, İngilizce].
+   Yalnız kök + izinli ad ekleri eşleşir (app.js GLOSS_EK); fiil ve türetilmiş sözcük parantez almaz. Çok anlamlı sözcükler (istem, getirme, kapanış) bu listeye girmez: ilgili derste elle yazılır. Yeni biçim çıkarsa tools/gloss_onayli.json gözden geçirilir. */
+W.PY_TERMS = [['üreteç|üretec', 'generator'], ['yineleyici', 'iterator'], ['parçalama', 'chunking'], ['pencere fonksiyon', 'window function'], ['dekoratör', 'decorator'], ['kalıtım', 'inheritance'], ['özyineleme', 'recursion'], ['sanal ortam', 'virtual environment'], ['bağlam yöneticisi|bağlam yöneticileri', 'context manager'], ['eşzamanlılık|eşzamanlılığ', 'concurrency'], ['vektörleştirme', 'vectorization'], ['aşırı öğrenme', 'overfitting'], ['özellik mühendisliği', 'feature engineering'], ['çapraz doğrulama', 'cross-validation'], ['veri sızıntısı|veri sızıntıları', 'data leakage'], ['önbellek|önbelleğ', 'cache'], ['boru hattı|boru hatlar', 'pipeline'], ['tip ipucu|tip ipuçlar', 'type hint'], ['kod inceleme', 'code review'], ['hata ayıklama', 'debugging']];
 /* Arama için ek terimler */
 W.PY_ALIAS = {
 "iteratorler-uretecler": "generator iterator yield üreteç yineleyici",

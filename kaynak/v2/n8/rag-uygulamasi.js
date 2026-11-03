@@ -21,7 +21,7 @@ L.push(
     ],
     body: `
 <h2>Demo RAG ile üretim RAG arasındaki fark</h2>
-<p><code>llm-api</code> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme koydun; <code>embedding-vektor-arama</code> dersinde getirme katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
+<p><code>llm-api</code> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme (prompt) koydun; <code>embedding-vektor-arama</code> dersinde getirme (retrieval) katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
 <p>Senaryo: <b>Pusula İK</b> çalışanları izin, çalışma düzeni ve eğitim kurallarını soruyor. Kaynaklar kurgusal bir yönetmelik metni ile gerçek <code>pusula_ik</code> tablolarından üretilen istatistik belgeleri; ürün sorularını da sınamak için <code>anadolu_market</code> ürünlerinden kısa ürün kartları ekliyoruz.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Hat</th><th>Adımlar</th><th>Ne zaman çalışır?</th></tr>
@@ -305,7 +305,7 @@ r.sor("  raporsuz HASTALIK izni kaç gün ")
 r.surum += 1                     # indeks güncellendi: eski kayıtlar artık eşleşmez
 r.sor("Raporsuz hastalık izni kaç gün?")
 print(r.isabet, r.iska)</pre>
-<p>Üç katman önbellek vardır: <b>embedding önbelleği</b> (aynı metni iki kez vektörleştirme), <b>getirme önbelleği</b> (soru → parça kimlikleri) ve <b>cevap önbelleği</b>. Cevap önbelleğini kullanıcıya özel içerikte (ör. "benim izin bakiyem") kullanma; anahtara kullanıcı ya da yetki grubunu ekle. Sağlayıcıların <b>istem önbelleği</b> (prompt caching) ise sabit sistem istemini ucuzlatır; ikisi birbirinin yerine geçmez.</p>
+<p>Üç katman önbellek vardır: <b>embedding önbelleği</b> (aynı metin için ikinci kez embedding hesaplanmaz), <b>getirme önbelleği</b> (soru → parça kimlikleri) ve <b>cevap önbelleği</b>. Cevap önbelleğini kullanıcıya özel içerikte (ör. "benim izin bakiyem") kullanma; anahtara kullanıcı ya da yetki grubunu ekle. Sağlayıcıların <b>istem önbelleği</b> (prompt caching) ise sabit sistem istemini ucuzlatır; ikisi birbirinin yerine geçmez.</p>
 
 <h2>7. Güncelleme ve silme</h2>
 <p>Belge değişince en sık yapılan hata yeni parçaları eskilerin üzerine yazmaktır: yeni sürüm daha kısaysa eski parçaların bir kısmı indekste <b>hayalet</b> olarak kalır ve model artık geçerli olmayan kuralı söyler. Doğru yol belge düzeyinde düşünmektir: parmak izi aynıysa hiçbir şey yapma; değiştiyse belgenin <b>tüm</b> eski parçalarını sil, yenilerini ekle, sürümü artır.</p>

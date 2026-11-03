@@ -1,0 +1,115 @@
+{
+ "_not": "Otomatik terim parantezinin onaylı biçimleri: her biçim ve geçiş elle okundu. Yeni biçim çıkınca metinval durur; bağlamını oku, doğruysa buraya ekle.",
+ "cache": [
+  "önbellek",
+  "önbellekle",
+  "önbellekten",
+  "önbellektir",
+  "önbelleğe",
+  "önbelleği",
+  "önbelleğine"
+ ],
+ "chunking": [
+  "parçalama",
+  "parçalamayı"
+ ],
+ "code review": [
+  "kod inceleme",
+  "kod incelemelerinde",
+  "kod incelemesi",
+  "kod incelemesinde",
+  "kod incelemesinden",
+  "kod incelemesine",
+  "kod incelemesini",
+  "kod incelemesinin"
+ ],
+ "concurrency": [
+  "eşzamanlılık",
+  "eşzamanlılığı"
+ ],
+ "context manager": [
+  "bağlam yöneticisi",
+  "bağlam yöneticisidir",
+  "bağlam yöneticisinde",
+  "bağlam yöneticisiyle"
+ ],
+ "cross-validation": [
+  "çapraz doğrulama",
+  "çapraz doğrulamada",
+  "çapraz doğrulamayla"
+ ],
+ "data leakage": [
+  "veri sızıntısı"
+ ],
+ "debugging": [
+  "hata ayıklama",
+  "hata ayıklamada",
+  "hata ayıklamanın",
+  "hata ayıklaması",
+  "hata ayıklamayı"
+ ],
+ "decorator": [
+  "dekoratör",
+  "dekoratörle",
+  "dekoratörler",
+  "dekoratörlerin",
+  "dekoratörlerle",
+  "dekoratörünü"
+ ],
+ "feature engineering": [
+  "özellik mühendisliği"
+ ],
+ "generator": [
+  "üreteci",
+  "üretecini",
+  "üreteç",
+  "üreteçle",
+  "üreteçler"
+ ],
+ "inheritance": [
+  "kalıtım",
+  "kalıtımda",
+  "kalıtımdan",
+  "kalıtımla",
+  "kalıtımı"
+ ],
+ "iterator": [
+  "yineleyici",
+  "yineleyicidir",
+  "yineleyiciler"
+ ],
+ "overfitting": [
+  "aşırı öğrenme",
+  "aşırı öğrenmedir"
+ ],
+ "pipeline": [
+  "boru hattı",
+  "boru hattında",
+  "boru hattını"
+ ],
+ "recursion": [
+  "özyineleme",
+  "özyinelemenin",
+  "özyinelemeye"
+ ],
+ "type hint": [
+  "tip ipucuyla",
+  "tip ipuçları",
+  "tip ipuçlarına",
+  "tip ipuçlarından",
+  "tip ipuçlarıyla"
+ ],
+ "vectorization": [
+  "vektörleştirme"
+ ],
+ "virtual environment": [
+  "sanal ortam",
+  "sanal ortamı",
+  "sanal ortamın",
+  "sanal ortamına",
+  "sanal ortamında"
+ ],
+ "window function": [
+  "pencere fonksiyonları"
+ ]
+}

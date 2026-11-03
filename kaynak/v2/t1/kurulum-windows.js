@@ -137,7 +137,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 py -3.12 -m venv .venv
 .venv\\Scripts\\Activate.ps1
 python -m pip install --upgrade pip</pre>
-<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
+<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin (prompt) başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
 <pre class="py">import ntpath, posixpath, sys
 
 def venv_python(proje, windows=True):

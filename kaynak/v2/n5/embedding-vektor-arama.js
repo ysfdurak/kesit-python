@@ -21,7 +21,7 @@ L.push(
     ],
     body: `
 <h2>Kelimeyle değil anlamla aramak</h2>
-<p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" katmanı bu fikre dayanır.</p>
+<p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" (retrieval) katmanı bu fikre dayanır.</p>
 <p><code>llm-api</code> dersinde TF-IDF ile basit bir RAG kurdun. Bu derste getirme katmanını mühendis gözüyle derinleştireceksin: vektör benzerliği, numpy ile kNN, ANN indeksleri, parçalama stratejileri, BM25 ile hibrit arama, RRF, yeniden sıralama, değerlendirme metrikleri ve yetki filtresi.</p>
 <div class="note"><b>Tarayıcıda sahte embedding</b>Gerçek embedding modelleri (sentence-transformers, OpenAI, Cohere, Voyage...) yüzlerce MB'lık ağlar ya da ağ üzerinden API'lerdir. Alıştırmalarda karakter üçlülerini (trigram) hash'leyen 256 boyutlu bir <b>sahte embedding</b> kullanacağız. Anlamı değil yazım benzerliğini yakalar; ama vektör aramanın tüm mühendisliği (normalizasyon, kNN, indeks, değerlendirme) birebir aynıdır. Sahte modelin hatalarını görmek, gerçek modelin neden gerektiğini de gösterecek.</div>
 
@@ -205,7 +205,7 @@ for k in (1, 3):
     print(f"recall@{k}, MRR@{k} =", metrikler(sonuclar, altin, k))</pre>
 
 <h2>8. Metadata filtreleme ve yetki</h2>
-<p>Kurumsal aramada her kullanıcı yalnız görme yetkisi olan belgeleri görmelidir: Ali'nin iade notu Ayşe'nin sonuçlarında çıkmamalı. Filtre <b>sıralamadan önce</b> uygulanmalıdır (pre-filtering). Önce ilk k'yı alıp sonra yetkisizleri atmak (post-filtering) iki sorun yaratır: k'dan az sonuç döner ve hata yapılırsa yetkisiz belge LLM istemine sızar. Vektör veritabanları bu yüzden <code>where</code> koşulunu indeks aramasıyla birlikte uygular. Ayrıca embedding'ler de kişisel veri sayılabilir; silinen bir belgenin vektörü de silinmelidir (KVKK).</p>
+<p>Kurumsal aramada her kullanıcı yalnız görme yetkisi olan belgeleri görmelidir: Ali'nin iade notu Ayşe'nin sonuçlarında çıkmamalı. Filtre <b>sıralamadan önce</b> uygulanmalıdır (pre-filtering). Önce ilk k'yı alıp sonra yetkisizleri atmak (post-filtering) iki sorun yaratır: k'dan az sonuç döner ve hata yapılırsa yetkisiz belge LLM istemine (prompt) sızar. Vektör veritabanları bu yüzden <code>where</code> koşulunu indeks aramasıyla birlikte uygular. Ayrıca embedding'ler de kişisel veri sayılabilir; silinen bir belgenin vektörü de silinmelidir (KVKK).</p>
 
 <h2>9. Kullanım alanları</h2>
 <ul>

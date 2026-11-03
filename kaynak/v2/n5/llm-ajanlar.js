@@ -252,7 +252,7 @@ for adim in range(1, 11):
 <tr><td>Sağlayıcı SDK'sı (anthropic, openai)</td><td>Ham araç çağırma döngüsü</td><td>Tam kontrol, az bağımlılık; bu dersteki yaklaşım</td></tr>
 <tr><td>LangGraph</td><td>Ajanı durum makinesi/graf olarak modelleme, kalıcı durum, insan onayı düğümleri</td><td>Çok adımlı, dallanan, kesintiye uğrayıp devam eden akışlar</td></tr>
 <tr><td>LangChain</td><td>Hazır bileşenler (yükleyiciler, araç sarmalayıcılar)</td><td>Hızlı prototip; soyutlamaların bedelini bil</td></tr>
-<tr><td>LlamaIndex</td><td>Veri bağlayıcıları ve RAG odaklı ajanlar</td><td>Belge ağırlıklı getirme uygulamaları</td></tr>
+<tr><td>LlamaIndex</td><td>Veri bağlayıcıları ve RAG odaklı ajanlar</td><td>Belge ağırlıklı getirme (retrieval) uygulamaları</td></tr>
 </table></div>
 
 <h2>7. Text-to-SQL ajanı ve değerlendirme seti</h2>

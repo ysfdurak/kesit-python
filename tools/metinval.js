@@ -8,7 +8,18 @@ require(process.env.METINVAL_CORE||'./metinval_core.js')({
        'PY_ARENA[].statement','PY_ARENA[].input','PY_ARENA[].output','PY_ARENA[].editorial','PY_ARENA[].hints[]',
        'PY_EXAMS[].qs[].q','PY_EXAMS[].qs[].why','PY_EXAMS[].qs[].hints[]',"PY_EXAMS[].qs[].o[]@e.t!=='predict'"],
   ESC:['PY_LESSONS[].goals[]','PY_LESSONS[].mistakes[].why','PY_MISTAKES[].why','PY_MISTAKES[].rule'],
-  async dom(p,scan){
+  async dom(p,scan,bad){
+    /* Terim parantezi: yanlış sözcüğe yapışan İngilizce karşılık (Y1). Otomatik biçimler onay listesinde olmalı; çok anlamlı üç terim yalnız elle yazıldığı derslerde ve doğru biçimde geçer. */
+    const onay=JSON.parse(require('fs').readFileSync(path.join(__dirname,'gloss_onayli.json'),'utf8'));
+    const log=await p.evaluate(()=>window.PY_GLOSS_LOG||[]);
+    for(const g of log) if(!(onay[g.en]||[]).includes(g.s.toLocaleLowerCase('tr').replace(/i̇/g,'i')) && !(onay[g.en]||[]).includes(g.s.toLowerCase())) bad('gloss onaysız '+g.id,g.s+' ('+g.en+')',g.c);
+    const hand=await p.evaluate(()=>{const out=[];const re=/([\p{L}'’-]+)\s*"?\s*\((prompt|retrieval|closure)\)/giu;PY_LESSONS.forEach(l=>{const d=document.createElement('div');d.innerHTML=l.body;d.querySelectorAll('pre,code,a.lk').forEach(x=>x.remove());const t=d.textContent;let m;while((m=re.exec(t)))out.push({id:l.id,w:m[1],en:m[2],c:t.slice(Math.max(0,m.index-40),m.index+m[0].length+20)});});return out;});
+    const BICIM={prompt:/^(istem|istemi|isteme|istemin|istemde|istemine|istemdeki|istemler)$/i,retrieval:/^getirme$/i,closure:/^(kapanış|kapanışların)$/i};
+    const YASAK=/(izin isteme|hesap kapanış|muhasebe kapanış|sonu kapanış|açılış\/kapanış)/i;
+    const DERS={prompt:['prompt-muhendisligi','kurulum-araclar','sanal-ortam-pip','kurulum-windows','proje-oyunlar','embedding-vektor-arama','rag-uygulamasi','yerel-modeller-hf','llm-api','llm-degerlendirme','girdi-donusum','yapay-zeka-ile-kod'],retrieval:['embedding-vektor-arama','llm-api','llm-degerlendirme','llm-ajanlar','rag-uygulamasi','proje-ai'],closure:['kapanis-kapsam','kapsam-moduller','bellek-ic-yapi']};
+    for(const h of hand){ const en=h.en.toLowerCase(); if(!BICIM[en].test(h.w)||YASAK.test(h.c)||!DERS[en].includes(h.id)) bad('gloss yanlış sözcük '+h.id,h.w+' ('+h.en+')',h.c); }
+    console.log('terim parantezi: otomatik',log.length,'elle (prompt/retrieval/closure)',hand.length);
+    if(process.env.GLOSS_ONLY) return;
     const go=async h=>{ await p.evaluate(x=>{location.hash=x},h); await sleep(70); };
     const ids=await p.evaluate(()=>PY_LESSONS.map(l=>l.id));
     for(const id of ids){ await go('#/lesson/'+id+'/sss'); await p.evaluate(()=>document.querySelectorAll('.faq details').forEach(d=>d.open=true)); await scan('.faq,.mist','sss '+id); }

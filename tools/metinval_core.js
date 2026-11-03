@@ -21,7 +21,7 @@ async function main(CFG){
   let dom=0, domBad=[];
   const BAD=/<\/?(code|b|strong|em|br)\b[^<>]*>|&(lt|gt|amp|quot);/;
   const scan=async(sel,where)=>{ const t=await p.evaluate(s=>[...document.querySelectorAll(s)].map(x=>{ const y=x.cloneNode(true); y.querySelectorAll('code,pre,.codebox').forEach(z=>z.remove()); return y.textContent; }).join('\n'),sel); dom++; const m=t.match(BAD); if(m) domBad.push({where,m:m[0],near:t.slice(Math.max(0,m.index-50),m.index+50)}); };
-  if(CFG.dom) await CFG.dom(p,scan);
+  if(CFG.dom) await CFG.dom(p,scan,(where,m,near)=>domBad.push({where,m,near}));
   await b.close(); srv.close();
   if(CFG.dump) fs.writeFileSync(CFG.dump,JSON.stringify(res.out,null,0));
   const by={}; res.out.forEach(o=>{ const k=o.f+' '+o.k; by[k]=(by[k]||0)+1; });

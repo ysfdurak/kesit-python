@@ -24,9 +24,11 @@ LESSONS.forEach(l => { (l.ex || []).forEach(e => { if (!e.stage) e.stage = e.t =
 /* Ders metinlerindeki iç kimlikleri başlıklı bağlantıya çevir (<b>http-api</b> dersi → tıklanır başlık) */
 function linkIds(h) { if (!h) return h; return String(h).replace(/<(b|code)>([a-z0-9]+(?:-[a-z0-9]+)*)<\/\1>/g, (m, tag, id, at, all) => { if (!LMAP[id]) return m; if (!id.includes('-') && !/^\s*ders/.test(all.slice(at + m.length, at + m.length + 8))) return m; return '<a class="lk" href="#/lesson/' + id + '" data-go="lesson" data-id="' + id + '">' + esc(LMAP[id].title) + '</a>'; }); }
 /* Terim dili: Türkçe terimin ilk geçtiği yere İngilizcesi eklenir (ders metninde, kod ve bağlantı dışında) */
-const TERMS = (window.PY_TERMS || []).map(([tr, en]) => [new RegExp('(?<![\\p{L}\\p{N}])(' + tr + ')(\\p{L}*)(?![\\p{L}\\p{N}]*\\s*\\()', 'iu'), en]);
-function termify(h) { const parts = String(h).split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<a [\s\S]*?<\/a>|<h[1-6][\s\S]*?<\/h[1-6]>|<[^>]+>)/); TERMS.forEach(([re, en]) => { if (new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(h)) return; for (let i = 0; i < parts.length; i += 2) { const m = re.exec(parts[i]); if (m) { const end = m.index + m[0].length; parts[i] = parts[i].slice(0, end) + ' (' + en + ')' + parts[i].slice(end); break; } } }); return parts.join(''); }
-LESSONS.forEach(l => { l.body = termify(linkIds(l.body)); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
+const GLOSS_EK = '(?:l[ae]r)?(?:s?[ıiuü])?(?:[ny]?[ıiuü]|[ny]?[ae]|n?[dt][ae](?:n|ki)?|n?[ıiuü]n|y?l[ae]|[dt][ıiuü]r)?';
+const TERMS = (window.PY_TERMS || []).map(([tr, en]) => [new RegExp('(?<![\\p{L}\\p{N}])(?:' + tr + ')' + GLOSS_EK + '(?![\\p{L}\\p{N}])(?!\\s*\\()', 'iu'), en]);
+window.PY_GLOSS_LOG = [];
+function termify(h, id) { const parts = String(h).split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<a [\s\S]*?<\/a>|<h[1-6][\s\S]*?<\/h[1-6]>|<[^>]+>)/); TERMS.forEach(([re, en]) => { if (new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(h)) return; for (let i = 0; i < parts.length; i += 2) { const m = re.exec(parts[i]); if (m) { const end = m.index + m[0].length; window.PY_GLOSS_LOG.push({ id, en, s: m[0], c: parts[i].slice(Math.max(0, m.index - 45), end + 35) }); parts[i] = parts[i].slice(0, end) + ' (' + en + ')' + parts[i].slice(end); break; } } }); return parts.join(''); }
+LESSONS.forEach(l => { l.body = termify(linkIds(l.body), l.id); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
 const ORDERED = ORDER.map(id => LMAP[id]).filter(Boolean);
 LESSONS.forEach(l => { if (!ORDER.includes(l.id)) ORDERED.push(l); });
 ORDERED.forEach((l, i) => { l._i = i; });

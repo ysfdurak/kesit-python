@@ -21,7 +21,7 @@ L.push(
     ],
     body: `
 <h2>"Çalışıyor gibi" yetmez</h2>
-<p><code>prompt-muhendisligi</code> dersinde Lezzet Kurye yorumlarını etiketleyen bir hat kurdun. Beş yorumu deneyip "iyi görünüyor" demek yetmez: çıktı serbest metindir, model sürümü değişir, istemdeki tek kelime her şeyi etkileyebilir. Bu derste bir LLM uygulamasını <b>sayıyla</b> ölçmeyi, her değişiklikte <b>otomatik</b> denetlemeyi ve canlıda <b>izlemeyi</b> öğreneceksin.</p>
+<p><code>prompt-muhendisligi</code> dersinde Lezzet Kurye yorumlarını etiketleyen bir hat kurdun. Beş yorumu deneyip "iyi görünüyor" demek yetmez: çıktı serbest metindir, model sürümü değişir, istemdeki (prompt) tek kelime her şeyi etkileyebilir. Bu derste bir LLM uygulamasını <b>sayıyla</b> ölçmeyi, her değişiklikte <b>otomatik</b> denetlemeyi ve canlıda <b>izlemeyi</b> öğreneceksin.</p>
 <div class="tbl-wrap"><table>
 <tr><th>Katman</th><th>Ne ölçer?</th><th>Hız / maliyet</th></tr>
 <tr><td>Kurala dayalı ölçüt</td><td>Tam eşleşme, içerir, JSON şema, regex</td><td>Anında, ücretsiz; ilk tercih</td></tr>
@@ -187,7 +187,7 @@ def test_enjeksiyon_reddedilir():
 <div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pytest</code> ile kur ve proje kökünde <code>pytest -q</code> çalıştır. Gerçek API çağıran testler yavaş ve ücretlidir: CI'da model cevaplarını önbellekten oynat (kayıt/oynatma), tam değerlendirmeyi gece ya da istem dosyası değişince çalıştır, eşiği tek sayıya değil son çalıştırmaya göre kıyasla.</div>
 
 <h2>6. RAG değerlendirme</h2>
-<p>RAG'de iki ayrı katmanı ayrı ölç. <b>Getirme</b>: doğru belgeler geldi mi? (recall@k, MRR; <code>embedding-vektor-arama</code> dersinde yazdın). <b>Üretim</b>: cevap yalnız getirilen belgelere mi dayanıyor (<b>sadakat</b>, faithfulness) ve iddialar doğru kaynağa mı atıflı? Getirme mükemmelken cevap uydurma olabilir; tersine getirme kötüyse en iyi model bile doğru cevap veremez.</p>
+<p>RAG'de iki ayrı katmanı ayrı ölç. <b>Getirme</b> (retrieval): doğru belgeler geldi mi? (recall@k, MRR; <code>embedding-vektor-arama</code> dersinde yazdın). <b>Üretim</b>: cevap yalnız getirilen belgelere mi dayanıyor (<b>sadakat</b>, faithfulness) ve iddialar doğru kaynağa mı atıflı? Getirme mükemmelken cevap uydurma olabilir; tersine getirme kötüyse en iyi model bile doğru cevap veremez.</p>
 <pre class="py">import re
 import veri
 

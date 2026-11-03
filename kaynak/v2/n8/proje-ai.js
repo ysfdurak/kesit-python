@@ -26,7 +26,7 @@ L.push(
 <li>Mesajın <b>niyetini</b> anlamak: sipariş durumu, iade, şikâyet, genel bilgi, selamlaşma ya da anlaşılmayan istek.</li>
 <li>Sipariş sorularında gerçek veritabanına bir <b>araçla</b> bakmak ve <b>yalnız müşterinin kendi siparişini</b> göstermek.</li>
 <li>Kural sorularını (teslimat ücreti, iptal, iade süresi) <b>RAG</b> ile, kaynak göstererek cevaplamak; bilmediğinde "bilmiyorum" deyip devretmek.</li>
-<li>Çıktıyı <b>pydantic</b> ile doğrulamak; kart numarası gibi kişisel verileri maskelemek; istem enjeksiyonunu durdurmak.</li>
+<li>Çıktıyı <b>pydantic</b> ile doğrulamak; kart numarası gibi kişisel verileri maskelemek; istem enjeksiyonunu (prompt injection) durdurmak.</li>
 <li>Her değişiklikten sonra bir <b>değerlendirme setiyle</b> ölçülmek ve rapor üretmek.</li>
 </ul>
 <p>Tüm sistem tarayıcıda, ağ olmadan çalışır: dil modelinin yerinde <b>sahte LLM</b> var. Gerçek modele geçiş tek bir sınıfı değiştirmektir (bölüm sonunda).</p>
@@ -35,7 +35,7 @@ L.push(
 <tr><td>Giriş bariyeri</td><td>Kişisel veri maskeleme, enjeksiyon kalıpları, uzunluk</td><td><code>re</code></td><td><code>llm-api</code>, <code>llm-ajanlar</code></td></tr>
 <tr><td>Niyet</td><td>TF-IDF karakter n-gram + lojistik regresyon, güven eşiği</td><td>scikit-learn</td><td><code>nlp-metin</code>, <code>yerel-modeller-hf</code></td></tr>
 <tr><td>Araç</td><td>Sipariş durumu sorgusu, sahiplik kontrolü</td><td><code>sqlite3</code>, <code>veri.baglan</code></td><td><code>sqlite-python</code>, <code>llm-ajanlar</code></td></tr>
-<tr><td>Bilgi</td><td>SSS + veriden üretilen belge, getirme eşiği, kaynak</td><td>TF-IDF, sahte LLM</td><td><code>rag-uygulamasi</code></td></tr>
+<tr><td>Bilgi</td><td>SSS + veriden üretilen belge, getirme (retrieval) eşiği, kaynak</td><td>TF-IDF, sahte LLM</td><td><code>rag-uygulamasi</code></td></tr>
 <tr><td>Çıktı</td><td>Şema, doğrulama, yeniden deneme, devretme</td><td>pydantic</td><td><code>pydantic-dogrulama</code></td></tr>
 <tr><td>Ölçüm</td><td>Değerlendirme seti, metrikler, rapor</td><td>saf Python</td><td><code>llm-degerlendirme</code></td></tr>
 </table></div>

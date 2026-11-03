@@ -226,7 +226,7 @@ print("istek başına token:", girdi, "+", cikti)
 print(f"günlük tahmini: {gunluk:.2f} | aylık: {gunluk * 30:.2f}")</pre>
 
 <h2>Basit RAG: belgelerinle cevap ver</h2>
-<p>Model, Ilgaz Bank'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
+<p>Model, Ilgaz Bank'ın güncel kredi kartı aidat politikasını bilemez. <b>RAG</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) bu sorunu çözer: (1) belgeleri parçalara böl, (2) soruya en ilgili parçaları bul, (3) bu parçaları istemin (prompt) içine koyup "yalnızca bunlara dayanarak cevap ver" de. <code>nlp-metin</code> dersindeki TF-IDF + kosinüs benzerliği getirme (retrieval) adımı için yeterlidir; büyük sistemlerde embedding ve vektör veritabanı kullanılır.</p>
 <pre class="py">from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 

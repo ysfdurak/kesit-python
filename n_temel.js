@@ -772,7 +772,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 py -3.12 -m venv .venv
 .venv\\Scripts\\Activate.ps1
 python -m pip install --upgrade pip</pre>
-<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
+<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin (prompt) başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
 <pre class="py">import ntpath, posixpath, sys
 
 def venv_python(proje, windows=True):
@@ -5298,7 +5298,7 @@ def adam_asmaca(kelime, girdi=input):
 
 cevaplar = iter(["a", "e", "k", "a", "n", "r"])
 adam_asmaca("ankara", lambda istem: (print(istem), next(cevaplar))[1])</pre>
-<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi de ekrana yazar ki oyunun akışını görebilesin.</p>
+<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi (prompt) de ekrana yazar ki oyunun akışını görebilesin.</p>
 
 <h2>Proje 3: Taş-kağıt-makas</h2>
 <p><b>Tasarım:</b> kuralı <code>if</code> merdiveniyle değil, <b>veriyle</b> anlat: "kim kimi yener" bir sözlüktür. Yeni bir seçenek (kertenkele, Spock) eklemek kod değil veri değişikliği olur.</p>

@@ -261,7 +261,7 @@ print(model.named_steps["tfidfvectorizer"].transform(yeni).nnz, "bilinen kelime"
 <h3>Damıtma (distillation)</h3>
 <p>Büyük modelin etiketlerini (ya da olasılıklarını) öğretmen olarak kullanıp küçük bir modeli eğitirsin. Mini projedeki hibrit yaklaşımın doğal devamıdır: LLM'in etiketlediği zor örnekler zamanla küçük modelin eğitim setine eklenir.</p>
 <h3>Değerlendirme</h3>
-<p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <code>llm-degerlendirme</code> dersinde.</p>
+<p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi (prompt) ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <code>llm-degerlendirme</code> dersinde.</p>
 </section>
 `,
     ex: [

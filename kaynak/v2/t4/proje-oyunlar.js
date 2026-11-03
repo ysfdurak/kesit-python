@@ -123,7 +123,7 @@ def adam_asmaca(kelime, girdi=input):
 
 cevaplar = iter(["a", "e", "k", "a", "n", "r"])
 adam_asmaca("ankara", lambda istem: (print(istem), next(cevaplar))[1])</pre>
-<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi de ekrana yazar ki oyunun akışını görebilesin.</p>
+<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi (prompt) de ekrana yazar ki oyunun akışını görebilesin.</p>
 
 <h2>Proje 3: Taş-kağıt-makas</h2>
 <p><b>Tasarım:</b> kuralı <code>if</code> merdiveniyle değil, <b>veriyle</b> anlat: "kim kimi yener" bir sözlüktür. Yeni bir seçenek (kertenkele, Spock) eklemek kod değil veri değişikliği olur.</p>
