@@ -22,7 +22,7 @@
   flags: ['Yalnız "cron\'u kontrol ederiz" demek', 'Kaçırılan günleri elle tek tek çalıştırmayı kalıcı çözüm saymak', 'Durumu işlemden önce güncellemek'],
   tip: 'Vakada önce kök nedeni tek cümleyle adlandır ("dün, çalışma anına göre hesaplanıyor"); çözüm o cümleden doğal olarak çıkar.' },
 { id: 'm-382',
-  roles: ['otomasyon', 'muhendis'],
+  roles: ['otomasyon', 'muhendis', 'is-analisti'],
   lv: 'orta',
   topic: 'requests: zaman aşımı ve Retry adaptörü',
   kind: 'kavram',

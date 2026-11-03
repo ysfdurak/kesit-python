@@ -150,6 +150,7 @@ genel = next(p for p in D['P'] if p['id'] == 'genel')['lessons']
 JSON = lambda o: json.dumps(o, ensure_ascii=False)
 out = []
 for p in D['P']:
+    if p['id'] not in KAVRAM: continue  # kavram soruları elle yazılı; yazılmamış yolun sınavı üretilmez
     r = random.Random('sinav-' + p['id'])
     ids = [i for i in p['lessons'] if i in L and (p['id'] in ('genel', 'sertifika') or i not in genel)]
     if len(ids) < 8: ids = [i for i in p['lessons'] if i in L]

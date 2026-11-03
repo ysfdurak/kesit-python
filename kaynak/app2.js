@@ -22,7 +22,7 @@ const hashStr = s => { let h = 2166136261; for (const c of String(s)) { h ^= c.c
 
 /* ================= PYTHON ARENA ================= */
 const AF = { track: 'all', diff: 'all', st: 'all', q: '', role: '' };
-const ROLE_TRACKS = { genel: ['Python dili', 'Veri tipleri', 'Metinler'], analist: ['Veri seti analizi', 'pandas', 'numpy', 'SQL + Python'], bilimci: ['Veri seti analizi', 'pandas', 'numpy', 'Matematik'], muhendis: ['SQL + Python', 'Veri seti analizi', 'Veri yapıları', 'Algoritmalar'], backend: ['Python dili', 'Veri yapıları', 'Algoritmalar', 'Sınıflar'], ml: ['numpy', 'pandas', 'Matematik', 'Veri seti analizi'], web: ['Python dili', 'Metinler', 'Sınıflar', 'Hatalar ve istisnalar'], ai: ['Metinler', 'Regex', 'Python dili', 'Fonksiyonel'], otomasyon: ['Metinler', 'Regex', 'Tarih ve saat', 'Veri seti analizi'], sertifika: ['Python dili', 'Veri tipleri', 'Sınıflar', 'Hatalar ve istisnalar', 'Fonksiyonel'] };
+const ROLE_TRACKS = { genel: ['Python dili', 'Veri tipleri', 'Metinler'], analist: ['Veri seti analizi', 'pandas', 'numpy', 'SQL + Python'], bilimci: ['Veri seti analizi', 'pandas', 'numpy', 'Matematik'], muhendis: ['SQL + Python', 'Veri seti analizi', 'Veri yapıları', 'Algoritmalar'], backend: ['Python dili', 'Veri yapıları', 'Algoritmalar', 'Sınıflar'], ml: ['numpy', 'pandas', 'Matematik', 'Veri seti analizi'], web: ['Python dili', 'Metinler', 'Sınıflar', 'Hatalar ve istisnalar'], ai: ['Metinler', 'Regex', 'Python dili', 'Fonksiyonel'], otomasyon: ['Metinler', 'Regex', 'Tarih ve saat', 'Veri seti analizi'], 'is-analisti': ['Metinler', 'Veri seti analizi', 'pandas'], sertifika: ['Python dili', 'Veri tipleri', 'Sınıflar', 'Hatalar ve istisnalar', 'Fonksiyonel'] };
 function arenaHead() {
   const sc = arenaScore(), rk = rankOf(sc), n = ARENA.filter(a => solved(a.id)).length;
   const by = DIFF.map(d => [d, ARENA.filter(a => a.diff === d).length, ARENA.filter(a => a.diff === d && solved(a.id)).length]);
@@ -167,7 +167,7 @@ VIEWS['arena-c'] = { html() {
 } };
 
 /* ================= MÜLAKAT MERKEZİ ================= */
-const ROLES = [['genel', 'Python (genel)'], ['analist', 'Veri Analisti'], ['bilimci', 'Veri Bilimci'], ['ml', 'ML Mühendisi'], ['muhendis', 'Veri Mühendisi'], ['backend', 'Backend'], ['web', 'Web'], ['ai', 'Yapay Zekâ'], ['otomasyon', 'Otomasyon']];
+const ROLES = [['genel', 'Python (genel)'], ['analist', 'Veri Analisti'], ['bilimci', 'Veri Bilimci'], ['ml', 'ML Mühendisi'], ['muhendis', 'Veri Mühendisi'], ['backend', 'Backend'], ['web', 'Web'], ['ai', 'Yapay Zekâ'], ['otomasyon', 'Otomasyon'], ['is-analisti', 'BT İş Analisti']];
 const KINDS = { kavram: 'Kavram', 'kod-okuma': 'Kod okuma', tasarim: 'Python ile tasarım', vaka: 'Vaka' };
 const IF = { role: 'all', lv: 'all', kind: 'all', st: 'all', q: '' };
 const ivState = id => (P.iv[id] || {}).r;

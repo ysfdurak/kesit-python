@@ -9,7 +9,7 @@ Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Tür
 | Bölüm | Kapsam |
 |---|---|
 | Dersler | 140 ders, 3.100+ otomatik testli alıştırma (Temel / Orta / İleri) |
-| Patikalar | 10 rol: Python Temelleri, Veri Analisti, Veri Bilimci, Veri Mühendisi, Backend, Makine Öğrenmesi, Web, Yapay Zekâ ile Python, Otomasyon, Sertifika ve Mülakat |
+| Öğrenme yolları | 11 rol: Python Temelleri, Veri Analisti, Veri Bilimci, Veri Mühendisi, Backend, Makine Öğrenmesi, Web, Yapay Zekâ ile Python, Otomasyon, BT İş Analisti (isteğe bağlı), Sertifika ve Mülakat |
 | Yapay Zekâ | LLM API, istem mühendisliği, embedding ve vektör arama, RAG, ajanlar, LLM değerlendirme, yerel modeller, YZ bitirme projesi + ML dersleri |
 | Pratik | 550 seviyeli görev (140'ı gerçek veri setleriyle) |
 | Kodlama Arenası | 250 HackerRank tarzı problem: stdin/stdout, gizli testler, puan ve rütbe, süreli yarışma |
