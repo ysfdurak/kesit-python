@@ -12216,9 +12216,9 @@ plt.close(fig)
         q: 'Rötar nedenleri yatay çubukla çiziliyor. Bu kod ne yazdırır?',
         needs: ['pandas', 'matplotlib'],
         code: 'import veri\nimport matplotlib.pyplot as plt\nd = veri.oku("kanat_havayollari", "hv_delays")\ntoplam = d.groupby("reason")["minutes"].sum().sort_values()\nfig, ax = plt.subplots()\nax.barh(toplam.index, toplam.values)\nprint(len(ax.patches), toplam.index[-1])\nplt.close(fig)\n',
-        o: ['5 gec_gelen_ucak', '5 yer_hizmetleri', '1350 gec_gelen_ucak', '1 gec_gelen_ucak'],
+        o: ['5 hava', '5 yer_hizmetleri', '1350 hava', '1 hava'],
         a: 0,
-        why: 'Beş neden var, her biri bir çubuk (patch). Artan sıralamada en büyük değer (gec_gelen_ucak, 26.420 dk) sonda; barh onu en üste çizer.'
+        why: 'Beş neden var, her biri bir çubuk (patch). Artan sıralamada en büyük değer (hava, 23.534 dk) sonda; barh onu en üste çizer.'
       },
       {
         t: 'order',
@@ -12256,9 +12256,9 @@ plt.close(fig)
         example: 'import matplotlib.pyplot as plt\nimport pandas as pd\ns = pd.Series({"a": 5, "b": 2, "c": 9}).sort_values()\nfig, ax = plt.subplots()\nax.barh(s.index, s.values)\nprint([p.get_width() for p in ax.patches])\nplt.close(fig)\n',
         start: 'import veri\nimport matplotlib.pyplot as plt\n\ndef neden_cubuk():\n    d = veri.oku("kanat_havayollari", "hv_delays")\n    fig, ax = plt.subplots()\n    # TODO: nedene göre topla, sırala, barh çiz, başlık ve etiket\n    return fig, ax\n',
         sol: 'import veri\nimport matplotlib.pyplot as plt\n\ndef neden_cubuk():\n    d = veri.oku("kanat_havayollari", "hv_delays")\n    toplam = d.groupby("reason")["minutes"].sum().sort_values()\n    fig, ax = plt.subplots()\n    ax.barh(toplam.index, toplam.values)\n    ax.set_title("Rötar dakikası nedene göre")\n    ax.set_xlabel("Toplam dakika")\n    return fig, ax\n',
-        tests: 'fig, ax = neden_cubuk()\nw = [float(p.get_width()) for p in ax.patches]\nassert w == [7854.0, 7901.0, 8498.0, 21570.0, 26420.0], f"Çubuk genişlikleri artan sırada toplam dakikalar olmalı: {w}"\nassert ax.get_title() == "Rötar dakikası nedene göre", "Başlık eksik"\nassert ax.get_xlabel() == "Toplam dakika", "x etiketi eksik"\nplt.close("all")\n',
+        tests: 'fig, ax = neden_cubuk()\nw = [float(p.get_width()) for p in ax.patches]\nassert w == [10154.0, 10239.0, 10321.0, 17995.0, 23534.0], f"Çubuk genişlikleri artan sırada toplam dakikalar olmalı: {w}"\nassert ax.get_title() == "Rötar dakikası nedene göre", "Başlık eksik"\nassert ax.get_xlabel() == "Toplam dakika", "x etiketi eksik"\nplt.close("all")\n',
         hints: ['barh\'te ilk eleman en altta çizilir.', 'sort_values() varsayılan olarak artandır.'],
-        why: 'Geç gelen uçak (zincirleme rötar) ve hava, toplam rötar dakikasının yarısından fazlası. Sıralı yatay çubuk bunu ilk bakışta gösterir.'
+        why: 'Hava ve geç gelen uçak (zincirleme rötar), toplam rötar dakikasının yarısından fazlası. Sıralı yatay çubuk bunu ilk bakışta gösterir.'
       },
       {
         t: 'code',

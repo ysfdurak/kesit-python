@@ -2,7 +2,7 @@
    Çekirdek dosyalar ilk ziyarette önbelleğe alınır; her yeni sürümde eski önbellek silinir.
    Sürüm ve dosya listesi tools/ghpack.py tarafından yazılır. Yalnız bu uygulamanın önbelleklerine dokunur. */
 const PREFIX = 'kesit-python-';
-const CACHE = PREFIX + '2c8bac2604aa';
+const CACHE = PREFIX + '7a82617134bb';
 const CORE = ["./", "index.html", "config.js", "pyworker.js", "vendor/fonts.css", "data/manifest.json", "levels.js", "paths.js", "c_temel.js", "c_orta.js", "c_ileri.js", "n_temel.js", "n_orta.js", "n_ileri.js", "x_1.js", "x_2.js", "bank.js", "exams.js", "arena.js", "interview.js", "mistakes.js", "ex_anahtar.js", "bilinen-sinirlar.js", "engine.js", "app.js", "app2.js", "portfolio.js"];
 self.addEventListener('install', e => {
   e.waitUntil(caches.open(CACHE).then(c => Promise.all(CORE.map(u => c.add(u).catch(() => {})))).then(() => self.skipWaiting()));
