@@ -32,7 +32,7 @@ print(a, b)</pre>
     pass</pre>
 <p>Birden çok değer alan fonksiyonda parametreler virgülle ayrılır: <code>def topla(a, b):</code>. Fonksiyonlar dersinde varsayılan değerleri, kapsamı ve daha fazlasını göreceksin.</p>`,
   ex: [
-    { t: 'mc', stage: 'Isınma', id: 'fonksiyon-iskeleti-1', q: '<p><code>def alan(en, boy):</code> satırında <code>en</code> ve <code>boy</code> nedir?</p>', o: ['Fonksiyona verilecek değerlerin adları (parametre)', 'Fonksiyonun döndürdüğü sonuçlar', 'Daha önce tanımlanmış zorunlu değişkenler', 'Fonksiyonun adı'], a: 0, why: 'Parantez içindekiler parametredir; fonksiyon çağrılırken değer alırlar.' },
+    { t: 'mc', stage: 'Isınma', id: 'fonksiyon-iskeleti-1', q: '<p><code>def alan(en, boy):</code> satırında <code>en</code> ve <code>boy</code> nedir?</p>', o: ['Fonksiyona verilecek değerlerin adları (parametre)', 'Fonksiyonun döndürdüğü sonuçlar', 'Fonksiyondan önce tanımlanmış olması zorunlu global değişkenler', 'Fonksiyonun adı'], a: 0, why: 'Parantez içindekiler parametredir; fonksiyon çağrılırken değer alırlar.' },
     { t: 'mc', stage: 'Isınma', id: 'fonksiyon-iskeleti-2', q: '<p>Testler bir fonksiyonun sonucunu görmek istiyor. Gövdede hangisini kullanmalısın?</p>', o: ['<code>print(sonuc)</code>', '<code>return sonuc</code>', '<code>sonuc</code> yazıp bırakmak', '<code>input(sonuc)</code>'], a: 1, why: 'Sonucu çağırana yalnız return geri verir; print yalnız ekrana yazar ve fonksiyon None döndürür.' },
     { t: 'predict', stage: 'Kodu oku', id: 'fonksiyon-iskeleti-3', q: 'Bu kod ne yazdırır?', code: 'def iki_kat(x):\n    return x * 2\n\nprint(iki_kat(4))\nprint(iki_kat(4) + 1)\n', o: ['8\n9', '4\n5', '8\n8', 'x * 2\n9'], a: 0, why: 'Çağrı, return edilen değere dönüşür: 8, sonra 8 + 1.' },
     { t: 'predict', stage: 'Kodu oku', id: 'fonksiyon-iskeleti-4', q: 'Bu kod ne yazdırır?', code: 'def selam(ad):\n    print("Merhaba", ad)\n\nsonuc = selam("Ece")\nprint(sonuc)\n', o: ['Merhaba Ece\nNone', 'Merhaba Ece\nMerhaba Ece', 'None\nMerhaba Ece', 'Merhaba Ece'], a: 0, why: 'selam ekrana yazar ama return etmez; bu yüzden sonuc None olur.' },
@@ -772,7 +772,7 @@ Set-ExecutionPolicy -Scope CurrentUser RemoteSigned
 py -3.12 -m venv .venv
 .venv\\Scripts\\Activate.ps1
 python -m pip install --upgrade pip</pre>
-<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
+<p><b>RemoteSigned</b>: kendi yazdığın yerel betikler çalışır, internetten indirilen betikler imza ister. <code>Unrestricted</code> ya da <code>Bypass</code> kullanma; gereğinden geniştir. Etkinleştirme başarılıysa istemin (prompt) başında <code>(.venv)</code> görürsün; <code>deactivate</code> ile çıkarsın.</p>
 <pre class="py">import ntpath, posixpath, sys
 
 def venv_python(proje, windows=True):
@@ -2211,8 +2211,12 @@ L.push({
   goals: ['ASCII, Unicode ve UTF-8 arasındaki farkı açıklar, bir karakterin kod noktasını ve bayt sayısını bulabilirim.', 'Kaçış dizilerini ve ham dizeleri doğru kullanır, Windows yolu tuzağından kaçınırım.', 'str ile bytes arasında encode/decode yapar, UnicodeDecodeError\'ı doğru kodlamayla çözerim.', 'Türkçe I/İ/ı/i için doğru büyük-küçük harf dönüşümü ve Türk alfabesine göre sıralama yazabilirim.', 'unicodedata.normalize ile metinleri karşılaştırma ve arama için normalleştiririm.'],
   body: `
 <h2>Bir harf neden bu kadar sorun çıkarır?</h2>
-<p>Anadolu Market'in müşteri listesini Excel'den aldın; "Şişli" yerine "Ãžiãžli", "İzmir" yerine "Ä°zmir" görüyorsun. Aramada "istanbul" yazan müşteri "İSTANBUL" kaydını bulamıyor. Alfabetik sıralı raporda "Çorum" listenin en sonunda, "Zonguldak"tan sonra çıkıyor. Bunların hepsi aynı kökten gelir: bilgisayar harf bilmez, <b>sayı</b> bilir. Bir harfin hangi sayıyla, o sayının da hangi baytlarla saklandığını anlamayan geliştirici, Türkçe veriyle her gün bu hatalarla boğuşur. Bu ders metinlerin "altını" gösteriyor: Unicode, UTF-8, bytes ve Türkçeye özel tuzaklar. Metin metotlarını (split, strip, replace) metinler dersinde gördün; burada karakterin kendisine iniyoruz.</p>
-
+<p>Anadolu Market'in müşteri listesini Excel'den aldın; "Şişli" yerine "ÅžiÅŸli", "İzmir" yerine "Ä°zmir" görüyorsun. Aramada "istanbul" yazan müşteri "İSTANBUL" kaydını bulamıyor. Alfabetik sıralı raporda "Çorum" listenin en sonunda, "Zonguldak"tan sonra çıkıyor. Bunların hepsi aynı kökten gelir: bilgisayar harf bilmez, <b>sayı</b> bilir. Bir harfin hangi sayıyla, o sayının da hangi baytlarla saklandığını anlamayan geliştirici, Türkçe veriyle her gün bu hatalarla boğuşur. Bu ders metinlerin "altını" gösteriyor: Unicode, UTF-8, bytes ve Türkçeye özel tuzaklar. Metin metotlarını (split, strip, replace) metinler dersinde gördün; burada karakterin kendisine iniyoruz.</p>
+<p>Bu bozulmayı kendin üret: UTF-8 baytlarını Windows'un Batı Avrupa tablosu (cp1252) ile okuyan program, Türkçe harfi iki ayrı karakter sanır. Aynı yoldan geri dönersen metin düzelir.</p>
+<pre class="py">bozuk = "Şişli".encode("utf-8").decode("cp1252")
+print(bozuk)
+print("İzmir".encode("utf-8").decode("cp1252"))
+print(bozuk.encode("cp1252").decode("utf-8"))</pre>
 <h2>ASCII, Unicode ve UTF-8</h2>
 <p><b>ASCII</b> (1960'lar) 128 karakterlik bir tablodur: İngilizce harfler, rakamlar, noktalama. "A" = 65, "a" = 97. ç, ş, ğ, ı, İ, ö, ü yoktur. Bu yüzden her ülke kendi 256'lık tablosunu yaptı; Türkçe için Windows'ta <b>cp1254</b>, standartlarda <b>ISO-8859-9</b>. Aynı sayı farklı tabloda farklı harf demekti ve karmaşa buradan doğdu.</p>
 <p><b>Unicode</b> bu karmaşayı bitiren evrensel katalogdur: dünyadaki her karaktere (emoji dâhil) tek bir numara verir. Bu numaraya <b>kod noktası</b> (code point) denir ve <code>U+00E7</code> (ç) biçiminde yazılır. Unicode "hangi numara" sorusunu çözer; "bu numara diske hangi baytlarla yazılır" sorusunu ise bir <b>kodlama</b> (encoding) çözer. Bugünün standardı <b>UTF-8</b>'dir: ASCII karakterlerini 1 bayt, Türkçe harfleri 2 bayt, çoğu Asya karakterini 3, emojileri 4 baytla yazar. ASCII ile geriye dönük uyumludur; web sayfalarının çok büyük bölümü UTF-8'dir.</p>
@@ -2336,9 +2340,9 @@ print(unicodedata.name("ğ"))</pre>
 <h3>Bayt sınırı olan alanlar</h3>
 <p>Bazı veritabanı sütunları ve protokoller sınırı karakter değil <b>bayt</b> olarak koyar. "50 karakter" sandığın "ŞŞŞ..." metni UTF-8'de 100 bayttır. Kırparken baytı ortadan bölersen geçersiz UTF-8 üretirsin; doğru yol karakter karakter ilerleyip bayt toplamını izlemek ya da <code>veri[:sinir].decode("utf-8", errors="ignore")</code> ile yarım kalan son karakteri atmaktır.</p>
 <h3>Varsayılan kodlamanın geleceği</h3>
-<p>PEP 686 ile Python 3.15'te UTF-8 modu varsayılan hâle geliyor; o zaman <code>open()</code> her platformda UTF-8 kullanacak. O güne kadar ve eski sürümleri destekleyen her kodda <code>encoding="utf-8"</code> yazmak tek güvenli yoldur. <code>python -X utf8</code> ya da <code>PYTHONUTF8=1</code> ortam değişkeni bu modu bugünden açar.</p>
+<p>PEP 686 ile Python 3.15'te UTF-8 modu varsayılan oldu; bu sürümden itibaren <code>open()</code> her platformda UTF-8 kullanır. 3.14 ve öncesini destekleyen her kodda <code>encoding="utf-8"</code> yazmak tek güvenli yoldur; açıkça yazmak okuyana da niyetini gösterir. <code>python -X utf8</code> ya da <code>PYTHONUTF8=1</code> ortam değişkeni bu modu eski sürümlerde de açar.</p>
 <h3>Gerçek dilbilimsel sıralama</h3>
-<p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code>icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
+<p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code style="overflow-wrap:anywhere">icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
 </section>
 `,
   ex: [
@@ -3177,7 +3181,7 @@ for s in siparisler:
     { t: 'mc',
       stage: 'Isınma',
       q: '<code>m.get("adres", {}).get("sehir", "?")</code> ifadesinde ilk get\'e neden <code>{}</code> varsayılanı verilir?',
-      o: ['Boş sözlük daha az bellek kullandığı için', 'Adres yoksa ikinci .get boş sözlükte güvenle çalışsın diye', 'Python get\'te varsayılanı zorunlu tuttuğu için', 'Şehir alanını otomatik olarak oluşturmak için'],
+      o: ['Boş sözlük daha az bellek kullandığı için', 'Adres yoksa ikinci .get boş sözlükte güvenle çalışsın diye', 'Python get\'te varsayılanı zorunlu tuttuğu için', 'Şehir alanını sözlükte otomatik olarak oluşturup "?" ile doldurmak için'],
       a: 1,
       why: 'Adres anahtarı yoksa varsayılansız get None döndürür ve None.get(...) AttributeError verir. {} döndüğünde ikinci get onun üzerinde çalışır ve "?" verir. Varsayılan zorunlu değildir ve hiçbir alan oluşturmaz.' },
     { t: 'predict',
@@ -4145,10 +4149,10 @@ print(toplam_boyut_yigin(disk))</pre>
       stage: 'Hata avı',
       kind: 'bug',
       diff: 1,
-      q: '<p>Hatayı bul ve düzelt. <code>taksit_secenekleri(n)</code> n taksitli bir alışverişte kampanya kodu için n! (faktöriyel) hesaplıyor. <code>taksit_secenekleri(5)</code> doğru çalışıyor ama tek çekim (0 taksit) gönderilince sistem çöküyor.</p>',
-      start: 'def taksit_secenekleri(n):\n    if n == 1:\n        return 1\n    return n * taksit_secenekleri(n - 1)\n',
-      sol: 'def taksit_secenekleri(n):\n    if n <= 1:\n        return 1\n    return n * taksit_secenekleri(n - 1)\n',
-      tests: 'assert taksit_secenekleri(5) == 120, "5! = 120"\nassert taksit_secenekleri(1) == 1, "1! = 1"\ntry:\n    sonuc = taksit_secenekleri(0)\nexcept RecursionError:\n    raise AssertionError("0 için temel duruma hiç ulaşılmıyor (0, -1, -2, ...): temel durumu n <= 1 yap")\nassert sonuc == 1, "0! = 1 olmalı"\n',
+      q: '<p>Hatayı bul ve düzelt. <code>faktoriyel(n)</code> n! hesaplıyor. <code>faktoriyel(5)</code> doğru çalışıyor ama 0 gönderilince program çöküyor.</p>',
+      start: 'def faktoriyel(n):\n    if n == 1:\n        return 1\n    return n * faktoriyel(n - 1)\n',
+      sol: 'def faktoriyel(n):\n    if n <= 1:\n        return 1\n    return n * faktoriyel(n - 1)\n',
+      tests: 'assert faktoriyel(5) == 120, "5! = 120"\nassert faktoriyel(1) == 1, "1! = 1"\ntry:\n    sonuc = faktoriyel(0)\nexcept RecursionError:\n    raise AssertionError("0 için temel duruma hiç ulaşılmıyor (0, -1, -2, ...): temel durumu n <= 1 yap")\nassert sonuc == 1, "0! = 1 olmalı"\n',
       hints: ['n = 0 ile başlayınca çağrılar 0, -1, -2 diye iner; n == 1 hiç gerçekleşmez.', 'Temel durumu tüm küçük girdileri kapsayacak şekilde genişlet: n &lt;= 1.'],
       why: 'Temel durum her olası girdi için ulaşılabilir olmalı. Eşitlik (==) yerine aralık (&lt;=) kontrolü, beklenmeyen başlangıç değerlerinde de özyinelemeyi durdurur.' },
     { id: 'ozyineleme-9',
@@ -5298,7 +5302,7 @@ def adam_asmaca(kelime, girdi=input):
 
 cevaplar = iter(["a", "e", "k", "a", "n", "r"])
 adam_asmaca("ankara", lambda istem: (print(istem), next(cevaplar))[1])</pre>
-<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi de ekrana yazar ki oyunun akışını görebilesin.</p>
+<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi (prompt) de ekrana yazar ki oyunun akışını görebilesin.</p>
 
 <h2>Proje 3: Taş-kağıt-makas</h2>
 <p><b>Tasarım:</b> kuralı <code>if</code> merdiveniyle değil, <b>veriyle</b> anlat: "kim kimi yener" bir sözlüktür. Yeni bir seçenek (kertenkele, Spock) eklemek kod değil veri değişikliği olur.</p>

@@ -40,7 +40,7 @@ print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>G
         id: 'degiskenler-x1',
         stage: 'Isınma',
         q: 'Bir yapılandırma dosyasından <code>"False"</code> metni okundu. <code>bool("False")</code> ne döndürür?',
-        o: ['<code>False</code>, çünkü metnin içeriği False', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
+        o: ['<code>False</code>, çünkü bool() metnin içeriğini okuyup "False" sözcüğünü tanır', '<code>True</code>, çünkü boş olmayan her metin True\'dur', '<code>ValueError</code> hatası verir', '<code>None</code> döndürür'],
         a: 1,
         why: 'bool() bir metnin içeriğini yorumlamaz, yalnızca boş olup olmadığına bakar. "False", "0", "hayır" hepsi boş olmayan metinlerdir ve True verir. Ayar metinlerini açıkça karşılaştırman gerekir.'
       },
@@ -460,7 +460,7 @@ print("En az 3.10 mu?", sys.version_info &gt;= (3, 10))</pre><div class="tbl-wra
 &gt;&gt;&gt; dir("metin")         # bir nesnenin metotlarını listeler
 &gt;&gt;&gt; import math; math.sqrt(144)
 12.0
-&gt;&gt;&gt; exit()</pre><ul><li><b><code>_</code> değişkeni:</b> REPL'de son ifadenin sonucunu tutar. Betikte bu özellik yoktur.</li><li><b><code>help()</code> ve <code>dir()</code>:</b> İnternete çıkmadan belge okumanın yolu. <code>help(str.split)</code> bir metodun ne yaptığını anlatır.</li><li><b>Yukarı ok:</b> Önceki satırları geri getirir. Python 3.13 ile gelen yeni REPL renkli istem, çok satırlı düzenleme, F1 (yardım), F2 (geçmiş) ve F3 (yapıştırma kipi) sunar; <code>exit</code> parantezsiz de çalışır.</li><li><b><code>python -i rapor.py</code>:</b> Betiği çalıştırır ve bittiğinde REPL'e düşer; betikteki değişkenleri inceleyebilirsin. Hata ayıklamanın en basit biçimidir.</li></ul><p><code>help</code> ve <code>dir</code> burada da çalışır; çıktıyı kısaltmak için yalnız ilk elemanları alıyoruz:</p><pre class="py">yontemler = dir("Anadolu")
+&gt;&gt;&gt; exit()</pre><ul><li><b><code>_</code> değişkeni:</b> REPL'de son ifadenin sonucunu tutar. Betikte bu özellik yoktur.</li><li><b><code>help()</code> ve <code>dir()</code>:</b> İnternete çıkmadan belge okumanın yolu. <code>help(str.split)</code> bir metodun ne yaptığını anlatır.</li><li><b>Yukarı ok:</b> Önceki satırları geri getirir. Python 3.13 ile gelen yeni REPL renkli istem (prompt), çok satırlı düzenleme, F1 (yardım), F2 (geçmiş) ve F3 (yapıştırma kipi) sunar; <code>exit</code> parantezsiz de çalışır.</li><li><b><code>python -i rapor.py</code>:</b> Betiği çalıştırır ve bittiğinde REPL'e düşer; betikteki değişkenleri inceleyebilirsin. Hata ayıklamanın en basit biçimidir.</li></ul><p><code>help</code> ve <code>dir</code> burada da çalışır; çıktıyı kısaltmak için yalnız ilk elemanları alıyoruz:</p><pre class="py">yontemler = dir("Anadolu")
 print(len(yontemler) &gt; 30)
 print([y for y in yontemler if y.startswith("s")])
 help(len)</pre><h2><code>python -m</code>: modülü program gibi çalıştırmak</h2><p><code>-m</code> bayrağı "şu modülü, <b>bu</b> Python'la çalıştır" demektir. Makinede birden fazla Python olduğunda doğru olanı kullandığından emin olmanın en güvenli yolu budur.</p><div class="tbl-wrap"><table><tr><th>Komut</th><th>Ne yapar?</th></tr><tr><td><code>python -V</code> / <code>-VV</code></td><td>Sürümü gösterir (-VV derleme ayrıntısıyla)</td></tr><tr><td><code>python -c "print(2**10)"</code></td><td>Tek satırlık kodu dosya yazmadan çalıştırır</td></tr><tr><td><code>python -m pip install pandas</code></td><td>Bu Python'ın pip'iyle paket kurar</td></tr><tr><td><code>python -m venv .venv</code></td><td>Projeye özel sanal ortam oluşturur</td></tr><tr><td><code>python -m http.server 8000</code></td><td>Klasörü yerel bir web sunucusuyla paylaşır</td></tr><tr><td><code>python -m json.tool veri.json</code></td><td>JSON dosyasını okunur biçimde yazdırır ve doğrular</td></tr><tr><td><code>python -m timeit "sum(range(1000))"</code></td><td>Küçük bir ifadenin süresini ölçer</td></tr><tr><td><code>python -m site</code></td><td>Paketlerin hangi klasörlere kurulduğunu gösterir</td></tr></table></div><p>Kendi betiğin de bir modüldür. Doğrudan çalıştırıldığında özel değişken <code>__name__</code>, <code>"__main__"</code> değerini alır; içe aktarıldığında ise modülün adını. İleride <code>if __name__ == "__main__":</code> kalıbını bu yüzden göreceksin.</p><pre class="py">print("Bu kod şu adla çalışıyor:", __name__)
@@ -800,7 +800,7 @@ print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık dü
         id: 'metinler-x1',
         stage: 'Isınma',
         q: '<code>"SUBE=Konak".partition("=")</code> ne döndürür?',
-        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>"SUBE"</code>'],
+        o: ['<code>["SUBE", "Konak"]</code>', '<code>("SUBE", "=", "Konak")</code>', '<code>("SUBE", "Konak")</code>', '<code>["SUBE", "=", "Konak", ""]</code>'],
         a: 1,
         why: 'partition her zaman üç elemanlı bir demet döndürür: ayraçtan önceki kısım, ayracın kendisi ve sonrası. split ise liste döndürür ve ayracı içermez.'
       },
@@ -2684,7 +2684,7 @@ print(gruplar)</pre>
     { t: 'mc',
       stage: 'Isınma',
       q: '<code>a = {"kargo": 49.9, "kdv": 0.2}</code> ve <code>b = {"kargo": 0}</code> için <code>(a | b)["kargo"]</code> nedir?',
-      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, anahtar çakışıyor'],
+      o: ['49.9, çünkü soldaki öncelikli', '0, çünkü aynı anahtarda sağdaki kazanır', '49.9 + 0 toplamı', 'KeyError, çünkü aynı anahtar iki sözlükte de tanımlı'],
       a: 1,
       why: '| birleştirmesinde aynı anahtar iki tarafta varsa sağdaki sözlüğün değeri kullanılır. Değerler toplanmaz; toplama gerekiyorsa döngü yazarsın.' },
     { t: 'predict',
@@ -7080,7 +7080,7 @@ X.push({
 <p>Bu bölüm bir başvuru kılavuzudur: her işletim sisteminde sanal ortamı kurup etkinleştirme, pip'in tüm günlük komutları, requirements ve constraints dosyaları, pip-tools, uv, poetry, conda ve pipx ile iş akışları ve en sık karşılaşılan hataların çözümü. Komutları kendi bilgisayarında, proje klasöründe dene; tarayıcıdaki örnekler ise ortamı ve sürümleri <b>Python'dan</b> nasıl sorgulayacağını gösterir. Altın kural: <code>pip</code> yerine <code>python -m pip</code> yaz; böylece paket, o an çalışan Python'a kurulur.</p>
 <h3>1. venv: her işletim sisteminde oluştur, etkinleştir, doğrula</h3>
 <div class="tbl-wrap"><table><tr><th>Sistem / kabuk</th><th>Oluştur</th><th>Etkinleştir</th></tr><tr><td>Windows – PowerShell</td><td><code>py -3.12 -m venv .venv</code></td><td><code>.venv\\Scripts\\Activate.ps1</code></td></tr><tr><td>Windows – cmd</td><td><code>py -m venv .venv</code></td><td><code>.venv\\Scripts\\activate.bat</code></td></tr><tr><td>Windows – Git Bash</td><td><code>py -m venv .venv</code></td><td><code>source .venv/Scripts/activate</code></td></tr><tr><td>macOS / Linux – bash, zsh</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate</code></td></tr><tr><td>Linux/macOS – fish</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate.fish</code></td></tr><tr><td>csh / tcsh</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate.csh</code></td></tr></table></div>
-<p>Etkinleşince istemde <code>(.venv)</code> görünür. Çıkmak için her kabukta <code>deactivate</code>. Etkinleştirmeden de çalışabilirsin: <code>.venv/bin/python betik.py</code> (Windows'ta <code>.venv\\Scripts\\python.exe betik.py</code>) doğrudan o ortamın Python'ını kullanır; zamanlanmış görevlerde ve CI'da en güvenli yol budur.</p>
+<p>Etkinleşince istemde (prompt) <code>(.venv)</code> görünür. Çıkmak için her kabukta <code>deactivate</code>. Etkinleştirmeden de çalışabilirsin: <code>.venv/bin/python betik.py</code> (Windows'ta <code>.venv\\Scripts\\python.exe betik.py</code>) doğrudan o ortamın Python'ını kullanır; zamanlanmış görevlerde ve CI'da en güvenli yol budur.</p>
 <pre class="code"># Windows PowerShell: "running scripts is disabled on this system" hatası
 Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
 .venv\\Scripts\\Activate.ps1

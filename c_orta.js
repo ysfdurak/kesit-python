@@ -1635,7 +1635,7 @@ except TypeError as e:
 `,
     ex: [
       { t: 'mc', q: 'Alt sınıfta <code>__init__</code> tanımlanırsa üst sınıfın <code>__init__</code> metodu ne olur?',
-        o: ['Otomatik olarak önce çalışır', 'Otomatik olarak sonra çalışır', 'Çağrılmaz; super().__init__ ile açıkça çağrılmalıdır', 'SyntaxError oluşur'],
+        o: ['Otomatik olarak önce çalışır; alt sınıfın __init__ metodu onun ardından gelir', 'Otomatik olarak sonra çalışır', 'Çağrılmaz; super().__init__ ile açıkça çağrılmalıdır', 'SyntaxError oluşur'],
         a: 2, why: 'Python üst sınıf kurucusunu örtük çağırmaz; alt sınıf kurucu yazıyorsa ortak nitelikler için super().__init__(...) çağırmak alt sınıfın sorumluluğudur.' },
       { t: 'code', id: 'kalitim-polimorfizm-1',
         q: '<p>Verilen <code>Hesap</code> sınıfından türeyen <code>Kredili</code> sınıfını yaz: <code>Kredili(no, bakiye=0.0, limit=1000.0)</code>; kurucu ortak alanlar için <code>super().__init__</code> kullansın ve <code>limit</code> niteliğini eklesin. <code>cek(tutar)</code> metodunu ez: <code>tutar &gt; bakiye + limit</code> ise <code>ValueError</code> yükseltsin, değilse bakiyeden düşsün (eksiye inebilir).</p>',
@@ -1652,7 +1652,7 @@ except TypeError as e:
         hints: ['Satisci kurucusu üç parametre alır; super().__init__(ad, maas) sonra self.satis', 'toplam_prim: sum(c.prim() for c in calisanlar); isinstance kullanma'],
         why: 'Her sınıf prim kuralını kendi içinde taşır; toplam_prim türleri bilmeden aynı metodu çağırır. Yeni çalışan türü eklemek fonksiyonu değiştirmez.' },
       { t: 'mc', q: '"Müşterinin hesapları vardır" ilişkisi için doğru tasarım hangisidir?',
-        o: ['class Musteri(Hesap)', 'class Hesap(Musteri)', 'Musteri sınıfında self.hesaplar listesi (kompozisyon)', 'class Musteri(Hesap, list)'],
+        o: ['class Musteri(Hesap)', 'class Hesap(Musteri)', 'Musteri sınıfında self.hesaplar listesi (kompozisyon)', 'class Musteri(Hesap, list) ile çoklu kalıtım (hesaplar üst sınıftan gelir)'],
         a: 2, why: '"-ı var" ilişkisi kompozisyondur: Musteri, Hesap nesnelerini nitelik olarak tutar. Kalıtım yalnızca "-dır" ilişkisinde (Vadeli bir Hesap\'tır) kullanılır.' },
       { t: 'code', id: 'kalitim-polimorfizm-3',
         q: '<p><code>abc</code> ile soyut sınıf yaz: <code>Bildirim(ABC)</code> içinde soyut <code>gonder(self, mesaj)</code> metodu olsun. <code>Sms(Bildirim)</code> <code>gonder</code> çağrılınca <code>"SMS: " + mesaj</code>, <code>Eposta(Bildirim)</code> ise <code>"E-posta: " + mesaj</code> döndürsün. Bildirim doğrudan örneklenememeli.</p>',
@@ -1669,7 +1669,7 @@ except TypeError as e:
         hints: ['__init__ içinde super().__init__(no, bakiye) sonra self.kilitli = kilitli', 'cek içinde kilit kontrolünden sonra super().cek(tutar) çağır'],
         why: 'Alt sınıf yalnızca ek kuralı yazar, gerisini super() ile üst sınıfa bırakır; kayıt tutma mantığı tek yerde kalır.' },
       { t: 'mc', q: 'Kodda <code>if isinstance(h, Vadeli): ... elif isinstance(h, Kredili): ...</code> zinciri görmek genellikle neye işaret eder?',
-        o: ['Kodun doğru yazıldığına', 'O dallanmanın her sınıfın kendi metodunda olması gerektiğine', 'ABC kullanılması gerektiğine', 'Kompozisyonun yanlış olduğuna'],
+        o: ['Kodun doğru yazıldığına', 'O dallanmanın her sınıfın kendi metodunda olması gerektiğine', 'ABC kullanılması gerektiğine', 'Kompozisyonun yanlış kullanıldığına, sınıfların birleştirilmesi gerektiğine'],
         a: 1, why: 'Tür bazlı dallanma, polimorfizmin yapması gereken işi elle yapmaktır; davranışı ilgili sınıfların metoduna taşıyınca yeni tür eklemek zinciri değiştirmeyi gerektirmez.' }
     ],
     faq: [
@@ -1885,7 +1885,7 @@ print(tahsil_et(KrediKarti(), 149.9))</pre>
 `,
     ex: [
       { t: 'mc', q: 'Bir dataclass alanına liste varsayılanı vermek için doğru yazım hangisidir?',
-        o: ['kalemler: list = []', 'kalemler: list = field(default=[])', 'kalemler: list[str] = field(default_factory=list)', 'kalemler: list = list'],
+        o: ['kalemler: list = []', 'kalemler: list[str] = field(default=list, init=False)', 'kalemler: list[str] = field(default_factory=list)', 'kalemler: list = list'],
         a: 2, why: 'Değiştirilebilir varsayılanlar paylaşım tuzağı yarattığı için dataclass bunları reddeder; default_factory her örnek için list() çağırır.' },
       { t: 'code', id: 'dataclass-typing-1',
         q: '<p><code>Urun</code> dataclass\'ını yaz: alanlar <code>kod: str</code>, <code>ad: str</code>, <code>fiyat: float</code>, <code>stok: int = 0</code>. <code>kdvli</code> property <code>round(fiyat * 1.2, 2)</code> döndürsün. <code>__post_init__</code> ile negatif fiyat için <code>ValueError</code> yükselt.</p>',
@@ -1902,7 +1902,7 @@ print(tahsil_et(KrediKarti(), 149.9))</pre>
         hints: ['kalemler: list[float] = field(default_factory=list)', '@dataclass(frozen=True, order=True) class Para'],
         why: 'default_factory her örneğe ayrı liste verir; frozen değiştirilemez ve hashlenebilir yapar, order karşılaştırma metotlarını üretir.' },
       { t: 'mc', q: '<code>def bul(no: str) -> str | None</code> imzası çağıran tarafa ne söyler?',
-        o: ['Fonksiyon her zaman str döndürür', 'Sonuç None olabilir, kullanmadan önce kontrol gerekir', 'Parametre isteğe bağlıdır', 'Fonksiyon hata yükseltebilir'],
+        o: ['Fonksiyon her zaman str döndürür; None yalnız belge amaçlı yazılmıştır', 'Sonuç None olabilir, kullanmadan önce kontrol gerekir', 'Parametre isteğe bağlıdır', 'Fonksiyon hata yükseltebilir'],
         a: 1, why: '| None dönüş tipi "bulunamayabilir" anlamına gelir; mypy, None kontrolü yapılmadan .upper() gibi kullanımları hata olarak raporlar.' },
       { t: 'code', id: 'dataclass-typing-3',
         q: '<p>Tip ipuçlarıyla iki fonksiyon yaz. <code>sehir_toplam(kayitlar: list[dict[str, object]], sehir: str) -> float</code>: her kayıt <code>"sehir"</code> ve <code>"tutar"</code> anahtarlı sözlük; verilen şehrin tutar toplamını döndürsün. <code>musteri_bul(musteriler: dict[str, str], no: str) -> str | None</code>: anahtar yoksa <code>None</code> döndürsün. Her iki fonksiyonun dönüş tipi ipucu (<code>__annotations__["return"]</code>) tanımlı olmalı.</p>',
@@ -1919,7 +1919,7 @@ print(tahsil_et(KrediKarti(), 149.9))</pre>
         hints: ['Protocol gövdesinde metot imzasını yazıp gövdeye ... koy', 'Sınıflar sadece aynı imzalı ode metodunu tanımlar; kalıtım yok'],
         why: 'Protocol yapısal tipleme sağlar: uygun metodu olan her nesne kabul edilir, kalıtım gerekmez. Bu ördek tiplemenin tip denetleyicideki karşılığıdır.' },
       { t: 'mc', q: 'Tip ipucu olan <code>def kare(x: int) -> int</code> fonksiyonuna <code>kare("3")</code> ile dize verilirse Python ne yapar?',
-        o: ['TypeError yükseltir', 'Dizeyi int\'e çevirir', 'Tip ipucunu dikkate almaz, fonksiyonu çalıştırır', 'Uyarı yazdırıp devam eder'],
+        o: ['TypeError yükseltir', 'Dizeyi int\'e çevirir', 'Tip ipucunu dikkate almaz, fonksiyonu çalıştırır', 'Çalışma zamanında uyarı yazdırıp dizeyi int\'e çevirmeden devam eder'],
         a: 2, why: 'Tip ipuçları çalışma zamanında zorlanmaz; yalnızca mypy gibi statik araçlar ve editörler denetler. Fonksiyon gövdesi "3" * "3" gibi bir işlemde ancak kendi hatasıyla durur.' }
     ],
     faq: [
@@ -2129,7 +2129,7 @@ except AssertionError as e:
 `,
     ex: [
       { t: 'mc', q: '<code>raise VeriHatasi("bozuk") from e</code> yazımının amacı nedir?',
-        o: ['e istisnasını bastırmak', 'Yeni istisnayı yükseltirken asıl nedeni (e) zincire eklemek', 'İki istisnayı aynı anda yükseltmek', 'e istisnasını yeniden denemek'],
+        o: ['e istisnasını bastırmak', 'Yeni istisnayı yükseltirken asıl nedeni (e) zincire eklemek', 'İki istisnayı aynı anda yükseltmek; önce e, sonra yeni istisna fırlatılır', 'e istisnasını yeniden denemek'],
         a: 1, why: 'from, yeni istisnanın __cause__ alanına eskisini koyar; iz kaydında her iki hata da görünür. from None ise zinciri keser.' },
       { t: 'code', id: 'hata-tasarim-1',
         q: '<p>İstisna hiyerarşisi kur: <code>BankaHatasi(Exception)</code>, ondan türeyen <code>HesapBulunamadi</code> ve <code>YetersizBakiye</code>. <code>YetersizBakiye</code> kurucusu <code>(istenen, mevcut)</code> alsın, mesajı <code>f"{istenen} istendi, {mevcut} var"</code> olsun ve <code>eksik</code> niteliğinde farkı tutsun. <code>cek(hesaplar, no, tutar)</code> fonksiyonu: hesap yoksa <code>HesapBulunamadi(no)</code>, bakiye yetmezse <code>YetersizBakiye</code> yükseltsin; başarılıysa bakiyeyi düşüp yeni bakiyeyi döndürsün.</p>',
@@ -2164,10 +2164,10 @@ except AssertionError as e:
         hints: ['Tek try: musteriler[no]["eposta"]; KeyError her iki eksikliği de kapsar', 'İç içe try: önce int, except ValueError içinde float'],
         why: 'EAFP dener ve hatayı yakalar; iki anahtarı tek except KeyError ile ele almak LBYL\'deki çift kontrolden kısa.' },
       { t: 'mc', q: 'Aşağıdaki except sıralamasında ne sorun vardır?<br><code>except BankaHatasi: ...<br>except YetersizBakiye: ...</code> (YetersizBakiye, BankaHatasi\'ndan türer)',
-        o: ['İkinci blok hiç çalışmaz, çünkü ilk blok onu da yakalar', 'SyntaxError oluşur', 'Her iki blok da çalışır', 'Sorun yok'],
+        o: ['İkinci blok hiç çalışmaz, çünkü ilk blok onu da yakalar', 'SyntaxError oluşur', 'Her iki blok da sırayla çalışır, çünkü ikisi de aynı hatayı yakalar', 'Sorun yok'],
         a: 0, why: 'except blokları sırayla denenir ve isinstance mantığıyla eşleşir; alt sınıf üst sınıf bloğuna takılır. Özel sınıflar önce, genel olanlar sonra yazılmalıdır.' },
       { t: 'mc', q: '<code>log.info("bakiye %s", bakiye)</code> yerine <code>log.info(f"bakiye {bakiye}")</code> yazmanın sakıncası nedir?',
-        o: ['f-string logging içinde çalışmaz', 'Seviye kapalı olsa bile dize biçimlenir ve log araçları mesajı gruplayamaz', 'Mesaj iki kez yazılır', 'Sadece DEBUG seviyesinde çalışır'],
+        o: ['f-string logging içinde çalışmaz', 'Seviye kapalı olsa bile dize biçimlenir ve log araçları mesajı gruplayamaz', 'Mesaj hem log dosyasına hem ekrana iki kez yazılır ve dosyanın boyutu hızla büyür', 'Sadece DEBUG seviyesinde çalışır'],
         a: 1, why: 'Şablon ve argüman ayrı verilince logging dizeyi yalnızca gerektiğinde biçimler; log toplayıcılar aynı şablonu tek olay olarak gruplar. f-string çalışır ama bu avantajları kaybeder.' }
     ],
     faq: [
@@ -2370,7 +2370,7 @@ print("Kümülatif:", list(accumulate(gunluk.values())))</pre>
         o: ['KeyError fırlatır', '0', 'None', '[]'], a: 1,
         why: 'Counter olmayan anahtar için 0 döndürür; sözlük gibi KeyError vermez. None ya da boş liste döndürmez.' },
       { t: 'mc', q: '<code>groupby</code> kullanmadan önce veriyi neden sıralamak gerekir?',
-        o: ['Daha hızlı çalışması için', 'Yalnızca ardışık eşit anahtarları grupladığından', 'Anahtar fonksiyonu sıralı veri bekler', 'Sıralanmazsa hata fırlatır'], a: 1,
+        o: ['Daha hızlı çalışması için', 'Yalnızca ardışık eşit anahtarları grupladığından', 'Anahtar fonksiyonu sıralı veri bekler', 'Sıralanmazsa <code>ValueError</code> fırlatır, çünkü anahtarları karşılaştıramaz'], a: 1,
         why: 'groupby ardışık (yan yana) eşit anahtarları tek grup yapar; sırasız veride aynı anahtar birden çok gruba bölünür. Hata fırlatmaz, sessizce yanlış sonuç verir.' },
       { t: 'code', id: 'collections-itertools-1',
         q: '<p>Anadolu Market sipariş listesinden şehir bazlı sayım yapan <code>en_cok_sehirler(siparisler, n)</code> fonksiyonunu yaz. <code>siparisler</code>, her biri <code>{"sehir": ..., "tutar": ...}</code> olan sözlük listesidir. Fonksiyon en çok sipariş gelen <code>n</code> şehri <code>[(sehir, adet), ...]</code> biçiminde, adede göre azalan sırada döndürsün. <code>Counter</code> kullan.</p>',
@@ -3032,7 +3032,7 @@ print(cikti.getvalue())</pre>
         o: ['(1, 2)', '[1, 2]', '"(1, 2)"', 'TypeError'], a: 1,
         why: 'JSON\'da demet yoktur; dumps demeti diziye çevirir, loads diziyi liste olarak okur. Hata vermez, sessizce tip değişir.' },
       { t: 'mc', q: 'Türkçe karakterli veriyi insanların okuyacağı JSON dosyasına yazarken hangi parametre gerekir?',
-        o: ['indent=4', 'sort_keys=True', 'ensure_ascii=False', 'default=str'], a: 2,
+        o: ['encoding="utf-8" yeterlidir', 'sort_keys=True', 'ensure_ascii=False', 'default=str'], a: 2,
         why: 'ensure_ascii=False Türkçe harfleri \\u kaçışı yerine olduğu gibi yazar. indent biçimlendirir, sort_keys sıralar, default desteklenmeyen tipleri çevirir.' },
       { t: 'code', id: 'json-csv-1',
         q: '<p>Anadolu Market CSV dışa aktarımından toplam ciroyu hesaplayan <code>sehir_cirosu(csv_metni: str) -> dict</code> fonksiyonunu yaz. CSV başlıkları <code>no,sehir,tutar</code>; alanlar virgülle ayrılmış, bazı değerler tırnak içinde olabilir. Şehir bazında tutar toplamını (float, 2 basamağa yuvarlanmış) sözlük olarak döndür. <code>csv.DictReader</code> ve <code>io.StringIO</code> kullan.</p>',
@@ -3727,7 +3727,7 @@ print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
       why: 'Testler arayüzü önceden belirledi; sınıf yalnızca onları geçecek kadar yazıldı. setUp her testte yeni sepet kurduğu için testler birbirini etkilemez.' },
 
     { t: 'mc', q: '<code>suite = loadTestsFromTestCase(T)</code> yükledin ve <code>run(suite)</code> çağırdın. Sonra <code>[t.id() for t in suite]</code> boş liste döndü. Neden?',
-      o: ['Testler başarısız olduğu için suite temizlendi', 'id() yalnızca pytest\'te vardır', 'TextTestRunner suite\'i çalıştırdıktan sonra içini boşaltır', 'loadTestsFromTestCase tembel (lazy) çalışır'],
+      o: ['Testler başarısız olduğu için suite temizlendi', 'id() yalnızca pytest\'te vardır', 'TextTestRunner suite\'i çalıştırdıktan sonra içini boşaltır', 'loadTestsFromTestCase tembel (lazy) çalışır; testler ancak ilk gezinmede yüklenir ve biter'],
       a: 2,
       why: 'unittest, çalıştırılan testleri bellekten düşürmek için suite\'i run sonrasında boşaltır. Test adlarını ya da sayısını kaydetmek istiyorsan run çağrısından önce topla.' },
 
@@ -3948,7 +3948,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
       why: 'tomllib TOML\'ı iç içe sözlüklere çevirir; get zinciri eksik alanlarda KeyError yerine boş liste vermeyi sağlar.' },
 
     { t: 'mc', q: 'Ekip arkadaşın projeyi klonladı, <code>pip install -r requirements.txt</code> çalıştırmadan betiği başlattı ve ModuleNotFoundError aldı. Ama senin repoda <code>.venv</code> klasörü de vardı. Doğru yaklaşım hangisi?',
-      o: ['.venv klasörünü Git\'e ekleyip paylaşmak', '.venv\'i .gitignore\'a yazıp requirements.txt ile kurulum yaptırmak', 'Paketleri global olarak kurmasını söylemek', 'Betiğin başına pip install satırı eklemek'],
+      o: ['.venv klasörünü Git\'e ekleyip paylaşmak', '.venv\'i .gitignore\'a yazıp requirements.txt ile kurulum yaptırmak', 'Paketleri global olarak kurmasını söylemek', 'Betiğin başına paketi kuran bir pip install satırı ekleyip her çalıştırmada kurdurmak'],
       a: 1,
       why: 'Sanal ortam makineye özgüdür (mutlak yollar, işletim sistemi); paylaşılmaz, bağımlılık listesinden yeniden kurulur. Global kurulum projeler arası çatışma yaratır; betik içinden pip çağırmak ise kırılgan ve güvensizdir.' },
 
@@ -3961,7 +3961,7 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
       why: 'Demet karşılaştırması sürüm sırasını doğru verir. ~= işlecinin üst sınırı, kaç basamak yazıldığına bağlıdır; bu yüzden sınır orijinal metinden hesaplanır, doldurulmuş demetten değil.' },
 
     { t: 'mc', q: '<code>pip freeze &gt; requirements.txt</code> ile üretilen dosyanın asıl amacı nedir?',
-      o: ['Projenin istediği en düşük sürümleri belgelemek', 'O anda kurulu tam sürümlerin fotoğrafını alıp aynısını başka makinede kurmak', 'Kullanılmayan paketleri temizlemek', 'pyproject.toml dosyasını otomatik üretmek'],
+      o: ['Projenin istediği en düşük sürümleri belgelemek', 'O anda kurulu tam sürümlerin fotoğrafını alıp aynısını başka makinede kurmak', 'Kullanılmayan paketleri temizleyip yalnız koda doğrudan eklenen bağımlılıkları bırakmak', 'pyproject.toml dosyasını otomatik üretmek'],
       a: 1,
       why: 'freeze, kurulu her paketi paket==sürüm biçiminde yazar; bu, dağıtımda birebir aynı ortamı yeniden kurmak içindir. En düşük sürümler ve esnek aralıklar pyproject.toml\'un işidir.' }
   ],
@@ -4140,19 +4140,19 @@ except RuntimeError as e:
 </section>
 `,
   ex: [{ t: 'mc', q: 'Yeni bir özellik üzerinde çalışırken ana kodu bozmamak için ilk yapılacak şey hangisidir?',
-      o: ['git commit -m "wip"', 'git switch -c ozellik-adi', 'git stash', 'git push origin main'],
+      o: ['git commit -m "wip"', 'git switch -c ozellik-adi', 'git stash push -m "yeni ozellik"', 'git push origin main'],
       a: 1,
       why: 'Yeni dal açmak (switch -c) işi ana koddan izole eder. stash yarım işi geçici kaldırır, wip commit geçmişi kirletir, main\'e push ise tam da kaçınılması gereken şeydir.' },
     { t: 'mc', q: 'Bir ekip arkadaşın yanlışlıkla <code>.env</code> dosyasını commit edip push etti ve sonra sildi. Şimdi ne yapılmalı?',
-      o: ['Hiçbir şey; dosya silindiği için sorun kalmadı', '.env\'i .gitignore\'a eklemek yeterli', 'İçindeki anahtarları derhal iptal edip yenilemek ve .gitignore\'a eklemek', 'Depoyu silip yeniden oluşturmak'],
+      o: ['Hiçbir şey; dosya silindiği için sorun kalmadı', '.env\'i .gitignore\'a eklemek yeterli', 'İçindeki anahtarları derhal iptal edip yenilemek ve .gitignore\'a eklemek', 'Depoyu silip temiz geçmişle yeniden oluşturmak; anahtarlar böylece güvende kalır'],
       a: 2,
       why: 'Push edilen içerik Git geçmişinde ve uzak sunucuda kalır; silmek geçmişi temizlemez. Sızan anahtar artık sızmış sayılır ve iptal edilir. .gitignore tekrarını önler ama olanı geri almaz.' },
     { t: 'mc', q: 'Kod incelemesinde (code review) aşağıdaki yorumlardan hangisi iyi örnektir?',
-      o: ['Bu nasıl çalışıyor anlamadım, baştan yaz.', 'Burada iç içe döngü O(n²); şehir sözlüğüyle tek geçişte olur, ister misin örnek yazayım?', 'Bence olmuş, onaylıyorum.', 'Girintiler 2 boşluk olmalıydı.'],
+      o: ['Bu nasıl çalışıyor anlamadım, baştan yaz.', 'Burada iç içe döngü O(n²); şehir sözlüğüyle tek geçişte olur, ister misin örnek yazayım?', 'Bence olmuş, onaylıyorum.', 'Burada performans sorunu var, bu yaklaşım olmamış; bana göre hepsini baştan yazman gerekir.'],
       a: 1,
       why: 'İyi yorum kodu konuşur, somut sorun ve çözüm önerir, yardım teklif eder. "Baştan yaz" kişiselleştirir ve yol göstermez; girinti tartışması biçimlendiriciye bırakılır; içeriksiz onay inceleme sayılmaz.' },
     { t: 'mc', q: 'src yerleşiminin (src layout) temel avantajı nedir?',
-      o: ['Daha az klasör gerektirir', 'Testler kurulu paketi test eder, yanlışlıkla yerel kodu değil', 'pip install gerekmez', 'Git çakışmalarını azaltır'],
+      o: ['Daha az klasör gerektirir', 'Testler kurulu paketi test eder, yanlışlıkla yerel kodu değil', 'pip install gerekmez', 'Modüller tek klasörde toplandığı için Git çakışmalarını azaltır'],
       a: 1,
       why: 'Paket src/ altında olunca proje kökünden çalışan testler onu doğrudan içe aktaramaz; pip install -e . ile kurulu paket kullanılır. Böylece "bende çalışıyor, kurulumda bozuk" hataları yakalanır.' }],
   faq: [
@@ -4462,7 +4462,7 @@ print("başarılı:", sonuc.wasSuccessful())</pre>
       why: 'Her kural için pozitif, negatif ve sınır testi yazılır; fabrika fonksiyonu test verisini kısa tutar. Bozulmuş kurala karşı testin düşmesi, testin gerçekten çalıştığını gösterir.' },
 
     { t: 'mc', q: 'Raporda tutarları JSON\'a <code>"8500.00"</code> metni olarak yazdık, <code>8500.0</code> sayısı olarak değil. Bunun nedeni nedir?',
-      o: ['JSON sayı tipini desteklemez', 'Metin daha az yer kaplar', 'Alıcı taraf metni kayıpsız Decimal\'e çevirebilir; float yuvarlama hatası taşıyabilir', 'json.dumps Decimal\'i otomatik metne çevirir'],
+      o: ['JSON sayı tipini desteklemez', 'Metin daha az yer kaplar', 'Alıcı taraf metni kayıpsız Decimal\'e çevirebilir; float yuvarlama hatası taşıyabilir', 'json.dumps Decimal\'i kendiliğinden metne çevirir, bu yüzden başka bir biçimde yazmak mümkün olmaz'],
       a: 2,
       why: 'JSON sayıları çoğu dilde float olarak okunur ve para hassasiyeti kaybolabilir; metin ise Decimal("8500.00") ile birebir geri döner. json.dumps Decimal\'i tanımaz, default ile biz çeviririz.' }
   ],

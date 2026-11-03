@@ -8,7 +8,7 @@
 
 ## Neler var?
 - **141 ders, 3.034 ders içi alıştırma, 550 pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
-- **10 öğrenme yolu:** veri analisti, veri bilimci, veri mühendisi, backend, web, makine öğrenmesi, yapay zekâ, otomasyon ve diğerleri. Her yolda ön koşul, sınav, role süzülmüş mülakat soruları ve portföy önerileri.
+- **11 öğrenme yolu:** veri analisti, veri bilimci, veri mühendisi, backend, web, makine öğrenmesi, yapay zekâ, otomasyon ve diğerleri. Her yolda ön koşul, sınav, role süzülmüş mülakat soruları ve portföy önerileri.
 - **250 Python Arena problemi, 277 Python mülakat sorusu, 160 sık hata kaydı, 18 sınav.**
 - **8 kurgusal veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
 
