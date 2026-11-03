@@ -11757,3 +11757,549 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
   ] }
 );
 })(window);
+/* Kesit Python: Bitirme: proje-analist (Veri Analisti). uretec/p1 üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const L = W.PY_LESSONS = W.PY_LESSONS || [];
+L.push(Object.assign({ id: 'proje-analist', lv: 'orta' }, {
+ "mod": "Orta bitirme",
+ "min": 75,
+ "needs": [
+  "pandas",
+  "matplotlib"
+ ],
+ "title": "Bitirme projesi: Kanat Havayolları gecikme analizi",
+ "sum": "Gerçek uçuş verisini okur, sorunlarını denetler, temizler, zaman dilimi ve neden bazında analiz eder, grafiğini çizer, tampon senaryosunu hesaplar ve operasyon müdürüne gerekçeli bir iş kararı yazarsın.",
+ "goals": [
+  "Bir tabloyu okuyup eksiklerinin anlamını açıklayabilirim.",
+  "Analiz tanımlarını koda ve rapora açıkça yazabilirim.",
+  "Grupla, oranla, küçük grupları ele ve bire çok birleştirme tuzağından kaçınabilirim.",
+  "Karar verdiren, yanıltmayan bir grafik çizebilirim.",
+  "Sonucu varsayımı ve sınırıyla birlikte bir iş önerisine çevirebilirim."
+ ],
+ "body": "\n<h2>Proje: kış tarifesinde tampon nereye?</h2>\n<p>Kanat Havayolları operasyon müdürü soruyor: \"Eylülden beri geç kalkışlar artıyor. Kış tarifesinde bazı seferlerin planına 15 dakika tampon koyabilirim ama hepsine koyamam, uçağı boşa bekletmek pahalı. Nereye koyalım?\" Bu proje bir analistin gerçek işini baştan sona yaptırır: veriyi oku, sorunlarını anla, temizle, analiz et, grafiği çiz, kararı yaz.</p>\n<div class=\"tbl-wrap\"><table><tr><th>Adım</th><th>Soru</th><th>Çıktı</th></tr><tr><td>1. Oku ve denetle</td><td>Elimde ne var?</td><td><code>denetle</code></td></tr><tr><td>2. Temizle</td><td>Hangi satırlar ve tanımlar?</td><td><code>temizle</code></td></tr><tr><td>3. Analiz</td><td>Sorun nerede yoğun?</td><td><code>grup_ozeti</code>, <code>neden_ozeti</code></td></tr><tr><td>4. Grafik</td><td>Nasıl gösteririm?</td><td><code>grafik</code></td></tr><tr><td>5. Senaryo</td><td>Tampon ne kazandırır?</td><td><code>tampon_etkisi</code></td></tr><tr><td>6. Karar</td><td>Ne öneririm?</td><td><code>karar</code>, <code>rapor</code></td></tr></table></div>\n<h2>Önce veriyi tanı</h2>\n<p>Her analiz aynı soruyla başlar: bu tablo ne anlatıyor, nerede eksik? Burada boş değerlerin bir anlamı var: iptal seferde gerçek zaman olmaz, yön değiştiren seferde varış zamanı boştur.</p>\n<pre class=\"py\">import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\nucus, rotar, rota = oku()\nprint(len(ucus), \"sefer\", ucus[\"status\"].value_counts().to_dict())\nprint(ucus[[\"actual_dep\", \"actual_arr\"]].isna().sum().to_dict())\nprint(len(rotar), \"rötar satırı,\", rotar[\"flight_id\"].nunique(), \"sefer\")</pre>\n<p>Son satır bir tuzağı gösteriyor: 1.350 rötar satırı 1.228 seferi anlatıyor, çünkü bir seferin birden çok nedeni olabilir.</p>\n<h2>Tanımları yaz</h2>\n<p>Analizde en çok tartışma tanımlardan çıkar. Bu projenin tanımları: geç kalkış, planlanandan 15 dakikayı aşan kalkıştır; iptaller gecikme hesabına girmez, ayrı sayılır; dilimler sabah (12'den önce), öğle (12-18), akşam (18 ve sonrası). Tanımı değiştirirsen sonuç değişir, bu yüzden raporda da yazılır.</p>\n<h2>Sonuç nereye işaret ediyor?</h2>\n<p>İptaller çıkınca 3.111 sefer kalıyor ve %37,9 geç kalkış var. Dilimlere ayırınca fark görünür:</p>\n<div class=\"tbl-wrap\"><table><tr><th>Dilim</th><th>Sefer</th><th>Geç oranı</th><th>Medyan gecikme</th></tr><tr><td>akşam</td><td>1.096</td><td>%47,4</td><td>14,0 dk</td></tr><tr><td>sabah</td><td>1.260</td><td>%33,0</td><td>5,0 dk</td></tr><tr><td>öğle</td><td>755</td><td>%32,2</td><td>5,0 dk</td></tr></table></div>\n<p>Aylara bakınca oran Eylül'de %29,8 iken Aralık'ta %51,0. Neden tarafında en çok dakikayı <b>hava</b> kaybettiriyor (%32,6). Bu önemli bir uyarıdır: tampon hava koşulunu çözmez, yalnız yolcunun gördüğü gecikmeyi azaltır. Rapora bunu yazmak senin işin.</p>\n<div class=\"note\"><b>Veri notu</b>Bu veri kurgusaldır ve bilinen sınırları Veri setleri sayfasında yazar; örneğin geç gelen uçak nedeninin nedensellik gücü zayıftır. Yöntemi öğren, sonucu gerçek bir havayoluna genelleme.</div>\n<h2>Grafik karar için çizilir</h2>\n<pre class=\"py\">import matplotlib.pyplot as plt\nimport pandas as pd\nozet = pd.DataFrame({'dilim': ['akşam', 'sabah', 'öğle'], 'gec_orani': [47.4, 33.0, 32.2]})\nfig, ax = plt.subplots(figsize=(6, 3.5))\nax.bar(ozet[\"dilim\"], ozet[\"gec_orani\"], color=\"#3b6ea8\")\nax.set_title(\"Zaman dilimine göre geç kalkış oranı\")\nax.set_ylabel(\"Geç kalkış oranı (%)\")\nax.set_ylim(0, None)\nplt.show()</pre>\n<p>Başlık ne gösterdiğini söyler, eksen birimini yazar, sütun ekseni sıfırdan başlar. Tek bir renk yeter; karar sütunların yüksekliğindedir.</p>\n<h2>Kararı yaz</h2>\n<p>Hesabın sonunda elinde bir öneri olmalı. Akşam dilimine 15 dakika tampon, tüm seferlerde geç kalkış oranını %37,9 seviyesinden %27,9 seviyesine indirirdi; 310 sefer geç sayılmaktan çıkardı. Bu varsayımlı bir hesaptır, ölçüm değildir: rötarın kendisi değişmez varsayıldı. İyi bir karar notu bunu saklamaz, küçük bir deneme önerir.</p>\n<section class=\"deep\"><span class=\"eyebrow\">Uzmanlaş</span><h3>Projeyi portföye taşı</h3><p>Aynı akışı kendi bilgisayarında bir defterde yap ve sonucu tek sayfalık nota dök. Rotaları ekle (en az 50 sefer eşiğiyle), <code>hv_bookings</code> ile geciken yolcu sayısını bağla, tamponun maliyetine bir varsayım koy. Görüşmede en çok şunu sorarlar: \"Bu sonuca neden güveniyorsun, ne yanlış olabilir?\" Cevabın burada: tanımlar, çıkarılan satırlar, bire çok tuzağı, senaryo varsayımı.</p></section>\n",
+ "ex": [
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "hv_flights tablosunda iptal seferlerin gerçek kalkış zamanı boş. Ortalama gecikmeyi hesaplarken ne yaparsın?",
+   "o": [
+    "Boşlara 0 yazarım, sefer zamanında kalkmış sayılır",
+    "İptalleri ayrı sayar, hesaptan çıkarır, sayısını yazarım",
+    "Tablonun ortalamasını olduğu gibi alırım, pandas boşları halleder",
+    "İptalleri sessizce silerim, raporda hiç anmam, tablo temiz görünür"
+   ],
+   "a": 1,
+   "why": "İptal bir gecikme değil, ayrı bir sonuçtur. 0 yazmak ortalamayı iyi gösterir, sessizce silmek de okura yalan söyler. Çıkardığın satır sayısını yazmak raporu denetlenebilir kılar."
+  },
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "Sefer tablosunu rötar tablosuyla birleştirdin, satır sayısı arttı. İlk şüphen ne olmalı?",
+   "o": [
+    "pandas hatası, kernel yeniden başlatılmalı",
+    "Tarih sütunları yanlış okundu",
+    "Bir seferin birden çok rötar nedeni var",
+    "Rötar tablosu daha yeni bir sürümden geliyor"
+   ],
+   "a": 2,
+   "why": "Bire çok birleştirme satırları çoğaltır. Yolcu gibi sefer düzeyindeki bir değeri bu tablodan toplarsan aynı yolcuyu birkaç kez sayarsın."
+  },
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "Yöneticiye \"akşam tamponu geç kalkışı düşürür\" diyeceksin. En dürüst cümle hangisi?",
+   "o": [
+    "Varsayımla bu kadar düşerdi; küçük bir deneme öneririm",
+    "Tampon koyarsak geç kalkış kesinlikle bu kadar düşer",
+    "Veri bunu kanıtladı, ayrıca denemeye hiç gerek yok",
+    "Sonuç belirsiz olduğu için hiçbir öneri yapamam"
+   ],
+   "a": 0,
+   "why": "Hesap bir senaryodur, ölçüm değildir. Varsayımı söyleyip küçük denemeyle ölçmeyi önermek hem karar verdirir hem güveni korur."
+  },
+  {
+   "t": "predict",
+   "stage": "Kodu oku",
+   "q": "Bire çok birleştirme. Bu kod ne yazdırır?",
+   "code": "import pandas as pd\nsefer = pd.DataFrame({\"id\": [1, 2], \"pax\": [100, 50]})\nneden = pd.DataFrame({\"id\": [1, 1, 2], \"neden\": [\"hava\", \"teknik\", \"hava\"]})\nm = sefer.merge(neden, on=\"id\")\nprint(len(m), m[\"pax\"].sum(), sefer[\"pax\"].sum())\n",
+   "o": [
+    "2 150 150",
+    "3 250 150",
+    "3 150 150",
+    "3 200 200"
+   ],
+   "a": 1,
+   "why": "Birinci seferin iki nedeni olduğu için satırı iki kez görünür; 100 yolcu iki kez toplanır: 250. Gerçek toplam 150."
+  },
+  {
+   "t": "predict",
+   "stage": "Kodu oku",
+   "q": "Aykırı değer ve özet ölçü. Bu kod ne yazdırır?",
+   "code": "import pandas as pd\ng = pd.Series([1, 2, 3, 4, 200])\nprint(g.mean(), g.median())\n",
+   "o": [
+    "3.0 42.0",
+    "42.0 42.0",
+    "42.0 3.0",
+    "3.0 3.0"
+   ],
+   "a": 2,
+   "why": "Tek bir uzun rötar ortalamayı 42 dakikaya çeker, medyan 3 kalır. Bu yüzden özet tabloda ikisini ve oranı birlikte verdik."
+  },
+  {
+   "t": "predict",
+   "stage": "Kodu oku",
+   "q": "Küçük örneklem. Bu kod ne yazdırır?",
+   "code": "import pandas as pd\nt = pd.DataFrame({\"rota\": [\"A\"] * 2 + [\"B\"] * 100, \"gec\": [True, False] + [True] * 40 + [False] * 60})\no = t.groupby(\"rota\")[\"gec\"].agg([\"size\", \"mean\"])\nprint(o[o[\"size\"] >= 50].index.tolist(), o[\"mean\"].idxmax())\n",
+   "o": [
+    "['A'] B",
+    "['B'] B",
+    "['B'] A",
+    "['A', 'B'] A"
+   ],
+   "a": 2,
+   "why": "A rotasının oranı %50 ile en yüksek görünür ama yalnız 2 sefere dayanır. En az sefer eşiği bu sahte birinciliği eler."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-1",
+   "stage": "Rehberli",
+   "diff": 1,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 1: oku ve denetle.</b> <code>oku()</code> hazır. <code>denetle(ucus)</code> yaz ve şu tam sayıları içeren sözlük döndür: <code>satir</code>, <code>tekil_sefer</code> (farklı <code>flight_id</code>), <code>iptal</code> (<code>status == \"cancelled\"</code>), <code>yon_degisen</code> (<code>\"diverted\"</code>), <code>bos_kalkis</code> (<code>actual_dep</code> boş), <code>bos_varis</code> (<code>actual_arr</code> boş).</p>",
+   "guide": [
+    "len(ucus) satır sayısını verir.",
+    "ucus[\"flight_id\"].nunique() farklı değerleri sayar.",
+    "(ucus[\"status\"] == \"cancelled\").sum() koşulu sayar.",
+    "isna().sum() boşları sayar; int() ile sar."
+   ],
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    # sözlük döndür\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n",
+   "tests": "_d = denetle(oku()[0])\nassert _d == {'satir': 3173, 'tekil_sefer': 3173, 'iptal': 62, 'yon_degisen': 9, 'bos_kalkis': 62, 'bos_varis': 71}, \"Sayılar farklı: \" + repr(_d)\nassert all(type(v) is int for v in _d.values()), \"Değerler int olmalı\"\n_x = pd.DataFrame({\"flight_id\": [1, 1, 2], \"status\": [\"cancelled\", \"landed\", \"diverted\"], \"actual_dep\": [None, \"a\", \"b\"], \"actual_arr\": [None, None, \"c\"]})\nassert denetle(_x) == {\"satir\": 3, \"tekil_sefer\": 2, \"iptal\": 1, \"yon_degisen\": 1, \"bos_kalkis\": 1, \"bos_varis\": 2}, \"Sabit değer değil, hesap olmalı\"\n",
+   "hints": [
+    "Önce kod editöründe ucus.head() ve ucus.isna().sum() ile tabloya bak."
+   ],
+   "why": "62 boş kalkış tam olarak 62 iptale, 71 boş varış da iptal ile yön değiştiren seferlerin toplamına eşit. Boşlar veri hatası değil, sürecin sonucudur; bunu bilmeden \"boşları doldurmak\" yanlış olurdu."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-2",
+   "stage": "Rehberli",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 2: temizle.</b> <code>temizle(ucus, rota)</code> yaz; girdiyi değiştirme. İptalleri çıkar, <code>rota</code> tablosunu <code>route_id</code> ile bağla ve şu sütunları ekle:</p><ul><li><code>rota</code>: <code>\"IST-ESB\"</code> biçiminde</li><li><code>gec_dk</code>: gerçek kalkış eksi planlanan kalkış, dakika (ondalıklı olabilir)</li><li><code>gec</code>: <code>gec_dk</code> 15'ten büyükse <code>True</code></li><li><code>ay</code>: <code>\"2024-09\"</code> biçiminde planlanan ay</li><li><code>dilim</code>: planlanan saat 12'den küçükse <code>\"sabah\"</code>, 18'den küçükse <code>\"öğle\"</code>, değilse <code>\"akşam\"</code></li></ul>",
+   "guide": [
+    "İptal filtresinden sonra .copy() al.",
+    "t[\"actual_dep\"] - t[\"sched_dep\"] süre verir; .dt.total_seconds() / 60 dakikaya çevirir.",
+    "t[\"sched_dep\"].dt.hour.map(dilim_bul) ile dilimi bul."
+   ],
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    pass\n\ndef temizle(ucus, rota):\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n",
+   "tests": "_u, _r, _ro = oku()\n_b = len(_u)\n_t = temizle(_u, _ro)\nassert len(_u) == _b and \"gec_dk\" not in _u.columns, \"Girdiyi değiştirme\"\nassert len(_t) == 3111, \"İptaller çıkınca 3111 sefer kalmalı: \" + str(len(_t))\nassert (_t[\"status\"] != \"cancelled\").all()\nassert _t[\"gec_dk\"].isna().sum() == 0, \"Temiz tabloda boş gecikme kalmamalı\"\nassert round(_t[\"gec\"].mean() * 100, 1) == 37.9, \"Geç kalkış oranı %37.9 olmalı: \" + str(round(_t[\"gec\"].mean() * 100, 1))\nassert _t.loc[_t[\"flight_id\"] == 1, \"rota\"].iloc[0] == \"IST-ESB\", \"rota biçimi IST-ESB\"\nassert _t.loc[_t[\"flight_id\"] == 1, \"gec_dk\"].iloc[0] == 3, \"Birinci seferin gecikmesi 3 dakika\"\nassert _t.loc[_t[\"flight_id\"] == 1, \"ay\"].iloc[0] == \"2024-09\"\nassert set(_t[\"dilim\"]) == {\"sabah\", \"öğle\", \"akşam\"}, \"Üç dilim olmalı\"\nassert dilim_bul(11) == \"sabah\" and dilim_bul(12) == \"öğle\" and dilim_bul(17) == \"öğle\" and dilim_bul(18) == \"akşam\", \"Sınır saatleri yanlış\"\nassert _t[\"dilim\"].value_counts().to_dict() == {'sabah': 1260, 'akşam': 1096, 'öğle': 755}, \"Dilim sayıları farklı\"\n",
+   "hints": [
+    "Yön değiştiren seferlerin kalkış zamanı vardır; onları çıkarma.",
+    "15 dakikada tam kalkan sefer geç sayılmaz: &gt; 15."
+   ],
+   "why": "Tanımları koda yazdın: \"geç\" 15 dakikayı aşan kalkıştır. Havacılıkta yaygın bir eşiktir; farklı bir eşik seçersen sonuçlar değişir, bu yüzden tanımı rapora da yazacaksın."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-3",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 3: analiz et.</b> İki fonksiyon yaz.</p><p><code>grup_ozeti(t, sutun, en_az=1)</code>: <code>sutun</code>a göre grupla; <code>ucus</code> (satır sayısı), <code>gec_orani</code> (<code>gec</code> ortalaması × 100, 1 ondalık), <code>medyan_gec</code> (<code>gec_dk</code> medyanı). <code>ucus &lt; en_az</code> olan grupları at. Oran azalan, eşitlikte <code>sutun</code> artan sıralı, indeksi sıfırlanmış DataFrame döndür.</p><p><code>neden_ozeti(rotar)</code>: <code>reason</code> başına <code>sefer</code> (farklı sefer), <code>dakika</code> (toplam), <code>pay</code> (dakika payı, %, 1 ondalık). Dakika azalan sıralı döndür.</p>",
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    pass\n\ndef neden_ozeti(rotar):\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    o = t.groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))\n    o = o[o[\"ucus\"] >= en_az].copy()\n    o[\"gec_orani\"] = (o[\"gec_orani\"] * 100).round(1)\n    o = o.reset_index().sort_values([\"gec_orani\", sutun], ascending=[False, True]).reset_index(drop=True)\n    return o\n\ndef neden_ozeti(rotar):\n    o = rotar.groupby(\"reason\").agg(sefer=(\"flight_id\", \"nunique\"), dakika=(\"minutes\", \"sum\")).reset_index()\n    o[\"pay\"] = (o[\"dakika\"] / o[\"dakika\"].sum() * 100).round(1)\n    return o.sort_values(\"dakika\", ascending=False).reset_index(drop=True)\n",
+   "tests": "_u, _r, _ro = oku()\n_t = temizle(_u, _ro)\n_o = grup_ozeti(_t, \"dilim\")\nassert list(_o.columns) == [\"dilim\", \"ucus\", \"gec_orani\", \"medyan_gec\"], \"Sütunlar: \" + repr(list(_o.columns))\nassert _o.to_dict(\"list\") == {'dilim': ['akşam', 'sabah', 'öğle'], 'ucus': [1096, 1260, 755], 'gec_orani': [47.4, 33.0, 32.2], 'medyan_gec': [14.0, 5.0, 5.0]}, \"Dilim özeti farklı: \" + repr(_o.to_dict(\"list\"))\n_n = neden_ozeti(_r)\nassert _n.to_dict(\"list\") == {'reason': ['hava', 'gec_gelen_ucak', 'teknik', 'yer_hizmetleri', 'hava_trafik'], 'sefer': [381, 342, 219, 204, 204], 'dakika': [23534, 17995, 10321, 10239, 10154], 'pay': [32.6, 24.9, 14.3, 14.2, 14.1]}, \"Neden özeti farklı: \" + repr(_n.to_dict(\"list\"))\n_ro2 = grup_ozeti(_t, \"rota\", en_az=50)\nassert (_ro2[\"ucus\"] >= 50).all() and len(_ro2) == 40, \"En az 50 seferli rota sayısı 40\"\nassert _ro2.iloc[0][\"rota\"] == 'FRA-IST' and _ro2.iloc[0][\"gec_orani\"] == 51.8, \"En geç rota farklı\"\nassert list(_ro2.index) == list(range(len(_ro2))), \"İndeks sıfırlanmalı\"\nassert grup_ozeti(_t, \"ay\").set_index(\"ay\")[\"gec_orani\"].to_dict() == {'2024-12': 51.0, '2024-11': 39.3, '2024-10': 31.5, '2024-09': 29.8}, \"Aylık oranlar farklı\"\n",
+   "hints": [
+    "groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))",
+    "sort_values([..., ...], ascending=[False, True]).reset_index(drop=True)"
+   ],
+   "why": "hv_delays bir seferde birden çok neden taşır, bu yüzden <code>nunique</code> kullandın. Oran tek başına yanıltabilir; sefer sayısını yanında tutmak küçük grupları görünür kılar."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-4",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "needs": [
+    "pandas",
+    "matplotlib"
+   ],
+   "q": "<p><b>Adım 4: grafik.</b> <code>grafik(ozet)</code> yaz. Dilim özetini sütun grafiğiyle çiz ve <code>fig</code> döndür: x ekseni <code>dilim</code>, yükseklik <code>gec_orani</code>; başlık <code>Zaman dilimine göre geç kalkış oranı</code>; y ekseni <code>Geç kalkış oranı (%)</code>; x ekseni <code>Planlanan kalkış dilimi</code>; y ekseni 0'dan başlasın.</p>",
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    o = t.groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))\n    o = o[o[\"ucus\"] >= en_az].copy()\n    o[\"gec_orani\"] = (o[\"gec_orani\"] * 100).round(1)\n    o = o.reset_index().sort_values([\"gec_orani\", sutun], ascending=[False, True]).reset_index(drop=True)\n    return o\n\ndef neden_ozeti(rotar):\n    o = rotar.groupby(\"reason\").agg(sefer=(\"flight_id\", \"nunique\"), dakika=(\"minutes\", \"sum\")).reset_index()\n    o[\"pay\"] = (o[\"dakika\"] / o[\"dakika\"].sum() * 100).round(1)\n    return o.sort_values(\"dakika\", ascending=False).reset_index(drop=True)\n\nimport matplotlib.pyplot as plt\n\ndef grafik(ozet):\n    pass\n\nfig = grafik(grup_ozeti(temizle(oku()[0], oku()[2]), \"dilim\"))\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    o = t.groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))\n    o = o[o[\"ucus\"] >= en_az].copy()\n    o[\"gec_orani\"] = (o[\"gec_orani\"] * 100).round(1)\n    o = o.reset_index().sort_values([\"gec_orani\", sutun], ascending=[False, True]).reset_index(drop=True)\n    return o\n\ndef neden_ozeti(rotar):\n    o = rotar.groupby(\"reason\").agg(sefer=(\"flight_id\", \"nunique\"), dakika=(\"minutes\", \"sum\")).reset_index()\n    o[\"pay\"] = (o[\"dakika\"] / o[\"dakika\"].sum() * 100).round(1)\n    return o.sort_values(\"dakika\", ascending=False).reset_index(drop=True)\n\nimport matplotlib.pyplot as plt\n\ndef grafik(ozet):\n    fig, ax = plt.subplots(figsize=(6, 3.5))\n    ax.bar(ozet[\"dilim\"], ozet[\"gec_orani\"], color=\"#3b6ea8\")\n    ax.set_title(\"Zaman dilimine göre geç kalkış oranı\")\n    ax.set_ylabel(\"Geç kalkış oranı (%)\")\n    ax.set_xlabel(\"Planlanan kalkış dilimi\")\n    ax.set_ylim(0, None)\n    return fig\n\nfig = grafik(grup_ozeti(temizle(oku()[0], oku()[2]), \"dilim\"))\n",
+   "tests": "_ax = grafik(pd.DataFrame({'dilim': ['akşam', 'sabah', 'öğle'], 'ucus': [1096, 1260, 755], 'gec_orani': [47.4, 33.0, 32.2], 'medyan_gec': [14.0, 5.0, 5.0]})).axes[0]\nassert [round(p.get_height(), 1) for p in _ax.patches] == [47.4, 33.0, 32.2], \"Sütun yükseklikleri oranlar olmalı\"\nassert _ax.get_title() == \"Zaman dilimine göre geç kalkış oranı\", \"Başlık: \" + _ax.get_title()\nassert _ax.get_ylabel() == \"Geç kalkış oranı (%)\" and _ax.get_xlabel() == \"Planlanan kalkış dilimi\", \"Eksen adları eksik\"\nassert _ax.get_ylim()[0] == 0, \"Sütun grafiğinin ekseni 0'dan başlamalı; yoksa fark büyük görünür\"\nassert [_t.get_text() for _t in _ax.get_xticklabels()] == ['akşam', 'sabah', 'öğle'], \"x ekseninde dilim adları olmalı\"\n",
+   "hints": [
+    "fig, ax = plt.subplots(); ax.bar(x, y)",
+    "ax.set_ylim(0, None) alt sınırı sabitler."
+   ],
+   "why": "Sütun grafiğinde eksen sıfırdan başlamazsa 10 puanlık fark birkaç kat büyük görünür. Grafik karar verdirdiği için okurunu yanıltmamalı."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-5",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 5: senaryo.</b> <code>tampon_etkisi(t, dilim, dakika)</code> yaz. Seçilen dilimdeki seferlerin planı <code>dakika</code> kadar genişletilirse her birinin gecikmesi o kadar azalır. Tüm seferler üzerinden <code>{\"once_oran\", \"sonra_oran\", \"kurtulan_ucus\"}</code> döndür: oranlar %, 1 ondalık; <code>kurtulan_ucus</code> artık geç sayılmayan sefer sayısı. Girdiyi değiştirme.</p>",
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef tampon_etkisi(t, dilim, dakika):\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef tampon_etkisi(t, dilim, dakika):\n    secili = t[\"dilim\"] == dilim\n    yeni = t[\"gec_dk\"].where(~secili, t[\"gec_dk\"] - dakika)\n    once = int(t[\"gec\"].sum())\n    sonra = int((yeni > 15).sum())\n    return {\"once_oran\": round(once / len(t) * 100, 1), \"sonra_oran\": round(sonra / len(t) * 100, 1), \"kurtulan_ucus\": once - sonra}\n",
+   "tests": "_t = temizle(oku()[0], oku()[2])\n_kop = _t[\"gec_dk\"].copy()\n_e = tampon_etkisi(_t, \"akşam\", 15)\nassert _e == {'once_oran': 37.9, 'sonra_oran': 27.9, 'kurtulan_ucus': 310}, \"Etki farklı: \" + repr(_e)\nassert _t[\"gec_dk\"].equals(_kop), \"Girdiyi değiştirme\"\n_x = pd.DataFrame({\"dilim\": [\"a\", \"a\", \"b\"], \"gec_dk\": [20.0, 40.0, 20.0], \"gec\": [True, True, True]})\nassert tampon_etkisi(_x, \"a\", 10) == {\"once_oran\": 100.0, \"sonra_oran\": 66.7, \"kurtulan_ucus\": 1}, \"Yalnız seçili dilim etkilenmeli\"\nassert tampon_etkisi(_x, \"z\", 10)[\"kurtulan_ucus\"] == 0\n",
+   "hints": [
+    "t[\"gec_dk\"].where(~secili, t[\"gec_dk\"] - dakika) yalnız seçili satırları değiştirir.",
+    "Yeni geç sayısı: (yeni > 15).sum()."
+   ],
+   "why": "Bu bir ölçüm değil, varsayımlı hesaptır: gerçekte plan uzayınca uçak zinciri ve yer hizmetleri de değişir. Yine de seçenekleri kıyaslamak için ucuz ve hızlı bir araçtır."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-6",
+   "stage": "Hata avı",
+   "kind": "bug",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Hatayı bul ve düzelt.</b> <code>rotarli_yolcu(t, rotar)</code> en az bir rötar kaydı olan seferlerdeki toplam yolcuyu vermeli. Sonuç 215.146 çıkıyor, ama bu sayı olduğundan büyük. Sefer başına yolcu bir kez sayılmalı.</p>",
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef rotarli_yolcu(t, rotar):\n    # Hatalı: rötarlı seferlerdeki yolcu sayısı olduğundan büyük çıkıyor\n    m = t.merge(rotar, on=\"flight_id\")\n    return int(m[\"pax\"].sum())\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef rotarli_yolcu(t, rotar):\n    return int(t[t[\"flight_id\"].isin(rotar[\"flight_id\"])][\"pax\"].sum())\n",
+   "tests": "_t = temizle(oku()[0], oku()[2])\n_n = rotarli_yolcu(_t, oku()[1])\nassert _n == 195874, \"Doğru toplam 195874: \" + str(_n)\n_a = pd.DataFrame({\"flight_id\": [1, 2, 3], \"pax\": [100, 50, 70]})\n_b = pd.DataFrame({\"flight_id\": [1, 1, 2], \"reason\": [\"hava\", \"teknik\", \"hava\"], \"minutes\": [5, 6, 7]})\nassert rotarli_yolcu(_a, _b) == 150, \"Rötarsız sefer sayılmaz, çok nedenli sefer bir kez sayılır\"\n",
+   "hints": [
+    "Birleştirme yerine isin ile süzmek satır çoğaltmaz."
+   ],
+   "why": "19.272 yolcu fazla sayılıyordu. Hata vermeyen ama raporu şişiren en yaygın analist hatası budur: birleştirmeden önce ve sonra satır sayısına bak."
+  },
+  {
+   "t": "code",
+   "id": "proje-analist-7",
+   "stage": "Mini proje",
+   "diff": 3,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Son adım: karar.</b> İki fonksiyon yaz.</p><p><code>karar(ozet, etki, en_az_fark=5)</code>: <code>ozet</code> oran azalan sıralıdır. En yüksek ile en düşük oran farkı (1 ondalık) <code>en_az_fark</code> altındaysa <code>{\"oneri\": \"tampon_yok\", \"dilim\": None, \"fark\": fark}</code>, değilse <code>{\"oneri\": \"tampon_ekle\", \"dilim\": ilk_dilim, \"fark\": fark}</code>.</p><p><code>rapor()</code>: tüm adımları çalıştırıp şu altı satırı <code>\"\\n\"</code> ile birleştirip döndür:</p><pre class=\"out\"># Kış tarifesi: tampon önerisi\nVeri: {satir} sefer, {iptal} iptal çıkarıldı, {incelenen} sefer incelendi.\nEn geç dilim: {dilim} (%{oran}), en iyi dilim: {dilim} (%{oran}).\nEn çok dakika kaybettiren neden: {neden} (%{pay}).\nÖneri: {dilim} dilimine 15 dakika tampon. Etki: %{once} -&gt; %{sonra}, {n} sefer geç sayılmaktan çıkar.\nSınır: etki, rötarın değişmediği varsayımıyla hesaplandı; deneme yapılmadan kesin sonuç değildir.</pre>",
+   "start": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    o = t.groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))\n    o = o[o[\"ucus\"] >= en_az].copy()\n    o[\"gec_orani\"] = (o[\"gec_orani\"] * 100).round(1)\n    o = o.reset_index().sort_values([\"gec_orani\", sutun], ascending=[False, True]).reset_index(drop=True)\n    return o\n\ndef neden_ozeti(rotar):\n    o = rotar.groupby(\"reason\").agg(sefer=(\"flight_id\", \"nunique\"), dakika=(\"minutes\", \"sum\")).reset_index()\n    o[\"pay\"] = (o[\"dakika\"] / o[\"dakika\"].sum() * 100).round(1)\n    return o.sort_values(\"dakika\", ascending=False).reset_index(drop=True)\n\ndef tampon_etkisi(t, dilim, dakika):\n    secili = t[\"dilim\"] == dilim\n    yeni = t[\"gec_dk\"].where(~secili, t[\"gec_dk\"] - dakika)\n    once = int(t[\"gec\"].sum())\n    sonra = int((yeni > 15).sum())\n    return {\"once_oran\": round(once / len(t) * 100, 1), \"sonra_oran\": round(sonra / len(t) * 100, 1), \"kurtulan_ucus\": once - sonra}\n\ndef karar(ozet, etki, en_az_fark=5):\n    pass\n\ndef rapor():\n    pass\n\nprint(rapor())\n",
+   "sol": "import pandas as pd\nimport veri\n\nTARIHLER = [\"sched_dep\", \"sched_arr\", \"actual_dep\", \"actual_arr\"]\n\ndef oku():\n    ucus = veri.oku(\"kanat_havayollari\", \"hv_flights\", parse_dates=TARIHLER)\n    rotar = veri.oku(\"kanat_havayollari\", \"hv_delays\")\n    rota = veri.oku(\"kanat_havayollari\", \"hv_routes\")\n    return ucus, rotar, rota\n\ndef denetle(ucus):\n    return {\n        \"satir\": len(ucus),\n        \"tekil_sefer\": int(ucus[\"flight_id\"].nunique()),\n        \"iptal\": int((ucus[\"status\"] == \"cancelled\").sum()),\n        \"yon_degisen\": int((ucus[\"status\"] == \"diverted\").sum()),\n        \"bos_kalkis\": int(ucus[\"actual_dep\"].isna().sum()),\n        \"bos_varis\": int(ucus[\"actual_arr\"].isna().sum()),\n    }\n\ndef dilim_bul(saat):\n    if saat < 12:\n        return \"sabah\"\n    if saat < 18:\n        return \"öğle\"\n    return \"akşam\"\n\ndef temizle(ucus, rota):\n    t = ucus[ucus[\"status\"] != \"cancelled\"].copy()\n    t = t.merge(rota[[\"route_id\", \"origin\", \"dest\"]], on=\"route_id\", how=\"left\")\n    t[\"rota\"] = t[\"origin\"] + \"-\" + t[\"dest\"]\n    t[\"gec_dk\"] = (t[\"actual_dep\"] - t[\"sched_dep\"]).dt.total_seconds() / 60\n    t[\"gec\"] = t[\"gec_dk\"] > 15\n    t[\"ay\"] = t[\"sched_dep\"].dt.strftime(\"%Y-%m\")\n    t[\"dilim\"] = t[\"sched_dep\"].dt.hour.map(dilim_bul)\n    return t\n\ndef grup_ozeti(t, sutun, en_az=1):\n    o = t.groupby(sutun).agg(ucus=(\"gec\", \"size\"), gec_orani=(\"gec\", \"mean\"), medyan_gec=(\"gec_dk\", \"median\"))\n    o = o[o[\"ucus\"] >= en_az].copy()\n    o[\"gec_orani\"] = (o[\"gec_orani\"] * 100).round(1)\n    o = o.reset_index().sort_values([\"gec_orani\", sutun], ascending=[False, True]).reset_index(drop=True)\n    return o\n\ndef neden_ozeti(rotar):\n    o = rotar.groupby(\"reason\").agg(sefer=(\"flight_id\", \"nunique\"), dakika=(\"minutes\", \"sum\")).reset_index()\n    o[\"pay\"] = (o[\"dakika\"] / o[\"dakika\"].sum() * 100).round(1)\n    return o.sort_values(\"dakika\", ascending=False).reset_index(drop=True)\n\ndef tampon_etkisi(t, dilim, dakika):\n    secili = t[\"dilim\"] == dilim\n    yeni = t[\"gec_dk\"].where(~secili, t[\"gec_dk\"] - dakika)\n    once = int(t[\"gec\"].sum())\n    sonra = int((yeni > 15).sum())\n    return {\"once_oran\": round(once / len(t) * 100, 1), \"sonra_oran\": round(sonra / len(t) * 100, 1), \"kurtulan_ucus\": once - sonra}\n\ndef karar(ozet, etki, en_az_fark=5):\n    ilk, son = ozet.iloc[0], ozet.iloc[-1]\n    fark = round(float(ilk[\"gec_orani\"] - son[\"gec_orani\"]), 1)\n    if fark < en_az_fark:\n        return {\"oneri\": \"tampon_yok\", \"dilim\": None, \"fark\": fark}\n    return {\"oneri\": \"tampon_ekle\", \"dilim\": ilk[\"dilim\"], \"fark\": fark}\n\ndef rapor():\n    ucus, rotar, rota = oku()\n    d = denetle(ucus)\n    t = temizle(ucus, rota)\n    oz = grup_ozeti(t, \"dilim\")\n    ned = neden_ozeti(rotar).iloc[0]\n    k = karar(oz, None)\n    e = tampon_etkisi(t, k[\"dilim\"], 15)\n    satirlar = [\n        \"# Kış tarifesi: tampon önerisi\",\n        f\"Veri: {d['satir']} sefer, {d['iptal']} iptal çıkarıldı, {len(t)} sefer incelendi.\",\n        f\"En geç dilim: {k['dilim']} (%{oz.iloc[0]['gec_orani']}), en iyi dilim: {oz.iloc[-1]['dilim']} (%{oz.iloc[-1]['gec_orani']}).\",\n        f\"En çok dakika kaybettiren neden: {ned['reason']} (%{ned['pay']}).\",\n        f\"Öneri: {k['dilim']} dilimine 15 dakika tampon. Etki: %{e['once_oran']} -> %{e['sonra_oran']}, {e['kurtulan_ucus']} sefer geç sayılmaktan çıkar.\",\n        \"Sınır: etki, rötarın değişmediği varsayımıyla hesaplandı; deneme yapılmadan kesin sonuç değildir.\",\n    ]\n    return \"\\n\".join(satirlar)\n\nprint(rapor())\n",
+   "tests": "_o = rapor()\nassert _o == '# Kış tarifesi: tampon önerisi\\nVeri: 3173 sefer, 62 iptal çıkarıldı, 3111 sefer incelendi.\\nEn geç dilim: akşam (%47.4), en iyi dilim: öğle (%32.2).\\nEn çok dakika kaybettiren neden: hava (%32.6).\\nÖneri: akşam dilimine 15 dakika tampon. Etki: %37.9 -> %27.9, 310 sefer geç sayılmaktan çıkar.\\nSınır: etki, rötarın değişmediği varsayımıyla hesaplandı; deneme yapılmadan kesin sonuç değildir.', \"Rapor farklı:\\n\" + str(_o)\n_z = pd.DataFrame({\"dilim\": [\"x\", \"y\"], \"gec_orani\": [33.0, 30.0]})\nassert karar(_z, None) == {\"oneri\": \"tampon_yok\", \"dilim\": None, \"fark\": 3.0}, \"Fark küçükse karar değişmeli\"\nassert karar(_z, None, en_az_fark=2)[\"oneri\"] == \"tampon_ekle\", \"Eşik parametresi kullanılmalı\"\n",
+   "hints": [
+    "Sayıları elle yazma; her satır önceki adımların sonucundan gelmeli.",
+    "oz.iloc[0] en geç, oz.iloc[-1] en iyi dilim."
+   ],
+   "why": "Analizin çıktısı tablo değil karardır: öneri, gerekçe, etki ve sınır tek yerde. Yönetici bunu okuyup karar verebilir, sen de her sayının nereden geldiğini gösterebilirsin."
+  }
+ ],
+ "faq": [
+  {
+   "q": "Neden 15 dakika?",
+   "a": "Sektörde zamanında kalkış için yaygın kullanılan bir eşiktir. Asıl önemlisi tanımı açıkça yazmaktır; işin başka bir eşiği varsa <code>gec</code> sütununu değiştirir, sonucu yeniden üretirsin."
+  },
+  {
+   "q": "Yön değiştiren seferleri neden çıkarmadık?",
+   "a": "Kalkış gecikmesi hesabına engel değiller: kalkış zamanları var. Varış süresini inceleseydin ayrı karar vermen gerekirdi. Her temizlik kararı soruya bağlıdır."
+  },
+  {
+   "q": "Bu proje istatistik testi içermiyor, eksik mi?",
+   "a": "Bu soru için yönlü bir karar yeterli: dilim farkı büyük ve her dilimde yüzlerce sefer var. Farklar küçük olsaydı oran testi yapardın; <b>istatistik</b> dersindeki araçlar bunun için."
+  }
+ ],
+ "mistakes": [
+  {
+   "bad": "t = ucus.merge(rotar, on=\"flight_id\")\nprint(t[\"pax\"].sum())",
+   "good": "ucus[ucus[\"flight_id\"].isin(rotar[\"flight_id\"])][\"pax\"].sum()",
+   "why": "Bire çok birleştirmede sefer satırları çoğalır, sefer düzeyindeki değer şişer."
+  },
+  {
+   "bad": "ucus[\"actual_dep\"] = ucus[\"actual_dep\"].fillna(ucus[\"sched_dep\"])",
+   "good": "t = ucus[ucus[\"status\"] != \"cancelled\"].copy()",
+   "why": "İptal seferi zamanında kalkmış göstermek geç kalkış oranını düşürür. İptali ayrı say."
+  },
+  {
+   "bad": "ax.set_ylim(30, 50)",
+   "good": "ax.set_ylim(0, None)",
+   "why": "Sütun grafiğinde kesik eksen farkı olduğundan büyük gösterir."
+  }
+ ]
+}));
+})(window);
+/* Kesit Python: Bitirme: proje-mutabakat (BT İş Analisti). uretec/p1 üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const L = W.PY_LESSONS = W.PY_LESSONS || [];
+L.push(Object.assign({ id: 'proje-mutabakat', lv: 'orta' }, {
+ "mod": "Orta bitirme",
+ "min": 60,
+ "needs": [
+  "pandas"
+ ],
+ "title": "Bitirme projesi: Lezzet Kurye kupon mutabakatı",
+ "sum": "BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler, fark raporunu Excel olarak yazar ve kabul ya da ret notu üretirsin.",
+ "goals": [
+  "Karar tablosundaki bir kuralı doğru birim ve sınırla koda çevirebilirim.",
+  "İki kaynağı anahtarla karşılaştırıp eksik, fazla, çift ve tutar farkını ayırabilirim.",
+  "JSON cevabını alan, tür ve değer sözleşmesine göre denetleyebilirim.",
+  "Paydaşın açacağı bir Excel raporu üretebilirim.",
+  "Sonucu kabul ya da ret diyen kısa bir nota çevirebilirim."
+ ],
+ "body": "\n<h2>Proje: kupon mutabakatı</h2>\n<p>Kesit SQL'deki BT İş Analisti yolunda Lezzet Kurye için geç teslim kuponu talebini analiz ettin: 45 dakikayı aşan teslime 30 TL, 60 dakikayı aşana 60 TL. Geliştirme bitti, kabul testi sana geldi. Elinde sipariş verisi ve kupon servisinin dökümü var. Soru basit: <b>kural doğru uygulanmış mı?</b> Bu dersteki küçük betik bu soruyu her seferinde aynı biçimde, elle Excel karşılaştırması yapmadan cevaplar.</p>\n<p>Bu proje yazılımcı olmayı hedeflemez; yolda gördüğün dosya, CSV, JSON, pandas ve Excel işlerini gerçek bir kabul testinde birleştirir.</p>\n<div class=\"tbl-wrap\"><table><tr><th>Adım</th><th>Soru</th><th>Çıktı</th></tr><tr><td>1. Kural</td><td>Kaç kupon oluşmalıydı?</td><td><code>beklenen_kuponlar</code></td></tr><tr><td>2. Dosya</td><td>Döküm okunabilir mi?</td><td><code>dosya_oku</code></td></tr><tr><td>3. Mutabakat</td><td>Nerede fark var?</td><td><code>mutabakat</code>, <code>ozet_cikar</code></td></tr><tr><td>4. API</td><td>Cevaplar sözleşmeye uyuyor mu?</td><td><code>cevap_denetle</code></td></tr><tr><td>5. Rapor</td><td>Kabul mü, ret mi?</td><td><code>rapor_sayfalari</code>, <code>karar_notu</code></td></tr></table></div>\n<h2>Önce beklenen sonuç</h2>\n<p>Kabul testinin ilk kuralı: dosyaya bakmadan önce beklenen sonucu kendin hesapla. Dosyadan başlarsan farkında olmadan ona uyum sağlarsın. Hesabın SQL yolundaki sonuçla aynı olmalı: <b>1.508 kupon, 51.900 TL</b> (222 tanesi 60 TL).</p>\n<pre class=\"py\">import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ns = siparisleri_oku()\nprint(s[\"status\"].value_counts().to_dict())\nd = s[s[\"status\"] == \"teslim\"]\nsure = (d[\"delivered_at\"] - d[\"placed_at\"]).dt.total_seconds()\nprint(\"en kısa\", sure.min(), \"en uzun\", sure.max(), \"saniye\")</pre>\n<h2>İkinci dosya nereden geliyor?</h2>\n<p>Veri setlerinde gerçek bir kupon servisi dökümü yok, bu yüzden <code>kupon_dosyasi</code> onu hazır kuraldan üretir ve numaraya bağlı, açık hatalar ekler: bazı kuponlar oluşmamış, bazıları çift, bazılarında 30 ile 60 karışmış, bazıları zamanında teslime verilmiş. Hatalar derse aittir ve koda bakınca görünür; sonuçlar her çalıştırmada aynıdır.</p>\n<h2>Toplam tutarsa neden yetmez?</h2>\n<p>Dosyanın toplamını beklenenle karşılaştırmak en hızlı yoldur ve en yanıltıcısıdır. Bu örnekte beklenen 51.900 TL, dosyada 53.160 TL; net fark yalnız 1260 TL. Oysa 77 siparişte sorun var. Eksik kupon ile çift kupon birbirini götürür. Karşılaştırma bu yüzden sipariş numarası üzerinden, dış birleştirmeyle yapılır.</p>\n<pre class=\"py\">import pandas as pd\nb = pd.DataFrame({\"no\": [1, 2, 3], \"tutar\": [30, 30, 60]})\nd = pd.DataFrame({\"no\": [2, 3, 4], \"tutar\": [30, 30, 30]})\nm = b.merge(d, on=\"no\", how=\"outer\", suffixes=(\"_b\", \"_d\"), indicator=True)\nprint(m)</pre>\n<p><code>indicator=True</code> her satırın nereden geldiğini söyler: <code>left_only</code> eksik, <code>right_only</code> fazla, <code>both</code> ise tutar karşılaştırılacak satır.</p>\n<h2>API cevabı da bir sözleşmedir</h2>\n<p>İş analisti API yazmaz ama cevabın sözleşmeye uyup uymadığını denetleyebilir. <b>http-api</b> dersindeki JSON okuma burada işe yarar; gerçek servise bağlanman gerekmez, örnek cevaplar dosyadan okunur.</p>\n<h2>Bitince göreceğin sonuç</h2>\n<p>Tarayıcıda openpyxl çalışmadığı için rapor sayfalarını burada Python listesi olarak kurarsın; gerçek Excel dosyasını son adımda kendi bilgisayarında aynı kodla yazarsın.</p>\n<div class=\"tbl-wrap\"><table><tr><th>Durum</th><th>Sipariş</th></tr><tr><td>Tamam</td><td>1.459</td></tr><tr><td>Eksik</td><td>15</td></tr><tr><td>Çift</td><td>18</td></tr><tr><td>Tutar farkı</td><td>16</td></tr><tr><td>Fazla</td><td>28</td></tr></table></div>\n<section class=\"deep\"><span class=\"eyebrow\">Uzmanlaş</span><h3>Bunu işe taşı</h3><p>Aynı kalıp her kabul testinde çalışır: kuralı ayrı hesapla, anahtarla karşılaştır, farkı sınıflandır, dosya olarak paylaş. Kural Kesit SQL'deki karar tablosundan geliyor; tablo değişirse betikte tek yer değişir. Bir sonraki adım olarak bu betiği bir sonraki sürümde yeniden çalıştırıp farkın kapandığını göster: buna regresyon denetimi denir.</p></section>\n",
+ "ex": [
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "Kupon servisinden gelen dosyada 1.511 satır, senin hesabında 1.508 kupon var. Fark 3 satır. Ne dersin?",
+   "o": [
+    "Fark küçük olduğu için kabul eder, işi hemen kapatırım",
+    "Satır satır karşılaştırırım; hatalar birbirini götürebilir",
+    "Dosyayı silip servis ekibinden hemen yenisini isterim",
+    "Kendi hesabımı dosyadaki sayıya göre düzeltip geçerim"
+   ],
+   "a": 1,
+   "why": "Toplam tutması eşleşme demek değildir: 30 eksik ve 33 fazla kupon da 3 fark verir. Mutabakat anahtar bazında yapılır."
+  },
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "Geç teslimi neden saniyeyle hesaplıyoruz?",
+   "o": [
+    "Python dakika cinsinden süre hesaplayamaz",
+    "Saniye her zaman daha küçük sayı verir, rapor kısalır",
+    "Yuvarlama sınırdaki siparişi yanlış tarafa geçirir",
+    "Veritabanı yalnız saniye cinsinden sütun kabul eder"
+   ],
+   "a": 2,
+   "why": "Kural \"45 dakikayı aşan\" der. 45 dakika 20 saniye yuvarlanınca 45 olur, geç sayılmaz. Karar tablosundaki sınırı koda birebir taşımak için en ince birimle hesapla."
+  },
+  {
+   "t": "mc",
+   "stage": "Isınma",
+   "q": "API sözleşmesinde <code>tutar</code> sayı olarak tanımlı. Bir cevapta <code>\"tutar\": \"30\"</code> geldi. Doğru tepki hangisi?",
+   "o": [
+    "Sözleşme ihlali olarak raporlar, ekiple netleştiririm",
+    "Metni sayıya çevirip geçerim, sonuç yine aynı olur",
+    "Görmezden gelirim, çünkü tutarın kendisi doğrudur",
+    "Testi başarılı sayarım, çünkü değer yine de 30"
+   ],
+   "a": 0,
+   "why": "Tür de sözleşmenin parçasıdır. Bugün çevirip geçmek, başka bir istemcinin çökmesini gizler. İş analisti olarak farkı yazıp sahibine götürürsün."
+  },
+  {
+   "t": "predict",
+   "stage": "Kodu oku",
+   "q": "Birleştirme türü. Bu kod ne yazdırır?",
+   "code": "import pandas as pd\nb = pd.DataFrame({\"no\": [1, 2, 3], \"t\": [30, 30, 60]})\nd = pd.DataFrame({\"no\": [2, 3, 4], \"t\": [30, 30, 30]})\nprint(len(b.merge(d, on=\"no\")), len(b.merge(d, on=\"no\", how=\"outer\")))\n",
+   "o": [
+    "3 3",
+    "2 4",
+    "2 3",
+    "4 2"
+   ],
+   "a": 1,
+   "why": "İç birleştirme yalnız iki tarafta da olan no 2 ve 3'ü bırakır. Dış birleştirme 1, 2, 3, 4'ü verir; mutabakatta eksik ve fazlayı görmek için gereken budur.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "predict",
+   "stage": "Kodu oku",
+   "q": "Sınır değer. Bu kod ne yazdırır?",
+   "code": "def tutar(sn):\n    if sn > 3600:\n        return 60\n    if sn > 2700:\n        return 30\n    return 0\nprint(tutar(2700), tutar(2701), tutar(3600), tutar(3601))\n",
+   "o": [
+    "30 30 60 60",
+    "0 30 30 60",
+    "0 30 60 60",
+    "0 0 30 60"
+   ],
+   "a": 1,
+   "why": "Kural \"aşan\" der: tam 2.700 saniye geç değildir, tam 3.600 saniye 30 TL'dir. Sınır değerleri test etmek karar tablosu okumanın parçasıdır."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 1: kuralı koda çevir.</b> Kesit SQL'deki BT İş Analisti yolunun kuralı: dönem 1 Ekim - 31 Aralık 2024 (<code>placed_at</code>), yalnız <code>status == \"teslim\"</code>. Sipariş ile teslim arası 2.700 saniyeyi aşarsa 30 TL, 3.600 saniyeyi aşarsa 60 TL kupon. <code>beklenen_kuponlar(s)</code> yaz: <code>order_id</code>, <code>sure_sn</code>, <code>tutar</code> sütunlu, <code>order_id</code> sıralı, indeksi sıfırlanmış DataFrame döndürsün. SQL sonucuyla aynı olmalı: 1.508 kupon, 51.900 TL.</p>",
+   "guide": [
+    "Üç koşulu & ile birleştir, her birini paranteze al.",
+    "Süre: (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()",
+    "Önce hepsine 30 yaz, sonra t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60.",
+    "İstenen sütunları seç, sort_values ve reset_index(drop=True)."
+   ],
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    pass\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n",
+   "tests": "_b = beklenen_kuponlar(siparisleri_oku())\nassert list(_b.columns) == [\"order_id\", \"sure_sn\", \"tutar\"], \"Sütunlar: \" + repr(list(_b.columns))\nassert len(_b) == 1508 and int(_b[\"tutar\"].sum()) == 51900, f\"1508 kupon, 51900 TL beklenir: {len(_b)}, {int(_b['tutar'].sum())}\"\nassert int((_b[\"tutar\"] == 60).sum()) == 222, \"60 TL kupon sayısı 222 olmalı\"\nassert _b[\"order_id\"].is_monotonic_increasing and list(_b.index) == list(range(len(_b))), \"Sıralı ve sıfırlanmış olmalı\"\n_x = pd.DataFrame({\"order_id\": [1, 2, 3, 4, 5], \"status\": [\"teslim\", \"teslim\", \"teslim\", \"iade\", \"teslim\"],\n    \"placed_at\": pd.to_datetime([\"2024-10-01 10:00:00\"] * 4 + [\"2025-01-01 10:00:00\"]),\n    \"delivered_at\": pd.to_datetime([\"2024-10-01 10:45:00\", \"2024-10-01 10:45:01\", \"2024-10-01 11:00:00\", \"2024-10-01 12:00:00\", \"2025-01-01 12:00:00\"])})\n_y = beklenen_kuponlar(_x)\nassert _y[\"order_id\"].tolist() == [2, 3] and _y[\"tutar\"].tolist() == [30, 30], \"Sınırlar: tam 2.700 sn yok, tam 3.600 sn 30 TL; iade ve dönem dışı yok\"\n",
+   "hints": [
+    "Tarih karşılaştırması metinle de çalışır: s[\"placed_at\"] >= \"2024-10-01\"."
+   ],
+   "why": "Kod ile SQL aynı sayıyı veriyor. İki bağımsız hesabın tutması, kuralı doğru anladığının en iyi kanıtıdır."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-2",
+   "stage": "Rehberli",
+   "diff": 1,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 2: dosyayı denetleyerek oku.</b> <code>kupon_dosyasi</code> hazır; kupon servisinin CSV dökümünü taklit eder. <code>dosya_oku(metin)</code> yaz: metni <code>pd.read_csv(io.StringIO(metin))</code> ile oku. <code>ZORUNLU</code> sütunlardan eksik varsa <code>ValueError(\"eksik sütun: a, b\")</code> fırlat; yoksa DataFrame döndür.</p>",
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    pass\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n",
+   "tests": "_s = siparisleri_oku(); _b = beklenen_kuponlar(_s)\n_d = dosya_oku(kupon_dosyasi(_b, _s))\nassert len(_d) == 1539, \"Dosyada 1539 satır var: \" + str(len(_d))\nassert list(_d.columns) == [\"kupon_id\", \"order_id\", \"tutar\"]\nfor _m, _e in [(\"kupon_id,tutar\\n1,30\\n\", \"eksik sütun: order_id\"), (\"no\\n1\\n\", \"eksik sütun: kupon_id, order_id, tutar\")]:\n    try:\n        dosya_oku(_m)\n        assert False, \"Eksik sütunda ValueError beklenir\"\n    except ValueError as e:\n        assert str(e) == _e, \"Mesaj: \" + str(e)\n",
+   "hints": [
+    "eksik = [c for c in ZORUNLU if c not in d.columns]",
+    "\", \".join(eksik)"
+   ],
+   "why": "Dosyanın biçimi değiştiğinde anlaşılır bir mesajla durmak, saçma bir rapor üretmekten iyidir. Hangi sütunun eksik olduğunu yazmak sorunu doğru kişiye taşır."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-3",
+   "stage": "Kendin yaz",
+   "diff": 3,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Adım 3: mutabakat.</b> <code>mutabakat(beklenen, dosya)</code> yaz. Dosyayı önce <code>order_id</code> başına topla (kupon sayısı, toplam tutar, ilk tutar), sonra beklenenle <b>dış birleştirme</b> yap. Her sipariş için durum:</p><ul><li><code>eksik</code>: yalnız beklenende</li><li><code>fazla</code>: yalnız dosyada</li><li><code>cift</code>: dosyada birden çok kupon</li><li><code>tutar_farki</code>: tek kupon ama tutar farklı</li><li><code>tamam</code>: diğerleri</li></ul><p><code>order_id, durum, beklenen_tl, odenen_tl, fark_tl</code> sütunlu, <code>order_id</code> sıralı DataFrame döndür (<code>fark_tl = odenen_tl - beklenen_tl</code>, boşlar 0, tam sayı).</p><p><code>ozet_cikar(sonuc)</code>: <code>{\"adet\": {durum: sayı}, \"beklenen_tl\", \"odenen_tl\", \"net_fark_tl\"}</code> (hepsi <code>int</code>).</p>",
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef mutabakat(beklenen, dosya):\n    pass\n\ndef ozet_cikar(sonuc):\n    pass\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef mutabakat(beklenen, dosya):\n    say = dosya.groupby(\"order_id\").agg(kupon=(\"kupon_id\", \"size\"), odenen=(\"tutar\", \"sum\"), tek=(\"tutar\", \"first\")).reset_index()\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(say, on=\"order_id\", how=\"outer\", indicator=True)\n    def durum(r):\n        if r[\"_merge\"] == \"left_only\":\n            return \"eksik\"\n        if r[\"_merge\"] == \"right_only\":\n            return \"fazla\"\n        if r[\"kupon\"] > 1:\n            return \"cift\"\n        if r[\"tutar\"] != r[\"tek\"]:\n            return \"tutar_farki\"\n        return \"tamam\"\n    m[\"durum\"] = m.apply(durum, axis=1)\n    m[\"beklenen_tl\"] = m[\"tutar\"].fillna(0).astype(int)\n    m[\"odenen_tl\"] = m[\"odenen\"].fillna(0).astype(int)\n    m[\"fark_tl\"] = m[\"odenen_tl\"] - m[\"beklenen_tl\"]\n    return m[[\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef ozet_cikar(sonuc):\n    g = sonuc.groupby(\"durum\").agg(adet=(\"order_id\", \"size\"), fark_tl=(\"fark_tl\", \"sum\"))\n    return {\n        \"adet\": {k: int(v) for k, v in g[\"adet\"].items()},\n        \"beklenen_tl\": int(sonuc[\"beklenen_tl\"].sum()),\n        \"odenen_tl\": int(sonuc[\"odenen_tl\"].sum()),\n        \"net_fark_tl\": int(sonuc[\"fark_tl\"].sum()),\n    }\n",
+   "tests": "_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _d = dosya_oku(kupon_dosyasi(_b, _s))\n_r = mutabakat(_b, _d)\nassert list(_r.columns) == [\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"], \"Sütunlar: \" + repr(list(_r.columns))\n_o = ozet_cikar(_r)\nassert _o == {'adet': {'cift': 18, 'eksik': 15, 'fazla': 28, 'tamam': 1459, 'tutar_farki': 16}, 'beklenen_tl': 51900, 'odenen_tl': 53160, 'net_fark_tl': 1260}, \"Özet farklı: \" + repr(_o)\nassert all(type(v) is int for v in _o[\"adet\"].values()), \"Sayılar int olmalı\"\n_x = pd.DataFrame({\"order_id\": [1, 2, 3, 4], \"sure_sn\": [3000] * 4, \"tutar\": [30, 30, 60, 30]})\n_y = pd.DataFrame({\"kupon_id\": [1, 2, 3, 4, 5], \"order_id\": [1, 3, 4, 4, 9], \"tutar\": [30, 30, 30, 30, 30]})\n_z = mutabakat(_x, _y)\nassert _z.set_index(\"order_id\")[\"durum\"].to_dict() == {1: \"tamam\", 2: \"eksik\", 3: \"tutar_farki\", 4: \"cift\", 9: \"fazla\"}, repr(_z)\nassert _z.set_index(\"order_id\")[\"fark_tl\"].to_dict() == {1: 0, 2: -30, 3: -30, 4: 30, 9: 30}, \"Fark hesabı: \" + repr(_z)\n",
+   "hints": [
+    "merge(..., how=\"outer\", indicator=True) satırın hangi tarafta olduğunu _merge sütununa yazar.",
+    "Sıra önemli: önce eksik ve fazla, sonra çift, sonra tutar.",
+    "NaN için fillna(0).astype(int)."
+   ],
+   "why": "1.539 satırlık dosyada 15 eksik, 28 fazla, 18 çift ve 16 tutar farkı var; net fark yalnız 1260 TL. Net rakama bakan biri bunların çoğunu göremezdi, çünkü hatalar birbirini götürür."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-4",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Adım 4: API sözleşmesi.</b> Kupon servisi her istekte bir JSON cevap döndürür. Sözleşme: <code>kupon_id</code> ve <code>order_id</code> tam sayı, <code>tutar</code> tam sayı ve 30 ya da 60, <code>durum</code> <code>\"olustu\"</code> ya da <code>\"zaten_var\"</code>.</p><p><code>cevap_denetle(cevap)</code>: hata metinleri listesi döndürür: <code>\"kupon_id eksik\"</code>, <code>\"kupon_id tam sayı olmalı\"</code>, aynısı <code>order_id</code> için, <code>\"tutar eksik\"</code>, <code>\"tutar 30 ya da 60 olmalı\"</code>, <code>\"durum geçersiz\"</code>. Bu sırayla denetle.</p><p><code>cevaplari_tara(metin)</code>: her satırı bir JSON olan metni gezer; hatalı satırlar için <code>(satır_no, hatalar)</code> listesi döndürür. JSON okunamayan satır: <code>(no, [\"JSON bozuk\"])</code>.</p>",
+   "start": "import json\n\nDURUMLAR = {\"olustu\", \"zaten_var\"}\n\ndef cevap_denetle(cevap):\n    pass\n\ndef cevaplari_tara(metin):\n    pass\n",
+   "sol": "import json\n\nDURUMLAR = {\"olustu\", \"zaten_var\"}\n\ndef cevap_denetle(cevap):\n    hatalar = []\n    for alan in (\"kupon_id\", \"order_id\"):\n        if alan not in cevap:\n            hatalar.append(alan + \" eksik\")\n        elif type(cevap[alan]) is not int:\n            hatalar.append(alan + \" tam sayı olmalı\")\n    if \"tutar\" not in cevap:\n        hatalar.append(\"tutar eksik\")\n    elif cevap[\"tutar\"] not in (30, 60) or type(cevap[\"tutar\"]) is not int:\n        hatalar.append(\"tutar 30 ya da 60 olmalı\")\n    if cevap.get(\"durum\") not in DURUMLAR:\n        hatalar.append(\"durum geçersiz\")\n    return hatalar\n\ndef cevaplari_tara(metin):\n    rapor = []\n    for no, satir in enumerate(metin.strip().splitlines(), 1):\n        try:\n            cevap = json.loads(satir)\n        except json.JSONDecodeError:\n            rapor.append((no, [\"JSON bozuk\"]))\n            continue\n        h = cevap_denetle(cevap)\n        if h:\n            rapor.append((no, h))\n    return rapor\n",
+   "tests": "_i = {\"kupon_id\": 1, \"order_id\": 2, \"tutar\": 30, \"durum\": \"olustu\"}\nassert cevap_denetle(_i) == [], \"Doğru cevapta hata olmamalı\"\nassert cevap_denetle({\"order_id\": 2, \"tutar\": 30, \"durum\": \"olustu\"}) == [\"kupon_id eksik\"]\nassert cevap_denetle(dict(_i, order_id=\"2\")) == [\"order_id tam sayı olmalı\"], \"Metin sayı sayılmaz\"\nassert cevap_denetle(dict(_i, tutar=\"30\")) == [\"tutar 30 ya da 60 olmalı\"], \"Metin tutar kabul edilmez\"\nassert cevap_denetle(dict(_i, tutar=45)) == [\"tutar 30 ya da 60 olmalı\"]\nassert cevap_denetle(dict(_i, tutar=True)) == [\"tutar 30 ya da 60 olmalı\"]\nassert cevap_denetle(dict(_i, durum=\"iptal\")) == [\"durum geçersiz\"]\nassert cevap_denetle({}) == [\"kupon_id eksik\", \"order_id eksik\", \"tutar eksik\", \"durum geçersiz\"], \"Sıra ve tüm hatalar\"\n_m = '{\"kupon_id\": 1, \"order_id\": 2, \"tutar\": 30, \"durum\": \"olustu\"}\\n{bozuk\\n{\"kupon_id\": 2, \"order_id\": 3, \"tutar\": 45, \"durum\": \"olustu\"}\\n'\nassert cevaplari_tara(_m) == [(2, [\"JSON bozuk\"]), (3, [\"tutar 30 ya da 60 olmalı\"])], repr(cevaplari_tara(_m))\nassert cevaplari_tara(_m.splitlines()[0]) == []\n",
+   "hints": [
+    "type(x) is int, True değerini de reddeder; isinstance(True, int) doğrudur.",
+    "json.JSONDecodeError yakala, satırı atla, sonrakine geç."
+   ],
+   "why": "Gerçek servise ihtiyacın yok: cevap örnekleri dosyadan okunur. Bu araçla sözleşmeyi test ortamında kendin denetler, farkı belgeyle gösterirsin."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-5",
+   "stage": "Hata avı",
+   "kind": "bug",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Hatayı bul ve düzelt.</b> <code>beklenen_kuponlar(s)</code> 1.508 yerine 1.420 kupon buluyor; tutar da 51.900 yerine 48.810 TL. Kural değişmedi. Hesap dakikaya yuvarlandığı için sınırdaki siparişler yanlış tarafa düşüyor. Süreyi saniyeyle hesapla (<code>order_id</code>, <code>tutar</code> sütunları kalsın).</p>",
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    # Hatalı: kupon sayısı SQL sonucundan farklı çıkıyor\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_dk\"] = ((t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds() / 60).round()\n    t = t[t[\"sure_dk\"] > 45].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_dk\"] > 60, \"tutar\"] = 60\n    return t[[\"order_id\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n",
+   "tests": "_b = beklenen_kuponlar(siparisleri_oku())\nassert len(_b) == 1508 and int(_b[\"tutar\"].sum()) == 51900, \"1508 kupon, 51900 TL beklenir: \" + str((len(_b), int(_b[\"tutar\"].sum())))\n",
+   "hints": [
+    "round() olmasa bile dakika ondalıklı olurdu; en temizi saniyeyle karşılaştırmak: 2700 ve 3600."
+   ],
+   "why": "Yuvarlama küçük görünür ama her sınır bir kuraldır. Karar tablosunda \"aşan\" yazıyorsa kodda > ve doğru birim olmalıdır."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-6",
+   "stage": "Hata avı",
+   "kind": "bug",
+   "diff": 2,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Hatayı bul ve düzelt.</b> <code>fark_bul(beklenen, dosya)</code> farklı olan tüm siparişlerin numaralarını sıralı liste olarak vermeli (eksik ve fazla dahil). Şu an yalnız 16 sipariş buluyor, çünkü iki tarafta da olmayan satırlar birleştirmede kayboluyor. Tekrarlı satırı bir kez yaz; numaralar <code>int</code> olsun.</p>",
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef fark_bul(beklenen, dosya):\n    # Hatalı: raporda eksik ve fazla kuponlar hiç görünmüyor\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(dosya, on=\"order_id\", suffixes=(\"_b\", \"_d\"))\n    return m[m[\"tutar_b\"] != m[\"tutar_d\"]][\"order_id\"].tolist()\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef fark_bul(beklenen, dosya):\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(dosya, on=\"order_id\", how=\"outer\", suffixes=(\"_b\", \"_d\"))\n    return sorted(int(x) for x in m[~(m[\"tutar_b\"] == m[\"tutar_d\"])][\"order_id\"].unique())\n",
+   "tests": "_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _d = dosya_oku(kupon_dosyasi(_b, _s))\n_f = fark_bul(_b, _d)\nassert len(_f) == 59, \"59 farklı sipariş beklenir: \" + str(len(_f))\n_x = pd.DataFrame({\"order_id\": [1, 2, 3], \"tutar\": [30, 30, 60]})\n_y = pd.DataFrame({\"kupon_id\": [7, 8, 9], \"order_id\": [1, 3, 9], \"tutar\": [30, 30, 30]})\nassert fark_bul(_x, _y) == [2, 3, 9], repr(fark_bul(_x, _y))\nassert all(type(v) is int for v in fark_bul(_x, _y)), \"int döndür\"\n",
+   "hints": [
+    "how=\"outer\" ekle.",
+    "NaN kendine eşit değildir: tutar_b != tutar_d karşılaştırmasında eksik satırlar da doğru çıkar, ama güvenlisi ~(a == b)."
+   ],
+   "why": "İç birleştirme, varsayılan olduğu için en sık yapılan mutabakat hatasıdır: iki tarafta da olmayan satırı, yani asıl aradığın farkı, sessizce siler."
+  },
+  {
+   "t": "code",
+   "id": "proje-mutabakat-7",
+   "stage": "Mini proje",
+   "diff": 3,
+   "needs": [
+    "pandas"
+   ],
+   "q": "<p><b>Son adım: rapor ve karar.</b> İki fonksiyon yaz.</p><p><code>rapor_sayfalari(sonuc, ozet)</code>: Excel'e yazılacak sayfaları sözlük olarak döndürsün. <code>\"Özet\"</code>: başlık <code>[\"Ölçü\", \"Değer\"]</code>; satırlar <code>Beklenen TL</code>, <code>Ödenen TL</code>, <code>Net fark TL</code>, sonra alfabetik durum adı ve adedi. <code>\"Farklar\"</code>: başlık <code>BASLIKLAR</code>, sonra yalnız <code>tamam</code> olmayan satırlar (Python <code>int</code> ve metin). Gerçek dosyayı sonraki adımda bilgisayarında yazacaksın; tarayıcıda openpyxl yok.</p><p><code>karar_notu(ozet)</code>: <code>tamam</code> dışında durum yoksa <code>\"KABUL: Beklenen ve oluşan kuponlar tutuyor.\"</code>; varsa şu beş satırı döndürsün:</p><pre class=\"out\">RET: {fark} siparişte fark var, net {net} TL.\nEksik {n}: müşteriye söz verilen kupon oluşmamış.\nÇift {n}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\nTutar farkı {n}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\nFazla {n}: zamanında teslime kupon verilmiş.</pre>",
+   "start": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef mutabakat(beklenen, dosya):\n    say = dosya.groupby(\"order_id\").agg(kupon=(\"kupon_id\", \"size\"), odenen=(\"tutar\", \"sum\"), tek=(\"tutar\", \"first\")).reset_index()\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(say, on=\"order_id\", how=\"outer\", indicator=True)\n    def durum(r):\n        if r[\"_merge\"] == \"left_only\":\n            return \"eksik\"\n        if r[\"_merge\"] == \"right_only\":\n            return \"fazla\"\n        if r[\"kupon\"] > 1:\n            return \"cift\"\n        if r[\"tutar\"] != r[\"tek\"]:\n            return \"tutar_farki\"\n        return \"tamam\"\n    m[\"durum\"] = m.apply(durum, axis=1)\n    m[\"beklenen_tl\"] = m[\"tutar\"].fillna(0).astype(int)\n    m[\"odenen_tl\"] = m[\"odenen\"].fillna(0).astype(int)\n    m[\"fark_tl\"] = m[\"odenen_tl\"] - m[\"beklenen_tl\"]\n    return m[[\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef ozet_cikar(sonuc):\n    g = sonuc.groupby(\"durum\").agg(adet=(\"order_id\", \"size\"), fark_tl=(\"fark_tl\", \"sum\"))\n    return {\n        \"adet\": {k: int(v) for k, v in g[\"adet\"].items()},\n        \"beklenen_tl\": int(sonuc[\"beklenen_tl\"].sum()),\n        \"odenen_tl\": int(sonuc[\"odenen_tl\"].sum()),\n        \"net_fark_tl\": int(sonuc[\"fark_tl\"].sum()),\n    }\n\nBASLIKLAR = [\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]\n\ndef rapor_sayfalari(sonuc, ozet):\n    pass\n\ndef karar_notu(ozet):\n    pass\n",
+   "sol": "import csv, io, json\nimport pandas as pd\nimport veri\n\ndef siparisleri_oku():\n    return veri.oku(\"lezzet_kurye\", \"lk_orders\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef mutabakat(beklenen, dosya):\n    say = dosya.groupby(\"order_id\").agg(kupon=(\"kupon_id\", \"size\"), odenen=(\"tutar\", \"sum\"), tek=(\"tutar\", \"first\")).reset_index()\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(say, on=\"order_id\", how=\"outer\", indicator=True)\n    def durum(r):\n        if r[\"_merge\"] == \"left_only\":\n            return \"eksik\"\n        if r[\"_merge\"] == \"right_only\":\n            return \"fazla\"\n        if r[\"kupon\"] > 1:\n            return \"cift\"\n        if r[\"tutar\"] != r[\"tek\"]:\n            return \"tutar_farki\"\n        return \"tamam\"\n    m[\"durum\"] = m.apply(durum, axis=1)\n    m[\"beklenen_tl\"] = m[\"tutar\"].fillna(0).astype(int)\n    m[\"odenen_tl\"] = m[\"odenen\"].fillna(0).astype(int)\n    m[\"fark_tl\"] = m[\"odenen_tl\"] - m[\"beklenen_tl\"]\n    return m[[\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef ozet_cikar(sonuc):\n    g = sonuc.groupby(\"durum\").agg(adet=(\"order_id\", \"size\"), fark_tl=(\"fark_tl\", \"sum\"))\n    return {\n        \"adet\": {k: int(v) for k, v in g[\"adet\"].items()},\n        \"beklenen_tl\": int(sonuc[\"beklenen_tl\"].sum()),\n        \"odenen_tl\": int(sonuc[\"odenen_tl\"].sum()),\n        \"net_fark_tl\": int(sonuc[\"fark_tl\"].sum()),\n    }\n\nBASLIKLAR = [\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]\n\ndef rapor_sayfalari(sonuc, ozet):\n    oz = [[\"Ölçü\", \"Değer\"], [\"Beklenen TL\", ozet[\"beklenen_tl\"]], [\"Ödenen TL\", ozet[\"odenen_tl\"]], [\"Net fark TL\", ozet[\"net_fark_tl\"]]]\n    for durum in sorted(ozet[\"adet\"]):\n        oz.append([durum, ozet[\"adet\"][durum]])\n    farklar = [BASLIKLAR]\n    for r in sonuc[sonuc[\"durum\"] != \"tamam\"][BASLIKLAR].itertuples(index=False):\n        farklar.append([int(r[0]), r[1], int(r[2]), int(r[3]), int(r[4])])\n    return {\"Özet\": oz, \"Farklar\": farklar}\n\ndef karar_notu(ozet):\n    a = ozet[\"adet\"]\n    fark = sum(v for k, v in a.items() if k != \"tamam\")\n    if fark == 0:\n        return \"KABUL: Beklenen ve oluşan kuponlar tutuyor.\"\n    return \"\\n\".join([\n        f\"RET: {fark} siparişte fark var, net {ozet['net_fark_tl']} TL.\",\n        f\"Eksik {a.get('eksik', 0)}: müşteriye söz verilen kupon oluşmamış.\",\n        f\"Çift {a.get('cift', 0)}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\",\n        f\"Tutar farkı {a.get('tutar_farki', 0)}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\",\n        f\"Fazla {a.get('fazla', 0)}: zamanında teslime kupon verilmiş.\",\n    ])\n",
+   "tests": "_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _r = mutabakat(_b, dosya_oku(kupon_dosyasi(_b, _s))); _o = ozet_cikar(_r)\n_p = rapor_sayfalari(_r, _o)\nassert list(_p) == [\"Özet\", \"Farklar\"], \"Sayfalar: \" + repr(list(_p))\n_a = _p[\"Özet\"]\nassert _a[:4] == [[\"Ölçü\", \"Değer\"], [\"Beklenen TL\", 51900], [\"Ödenen TL\", 53160], [\"Net fark TL\", 1260]], repr(_a[:4])\nassert [tuple(x) for x in _a[4:]] == [('cift', 18), ('eksik', 15), ('fazla', 28), ('tamam', 1459), ('tutar_farki', 16)], repr(_a[4:])\n_f = _p[\"Farklar\"]\nassert _f[0] == [\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"], repr(_f[0])\nassert len(_f) - 1 == 77, \"Fark satırı sayısı farklı: \" + str(len(_f) - 1)\nassert all(x[1] != \"tamam\" for x in _f[1:]), \"tamam satırları olmamalı\"\nassert type(_f[1][0]) is int and type(_f[1][4]) is int, \"Excel'e yazılacak değerler Python int olmalı\"\nassert karar_notu(_o) == 'RET: 77 siparişte fark var, net 1260 TL.\\nEksik 15: müşteriye söz verilen kupon oluşmamış.\\nÇift 18: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\\nTutar farkı 16: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\\nFazla 28: zamanında teslime kupon verilmiş.', \"Not farklı:\\n\" + str(karar_notu(_o))\nassert karar_notu({\"adet\": {\"tamam\": 5}, \"beklenen_tl\": 150, \"odenen_tl\": 150, \"net_fark_tl\": 0}) == \"KABUL: Beklenen ve oluşan kuponlar tutuyor.\"\n",
+   "hints": [
+    "sonuc[sonuc[\"durum\"] != \"tamam\"] ile süz, itertuples ile gez.",
+    "int(r[0]) numpy tam sayısını Python int yapar; openpyxl ikisini de yazar ama karşılaştırma için net olsun.",
+    "a.get(\"eksik\", 0): o durum hiç yoksa sayı 0."
+   ],
+   "why": "Çıktın artık paydaşın açıp bakabileceği sayfalar ve kabul ya da ret diyen bir not. Python'ı burada yazılımcı olmak için değil, SQL'den gelen hesabı tekrarlanabilir bir denetime çevirmek için kullandın."
+  },
+  {
+   "t": "local",
+   "id": "proje-mutabakat-yerel",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>Gerçek Excel dosyasını bilgisayarında üret. Betik aynı hesabı yapar, sonra openpyxl ile iki sayfalı dosya yazar.</p>",
+   "steps": [
+    "Veri setleri sayfasından Lezzet Kurye'nin <code>lk_orders.csv</code> dosyasını indir.",
+    "<code>python -m pip install pandas openpyxl</code> yaz.",
+    "Aşağıdaki kodu aynı klasöre <code>mutabakat.py</code> olarak kaydet.",
+    "Komutu çalıştır, <code>kupon_mutabakat.xlsx</code> dosyasını aç: <code>Özet</code> ve <code>Farklar</code> sayfalarını incele."
+   ],
+   "file": "import csv, io, json\nimport pandas as pd\n\ndef siparisleri_oku():\n    return pd.read_csv(\"lk_orders.csv\", parse_dates=[\"placed_at\", \"delivered_at\"])\n\ndef beklenen_kuponlar(s):\n    t = s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")].copy()\n    t[\"sure_sn\"] = (t[\"delivered_at\"] - t[\"placed_at\"]).dt.total_seconds()\n    t = t[t[\"sure_sn\"] > 2700].copy()\n    t[\"tutar\"] = 30\n    t.loc[t[\"sure_sn\"] > 3600, \"tutar\"] = 60\n    return t[[\"order_id\", \"sure_sn\", \"tutar\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef kupon_dosyasi(beklenen, s):\n    \"\"\"Kupon servisinin dökümünü taklit eder. Hatalar numaraya bağlı, kuralı açık: gerçek veride bu dosya yok.\"\"\"\n    satirlar, kupon_id = [], 5000\n    def yaz(order_id, tutar):\n        nonlocal kupon_id\n        kupon_id += 1\n        satirlar.append({\"kupon_id\": kupon_id, \"order_id\": order_id, \"tutar\": tutar})\n    for i, r in enumerate(beklenen.itertuples(), 1):\n        if i % 97 == 0:          # kupon hiç oluşmamış\n            continue\n        tutar = r.tutar\n        if i % 89 == 0:          # yanlış tutar: 30 ile 60 karışmış\n            tutar = 90 - tutar\n        yaz(r.order_id, tutar)\n        if i % 83 == 0:          # aynı siparişe ikinci kupon\n            yaz(r.order_id, tutar)\n    gec = set(beklenen[\"order_id\"])\n    for o in s[(s[\"status\"] == \"teslim\") & (s[\"placed_at\"] >= \"2024-10-01\") & (s[\"placed_at\"] < \"2025-01-01\")][\"order_id\"]:\n        if o % 211 == 0 and o not in gec:   # zamanında teslime kupon\n            yaz(int(o), 30)\n    f = io.StringIO()\n    y = csv.DictWriter(f, [\"kupon_id\", \"order_id\", \"tutar\"], lineterminator=\"\\n\")\n    y.writeheader()\n    y.writerows(satirlar)\n    return f.getvalue()\n\nZORUNLU = [\"kupon_id\", \"order_id\", \"tutar\"]\n\ndef dosya_oku(metin):\n    d = pd.read_csv(io.StringIO(metin))\n    eksik = [s for s in ZORUNLU if s not in d.columns]\n    if eksik:\n        raise ValueError(\"eksik sütun: \" + \", \".join(eksik))\n    return d\n\ndef mutabakat(beklenen, dosya):\n    say = dosya.groupby(\"order_id\").agg(kupon=(\"kupon_id\", \"size\"), odenen=(\"tutar\", \"sum\"), tek=(\"tutar\", \"first\")).reset_index()\n    m = beklenen[[\"order_id\", \"tutar\"]].merge(say, on=\"order_id\", how=\"outer\", indicator=True)\n    def durum(r):\n        if r[\"_merge\"] == \"left_only\":\n            return \"eksik\"\n        if r[\"_merge\"] == \"right_only\":\n            return \"fazla\"\n        if r[\"kupon\"] > 1:\n            return \"cift\"\n        if r[\"tutar\"] != r[\"tek\"]:\n            return \"tutar_farki\"\n        return \"tamam\"\n    m[\"durum\"] = m.apply(durum, axis=1)\n    m[\"beklenen_tl\"] = m[\"tutar\"].fillna(0).astype(int)\n    m[\"odenen_tl\"] = m[\"odenen\"].fillna(0).astype(int)\n    m[\"fark_tl\"] = m[\"odenen_tl\"] - m[\"beklenen_tl\"]\n    return m[[\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]].sort_values(\"order_id\").reset_index(drop=True)\n\ndef ozet_cikar(sonuc):\n    g = sonuc.groupby(\"durum\").agg(adet=(\"order_id\", \"size\"), fark_tl=(\"fark_tl\", \"sum\"))\n    return {\n        \"adet\": {k: int(v) for k, v in g[\"adet\"].items()},\n        \"beklenen_tl\": int(sonuc[\"beklenen_tl\"].sum()),\n        \"odenen_tl\": int(sonuc[\"odenen_tl\"].sum()),\n        \"net_fark_tl\": int(sonuc[\"fark_tl\"].sum()),\n    }\n\nBASLIKLAR = [\"order_id\", \"durum\", \"beklenen_tl\", \"odenen_tl\", \"fark_tl\"]\n\ndef rapor_sayfalari(sonuc, ozet):\n    oz = [[\"Ölçü\", \"Değer\"], [\"Beklenen TL\", ozet[\"beklenen_tl\"]], [\"Ödenen TL\", ozet[\"odenen_tl\"]], [\"Net fark TL\", ozet[\"net_fark_tl\"]]]\n    for durum in sorted(ozet[\"adet\"]):\n        oz.append([durum, ozet[\"adet\"][durum]])\n    farklar = [BASLIKLAR]\n    for r in sonuc[sonuc[\"durum\"] != \"tamam\"][BASLIKLAR].itertuples(index=False):\n        farklar.append([int(r[0]), r[1], int(r[2]), int(r[3]), int(r[4])])\n    return {\"Özet\": oz, \"Farklar\": farklar}\n\nfrom openpyxl import Workbook\nfrom openpyxl.styles import Font\n\ndef excel_yaz(sayfalar, yol):\n    wb = Workbook()\n    wb.remove(wb.active)\n    for ad, satirlar in sayfalar.items():\n        ws = wb.create_sheet(ad)\n        for satir in satirlar:\n            ws.append(satir)\n        for hucre in ws[1]:\n            hucre.font = Font(bold=True)\n        ws.freeze_panes = \"A2\"\n    wb.save(yol)\n\ndef karar_notu(ozet):\n    a = ozet[\"adet\"]\n    fark = sum(v for k, v in a.items() if k != \"tamam\")\n    if fark == 0:\n        return \"KABUL: Beklenen ve oluşan kuponlar tutuyor.\"\n    return \"\\n\".join([\n        f\"RET: {fark} siparişte fark var, net {ozet['net_fark_tl']} TL.\",\n        f\"Eksik {a.get('eksik', 0)}: müşteriye söz verilen kupon oluşmamış.\",\n        f\"Çift {a.get('cift', 0)}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\",\n        f\"Tutar farkı {a.get('tutar_farki', 0)}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\",\n        f\"Fazla {a.get('fazla', 0)}: zamanında teslime kupon verilmiş.\",\n    ])\n\nif __name__ == \"__main__\":\n    s = siparisleri_oku()\n    b = beklenen_kuponlar(s)\n    d = dosya_oku(kupon_dosyasi(b, s))\n    r = mutabakat(b, d)\n    o = ozet_cikar(r)\n    excel_yaz(rapor_sayfalari(r, o), \"kupon_mutabakat.xlsx\")\n    print(karar_notu(o))\n    print(\"Yazıldı: kupon_mutabakat.xlsx\")\n",
+   "fname": "mutabakat.py",
+   "cmd": "python mutabakat.py",
+   "expect": "RET: 77 siparişte fark var, net 1260 TL.\nEksik 15: müşteriye söz verilen kupon oluşmamış.\nÇift 18: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\nTutar farkı 16: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\nFazla 28: zamanında teslime kupon verilmiş.\nYazıldı: kupon_mutabakat.xlsx"
+  }
+ ],
+ "faq": [
+  {
+   "q": "Bu projeyi yapmadan iş analisti olunur mu?",
+   "a": "Evet. Python iş analistliği için şart değildir; bu yol isteğe bağlıdır. Proje, SQL'in ötesinde tekrarlanabilir bir denetim kurmak isteyenler içindir."
+  },
+  {
+   "q": "Neden SQL yerine Python?",
+   "a": "Hesabın kendisi SQL'de de yapılır, orada yaptın. Python burada iki kaynağı (biri dosya) birleştirmek, JSON denetlemek ve Excel raporu üretmek için kolaylık sağlar."
+  },
+  {
+   "q": "Kupon dökümü gerçek mi?",
+   "a": "Hayır. Veri setlerinde böyle bir dosya yok; ders onu hazır kuraldan üretip açık hatalar ekliyor. Sipariş verisi ise gerçek <code>lezzet_kurye</code> tablosudur."
+  }
+ ],
+ "mistakes": [
+  {
+   "bad": "print(dosya[\"tutar\"].sum() == beklenen[\"tutar\"].sum())",
+   "good": "m = beklenen.merge(say, on=\"order_id\", how=\"outer\", indicator=True)",
+   "why": "Toplam tutarken satırlar tutmayabilir; eksik ve fazla birbirini götürür."
+  },
+  {
+   "bad": "m = beklenen.merge(dosya, on=\"order_id\")",
+   "good": "m = beklenen.merge(dosya, on=\"order_id\", how=\"outer\")",
+   "why": "Varsayılan iç birleştirme, aradığın farkları siler."
+  },
+  {
+   "bad": "gec = sure_dk.round() > 45",
+   "good": "gec = sure_sn > 2700",
+   "why": "Yuvarlama sınırdaki siparişleri yanlış tarafa taşır."
+  }
+ ]
+}));
+})(window);
