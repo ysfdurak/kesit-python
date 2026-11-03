@@ -459,7 +459,7 @@
   statement: '<p>Anadolu Market ürün ekibi web sitesindeki satın alma hunisini ölçüyor. <code>web_events</code>: <code>user_id, event_type, event_time, device</code>. Huni adımları sırasıyla: <code>visit → product_view → add_to_cart → checkout → purchase</code>.</p><p><code>huni(cihaz=None)</code>: SQL ile her adımı yapan <b>farklı</b> kullanıcı sayısını bul (<code>cihaz</code> verilirse yalnız o cihaz). Python ile her adım için <code>(adım, kullanıcı, bir_önceki_adıma_göre_yüzde)</code> listesi döndür; ilk adımın yüzdesi 100.0, yüzdeler 1 ondalık. Hiç olay yoksa adımın sayısı 0 ve yüzdesi 0.0 olsun.</p><p>Cihaz filtresini <b>parametreyle</b> ekle (sorguyu koşullu kur ama değeri asla metne gömme).</p>',
   input: '<p><code>cihaz</code>: <code>None</code> ya da <code>web_events.device</code> değeri.</p>',
   output: '<p><code>list</code> of <code>(str, int, float)</code>, 5 eleman.</p>',
-  constraints: 'web_events 1412 satır',
+  constraints: 'web_events 2819 satır',
   samples: [
     { in: 'huni()', out: '[(\'visit\', 600, 100.0), (\'product_view\', 453, 75.5), (\'add_to_cart\', 183, 40.4), (\'checkout\', 109, 59.6), (\'purchase\', 67, 61.5)]', why: 'Tüm cihazlarda huni.' }
   ],

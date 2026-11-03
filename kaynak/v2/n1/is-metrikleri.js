@@ -49,7 +49,7 @@ print("ciro x", round(b["ciro"], 3), "= müşteri x", round(b["musteri"], 3),
 <p>Her metrik için yazılı bir <b>sözleşme</b> (metric definition) tut: ad, formül, pay ve payda, dahil/hariç durumlar (iptal, iade, test kullanıcıları), zaman damgası (sipariş mi teslim tarihi mi?), sahibi. "Dönüşüm oranı" iki ekipte iki farklı şey demeye başladığı an, toplantılar sayı tartışmasına döner.</p>
 
 <h2>2. Huni analizi</h2>
-<p>Huni (funnel), kullanıcıların adım adım nerede döküldüğünü gösterir. Her adımda o adımı yapan <b>tekil kullanıcı</b> sayılır; olay sayısı değil.</p>
+<p>Huni (funnel), kullanıcıların adım adım nerede döküldüğünü gösterir. Her adımda o adımı yapan <b>tekil kullanıcı</b> sayılır; olay sayısı değil. Bu veride fark büyüktür: kullanıcılar geri gelir ve adımları tekrar eder, 40 olay da iki kez gönderilmiştir; 2.819 satır 600 kullanıcıdan gelir.</p>
 <pre class="py">import veri
 import pandas as pd
 
@@ -64,7 +64,7 @@ print(huni)
 cihaz = w.pivot_table(index="event_type", columns="device", values="user_id", aggfunc="nunique").reindex(adimlar)
 print((cihaz.loc["purchase"] / cihaz.loc["visit"]).round(3))</pre>
 <p>En büyük kayıp ürün görüntülemeden sepete geçişte (%40); mobilde ziyaretten satın almaya dönüşüm masaüstünden düşük. Huniyi bir kırılımla (cihaz, kaynak, yeni/eski kullanıcı) okumak "nerede" sorusunu "kimde" sorusuna çevirir.</p>
-<div class="tip"><b>Katı huni mi, gevşek huni mi?</b>Gevşek huni her adımı bağımsız sayar. Katı (strict) huni ise bir adımı yalnız önceki adımları da yapmış kullanıcılar için sayar; sırayı ve zaman penceresini (ör. 7 gün içinde) de şart koşabilir. Bu veride ikisi aynı sonucu veriyor; gerçek veride sepete doğrudan bağlantıyla gelenler yüzünden genellikle farklıdır. Hangisini kullandığını sözleşmeye yaz.</div>
+<div class="tip"><b>Katı huni mi, gevşek huni mi?</b>Gevşek huni her adımı bağımsız sayar. Katı (strict) huni ise bir adımı yalnız önceki adımları da yapmış kullanıcılar için sayar; sırayı ve zaman penceresini (ör. 7 gün içinde) de şart koşabilir. Bu veride tekil kullanıcıda ikisi aynı sonucu veriyor; sıra şartı eklersen farklılaşır, çünkü 24 kullanıcıda iki adımın zamanı yer değiştirmiştir. Gerçek veride sepete doğrudan bağlantıyla gelenler yüzünden de genellikle farklıdır. Hangisini kullandığını sözleşmeye yaz.</div>
 
 <h2>3. Kohort, tutundurma ve churn</h2>
 <p>Kohort (cohort), aynı dönemde başlayan müşteri grubudur. Tutundurma (retention) tablosu her kohortun sonraki dönemlerde ne kadarının geri geldiğini gösterir. SQL sürümünü <b>Python'dan SQL ile analiz</b> dersinde yazdın; burada pandas ile çeyreklik kohort kuruyoruz.</p>
@@ -414,12 +414,12 @@ bgf = BetaGeoFitter(penalizer_coef=0.01).fit(ozet["frequency"], ozet["recency"],
         diff: 2,
         kind: 'bug',
         needs: ['pandas'],
-        q: '<p><b>Hatayı bul ve düzelt.</b> <code>donem_donusumu(w)</code> Ekim–Kasım 2024 dönemi için ziyaretten satın almaya dönüşüm oranını (4 basamak) döndürmeli. Kod günlük oranları hesaplayıp ortalamasını alıyor ve 0.1042 buluyor; pazarlamanın panosu 0.1117 gösteriyor. Hangisi doğru? Kodu düzelt.</p>',
+        q: '<p><b>Hatayı bul ve düzelt.</b> <code>donem_donusumu(w)</code> Ekim–Kasım 2024 dönemi için ziyaretten satın almaya dönüşüm oranını (4 basamak) döndürmeli. Kod günlük oranları hesaplayıp ortalamasını alıyor ve 0.0679 buluyor; pazarlamanın panosu 0.1117 gösteriyor. Hangisi doğru? Kodu düzelt.</p>',
         start: 'import veri\nimport pandas as pd\n\nw = veri.oku("anadolu_market", "web_events", parse_dates=["event_time"])\n\n\ndef donem_donusumu(w):\n    w = w.assign(gun=w["event_time"].dt.date)\n    g = w.pivot_table(index="gun", columns="event_type", values="user_id", aggfunc="nunique", fill_value=0)\n    g = g[g["visit"] > 0]\n    return round(float((g["purchase"] / g["visit"]).mean()), 4)\n\n\nprint(donem_donusumu(w))\n',
-        sol: 'import veri\nimport pandas as pd\n\nw = veri.oku("anadolu_market", "web_events", parse_dates=["event_time"])\n\n\ndef donem_donusumu(w):\n    w = w.assign(gun=w["event_time"].dt.date)\n    g = w.pivot_table(index="gun", columns="event_type", values="user_id", aggfunc="nunique", fill_value=0)\n    g = g[g["visit"] > 0]\n    return round(float(g["purchase"].sum() / g["visit"].sum()), 4)\n\n\nprint(donem_donusumu(w))\n',
-        tests: 'assert donem_donusumu(w) == 0.1117, "Dönem oranı = toplam satın alan / toplam ziyaret = 0.1117; günlük oranların ortalaması küçük günlere fazla ağırlık verir"\n',
-        hints: ['60 günün ziyaretçi sayıları çok farklı; her güne eşit ağırlık vermek doğru mu?', 'Oranı pay toplamı / payda toplamı olarak hesapla.'],
-        why: 'Oranların basit ortalaması, trafiği az olan günlere trafiği çok olan günlerle aynı ağırlığı verir. Doğru dönem oranı ağırlıklı ortalamadır, yani toplam / toplam. (Not: günlük tekil kullanıcıların toplamı dönemin tekil kullanıcısı değildir; bu veride her kullanıcı tek gün göründüğü için ikisi örtüşüyor.)'
+        sol: 'import veri\nimport pandas as pd\n\nw = veri.oku("anadolu_market", "web_events", parse_dates=["event_time"])\n\n\ndef donem_donusumu(w):\n    w = w.assign(gun=w["event_time"].dt.date)\n    alan = w.loc[w["event_type"] == "purchase", "user_id"].nunique()\n    gelen = w.loc[w["event_type"] == "visit", "user_id"].nunique()\n    return round(alan / gelen, 4)\n\n\nprint(donem_donusumu(w))\n',
+        tests: 'assert donem_donusumu(w) == 0.1117, "Dönem oranı = dönemde satın alan tekil kullanıcı / ziyaret eden tekil kullanıcı = 67 / 600 = 0.1117"\n',
+        hints: ['60 günün ziyaretçi sayıları çok farklı; her güne eşit ağırlık vermek doğru mu?', 'Bir kullanıcı birkaç gün gelebilir: tekil kullanıcıyı günlere bölmeden, tüm dönem üzerinden say.'],
+        why: 'Oranların basit ortalaması, trafiği az olan günlere trafiği çok olan günlerle aynı ağırlığı verir. Günlük toplamları bölmek de yetmez: 67 satın alan / 973 günlük ziyaretçi 0.0689 eder, çünkü geri gelen kullanıcı her gün yeniden sayılır. Dönem oranını dönemin tekil kullanıcısıyla hesapla: 67 / 600.'
       },
       {
         t: 'code',
