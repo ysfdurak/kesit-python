@@ -292,7 +292,7 @@ assert len(_b) == {ADET} and int(_b["tutar"].sum()) == {TL}, "{ADET} kupon, {TL}
    hints=['round() olmasa bile dakika ondalıklı olurdu; en temizi saniyeyle karşılaştırmak: 2700 ve 3600.'],
    why='Yuvarlama küçük görünür ama her sınır bir kuraldır. Karar tablosunda "aşan" yazıyorsa kodda > ve doğru birim olmalıdır.'),
  dict(t='code', id='proje-mutabakat-6', stage='Hata avı', kind='bug', diff=2, needs=['pandas'],
-   q=f'<p><b>Hatayı bul ve düzelt.</b> <code>fark_bul(beklenen, dosya)</code> farklı olan tüm siparişlerin numaralarını sıralı liste olarak vermeli (eksik ve fazla dahil). Şu an yalnız {HATALI_FARK} sipariş buluyor, çünkü iki tarafta da olmayan satırlar birleştirmede kayboluyor. Tekrarlı satırı bir kez yaz; numaralar <code>int</code> olsun.</p>',
+   q=f'<p><b>Hatayı bul ve düzelt.</b> <code>fark_bul(beklenen, dosya)</code> farklı olan tüm siparişlerin numaralarını sıralı liste olarak vermeli (eksik ve fazla dahil). Şu an yalnız {HATALI_FARK} sipariş buluyor, çünkü yalnız bir tarafta olan satırlar birleştirmede kayboluyor. Tekrarlı satırı bir kez yaz; numaralar <code>int</code> olsun. Tutarı aynı olan çift kuponu bu fonksiyon aramaz, onu <code>mutabakat</code> yakalar.</p>',
    start=H3 + '\n' + BUG_INNER, sol=H3 + '\n' + BUG_INNER_SOL,
    tests=f'''_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _d = dosya_oku(kupon_dosyasi(_b, _s))
 _f = fark_bul(_b, _d)
@@ -303,7 +303,7 @@ assert fark_bul(_x, _y) == [2, 3, 9], repr(fark_bul(_x, _y))
 assert all(type(v) is int for v in fark_bul(_x, _y)), "int döndür"
 ''',
    hints=['how="outer" ekle.', 'NaN kendine eşit değildir: tutar_b != tutar_d karşılaştırmasında eksik satırlar da doğru çıkar, ama güvenlisi ~(a == b).'],
-   why='İç birleştirme, varsayılan olduğu için en sık yapılan mutabakat hatasıdır: iki tarafta da olmayan satırı, yani asıl aradığın farkı, sessizce siler.'),
+   why='İç birleştirme, varsayılan olduğu için en sık yapılan mutabakat hatasıdır: yalnız bir tarafta olan satırı, yani asıl aradığın farkı, sessizce siler.'),
 dict(t='code', id='proje-mutabakat-7', stage='Mini proje', diff=3, needs=['pandas'],
    q='<p><b>Son adım: rapor ve karar.</b> İki fonksiyon yaz.</p><p><code>rapor_sayfalari(sonuc, ozet)</code>: Excel\'e yazılacak sayfaları sözlük olarak döndürsün. <code>"Özet"</code>: başlık <code>["Ölçü", "Değer"]</code>; satırlar <code>Beklenen TL</code>, <code>Ödenen TL</code>, <code>Net fark TL</code>, sonra alfabetik durum adı ve adedi. <code>"Farklar"</code>: başlık <code>BASLIKLAR</code>, sonra yalnız <code>tamam</code> olmayan satırlar (Python <code>int</code> ve metin). Gerçek dosyayı sonraki adımda bilgisayarında yazacaksın; tarayıcıda openpyxl yok.</p><p><code>karar_notu(ozet)</code>: <code>tamam</code> dışında durum yoksa <code>"KABUL: Beklenen ve oluşan kuponlar tutuyor."</code>; varsa şu beş satırı döndürsün:</p><pre class="out">RET: {fark} siparişte fark var, net {net} TL.\nEksik {n}: müşteriye söz verilen kupon oluşmamış.\nÇift {n}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\nTutar farkı {n}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\nFazla {n}: zamanında teslime kupon verilmiş.</pre>',
    start=H4 + '\nBASLIKLAR = ["order_id", "durum", "beklenen_tl", "odenen_tl", "fark_tl"]\n\ndef rapor_sayfalari(sonuc, ozet):\n    pass\n\ndef karar_notu(ozet):\n    pass\n', sol=H4 + '\n' + SAYFA + '\n' + KARAR,
