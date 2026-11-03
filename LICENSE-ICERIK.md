@@ -11,4 +11,4 @@ Kesit Python'ın ders anlatımları, alıştırmaları, sınav, mülakat ve oyun
 Bu bir özettir; bağlayıcı metin: https://creativecommons.org/licenses/by-nc/4.0/legalcode.tr
 
 Uygulama kodu (HTML ve JavaScript dosyaları) ayrıca [MIT lisansıyla](LICENSE) sunulur.
-Microsoft, Power BI, Fabric, Excel ve sınav adları Microsoft Corporation’ın markalarıdır; bu proje Microsoft ile bağlantılı değildir.
+Python, Python Software Foundation'ın; PCEP ve PCAP, Python Institute'un markalarıdır. Bu proje bu kuruluşlarla bağlantılı değildir. Diğer ürün ve araç adları sahiplerinindir.

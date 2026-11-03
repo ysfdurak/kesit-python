@@ -19,7 +19,7 @@ L.push(
   ],
   body: `
 <h2>Python nedir?</h2>
-<p>Python, 1991'de Guido van Rossum'un yayımladığı, okunabilirliği her şeyin önüne koyan genel amaçlı bir programlama dili (programming language). Adını yılandan değil, Monty Python komedi grubundan alır. Bugün kullanılan sürüm ailesi Python 3; bu uygulamada Python 3.12 ile çalışacaksın. Yazdığın kod, tarayıcının içinde gerçek bir Python yorumlayıcısında (interpreter) koşar. Yani burada öğrendiğin her satır, bilgisayarına kuracağın Python'da da birebir aynı şekilde çalışır.</p>
+<p>Python, 1991'de Guido van Rossum'un yayımladığı, okunabilirliği her şeyin önüne koyan genel amaçlı bir programlama dili (programming language). Adını yılandan değil, Monty Python komedi grubundan alır. Bugün kullanılan sürüm ailesi Python 3; bu uygulamada Python 3.12 ile çalışacaksın. Yazdığın kod, tarayıcının içinde gerçek bir Python yorumlayıcısında (interpreter) koşar. Temel dil birebir aynıdır: burada öğrendiğin dil kuralları bilgisayarına kuracağın Python'da da aynı çalışır.</p>
 <p>Python'ı bu kadar sevdiren üç özellik var:</p>
 <ul>
 <li><b>Okunur sözdizimi:</b> Süslü parantez yerine girinti, noktalı virgül yerine satır sonu. Kod, kısa İngilizce cümlelere benzer; başkasının kodunu okumak kolaydır.</li>
@@ -58,7 +58,7 @@ print("Bugün 3 yeni sipariş geldi.")</pre>
 <p>Tırnak içine yazdığın şeye metin (string) denir. Birden fazla değeri virgülle ayırarak aynı satıra yazdırabilirsin; Python aralarına otomatik boşluk koyar:</p>
 <pre class="py">print("Sipariş adedi:", 3)
 print("Toplam tutar:", 3 * 250)
-print("Anadolu", "Bank", sep=" - ")</pre>
+print("Ilgaz", "Bank", sep=" - ")</pre>
 <p>Üçüncü satırdaki <code>sep</code>, değerler arasına ne konulacağını belirler. Şimdi en önemli ayrımı gör: tırnak içindeki her şey metindir, tırnak dışındaki sayılarla hesap yapılır.</p>
 <pre class="py">print(3 * 250)
 print("3 * 250")
@@ -79,7 +79,7 @@ print("Kalan stok:", 250 - 31)</pre>
 <p>Dördüncü satırdaki bölme işlemi ondalıklı sonuç verir; bunun neden hep böyle olduğunu Sayılar dersinde öğreneceksin. Şimdilik şunu gör: Python bir hesap makinesi gibi parantez önceliğine uyar ve sonucu hemen basar.</p>
 
 <h2>Yorumlanan dil ne demek?</h2>
-<p>Python yorumlanan (interpreted) bir dildir: kodunu önce makine diline çeviren ayrı bir program çalıştırmazsın; yorumlayıcı satırları sırayla okur ve uygular. Bunun iki sonucu var. Birincisi, deneme yapmak hızlıdır: bir satır yazar, hemen sonucu görürsün. İkincisi, bir hata ancak o satıra sıra geldiğinde ortaya çıkar; dolayısıyla kodu küçük parçalar hâlinde sık sık çalıştırmak iyi bir alışkanlıktır. Bir sonraki derste Python'ı kendi bilgisayarına kuracak ve bu yorumlayıcıyı terminalden çalıştıracaksın.</p>
+<p>Python yorumlanan (interpreted) bir dildir: kodunu önce makine diline çeviren ayrı bir program çalıştırmazsın; yorumlayıcı satırları sırayla okur ve uygular. Bunun iki sonucu var. Birincisi, deneme yapmak hızlıdır: bir satır yazar, hemen sonucu görürsün. İkincisi, çoğu hata (yazım hatası hariç) ancak o satıra sıra geldiğinde ortaya çıkar; Python önce dosyanın tamamını okur, sözdizimi hatası varsa hiçbir satırı çalıştırmaz. Dolayısıyla kodu küçük parçalar hâlinde sık sık çalıştırmak iyi bir alışkanlıktır. Şimdilik her şey tarayıcıda çalışıyor; hazır olduğunda "Bilgisayarına geç" bölümünde Python'ı kendi bilgisayarına kurar, bu yorumlayıcıyı terminalden çalıştırırsın.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Excel'den Python'a geçiş neden kârlı?</h3>
@@ -91,9 +91,9 @@ print("Kalan stok:", 250 - 31)</pre>
 </section>
 `,
   ex: [
-    { t: 'mc', q: "Python adını nereden alır?",
-      o: ['Piton yılanından', 'Monty Python komedi grubundan', 'Yunan mitolojisindeki bir yaratıktan', "Guido van Rossum'un doğduğu kasabanın adından"], a: 1,
-      why: "Guido van Rossum dilin adını, sevdiği Monty Python komedi grubundan seçti. Yılan logosu sonradan geldi; mitoloji ve kasaba seçenekleri uydurmadır." },
+    { t: 'mc', q: "Bu uygulamada yazdığın Python kodu nerede çalışır?",
+      o: ["Kendi tarayıcının içinde, gerçek bir Python yorumlayıcısında", "Uzaktaki bir sunucuda; kodun oraya gönderilir", "Hiç çalışmaz, yalnızca metin olarak denetlenir", "Bilgisayarına kurulan bir programda"], a: 0,
+      why: "Motor (Pyodide) tarayıcıda çalışır; kodun bir sunucuya gitmez ve kurulum gerekmez." },
     { t: 'code', id: 'python-nedir-1',
       q: '<p>Ekrana tam olarak <code>Merhaba, Anadolu Market!</code> yazdır.</p>',
       start: '# print ile yazdır\n',
@@ -112,10 +112,10 @@ print("Kalan stok:", 250 - 31)</pre>
       o: ['Satış verisini temizleyip haftalık rapor üretmek', 'Her gün tekrarlanan dosya işlerinin otomasyonu', 'Oyun motoru çekirdeği gibi ham hız isteyen kod', 'Web servisleri ve API yazmak'], a: 2,
       why: "Oyun motoru çekirdeği, işletim sistemi gibi ham hız gerektiren işlerde C, C++ ve Rust tercih edilir. Veri analizi, otomasyon ve web, Python'ın en güçlü olduğu alanlardır." },
     { t: 'code', id: 'python-nedir-3',
-      q: "<p>Tek bir <code>print</code> çağrısı ile <code>Anadolu-Bank</code> yazdır. <code>\"Anadolu\"</code> ve <code>\"Bank\"</code> ayrı iki değer olarak verilsin; aralarına tire koymak için <code>sep</code> kullan. İkinci satırda ise <code>Toplam: 750</code> yazdır; 750 sayısını <code>3 * 250</code> çarpımıyla üret.</p>",
-      start: 'print("Anadolu", "Bank")\nprint("Toplam:", 3 * 250)\n',
-      sol: 'print("Anadolu", "Bank", sep="-")\nprint("Toplam:", 3 * 250)\n',
-      expect: 'Anadolu-Bank\nToplam: 750\n',
+      q: "<p>Tek bir <code>print</code> çağrısı ile <code>Ilgaz-Bank</code> yazdır. <code>\"Ilgaz\"</code> ve <code>\"Bank\"</code> ayrı iki değer olarak verilsin; aralarına tire koymak için <code>sep</code> kullan. İkinci satırda ise <code>Toplam: 750</code> yazdır; 750 sayısını <code>3 * 250</code> çarpımıyla üret.</p>",
+      start: 'print("Ilgaz", "Bank")\nprint("Toplam:", 3 * 250)\n',
+      sol: 'print("Ilgaz", "Bank", sep="-")\nprint("Toplam:", 3 * 250)\n',
+      expect: 'Ilgaz-Bank\nToplam: 750\n',
       hints: ['sep="-" parametresi değerlerin arasına tire koyar.', 'İkinci print zaten doğru; ilkine sep ekle.'],
       why: 'sep, print içindeki değerlerin arasına konacak ayracı belirler; varsayılanı tek boşluktur.' },
     { t: 'mc', q: '<code>print("5" + "3")</code> ne yazdırır?',
@@ -150,7 +150,7 @@ print("Kalan stok:", 250 - 31)</pre>
   title: 'Kurulum ve araçlar',
   sum: "Python'ı ve VS Code'u kurar, terminalden sürümü kontrol eder, REPL ile betik çalıştırmayı ayırt eder ve sanal ortam kavramına ilk bakışı atarsın.",
   goals: [
-    "python.org'dan Python 3.12'yi kurup terminalde sürümü doğrulayabilirim.",
+    "python.org'dan güncel bir Python 3 sürümünü kurup terminalde sürümü doğrulayabilirim.",
     'VS Code ile bir .py dosyası oluşturup terminalden çalıştırabilirim.',
     'REPL ile betik çalıştırmanın farkını ve hangisini ne zaman kullanacağımı açıklayabilirim.',
     "Jupyter'ın ne işe yaradığını ve sanal ortamın neden gerektiğini özetleyebilirim."
@@ -160,7 +160,7 @@ print("Kalan stok:", 250 - 31)</pre>
 <p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Ilgaz Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
 
 <h2>1. Python'ı kurmak</h2>
-<p>Resmî kaynak <b>python.org</b>. İndirme sayfasından işletim sistemine uygun Python 3.12 kurulumunu al.</p>
+<p>Resmî kaynak <b>python.org</b>. Kasım 2026'da kararlı sürümler 3.15 (Ekim 2026'da çıktı) ve 3.14; yeni başlayan için öneri <b>3.14</b>, çünkü paketlerin hazır derlemeleri yeni sürümlere biraz geç gelir. Bu uygulamadaki tarayıcı motoru Python 3.12'dir; temel dil aynıdır, bilgisayarına 3.14 kurman sorun çıkarmaz. Windows'ta python.org artık "Python install manager" adlı yükleme yöneticisini öne çıkarıyor, klasik yükleyici de hâlâ sunuluyor.</p>
 <div class="steps-list"><ol>
 <li><b>Windows:</b> Kurulum sihirbazının ilk ekranında "Add python.exe to PATH" kutusunu mutlaka işaretle. Bu kutu, terminalde <code>python</code> yazınca bilgisayarın Python'ı bulmasını sağlar.</li>
 <li><b>macOS:</b> python.org paketini kur. Sistemle gelen eski Python'a dokunma; sen hep <code>python3</code> komutunu kullan.</li>
@@ -168,8 +168,8 @@ print("Kalan stok:", 250 - 31)</pre>
 </ol></div>
 <p>Kurulum bittikten sonra bir terminal (Windows'ta PowerShell ya da Komut İstemi, macOS ve Linux'ta Terminal) aç ve şunu yaz:</p>
 <pre class="out">python --version
-Python 3.12.x</pre>
-<p>Windows'ta <code>python</code>, macOS ve Linux'ta genelde <code>python3</code> çalışır. "Python 3.12" ile başlayan bir satır görüyorsan kurulum tamam. "command not found" ya da "tanınmıyor" diyorsa büyük ihtimalle PATH adımı atlanmıştır; kurulumu "Modify" ile tekrar aç ve kutuyu işaretle.</p>
+Python 3.14.x</pre>
+<p>Windows'ta <code>python</code>, macOS ve Linux'ta genelde <code>python3</code> çalışır. "Python 3." ile başlayan bir satır görüyorsan kurulum tamam. "command not found" ya da "tanınmıyor" diyorsa büyük ihtimalle PATH adımı atlanmıştır; kurulumu "Modify" ile tekrar aç ve kutuyu işaretle.</p>
 
 <h2>2. Editör: VS Code</h2>
 <p>Kodu Not Defteri'nde de yazabilirsin ama bir kod editörü (code editor) sana renklendirme, otomatik tamamlama ve hata altı çizme verir. En yaygın tercih ücretsiz <b>Visual Studio Code</b>. Kurduktan sonra sol taraftaki Extensions panelinden Microsoft'un <b>Python</b> eklentisini yükle. Bu eklenti, dosyanın sağ üstündeki "Run" düğmesini ve hata uyarılarını getirir.</p>
@@ -210,7 +210,7 @@ print("Uygulama:", platform.python_implementation())</pre>
 
 <h2>İlk betiği adım adım çalıştırmak</h2>
 <div class="steps-list"><ol>
-<li>VS Code'da bir klasör aç (örneğin <code>pythonpatika</code>).</li>
+<li>VS Code'da bir klasör aç (örneğin <code>python-proje</code>).</li>
 <li>Yeni dosya oluştur, adını <code>merhaba.py</code> koy ve içine <code>print("Merhaba")</code> yaz, kaydet.</li>
 <li>Üst menüden Terminal &gt; New Terminal ile editörün içinde bir terminal aç; terminal zaten klasörün içinde başlar.</li>
 <li><code>python merhaba.py</code> (ya da <code>python3 merhaba.py</code>) yaz ve Enter'a bas.</li>
@@ -235,45 +235,22 @@ print("Uygulama:", platform.python_implementation())</pre>
 <p>PyCharm, Python'a özel güçlü bir editördür ve büyük projelerde tercih edilir. Jupyter Lab veri keşfi için, Thonny ise tamamen yeni başlayanlar için sadeleştirilmiştir. Hangisini seçersen seç, temel beceriler aynıdır: dosya oluştur, kaydet, terminalden çalıştır, hata mesajını oku.</p>
 </section>
 `,
-  ex: [
-    { t: 'mc', q: "Windows'ta Python kurarken \"Add python.exe to PATH\" kutusunu işaretlemezsen ne olur?",
+  ex: [{ t: 'mc', q: "Windows'ta Python kurarken \"Add python.exe to PATH\" kutusunu işaretlemezsen ne olur?",
       o: ['Python hiç kurulmaz', 'Terminalde python komutu bulunamaz', 'Sadece REPL çalışır, betik çalışmaz', 'pip kurulmaz'], a: 1,
       why: 'Python kurulur ama terminal onun yerini bilmez; python yazınca "tanınmıyor" hatası alırsın. PATH, komutların nerede arandığını söyleyen listedir.' },
-    { t: 'code', id: 'kurulum-araclar-1',
-      q: '<p><code>sys</code> modülünü içe aktar ve çalışan Python\'ın <b>ana sürüm numarasını</b> (<code>sys.version_info.major</code>) yazdır. Beklenen çıktı tek satır: <code>3</code></p>',
-      start: 'import sys\n# ana sürümü yazdır\n',
-      sol: 'import sys\nprint(sys.version_info.major)\n',
-      expect: '3\n',
-      hints: ['sys.version_info.major bir sayıdır; print ile yazdır.', 'print(sys.version_info.major)'],
-      why: 'version_info, sürümü parçalara ayırmış bir nesnedir; major alanı 3 verir.' },
     { t: 'mc', q: 'REPL ile betik (.py dosyası) arasındaki temel fark nedir?',
       o: ['REPL yalnızca Windows\'ta çalışır', 'Betik dosyasında print kullanılamaz, yalnızca REPL\'de kullanılır', 'REPL her ifadenin değerini kendiliğinden gösterir', 'Betik daha yavaş çalışır'], a: 2,
       why: 'REPL etkileşimlidir ve her ifadenin sonucunu otomatik basar. Betikte yalnızca print çıktıları görünür; 3 * 250 yazıp bırakırsan hiçbir şey çıkmaz.' },
-    { t: 'code', id: 'kurulum-araclar-2',
-      q: '<p>Bir betik adı değişkeni tanımla: <code>dosya = "rapor.py"</code>. Sonra terminalde yazılacak komutu üret ve yazdır: çıktı tam olarak <code>python rapor.py</code> olmalı. Metni birleştirmek için <code>"python " + dosya</code> ya da print\'in virgülünü kullanabilirsin.</p>',
-      start: 'dosya = "rapor.py"\n# komutu yazdır\n',
-      sol: 'dosya = "rapor.py"\nprint("python", dosya)\n',
-      expect: 'python rapor.py\n',
-      hints: ['print("python", dosya) araya boşluk koyar.', 'Alternatif: print("python " + dosya)'],
-      why: 'print virgülle ayrılan değerlerin arasına bir boşluk koyar; + ile birleştirirken boşluğu kendin eklersin.' },
     { t: 'mc', q: 'Sanal ortam (virtual environment) neden kullanılır?',
       o: ['Python\'ı daha hızlı çalıştırmak için', 'Her projenin paketlerini birbirinden izole tutmak için', 'Kodun internete çıkmasını engellemek için', 'VS Code\'un çalışması için zorunlu olduğundan'], a: 1,
       why: 'Sanal ortam projeye özel bir paket deposudur; farklı projelerin farklı sürüm ihtiyaçları birbirini bozmaz. Hız ya da güvenlikle ilgisi yoktur.' },
-    { t: 'code', id: 'kurulum-araclar-3',
-      q: '<p>Bir kurulum kontrol listesi yazdır. Üç değişken tanımla: <code>surum = "3.12"</code>, <code>editor = "VS Code"</code>, <code>komut = "python --version"</code>. Sonra tam olarak şu üç satırı üret:</p><pre class="out">Sürüm: 3.12\nEditör: VS Code\nKontrol: python --version</pre>',
-      start: 'surum = "3.12"\neditor = "VS Code"\nkomut = "python --version"\n# üç satırı yazdır\n',
-      sol: 'surum = "3.12"\neditor = "VS Code"\nkomut = "python --version"\nprint("Sürüm:", surum)\nprint("Editör:", editor)\nprint("Kontrol:", komut)\n',
-      expect: 'Sürüm: 3.12\nEditör: VS Code\nKontrol: python --version\n',
-      hints: ['Her satır için print("Etiket:", degisken) kalıbını kullan.', 'Değişken adlarını tırnaksız yaz ki değerleri basılsın.'],
-      why: 'Değişkenler tırnaksız yazılınca değerleri basılır; print araya boşluğu kendisi koyar.' },
     { t: 'mc', q: 'Aşağıdaki dosya adlarından hangisi bir Python betiği için en uygundur?',
       o: ['Haftalık Rapor.py', 'rapor.txt', 'haftalik_rapor.py', 'rapor'], a: 2,
-      why: 'Python betiği .py uzantısı taşımalı; küçük harf, boşluksuz ve ASCII ad terminalde yazmayı ve paylaşmayı kolaylaştırır.' }
-  ],
+      why: 'Python betiği .py uzantısı taşımalı; küçük harf, boşluksuz ve ASCII ad terminalde yazmayı ve paylaşmayı kolaylaştırır.' }],
   faq: [
     { q: "Terminalde python yazınca Microsoft Store açılıyor, ne yapmalıyım?", a: "Windows'un kısayol davranışı. Ya python.org kurulumunu PATH seçeneğiyle yeniden yap ya da Ayarlar > Uygulamalar > Uygulama yürütme diğer adları bölümünden python kısayollarını kapat." },
     { q: "Anaconda kurmalı mıyım?", a: "Veri bilimi için pandas, numpy ve Jupyter'ı tek pakette getirir, ama büyüktür ve kendi ortam sistemi vardır. Başlangıçta python.org kurulumu ve pip yeterli; Anaconda'ya ihtiyacın olursa ileride geçersin." },
-    { q: "VS Code'da Run düğmesine basınca yanlış Python çalışıyor.", a: "Sağ alttaki yorumlayıcı seçiciye tıkla (ya da Ctrl+Shift+P > Python: Select Interpreter) ve 3.12 olanı seç. Sanal ortam kullanıyorsan .venv içindekini seçmelisin." }
+    { q: "VS Code'da Run düğmesine basınca yanlış Python çalışıyor.", a: "Sağ alttaki yorumlayıcı seçiciye tıkla (ya da Ctrl+Shift+P > Python: Select Interpreter) ve kurduğun sürümü seç. Sanal ortam kullanıyorsan .venv içindekini seçmelisin." }
   ],
   mistakes: [
     { bad: 'python rapor', good: 'python rapor.py', why: 'Betik çalıştırırken dosya adını uzantısıyla birlikte verirsin.' },
@@ -371,7 +348,7 @@ print("Tutar   :", tutar, "TL")
 print("Komisyon:", komisyon, "TL")
 print("Net     :", tutar - komisyon, "TL")
 print("=" * 28)</pre>
-<p>Dikkat et: değişken adları (<code>musteri</code>, <code>tutar</code>) tırnaksız, etiketler tırnaklı. Değişkenleri bir sonraki derste derinlemesine ele alacağız.</p>
+<p>Dikkat et: değişken adları (<code>musteri</code>, <code>tutar</code>) tırnaksız, etiketler tırnaklı. Değişkenleri ayrı bir derste derinlemesine ele alacağız.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Gerçek programlarda input nerede?</h3>
@@ -538,7 +515,7 @@ print(type(deger), deger is None)</pre>
 <h3>Tip ipuçları: dinamik dilde belgeleme</h3>
 <p>Python 3'te değişkene beklenen türü yazabilirsin: <code>tutar: float = 1499.90</code>. Buna tip ipucu (type hint) denir. Python bunu çalışırken denetlemez; ama VS Code ve mypy gibi araçlar okur, yanlış türde atama yapınca altını çizer. Kurumsal projelerde fonksiyon imzalarında neredeyse standarttır; Orta seviyede ayrıntılı göreceksin.</p>
 <h3>Para için float mı?</h3>
-<p>Bankacılıkta kuruş hatası kabul edilmez ve <code>float</code> bazı ondalıkları tam temsil edemez (bir sonraki derste göreceksin). Finans yazılımları ya tutarı kuruş cinsinden <code>int</code> tutar (1499.90 TL yerine 149990 kuruş) ya da <code>decimal</code> modülünü kullanır. Raporlama ve analizde <code>float</code> yeterlidir; muhasebe kaydında değildir.</p>
+<p>Bankacılıkta kuruş hatası kabul edilmez ve <code>float</code> bazı ondalıkları tam temsil edemez (Sayılar dersinde göreceksin). Finans yazılımları ya tutarı kuruş cinsinden <code>int</code> tutar (1499.90 TL yerine 149990 kuruş) ya da <code>decimal</code> modülünü kullanır. Raporlama ve analizde <code>float</code> yeterlidir; muhasebe kaydında değildir.</p>
 <h3>Değişken aslında neye işaret eder?</h3>
 <p>Python'da her değer bellekte bir nesnedir (object) ve değişken ona bir referanstır. <code>a = b</code> dediğinde değer kopyalanmaz, ikinci bir etiket aynı nesneye takılır. Sayı ve metinler değiştirilemez olduğundan bunu fark etmezsin; ama liste gibi değiştirilebilir nesnelerde bu "kopyalama tuzağı"na dönüşür. Listeler dersinde başına gelmeden önce burada duymuş ol.</p>
 </section>
@@ -835,7 +812,7 @@ kelimeler = "  Kahve   Makinesi  Siyah ".split()
 print(kelimeler)
 print(" ".join(kelimeler))
 print(" | ".join(["Ad", "Şehir", "Tutar"]))</pre>
-<p><code>split()</code> ayraçsız çağrılırsa her türlü boşluktan böler ve fazla boşlukları yok sayar; dağınık metni kelimelere ayırmanın en kolay yolu budur. <code>join</code>'in yazımına dikkat: ayraç önde, liste parantez içinde. Listeleri bir sonraki derste ayrıntılı göreceksin.</p>
+<p><code>split()</code> ayraçsız çağrılırsa her türlü boşluktan böler ve fazla boşlukları yok sayar; dağınık metni kelimelere ayırmanın en kolay yolu budur. <code>join</code>'in yazımına dikkat: ayraç önde, liste parantez içinde. Listeleri ilerideki Listeler dersinde ayrıntılı göreceksin.</p>
 
 <h2>f-string: değişkeni metne yerleştirmek</h2>
 <p>Rapor satırı üretmek için + ile birleştirmek hem yorucu hem hataya açıktır (sayıları str'ye çevirmek gerekir). <b>f-string</b> çözümdür: tırnağın önüne <code>f</code> koy, süslü parantez içine değişken ya da ifade yaz.</p>
@@ -871,7 +848,7 @@ sehir = sehir.upper()         # yeni metni aynı ada bağla
 print(sehir)
 yeni = "İ" + sehir[1:]        # ilk harfi değiştirmek: yeni metin kur
 print(yeni)</pre>
-<p>Değişmezlik ilk bakışta kısıtlama gibi dursa da bir güvencedir: bir metni fonksiyona verdiğinde fonksiyonun onu bozmayacağını bilirsin. Listelerde bu güvence yoktur ve bunun sonuçlarını bir sonraki derste yaşayacaksın.</p>
+<p>Değişmezlik ilk bakışta kısıtlama gibi dursa da bir güvencedir: bir metni fonksiyona verdiğinde fonksiyonun onu bozmayacağını bilirsin. Listelerde bu güvence yoktur ve bunun sonuçlarını Listeler dersinde göreceksin.</p>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Veri temizliğinin standart hattı</h3>
@@ -1699,6 +1676,7 @@ match durum:
     'Sayaç, toplam biriktirme ve "en büyüğü bul" kalıplarını ezbere yazabilirim.'
   ],
   body: `
+<div class="note"><b>Önce küçük bir not</b>Döngülerde sık göreceğin <code>[10, 20, 30]</code> yazımı bir <b>liste</b>dir: birkaç değeri sırayla tutar. Şimdilik bu kadarını bilmen yeter; ayrıntısı bir sonraki modülde, Listeler dersinde.</div>
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'te bir günde yüzlerce sipariş oluşur. "Her siparişin tutarını topla", "İstanbul'a gidenleri say", "stoğu 5'in altına düşen ilk ürünü bul" gibi işler aynı adımı tekrar tekrar uygulamaktır. Bilgisayarın asıl gücü de budur: tekrar. Döngü (loop) bu tekrarı sen yorulmadan yapar.</p>
 
@@ -1835,7 +1813,7 @@ print(max(siparisler, key=lambda s: s[1]))</pre>
       tests: 'veri = [{"id": 1001, "tutar": 900.0}, {"id": 1002, "tutar": 820.0}, {"id": 1003, "tutar": 930.0}, {"id": 1004, "tutar": 3200.0}]\nassert ilk_buyuk_siparis(veri, 850) == 1001, "850 eşiği için ilk büyük sipariş 1001 olmalı"\nassert ilk_buyuk_siparis(veri, 920) == 1003, "920 eşiği için 1003 olmalı"\nassert ilk_buyuk_siparis(veri, 900) == 1003, "900 eşiğinde eşit olan sayılmaz, 1003 dönmeli"\nassert ilk_buyuk_siparis(veri, 5000) is None, "hiç büyük sipariş yoksa None dönmeli"\nassert ilk_buyuk_siparis([], 0) is None, "boş liste için None dönmeli"\n',
       hints: ['Döngü içinde koşul sağlanınca return s["id"] yaz; return döngüyü de bitirir.', 'Döngü bittiğinde hâlâ fonksiyondaysan hiç bulunamamıştır: return None.'],
       why: 'Fonksiyon içindeki return, break gibi döngüyü keser ve değeri döndürür. Döngüden sonra gelen return None "bulunamadı" durumudur; for-else ile de yazılabilir.' },
-    { t: 'code', id: 'donguler-3',
+    { erken: true, t: 'code', id: 'donguler-3',
       q: '<p><code>sehir_sayaci(siparisler)</code> fonksiyonu her şehre kaç sipariş düştüğünü sözlük olarak döndürsün. Örnek: <code>{"Ankara": 2, "İzmir": 1}</code>. Siparişler <code>"sehir"</code> anahtarlı sözlüklerdir. Sayaç kalıbını sözlükle kur (<code>dict.get</code> işine yarar).</p>',
       start: 'def sehir_sayaci(siparisler):\n    sayac = {}\n    for s in siparisler:\n        pass\n    return sayac\n',
       sol: 'def sehir_sayaci(siparisler):\n    sayac = {}\n    for s in siparisler:\n        sehir = s["sehir"]\n        sayac[sehir] = sayac.get(sehir, 0) + 1\n    return sayac\n',
@@ -2212,7 +2190,7 @@ print(random.sample(range(1000, 2000), 3))</pre>
       q: '<p>Aşağıdaki kod <code>global</code> kullanarak <code>toplam_islem</code> sayacını artırıyor. Kodu globalsiz, saf bir fonksiyona çevir: <code>islem_ekle(sayac, tutar)</code> fonksiyonu mevcut sayaç değerini ve tutarı alsın, tutar 0\'dan büyükse sayacı 1 artırılmış olarak, değilse aynı değerle döndürsün. Global değişken kullanma.</p>',
       start: 'toplam_islem = 0\n\ndef islem_ekle(tutar):\n    global toplam_islem\n    if tutar > 0:\n        toplam_islem += 1\n\n# islem_ekle(sayac, tutar) olarak yeniden yaz\n',
       sol: 'def islem_ekle(sayac, tutar):\n    if tutar > 0:\n        return sayac + 1\n    return sayac\n',
-      tests: 'assert "global " not in __source__, "global anahtar sözcüğü kullanılmamalı"\nassert islem_ekle(0, 250) == 1, "pozitif tutar sayacı 1 artırmalı"\nassert islem_ekle(5, 0) == 5, "sıfır tutar sayacı değiştirmemeli"\nassert islem_ekle(5, -40) == 5, "negatif tutar sayacı değiştirmemeli"\ns = 0\nfor t in [100, -5, 30, 0, 70]:\n    s = islem_ekle(s, t)\nassert s == 3, "beş işlemden üçü pozitif: sayaç 3 olmalı"\n',
+      tests: 'assert "global " not in __kod__, "global anahtar sözcüğü kullanılmamalı"\nassert islem_ekle(0, 250) == 1, "pozitif tutar sayacı 1 artırmalı"\nassert islem_ekle(5, 0) == 5, "sıfır tutar sayacı değiştirmemeli"\nassert islem_ekle(5, -40) == 5, "negatif tutar sayacı değiştirmemeli"\ns = 0\nfor t in [100, -5, 30, 0, 70]:\n    s = islem_ekle(s, t)\nassert s == 3, "beş işlemden üçü pozitif: sayaç 3 olmalı"\n',
       hints: ['Fonksiyon iki parametre alsın: sayac ve tutar.', 'Değiştirmek yerine yeni değeri return et.'],
       why: 'Saf fonksiyon dış durumu değiştirmez: mevcut değeri parametre olarak alır, yeni değeri döndürür. Çağıran yer sonucu değişkene atar.' },
     { t: 'mc', q: 'Hangi import biçimi, bir modüldeki tüm adları dosyaya kontrolsüzce döktüğü için ekip kodunda kaçınılması gereken biçimdir?',
@@ -2414,7 +2392,7 @@ for sehir in ["İstanbul", "Çorum", "Iğdır", "Muş"]:
       start: 'def hesap_satiri(ad, tur, bakiye):\n    pass\n',
       sol: 'def hesap_satiri(ad, tur, bakiye):\n    return f"{ad:<16}{tur:<9}{bakiye:>14,.2f}"\n',
       tests: 's = hesap_satiri("Ayşe Yılmaz", "Vadesiz", 12500.5)\nassert len(s) == 39, "satır 39 karakter olmalı, gelen %d" % len(s)\nassert s.startswith("Ayşe Yılmaz     "), "ad 16 karakter sola hizalı olmalı"\nassert s[16:25] == "Vadesiz  ", "tür 9 karakter sola hizalı olmalı"\nassert s[25:] == "     12,500.50", "bakiye 14 karakter sağa hizalı, binlik ve 2 ondalık olmalı"\ns2 = hesap_satiri("Mehmet Can", "Vadeli", 830)\nassert s2 == "Mehmet Can      Vadeli           830.00", "ikinci satır: %r" % s2\n',
-      hints: ['Üç süslü parantezi yan yana yaz; aralarına boşluk koyma.', 'Metin için :<16, sayı için :>14,.2f'],
+      hints: ['Üç süslü parantezi yan yana yaz; aralarına boşluk koyma.', 'Metin için :&lt;16, sayı için :>14,.2f'],
       why: 'Sabit genişlikler sayesinde her satır aynı sütunlarda başlar; başlık satırıyla aynı genişlikler kullanılırsa tablo hizalı çıkar.' },
     { t: 'code', id: 'string-bicimleme-4',
       q: '<p>Aşağıdaki <code>hesaplar</code> listesinden bir tablo yazdır. Önce başlık satırı: <code>Müşteri</code> 14 karakter sola, <code>Bakiye</code> 12 karakter sağa hizalı. Sonra 26 tireden oluşan bir çizgi. Sonra her hesap için ad 14 sola, bakiye 12 sağa (binlik, 2 ondalık). En sonda yine 26 tire ve <code>TOPLAM</code> 14 sola, toplam bakiye 12 sağa.</p>',
@@ -2438,7 +2416,7 @@ for sehir in ["İstanbul", "Çorum", "Iğdır", "Muş"]:
     { q: 'f-string içinde süslü parantezin kendisini nasıl yazarım?', a: 'İki kere yaz: f"{{ve}}" çıktısı {ve} olur. Tek süslü parantez her zaman ifade başlangıcı sayılır.' },
     { q: 'Türkçe biçim (1.234,50) için locale kullanmalı mıyım?', a: 'locale sistem ayarına bağlıdır; tarayıcıda, Windows\'ta ve Linux sunucuda farklı sonuç verebilir. Küçük raporlarda replace ile takas güvenlidir; büyük projelerde Babel gibi paketler kullanılır.' },
     { q: 'Yuvarlama için round mu :.2f mi?', a: ':.2f yalnızca görünümü değiştirir, değer aynı kalır; round değeri değiştirir. Raporda :.2f, sonraki hesapta kullanılacak değerde round tercih edilir. Para hesabında ise decimal.Decimal.' },
-    { q: 'Tablo sütun genişliğini nasıl otomatik bulurum?', a: 'Her sütun için en uzun değerin uzunluğunu al: g = max(len(str(x)) for x in sutun) + 2. Sonra f"{deger:<{g}}" ile genişliği gömebilirsin.' }
+    { q: 'Tablo sütun genişliğini nasıl otomatik bulurum?', a: 'Her sütun için en uzun değerin uzunluğunu al: g = max(len(str(x)) for x in sutun) + 2. Sonra f"{deger:&lt;{g}}" ile genişliği gömebilirsin.' }
   ],
   mistakes: [
     { bad: 'print(f"{bakiye:2f}")', good: 'print(f"{bakiye:.2f}")', why: 'Nokta olmadan 2, genişlik sayılır; ondalık sayısı için .2 gerekir.' },
@@ -2607,7 +2585,7 @@ for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
       q: '<p><code>kritik_satirlar(yol, anahtar)</code> fonksiyonu dosyayı <b>satır satır</b> okusun ve içinde <code>anahtar</code> metni geçen satırları (baştaki ve sondaki boşluklar temizlenmiş halde) liste olarak döndürsün. <code>read()</code> kullanma; dosya nesnesi üzerinde for ile dön.</p>',
       start: 'def kritik_satirlar(yol, anahtar):\n    bulunanlar = []\n    pass\n    return bulunanlar\n',
       sol: 'def kritik_satirlar(yol, anahtar):\n    bulunanlar = []\n    with open(yol, encoding="utf-8") as f:\n        for satir in f:\n            satir = satir.strip()\n            if anahtar in satir:\n                bulunanlar.append(satir)\n    return bulunanlar\n',
-      tests: 'with open("stok.log", "w", encoding="utf-8") as f:\n    f.write("Kulaklık stok: 12\\nKlavye stok: 3 KRITIK\\nMouse stok: 25\\nMonitör stok: 0 KRITIK\\n")\nassert kritik_satirlar("stok.log", "KRITIK") == ["Klavye stok: 3 KRITIK", "Monitör stok: 0 KRITIK"], "KRITIK geçen iki satır dönmeli"\nassert kritik_satirlar("stok.log", "Mouse") == ["Mouse stok: 25"], "Mouse satırı dönmeli, satır sonu temizlenmiş olmalı"\nassert kritik_satirlar("stok.log", "Webcam") == [], "eşleşme yoksa boş liste"\nassert ".read()" not in __source__, "read() yerine satır satır oku"\n',
+      tests: 'with open("stok.log", "w", encoding="utf-8") as f:\n    f.write("Kulaklık stok: 12\\nKlavye stok: 3 KRITIK\\nMouse stok: 25\\nMonitör stok: 0 KRITIK\\n")\nassert kritik_satirlar("stok.log", "KRITIK") == ["Klavye stok: 3 KRITIK", "Monitör stok: 0 KRITIK"], "KRITIK geçen iki satır dönmeli"\nassert kritik_satirlar("stok.log", "Mouse") == ["Mouse stok: 25"], "Mouse satırı dönmeli, satır sonu temizlenmiş olmalı"\nassert kritik_satirlar("stok.log", "Webcam") == [], "eşleşme yoksa boş liste"\nassert ".read()" not in __kod__, "read() yerine satır satır oku"\n',
       hints: ['for satir in f: her turda bir satır verir.', 'strip() ile satır sonunu temizle, sonra in ile kontrol et.'],
       why: 'Dosya nesnesi yinelenebilirdir; satır satır okumak belleği korur. strip olmadan satır sonundaki \\n listeye girer.' },
     { t: 'code', id: 'dosya-islemleri-4',
@@ -3030,14 +3008,14 @@ print("\\nDosyadan geri okundu, satır sayısı:", len(open("gunluk_rapor.txt", 
       start: 'def temizle(ham):\n    temiz = []\n    atlanan = 0\n    for s in ham:\n        try:\n            pass\n        except (KeyError, ValueError, TypeError):\n            atlanan += 1\n    return temiz, atlanan\n',
       sol: 'def temizle(ham):\n    temiz = []\n    atlanan = 0\n    for s in ham:\n        try:\n            kayit = dict(s)\n            kayit["adet"] = int(s["adet"])\n            kayit["birim_fiyat"] = float(s["birim_fiyat"])\n            if kayit["adet"] <= 0:\n                raise ValueError("adet pozitif olmalı")\n            temiz.append(kayit)\n        except (KeyError, ValueError, TypeError):\n            atlanan += 1\n    return temiz, atlanan\n',
       tests: 'ham = [\n    {"id": 1, "sehir": "Ankara", "urun": "Mouse", "adet": "3", "birim_fiyat": "349.5"},\n    {"id": 2, "sehir": "İzmir", "urun": "Klavye", "adet": "yok", "birim_fiyat": 1249},\n    {"id": 3, "sehir": "Bursa", "urun": "Kulaklık", "adet": 1},\n    {"id": 4, "sehir": "Ankara", "urun": "Monitör", "adet": 0, "birim_fiyat": 4599.0},\n    {"id": 5, "sehir": "İzmir", "urun": "Mouse", "adet": 2, "birim_fiyat": None},\n]\ntemiz, atlanan = temizle(ham)\nassert atlanan == 4, "4 kayıt atlanmalı (metin adet, eksik fiyat, sıfır adet, None fiyat)"\nassert len(temiz) == 1 and temiz[0]["id"] == 1, "yalnız 1 numaralı kayıt kalmalı"\nassert temiz[0]["adet"] == 3 and isinstance(temiz[0]["adet"], int), "adet int 3 olmalı"\nassert temiz[0]["birim_fiyat"] == 349.5 and isinstance(temiz[0]["birim_fiyat"], float), "birim_fiyat float 349.5 olmalı"\nassert ham[0]["adet"] == "3", "orijinal kayıt değiştirilmemeli (kopya üzerinde çalış)"\nassert temizle([]) == ([], 0), "boş liste için ([], 0)"\n',
-      hints: ['dict(s) ile kopya al; orijinali değiştirme.', 'int ve float dönüşümleri try içinde; adet <= 0 için raise ValueError.', 'float(None) TypeError fırlatır; demet içindeki üç tür bunu da yakalar.'],
+      hints: ['dict(s) ile kopya al; orijinali değiştirme.', 'int ve float dönüşümleri try içinde; adet &lt;= 0 için raise ValueError.', 'float(None) TypeError fırlatır; demet içindeki üç tür bunu da yakalar.'],
       why: 'Hata döngü içinde yakalanır, bozuk kayıt sayılır ve iş devam eder. Kopya üzerinde çalışmak çağıranın verisini bozmaz.' },
     { t: 'code', id: 'proje-temel-5',
       q: '<p><b>Adım 5.</b> Verilen yardımcı fonksiyonları kullanarak <code>rapor_metni(siparisler)</code> fonksiyonunu yaz. Tam olarak şu satırları <code>"\\n"</code> ile birleştirip döndürsün:</p><ol><li><code>ANADOLU MARKET GÜNLÜK RAPOR</code></li><li><code>Sipariş sayısı: N</code></li><li><code>Toplam ciro: X TL</code> (X binlik ayırıcılı, 2 ondalık)</li><li>Ciroya göre <b>büyükten küçüğe</b> sıralı her şehir için: şehir adı 10 karakter sola yaslı, ardından ciro 12 karakter sağa yaslı binlik ayırıcılı 2 ondalık, ardından <code> TL</code></li><li><code>En çok satan: URUN (ADET adet)</code></li></ol>',
       start: 'def siparis_tutari(s):\n    return round(s["adet"] * s["birim_fiyat"], 2)\n\ndef toplam_ciro(siparisler):\n    return round(sum(siparis_tutari(s) for s in siparisler), 2)\n\ndef sehre_gore_ciro(siparisler):\n    ciro = {}\n    for s in siparisler:\n        ciro[s["sehir"]] = round(ciro.get(s["sehir"], 0.0) + siparis_tutari(s), 2)\n    return ciro\n\ndef en_cok_satan(siparisler):\n    adetler = {}\n    for s in siparisler:\n        adetler[s["urun"]] = adetler.get(s["urun"], 0) + s["adet"]\n    if not adetler:\n        return None, 0\n    urun = max(adetler, key=adetler.get)\n    return urun, adetler[urun]\n\ndef rapor_metni(siparisler):\n    satirlar = ["ANADOLU MARKET GÜNLÜK RAPOR"]\n    # satırları ekle\n    return "\\n".join(satirlar)\n',
       sol: 'def siparis_tutari(s):\n    return round(s["adet"] * s["birim_fiyat"], 2)\n\ndef toplam_ciro(siparisler):\n    return round(sum(siparis_tutari(s) for s in siparisler), 2)\n\ndef sehre_gore_ciro(siparisler):\n    ciro = {}\n    for s in siparisler:\n        ciro[s["sehir"]] = round(ciro.get(s["sehir"], 0.0) + siparis_tutari(s), 2)\n    return ciro\n\ndef en_cok_satan(siparisler):\n    adetler = {}\n    for s in siparisler:\n        adetler[s["urun"]] = adetler.get(s["urun"], 0) + s["adet"]\n    if not adetler:\n        return None, 0\n    urun = max(adetler, key=adetler.get)\n    return urun, adetler[urun]\n\ndef rapor_metni(siparisler):\n    satirlar = ["ANADOLU MARKET GÜNLÜK RAPOR"]\n    satirlar.append(f"Sipariş sayısı: {len(siparisler)}")\n    satirlar.append(f"Toplam ciro: {toplam_ciro(siparisler):,.2f} TL")\n    sehirler = sehre_gore_ciro(siparisler)\n    for sehir, ciro in sorted(sehirler.items(), key=lambda x: x[1], reverse=True):\n        satirlar.append(f"{sehir:<10}{ciro:>12,.2f} TL")\n    urun, adet = en_cok_satan(siparisler)\n    satirlar.append(f"En çok satan: {urun} ({adet} adet)")\n    return "\\n".join(satirlar)\n',
       tests: 'S = [\n    {"id": 1001, "sehir": "Ankara", "urun": "Kulaklık", "adet": 2, "birim_fiyat": 899.90},\n    {"id": 1002, "sehir": "İzmir", "urun": "Klavye", "adet": 1, "birim_fiyat": 1249.00},\n    {"id": 1003, "sehir": "Ankara", "urun": "Mouse", "adet": 3, "birim_fiyat": 349.50},\n    {"id": 1004, "sehir": "İstanbul", "urun": "Kulaklık", "adet": 1, "birim_fiyat": 899.90},\n    {"id": 1005, "sehir": "İzmir", "urun": "Mouse", "adet": 2, "birim_fiyat": 349.50},\n    {"id": 1006, "sehir": "Ankara", "urun": "Monitör", "adet": 1, "birim_fiyat": 4599.00},\n]\nbeklenen = "\\n".join([\n    "ANADOLU MARKET GÜNLÜK RAPOR",\n    "Sipariş sayısı: 6",\n    "Toplam ciro: 10,295.20 TL",\n    "Ankara        7,447.30 TL",\n    "İzmir         1,948.00 TL",\n    "İstanbul        899.90 TL",\n    "En çok satan: Mouse (5 adet)",\n])\ngelen = rapor_metni(S)\nassert gelen == beklenen, "rapor metni beklenenle aynı olmalı:\\n" + beklenen + "\\n--- gelen ---\\n" + gelen\nbos = rapor_metni([])\nassert "Sipariş sayısı: 0" in bos and "Toplam ciro: 0.00 TL" in bos, "boş liste için 0 sipariş ve 0.00 TL"\n',
-      hints: ['Her satırı f-string ile satirlar listesine ekle.', 'sorted(sehirler.items(), key=lambda x: x[1], reverse=True) ciroya göre büyükten küçüğe sıralar.', 'Şehir satırı: f"{sehir:<10}{ciro:>12,.2f} TL"'],
+      hints: ['Her satırı f-string ile satirlar listesine ekle.', 'sorted(sehirler.items(), key=lambda x: x[1], reverse=True) ciroya göre büyükten küçüğe sıralar.', 'Şehir satırı: f"{sehir:&lt;10}{ciro:>12,.2f} TL"'],
       why: 'Rapor fonksiyonu hesap yapmaz; hazır fonksiyonları çağırıp satırları dizer. Sıralama için sorted ve key kullanılır; biçimleme f-string belirteçleriyle yapılır.' },
     { t: 'code', id: 'proje-temel-6',
       q: '<p><b>Adım 6.</b> <code>raporu_kaydet(metin, yol)</code> fonksiyonu metni dosyaya (utf-8, <code>"w"</code>) yazsın, sonuna bir satır sonu eklesin ve <b>yazılan satır sayısını</b> döndürsün. Satır sayısını dosyayı <b>geri okuyarak</b> hesapla.</p>',

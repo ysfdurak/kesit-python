@@ -913,7 +913,7 @@ loop = asyncio.new_event_loop()
 loop.run_until_complete(main())
 loop.close()
 </pre>
-<div class="tip"><b>Hata yönetimi</b><code>gather(..., return_exceptions=True)</code> bir iş hata verirse diğerlerini iptal etmez; sonuç listesinde o konuma istisna nesnesini koyar. Toplu sorgulamada "biri patladı diye hepsi çökmesin" istiyorsan bunu kullan.</div>
+<div class="tip"><b>Hata yönetimi</b>Varsayılan <code>gather</code>'da ilk hata hemen yükselir ama <b>diğer işler iptal edilmez</b>, arkada çalışmaya devam eder. <code>return_exceptions=True</code> hatayı yükseltmez, sonuç listesinde o konuma istisna nesnesini koyar. Biri hata verince hepsini birlikte iptal etmek için <code>asyncio.TaskGroup</code> kullan. Toplu sorgulamada "biri patladı diye hepsi çökmesin" istiyorsan bunu kullan.</div>
 
 <h2>create_task: arka planda başlat</h2>
 <p><code>gather</code> hepsini beklerken <code>asyncio.create_task(coro)</code> işi hemen zamanlar ve sana bir <b>Task</b> verir; sen başka şey yapar, istediğinde <code>await task</code> ile sonucu alırsın. Bir sayaç, bir ısıtma işlemi ya da sonucu sonra gereken sorgu için uygundur.</p>
@@ -1063,7 +1063,8 @@ L.push(
     title: 'threading, concurrent.futures ve GIL',
     sum: 'Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL\'in etkisi ve ProcessPoolExecutor kavramı; hangi iş için hangi araç.',
     goals: ['ThreadPoolExecutor ile I/O işlerini paralel çalıştırıp sonuçları toplayabilirim', 'Yarış durumunu (race condition) tanıyıp Lock ile önleyebilirim', 'queue.Queue ile üretici-tüketici kalıbı kurabilirim', 'GIL\'in thread ve process seçimini nasıl etkilediğini açıklayabilirim', 'asyncio, thread ve process arasında işe göre doğru aracı seçebilirim'],
-    body: `<h2>Üç araç, üç farklı iş</h2>
+    body: `<div class="warn"><b>Bu derste örnekler tarayıcıda farklı davranır</b>Tarayıcıdaki Python gerçek iş parçacığı başlatamaz: thread\'ler sırayla çalışır. Bu yüzden thread örneklerinde hız kazancı ya da yarış durumu burada görünmez. Her örneğin altında <b>kendi bilgisayarında beklenen çıktı</b> yazıyor; bu dersi bilgisayarında da çalıştırman iyi olur.</div>
+<h2>Üç araç, üç farklı iş</h2>
 <p>Anadolu Market\'in gece işi: 200 tedarikçi dosyasını indir (ağ beklemesi), her birini ayrıştır (hafif), sonra 2 milyon satırda fiyat optimizasyonu hesapla (ağır hesap). Üçü de "aynı anda daha çok iş" ister ama farklı araçlarla: ağ için thread ya da asyncio, ağır hesap için süreç (process). Bu dersin amacı doğru aracı seçmeyi ve paylaşılan veriyi güvenle korumayı öğretmek.</p>
 
 <h2>İş parçacığı (thread) ve havuz</h2>
@@ -1072,7 +1073,7 @@ L.push(
 from concurrent.futures import ThreadPoolExecutor, as_completed
 
 def indir(tedarikci: str) -&gt; str:
-    time.sleep(0.2)                       # sahte ağ beklemesi
+    time.sleep(0.1)                       # sahte ağ beklemesi
     return f"{tedarikci}.csv"
 
 tedarikciler = ["Ege", "Marmara", "Karadeniz", "Akdeniz", "Anadolu", "Trakya"]
@@ -1091,6 +1092,13 @@ with ThreadPoolExecutor(max_workers=6) as havuz:
     for f in as_completed(gelecekler):                  # bitiş sırasıyla
         print("bitti:", f.result())
 </pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (süre değişebilir, "bitti" sırası her seferinde farklı olabilir):
+sıralı: 0.60 s
+['Ege.csv', 'Marmara.csv', 'Karadeniz.csv', 'Akdeniz.csv', 'Anadolu.csv', 'Trakya.csv'] havuz(3): 0.20 s
+bitti: Marmara.csv
+bitti: Ege.csv
+…
+Tarayıcıda iki süre de 0.60 s görünür, çünkü thread\'ler sırayla çalışır.</pre>
 <div class="tip"><b>map mi submit mi?</b><code>map</code> girdi sırasında sonuç verir ve kısa yazılır. <code>submit</code> + <code>as_completed</code> biten işi hemen işlemene, hataları tek tek yakalamana izin verir; <code>f.result()</code> işçideki istisnayı burada yeniden fırlatır.</div>
 
 <h2>GIL: tek anda tek Python</h2>
@@ -1112,11 +1120,11 @@ with ThreadPoolExecutor(max_workers=4) as havuz:
 coklu = time.perf_counter() - t0
 print(f"sıralı {tek:.2f} s, 4 thread {coklu:.2f} s -&gt; GIL yüzünden kazanç yok")
 </pre>
-<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL\'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python\'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel "free-threaded" yapı GIL\'siz çalışabiliyor ama henüz varsayılan değil.</div>
+<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL\'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python\'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14\'te resmî destek kazanan "free-threaded" yapı GIL\'siz çalışabiliyor ama varsayılan değil ve henüz varsayılan değil.</div>
 
 <h2>Yarış durumu ve Lock</h2>
 <p>İki thread aynı sayacı artırırsa ne olur? <code>sayac += 1</code> aslında oku-artır-yaz üç adımdır; GIL adımların arasında thread değiştirebilir ve bir artış kaybolur. Buna <b>yarış durumu</b> (race condition) denir. Çözüm: paylaşılan veriye erişimi <code>threading.Lock</code> ile tek seferde bir thread\'e vermek.</p>
-<pre class="py">import threading
+<pre class="py">import threading, time
 from concurrent.futures import ThreadPoolExecutor
 
 bakiye = 0
@@ -1126,8 +1134,8 @@ def yatir_guvensiz(n):
     global bakiye
     for _ in range(n):
         tmp = bakiye            # oku
-        tmp += 1                # artır
-        bakiye = tmp            # yaz  (arada başka thread girebilir)
+        time.sleep(0)           # başka thread'e sıra ver: yarışı görünür kılar
+        bakiye = tmp + 1        # yaz
 
 def yatir_guvenli(n):
     global bakiye
@@ -1138,9 +1146,13 @@ def yatir_guvenli(n):
 for fn in (yatir_guvensiz, yatir_guvenli):
     bakiye = 0
     with ThreadPoolExecutor(max_workers=4) as havuz:
-        list(havuz.map(fn, [50_000] * 4))
-    print(fn.__name__, "beklenen 200000, gelen", bakiye)
+        list(havuz.map(fn, [2_000] * 4))
+    print(fn.__name__, "beklenen 8000, gelen", bakiye)
 </pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (ilk sayı her çalıştırmada farklı olur, 8000'den küçüktür):
+yatir_guvensiz beklenen 8000, gelen 2004
+yatir_guvenli beklenen 8000, gelen 8000
+Tarayıcıda ikisi de 8000 görünür, çünkü thread'ler sırayla çalışır: yarış burada oluşmaz.</pre>
 <div class="warn"><b>Kilit her yerde değil</b>Kilit tutulan süre kısa olsun; kilit içinde I/O yapma. Birden çok kilit varsa hep aynı sırada al, yoksa karşılıklı bekleme (deadlock) oluşur. Mümkünse paylaşılan durumdan kaçın: her işçi kendi sonucunu döndürsün, ana thread toplasın.</div>
 
 <h2>queue ile üretici-tüketici</h2>
@@ -1173,13 +1185,17 @@ kuyruk.join()
 print("işlenen sipariş:", sorted(s for _, s in islenen))
 print("işçi başına:", {ad: sum(1 for a, _ in islenen if a == ad) for ad in ("isci0", "isci1", "isci2")})
 </pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (dağılım her seferinde değişir):
+işlenen sipariş: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010]
+işçi başına: {'isci0': 3, 'isci1': 3, 'isci2': 4}
+Tarayıcıda işin tamamını ilk işçi yapar: {'isci0': 10, 'isci1': 0, 'isci2': 0}.</pre>
 
 <h2>Hangi iş için hangisi?</h2>
 <div class="tbl-wrap"><table><tr><th>İş türü</th><th>Araç</th><th>Neden</th></tr>
 <tr><td>Çok sayıda ağ/disk beklemesi, kütüphane async destekliyor</td><td>asyncio</td><td>Tek thread, binlerce bağlantı, düşük bellek</td></tr>
 <tr><td>Ağ/disk beklemesi, kütüphane senkron (requests, sqlite)</td><td>ThreadPoolExecutor</td><td>Kodu değiştirmeden paralel; GIL beklerken bırakılır</td></tr>
 <tr><td>Saf Python CPU hesabı</td><td>ProcessPoolExecutor</td><td>GIL\'i aşar, çekirdekleri kullanır</td></tr>
-<tr><td>Sayısal hesap</td><td>numpy/pandas (önce bunu dene)</td><td>C döngüsü GIL\'i bırakır; çoğu zaman paralelliğe gerek kalmaz</td></tr>
+<tr><td>Sayısal hesap</td><td>numpy/pandas (önce bunu dene)</td><td>Vektörel işlem C'de çalışır, çoğu zaman tek çekirdekte bile en hızlısıdır; numpy birçok döngüde GIL\'i bırakır, pandas\'ta bu işleme göre değişir</td></tr>
 <tr><td>Basit betik</td><td>Hiçbiri</td><td>Karmaşıklık maliyeti kazancı geçer</td></tr>
 </table></div>
 
@@ -2618,7 +2634,7 @@ print(r.status_code, r.json(), 'beklemeler:', bekleme)
         start: 'import re\n\nclass HTTPHata(Exception):\n    def __init__(self, kod, detay):\n        self.kod, self.detay = kod, detay\n\nclass Uygulama:\n    def __init__(self):\n        self.rotalar = []\n    # rota, istek\n',
         sol: 'import re\n\nclass HTTPHata(Exception):\n    def __init__(self, kod, detay):\n        self.kod, self.detay = kod, detay\n\nclass Uygulama:\n    def __init__(self):\n        self.rotalar = []\n\n    def rota(self, yontem, desen):\n        rx = re.compile(\'^\' + re.sub(r\'\\{(\\w+)\\}\', r\'(?P<\\1>[^/]+)\', desen) + \'$\')\n        def kaydet(fn):\n            self.rotalar.append((yontem, rx, fn))\n            return fn\n        return kaydet\n\n    def istek(self, yontem, yol, govde=None):\n        yol_eslesti = False\n        for y, rx, fn in self.rotalar:\n            m = rx.match(yol)\n            if not m:\n                continue\n            yol_eslesti = True\n            if y != yontem:\n                continue\n            try:\n                return 200, fn(**m.groupdict(), govde=govde)\n            except HTTPHata as e:\n                return e.kod, {\'detail\': e.detay}\n        if yol_eslesti:\n            return 405, {\'detail\': \'yöntem desteklenmiyor\'}\n        return 404, {\'detail\': \'rota yok\'}\n',
         tests: 'app = Uygulama()\nDB = {\'1\': {\'id\': 1, \'ad\': \'kahve\'}}\n@app.rota(\'GET\', \'/urunler/{no}\')\ndef getir(no, govde=None):\n    if no not in DB:\n        raise HTTPHata(404, \'ürün yok\')\n    return DB[no]\n@app.rota(\'POST\', \'/urunler\')\ndef ekle(govde):\n    return {\'eklendi\': govde[\'ad\']}\nassert app.istek(\'GET\', \'/urunler/1\') == (200, {\'id\': 1, \'ad\': \'kahve\'}), "Yol parametresi ile GET"\nassert app.istek(\'GET\', \'/urunler/9\') == (404, {\'detail\': \'ürün yok\'}), "HTTPHata koda dönmeli"\nassert app.istek(\'POST\', \'/urunler\', {\'ad\': \'çay\'}) == (200, {\'eklendi\': \'çay\'}), "POST gövde"\nassert app.istek(\'DELETE\', \'/urunler\')[0] == 405, "Yol var yöntem yok: 405"\nassert app.istek(\'GET\', \'/yok\') == (404, {\'detail\': \'rota yok\'}), "Bilinmeyen yol 404"\nassert getir(\'1\') == DB[\'1\'], "Dekoratör fonksiyonu aynen döndürmeli"\n',
-        hints: ['Deseni regex\'e çevir: {ad} -> (?P<ad>[^/]+).', 'Yol eşleşti ama yöntem farklıysa bayrak tut; döngü sonunda 405 döndür.'],
+        hints: ['Deseni regex\'e çevir: {ad} -> (?P&lt;ad>[^/]+).', 'Yol eşleşti ama yöntem farklıysa bayrak tut; döngü sonunda 405 döndür.'],
         why: 'Gerçek çerçeveler de aynı şeyi yapar: desen -> regex, eşleşme -> fonksiyon çağrısı, istisna -> durum kodu. 405 ayrımı, istemciye yolun doğru ama yöntemin yanlış olduğunu söyler.' },
       { t: 'code', id: 'api-web-7',
         q: '<p>Sayfalı API tüketimi. Sahte istemcinin <code>get(yol, params)</code> metodu <code>{\'items\': [...], \'next\': sonraki_sayfa_veya_None}</code> döndüren <code>SahteYanit</code> verir. <code>tum_siparisler(client, yol=\'/siparisler\')</code> fonksiyonu <code>page=1</code>\'den başlayıp <code>next</code> None olana kadar tüm <code>items</code>\'ı tek listede toplayıp döndürsün. Her yanıtta <code>raise_for_status()</code> çağır. Sahte istemci ve 3 sayfalık veri start kodunda hazır.</p>',
@@ -3574,8 +3590,8 @@ print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
       start: 'def ikili_ara(sirali, hedef):\n    lo, hi = 0, len(sirali) - 1\n    adim = 0\n    pass\n',
       sol: 'def ikili_ara(sirali, hedef):\n    lo, hi = 0, len(sirali) - 1\n    adim = 0\n    while lo <= hi:\n        adim += 1\n        mid = (lo + hi) // 2\n        if sirali[mid] == hedef:\n            return (mid, adim)\n        if sirali[mid] < hedef:\n            lo = mid + 1\n        else:\n            hi = mid - 1\n    return (-1, adim)\n',
       tests: 'veri = [3, 8, 15, 21, 42, 57, 60, 75]\nassert ikili_ara(veri, 21)[0] == 3, "21 indeks 3"\nassert ikili_ara(veri, 22)[0] == -1, "22 yok"\nassert ikili_ara([], 5) == (-1, 0), "boş liste 0 adım"\nassert ikili_ara([7], 7) == (0, 1), "tek eleman 1 adım"\nbuyuk = list(range(0, 2000000, 2))\nidx, adim = ikili_ara(buyuk, 1999998)\nassert idx == 999999, "son eleman"\nassert adim <= 21, f"1 milyon elemanda en çok ~20 adım olmalı, {adim} adım yapıldı"\n',
-      hints: ['while lo <= hi: mid = (lo + hi) // 2.', 'Küçükse lo = mid + 1, büyükse hi = mid - 1.'],
-      why: 'Zaman O(log n), bellek O(1). Her tur arama aralığını yarılar; 1 milyon eleman için en çok 20-21 adım. lo <= hi koşulu tek elemanlı aralığı da kontrol eder.' },
+      hints: ['while lo &lt;= hi: mid = (lo + hi) // 2.', 'Küçükse lo = mid + 1, büyükse hi = mid - 1.'],
+      why: 'Zaman O(log n), bellek O(1). Her tur arama aralığını yarılar; 1 milyon eleman için en çok 20-21 adım. lo &lt;= hi koşulu tek elemanlı aralığı da kontrol eder.' },
     { t: 'code', id: 'mulakat-hazirlik-6',
       q: '<p>BFS: <code>en_kisa_adim(graf, bas, hedef)</code> komşuluk sözlüğü (<code>{dugum: [komsular]}</code>) verilen yönsüz grafta <code>bas</code>\'tan <code>hedef</code>\'e en az kaç kenar geçildiğini döndürsün; ulaşılamıyorsa <code>-1</code>. <code>bas == hedef</code> ise 0. <code>collections.deque</code> kullan.</p>',
       start: 'from collections import deque\n\ndef en_kisa_adim(graf, bas, hedef):\n    pass\n',
@@ -3594,7 +3610,7 @@ print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
   faq: [
     { q: 'Mülakatta çözümü hatırlayamazsam ne yapmalıyım?', a: 'Kaba çözümü yaz ve karmaşıklığını söyle; sonra "sözlükle iyileştirebilirim" gibi yönü belirt. Çalışan O(n²) çözüm, bitmemiş O(n) çözümden iyidir. Mülakatçıdan ipucu istemek de puan kaybettirmez; sessiz kalmak kaybettirir.' },
     { q: 'Hangi dili/araçları bildiğimi nasıl kanıtlarım?', a: 'Kodda Pythonic kalıplar kullan: enumerate, zip, comprehension, setdefault, deque, Counter. Big-O ve bellek yorumunu kendin ekle. Küçük bir test (assert) yazmak güçlü bir sinyaldir.' },
-    { q: 'GIL sorusunda ne kadar derine inmeliyim?', a: 'Üç cümle: ne olduğu, neden I/O için threading işe yarar (bekleme sırasında kilit bırakılır), CPU işi için multiprocessing ya da C uzantıları (numpy) kullanılır. Python 3.13 ile deneysel serbest iş parçacığı (free-threaded) derlemesinin varlığını bilmek artı puan.' },
+    { q: 'GIL sorusunda ne kadar derine inmeliyim?', a: 'Üç cümle: ne olduğu, neden I/O için threading işe yarar (bekleme sırasında kilit bırakılır), CPU işi için multiprocessing ya da C uzantıları (numpy) kullanılır. Python 3.13\'te deneysel gelip 3.14\'te resmî destek kazanan serbest iş parçacığı (free-threaded) derlemesinin varlığını bilmek artı puan.' },
     { q: 'Ev ödevi projesinde en çok neye bakıyorlar?', a: 'README, testler, temiz yapı ve hata yönetimi. Fazla özellik eklemek yerine istenen işi eksiksiz, test edilmiş ve okunur biçimde teslim et.' }
   ],
   mistakes: [
