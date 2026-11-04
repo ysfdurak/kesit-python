@@ -93,7 +93,7 @@ Pyodide'ın kendi paketlerinde olmayanlar `pypaket/` klasöründen gerekince ine
 ## Yayın
 
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.
-- **claude.ai artifact:** kökteki `index.html` sayfa, diğer kök `*.js` dosyaları ve `data/**` (CSV + manifest) ek dosya olarak yayımlanır (yaklaşık 97 dosya, 30 MB). Yayından önce U+FFFD karakteri olmadığını denetleyin: `grep -c $'\xef\xbf\xbd' *.js index.html`.
+- **claude.ai artifact:** kökteki `index.html` sayfa, diğer kök `*.js` dosyaları, `data/**` (CSV + manifest) ve `pypaket/**` ek dosya olarak yayımlanır (yaklaşık 110 dosya, 43 MB). `pypaket/` atlanırsa Excel, Word, PDF, seaborn ve plotly görevleri "Bu paket inemedi" der; `.whl` dosyalarının artifact olarak yayımlanması denenmedi. Yayından önce U+FFFD karakteri olmadığını denetleyin: `grep -c $'\xef\xbf\xbd' *.js index.html`.
 
 ## Bilinen tarayıcı (Pyodide) farkları — `kaynak/pyworker.js` PRELUDE'unda çözüldü
 
