@@ -71,12 +71,12 @@ X.push(
    "stage": "Kendi bilgisayarında",
    "q": "<p>Dersteki küçük DAG benzetiminin gerçeğini kur. Airflow tarayıcıda çalışmaz, Windows'ta WSL ya da Docker ister. Bu dosya bu ortamda çalıştırılmadı.</p>",
    "steps": [
-    "Sanal ortamda Airflow'u kur: resmî kurulum sayfasındaki sürüm kısıtlı komutu kullan.",
+    "Sanal ortamda Airflow 3'ü kur: resmî kurulum sayfasındaki sürüm kısıtlı komutu kullan. Kod Airflow 3 içindir; 2.x'te içe aktarma <code>from airflow.decorators import dag, task</code> olur.",
     "<code>airflow standalone</code> ile başlat; arayüz <code>http://localhost:8080</code>.",
     "Kodu <code>~/airflow/dags/satis.py</code> olarak kaydet.",
     "Komutla bir tarih için dene. Sonra arayüzden yeniden deneme ve <code>catchup</code> davranışına bak."
    ],
-   "file": "from datetime import datetime, timedelta\n\nfrom airflow.decorators import dag, task\n\n@dag(schedule=\"@daily\", start_date=datetime(2024, 10, 1), catchup=False, default_args={\"retries\": 2, \"retry_delay\": timedelta(minutes=5)})\ndef satis_etl():\n    @task\n    def cikar(ds=None):\n        return {\"tarih\": ds, \"satir\": 3}\n\n    @task\n    def yukle(sonuc):\n        print(\"yuklendi\", sonuc)\n\n    yukle(cikar())\n\nsatis_etl()\n",
+   "file": "from datetime import datetime, timedelta\n\nfrom airflow.sdk import dag, task\n\n@dag(schedule=\"@daily\", start_date=datetime(2024, 10, 1), catchup=False, default_args={\"retries\": 2, \"retry_delay\": timedelta(minutes=5)})\ndef satis_etl():\n    @task\n    def cikar(ds=None):\n        return {\"tarih\": ds, \"satir\": 3}\n\n    @task\n    def yukle(sonuc):\n        print(\"yuklendi\", sonuc)\n\n    yukle(cikar())\n\nsatis_etl()\n",
    "fname": "satis.py",
    "cmd": "airflow dags test satis_etl 2024-10-01"
   }
