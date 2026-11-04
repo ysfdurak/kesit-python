@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Prompt mühendisliği ve yapılandırılmış çıktı</h1><p class="st-l">Sistem/kullanıcı istemi, rol ve kısıtlar, few-shot örnek seçimi, string.Template ve jinja2 şablonları, JSON çıktıyı pydantic ile doğrulayıp geri bildirimle yeniden deneme, katı şema üretme, token ve maliyet hesabı, sıcaklık ve top-p, ayraçlarla istem enjeksiyonu savunması ve istem sürümlemeyi sahte bir LLM ile Lezzet Kurye yorumları üzerinde uygularsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/prompt-muhendisligi">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>İstem de koddur</h2>
 <p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde bir modele istek göndermeyi, cevaptaki JSON'u ayıklamayı ve token maliyetini kabaca hesaplamayı gördün. Bu derste aynı işi <b>mühendislik disipliniyle</b> yaparsın. Lezzet Kurye'nin 3 979 değerlendirmesinden 2 366'sında yazılı yorum var ve ürün ekibi bunların konusunu (lezzet, teslimat, porsiyon...) ve duygusunu görmek istiyor. İlk denemede ChatGPT'ye "bu yorumları sınıflandır" yazmak işe yarıyor gibi görünür. Ama bu iş her gün çalışacak, çıktısı bir panoya akacak ve istem (prompt) değişince sonuçlar bozulmamalı. Bu yüzden istemi kod gibi ele alırsın: <b>şablon</b>, <b>doğrulama</b>, <b>sürüm</b>, <b>maliyet</b> ve <b>güvenlik</b> ile.</p>
@@ -302,6 +303,6 @@ print(s.ad, "v" + str(s.surum), s.parmak_izi, "|", s.aciklama)</pre>
 <p>İstem değişikliklerini sezgiyle değil, altın veri setinde A/B karşılaştırmasıyla seç. DSPy gibi araçlar örnek seçimini ve talimat metnini otomatik olarak optimize eder; temelde yaptıkları şey bu dersteki parçaları (şablon, örnek, doğrulama, ölçüm) bir döngüye bağlamaktır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/prompt-muhendisligi">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/prompt-muhendisligi/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../pdf-word-otomasyon/">← PDF ve Word belgeleriyle otomasyon</a><a href="../kapanis-kapsam/">Kapsam ve kapanışlar (closures) derinlemesine →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>API tasarımına giriş: HTTP, doğrulama ve ilk servis</h1><p class="st-l">HTTP'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda sahte istemci ve fonksiyon tabanlı yönlendiriciyle çalıştır.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/api-web">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>Kurumsal Python kodunun büyük bölümü bir ağ sınırında durur: Anadolu Market'in sipariş servisi kargo firmasının API'sine istek atar, Ilgaz Bank'ın kredi modülü skor servisinden yanıt bekler. Bu sınırda her şey ters gidebilir: zaman aşımı, 503, bozuk JSON, beklenmeyen alan. Bu derste HTTP'yi, istemci kütüphanelerini ve bir API yazmanın iskeletini öğreneceksin. Tarayıcıda ağ erişimi olmadığı için örnekler <b>sahte istemci</b> (fake client) ile çalışır; gerçek <code>requests</code>/<code>httpx</code>/FastAPI kodu gösterim olarak verilir. Sahte istemci yaklaşımı aynı zamanda ekiplerin birim testte kullandığı yöntemdir, boşa gitmez.</p>
 
@@ -310,6 +311,6 @@ print(dogrula(1_700_000_000, govde, imza, simdi=1_700_009_999))
 <p>Sunucu tarafında FastAPI'nin bağımlılık enjeksiyonu (<code>Depends</code>) veritabanı oturumu ve kimlik doğrulamayı uç noktadan ayırır. Asenkron uç noktalar (<code>async def</code>) yalnızca I/O beklerken kazanç sağlar; CPU ağırlıklı işi <code>run_in_executor</code> ya da ayrı işçiye ver. Sürümleme (<code>/v1/</code>), sayfalama (<code>limit/offset</code> ya da imleç), oran sınırlama (rate limit) ve OpenAPI belgesi, bir API'nin "üretime hazır" sayılması için beklenen asgari özelliklerdir.</p>
 <p>Devre kesici (circuit breaker) kalıbını da bil: dış servis art arda başarısız olunca bir süre hiç istek atmadan hızlı hata dön; böylece hem kendi hizmetin yavaşlamaz hem de karşı tarafa yük bindirmezsin.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/api-web">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/api-web/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../tip-sistemi-ileri/">← İleri tip sistemi: Generic, Protocol, TypedDict ve mypy</a><a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

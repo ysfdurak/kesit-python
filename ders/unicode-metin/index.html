@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Karakterler, Unicode ve Türkçe</h1><p class="st-l">ASCII, Unicode ve UTF-8 farkı, kod noktası ve ord/chr, kaçış dizileri ve ham dize, bytes ile encode/decode, encoding="utf-8", Türkçe I/İ tuzakları, Türk alfabesine göre sıralama ve unicodedata ile normalleştirmeyi öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/unicode-metin">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Bir harf neden bu kadar sorun çıkarır?</h2>
 <p>Anadolu Market'in müşteri listesini Excel'den aldın; "Şişli" yerine "ÅžiÅŸli", "İzmir" yerine "Ä°zmir" görüyorsun. Aramada "istanbul" yazan müşteri "İSTANBUL" kaydını bulamıyor. Alfabetik sıralı raporda "Çorum" listenin en sonunda, "Zonguldak"tan sonra çıkıyor. Bunların hepsi aynı kökten gelir: bilgisayar harf bilmez, <b>sayı</b> bilir. Bir harfin hangi sayıyla, o sayının da hangi baytlarla saklandığını anlamayan geliştirici, Türkçe veriyle her gün bu hatalarla boğuşur. Bu ders metinlerin "altını" gösteriyor: Unicode, UTF-8, bytes ve Türkçeye özel tuzaklar. Metin metotlarını (split, strip, replace) metinler dersinde gördün; burada karakterin kendisine iniyoruz.</p>
@@ -141,6 +142,6 @@ print(unicodedata.name("ğ"))</pre>
 <p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code style="overflow-wrap:anywhere">icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/unicode-metin">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/unicode-metin/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../terminal-temelleri/">← Terminal ve komut satırı</a><a href="../dongu-kaliplari/">Döngü kalıpları ve temel algoritmalar →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

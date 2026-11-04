@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma</h1><p class="st-l">re.search/match/findall/sub ile kalıp arar, gruplarla veri çıkarır, telefon/e-posta/IBAN benzeri doğrulamalar yazar ve regex tuzaklarından kaçınırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/regex">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
@@ -219,6 +220,6 @@ except ValueError as e:
 <p>Unicode: Python 3'te <code>\w</code> varsayılan olarak Türkçe harfleri de kapsar (<code>re.ASCII</code> bayrağı vermediğin sürece). Büyük/küçük harf duyarsız eşleşmede "İ/i" ve "I/ı" ayrımı yanıltabilir; kritik karşılaştırmalarda metni önce normalize et. Son olarak, bir kalıbı yazdıktan sonra dört beş örnek metinle etkileşimli olarak denemek (regex101 gibi araçlar ya da küçük bir Python döngüsü) hatayı üretime gitmeden yakalar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/regex">Alıştırmalara geç (22)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/regex/alistirma">Alıştırmalara geç (22)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../tarih-saat/">← Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi</a><a href="../json-csv/">JSON ve CSV: veri alışverişinin iki ortak dili →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

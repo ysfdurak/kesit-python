@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)</h1><p class="st-l">Fonksiyonları değer gibi kullanmayı öğrenir; lambda, map/filter/reduce, çok anahtarlı sorted, any/all, closure ve functools.partial ile veriyi kısa ve esnek biçimde işlersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonel">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Ilgaz Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
@@ -292,6 +293,6 @@ print(temizle("  Anadolu Market Rapor "))
 <p>pandas'ta <code>df["tutar"].map(f)</code> ve <code>df.apply(f, axis=1)</code>, bu dersteki map'in sütun üzerinde çalışan hali. Web çerçevelerinde yol (route) işleyicileri, olay dinleyicileri ve geri çağırma (callback) fonksiyonları hep "fonksiyonu argüman olarak geçir" kalıbıdır. Konfigürasyonla davranış üretme (şube bazlı komisyon, müşteri segmentine göre indirim) ise closure ve partial'ın doğal alanıdır; bu desenle bir "if şube == ... elif şube == ..." zincirinden kurtulursun.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonel">Alıştırmalara geç (23)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonel/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../iteratorler-uretecler/">← Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle</a><a href="../dekoratorler/">Dekoratörler (decorators) ve bağlam yöneticileri (context managers) →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

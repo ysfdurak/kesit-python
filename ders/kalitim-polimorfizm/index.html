@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Kalıtım (inheritance) ve polimorfizm</h1><p class="st-l">Ortak davranışı üst sınıfta toplar, super() ve metot ezmeyle özelleştirir, polimorfizmle farklı nesneleri aynı arayüzden kullanır; kompozisyon ve ABC ile tasarımı sağlamlaştırırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kalitim-polimorfizm">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
@@ -356,6 +357,6 @@ except TypeError as e:
 <p>İki-üç seviye derin hiyerarşiler okunabilir sınırdır. Beş seviye derin bir "Hesap → Mevduat → Vadeli → DövizVadeli → AltınVadeli" zinciri, bir metodun nerede ezildiğini bulmayı işkenceye çevirir. Derinleşiyorsa stratejiyi (vade kuralı, masraf kuralı) ayrı küçük nesnelere taşı ve kompozisyonla birleştir; "Tasarım kalıpları" dersinde bunun adı Strategy olacak.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kalitim-polimorfizm">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalitim-polimorfizm/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../siniflar-oop/">← Sınıflar: veri ve davranışı bir arada tutmak</a><a href="../dataclass-typing/">dataclass ve tip ipuçları (type hints) →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

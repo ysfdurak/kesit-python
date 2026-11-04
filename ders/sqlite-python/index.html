@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Veritabanı (giriş)</span><h1>sqlite3 ile Python</h1><p class="st-l">Bellek içi SQLite veritabanı kurar, parametreli sorguyla SQL enjeksiyonundan korunur, executemany ile toplu yükler, Row factory ile satırları sözlük gibi okur ve transaction mantığını kavrarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/sqlite-python">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden SQLite?</h2>
 <p>SQLite, tek bir dosyada (ya da bellekte) yaşayan, sunucu gerektirmeyen bir ilişkisel veritabanıdır (relational database). Python ile birlikte gelen <code>sqlite3</code> modülü sayesinde kurulum yapmadan SQL yazabilirsin. Anadolu Market'te bir analist için tipik kullanım şu: binlerce satırlık sipariş CSV'sini bir SQLite tablosuna yükle, SQL ile grupla ve filtrele, sonucu Python ile raporla. Masaüstü uygulamaları, mobil uygulamalar ve tarayıcılar da yerel verisini SQLite'ta tutar; yani öğrendiğin şey oyuncak değil, dünyanın en yaygın veritabanı motoru.</p>
@@ -293,6 +294,6 @@ print(con.execute(SQL).fetchall())
 <p>Şema değişiklikleri (migration) için <code>CREATE TABLE IF NOT EXISTS</code> başlangıçtır; büyüyen projede <code>PRAGMA user_version</code> ile şema sürümü tutup sırayla ALTER TABLE betikleri çalıştırırsın. Performans için iki not: toplu eklemede her satırdan sonra commit yapma, executemany + tek commit kullan; sık filtrelenen sütuna <code>CREATE INDEX</code> ekle. SQLite'ın sınırı eşzamanlı yazmadır: aynı anda tek yazar kabul eder. Çok kullanıcılı web uygulaması ya da gigabaytlarca büyüyen veri için PostgreSQL gibi sunucu tabanlı bir motora geçersin; ama Python tarafındaki kalıp (bağlantı, parametreli sorgu, transaction) birebir aynı kalır, çünkü hepsi DB-API 2.0 standardını izler.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sqlite-python">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sqlite-python/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../standart-kutuphane/">← Standart kütüphane turu</a><a href="../test-yazma/">Test yazma: unittest, pytest ve mock →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

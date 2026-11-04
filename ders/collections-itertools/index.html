@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>collections ve itertools: hazır veri yapıları ve yineleme araçları</h1><p class="st-l">Counter, defaultdict, deque, namedtuple ile veriyi daha az kodla tutar; chain, groupby, product, combinations, accumulate ve islice ile yinelemeyi tek geçişte kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/collections-itertools">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in raporlama ekibinde çalıştığını düşün. Her gün "hangi şehirden kaç sipariş geldi", "son 5 işlem neydi", "ürün çiftlerinin hangisi birlikte alınıyor" gibi sorular geliyor. Bunların hepsini sözlük ve for döngüsüyle yazabilirsin; ama Python'ın standart kütüphanesindeki <code>collections</code> ve <code>itertools</code> modülleri aynı işi daha kısa, daha hızlı ve daha az hatayla yapar. Bu ders, "elle yazdığın yardımcı kodun" yerine hazır ve test edilmiş araçları koymayı öğretir.</p>
@@ -262,6 +263,6 @@ print(list(zip(["Pzt", "Sal", "Çar", "Per"], cycle(["Ayşe", "Can"]))))</pre>
 <p>Son bir not: <code>namedtuple</code> okunurluğu artırır ama değiştirilemez; kaydı güncellemek istiyorsan <code>_replace</code> yeni nesne döndürür. Mutasyon gerekiyorsa <code>@dataclass</code>; bellek kritikse <code>@dataclass(slots=True)</code> tercih et.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/collections-itertools">Alıştırmalara geç (22)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/collections-itertools/alistirma">Alıştırmalara geç (22)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../hata-tasarim/">← Hata tasarımı: özel istisnalar, logging, EAFP</a><a href="../tarih-saat/">Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

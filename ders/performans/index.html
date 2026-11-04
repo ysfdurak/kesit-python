@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>Profil ve optimizasyon</h1><p class="st-l">timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy'a geçiş.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/performans">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Önce ölç, sonra düzelt</h2>
 <p>Ilgaz Bank'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5'lik kodu düzelt, gerisine dokunma.</p>
 
@@ -272,6 +273,6 @@ print(Counter(sehirler).most_common(2))
 <h3>Ölçüm hataları</h3>
 <p>İlk çalıştırma önbellek yüzünden yavaştır; <code>number</code> ve <code>repeat</code> ile birkaç kez ölç, en küçüğü al. Dizüstünde pil modu, arka plan işleri ölçümü oynatır; karşılaştırmayı aynı oturumda ve arka arkaya yap.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/performans">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/performans/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../eszamanlilik/">← threading, concurrent.futures ve GIL</a><a href="../bellek-ic-yapi/">Python'ın iç yapısı: nesne, referans, bellek →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

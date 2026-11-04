@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>match-case: yapısal desen eşleme</h1><p class="st-l">Python 3.10 ile gelen match-case ile değer, birleşik, dizi, sözlük ve sınıf desenlerini; guard ve yakalamayı öğrenir, komut ayrıştırıcı ve banka işlem yönlendirici yazarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/match-case">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden yeni bir dallanma aracı?</h2>
 <p>Koşullar dersinde <code>match</code>'i kısaca gördün: bir değeri birkaç sabitle karşılaştırmanın düzenli yolu. Ama <code>match</code> aslında bundan çok daha güçlüdür. Adı <b>yapısal desen eşleme</b> (structural pattern matching): yalnızca "değer şuna eşit mi" diye sormaz, "veri <b>şu şekilde</b> mi" diye sorar ve şekle uyuyorsa parçalarını tek hamlede değişkenlere ayırır.</p>
@@ -215,6 +216,6 @@ print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
 <p>match bir "atlama tablosu" değildir; desenler sırayla denenir, yani if/elif zincirinden hızlı değildir. Avantajı hız değil okunabilirlik ve doğruluktur. Yüzlerce sabit değere göre dallanıyorsan sözlükle eşleme (<code>{"H": "Hazırlanıyor", ...}.get(kod)</code>) hem daha hızlı hem daha kısadır. Ayrıca derleyici, eksik dalları (exhaustiveness) denetlemez; tüm durumları kapsadığından emin olmak için sonda <code>case _:</code> ile açıkça hata fırlatmak iyi bir alışkanlıktır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/match-case">Alıştırmalara geç (17)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/match-case/alistirma">Alıştırmalara geç (17)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ic-ice-veri/">← İç içe veri yapıları</a><a href="../ozyineleme/">Özyineleme (recursion) →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

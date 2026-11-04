@@ -4,7 +4,8 @@
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Lezzet Kurye kupon mutabakatı","description":"BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/proje-mutabakat/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Bitirme projesi: Lezzet Kurye kupon mutabakatı</h1><p class="st-l">BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler, fark raporunu Excel olarak yazar ve kabul ya da ret notu üretirsin.</p>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat">Uygulamada aç, 13 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat">Uygulamada aç, 14 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje: kupon mutabakatı</h2>
 <p>Kesit SQL'deki BT İş Analisti yolunda Lezzet Kurye için geç teslim kuponu talebini analiz ettin: 45 dakikayı aşan teslime 30 TL, 60 dakikayı aşana 60 TL. Geliştirme bitti, kabul testi sana geldi. Elinde sipariş verisi ve kupon servisinin dökümü var. Soru basit: <b>kural doğru uygulanmış mı?</b> Bu dersteki küçük betik bu soruyu her seferinde aynı biçimde, elle Excel karşılaştırması yapmadan cevaplar.</p>
@@ -37,10 +38,10 @@ print(m)</pre>
 <h2>API cevabı da bir sözleşmedir</h2>
 <p>İş analisti API yazmaz ama cevabın sözleşmeye uyup uymadığını denetleyebilir. <a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</a> dersindeki JSON okuma burada işe yarar; gerçek servise bağlanman gerekmez, örnek cevaplar dosyadan okunur.</p>
 <h2>Bitince göreceğin sonuç</h2>
-<p>Tarayıcıda openpyxl çalışmadığı için rapor sayfalarını burada Python listesi olarak kurarsın; gerçek Excel dosyasını son adımda kendi bilgisayarında aynı kodla yazarsın.</p>
+<p>Rapor sayfalarını önce Python listesi olarak kurarsın, sonra gerçek Excel dosyasına yazarsın. Dosya bu sayfada oluşur, indirip Excel'de açabilirsin (openpyxl ilk kullanımda iner, yaklaşık 270 KB).</p>
 <div class="tbl-wrap"><table><tr><th>Durum</th><th>Sipariş</th></tr><tr><td>Tamam</td><td>1.459</td></tr><tr><td>Eksik</td><td>15</td></tr><tr><td>Çift</td><td>18</td></tr><tr><td>Tutar farkı</td><td>16</td></tr><tr><td>Fazla</td><td>28</td></tr></table></div>
 <section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bunu işe taşı</h3><p>Aynı kalıp her kabul testinde çalışır: kuralı ayrı hesapla, anahtarla karşılaştır, farkı sınıflandır, dosya olarak paylaş. Kural Kesit SQL'deki karar tablosundan geliyor; tablo değişirse betikte tek yer değişir. Bir sonraki adım olarak bu betiği bir sonraki sürümde yeniden çalıştırıp farkın kapandığını göster: buna regresyon denetimi denir.</p></section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat">Alıştırmalara geç (13)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat/alistirma">Alıştırmalara geç (14)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-analist/">← Bitirme projesi: Kanat Havayolları gecikme analizi</a><a href="../istatistik/">İstatistik ve hipotez testi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

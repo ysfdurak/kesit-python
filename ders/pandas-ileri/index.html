@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İleri pandas: şekil, pencere ve zincir</h1><p class="st-l">MultiIndex, melt/pivot ile yeniden şekillendirme, rolling/expanding/ewm pencereleri, rank ve cumcount, kategorik tür, assign/pipe/query zinciri, np.select ile vektörleştirme ve validate/indicator ile güvenli merge.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/pandas-ileri">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden "ileri" pandas?</h2>
 <p>Seçme, filtreleme ve temizliği <b>pandas giriş</b> ile <b>veri temizleme</b> derslerinde, <code>groupby</code>, <code>pivot_table</code> ve <code>merge</code>'ü <b>groupby, pivot, merge</b> dersinde gördün. Gerçek işte bunlar yetmeye başladığı an şöyle sorular gelir: "Her şehirde ciroya göre ilk 3 ürün hangisi?", "Excel'den gelen ay sütunlarını nasıl tek sütuna çeviririm?", "Son 7 günün hareketli ortalaması düşüyor mu?", "Birleştirmeden sonra neden satır sayım arttı?". Bu ders, analistin günlük işindeki bu ikinci katmanı kapsar: çok seviyeli index (MultiIndex), yeniden şekillendirme (reshaping), pencere fonksiyonları (window functions), sıralama, kategorik tür, zincirleme yazım (method chaining), vektörleştirme (vectorization) ve güvenli birleştirme.</p>
 <p>Tüm örnekler Anadolu Market'in küçük bir satış tablosu üzerinde. Kodları çalıştır, çıktıyı oku, sonra bir değeri değiştirip tekrar çalıştır; ileri pandas en hızlı böyle oturur.</p>
@@ -204,6 +205,6 @@ print("satır sayısı korundu mu:", len(b) == len(siparis))</pre>
 <h3>Grup içi ilk N</h3>
 <p>"Her şehirde en çok satan 3 ürün" için iki yol vardır: <code>sort_values("ciro", ascending=False).groupby("sehir").head(3)</code> (hızlı, eşitlikte keyfi) ya da <code>rank(method="dense")</code> ile <code>sira &lt;= 3</code> filtresi (eşitlikleri birlikte tutar). İş kuralı hangisini istiyorsa onu seç ve raporda belirt.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-ileri">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-ileri/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../istatistik/">← İstatistik ve hipotez testi</a><a href="../pandas-zaman-serisi/">Zaman serisi analizi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

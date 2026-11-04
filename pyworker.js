@@ -269,7 +269,37 @@ def _pp_grafikler():
         pass
     return out
 
+_PP_HTML = []
+def _pp_html_al():
+    h = list(_PP_HTML); _PP_HTML.clear(); return h
+def _pp_plotly_kur():
+    import plotly.basedatatypes as _b
+    def _goster(self, *a, **k):
+        _PP_HTML.append(self.to_html(include_plotlyjs=True, full_html=True))
+    _b.BaseFigure.show = _goster
+_PP_UZANTI = (".xlsx", ".docx", ".pdf", ".html", ".csv", ".xml")
+def _pp_dosya_durum():
+    import os
+    d = {}
+    for kok, _, ad in os.walk("."):
+        for a in ad:
+            if a.lower().endswith(_PP_UZANTI):
+                y = os.path.join(kok, a)
+                try:
+                    s = os.stat(y); d[y] = (s.st_mtime, s.st_size)
+                except OSError:
+                    pass
+    return d
+def _pp_dosya_fark(once):
+    import base64
+    out = []
+    for y, v in _pp_dosya_durum().items():
+        if once.get(y) != v and v[1] <= 8000000 and len(out) < 6:
+            with open(y, "rb") as f:
+                out.append({"ad": y[2:], "b64": base64.b64encode(f.read()).decode()})
+    return out
 def _pp_run(code, tests, inputs, filename="<kodun>", nskey="", raw=None, grafik=False):
+    _once = _pp_dosya_durum() if grafik else {}
     try: _pp_fix_lazy()
     except Exception: pass
     _PP.inputs = list(inputs or [])
@@ -302,7 +332,7 @@ def _pp_run(code, tests, inputs, filename="<kodun>", nskey="", raw=None, grafik=
         err = {"type": type(e).__name__, "msg": str(e), "line": line, "where": where, "phase": phase}
     finally:
         sys.stdout = old_out; sys.stderr = old_err; sys.stdin = old_in
-    return json.dumps({"out": buf.getvalue(), "stderr": ebuf.getvalue(), "err": err, "images": _pp_grafikler() if grafik else []})
+    return json.dumps({"out": buf.getvalue(), "stderr": ebuf.getvalue(), "err": err, "images": _pp_grafikler() if grafik else [], "htmls": _pp_html_al(), "dosyalar": _pp_dosya_fark(_once) if grafik else []})
 `;
 
 async function boot() {
@@ -344,10 +374,47 @@ async function mplReady(py) {
   S.pkgs.add('mpl-agg');
 }
 
+/*YEREL*/
+/* Pyodide'ın kendi paketlerinde olmayan saf Python tekerlekleri: sitenin pypaket/ klasöründen, sürümü sabit, gerekince iner. Lisanslar: pypaket/LISANSLAR.md */
+const YEREL = {
+  openpyxl: { kb: 270, whl: ['et_xmlfile-2.0.0-py3-none-any.whl', 'openpyxl-3.1.5-py2.py3-none-any.whl'], dep: [] },
+  xlsxwriter: { kb: 180, whl: ['xlsxwriter-3.3.1-py3-none-any.whl'], dep: [] },
+  pypdf: { kb: 410, whl: ['pypdf-6.21.4-py3-none-any.whl'], dep: [] },
+  docx: { kb: 250, whl: ['python_docx-1.2.0-py3-none-any.whl'], dep: ['lxml', 'typing-extensions'] },
+  reportlab: { kb: 2020, whl: ['reportlab-5.1.0-py3-none-any.whl'], dep: ['pillow', 'charset-normalizer'] },
+  seaborn: { kb: 295, whl: ['seaborn-0.13.2-py3-none-any.whl'], dep: ['matplotlib', 'pandas', 'numpy'] },
+  plotly: { kb: 9700, whl: ['plotly-7.1.0-py3-none-any.whl'], dep: ['narwhals', 'packaging', 'numpy'] }
+};
+function yerelGerek(src) {
+  const ad = Object.keys(YEREL).filter(k => new RegExp('^\\s*(?:import|from)\\s+' + k + '\\b', 'm').test(src));
+  if (/\b(?:read_excel|to_excel|ExcelWriter|ExcelFile)\b/.test(src) && !ad.includes('openpyxl')) ad.push('openpyxl');
+  if (/engine\s*=\s*["']xlsxwriter/.test(src) && !ad.includes('xlsxwriter')) ad.push('xlsxwriter');
+  return ad;
+}
+/*/YEREL*/
+const boyutYaz = kb => kb >= 1000 ? (kb / 1000).toFixed(1).replace('.', ',') + ' MB' : kb + ' KB';
+async function ensureYerel(py, ad) {
+  const need = ad.filter(k => !S.pkgs.has('yerel:' + k));
+  if (!need.length) return;
+  postMessage({ paketBilgi: need.map(k => k + ', yaklaşık ' + boyutYaz(YEREL[k].kb)).join('; ') });
+  state('paket');
+  const adres = f => new URL('pypaket/' + f, self.location.href).href;
+  const dep = [...new Set(need.flatMap(k => YEREL[k].dep))], whl = [...new Set(need.flatMap(k => YEREL[k].whl))];
+  try {
+    await py.loadPackage(dep.concat(whl.map(adres)));
+    const yok = py.runPython('import importlib, importlib.util as _iu\nimportlib.invalidate_caches()\n[m for m in ' + JSON.stringify(need) + ' if _iu.find_spec(m) is None]').toJs();
+    need.filter(k => !yok.includes(k)).forEach(k => S.pkgs.add('yerel:' + k));
+    if (need.includes('seaborn') && !yok.includes('seaborn')) await mplReady(py);
+    if (need.includes('plotly') && !yok.includes('plotly')) await py.runPythonAsync('_pp_plotly_kur()');
+  } finally { postMessage({ paketBilgi: '' }); state('hazir'); }
+}
+
 async function ensurePkgs(list) {
   if (!list || !list.length) return;
   const py = await boot();
-  const need = list.filter(p => !S.pkgs.has(p));
+  const yerel = list.filter(p => YEREL[p]);
+  if (yerel.length) await ensureYerel(py, yerel);
+  const need = list.filter(p => !YEREL[p] && !S.pkgs.has(p));
   if (!need.length) return;
   state('paket');
   try { await py.loadPackage(need); need.forEach(p => S.pkgs.add(p)); if (need.includes('matplotlib')) await mplReady(py); }
@@ -359,6 +426,7 @@ async function run(opt) {
   await ensurePkgs(opt.needs);
   const src = String(opt.code || '') + '\n' + String(opt.tests || '');
   await ensureData(py, src);
+  try { await ensureYerel(py, yerelGerek(src)); } catch (e) {}
   try {
     if (/\bhashlib\b/.test(src) && !S.pkgs.has('hashlib')) {
       try { await py.loadPackage(['hashlib']); S.pkgs.add('hashlib'); await py.runPythonAsync('import sys\nfor _m in ("hashlib", "_hashlib", "hmac", "secrets"): sys.modules.pop(_m, None)'); } catch (e) {}

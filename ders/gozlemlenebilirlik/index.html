@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Gözlemlenebilirlik: log, metrik, iz ve SLO</h1><p class="st-l">Log, metrik ve izi birbirine bağlar; contextvars ile istek kimliğini taşır, sayaç/ölçer/histogram tasarlar, gerçek Lezzet Kurye teslim sürelerinden p50/p95 hesaplar, span ve trace simüle eder, SLO ve hata bütçesini ölçüp gürültüsüz yanma hızı alarmı kurar, veri hattının tazelik/hacim/şema sağlığını denetlersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/gozlemlenebilirlik">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Cuma akşamı Lezzet Kurye'ye "siparişim bir saattir gelmedi" şikâyetleri yağıyor. Sunucular ayakta, CPU normal, hata logu yok. Sorun nerede: restoranın onayında mı, kurye atamasında mı, ödeme servisinin yavaşlamasında mı? <b>İzleme</b> (monitoring) önceden bildiğin soruları sorar: "CPU %90'ı geçti mi?". <b>Gözlemlenebilirlik</b> (observability) ise sistemin dışarı verdiği sinyallerle <b>önceden düşünmediğin</b> soruları da cevaplayabilmektir: "Bu akşam Kadıköy'deki nakit ödemeli siparişlerde kurye atama adımı neden 4 kat yavaş?". Bu dersin sonunda bir servisin log, metrik ve izlerini tasarlayabilecek, "iyi çalışıyor"u bir SLO ile sayıya dökebilecek ve gürültüsüz alarm kurabileceksin.</p>
@@ -253,6 +254,6 @@ print("şema farkı:", set(siparisler[0]) ^ beklenen or "yok")</pre>
 <p>İyi SLI kullanıcının gördüğü şeydir: "sipariş butonuna basınca 2 saniye içinde onay" ya da "60 dakikada teslim"; "CPU %80 altında" değil. Önce kullanıcı yolculuklarını (sipariş ver, kurye takip et, öde) belirle, her biri için bir ya da iki SLI seç, hedefi geçmiş verinin biraz altına koy ve hata bütçesi politikasını ürün ekibiyle birlikte yaz.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/gozlemlenebilirlik">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/gozlemlenebilirlik/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../django-ileri/">← İleri Django ve DRF: ORM optimizasyonu, izinler ve test</a><a href="../kimlik-yetki/">Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

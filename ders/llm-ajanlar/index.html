@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</h1><p class="st-l">İş akışı ile ajan farkından ReAct döngüsüne, pydantic ile araç şemalarına, hata gözlemine, adım sınırı ve takılma tespitine, hafıza kırpmaya, MCP protokolüne, insan onayı ve istem enjeksiyonu savunmasına, maliyet hesabına kadar ajan mühendisliğini sahte bir LLM ile uygular; Anadolu Market text-to-SQL ajanı ve değerlendirme setiyle bitirirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/llm-ajanlar">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Ajan nedir, ne zaman gerekir?</h2>
 <p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde modele tek turda bir araç çağırttın: model "şu fonksiyonu şu argümanla çağır" dedi, sen çağırıp sonucu geri verdin. Bir <b>ajan</b> (agent) bu turu <b>döngüye</b> çevirir: model düşünür, bir araç seçer, sonucu gözlemler, gerekirse başka bir araç çağırır ve görev bitince cevap verir. Kaç adım süreceğine ve hangi aracı çağıracağına <b>model</b> karar verir.</p>
@@ -254,6 +255,6 @@ for adim in range(1, 11):
 <p>Son cevap doğruluğu yanında yörünge (trajectory) değerlendirmesi yap: doğru araçlar doğru sırayla mı çağrıldı, gereksiz adım var mı, yasak araç denendi mi? LLM-as-judge kullanıyorsan hakemi insan etiketleriyle kalibre et.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/llm-ajanlar">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/llm-ajanlar/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../embedding-vektor-arama/">← Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</a><a href="../sistem-tasarimi/">Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

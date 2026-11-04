@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi</h1><p class="st-l">date/datetime/timedelta ile tarih aritmetiği yapar, strftime/strptime ile metne çevirir, zoneinfo ile saat dilimi ekler, ay sonu ve iş günü hesaplarını güvenle kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/tarih-saat">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
@@ -243,6 +244,6 @@ except Exception as e:
 <p>Performans ipucu: milyonlarca satırda <code>strptime</code> yavaştır; biçim sabit ISO ise <code>fromisoformat</code> birkaç kat hızlıdır. pandas'a geçtiğinde <code>pd.to_datetime(..., format=...)</code> aynı mantıkla çalışır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/tarih-saat">Alıştırmalara geç (22)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tarih-saat/alistirma">Alıştırmalara geç (22)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../collections-itertools/">← collections ve itertools: hazır veri yapıları ve yineleme araçları</a><a href="../regex/">Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

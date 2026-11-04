@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market web olayları ETL</h1><p class="st-l">Kirli ham partileri doğrular, reddedilenleri ayırır, dönüştürür, SQLite'a idempotent ve artımlı yükler, günlük tutar, kalite testi yazar ve aynı işi iki kez çalıştırınca satır çiftlenmediğini kanıtlarsın. Gerçek web_events verisiyle, tarayıcıda.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-etl">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje: Anadolu Market web olayları için ETL</h2>
 <p>Anadolu Market'in analiz ekibi huni raporunu her sabah elle düzeltiyor: bazı günlerde aynı olay iki kez sayılıyor, sistem yeniden çalışınca rakamlar şişiyor, ertesi gün gelen eski olaylar rapora girmiyor. Senden her gece çalışacak bir veri işi istiyorlar: ham dosyayı alsın, bozuk satırı ayırsın, temiz satırı SQLite'a yüklesin, aynı iş iki kez çalışsa da hiçbir şey çiftlenmesin ve sabah neyin olduğu görülebilsin.</p>
@@ -114,6 +115,6 @@ print("satır:", con.execute("SELECT COUNT(*) FROM t").fetchone()[0])</pre>
 <tr><td>Huni uyarısı</td><td>18 kullanıcı (ham tabloda 17; reddedilen satırlar sayıyı değiştirir, silinmez, raporlanır)</td></tr></table></div>
 <section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bu işi gerçek bir ortama taşırken</h3><p>Aynı tasarım PostgreSQL'de de geçerlidir; <code>ON CONFLICT</code> söz dizimi aynıdır, toplu yüklemede <code>COPY</code> ile geçici tablo kullanılır. Airflow gibi bir orkestratörde parti tarihi görevin veri aralığına karşılık gelir ve geriye dönük çalıştırma (backfill) bu sayede güvenlidir. dbt testleri ve Great Expectations, burada elle yazdığın kalite testlerinin bildirimsel hâlidir. Reddedilen oranına eşik koymak da yaygındır: satırların önemli bir kısmı reddedilmişse yüklemeyi durdurup haber vermek, eksik veriyi sessizce yayımlamaktan iyidir. Bu eşiği iş birimiyle birlikte seç. Geri bakış penceresinden eski bir parti düzeltilirse bu iş onu kendiliğinden görmez; o tarih için filigranı geri alıp geriye dönük çalıştırman gerekir.</p></section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-etl">Alıştırmalara geç (17)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-etl/alistirma">Alıştırmalara geç (17)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../yerel-modeller-hf/">← Hugging Face ve yerel modellerle Python</a><span></span></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

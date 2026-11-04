@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>FastAPI ile API geliştirme</h1><p class="st-l">Tip ipuçlarından otomatik doğrulama ve dokümantasyon üreten FastAPI ile path/query parametreleri, pydantic şemaları, 422 hataları, HTTPException, Depends ile bağımlılık enjeksiyonu, async uç noktalar, CORS, OAuth2/JWT, TestClient ve uvicorn'u öğrenir; mekanizmaları pydantic ve asyncio ile kendin kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/fastapi">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Flask dersinde bir web çatısının nasıl çalıştığını gördün: route kaydı, istek, yanıt, durum kodu. Ama JSON API yazarken Flask'ta işin büyük kısmı tekrar eden "bürokrasidir": gelen gövdeyi oku, her alanı elle doğrula, hatalı alanları toplayıp 400 döndür, dokümantasyonu ayrıca yaz ve kodla güncel tut. <b>FastAPI</b> bu bürokrasiyi <b>tip ipuçlarından</b> (type hints) otomatik üretir: fonksiyonunun parametrelerine yazdığın tiplere bakarak isteği ayrıştırır, pydantic ile doğrular, hatalıysa standart bir 422 yanıtı döner ve tüm API'nin etkileşimli dokümantasyonunu (<code>/docs</code>) kendisi oluşturur.</p>
@@ -426,6 +427,6 @@ async def siparis(sid: int, oturum: Oturum):
 <p>Yayındaki bir API'de alan adını değiştirmek, istemcileri kırar. Kalıcı API'lerde <code>APIRouter(prefix="/v1")</code> ile sürümle, alanları kaldırmadan önce kullanımdan kaldırıldı (<code>deprecated=True</code>) olarak işaretle ve OpenAPI belgesini CI'da önceki sürümle karşılaştırarak kırıcı değişiklikleri yakala.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/fastapi">Alıştırmalara geç (29)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fastapi/alistirma">Alıştırmalara geç (29)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-ml/">← Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini</a><a href="../flask/">Flask ile web uygulaması →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

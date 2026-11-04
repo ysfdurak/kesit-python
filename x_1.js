@@ -979,6 +979,7 @@ const X = W.PY_EXT = W.PY_EXT || [];
 X.push(
   {
     id: 'python-nedir',
+    kapali: 'Derinleş: Python kodu nasıl çalıştırır? (isteğe bağlı)',
     min: 20,
     html: `<h2>Python bir programı nasıl çalıştırır?</h2><p>"Yorumlanan dil" ifadesi doğru ama eksik. Sen <code>python rapor.py</code> yazdığında perde arkasında üç adım olur:</p><div class="steps-list"><ol><li><b>Ayrıştırma (parsing):</b> Yorumlayıcı dosyanın tamamını okur ve sözdizimini denetler. Kapanmamış bir parantez varsa program <i>hiç başlamaz</i>; SyntaxError bu yüzden ilk satır bile çalışmadan gelir.</li><li><b>Bayt koduna derleme (bytecode):</b> Kod, Python sanal makinesinin anlayacağı ara bir dile çevrilir. Bir modülü içe aktardığında oluşan <code>__pycache__</code> klasöründeki <code>.pyc</code> dosyaları bu bayt kodudur; bir dahaki sefere derleme adımı atlanır.</li><li><b>Yürütme:</b> Python sanal makinesi (PVM) bayt kodunu satır satır çalıştırır. NameError, TypeError gibi hatalar bu aşamada, o satıra sıra geldiğinde çıkar.</li></ol></div><p>Bayt kodunu merak ediyorsan standart kütüphanedeki <code>dis</code> modülü onu gösterir. Çıktının ayrıntısı sürümden sürüme değişir; amaç ezberlemek değil, "kod önce çevriliyor, sonra çalışıyor" fikrini görmek:</p><pre class="py">import dis
 dis.dis("toplam = 3 * 250")
@@ -9319,7 +9320,7 @@ print(df["sehir"].tolist())
 df["ciro"] = df["ciro"] / 3
 df.to_csv("rapor.csv", sep=";", decimal=",", encoding="utf-8-sig", index=False, float_format="%.2f")
 print(open("rapor.csv", encoding="utf-8-sig").read())
-</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir; tarayıcıda çalışmaz, kendi bilgisayarında dene:</p><pre class="code"># python -m pip install openpyxl
+</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir. Bu sayfada ilk kullanımda kendiliğinden iner (yaklaşık 270 KB); bilgisayarında şöyle kurarsın:</p><pre class="code"># python -m pip install openpyxl
 import pandas as pd
 
 df = pd.read_excel("satislar.xlsx", sheet_name="Mart", skiprows=2,
@@ -9473,7 +9474,7 @@ con.close()
       { q: 'UnicodeDecodeError: \'utf-8\' codec can\'t decode byte hatası alıyorum.',
         a: 'Dosya UTF-8 değil. Türkçe Windows/eski sistem çıktısıysa encoding="cp1254", Excel\'in BOM\'lu UTF-8\'iyse encoding="utf-8-sig" dene. latin-1 her baytı okur ama Türkçe harfleri (ş, ğ, ı) yanlış gösterir; son çare değil, yanlış çözümdür.' },
       { q: 'read_excel "Missing optional dependency \'openpyxl\'" diyor.',
-        a: 'pandas Excel dosyalarını kendi okumaz, motor paketine ihtiyaç duyar: .xlsx için python -m pip install openpyxl, eski .xls için xlrd. Bu paketler tarayıcı motorunda yoktur; kendi bilgisayarında kur.' }
+        a: 'pandas Excel dosyalarını kendi okumaz, motor paketine ihtiyaç duyar: .xlsx için python -m pip install openpyxl, eski .xls için xlrd. Bu sayfada openpyxl gerekince iner; xlrd yoktur, bilgisayarında kur.' }
     ],
     mistakes: [
       { bad: 'df = pd.read_csv("musteri.csv")\n# musteri_no: 412',
@@ -12180,6 +12181,813 @@ X.push({
   ]
 });
 })(window);
+/* Kesit Python: gerçek Word ve PDF görevleri, RPA, e-posta. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "pdf-word-otomasyon",
+ "min": 25,
+ "html": "<h2>Gerçek Word ve PDF dosyası</h2><p>Aşağıdaki görevler tarayıcıda gerçek <code>.docx</code> ve <code>.pdf</code> yazar, açar ve okur; sonucu indirip kendi programında görebilirsin. İlk kullanımda inenler: python-docx yaklaşık 250 KB, pypdf yaklaşık 410 KB, reportlab yaklaşık 2 MB.</p>\n<pre class=\"py\">from docx import Document\n\nd = Document()\nd.add_heading(\"Kira sözleşmesi\", level=1)\nd.add_paragraph(\"Taraflar aşağıdadır.\")\nd.save(\"ornek.docx\")\nprint([p.text for p in Document(\"ornek.docx\").paragraphs])</pre>\n<div class=\"tbl-wrap\"><table><tr><th>İş</th><th>Burada</th><th>Bilgisayarında</th></tr><tr><td>Word okuma, yazma, şablon</td><td>python-docx</td><td>docxtpl ile Jinja2 şablon</td></tr><tr><td>PDF metin okuma, birleştirme, bölme</td><td>pypdf</td><td>Tablo için pdfplumber</td></tr><tr><td>PDF üretme</td><td>reportlab</td><td>HTML'den WeasyPrint</td></tr><tr><td>Taranmış PDF (OCR)</td><td>Yok</td><td>pytesseract</td></tr></table></div>\n<div class=\"warn\"><b>Türkçe harf</b>reportlab'ın hazır yazı tiplerinde ş, ğ, ı gibi harfler yoktur. Gerçek belgede <code>pdfmetrics.registerFont(TTFont(...))</code> ile bir TTF yazı tipi kaydet. Görevler bu yüzden İngilizce harflerle yazılmış metin kullanır.</div>\n<h3>RPA araçları ve Python</h3><p>UiPath ve Power Automate ekrandaki düğmelere basar; API'si olmayan eski programlar için uygundur, kod bilmeyen ekipler de kullanır ama lisans ister ve ekran değişince kırılır. Python dosya ve veri işinde daha sağlamdır, test edilir, ücretsizdir ama ekran otomasyonu zayıftır. Önce API ya da dosya yolunu ara; yoksa RPA düşün.</p>",
+ "ex": [
+  {
+   "t": "code",
+   "id": "pdf-word-otomasyon-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>Word yaz ve oku.</b> <code>belge_yaz(yol, baslik, maddeler, satirlar)</code>: 1. düzey başlık, her madde için paragraf, başlığı <code>Ürün, Tutar</code> olan tablo. <code>belge_oku(yol)</code>: <code>{\"paragraflar\": [...metinler], \"tablo\": [[hücre metinleri], ...]}</code> döndürsün (başlık da bir paragraftır).</p>",
+   "start": "from docx import Document\n\ndef belge_yaz(yol, baslik, maddeler, satirlar):\n    pass\n\ndef belge_oku(yol):\n    pass\n",
+   "sol": "from docx import Document\n\ndef belge_yaz(yol, baslik, maddeler, satirlar):\n    d = Document()\n    d.add_heading(baslik, level=1)\n    for m in maddeler:\n        d.add_paragraph(m)\n    t = d.add_table(rows=1, cols=2)\n    t.rows[0].cells[0].text = \"Ürün\"\n    t.rows[0].cells[1].text = \"Tutar\"\n    for ad, tutar in satirlar:\n        h = t.add_row().cells\n        h[0].text = ad\n        h[1].text = str(tutar)\n    d.save(yol)\n\ndef belge_oku(yol):\n    d = Document(yol)\n    return {\"paragraflar\": [p.text for p in d.paragraphs], \"tablo\": [[h.text for h in r.cells] for r in d.tables[0].rows]}\n",
+   "tests": "import tempfile, os\n_y = os.path.join(tempfile.mkdtemp(), \"t.docx\")\nbelge_yaz(_y, \"Teklif\", [\"Birinci madde\", \"İkinci madde\"], [(\"Çay\", 50), (\"Kahve\", 120)])\n_o = belge_oku(_y)\nassert _o[\"paragraflar\"] == [\"Teklif\", \"Birinci madde\", \"İkinci madde\"], \"Paragraflar: \" + repr(_o[\"paragraflar\"])\nassert _o[\"tablo\"] == [[\"Ürün\", \"Tutar\"], [\"Çay\", \"50\"], [\"Kahve\", \"120\"]], \"Tablo: \" + repr(_o[\"tablo\"])\n_d = Document(_y)\nassert _d.paragraphs[0].style.name == \"Heading 1\", \"İlk paragraf başlık olmalı\"\n_d.add_paragraph(\"Ek\"); _d.save(_y)\nassert belge_oku(_y)[\"paragraflar\"][-1] == \"Ek\", \"belge_oku dosyadan okumalı\"\n",
+   "hints": [
+    "d.add_heading(baslik, level=1)",
+    "t.add_row().cells yeni satırın hücrelerini verir.",
+    "Hücreye metin yazılır: str(tutar)."
+   ],
+   "why": "docx bir zip içinde XML'dir. python-docx bunu paragraf ve tablo olarak gösterir."
+  },
+  {
+   "t": "code",
+   "id": "pdf-word-otomasyon-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Word şablonu.</b> <code>word_doldur(sablon, cikti, veri)</code>: paragraflardaki ve tablo hücrelerindeki <code>{{alan}}</code> yer tutucularını doldur. Dikkat: Word bir yer tutucuyu birkaç parçaya (run) bölebilir; yalnız tek parçaya bakan kod onu bulamaz. Şablon değişmesin.</p>",
+   "start": "import re\nfrom docx import Document\n\ndef word_doldur(sablon, cikti, veri):\n    pass\n",
+   "sol": "import re\nfrom docx import Document\n\ndef _doldur(p, veri):\n    if \"{{\" not in p.text:\n        return\n    yeni = re.sub(r\"\\{\\{(\\w+)\\}\\}\", lambda m: str(veri[m.group(1)]), p.text)\n    p.runs[0].text = yeni\n    for r in p.runs[1:]:\n        r.text = \"\"\n\ndef word_doldur(sablon, cikti, veri):\n    d = Document(sablon)\n    for p in d.paragraphs:\n        _doldur(p, veri)\n    for t in d.tables:\n        for s in t.rows:\n            for h in s.cells:\n                for p in h.paragraphs:\n                    _doldur(p, veri)\n    d.save(cikti)\n",
+   "tests": "import tempfile, os\n_k = tempfile.mkdtemp(); _s = os.path.join(_k, \"s.docx\"); _c = os.path.join(_k, \"c.docx\")\n_d = Document()\n_p = _d.add_paragraph(); _p.add_run(\"Sayın {{mus\"); _p.add_run(\"teri}}, borcunuz \").bold = False; _p.add_run(\"{{tutar}} TL\")\n_d.add_paragraph(\"Değişmeyen satır\")\n_t = _d.add_table(rows=1, cols=1); _t.rows[0].cells[0].text = \"Vade: {{vade}}\"\n_d.save(_s)\nword_doldur(_s, _c, {\"musteri\": \"Ayşe\", \"tutar\": 150, \"vade\": \"Ekim\"})\n_o = Document(_c)\nassert _o.paragraphs[0].text == \"Sayın Ayşe, borcunuz 150 TL\", \"Parçalara bölünmüş alan: \" + repr(_o.paragraphs[0].text)\nassert _o.paragraphs[1].text == \"Değişmeyen satır\", \"Yer tutucusuz paragrafa dokunma\"\nassert _o.tables[0].rows[0].cells[0].text == \"Vade: Ekim\", \"Tablo hücresi doldurulmalı\"\nassert \"{{\" in Document(_s).paragraphs[0].text, \"Şablon değişmemeli\"\n",
+   "hints": [
+    "p.text tüm parçaları birleştirir; yeni metni ilk parçaya yaz, diğerlerini boşalt.",
+    "Tablo hücrelerinin de .paragraphs listesi vardır."
+   ],
+   "why": "Word'de yazım denetimi bile metni parçalara böler. Bu tuzağı bilmeyen kod bazı belgelerde sessizce çalışmaz. Karmaşık şablon için docxtpl daha rahattır."
+  },
+  {
+   "t": "code",
+   "id": "pdf-word-otomasyon-g3",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>PDF üret.</b> <code>fatura_pdf(yol, no, satirlar)</code>: reportlab ile iki sayfa yaz. Birinci sayfa: <code>Fatura No: {no}</code> ve her satır için <code>{ad}: {tutar}</code>. İkinci sayfa: <code>Toplam: {toplam}</code>. Test dosyayı pypdf ile okur.</p>",
+   "start": "from reportlab.pdfgen import canvas\n\ndef fatura_pdf(yol, no, satirlar):\n    pass\n",
+   "sol": "from reportlab.pdfgen import canvas\n\ndef fatura_pdf(yol, no, satirlar):\n    c = canvas.Canvas(yol)\n    c.drawString(72, 780, f\"Fatura No: {no}\")\n    y = 750\n    for ad, tutar in satirlar:\n        c.drawString(72, y, f\"{ad}: {tutar}\")\n        y -= 20\n    c.showPage()\n    c.drawString(72, 780, f\"Toplam: {sum(t for _, t in satirlar)}\")\n    c.save()\n",
+   "tests": "import tempfile, os\nfrom pypdf import PdfReader\n_y = os.path.join(tempfile.mkdtemp(), \"f.pdf\")\nfatura_pdf(_y, \"A-12\", [(\"Cay\", 50), (\"Kahve\", 120)])\n_r = PdfReader(_y)\nassert len(_r.pages) == 2, \"İki sayfa beklenir: \" + str(len(_r.pages))\n_a = _r.pages[0].extract_text()\nassert \"Fatura No: A-12\" in _a and \"Cay: 50\" in _a and \"Kahve: 120\" in _a, \"Birinci sayfa: \" + repr(_a)\nassert \"Toplam: 170\" in _r.pages[1].extract_text(), \"Toplam ikinci sayfada 170 olmalı\"\n",
+   "hints": [
+    "c.drawString(x, y, metin); y yukarıdan aşağı azalır.",
+    "c.showPage() sayfayı bitirir; c.save() dosyayı yazar."
+   ],
+   "why": "PDF sayfaya konum vererek yazılır, Word gibi akmaz. Uzun tabloda sayfa taşmasını sen yönetirsin."
+  },
+  {
+   "t": "code",
+   "id": "pdf-word-otomasyon-g4",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>PDF oku.</b> <code>toplam_oku(yol)</code>: pypdf ile tüm sayfaların metnini birleştir, <code>Toplam: 170</code> kalıbındaki sayıyı bul. <code>{\"sayfa\": sayfa_sayısı, \"toplam\": sayı ya da None}</code> döndür.</p>",
+   "start": "import re\nfrom pypdf import PdfReader\n\ndef toplam_oku(yol):\n    pass\n",
+   "sol": "import re\nfrom pypdf import PdfReader\n\ndef toplam_oku(yol):\n    r = PdfReader(yol)\n    metin = \"\\n\".join(s.extract_text() for s in r.pages)\n    m = re.search(r\"Toplam:\\s*(\\d+)\", metin)\n    return {\"sayfa\": len(r.pages), \"toplam\": int(m.group(1)) if m else None}\n",
+   "tests": "import tempfile, os\nfrom reportlab.pdfgen import canvas\ndef _pdf(y, sayfalar):\n    c = canvas.Canvas(y)\n    for s in sayfalar:\n        c.drawString(72, 780, s); c.showPage()\n    c.save()\n_k = tempfile.mkdtemp()\n_a = os.path.join(_k, \"a.pdf\"); _pdf(_a, [\"Fatura\", \"Toplam: 170\"])\nassert toplam_oku(_a) == {\"sayfa\": 2, \"toplam\": 170}, repr(toplam_oku(_a))\n_b = os.path.join(_k, \"b.pdf\"); _pdf(_b, [\"Toplam yok\"])\nassert toplam_oku(_b) == {\"sayfa\": 1, \"toplam\": None}, \"Kalıp yoksa None\"\n",
+   "hints": [
+    "s.extract_text() her sayfanın metnini verir.",
+    "re.search(r\"Toplam:\\s*(\\d+)\", metin)"
+   ],
+   "why": "Metin katmanı olan PDF'lerde çalışır. Taranmış belgede extract_text boş döner; OCR gerekir. Boş sonucu her zaman denetle."
+  },
+  {
+   "t": "code",
+   "id": "pdf-word-otomasyon-g5",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Birleştir ve böl.</b> <code>birlestir(yollar, cikti)</code>: PDF'leri sırayla tek dosyada birleştirsin. <code>bol(yol, kalip)</code>: her sayfayı ayrı dosyaya yazsın; dosya adı <code>kalip.format(sayfa_no)</code> (1'den başlar), ad listesini döndürsün.</p>",
+   "start": "from pypdf import PdfReader, PdfWriter\n\ndef birlestir(yollar, cikti):\n    pass\n\ndef bol(yol, kalip):\n    pass\n",
+   "sol": "from pypdf import PdfReader, PdfWriter\n\ndef birlestir(yollar, cikti):\n    w = PdfWriter()\n    for y in yollar:\n        for s in PdfReader(y).pages:\n            w.add_page(s)\n    w.write(cikti)\n\ndef bol(yol, kalip):\n    adlar = []\n    for i, s in enumerate(PdfReader(yol).pages, 1):\n        w = PdfWriter()\n        w.add_page(s)\n        ad = kalip.format(i)\n        w.write(ad)\n        adlar.append(ad)\n    return adlar\n",
+   "tests": "import tempfile, os\nfrom reportlab.pdfgen import canvas\ndef _pdf(y, sayfalar):\n    c = canvas.Canvas(y)\n    for s in sayfalar:\n        c.drawString(72, 780, s); c.showPage()\n    c.save()\n_k = tempfile.mkdtemp()\n_a = os.path.join(_k, \"a.pdf\"); _b = os.path.join(_k, \"b.pdf\"); _c = os.path.join(_k, \"c.pdf\")\n_pdf(_a, [\"Bir\", \"Iki\"]); _pdf(_b, [\"Uc\"])\nbirlestir([_b, _a], _c)\n_r = PdfReader(_c)\nassert [s.extract_text().strip() for s in _r.pages] == [\"Uc\", \"Bir\", \"Iki\"], \"Sıra korunmalı\"\n_ad = bol(_c, os.path.join(_k, \"p{}.pdf\"))\nassert [os.path.basename(x) for x in _ad] == [\"p1.pdf\", \"p2.pdf\", \"p3.pdf\"], repr(_ad)\nassert PdfReader(_ad[2]).pages[0].extract_text().strip() == \"Iki\" and len(PdfReader(_ad[2]).pages) == 1, \"Her dosyada tek sayfa\"\n",
+   "hints": [
+    "w = PdfWriter(); w.add_page(sayfa); w.write(yol)",
+    "bol içinde her sayfa için yeni PdfWriter aç."
+   ],
+   "why": "Yeni PdfWriter açmayı unutursan her dosya öncekileri de taşır; en sık hata budur."
+  }
+ ]
+},
+{
+ "id": "ofis-otomasyon",
+ "min": 8,
+ "ex": [
+  {
+   "t": "local",
+   "id": "ofis-otomasyon-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>E-postayı gerçekten gönder, ama dışarı çıkmadan: bilgisayarında sahte bir SMTP sunucusu aç, mesaj terminaline düşsün. Bu görev bu ortamda çalıştırıldı.</p>",
+   "steps": [
+    "<code>python -m pip install aiosmtpd</code> yaz.",
+    "Bir terminalde sunucuyu başlat: <code>python -m aiosmtpd -n -l 127.0.0.1:8025</code>.",
+    "Kodu <code>gonder.py</code> olarak kaydet, ikinci terminalde çalıştır.",
+    "İlk terminalde mesajı gör. Gerçek sunucuda <code>starttls()</code> ve <code>login()</code> eklenir; şifre ortam değişkeninden okunur."
+   ],
+   "file": "import smtplib\nfrom email.message import EmailMessage\n\nm = EmailMessage()\nm[\"Subject\"] = \"Haftalik rapor\"\nm[\"From\"] = \"rapor@ornek.test\"\nm[\"To\"] = \"mudur@ornek.test\"\nm.set_content(\"Rapor ektedir.\")\nm.add_attachment(b\"a,b\\n1,2\\n\", maintype=\"text\", subtype=\"csv\", filename=\"rapor.csv\")\n\nwith smtplib.SMTP(\"127.0.0.1\", 8025) as s:\n    s.send_message(m)\nprint(\"gonderildi\")\n",
+   "fname": "gonder.py",
+   "cmd": "python gonder.py",
+   "expect": "gonderildi"
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: gerçek Excel görevleri. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "excel-otomasyon",
+ "min": 30,
+ "html": "<h2>Gerçek .xlsx dosyasıyla çalışmak</h2><p>Bu bölümdeki kod tarayıcıda gerçek Excel dosyası yazar ve okur. Dosya tarayıcının belleğinde durur; çıktının altındaki <b>İndir</b> düğmesiyle alıp Excel'de açabilirsin. openpyxl ilk kullanımda iner (yaklaşık 270 KB), XlsxWriter yaklaşık 180 KB.</p>\n<pre class=\"py\">from openpyxl import Workbook, load_workbook\nfrom openpyxl.styles import Font\n\nwb = Workbook()\nws = wb.active\nws.title = \"Satış\"\nws.append([\"Ürün\", \"Adet\"])\nws.append([\"Çay\", 3])\nws[\"A1\"].font = Font(bold=True)\nws[\"C2\"] = \"=B2*2\"\nwb.save(\"ornek.xlsx\")\n\nokunan = load_workbook(\"ornek.xlsx\")\nprint(okunan.sheetnames, okunan[\"Satış\"][\"C2\"].value)\nprint(load_workbook(\"ornek.xlsx\", data_only=True)[\"Satış\"][\"C2\"].value)</pre>\n<p>Son satır <code>None</code> yazar: openpyxl formülü hesaplamaz, yalnız yazar. Hesaplanmış değer dosyaya Excel açıp kaydedince girer. Bu yüzden Python'da hesap yapıp sonucu ayrıca denetlemek gerekir.</p>\n<div class=\"tbl-wrap\"><table><tr><th>Araç</th><th>Ne zaman</th></tr><tr><td>openpyxl</td><td>Var olan dosyayı açmak, şablon doldurmak, okumak</td></tr><tr><td>XlsxWriter</td><td>Sıfırdan biçimli ve grafikli rapor; var olan dosyayı açamaz</td></tr><tr><td>pandas</td><td>Tabloyu toplu okumak ve yazmak; arka planda ikisini kullanır</td></tr></table></div>\n<div class=\"note\"><b>Sınır</b>Tarayıcıda gerçek Excel yok: grafik ve koşullu biçim dosyaya doğru yazılır ve testler dosyayı yeniden okuyarak denetler, ama görünümü ancak indirip Excel'de açınca görürsün. xlwings ve makro bilgisayarında kurulu Excel ister; burada çalışmaz.</div>",
+ "ex": [
+  {
+   "t": "mc",
+   "id": "excel-otomasyon-gm1",
+   "stage": "Isınma",
+   "q": "openpyxl ile <code>=SUM(A1:A3)</code> yazdın, dosyayı Excel'de hiç açmadan <code>load_workbook(yol, data_only=True)</code> ile okudun. Hücre ne döner?",
+   "o": [
+    "Toplamın sayı değeri",
+    "Formül metni",
+    "None",
+    "ValueError"
+   ],
+   "a": 2,
+   "why": "data_only son hesaplanan değeri okur. Dosyayı yalnız openpyxl yazdıysa hesaplayan olmamıştır, değer boştur."
+  },
+  {
+   "t": "mc",
+   "id": "excel-otomasyon-gm2",
+   "stage": "Isınma",
+   "q": "Elinde biçimli bir şablon var, içine veri yazacaksın. Hangi araç uygun?",
+   "o": [
+    "XlsxWriter, çünkü yalnız yeni dosya yazar",
+    "openpyxl, çünkü var olan dosyayı açar",
+    "csv modülü, çünkü en hafifi",
+    "read_excel, çünkü biçimi korur"
+   ],
+   "a": 1,
+   "why": "XlsxWriter var olan dosyayı açamaz. read_excel biçimi atar, csv biçim taşımaz."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>Hücre, sayfa, okuma.</b> <code>rapor_yaz(yol, satirlar)</code>: <code>satirlar</code> <code>(urun, adet, fiyat)</code> demetleridir. <code>Satış</code> adlı sayfaya başlık <code>Ürün, Adet, Fiyat</code> ve satırları yaz. <code>Özet</code> adlı ikinci sayfada <code>A1</code> <code>Toplam</code>, <code>B1</code> adet × fiyat toplamı olsun. Kaydet. <code>toplam_oku(yol)</code>: dosyayı <code>load_workbook</code> ile aç, <code>Satış</code> sayfasını <code>iter_rows(min_row=2, values_only=True)</code> ile gez, toplamı döndür.</p>",
+   "start": "from openpyxl import Workbook, load_workbook\n\ndef rapor_yaz(yol, satirlar):\n    pass\n\ndef toplam_oku(yol):\n    pass\n",
+   "sol": "from openpyxl import Workbook, load_workbook\n\ndef rapor_yaz(yol, satirlar):\n    wb = Workbook()\n    ws = wb.active\n    ws.title = \"Satış\"\n    ws.append([\"Ürün\", \"Adet\", \"Fiyat\"])\n    for s in satirlar:\n        ws.append(list(s))\n    oz = wb.create_sheet(\"Özet\")\n    oz[\"A1\"] = \"Toplam\"\n    oz[\"B1\"] = sum(a * f for _, a, f in satirlar)\n    wb.save(yol)\n\ndef toplam_oku(yol):\n    ws = load_workbook(yol)[\"Satış\"]\n    return sum(a * f for _, a, f in ws.iter_rows(min_row=2, values_only=True))\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nrapor_yaz(_y, [(\"Çay\", 2, 50.0), (\"Kahve\", 3, 100.0)])\nassert os.path.exists(_y), \"Dosya kaydedilmedi\"\n_w = load_workbook(_y)\nassert _w.sheetnames == [\"Satış\", \"Özet\"], \"Sayfalar: \" + repr(_w.sheetnames)\nassert [c.value for c in _w[\"Satış\"][1]] == [\"Ürün\", \"Adet\", \"Fiyat\"], \"Başlık satırı yanlış\"\nassert _w[\"Satış\"][\"A3\"].value == \"Kahve\" and _w[\"Satış\"].max_row == 3, \"Satırlar yanlış\"\nassert _w[\"Özet\"][\"A1\"].value == \"Toplam\" and _w[\"Özet\"][\"B1\"].value == 400.0, \"Özet B1 400 olmalı\"\nassert toplam_oku(_y) == 400.0, \"toplam_oku yanlış\"\n_y2 = os.path.join(_d, \"t2.xlsx\")\nrapor_yaz(_y2, [(\"Su\", 4, 5.0)])\nassert load_workbook(_y2)[\"Özet\"][\"B1\"].value == 20.0, \"Özet toplamı satırlardan hesaplanmalı\"\n_w[\"Satış\"].append([\"Şeker\", 1, 10.0]); _w.save(_y)\nassert toplam_oku(_y) == 410.0, \"Toplam dosyadan okunmalı, sabit olmamalı\"\n",
+   "hints": [
+    "wb.create_sheet(\"Özet\") yeni sayfa açar; wb[\"Satış\"] adla erişir.",
+    "values_only=True hücre nesnesi yerine değeri verir."
+   ],
+   "why": "Dosya gerçekten yazılıp yeniden açıldı. İndirip Excel'de açabilirsin."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Biçim.</b> <code>bicimle(yol)</code> var olan dosyayı açıp aynı dosyaya kaydetsin (ilk sayfa). Başlık satırı: kalın, <code>DDEBF7</code> dolgu, ortalı, altta ince kenarlık. C sütununda veri hücreleri <code>#,##0.00</code> sayı biçimi. A sütunu genişliği 24. İlk satır dondurulsun.</p>",
+   "start": "from openpyxl import load_workbook\nfrom openpyxl.styles import Alignment, Border, Font, PatternFill, Side\n\ndef bicimle(yol):\n    pass\n",
+   "sol": "from openpyxl import load_workbook\nfrom openpyxl.styles import Alignment, Border, Font, PatternFill, Side\n\ndef bicimle(yol):\n    wb = load_workbook(yol)\n    ws = wb.active\n    for h in ws[1]:\n        h.font = Font(bold=True)\n        h.fill = PatternFill(\"solid\", fgColor=\"DDEBF7\")\n        h.alignment = Alignment(horizontal=\"center\")\n        h.border = Border(bottom=Side(style=\"thin\"))\n    for sat in ws.iter_rows(min_row=2, min_col=3, max_col=3):\n        sat[0].number_format = \"#,##0.00\"\n    ws.column_dimensions[\"A\"].width = 24\n    ws.freeze_panes = \"A2\"\n    wb.save(yol)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active; _s.title = \"Satış\"\nfor _r in [[\"Ürün\", \"Adet\", \"Fiyat\"], [\"Çay\", 2, 50.0], [\"Kahve\", 3, 120.5], [\"Şeker\", 1, 30.0]]:\n    _s.append(_r)\n_w.save(_y)\nbicimle(_y)\n_s = load_workbook(_y).active\n_h = _s[\"B1\"]\nassert _h.font.bold, \"Başlık kalın olmalı\"\nassert _h.fill.fgColor.rgb.endswith(\"DDEBF7\"), \"Dolgu DDEBF7 olmalı\"\nassert _h.alignment.horizontal == \"center\", \"Başlık ortalı olmalı\"\nassert _h.border.bottom.style == \"thin\", \"Alt kenarlık ince olmalı\"\nassert _s[\"C2\"].number_format == \"#,##0.00\" and _s[\"C4\"].number_format == \"#,##0.00\", \"C sütunu sayı biçimi eksik\"\nassert _s[\"C1\"].number_format == \"General\", \"Başlık hücresine sayı biçimi verme\"\nassert _s.column_dimensions[\"A\"].width == 24, \"A sütunu genişliği 24 olmalı\"\nassert _s.freeze_panes == \"A2\", \"İlk satır dondurulmalı\"\nassert _s[\"B3\"].value == 3, \"Veri bozulmamalı\"\n",
+   "hints": [
+    "ws[1] ilk satırın hücrelerini verir.",
+    "PatternFill(\"solid\", fgColor=\"DDEBF7\")",
+    "iter_rows(min_row=2, min_col=3, max_col=3)"
+   ],
+   "why": "Biçim dosyada kalır; test dosyayı yeniden açıp okuyor."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g3",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Formül.</b> <code>formul_ekle(yol)</code>: ilk sayfada B adet, C fiyat, ilk satır başlık. D1'e <code>Tutar</code> yaz. Her veri satırına <code>=B2*C2</code> biçiminde formül yaz. Son satırın altına D sütununa <code>=SUM(D2:Dn)</code> ekle. Kaydet.</p>",
+   "start": "from openpyxl import load_workbook\n\ndef formul_ekle(yol):\n    pass\n",
+   "sol": "from openpyxl import load_workbook\n\ndef formul_ekle(yol):\n    wb = load_workbook(yol)\n    ws = wb.active\n    son = ws.max_row\n    ws[\"D1\"] = \"Tutar\"\n    for r in range(2, son + 1):\n        ws[f\"D{r}\"] = f\"=B{r}*C{r}\"\n    ws[f\"D{son + 1}\"] = f\"=SUM(D2:D{son})\"\n    wb.save(yol)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active; _s.title = \"Satış\"\nfor _r in [[\"Ürün\", \"Adet\", \"Fiyat\"], [\"Çay\", 2, 50.0], [\"Kahve\", 3, 120.5], [\"Şeker\", 1, 30.0]]:\n    _s.append(_r)\n_w.save(_y)\nformul_ekle(_y)\n_s = load_workbook(_y).active\nassert _s[\"D1\"].value == \"Tutar\", \"D1 Tutar olmalı\"\nassert _s[\"D2\"].value == \"=B2*C2\" and _s[\"D4\"].value == \"=B4*C4\", \"Satır formülü yanlış: \" + repr(_s[\"D2\"].value)\nassert _s[\"D5\"].value == \"=SUM(D2:D4)\", \"Toplam formülü yanlış: \" + repr(_s[\"D5\"].value)\nassert load_workbook(_y, data_only=True).active[\"D5\"].value is None, \"Formül metin olarak yazılmalı, sonucu elle koyma\"\n",
+   "hints": [
+    "ws.max_row son dolu satırı verir; onu değişkende tut, yazdıkça büyür."
+   ],
+   "why": "Formül hücrede yaşar; Excel açınca hesaplar. Kaynak veri değişince sonuç da değişir, elle yazılan sayı değişmezdi."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g4",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Şablon doldurma.</b> <code>sablon_doldur(sablon, cikti, veri)</code>: şablonu aç, tüm sayfalardaki <code>{{alan}}</code> yer tutucularını <code>veri</code> sözlüğünden doldur, <code>cikti</code>'ya kaydet. Şablon değişmesin, biçim kalsın. Hücrede başka metin de olabilir. Sözlükte olmayan alan için <code>ValueError</code> fırlat.</p>",
+   "start": "from openpyxl import load_workbook\n\ndef sablon_doldur(sablon, cikti, veri):\n    pass\n",
+   "sol": "import re\nfrom openpyxl import load_workbook\n\ndef sablon_doldur(sablon, cikti, veri):\n    wb = load_workbook(sablon)\n    for ws in wb.worksheets:\n        for sat in ws.iter_rows():\n            for h in sat:\n                if isinstance(h.value, str) and \"{{\" in h.value:\n                    def koy(m):\n                        if m.group(1) not in veri:\n                            raise ValueError(\"bilinmeyen alan: \" + m.group(1))\n                        return str(veri[m.group(1)])\n                    h.value = re.sub(r\"\\{\\{(\\w+)\\}\\}\", koy, h.value)\n    wb.save(cikti)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\nfrom openpyxl.styles import Font\n_c = os.path.join(_d, \"c.xlsx\")\n_w = Workbook(); _s = _w.active\n_s[\"A1\"] = \"Sayın {{musteri}}\"; _s[\"A1\"].font = Font(bold=True)\n_s[\"B2\"] = \"{{tutar}}\"; _s[\"B3\"] = 7\n_i = _w.create_sheet(\"İkinci\"); _i[\"A1\"] = \"Dönem: {{ay}} / {{yil}}\"\n_w.save(_y)\nsablon_doldur(_y, _c, {\"musteri\": \"Ayşe\", \"tutar\": 150, \"ay\": \"Ekim\", \"yil\": 2024})\n_o = load_workbook(_c)\nassert _o.active[\"A1\"].value == \"Sayın Ayşe\", \"A1: \" + repr(_o.active[\"A1\"].value)\nassert str(_o.active[\"B2\"].value) == \"150\", \"B2: \" + repr(_o.active[\"B2\"].value)\nassert _o.active[\"B3\"].value == 7, \"Sayı hücresine dokunma\"\nassert _o[\"İkinci\"][\"A1\"].value == \"Dönem: Ekim / 2024\", \"Tüm sayfalar ve aynı hücrede iki alan doldurulmalı\"\nassert _o.active[\"A1\"].font.bold, \"Şablonun biçimi korunmalı\"\nassert load_workbook(_y).active[\"A1\"].value == \"Sayın {{musteri}}\", \"Şablon dosyası değişmemeli\"\ntry:\n    sablon_doldur(_y, _c, {\"musteri\": \"Ayşe\"})\n    assert False, \"Eksik alanda ValueError beklenir\"\nexcept ValueError:\n    pass\n",
+   "hints": [
+    "isinstance(h.value, str) ile yalnız metin hücrelerine bak.",
+    "re.sub içinde fonksiyon vererek bilinmeyen alanı yakalarsın."
+   ],
+   "why": "İşte en sık gelen istek budur: biçimi tasarlanmış dosyayı kodla doldurmak. Şablonu değiştirmemek için farklı dosyaya kaydedilir."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g5",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>pandas ile Excel.</b> <code>rapor(yol, df)</code>: <code>pd.ExcelWriter</code> ile iki sayfa yaz, indeksiz: <code>Ham</code> (df) ve <code>Şehir</code> (<code>sehir</code> başına <code>tutar</code> toplamı; <code>sehir</code>, <code>tutar</code> sütunları). <code>oku(yol)</code>: <code>read_excel</code> ile yalnız <code>Ham</code> sayfasından <code>sehir</code> ve <code>tutar</code> sütunlarını al, <code>sehir</code> türü <code>str</code> olsun.</p>",
+   "start": "import pandas as pd\n\ndef rapor(yol, df):\n    pass\n\ndef oku(yol):\n    pass\n",
+   "sol": "import pandas as pd\n\ndef rapor(yol, df):\n    ozet = df.groupby(\"sehir\", as_index=False)[\"tutar\"].sum()\n    with pd.ExcelWriter(yol) as w:\n        df.to_excel(w, sheet_name=\"Ham\", index=False)\n        ozet.to_excel(w, sheet_name=\"Şehir\", index=False)\n\ndef oku(yol):\n    return pd.read_excel(yol, sheet_name=\"Ham\", usecols=[\"sehir\", \"tutar\"], dtype={\"sehir\": str})\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\n_df = pd.DataFrame({\"no\": [1, 2, 3], \"sehir\": [\"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [100.0, 50.0, 25.0]})\nrapor(_y, _df)\n_t = pd.read_excel(_y, sheet_name=None)\nassert list(_t) == [\"Ham\", \"Şehir\"], \"Sayfalar: \" + repr(list(_t))\nassert list(_t[\"Ham\"].columns) == [\"no\", \"sehir\", \"tutar\"], \"İndeks yazılmamalı: \" + repr(list(_t[\"Ham\"].columns))\nassert _t[\"Şehir\"].set_index(\"sehir\")[\"tutar\"].to_dict() == {\"İzmir\": 125.0, \"Van\": 50.0}, \"Şehir sayfası yanlış\"\n_o = oku(_y)\nassert list(_o.columns) == [\"sehir\", \"tutar\"] and len(_o) == 3, \"usecols ile iki sütun gelmeli: \" + repr(list(_o.columns))\n_df2 = pd.DataFrame({\"sehir\": [34, 35], \"tutar\": [1.0, 2.0]})\nrapor(_y, _df2)\nassert oku(_y)[\"sehir\"].tolist() == [\"34\", \"35\"], \"Plaka kodu metin kalmalı: dtype kullan\"\n",
+   "hints": [
+    "with pd.ExcelWriter(yol) as w: bloğu dosyayı kapatır.",
+    "df.to_excel(w, sheet_name=\"Ham\", index=False)",
+    "dtype={\"sehir\": str}"
+   ],
+   "why": "dtype özellikle kod sütunlarında önemlidir: 007 sayı olarak okunursa baştaki sıfırlar gider.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g6",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Klasördeki tüm dosyalar.</b> <code>birlestir(klasor)</code>: klasördeki <code>.xlsx</code> dosyalarını ad sırasıyla oku, Excel'in geçici dosyalarını (<code>~$</code> ile başlar) atla, her satıra dosya adını <code>kaynak</code> sütunu olarak ekle, tek DataFrame döndür. İndeks 0'dan başlasın.</p>",
+   "start": "from pathlib import Path\nimport pandas as pd\n\ndef birlestir(klasor):\n    pass\n",
+   "sol": "from pathlib import Path\nimport pandas as pd\n\ndef birlestir(klasor):\n    parcalar = []\n    for dosya in sorted(Path(klasor).glob(\"*.xlsx\")):\n        if dosya.name.startswith(\"~$\"):\n            continue\n        d = pd.read_excel(dosya)\n        d[\"kaynak\"] = dosya.name\n        parcalar.append(d)\n    return pd.concat(parcalar, ignore_index=True)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfor _a, _v in [(\"subat.xlsx\", [2, 3]), (\"ocak.xlsx\", [1])]:\n    pd.DataFrame({\"adet\": _v}).to_excel(os.path.join(_d, _a), index=False)\nopen(os.path.join(_d, \"not.txt\"), \"w\").close()\nif os.path.exists(_y): os.remove(_y)\nopen(os.path.join(_d, \"~$ocak.xlsx\"), \"wb\").write(b\"kilit\")\n_r = birlestir(_d)\nassert len(_r) == 3, \"3 satır beklenir: \" + str(len(_r))\nassert _r[\"kaynak\"].tolist() == [\"ocak.xlsx\", \"subat.xlsx\", \"subat.xlsx\"], \"Ad sırası ve kaynak: \" + repr(_r[\"kaynak\"].tolist())\nassert _r[\"adet\"].tolist() == [1, 2, 3] and list(_r.index) == [0, 1, 2], \"İndeks sıfırlanmalı\"\n",
+   "hints": [
+    "Path(klasor).glob(\"*.xlsx\") ile bul, sorted ile sırala.",
+    "pd.concat(parcalar, ignore_index=True)"
+   ],
+   "why": "Excel açıkken yanında ~$ kilit dosyası oluşur; okumaya kalkarsan iş çöker. Kaynak sütunu hatalı satırı geri izlemeyi sağlar.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g7",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Tablo, koşullu biçim, filtre.</b> <code>tablo_ekle(yol)</code>: ilk sayfanın dolu alanını <code>Satislar</code> adlı Excel tablosu yap (<code>TableStyleMedium2</code>). B sütununda veri hücrelerine: 2'den küçükse kırmızı dolgu (<code>CellIsRule</code>). C sütununda veri hücrelerine renk skalası (<code>ColorScaleRule</code>). <code>filtre_ekle(yol)</code>: tablo olmayan dosyada dolu alana otomatik filtre koysun. İkisi de aynı dosyaya kaydeder.</p>",
+   "start": "from openpyxl import load_workbook\nfrom openpyxl.formatting.rule import CellIsRule, ColorScaleRule\nfrom openpyxl.styles import PatternFill\nfrom openpyxl.worksheet.table import Table, TableStyleInfo\n\ndef tablo_ekle(yol):\n    pass\n\ndef filtre_ekle(yol):\n    pass\n",
+   "sol": "from openpyxl import load_workbook\nfrom openpyxl.formatting.rule import CellIsRule, ColorScaleRule\nfrom openpyxl.styles import PatternFill\nfrom openpyxl.worksheet.table import Table, TableStyleInfo\n\ndef tablo_ekle(yol):\n    wb = load_workbook(yol)\n    ws = wb.active\n    t = Table(displayName=\"Satislar\", ref=ws.dimensions)\n    t.tableStyleInfo = TableStyleInfo(name=\"TableStyleMedium2\", showRowStripes=True)\n    ws.add_table(t)\n    son = ws.max_row\n    ws.conditional_formatting.add(f\"B2:B{son}\", CellIsRule(operator=\"lessThan\", formula=[\"2\"], fill=PatternFill(\"solid\", bgColor=\"FFC7CE\")))\n    ws.conditional_formatting.add(f\"C2:C{son}\", ColorScaleRule(start_type=\"min\", start_color=\"FFFFFF\", end_type=\"max\", end_color=\"63BE7B\"))\n    wb.save(yol)\n\ndef filtre_ekle(yol):\n    wb = load_workbook(yol)\n    ws = wb.active\n    ws.auto_filter.ref = ws.dimensions\n    wb.save(yol)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active; _s.title = \"Satış\"\nfor _r in [[\"Ürün\", \"Adet\", \"Fiyat\"], [\"Çay\", 2, 50.0], [\"Kahve\", 3, 120.5], [\"Şeker\", 1, 30.0]]:\n    _s.append(_r)\n_w.save(_y)\ntablo_ekle(_y)\n_s = load_workbook(_y).active\nassert \"Satislar\" in _s.tables, \"Satislar tablosu yok\"\nassert _s.tables[\"Satislar\"].ref == \"A1:C4\", \"Tablo alanı: \" + _s.tables[\"Satislar\"].ref\nassert _s.tables[\"Satislar\"].tableStyleInfo.name == \"TableStyleMedium2\", \"Tablo stili yanlış\"\n_k = {str(r.sqref): [x.type for x in r.rules] for r in _s.conditional_formatting}\nassert _k.get(\"B2:B4\") == [\"cellIs\"], \"B sütununda CellIsRule: \" + repr(_k)\nassert _k.get(\"C2:C4\") == [\"colorScale\"], \"C sütununda renk skalası: \" + repr(_k)\n_r = _s.conditional_formatting\n_ku = [x for r in _r if str(r.sqref) == \"B2:B4\" for x in r.rules][0]\nassert _ku.operator == \"lessThan\" and _ku.formula == [\"2\"], \"Kural 2'den küçük olmalı\"\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active; _s.title = \"Satış\"\nfor _r in [[\"Ürün\", \"Adet\", \"Fiyat\"], [\"Çay\", 2, 50.0], [\"Kahve\", 3, 120.5], [\"Şeker\", 1, 30.0]]:\n    _s.append(_r)\n_w.save(_y)\nfiltre_ekle(_y)\nassert load_workbook(_y).active.auto_filter.ref == \"A1:C4\", \"Otomatik filtre alanı yanlış\"\n",
+   "hints": [
+    "ws.dimensions dolu alanı \"A1:C4\" olarak verir.",
+    "ws.add_table(t) tabloyu ekler; adında boşluk olamaz.",
+    "Excel tablosu ile aynı alanda ayrı auto_filter kullanma; tablonun kendi filtresi var."
+   ],
+   "why": "Tablo, kullanıcının filtre ve toplam satırını hazır verir. Koşullu biçim yeni veriyle kendini günceller."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g8",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Grafik.</b> <code>grafik_ekle(yol)</code>: ilk sayfada A ürün, B adet, ilk satır başlık. Başlığı <code>Adet</code> olan <code>BarChart</code> kur, veri B sütunu (başlık serinin adı), kategori A sütunu. <code>E2</code> hücresine ekle, kaydet.</p>",
+   "start": "from openpyxl import load_workbook\nfrom openpyxl.chart import BarChart, Reference\n\ndef grafik_ekle(yol):\n    pass\n",
+   "sol": "from openpyxl import load_workbook\nfrom openpyxl.chart import BarChart, Reference\n\ndef grafik_ekle(yol):\n    wb = load_workbook(yol)\n    ws = wb.active\n    g = BarChart()\n    g.title = \"Adet\"\n    veri = Reference(ws, min_col=2, min_row=1, max_row=ws.max_row)\n    g.add_data(veri, titles_from_data=True)\n    g.set_categories(Reference(ws, min_col=1, min_row=2, max_row=ws.max_row))\n    ws.add_chart(g, \"E2\")\n    wb.save(yol)\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active; _s.title = \"Satış\"\nfor _r in [[\"Ürün\", \"Adet\", \"Fiyat\"], [\"Çay\", 2, 50.0], [\"Kahve\", 3, 120.5], [\"Şeker\", 1, 30.0]]:\n    _s.append(_r)\n_w.save(_y)\ngrafik_ekle(_y)\n_s = load_workbook(_y).active\nassert len(_s._charts) == 1, \"Bir grafik beklenir\"\n_g = _s._charts[0]\nassert type(_g).__name__ == \"BarChart\", \"BarChart olmalı\"\nassert len(_g.series) == 1, \"Tek seri beklenir\"\n_f = _g.series[0].val.numRef.f\nassert _f.endswith(\"$B$2:$B$4\"), \"Veri aralığı B2:B4 olmalı: \" + _f\nassert _g.series[0].cat.strRef is not None or _g.series[0].cat.numRef is not None, \"Kategori verilmeli\"\n_cf = (_g.series[0].cat.strRef or _g.series[0].cat.numRef).f\nassert _cf.endswith(\"$A$2:$A$4\"), \"Kategori A2:A4 olmalı: \" + _cf\nassert _g.anchor._from.col == 4 and _g.anchor._from.row == 1, \"Grafik E2'de olmalı\"\n",
+   "hints": [
+    "Reference(ws, min_col=2, min_row=1, max_row=ws.max_row): başlık dahil.",
+    "g.add_data(veri, titles_from_data=True)"
+   ],
+   "why": "Grafik veriye bağlıdır, resim değildir: kullanıcı Excel'de sayıyı değiştirince çubuk da değişir."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g9",
+   "stage": "Meydan okuma",
+   "diff": 3,
+   "q": "<p><b>XlsxWriter.</b> <code>xw_rapor(yol, satirlar)</code>: <code>satirlar</code> <code>(sehir, ciro)</code> demetleridir. <code>Rapor</code> sayfası: kalın başlık <code>Şehir, Ciro</code>; ciro <code>#,##0.00</code> biçiminde; 1000'den büyük ciroya koşullu kırmızı dolgu; sütun grafiği <code>D2</code>'de. Test dosyayı openpyxl ile okur.</p>",
+   "start": "import xlsxwriter\n\ndef xw_rapor(yol, satirlar):\n    pass\n",
+   "sol": "import xlsxwriter\n\ndef xw_rapor(yol, satirlar):\n    wb = xlsxwriter.Workbook(yol)\n    ws = wb.add_worksheet(\"Rapor\")\n    kalin = wb.add_format({\"bold\": True})\n    para = wb.add_format({\"num_format\": \"#,##0.00\"})\n    kirmizi = wb.add_format({\"bg_color\": \"#FFC7CE\"})\n    ws.write_row(0, 0, [\"Şehir\", \"Ciro\"], kalin)\n    for i, (s, c) in enumerate(satirlar, 1):\n        ws.write(i, 0, s)\n        ws.write(i, 1, c, para)\n    n = len(satirlar)\n    ws.conditional_format(1, 1, n, 1, {\"type\": \"cell\", \"criteria\": \">\", \"value\": 1000, \"format\": kirmizi})\n    g = wb.add_chart({\"type\": \"column\"})\n    g.add_series({\"categories\": [\"Rapor\", 1, 0, n, 0], \"values\": [\"Rapor\", 1, 1, n, 1], \"name\": \"Ciro\"})\n    ws.insert_chart(\"D2\", g)\n    wb.close()\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nxw_rapor(_y, [(\"İzmir\", 1500.5), (\"Van\", 200.0)])\nfrom openpyxl import load_workbook\n_s = load_workbook(_y)[\"Rapor\"]\nassert [c.value for c in _s[1]] == [\"Şehir\", \"Ciro\"] and _s[\"A1\"].font.bold, \"Başlık kalın olmalı\"\nassert _s[\"B2\"].value == 1500.5 and _s[\"B2\"].number_format == \"#,##0.00\", \"Ciro biçimi yanlış\"\n_k = [x for r in _s.conditional_formatting if str(r.sqref) == \"B2:B3\" for x in r.rules]\nassert _k and _k[0].operator == \"greaterThan\" and _k[0].formula == [\"1000\"], \"Koşullu biçim B2:B3, 1000'den büyük\"\nassert len(_s._charts) == 1 and type(_s._charts[0]).__name__ == \"BarChart\", \"Sütun grafiği beklenir\"\nassert _s._charts[0].anchor._from.col == 3, \"Grafik D sütununda olmalı\"\n",
+   "hints": [
+    "wb.close() dosyayı yazar; unutursan dosya oluşmaz.",
+    "Satır ve sütun 0'dan başlar: A1 = (0, 0)."
+   ],
+   "why": "XlsxWriter yalnız yazar, ama biçim ve grafik seçenekleri geniştir. Sıfırdan rapor için çoğu zaman en kısa yol budur."
+  },
+  {
+   "t": "code",
+   "id": "excel-otomasyon-g10",
+   "stage": "Hata avı",
+   "diff": 2,
+   "q": "<p><b>Hatayı bul ve düzelt.</b> Dosyanın ilk iki satırı rapor başlığı, gerçek başlık üçüncü satırda. <code>toplam(yol)</code> <code>KeyError: 'Tutar'</code> veriyor. Düzelt.</p>",
+   "start": "import pandas as pd\n\ndef toplam(yol):\n    d = pd.read_excel(yol)\n    return d[\"Tutar\"].sum()\n",
+   "sol": "import pandas as pd\n\ndef toplam(yol):\n    d = pd.read_excel(yol, header=2)\n    return d[\"Tutar\"].sum()\n",
+   "tests": "import tempfile, os\n_d = tempfile.mkdtemp()\n_y = os.path.join(_d, \"t.xlsx\")\nfrom openpyxl import Workbook\n_w = Workbook(); _s = _w.active\nfor _r in [[\"Bayi raporu\"], [\"Ocak 2024\"], [\"Bayi\", \"Tutar\"], [\"A\", 10], [\"B\", 5]]:\n    _s.append(_r)\n_w.save(_y)\nassert toplam(_y) == 15, \"Toplam 15 olmalı\"\n",
+   "hints": [
+    "pandas ilk satırı başlık sanar.",
+    "header=2: üçüncü satır (0'dan sayılır)."
+   ],
+   "why": "Elle hazırlanan Excel dosyalarında tablo nadiren ilk satırdan başlar. Önce head() ile bak.",
+   "needs": [
+    "pandas"
+   ],
+   "kind": "bug"
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: seaborn ve plotly. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "seaborn-plotly",
+ "min": 20,
+ "html": "<h2>seaborn ve plotly'yi çalıştır</h2><p>İki kütüphane de tarayıcıda çalışır. İlk kullanımda inerler: seaborn yaklaşık 295 KB, plotly yaklaşık 9,7 MB. plotly büyüktür; mobil veride uzun sürebilir. <code>fig.show()</code> grafiği çıktının içinde etkileşimli gösterir, ayrıca 4,5 MB'lık bir çizim kitaplığını taşır.</p>\n<pre class=\"py\">import pandas as pd\nimport seaborn as sns\nimport matplotlib.pyplot as plt\n\nd = pd.DataFrame({\"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20]})\nsns.barplot(data=d, x=\"sehir\", y=\"tutar\", estimator=\"sum\", errorbar=None)\nplt.show()</pre>\n<div class=\"tbl-wrap\"><table><tr><th>Soru</th><th>Grafik</th></tr><tr><td>Dağılım nasıl?</td><td><code>histplot</code>, <code>boxplot</code></td></tr><tr><td>Grup karşılaştırması</td><td><code>barplot</code>, <code>countplot</code></td></tr><tr><td>Zaman içinde</td><td><code>lineplot</code></td></tr><tr><td>İki sayı ilişkisi</td><td><code>scatterplot</code>, <code>regplot</code></td></tr><tr><td>Gruba göre küçük panolar</td><td><code>FacetGrid</code>, <code>catplot</code></td></tr><tr><td>Etkileşim gerekiyor</td><td>plotly</td></tr></table></div><div class=\"note\"><b>Çalışmayan</b>Streamlit ve Dash sunucu ister, burada çalışmaz. plotly'nin PNG kaydı (kaleido) da burada yoktur; HTML olarak kaydedersin.</div>",
+ "ex": [
+  {
+   "t": "code",
+   "id": "seaborn-plotly-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>Dağılım.</b> <code>dagilim(df)</code>: yan yana iki eksenli figür döndür. Soldaki <code>histplot</code> (<code>tutar</code>, 5 kutu, başlık <code>Tutar dağılımı</code>), sağdaki <code>boxplot</code> (<code>sehir</code>e göre <code>tutar</code>, başlık <code>Şehre göre tutar</code>).</p>",
+   "start": "import matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef dagilim(df):\n    pass\n",
+   "sol": "import matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef dagilim(df):\n    fig, (a, b) = plt.subplots(1, 2, figsize=(9, 3))\n    sns.histplot(data=df, x=\"tutar\", bins=5, ax=a)\n    sns.boxplot(data=df, x=\"sehir\", y=\"tutar\", ax=b)\n    a.set_title(\"Tutar dağılımı\")\n    b.set_title(\"Şehre göre tutar\")\n    return fig\n",
+   "tests": "import pandas as _pd\n_df = _pd.DataFrame({\"gun\": [1, 2, 3, 4, 5, 6], \"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20, 25, 35]})\n_f = dagilim(_df)\n_a, _b = _f.axes\nassert len(_a.patches) == 5, \"5 kutu: \" + str(len(_a.patches))\nassert _a.get_title() == \"Tutar dağılımı\" and _b.get_title() == \"Şehre göre tutar\", \"Başlıklar\"\nassert [t.get_text() for t in _b.get_xticklabels()] == [\"Van\", \"İzmir\"], \"x ekseninde şehirler\"\nassert _a.get_xlabel() == \"tutar\" and _b.get_ylabel() == \"tutar\", \"Sütunlar seaborn ile verilmeli\"\nassert \"seaborn\" in __source__ and \"sns.histplot\" in __kod__ and \"sns.boxplot\" in __kod__, \"seaborn kullan\"\nplt.close(\"all\")\n",
+   "hints": [
+    "ax=a ile hangi eksene çizeceğini söyle.",
+    "sns.histplot(data=df, x=\"tutar\", bins=5, ax=a)"
+   ],
+   "why": "Kutu grafiği dağılımı ve aykırı değeri tek bakışta gösterir, ortalama bunu saklar.",
+   "needs": [
+    "pandas",
+    "matplotlib"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "seaborn-plotly-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>Dört temel grafik.</b> <code>panel(df)</code>: 2×2 figür. Sol üst <code>countplot</code> (<code>sehir</code>). Sağ üst <code>barplot</code> (şehre göre <code>tutar</code> toplamı, hata çubuğu yok). Sol alt <code>lineplot</code> (<code>gun</code>, <code>tutar</code>). Sağ alt <code>scatterplot</code> (<code>gun</code>, <code>tutar</code>, renk <code>sehir</code>).</p>",
+   "start": "import matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef panel(df):\n    pass\n",
+   "sol": "import matplotlib.pyplot as plt\nimport seaborn as sns\n\ndef panel(df):\n    fig, ax = plt.subplots(2, 2, figsize=(9, 6))\n    sns.countplot(data=df, x=\"sehir\", ax=ax[0, 0])\n    sns.barplot(data=df, x=\"sehir\", y=\"tutar\", estimator=\"sum\", errorbar=None, ax=ax[0, 1])\n    sns.lineplot(data=df, x=\"gun\", y=\"tutar\", errorbar=None, ax=ax[1, 0])\n    sns.scatterplot(data=df, x=\"gun\", y=\"tutar\", hue=\"sehir\", ax=ax[1, 1])\n    return fig\n",
+   "tests": "import pandas as _pd\n_df = _pd.DataFrame({\"gun\": [1, 2, 3, 4, 5, 6], \"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20, 25, 35]})\n_x = panel(_df).axes\nassert len(_x) == 4, \"Dört eksen\"\nassert sorted(round(p.get_height()) for p in _x[0].patches if p.get_height()) == [3, 3], \"countplot her şehir 3\"\nassert sorted(round(p.get_height()) for p in _x[1].patches if p.get_height()) == [65, 95], \"barplot toplam olmalı: estimator='sum'\"\nassert len(_x[1].lines) == 0, \"Hata çubuğu olmamalı: errorbar=None\"\nassert list(_x[2].lines[0].get_xdata()) == [1, 2, 3, 4, 5, 6], \"lineplot gun ekseninde\"\nassert len(_x[3].collections[0].get_offsets()) == 6 and _x[3].get_legend() is not None, \"scatterplot 6 nokta ve renk açıklaması\"\nplt.close(\"all\")\n",
+   "hints": [
+    "fig, ax = plt.subplots(2, 2); ax[0, 0] sol üst.",
+    "estimator=\"sum\", errorbar=None"
+   ],
+   "why": "barplot varsayılan olarak ortalama çizer; \"toplam\" sanılıp yanlış okunur.",
+   "needs": [
+    "pandas",
+    "matplotlib"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "seaborn-plotly-g3",
+   "stage": "Meydan okuma",
+   "diff": 3,
+   "q": "<p><b>Çok panelli ve eğilim.</b> <code>yuzey(df)</code>: <code>sehir</code> başına panel açan <code>FacetGrid</code> döndürsün, her panele <code>scatterplot</code> (<code>gun</code>, <code>tutar</code>). <code>egilim(df)</code>: <code>regplot</code> ekseni döndürsün, güven bandı olmasın. <code>ciftler(df)</code>: <code>gun</code> ve <code>tutar</code> için <code>pairplot</code> döndürsün.</p>",
+   "start": "import seaborn as sns\n\ndef yuzey(df):\n    pass\n\ndef egilim(df):\n    pass\n\ndef ciftler(df):\n    pass\n",
+   "sol": "import seaborn as sns\n\ndef yuzey(df):\n    g = sns.FacetGrid(df, col=\"sehir\")\n    g.map_dataframe(sns.scatterplot, x=\"gun\", y=\"tutar\")\n    return g\n\ndef egilim(df):\n    return sns.regplot(data=df, x=\"gun\", y=\"tutar\", ci=None)\n\ndef ciftler(df):\n    return sns.pairplot(df[[\"gun\", \"tutar\"]])\n",
+   "tests": "import pandas as _pd\n_df = _pd.DataFrame({\"gun\": [1, 2, 3, 4, 5, 6], \"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20, 25, 35]})\nimport matplotlib.pyplot as _plt\n_g = yuzey(_df)\nassert len(_g.axes.flat) == 2, \"İki panel\"\nassert all(len(a.collections[0].get_offsets()) == 3 for a in _g.axes.flat), \"Her panelde 3 nokta\"\n_plt.close(\"all\")\n_e = egilim(_df)\nassert len(_e.lines) == 1 and len(_e.collections) == 1, \"Tek eğilim çizgisi, güven bandı yok: ci=None\"\n_plt.close(\"all\")\n_c = ciftler(_df)\nassert _c.axes.shape == (2, 2), \"2x2 ızgara\"\n_plt.close(\"all\")\n",
+   "hints": [
+    "g.map_dataframe(sns.scatterplot, x=\"gun\", y=\"tutar\")",
+    "sns.regplot(..., ci=None)",
+    "df[[\"gun\", \"tutar\"]]"
+   ],
+   "why": "Küçük panolar aynı ölçekle grupları karşılaştırır. pairplot büyük veride yavaştır, önce örnekle.",
+   "needs": [
+    "pandas",
+    "matplotlib"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "seaborn-plotly-g4",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>plotly express.</b> <code>grafikler(df)</code>: üç figürlü sözlük döndür. <code>cizgi</code>: <code>px.line</code> (<code>gun</code>, <code>tutar</code>, renk <code>sehir</code>). <code>cubuk</code>: <code>px.bar</code> (<code>sehir</code>, <code>tutar</code>). <code>nokta</code>: <code>px.scatter</code> (<code>gun</code>, <code>tutar</code>, üzerine gelince <code>sehir</code>). Hepsinde başlık olsun. İlk kullanımda plotly iner (yaklaşık 9,7 MB).</p>",
+   "start": "import plotly.express as px\n\ndef grafikler(df):\n    pass\n",
+   "sol": "import plotly.express as px\n\ndef grafikler(df):\n    return {\"cizgi\": px.line(df, x=\"gun\", y=\"tutar\", color=\"sehir\", title=\"Günlük tutar\"),\n            \"cubuk\": px.bar(df, x=\"sehir\", y=\"tutar\", title=\"Şehre göre tutar\"),\n            \"nokta\": px.scatter(df, x=\"gun\", y=\"tutar\", hover_data=[\"sehir\"], title=\"Tutar\")}\n",
+   "tests": "import pandas as _pd\n_df = _pd.DataFrame({\"gun\": [1, 2, 3, 4, 5, 6], \"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20, 25, 35]})\n_g = grafikler(_df)\nassert set(_g) == {\"cizgi\", \"cubuk\", \"nokta\"}, \"Anahtarlar: \" + repr(sorted(_g))\nassert len(_g[\"cizgi\"].data) == 2 and _g[\"cizgi\"].data[0].type == \"scatter\" and _g[\"cizgi\"].data[0].mode == \"lines\", \"Şehir başına birer çizgi\"\nassert _g[\"cubuk\"].data[0].type == \"bar\" and list(_g[\"cubuk\"].data[0].x) == list(_df[\"sehir\"]), \"Çubuk şehir ekseninde\"\nassert _g[\"nokta\"].data[0].mode == \"markers\" and \"sehir\" in _g[\"nokta\"].data[0].hovertemplate, \"Üzerine gelince sehir görünmeli\"\nassert all(f.layout.title.text for f in _g.values()), \"Başlıklar eksik\"\n",
+   "hints": [
+    "px.line(df, x=\"gun\", y=\"tutar\", color=\"sehir\", title=\"...\")",
+    "hover_data=[\"sehir\"]"
+   ],
+   "why": "plotly figürü aslında veri ve ayar taşıyan bir sözlüktür; test de onu okuyor. Kendi kodunda fig.show() yazarsan grafiği görürsün.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "seaborn-plotly-g5",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>go.Figure ve HTML.</b> <code>elle_figur(df, yol)</code>: <code>go.Figure</code> kur, <code>go.Bar</code> ekle (<code>sehir</code>, <code>tutar</code>, ad <code>Tutar</code>, üzerine gelince <code>Van: 10 TL</code> gibi: <code>hovertemplate</code>). Başlık <code>Tutar</code>, y ekseni <code>TL</code>. <code>write_html</code> ile dosyaya yaz (<code>include_plotlyjs=True</code>), figürü döndür. Dosya internetsiz açılır.</p>",
+   "start": "import plotly.graph_objects as go\n\ndef elle_figur(df, yol):\n    pass\n",
+   "sol": "import plotly.graph_objects as go\n\ndef elle_figur(df, yol):\n    f = go.Figure()\n    f.add_trace(go.Bar(x=df[\"sehir\"], y=df[\"tutar\"], name=\"Tutar\", hovertemplate=\"%{x}: %{y} TL<extra></extra>\"))\n    f.update_layout(title=\"Tutar\", yaxis_title=\"TL\")\n    f.write_html(yol, include_plotlyjs=True)\n    return f\n",
+   "tests": "import pandas as _pd\n_df = _pd.DataFrame({\"gun\": [1, 2, 3, 4, 5, 6], \"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\", \"İzmir\"], \"tutar\": [10, 40, 30, 20, 25, 35]})\nimport tempfile, os\n_y = os.path.join(tempfile.mkdtemp(), \"g.html\")\n_f = elle_figur(_df, _y)\nassert isinstance(_f, go.Figure), \"go.Figure döndür\"\nassert _f.data[0].type == \"bar\" and _f.data[0].name == \"Tutar\", \"Bar izi\"\nassert \"%{x}\" in _f.data[0].hovertemplate and \"TL\" in _f.data[0].hovertemplate, \"hovertemplate\"\nassert _f.layout.title.text == \"Tutar\" and _f.layout.yaxis.title.text == \"TL\", \"Başlıklar\"\nassert os.path.getsize(_y) > 1000000, \"Tek dosya olmalı: include_plotlyjs=True\"\nassert \"Plotly.newPlot\" in open(_y, encoding=\"utf-8\").read(), \"Geçerli plotly HTML'i değil\"\n",
+   "hints": [
+    "f.add_trace(go.Bar(...))",
+    "f.update_layout(title=\"Tutar\", yaxis_title=\"TL\")"
+   ],
+   "why": "Tek dosyalık HTML e-postayla gönderilir, Excel eki gibi açılır; sunucu gerekmez.",
+   "needs": [
+    "pandas"
+   ]
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: bulut, derin öğrenme, Airflow, Selenium, MongoDB için yerel görevler. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "bulut-temelleri",
+ "min": 8,
+ "html": "<h2>Azure ve BigQuery karşılıkları</h2><p>Türkiye'deki ilanlarda Azure ve BigQuery sık geçer. Kavramlar aynı, adlar farklıdır. İstemciler ağ ve hesap ister; tarayıcıda çalışmaz.</p><div class=\"tbl-wrap\"><table><tr><th>Kavram</th><th>AWS</th><th>Azure</th><th>Google Cloud</th></tr><tr><td>Nesne depolama</td><td>S3</td><td>Blob Storage</td><td>Cloud Storage (GCS)</td></tr><tr><td>Veri ambarı</td><td>Redshift</td><td>Synapse, Fabric</td><td>BigQuery</td></tr><tr><td>Veri taşıma ve zamanlama</td><td>Glue, Step Functions</td><td>Data Factory</td><td>Dataflow, Composer</td></tr><tr><td>Python kütüphanesi</td><td>boto3</td><td>azure-storage-blob</td><td>google-cloud-storage, google-cloud-bigquery</td></tr></table></div>",
+ "ex": [
+  {
+   "t": "local",
+   "id": "bulut-temelleri-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>Azure hesabı açmadan Blob Storage kodu dene: Azurite, Microsoft'un yerel öykünücüsüdür. Bu betik bu ortamda çalıştırılmadı.</p>",
+   "steps": [
+    "<code>npx azurite --silent --location ./azurite</code> ile öykünücüyü başlat.",
+    "<code>python -m pip install azure-storage-blob</code> yaz.",
+    "Kodu <code>blob.py</code> olarak kaydet. Bağlantı metni Azurite'in belgelerde yayımlanan geliştirme hesabıdır; gerçek anahtarı koda yazma.",
+    "Komutu çalıştır: yüklediğin metin geri gelmeli."
+   ],
+   "file": "from azure.storage.blob import BlobServiceClient\n\nservis = BlobServiceClient.from_connection_string(\"UseDevelopmentStorage=true\")\nkap = servis.get_container_client(\"rapor\")\nif not kap.exists():\n    kap.create_container()\nkap.upload_blob(\"merhaba.txt\", b\"Merhaba Azure\", overwrite=True)\nprint(kap.download_blob(\"merhaba.txt\").readall().decode())\n",
+   "fname": "blob.py",
+   "cmd": "python blob.py",
+   "expect": "Merhaba Azure"
+  },
+  {
+   "t": "local",
+   "id": "bulut-temelleri-gy2",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>BigQuery'de herkese açık bir veri kümesini sorgula. Google hesabı ister; sandbox kartsız açılır, kota uygulanır. Bu betik bu ortamda çalıştırılmadı.</p>",
+   "steps": [
+    "Google Cloud'da proje aç, <code>gcloud auth application-default login</code> yap.",
+    "<code>python -m pip install google-cloud-bigquery pandas db-dtypes</code> yaz.",
+    "Kodu kaydet, <code>PROJE</code> ortam değişkenine proje kimliğini yaz.",
+    "Çalıştır. BigQuery taranan veriye göre ücretlendirir: önce <code>dry_run</code> ile boyuta bak, <code>SELECT *</code> yazma."
+   ],
+   "file": "import os\nfrom google.cloud import bigquery\n\nc = bigquery.Client(project=os.environ[\"PROJE\"])\nsql = \"SELECT name, SUM(number) AS n FROM `bigquery-public-data.usa_names.usa_1910_2013` GROUP BY name ORDER BY n DESC LIMIT 5\"\nprova = c.query(sql, job_config=bigquery.QueryJobConfig(dry_run=True))\nprint(\"Taranacak bayt:\", prova.total_bytes_processed)\nprint(c.query(sql).to_dataframe())\n",
+   "fname": "bq.py",
+   "cmd": "python bq.py"
+  }
+ ]
+},
+{
+ "id": "derin-ogrenme-giris",
+ "min": 6,
+ "ex": [
+  {
+   "t": "local",
+   "id": "derin-ogrenme-giris-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>İlk gerçek PyTorch modelini bilgisayarında eğit. PyTorch tarayıcıda çalışmaz. Bu betik bu ortamda çalıştırılmadı; kayıp değeri her makinede biraz farklı çıkar, azalıyor olması yeterli.</p>",
+   "steps": [
+    "<code>python -m pip install torch</code> yaz (GPU gerekmez).",
+    "Kodu <code>egit.py</code> olarak kaydet, çalıştır.",
+    "Kayıp azalmalı. Keras tercih edersen <code>python -m pip install keras torch</code>, <code>keras.Sequential</code> ile aynı ağ üç satırda kurulur; ilanlarda ikisi de geçer."
+   ],
+   "file": "import torch\nfrom torch import nn\n\ntorch.manual_seed(0)\nX = torch.rand(200, 2)\ny = (X.sum(dim=1) > 1).float().unsqueeze(1)\nmodel = nn.Sequential(nn.Linear(2, 8), nn.ReLU(), nn.Linear(8, 1))\nkayip_f = nn.BCEWithLogitsLoss()\nopt = torch.optim.Adam(model.parameters(), lr=0.05)\nfor tur in range(100):\n    opt.zero_grad()\n    kayip = kayip_f(model(X), y)\n    kayip.backward()\n    opt.step()\n    if tur % 25 == 0:\n        print(tur, round(kayip.item(), 3))\nprint(\"son\", round(kayip.item(), 3))\n",
+   "fname": "egit.py",
+   "cmd": "python egit.py"
+  }
+ ]
+},
+{
+ "id": "orkestrasyon",
+ "min": 8,
+ "ex": [
+  {
+   "t": "local",
+   "id": "orkestrasyon-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>Dersteki küçük DAG benzetiminin gerçeğini kur. Airflow tarayıcıda çalışmaz, Windows'ta WSL ya da Docker ister. Bu dosya bu ortamda çalıştırılmadı.</p>",
+   "steps": [
+    "Sanal ortamda Airflow 3'ü kur: resmî kurulum sayfasındaki sürüm kısıtlı komutu kullan. Kod Airflow 3 içindir; 2.x'te içe aktarma <code>from airflow.decorators import dag, task</code> olur.",
+    "<code>airflow standalone</code> ile başlat; arayüz <code>http://localhost:8080</code>.",
+    "Kodu <code>~/airflow/dags/satis.py</code> olarak kaydet.",
+    "Komutla bir tarih için dene. Sonra arayüzden yeniden deneme ve <code>catchup</code> davranışına bak."
+   ],
+   "file": "from datetime import datetime, timedelta\n\nfrom airflow.sdk import dag, task\n\n@dag(schedule=\"@daily\", start_date=datetime(2024, 10, 1), catchup=False, default_args={\"retries\": 2, \"retry_delay\": timedelta(minutes=5)})\ndef satis_etl():\n    @task\n    def cikar(ds=None):\n        return {\"tarih\": ds, \"satir\": 3}\n\n    @task\n    def yukle(sonuc):\n        print(\"yuklendi\", sonuc)\n\n    yukle(cikar())\n\nsatis_etl()\n",
+   "fname": "satis.py",
+   "cmd": "airflow dags test satis_etl 2024-10-01"
+  }
+ ]
+},
+{
+ "id": "web-scraping",
+ "min": 6,
+ "ex": [
+  {
+   "t": "local",
+   "id": "web-scraping-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>Gerçek tarayıcıyı Selenium ile sür. Tarayıcı içinde tarayıcı çalışmaz, bu yüzden görev bilgisayarında. Sayfayı önce <code>python -m http.server</code> ile kendin sunarsın; izinsiz siteye gitmezsin. Bu betik bu ortamda çalıştırılmadı.</p>",
+   "steps": [
+    "<code>python -m pip install selenium</code> yaz. Chrome kuruluysa sürücüyü Selenium kendisi bulur.",
+    "Aynı klasörde içinde <code>&lt;h1&gt;Kesit&lt;/h1&gt;</code> olan bir <code>index.html</code> oluştur, <code>python -m http.server 8000</code> başlat.",
+    "Kodu kaydet, ikinci terminalde çalıştır.",
+    "Ekran değişince kırılır: <code>WebDriverWait</code> kullan, <code>time.sleep</code> kullanma. Playwright de aynı işi görür."
+   ],
+   "file": "from selenium import webdriver\nfrom selenium.webdriver.common.by import By\nfrom selenium.webdriver.support import expected_conditions as EC\nfrom selenium.webdriver.support.ui import WebDriverWait\n\nsec = webdriver.ChromeOptions()\nsec.add_argument(\"--headless=new\")\nd = webdriver.Chrome(options=sec)\ntry:\n    d.get(\"http://localhost:8000/\")\n    h = WebDriverWait(d, 10).until(EC.presence_of_element_located((By.TAG_NAME, \"h1\")))\n    print(h.text)\nfinally:\n    d.quit()\n",
+   "fname": "sur.py",
+   "cmd": "python sur.py",
+   "expect": "Kesit"
+  }
+ ]
+},
+{
+ "id": "veri-modelleme",
+ "min": 6,
+ "html": "<h2>Belge veritabanı: MongoDB</h2><p>İlişkisel tabloda sipariş ve kalemler ayrı durur. MongoDB'de kalemler siparişin içinde tek belgedir: birlikte okunan veri için hızlı, şeması esnek. Karşılığında birleştirme zayıf, tutarlılık daha çok senin işin. Raporlama ve çok tablolu analizde ilişkisel model hâlâ daha rahattır.</p>",
+ "ex": [
+  {
+   "t": "local",
+   "id": "veri-modelleme-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>pymongo ile gerçek bir MongoDB'ye yaz ve topla. Sürücü ağ ister, tarayıcıda çalışmaz. Bu betik bu ortamda çalıştırılmadı.</p>",
+   "steps": [
+    "MongoDB'yi başlat: <code>docker run -d -p 27017:27017 mongo</code> ya da Atlas'ın ücretsiz katmanı.",
+    "<code>python -m pip install pymongo</code> yaz.",
+    "Kodu kaydet, çalıştır."
+   ],
+   "file": "from pymongo import MongoClient\n\nc = MongoClient(\"mongodb://localhost:27017\")\ns = c.kesit.siparis\ns.drop()\ns.insert_many([\n    {\"no\": 1, \"sehir\": \"Van\", \"kalemler\": [{\"ad\": \"cay\", \"tutar\": 50}, {\"ad\": \"kek\", \"tutar\": 30}]},\n    {\"no\": 2, \"sehir\": \"Kars\", \"kalemler\": [{\"ad\": \"kahve\", \"tutar\": 120}]},\n])\nprint(s.find_one({\"sehir\": \"Van\"})[\"no\"])\nhat = [{\"$unwind\": \"$kalemler\"}, {\"$group\": {\"_id\": \"$sehir\", \"ciro\": {\"$sum\": \"$kalemler.tutar\"}}}, {\"$sort\": {\"ciro\": -1}}]\nprint(list(s.aggregate(hat)))\n",
+   "fname": "mongo.py",
+   "cmd": "python mongo.py"
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: select_dtypes, explode, query, pipe, groupby.apply, Grouper. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "pandas-temizlik",
+ "min": 12,
+ "html": "<h2>Dört küçük araç: select_dtypes, explode, query, pipe</h2>\n<pre class=\"py\">import pandas as pd\n\nd = pd.DataFrame({\"no\": [1, 2], \"sehir\": [\"Van\", \"Kars\"], \"urunler\": [[\"çay\", \"kek\"], [\"kahve\"]], \"tutar\": [40.0, 25.0]})\nprint(d.select_dtypes(include=\"number\").columns.tolist())\nprint(d.explode(\"urunler\"))\nprint(d.query(\"tutar &gt; 30\")[\"sehir\"].tolist())\nprint(d.pipe(lambda x: x.assign(kdvli=x[\"tutar\"] * 1.2))[\"kdvli\"].round(1).tolist())</pre>\n<p><code>select_dtypes</code> keşfin ilk adımıdır: hangi sütunlar sayı, hangileri metin? Sayı olması gereken sütun metin çıkıyorsa temizlik başlar. <code>explode</code> API'den gelen liste sütununu satırlara açar; diğer sütunlar tekrar eder, toplam alırken dikkat et. <code>query</code> uzun filtreleri okunur yapar, dış değişkeni <code>@</code> ile alır. <code>pipe</code> kendi fonksiyonunu zincire sokar.</p>",
+ "ex": [
+  {
+   "t": "code",
+   "id": "pandas-temizlik-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>select_dtypes.</b> <code>tur_ayir(df)</code>: <code>(sayısal_sütunlar, diğerleri)</code> iki liste döndürsün. <code>sayisal_ozet(df)</code>: yalnız sayısal sütunların <code>min</code> ve <code>max</code> satırlarını versin. Sütun adlarını elle yazma.</p>",
+   "start": "import pandas as pd\n\ndef tur_ayir(df):\n    pass\n\ndef sayisal_ozet(df):\n    pass\n",
+   "sol": "import pandas as pd\n\ndef tur_ayir(df):\n    return list(df.select_dtypes(include=\"number\").columns), list(df.select_dtypes(exclude=\"number\").columns)\n\ndef sayisal_ozet(df):\n    return df.select_dtypes(include=\"number\").agg([\"min\", \"max\"])\n",
+   "tests": "_d = pd.DataFrame({\"a\": [1, 5], \"b\": [\"x\", \"y\"], \"c\": [0.5, 2.5], \"d\": [True, False]})\n_n, _o = tur_ayir(_d)\nassert _n == [\"a\", \"c\"], \"Sayısal: \" + repr(_n)\nassert _o == [\"b\", \"d\"], \"Diğerleri: \" + repr(_o)\n_s = sayisal_ozet(_d)\nassert list(_s.columns) == [\"a\", \"c\"] and _s.loc[\"max\", \"c\"] == 2.5 and _s.loc[\"min\", \"a\"] == 1, repr(_s)\nassert tur_ayir(pd.DataFrame({\"t\": [1], \"u\": [\"k\"]})) == ([\"t\"], [\"u\"]), \"Sütun adlarına bağlı olmamalı\"\n",
+   "hints": [
+    "df.select_dtypes(include=\"number\")",
+    "agg([\"min\", \"max\"])"
+   ],
+   "why": "Sütun adı yazmadan çalışan kod, yeni sütun gelince de doğru kalır. bool sayı sayılmaz.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "pandas-temizlik-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>explode.</b> <code>kalem_tablosu(kayitlar)</code>: API'den gelen <code>{\"no\", \"urunler\": [...]}</code> kayıtlarını her ürün bir satır olacak biçimde aç. Sütun adı <code>urun</code> olsun. Boş listeli kayıt satır üretmesin. İndeks 0'dan başlasın.</p>",
+   "start": "import pandas as pd\n\ndef kalem_tablosu(kayitlar):\n    pass\n",
+   "sol": "import pandas as pd\n\ndef kalem_tablosu(kayitlar):\n    d = pd.DataFrame(kayitlar).explode(\"urunler\", ignore_index=True)\n    return d.dropna(subset=[\"urunler\"]).rename(columns={\"urunler\": \"urun\"}).reset_index(drop=True)\n",
+   "tests": "_r = kalem_tablosu([{\"no\": 1, \"urunler\": [\"çay\", \"kek\"]}, {\"no\": 2, \"urunler\": []}, {\"no\": 3, \"urunler\": [\"kahve\"]}])\nassert list(_r.columns) == [\"no\", \"urun\"], \"Sütunlar: \" + repr(list(_r.columns))\nassert _r[\"no\"].tolist() == [1, 1, 3] and _r[\"urun\"].tolist() == [\"çay\", \"kek\", \"kahve\"], repr(_r.to_dict(\"list\"))\nassert list(_r.index) == [0, 1, 2], \"İndeks sıfırlanmalı\"\n",
+   "hints": [
+    "Boş liste explode sonrası NaN olur; dropna ile at.",
+    "rename(columns={\"urunler\": \"urun\"})"
+   ],
+   "why": "explode satırları çoğaltır: sipariş düzeyinde bir tutar varsa artık birkaç kez sayılır. Bire çok birleştirmeyle aynı tuzak.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "pandas-temizlik-g3",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>pipe ve query, gerçek veri.</b> <code>tutar_ekle(d)</code>: kopya üzerinde <code>tutar = quantity × unit_price × (1 − discount)</code> eklesin. <code>buyuk_kalemler(esik)</code>: <code>anadolu_market</code> <code>order_items</code> tablosunu oku, <code>pipe</code> ile <code>tutar_ekle</code>'den geçir, <code>query</code> ile tutarı <code>esik</code>'ten büyük ve indirimli satırları al, <code>item_id</code> sıralı döndür.</p>",
+   "start": "import pandas as pd\nimport veri\n\ndef tutar_ekle(d):\n    pass\n\ndef buyuk_kalemler(esik):\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\ndef tutar_ekle(d):\n    return d.assign(tutar=d[\"quantity\"] * d[\"unit_price\"] * (1 - d[\"discount\"]))\n\ndef buyuk_kalemler(esik):\n    d = veri.oku(\"anadolu_market\", \"order_items\")\n    return d.pipe(tutar_ekle).query(\"tutar > @esik and discount > 0\").sort_values(\"item_id\")\n",
+   "tests": "_b = veri.oku(\"anadolu_market\", \"order_items\")\n_e = _b[\"quantity\"] * _b[\"unit_price\"] * (1 - _b[\"discount\"])\n_w = _b[(_e > 5000) & (_b[\"discount\"] > 0)][\"item_id\"].tolist()\n_r = buyuk_kalemler(5000)\nassert _r[\"item_id\"].tolist() == _w, f\"{len(_w)} satır beklenir: {len(_r)}\"\nassert \".pipe(\" in __kod__ and \".query(\" in __kod__, \"pipe ve query kullan\"\n_k = _b.head(); tutar_ekle(_k); assert \"tutar\" not in _k.columns, \"Girdiyi değiştirme\"\nassert buyuk_kalemler(10 ** 9).empty, \"Eşik dış değişkenden gelmeli\"\n",
+   "hints": [
+    "d.assign(tutar=...) kopya döndürür.",
+    "query içinde dış değişken: \"tutar > @esik\""
+   ],
+   "why": "Temizlik adımlarını küçük fonksiyonlara bölüp pipe ile dizersen her biri ayrı test edilir.",
+   "needs": [
+    "pandas"
+   ]
+  }
+ ]
+},
+{
+ "id": "pandas-groupby",
+ "min": 8,
+ "html": "<h2>groupby.apply ve pd.Grouper</h2><p><code>agg</code> her gruptan tek değer üretir. Grup başına birkaç satır gerekiyorsa, örneğin her şehrin en büyük üç siparişi, <code>apply</code> kullanırsın; daha yavaştır, önce agg ya da transform dene. <code>include_groups=False</code> grup sütununu fonksiyona vermez; pandas 2.2 ve 3 için aynı sonucu verir. Zamanı dönemlere bölüp başka sütunla birlikte gruplamak için <code>pd.Grouper(key=\"tarih\", freq=\"MS\")</code> kullanılır; <code>MS</code> ay başı demektir.</p>",
+ "ex": [
+  {
+   "t": "code",
+   "id": "pandas-groupby-g1",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>groupby.apply.</b> <code>en_buyuk_n(df, n)</code>: her <code>sehir</code> için <code>tutar</code>'ı en büyük <code>n</code> satırı döndürsün. Sonuçta <code>sehir</code> sütun olsun, indeks 0'dan başlasın. Şehirler artan, şehir içinde tutar azalan sırada.</p>",
+   "start": "import pandas as pd\n\ndef en_buyuk_n(df, n):\n    pass\n",
+   "sol": "import pandas as pd\n\ndef en_buyuk_n(df, n):\n    return df.groupby(\"sehir\").apply(lambda g: g.nlargest(n, \"tutar\"), include_groups=False).reset_index(level=0).reset_index(drop=True)\n",
+   "tests": "_d = pd.DataFrame({\"sehir\": [\"Van\", \"İzmir\", \"Van\", \"İzmir\", \"Van\"], \"no\": [1, 2, 3, 4, 5], \"tutar\": [10, 40, 30, 20, 20]})\n_r = en_buyuk_n(_d, 2)\nassert \"sehir\" in _r.columns and list(_r.index) == list(range(4)), \"sehir sütun, indeks düz: \" + repr(_r)\nassert _r[[\"sehir\", \"no\"]].values.tolist() == [[\"Van\", 3], [\"Van\", 5], [\"İzmir\", 2], [\"İzmir\", 4]] or _r[[\"sehir\", \"no\"]].values.tolist() == [[\"İzmir\", 2], [\"İzmir\", 4], [\"Van\", 3], [\"Van\", 5]], repr(_r)\nassert len(en_buyuk_n(_d, 1)) == 2, \"n parametresi kullanılmalı\"\n",
+   "hints": [
+    "groupby(\"sehir\").apply(lambda g: g.nlargest(n, \"tutar\"), include_groups=False)",
+    "Sonuç çok düzeyli indeks taşır: reset_index(level=0) sehir'i sütuna alır."
+   ],
+   "why": "apply her grubu ayrı DataFrame olarak verir, esnektir ama yavaştır. Büyük veride sort_values ve groupby.head(n) daha hızlıdır.",
+   "needs": [
+    "pandas"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "pandas-groupby-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>pd.Grouper.</b> <code>aylik_kanal()</code>: <code>anadolu_market</code> <code>orders</code> tablosunda her ay ve <code>channel</code> için sipariş sayısını versin. Sütunlar <code>order_date</code> (ay başı), <code>channel</code>, <code>adet</code>.</p>",
+   "start": "import pandas as pd\nimport veri\n\ndef aylik_kanal():\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\n\ndef aylik_kanal():\n    d = veri.oku(\"anadolu_market\", \"orders\", parse_dates=[\"order_date\"])\n    return d.groupby([pd.Grouper(key=\"order_date\", freq=\"MS\"), \"channel\"]).size().rename(\"adet\").reset_index()\n",
+   "tests": "_b = veri.oku(\"anadolu_market\", \"orders\", parse_dates=[\"order_date\"])\n_r = aylik_kanal()\nassert list(_r.columns) == [\"order_date\", \"channel\", \"adet\"], \"Sütunlar: \" + repr(list(_r.columns))\nassert _r[\"adet\"].sum() == len(_b), \"Toplam sipariş sayısı tutmalı\"\n_m = _b.assign(ay=_b[\"order_date\"].dt.strftime(\"%Y-%m-01\")).groupby([\"ay\", \"channel\"]).size().to_dict()\n_g = {(a.strftime(\"%Y-%m-%d\"), c): n for a, c, n in _r.values.tolist()}\nassert _g == _m, \"Ay ve kanal sayıları farklı\"\nassert \"Grouper\" in __kod__, \"pd.Grouper kullan\"\n",
+   "hints": [
+    "groupby([pd.Grouper(key=\"order_date\", freq=\"MS\"), \"channel\"])",
+    ".size().rename(\"adet\").reset_index()"
+   ],
+   "why": "resample tek başına diğer sütunla gruplamaz; Grouper ikisini tek groupby içinde birleştirir.",
+   "needs": [
+    "pandas"
+   ]
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: read_sql, to_sql, sunucu bağlantıları. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "sql-analitik",
+ "min": 20,
+ "html": "<h2>pandas ve SQLAlchemy: read_sql ve to_sql</h2><p>İşte veri çoğu zaman bir veritabanındadır. pandas, SQLAlchemy motoru (engine) üzerinden okur ve yazar. Burada SQLite kullanıyoruz; aynı kod bağlantı adresi değişince başka veritabanında da çalışır.</p>\n<pre class=\"py\">import pandas as pd\nfrom sqlalchemy import create_engine, text\n\nengine = create_engine(\"sqlite:///:memory:\")\npd.DataFrame({\"sehir\": [\"İzmir\", \"Van\"], \"tutar\": [100, 40]}).to_sql(\"satis\", engine, index=False)\nprint(pd.read_sql(text(\"SELECT * FROM satis WHERE tutar &gt; :esik\"), engine, params={\"esik\": 50}))</pre>\n<p>Değeri f-string ile değil parametreyle ver: SQL enjeksiyonunu önler. <code>to_sql</code> için <code>if_exists</code> bu sitedeki pandas 2.2'de üç değer alır: <code>fail</code> (varsayılan), <code>replace</code>, <code>append</code>. pandas 3 ayrıca <code>delete_rows</code> ekler: tabloyu silmeden satırları temizleyip yazar. <code>replace</code> tabloyu silip yeniden kurar; indeks ve kısıtlar da gider, bu yüzden üretimde dikkatli kullan.</p>\n<h3>SQL Server, Oracle, MySQL</h3><p>Değişen yalnız bağlantı adresi ve sürücüdür. Bu sürücüler ağ ister, tarayıcıda çalışmaz; aşağıdaki görevi kendi bilgisayarında yap.</p>\n<div class=\"tbl-wrap\"><table><tr><th>Veritabanı</th><th>Sürücü</th><th>SQLAlchemy adresi</th><th>İlk 10 satır</th></tr>\n<tr><td>SQL Server</td><td>pyodbc</td><td><code>mssql+pyodbc://kul:sifre@sunucu/db?driver=ODBC+Driver+18+for+SQL+Server</code></td><td><code>SELECT TOP 10 ...</code></td></tr>\n<tr><td>Oracle</td><td>oracledb</td><td><code>oracle+oracledb://kul:sifre@sunucu:1521/?service_name=ORCL</code></td><td><code>FETCH FIRST 10 ROWS ONLY</code></td></tr>\n<tr><td>MySQL</td><td>pymysql</td><td><code>mysql+pymysql://kul:sifre@sunucu:3306/db</code></td><td><code>LIMIT 10</code></td></tr>\n<tr><td>PostgreSQL</td><td>psycopg</td><td><code>postgresql+psycopg://kul:sifre@sunucu:5432/db</code></td><td><code>LIMIT 10</code></td></tr></table></div>\n<div class=\"warn\"><b>Şifreyi koda yazma</b>Adresi ortam değişkeninden oku. SQL söz dizimi de değişir: SQL Server'da T-SQL, Oracle'da Oracle SQL; saklı yordamlar için PL/SQL ayrı bir dildir. Söz dizimi farkları Kesit SQL'de anlatılır.</div>",
+ "ex": [
+  {
+   "t": "code",
+   "id": "sql-analitik-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>read_sql ve parametre.</b> <code>sehir_cirosu(engine, en_az)</code>: <code>satis(sehir, tutar)</code> tablosundan şehir başına toplamı <code>ciro</code> adıyla, toplamı <code>en_az</code> ve üstü olan şehirleri, ciroya göre azalan döndür. <code>pd.read_sql</code> ve parametre kullan; değeri metne gömme.</p>",
+   "start": "import pandas as pd\nfrom sqlalchemy import create_engine, text\n\ndef sehir_cirosu(engine, en_az):\n    pass\n",
+   "sol": "import pandas as pd\nfrom sqlalchemy import create_engine, text\n\ndef sehir_cirosu(engine, en_az):\n    sql = text(\"SELECT sehir, SUM(tutar) AS ciro FROM satis GROUP BY sehir HAVING SUM(tutar) >= :en_az ORDER BY ciro DESC\")\n    return pd.read_sql(sql, engine, params={\"en_az\": en_az})\n",
+   "tests": "_e = create_engine(\"sqlite:///:memory:\")\npd.DataFrame({\"sehir\": [\"İzmir\", \"Van\", \"İzmir\", \"Kars\"], \"tutar\": [100, 40, 50, 5]}).to_sql(\"satis\", _e, index=False)\n_r = sehir_cirosu(_e, 40)\nassert list(_r.columns) == [\"sehir\", \"ciro\"], \"Sütunlar: \" + repr(list(_r.columns))\nassert _r[\"sehir\"].tolist() == [\"İzmir\", \"Van\"] and _r[\"ciro\"].tolist() == [150, 40], \"Sonuç: \" + repr(_r.to_dict(\"list\"))\nassert sehir_cirosu(_e, 100)[\"sehir\"].tolist() == [\"İzmir\"], \"Eşik parametreden gelmeli\"\nfrom sqlalchemy import event\n_giden = []\nevent.listen(_e, \"before_cursor_execute\", lambda con, cur, st, par, ctx, many: _giden.append((st, par)))\nsehir_cirosu(_e, 37)\n_st, _par = _giden[-1]\n_deger = list(_par.values()) if isinstance(_par, dict) else list(_par)\nassert \"37\" not in _st, \"Değer SQL metnine gömülmüş; params ile ayrı gönder\"\nassert 37 in _deger, \"Değer parametre olarak gitmedi: \" + repr(_par)\nassert sehir_cirosu(_e, \"0 OR 1=1\").empty, \"Girdi SQL olarak çalıştı: enjeksiyona açık\"\n",
+   "hints": [
+    "text(\"... :en_az\") ve params={\"en_az\": en_az}",
+    "Toplam üzerinde koşul için HAVING."
+   ],
+   "why": "read_sql sonucu doğrudan DataFrame verir. Filtreyi SQL'de yapmak büyük tabloda satırları Python'a hiç taşımaz.",
+   "needs": [
+    "pandas",
+    "sqlalchemy",
+    "sqlite3"
+   ]
+  },
+  {
+   "t": "code",
+   "id": "sql-analitik-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>to_sql.</b> <code>yukle(engine)</code>: <code>veri.oku(\"anadolu_market\", \"orders\")</code> tablosunu <code>siparis</code> adıyla, indeksiz, varsa üzerine yazarak yükle; sonra SQL ile <code>status</code> başına sayıyı (<code>status</code>, <code>adet</code>; <code>status</code> sıralı) döndür. <code>ekle(engine, df)</code>: df'i <code>gunluk</code> tablosuna ekleyerek yazsın ve tablodaki toplam satır sayısını döndürsün.</p>",
+   "start": "import pandas as pd\nimport veri\nfrom sqlalchemy import create_engine\n\ndef yukle(engine):\n    pass\n\ndef ekle(engine, df):\n    pass\n",
+   "sol": "import pandas as pd\nimport veri\nfrom sqlalchemy import create_engine\n\ndef yukle(engine):\n    d = veri.oku(\"anadolu_market\", \"orders\")\n    d.to_sql(\"siparis\", engine, if_exists=\"replace\", index=False)\n    return pd.read_sql(\"SELECT status, COUNT(*) AS adet FROM siparis GROUP BY status ORDER BY status\", engine)\n\ndef ekle(engine, df):\n    df.to_sql(\"gunluk\", engine, if_exists=\"append\", index=False)\n    return pd.read_sql(\"SELECT COUNT(*) AS n FROM gunluk\", engine)[\"n\"][0]\n",
+   "tests": "_e = create_engine(\"sqlite:///:memory:\")\n_b = veri.oku(\"anadolu_market\", \"orders\")\n_r = yukle(_e); _r = yukle(_e)\nassert _r[\"adet\"].sum() == len(_b), \"İki kez yüklemede satır çiftlenmemeli (replace)\"\nassert _r.set_index(\"status\")[\"adet\"].to_dict() == _b.groupby(\"status\").size().to_dict(), \"Durum sayıları yanlış\"\nassert _r[\"status\"].tolist() == sorted(_r[\"status\"]), \"status sıralı olmalı\"\nassert \"index\" not in pd.read_sql(\"SELECT * FROM siparis LIMIT 1\", _e).columns, \"İndeks tabloya yazılmamalı\"\n_d = pd.DataFrame({\"a\": [1, 2]})\nassert ekle(_e, _d) == 2 and ekle(_e, _d) == 4, \"append ile eklenmeli\"\n",
+   "hints": [
+    "df.to_sql(\"siparis\", engine, if_exists=\"replace\", index=False)",
+    "if_exists=\"append\" mevcut tabloya ekler."
+   ],
+   "why": "replace basit ama tabloyu yeniden kurar; append idempotent değildir. Çift satır önlemek için ETL bitirmesindeki doğal anahtar yöntemi gerekir.",
+   "needs": [
+    "pandas",
+    "sqlalchemy",
+    "sqlite3"
+   ]
+  },
+  {
+   "t": "local",
+   "id": "sql-analitik-gy1",
+   "stage": "Kendi bilgisayarında",
+   "q": "<p>Gerçek bir sunucuya bağlan. Sunucu yoksa MySQL ya da SQL Server'ın Docker imajı işe yarar. Bu betik bu ortamda çalıştırılmadı; adresi kendi sunucuna göre düzenle.</p>",
+   "steps": [
+    "Sürücüyü kur: <code>python -m pip install sqlalchemy pandas pymysql</code> (SQL Server için <code>pyodbc</code> ve ODBC sürücüsü, Oracle için <code>oracledb</code>).",
+    "Adresi ortam değişkenine yaz, koda yazma: <code>VERITABANI_URL</code>.",
+    "Betiği çalıştır. Sürüm satırı görünmeli."
+   ],
+   "file": "import os\n\nimport pandas as pd\nfrom sqlalchemy import create_engine, text\n\nengine = create_engine(os.environ[\"VERITABANI_URL\"])\nwith engine.connect() as con:\n    print(con.execute(text(\"SELECT VERSION()\")).scalar())   # SQL Server: SELECT @@VERSION; Oracle: SELECT banner FROM v$version\n\ndf = pd.DataFrame({\"a\": [1, 2]})\ndf.to_sql(\"kesit_deneme\", engine, if_exists=\"replace\", index=False)\nprint(pd.read_sql(\"SELECT * FROM kesit_deneme\", engine))\n",
+   "fname": "baglan.py",
+   "cmd": "python baglan.py"
+  }
+ ]
+}
+);
+})(window);
+/* Kesit Python: XML ve ElementTree. uretec/p2/gercek.py üretir, elle düzenleme. */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+{
+ "id": "json-csv",
+ "min": 18,
+ "html": "<h2>XML ve ElementTree</h2><p>Kurumsal entegrasyonlarda JSON kadar XML de karşına çıkar: e-Fatura, banka dosyaları, eski servisler. Python'ın standart kütüphanesi okur ve yazar, paket gerekmez.</p>\n<pre class=\"py\">import xml.etree.ElementTree as ET\n\nkok = ET.fromstring('&lt;Siparis no=\"7\"&gt;&lt;Kalem adet=\"2\"&gt;Çay&lt;/Kalem&gt;&lt;Kalem adet=\"1\"&gt;Kahve&lt;/Kalem&gt;&lt;/Siparis&gt;')\nprint(kok.tag, kok.get(\"no\"))\nfor k in kok.findall(\"Kalem\"):\n    print(k.text, k.get(\"adet\"))</pre>\n<p><code>.text</code> etiketin içindeki metni, <code>.get()</code> özniteliği verir. Her şey metindir; sayıya kendin çevirirsin, para için <code>Decimal</code> kullan.</p>\n<h3>Ad alanları (namespace)</h3><p>e-Fatura gibi belgelerde her etiketin bir ad alanı vardır. <code>findall(\"InvoiceLine\")</code> burada boş döner ve hata vermez; en sık yapılan hata budur. Ön ek sözlüğü vererek ararsın: <code>kok.findall(\"cac:InvoiceLine\", NS)</code>.</p>\n<div class=\"note\"><b>Kurgu örnek</b>Görevdeki fatura UBL biçimine benzetilmiş kurgu bir örnektir, geçerli bir e-Fatura değildir. Gerçek UBL-TR belgesi çok daha geniştir; şeması için Gelir İdaresi Başkanlığı kılavuzlarına bak. Güvenilmeyen kaynaktan gelen XML için <code>defusedxml</code> kullan.</div>",
+ "ex": [
+  {
+   "t": "mc",
+   "id": "json-csv-gm1",
+   "stage": "Isınma",
+   "q": "Ad alanlı bir belgede <code>kok.findall(\"InvoiceLine\")</code> ne döner?",
+   "o": [
+    "Boş liste",
+    "Tüm satırlar",
+    "Hata fırlatır",
+    "None"
+   ],
+   "a": 0,
+   "why": "Etiketin tam adı ad alanını da içerir, bu ad eşleşmez ve boş liste döner. Hata çıkmadığı için fark etmek zordur."
+  },
+  {
+   "t": "code",
+   "id": "json-csv-g1",
+   "stage": "Rehberli",
+   "diff": 2,
+   "q": "<p><b>e-Fatura benzeri XML oku.</b> <code>fatura_oku(yol)</code>: dosyayı <code>ET.parse</code> ile aç. Döndür: <code>no</code>, <code>satici</code>, <code>toplam</code> (Decimal), <code>kalemler</code> (<code>{\"ad\", \"miktar\": int, \"tutar\": Decimal}</code> listesi). <code>tutarli_mi(f)</code>: kalem tutarları toplamı toplama eşit mi? Kurgu örnek test dosyasında; yapısı: <code>cbc:ID</code>, <code>cac:AccountingSupplierParty/cac:Party/cac:PartyName/cbc:Name</code>, <code>cac:InvoiceLine</code> içinde <code>cbc:InvoicedQuantity</code>, <code>cbc:LineExtensionAmount</code>, <code>cac:Item/cbc:Name</code>, <code>cac:LegalMonetaryTotal/cbc:PayableAmount</code>.</p>",
+   "start": "import xml.etree.ElementTree as ET\nfrom decimal import Decimal\nNS = {\"inv\": \"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\",\n      \"cbc\": \"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\",\n      \"cac\": \"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"}\n\ndef fatura_oku(yol):\n    pass\n\ndef tutarli_mi(f):\n    pass\n",
+   "sol": "import xml.etree.ElementTree as ET\nfrom decimal import Decimal\nNS = {\"inv\": \"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\",\n      \"cbc\": \"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\",\n      \"cac\": \"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"}\n\ndef fatura_oku(yol):\n    kok = ET.parse(yol).getroot()\n    kalemler = []\n    for s in kok.findall(\"cac:InvoiceLine\", NS):\n        kalemler.append({\"ad\": s.find(\"cac:Item/cbc:Name\", NS).text,\n                         \"miktar\": int(s.find(\"cbc:InvoicedQuantity\", NS).text),\n                         \"tutar\": Decimal(s.find(\"cbc:LineExtensionAmount\", NS).text)})\n    return {\"no\": kok.find(\"cbc:ID\", NS).text,\n            \"satici\": kok.find(\".//cac:PartyName/cbc:Name\", NS).text,\n            \"toplam\": Decimal(kok.find(\"cac:LegalMonetaryTotal/cbc:PayableAmount\", NS).text),\n            \"kalemler\": kalemler}\n\ndef tutarli_mi(f):\n    return sum(k[\"tutar\"] for k in f[\"kalemler\"]) == f[\"toplam\"]\n",
+   "tests": "_XML = \"\"\"<?xml version=\"1.0\" encoding=\"UTF-8\"?>\n<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\"\n         xmlns:cbc=\"urn:oasis:names:specification:ubl:schema:xsd:CommonBasicComponents-2\"\n         xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\">\n  <cbc:ID>KST2024000000123</cbc:ID>\n  <cbc:IssueDate>2024-10-15</cbc:IssueDate>\n  <cac:AccountingSupplierParty><cac:Party><cac:PartyName><cbc:Name>Anadolu Market A.Ş.</cbc:Name></cac:PartyName></cac:Party></cac:AccountingSupplierParty>\n  <cac:InvoiceLine><cbc:InvoicedQuantity unitCode=\"C62\">2</cbc:InvoicedQuantity><cbc:LineExtensionAmount currencyID=\"TRY\">100.50</cbc:LineExtensionAmount><cac:Item><cbc:Name>Çay</cbc:Name></cac:Item></cac:InvoiceLine>\n  <cac:InvoiceLine><cbc:InvoicedQuantity unitCode=\"C62\">1</cbc:InvoicedQuantity><cbc:LineExtensionAmount currencyID=\"TRY\">49.50</cbc:LineExtensionAmount><cac:Item><cbc:Name>Kahve</cbc:Name></cac:Item></cac:InvoiceLine>\n  <cac:LegalMonetaryTotal><cbc:PayableAmount currencyID=\"TRY\">150.00</cbc:PayableAmount></cac:LegalMonetaryTotal>\n</Invoice>\n\"\"\"\nimport tempfile, os\n_y = os.path.join(tempfile.mkdtemp(), \"f.xml\")\nopen(_y, \"w\", encoding=\"utf-8\").write(_XML)\n_f = fatura_oku(_y)\nassert _f[\"no\"] == \"KST2024000000123\" and _f[\"satici\"] == \"Anadolu Market A.Ş.\", \"Başlık alanları: \" + repr(_f)\nassert _f[\"toplam\"] == Decimal(\"150.00\") and isinstance(_f[\"toplam\"], Decimal), \"Toplam Decimal olmalı\"\nassert _f[\"kalemler\"] == [{\"ad\": \"Çay\", \"miktar\": 2, \"tutar\": Decimal(\"100.50\")}, {\"ad\": \"Kahve\", \"miktar\": 1, \"tutar\": Decimal(\"49.50\")}], \"Kalemler: \" + repr(_f[\"kalemler\"])\nassert tutarli_mi(_f) is True, \"Tutarlı fatura\"\n_f[\"toplam\"] = Decimal(\"151\"); assert tutarli_mi(_f) is False, \"Tutarsız fatura yakalanmalı\"\n",
+   "hints": [
+    "ET.parse(yol).getroot()",
+    "kok.findall(\"cac:InvoiceLine\", NS)",
+    "Derin arama: kok.find(\".//cac:PartyName/cbc:Name\", NS)"
+   ],
+   "why": "Kalem toplamıyla belge toplamını karşılaştırmak gerçek bir kabul denetimidir. Para için Decimal, float yuvarlama farkı üretmez."
+  },
+  {
+   "t": "code",
+   "id": "json-csv-g2",
+   "stage": "Kendin yaz",
+   "diff": 2,
+   "q": "<p><b>XML üret.</b> <code>siparis_xml(no, kalemler)</code>: kök <code>Siparis</code> (öznitelik <code>no</code>), her <code>(ad, adet)</code> için <code>Kalem</code> (öznitelik <code>adet</code>, metni ad). Metin döndür. <code>adet_toplam(metin)</code>: metni çözüp adetleri toplasın.</p>",
+   "start": "import xml.etree.ElementTree as ET\n\ndef siparis_xml(no, kalemler):\n    pass\n\ndef adet_toplam(metin):\n    pass\n",
+   "sol": "import xml.etree.ElementTree as ET\n\ndef siparis_xml(no, kalemler):\n    kok = ET.Element(\"Siparis\", {\"no\": str(no)})\n    for ad, adet in kalemler:\n        k = ET.SubElement(kok, \"Kalem\", {\"adet\": str(adet)})\n        k.text = ad\n    return ET.tostring(kok, encoding=\"unicode\")\n\ndef adet_toplam(metin):\n    return sum(int(k.get(\"adet\")) for k in ET.fromstring(metin).findall(\"Kalem\"))\n",
+   "tests": "_m = siparis_xml(7, [(\"Çay & Kek\", 2), (\"Kahve\", 3)])\nassert isinstance(_m, str), \"Metin döndürmeli: encoding='unicode'\"\n_k = ET.fromstring(_m)\nassert _k.tag == \"Siparis\" and _k.get(\"no\") == \"7\", \"Kök yanlış\"\nassert [(x.text, x.get(\"adet\")) for x in _k] == [(\"Çay & Kek\", \"2\"), (\"Kahve\", \"3\")], \"Kalemler yanlış\"\nassert \"&amp;\" in _m, \"Özel karakter kaçırılmalı; XML'i elle birleştirme\"\nassert adet_toplam(_m) == 5, \"Toplam 5\"\n",
+   "hints": [
+    "ET.SubElement(kok, \"Kalem\", {\"adet\": str(adet)})",
+    "ET.tostring(kok, encoding=\"unicode\")"
+   ],
+   "why": "XML'i f-string ile kurma: & ve &lt; belgeyi bozar. Kütüphane kaçırmayı kendisi yapar."
+  },
+  {
+   "t": "code",
+   "id": "json-csv-g3",
+   "stage": "Hata avı",
+   "diff": 2,
+   "q": "<p><b>Hatayı bul ve düzelt.</b> <code>satir_sayisi(metin)</code> fatura satırlarını saymalı ama hep 0 döndürüyor, hata da vermiyor.</p>",
+   "start": "import xml.etree.ElementTree as ET\n\ndef satir_sayisi(metin):\n    kok = ET.fromstring(metin)\n    return len(kok.findall(\"InvoiceLine\"))\n",
+   "sol": "import xml.etree.ElementTree as ET\n\ndef satir_sayisi(metin):\n    kok = ET.fromstring(metin)\n    return len(kok.findall(\"{urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2}InvoiceLine\"))\n",
+   "tests": "_m = \"\"\"<Invoice xmlns=\"urn:oasis:names:specification:ubl:schema:xsd:Invoice-2\" xmlns:cac=\"urn:oasis:names:specification:ubl:schema:xsd:CommonAggregateComponents-2\"><cac:InvoiceLine/><cac:InvoiceLine/></Invoice>\"\"\"\nassert satir_sayisi(_m) == 2, \"İki satır beklenir\"\n",
+   "hints": [
+    "Etiketin gerçek adını görmek için print(kok[0].tag).",
+    "{ad_alani}InvoiceLine ya da findall(\"cac:InvoiceLine\", NS)."
+   ],
+   "why": "Sessiz sıfır, hata mesajından kötüdür. Beklenen en az bir satır varsa bunu ayrıca denetle.",
+   "kind": "bug"
+  }
+ ]
+}
+);
+})(window);
 /* Kesit Python — 'gorsellestirme' dersi uzantısı: Kanat Havayolları dakiklik panosu (gerçek veri setleri) */
 // needs: matplotlib, pandas
 (function (W) {
@@ -14427,555 +15235,5 @@ print(con.execute(SQL).fetchall())
       }
     ]
   }
-);
-})(window);
-/* Kesit Python — 'django-giris' dersi uzantısı: HTMX ile kısmi güncelleme, CSRF, fetch ile JSON, form hataları ve SPA kararı (AUDIT Ekle-12) */
-(function (W) {
-'use strict';
-const X = W.PY_EXT = W.PY_EXT || [];
-X.push(
-  { id: 'django-giris',
-    min: 25,
-    html: `<h2>Derinleş: Django'da HTMX, form, fetch ile JSON ve SPA kararı</h2><p>Django'nun şablon sistemi, formları ve admin paneli sunucu tarafı oluşturma (SSR) için kurulmuştur. Bir noktada şu karar gelir: arayüzü ayrı bir SPA (React) ve DRF API'siyle mi kuracağız, yoksa Django şablonlarını koruyup yalnız gereken yerleri dinamik mi yapacağız? İkinci yolun en yaygın aracı HTMX'tir. Flask dersindeki ek bölümde HTMX'in temel özniteliklerini (<code>hx-get</code>, <code>hx-target</code>, <code>hx-swap</code>, <code>hx-trigger</code>) gördüysen, burada aynı fikrin Django'daki karşılığını, CSRF'yi ve JSON uç noktalarını öğreneceksin.</p><div class="tbl-wrap"><table><tr><th>Soru</th><th>Django şablonu + HTMX</th><th>DRF + SPA</th></tr><tr><td>Arama motoru (SEO) önemli mi?</td><td>Hazır HTML, doğal</td><td>Ek sunucu tarafı oluşturma gerekir</td></tr><tr><td>Mobil uygulama da aynı veriyi kullanacak mı?</td><td>Ayrı JSON uç noktaları gerekir</td><td>Aynı API</td></tr><tr><td>Ekip</td><td>Python ağırlıklı</td><td>Ayrı ön yüz uzmanlığı</td></tr><tr><td>Admin, form, yetki</td><td>Django'nun hazır araçları aynen</td><td>API ve istemcide yeniden kurulur</td></tr></table></div><h3>Parça şablonu ve HX-Request</h3><p>Django'da parça şablonu ayrı bir dosyadır ve tam sayfa şablonunda <code>{% include %}</code> ile kullanılır. Görünüm, <code>request.headers</code> ile HTMX isteğini tanır; <code>django-htmx</code> paketi bunu <code>request.htmx</code> olarak kısaltır. Sayfalamada Django'nun <code>Paginator</code> sınıfı kullanılır.</p><pre class="code"># urunler/views.py
-from django.core.paginator import Paginator
-from django.shortcuts import render
-from .models import Urun
-
-def urun_listesi(request):
-    q = request.GET.get("q", "")
-    qs = Urun.objects.filter(ad__icontains=q).order_by("id")
-    sayfa = Paginator(qs, 12).get_page(request.GET.get("sayfa"))
-    baglam = {"sayfa": sayfa, "q": q}
-    if request.headers.get("HX-Request") == "true":          # ya da request.htmx
-        return render(request, "urunler/_satirlar.html", baglam)
-    return render(request, "urunler/liste.html", baglam)</pre><pre class="code">{# urunler/_satirlar.html #}
-{% for u in sayfa %}
-  &lt;tr&gt;&lt;td&gt;{{ u.ad }}&lt;/td&gt;&lt;td&gt;{{ u.fiyat }} TL&lt;/td&gt;&lt;/tr&gt;
-{% endfor %}
-{% if sayfa.has_next %}
-  &lt;tr hx-get="?q={{ q|urlencode }}&amp;sayfa={{ sayfa.next_page_number }}"
-      hx-trigger="revealed" hx-swap="outerHTML"&gt;&lt;td&gt;Yükleniyor...&lt;/td&gt;&lt;/tr&gt;
-{% endif %}</pre><h3>CSRF: Django'nun kapısı</h3><p>Django, POST/PUT/PATCH/DELETE isteklerinde CSRF belirteci (token) ister. Klasik formda <code>{% csrf_token %}</code> gizli bir <code>csrfmiddlewaretoken</code> alanı ekler. HTMX ve <code>fetch</code> isteklerinde belirteç <b>başlıkla</b> gönderilir: <code>X-CSRFToken</code>. Belirtecin değeri <code>csrftoken</code> çerezinde de durur.</p><pre class="code">&lt;body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'&gt;   {# tüm HTMX istekleri başlığı taşır #}
-
-&lt;script&gt;
-function cerez(ad) {
-  return document.cookie.split("; ").find(c =&gt; c.startsWith(ad + "="))?.split("=")[1];
-}
-const r = await fetch("/api/sepet/", {
-  method: "POST",
-  headers: {"Content-Type": "application/json", "X-CSRFToken": cerez("csrftoken")},
-  body: JSON.stringify({urun_id: 19, adet: 2}),
-});
-&lt;/script&gt;</pre><p>Çerezden belirteç okumak tarayıcıda çalışan kodun işidir; mantığı Python'la görelim. Gerçek Anadolu Market ürünlerini <code>veri</code> modülünden okuyup JSON'a çeviriyoruz:</p><pre class="py">import json
-from decimal import Decimal
-from http.cookies import SimpleCookie
-import veri
-
-c = SimpleCookie()
-c.load("sessionid=abc123; csrftoken=Xy9QeT2k")
-print("çerezdeki belirteç:", c["csrftoken"].value)
-
-urunler = veri.kayitlar("anadolu_market", "products")
-kitaplar = [{"id": u["product_id"], "ad": u["name"], "fiyat": Decimal(str(u["price"]))}
-            for u in urunler if u["category"] == "Kitap"][:3]
-
-def ondalik(o):                      # DjangoJSONEncoder'ın yaptığı gibi
-    if isinstance(o, Decimal):
-        return str(o)
-    raise TypeError(f"{type(o).__name__} JSON'a çevrilemez")
-
-print(json.dumps(kitaplar, default=ondalik, ensure_ascii=False))</pre><h3>JsonResponse ve fetch</h3><p>JSON uç noktası için DRF şart değildir; küçük işlerde <code>JsonResponse</code> yeter. İki ayrıntı: varsayılan <code>safe=True</code> yalnız sözlük kabul eder (liste için <code>safe=False</code>), ve <code>DecimalField</code> değerleri Django'nun kodlayıcısında metne çevrilir. Türkçe karakterlerin kaçırılmaması için <code>json_dumps_params={"ensure_ascii": False}</code> verilebilir.</p><pre class="code">import json
-from django.http import JsonResponse
-from django.views.decorators.http import require_POST
-
-@require_POST
-def sepet_api(request):
-    try:
-        govde = json.loads(request.body)
-    except json.JSONDecodeError:
-        return JsonResponse({"hata": "geçersiz JSON"}, status=400)
-    form = SepetFormu(govde)                       # Django formu JSON ile de çalışır
-    if not form.is_valid():
-        return JsonResponse({"hatalar": form.errors}, status=422)
-    return JsonResponse({"tutar": str(form.tutar())})
-
-def kategoriler(request):
-    return JsonResponse(list(Kategori.objects.values("id", "ad")), safe=False,
-                        json_dumps_params={"ensure_ascii": False})</pre><h3>Form hataları HTMX ile</h3><p>HTMX 2, varsayılan olarak 4xx/5xx yanıtları sayfaya yerleştirmez. Form hatalarını göstermek için iki yol var: hatalı formu 200 ile parça olarak döndürmek, ya da 422 dönüp <code>HX-Retarget</code> ve <code>HX-Reswap</code> yanıt başlıklarıyla hataların nereye konacağını söylemek (ve istemcide 422'yi yerleştirmeye izin veren yapılandırmayı açmak). Hangi yolu seçersen seç, kural aynıdır: doğrulama her zaman sunucuda yapılır.</p><div class="note"><b>Gerçek işte</b>Django + HTMX, özellikle iç sistemlerde (bayi portalı, İK izin ekranı, stok paneli) yaygınlaşıyor: admin paneli, kimlik doğrulama ve form doğrulaması hazır gelir; ön yüz projesi gerekmez. Mobil uygulama ya da dış ortaklar için ise aynı modeller üzerine DRF API eklenir. Mülakatta "Django ile SPA" sorulursa CSRF'nin başlıkla gönderildiğini ve CORS'un ayrı bir konu olduğunu söyleyebilmelisin.</div>`,
-    ex: [
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Bir Django görünümü <code>return JsonResponse([{"id": 1}, {"id": 2}])</code> satırında <code>TypeError</code> veriyor. Neden?',
-        o: ['JsonResponse varsayılan olarak yalnız sözlük kabul eder; liste için safe=False', 'Django, JSON yanıtlarında yalnızca DRF serializer kullanılmasını zorunlu kılar', 'Liste elemanları sözlükse önce json.dumps ile metne çevrilmeleri gerekir', 'JsonResponse yalnızca POST isteklerine cevap olarak kullanılabilen bir sınıftır'],
-        a: 0,
-        why: 'safe=True varsayılanı eski tarayıcılardaki bir JSON dizisi güvenlik açığına karşı konmuştur; bilinçli olarak liste döndürmek için safe=False verirsin. JsonResponse serileştirmeyi kendisi yapar.' },
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Django sayfasındaki JavaScript, <code>fetch</code> ile <code>/api/sepet/</code> adresine POST atıyor ve <b>403 CSRF verification failed</b> alıyor. En doğru çözüm hangisi?',
-        o: ['Görünüme @csrf_exempt dekoratörü ekleyip korumayı o uç nokta için kaldırmak', 'csrftoken çerezindeki belirteci X-CSRFToken başlığıyla göndermek', 'İsteği POST yerine GET ile gönderip verileri sorgu dizesine koymak', 'settings.py içinde CSRF_COOKIE_SECURE ayarını False yapmak'],
-        a: 1,
-        why: 'Django başlıktaki belirteci çerezdekiyle karşılaştırır. csrf_exempt korumayı kapatır; GET ile veri değiştirmek HTTP anlamını bozar ve önbelleğe/yeniden denemeye açıktır.' },
-      { t: 'predict',
-        stage: 'Kodu oku',
-        q: 'Django Paginator\'ı taklit eden hesap: 40 ürün, sayfa başına 12. Bu kod ne yazdırır?',
-        code: 'import math\ntoplam, boyut = 40, 12\nsayfa_sayisi = math.ceil(toplam / boyut)\nfor n in (1, 4):\n    bas = (n - 1) * boyut\n    son = min(bas + boyut, toplam)\n    print(n, son - bas, n < sayfa_sayisi)\n',
-        o: ['1 12 True\n4 4 False', '1 12 True\n4 12 False', '1 12 True\n4 4 True', '1 12 False\n4 4 False'],
-        a: 0,
-        why: '40 / 12 = 3.33 → 4 sayfa. 4. sayfa 36. elemandan başlar ve 40\'ta biter: 4 ürün. Son sayfa olduğu için has_next False.' },
-      { t: 'code',
-        id: 'django-giris-w1',
-        stage: 'Rehberli',
-        diff: 2,
-        q: '<p>Django\'nun CSRF denetimini basitleştirilmiş hâliyle yaz: <code>csrf_gecerli_mi(istek)</code>. <code>istek</code> sözlüğünde <code>"metot"</code>, <code>"cerez"</code> (ham <code>Cookie</code> başlık metni), <code>"basliklar"</code> ve <code>"form"</code> var. Kurallar:</p><ul><li>Güvenli metotlar (<code>GET</code>, <code>HEAD</code>, <code>OPTIONS</code>, <code>TRACE</code>) her zaman <code>True</code>.</li><li>Diğerlerinde <code>csrftoken</code> çerezi yoksa <code>False</code>.</li><li>Gönderilen belirteç: önce <code>form["csrfmiddlewaretoken"]</code>, yoksa <code>X-CSRFToken</code> başlığı. Yoksa <code>False</code>.</li><li>Karşılaştırma <code>hmac.compare_digest</code> ile yapılsın.</li></ul>',
-        guide: ['Metot güvenliyse hemen True döndür.', 'http.cookies.SimpleCookie ile çerez metnini ayrıştır, csrftoken\'ı al.', 'Belirteci önce formdan, sonra başlıktan oku.', 'İkisi de varsa hmac.compare_digest ile karşılaştır.'],
-        example: 'from http.cookies import SimpleCookie\nc = SimpleCookie()\nc.load("a=1; b=2")\nprint(c["b"].value, "c" in c)\n',
-        start: 'import hmac\nfrom http.cookies import SimpleCookie\n\nGUVENLI = {"GET", "HEAD", "OPTIONS", "TRACE"}\n\ndef csrf_gecerli_mi(istek):\n    # TODO: güvenli metot kontrolü\n    # TODO: çerezden csrftoken\n    # TODO: formdan ya da başlıktan gönderilen belirteç\n    return None\n',
-        sol: 'import hmac\nfrom http.cookies import SimpleCookie\n\nGUVENLI = {"GET", "HEAD", "OPTIONS", "TRACE"}\n\ndef csrf_gecerli_mi(istek):\n    if istek["metot"].upper() in GUVENLI:\n        return True\n    c = SimpleCookie()\n    c.load(istek.get("cerez", ""))\n    if "csrftoken" not in c:\n        return False\n    gelen = istek.get("form", {}).get("csrfmiddlewaretoken") or istek.get("basliklar", {}).get("X-CSRFToken")\n    if not gelen:\n        return False\n    return hmac.compare_digest(gelen, c["csrftoken"].value)\n',
-        tests: 'cerez = "sessionid=s1; csrftoken=T0k3n"\nassert csrf_gecerli_mi({"metot": "GET", "cerez": "", "basliklar": {}, "form": {}}) is True, "GET güvenli"\nassert csrf_gecerli_mi({"metot": "POST", "cerez": cerez, "basliklar": {"X-CSRFToken": "T0k3n"}, "form": {}}) is True, "fetch başlıkla"\nassert csrf_gecerli_mi({"metot": "POST", "cerez": cerez, "basliklar": {}, "form": {"csrfmiddlewaretoken": "T0k3n"}}) is True, "klasik form"\nassert csrf_gecerli_mi({"metot": "DELETE", "cerez": cerez, "basliklar": {"X-CSRFToken": "baska"}, "form": {}}) is False\nassert csrf_gecerli_mi({"metot": "POST", "cerez": "sessionid=s1", "basliklar": {"X-CSRFToken": "T0k3n"}, "form": {}}) is False, "çerez yoksa red"\nassert csrf_gecerli_mi({"metot": "post", "cerez": cerez, "basliklar": {}, "form": {}}) is False, "belirteç yoksa red"\n',
-        hints: ['Metodu upper() ile normalize et.', 'SimpleCookie nesnesinde "csrftoken" in c ile varlık kontrolü yapılır; değer c["csrftoken"].value.', 'compare_digest zamanlama saldırısına karşı sabit sürede karşılaştırır.'],
-        why: 'Saldırgan site, kurbanın tarayıcısına çerez gönderttirebilir ama çerezi okuyamaz; bu yüzden aynı değerin form alanında ya da başlıkta da gelmesi isteğin gerçekten senin sayfandan geldiğini kanıtlar. Gerçek Django ayrıca Origin/Referer denetimi ve belirteç maskeleme yapar.' },
-      { t: 'code',
-        id: 'django-giris-w2',
-        stage: 'Rehberli',
-        diff: 2,
-        q: '<p>Django <code>Paginator</code>\'ının özünü yaz: <code>SayfaBolucu(nesneler, sayfa_basi)</code>. Özellikler/metotlar: <code>num_pages</code> (en az 1), <code>sayfa(n)</code> → bir <code>Sayfa</code> nesnesi. <code>Sayfa</code>\'nın alanları: <code>object_list</code> (liste), <code>number</code>, <code>has_next()</code>, <code>has_previous()</code>, <code>next_page_number()</code> (sonraki yoksa <code>ValueError</code>). <code>get_page(n)</code> ise hoşgörülü olsun: <code>n</code> sayıya çevrilemezse 1. sayfa, aralık dışındaysa son sayfa. Testler gerçek 40 üründe çalışır.</p>',
-        guide: ['num_pages = max(1, ceil(len / sayfa_basi)).', 'Sayfa sınıfı bölücüye ve numaraya bakarak has_next ve has_previous\'ı hesaplar.', 'sayfa(n) dilimi (n-1)*boyut ile başlatır; aralık dışı n için ValueError.', 'get_page içinde int() hatasını yakala ve sınırla.'],
-        example: 'import math\nprint(math.ceil(40 / 12), max(1, math.ceil(0 / 12)))\n',
-        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport math\n\nclass Sayfa:\n    pass\n\nclass SayfaBolucu:\n    def __init__(self, nesneler, sayfa_basi):\n        self.nesneler = list(nesneler)\n        self.sayfa_basi = sayfa_basi\n    # TODO: num_pages, sayfa, get_page\n',
-        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport math\n\nclass Sayfa:\n    def __init__(self, object_list, number, bolucu):\n        self.object_list, self.number, self.bolucu = object_list, number, bolucu\n\n    def has_next(self):\n        return self.number < self.bolucu.num_pages\n\n    def has_previous(self):\n        return self.number > 1\n\n    def next_page_number(self):\n        if not self.has_next():\n            raise ValueError("sonraki sayfa yok")\n        return self.number + 1\n\nclass SayfaBolucu:\n    def __init__(self, nesneler, sayfa_basi):\n        self.nesneler = list(nesneler)\n        self.sayfa_basi = sayfa_basi\n\n    @property\n    def num_pages(self):\n        return max(1, math.ceil(len(self.nesneler) / self.sayfa_basi))\n\n    def sayfa(self, n):\n        if not 1 <= n <= self.num_pages:\n            raise ValueError("geçersiz sayfa")\n        bas = (n - 1) * self.sayfa_basi\n        return Sayfa(self.nesneler[bas:bas + self.sayfa_basi], n, self)\n\n    def get_page(self, n):\n        try:\n            n = int(n)\n        except (TypeError, ValueError):\n            n = 1\n        return self.sayfa(min(max(n, 1), self.num_pages))\n',
-        tests: 'b = SayfaBolucu(urunler, 12)\nassert b.num_pages == 4, "40 ürün / 12 = 4 sayfa"\ns = b.sayfa(1)\nassert [u["product_id"] for u in s.object_list] == list(range(1, 13)) and s.has_next() and not s.has_previous()\nassert s.next_page_number() == 2\nson = b.sayfa(4)\nassert len(son.object_list) == 4 and not son.has_next() and son.object_list[-1]["name"] == "Gurme Lokum Kutusu"\ntry:\n    son.next_page_number(); assert False, "Son sayfada ValueError"\nexcept ValueError:\n    pass\nassert b.get_page("abc").number == 1 and b.get_page(None).number == 1, "Sayıya çevrilemeyen değer 1. sayfa"\nassert b.get_page("99").number == 4, "Aralık dışı son sayfa"\nassert SayfaBolucu([], 10).num_pages == 1 and SayfaBolucu([], 10).sayfa(1).object_list == []\n',
-        hints: ['num_pages için @property kullan: b.num_pages parantezsiz okunur.', 'int(None) TypeError, int("abc") ValueError verir; ikisini birden yakala.', 'Sınırlamak için min(max(n, 1), num_pages).'],
-        why: 'Paginator.page katı (hatalı sayfada hata), get_page hoşgörülüdür; URL\'den gelen ?sayfa= değeri her şey olabileceği için görünümlerde get_page tercih edilir. has_next sonsuz kaydırmadaki gözcü satırının koşuludur.' },
-      { t: 'code',
-        id: 'django-giris-w3',
-        stage: 'Kendin yaz',
-        diff: 2,
-        q: '<p><code>JsonResponse</code>\'u taklit et: <code>json_yanit(veri, safe=True, status=200)</code> <code>(status, govde, basliklar)</code> döndürsün. <code>safe</code> doğruyken <code>veri</code> sözlük değilse <code>TypeError("In order to allow non-dict objects to be serialized set the safe parameter to False.")</code>. Gövde <code>json.dumps(..., ensure_ascii=False)</code>; <code>Decimal</code> → <code>str</code>, <code>datetime.date</code>/<code>datetime</code> → <code>isoformat()</code>, diğer bilinmeyen tipler <code>TypeError</code>. Başlık: <code>{"Content-Type": "application/json"}</code>.</p>',
-        start: 'import datetime\nimport json\nfrom decimal import Decimal\n\ndef json_yanit(veri, safe=True, status=200):\n    pass\n',
-        sol: 'import datetime\nimport json\nfrom decimal import Decimal\n\ndef _kodla(o):\n    if isinstance(o, Decimal):\n        return str(o)\n    if isinstance(o, (datetime.date, datetime.datetime)):\n        return o.isoformat()\n    raise TypeError(f"{type(o).__name__} JSON\'a çevrilemez")\n\ndef json_yanit(veri, safe=True, status=200):\n    if safe and not isinstance(veri, dict):\n        raise TypeError("In order to allow non-dict objects to be serialized set the safe parameter to False.")\n    govde = json.dumps(veri, ensure_ascii=False, default=_kodla)\n    return status, govde, {"Content-Type": "application/json"}\n',
-        tests: 'r = json_yanit({"ad": "Bakır Cezve", "fiyat": Decimal("320.00"), "tarih": datetime.date(2024, 12, 31)})\nassert r == (200, \'{"ad": "Bakır Cezve", "fiyat": "320.00", "tarih": "2024-12-31"}\', {"Content-Type": "application/json"}), f"Gelen {r}"\ntry:\n    json_yanit([1, 2]); assert False, "Liste safe=True ile reddedilmeli"\nexcept TypeError as h:\n    assert "safe parameter" in str(h)\nassert json_yanit([1, 2], safe=False, status=201)[:2] == (201, "[1, 2]")\ntry:\n    json_yanit({"x": {1, 2}}); assert False, "Küme JSON\\\'a çevrilemez"\nexcept TypeError:\n    pass\n',
-        hints: ['json.dumps\'ın default parametresine bilinmeyen tipleri çeviren bir fonksiyon ver.', 'default fonksiyonu çeviremediği tipte TypeError fırlatmalı; None döndürürse "null" yazılır.'],
-        why: 'Django modellerindeki DecimalField ve DateField değerleri standart json modülünde hata verir; DjangoJSONEncoder bunları metne çevirir. Para tutarını float yerine metin olarak göndermek kuruş hassasiyetini korur.' },
-      { t: 'code',
-        id: 'django-giris-w4',
-        stage: 'Kendin yaz',
-        diff: 2,
-        q: '<p>HTMX formu için yanıt seçici: <code>form_yaniti(gecerli, hatalar, htmx)</code> <code>(status, govde, basliklar)</code> döndürsün.</p><ul><li>Geçerli + HTMX: <code>(200, \'&lt;p class="ok"&gt;Kaydedildi&lt;/p&gt;\', {"HX-Trigger": "kayitEklendi"})</code></li><li>Geçerli + klasik: <code>(302, "", {"Location": "/basvurular/"})</code></li><li>Geçersiz + HTMX: <code>(422, govde, {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"})</code>; govde, hatalar sözlüğünden (alan adına göre sıralı) <code>&lt;li&gt;alan: mesaj&lt;/li&gt;</code> satırlarıyla kurulan <code>&lt;ul&gt;...&lt;/ul&gt;</code>; alan ve mesaj <code>html.escape</code> ile kaçırılır, bir alanın birden çok mesajı varsa her biri ayrı <code>li</code>.</li><li>Geçersiz + klasik: aynı <code>&lt;ul&gt;</code> gövdesiyle <code>(400, govde, {})</code>.</li></ul>',
-        start: 'import html\n\ndef form_yaniti(gecerli, hatalar, htmx):\n    pass\n',
-        sol: 'import html\n\ndef _hata_listesi(hatalar):\n    satirlar = "".join(f"<li>{html.escape(alan)}: {html.escape(m)}</li>"\n                       for alan in sorted(hatalar) for m in hatalar[alan])\n    return "<ul>" + satirlar + "</ul>"\n\ndef form_yaniti(gecerli, hatalar, htmx):\n    if gecerli:\n        if htmx:\n            return 200, \'<p class="ok">Kaydedildi</p>\', {"HX-Trigger": "kayitEklendi"}\n        return 302, "", {"Location": "/basvurular/"}\n    govde = _hata_listesi(hatalar)\n    if htmx:\n        return 422, govde, {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"}\n    return 400, govde, {}\n',
-        tests: 'assert form_yaniti(True, {}, True) == (200, \'<p class="ok">Kaydedildi</p>\', {"HX-Trigger": "kayitEklendi"})\nassert form_yaniti(True, {}, False) == (302, "", {"Location": "/basvurular/"})\nh = {"tutar": ["Tutar 0\\\'dan büyük olmalı"], "eposta": ["Geçersiz <e-posta>", "Zorunlu alan"]}\ns, g, b = form_yaniti(False, h, True)\nassert s == 422 and b == {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"}\nassert g == "<ul><li>eposta: Geçersiz &lt;e-posta&gt;</li><li>eposta: Zorunlu alan</li><li>tutar: Tutar 0&#x27;dan büyük olmalı</li></ul>", f"Gelen {g}"\nassert form_yaniti(False, h, False) == (400, g, {})\n',
-        hints: ['Hata listesini üreten küçük bir yardımcı fonksiyon yaz; iki geçersiz dalda da kullan.', 'İç içe comprehension: for alan in sorted(hatalar) for m in hatalar[alan].'],
-        why: 'HTMX isteğinde yönlendirme yerine parça ve olay başlığı, hatada ise hedefi değiştiren başlıklar döndürmek; klasik formda PRG ve 400 kullanmak. Aynı görünüm iki istemci türünü de doğru karşılar.' },
-      { t: 'code',
-        id: 'django-giris-w5',
-        stage: 'Hata avı',
-        kind: 'bug',
-        diff: 2,
-        q: '<p>Hatayı bul ve düzelt. <code>kategori_urunleri(kategori)</code> görünümü <code>fetch</code> ile çağrılıyor ve gerçek ürünlerden o kategoridekileri <code>[{"id", "ad", "fiyat"}]</code> listesi olarak JSON\'a çevirmeli (fiyat <code>Decimal</code>, JSON\'da metin, <b>iki ondalık</b>: <code>"145.00"</code>). Üç sorun var: yanıt <code>TypeError</code> veriyor (Decimal), JSON\'da Türkçe karakterler <code>\\u00e7</code> gibi kaçırılıyor ve fiyatlar <code>"145.0"</code> biçiminde çıkıyor. Dönüş: JSON metni.</p>',
-        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport json\nfrom decimal import Decimal\n\ndef kategori_urunleri(kategori):\n    liste = [{"id": u["product_id"], "ad": u["name"], "fiyat": Decimal(str(u["price"]))}\n             for u in urunler if u["category"] == kategori]\n    return json.dumps(liste)\n',
-        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport json\nfrom decimal import Decimal\n\ndef _kodla(o):\n    if isinstance(o, Decimal):\n        return str(o)\n    raise TypeError(type(o).__name__)\n\ndef kategori_urunleri(kategori):\n    liste = [{"id": u["product_id"], "ad": u["name"],\n              "fiyat": Decimal(str(u["price"])).quantize(Decimal("0.01"))}\n             for u in urunler if u["category"] == kategori]\n    return json.dumps(liste, ensure_ascii=False, default=_kodla)\n',
-        tests: 'r = json.loads(kategori_urunleri("Kitap"))\nassert len(r) == 7, "Kitap kategorisinde 7 ürün var"\nassert r[0] == {"id": 9, "ad": "Suç ve Ceza", "fiyat": "145.00"}, f"Gelen {r[0]}"\nassert "Suç ve Ceza" in kategori_urunleri("Kitap"), "Türkçe karakterler kaçırılmamalı (ensure_ascii=False)"\nassert json.loads(kategori_urunleri("Hediye"))[0]["fiyat"] == "500.00"\nassert kategori_urunleri("Yok") == "[]"\n',
-        hints: ['json.dumps\'a Decimal\'i metne çeviren bir default fonksiyonu ver.', 'Decimal("145.0").quantize(Decimal("0.01")) iki ondalığa sabitler.', 'ensure_ascii=False Türkçe karakterleri olduğu gibi bırakır.'],
-        why: 'Django\'nun DecimalField\'ı kendi ondalık hassasiyetini (decimal_places=2) korur ve DjangoJSONEncoder bunu metne çevirir. Standart json modülü Decimal\'i tanımaz; ensure_ascii varsayılanı da Türkçe metni okunmaz kılar.' },
-      { t: 'code',
-        id: 'django-giris-w6',
-        stage: 'Meydan okuma',
-        diff: 3,
-        q: '<p>Aktif aramada eşleşen kısmı vurgula: <code>vurgula(metin, sorgu)</code> metindeki <code>sorgu</code> eşleşmelerini (Türkçe büyük/küçük harf duyarsız) <code>&lt;mark&gt;...&lt;/mark&gt;</code> içine alsın, <b>orijinal yazımı koruyarak</b>. Metnin geri kalanı ve eşleşen parça <code>html.escape</code> ile kaçırılsın (XSS!). Boş sorguda yalnız kaçırılmış metin döner. Türkçe küçültme: <code>"I"→"ı"</code>, <code>"İ"→"i"</code>, sonra <code>lower()</code> (bu dönüşüm uzunluğu korur). Sonra <code>arama_parcasi(sorgu)</code> yaz: gerçek ürünlerden adı sorguyu içerenler için <code>&lt;li&gt;{vurgulu ad}&lt;/li&gt;</code> satırlarını birleştirsin; sonuç yoksa <code>&lt;li class="bos"&gt;Sonuç yok&lt;/li&gt;</code>.</p>',
-        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\n\ndef tr_kucuk(s):\n    return s.replace("I", "ı").replace("İ", "i").lower()\n\ndef vurgula(metin, sorgu):\n    pass\n\ndef arama_parcasi(sorgu):\n    pass\n',
-        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\n\ndef tr_kucuk(s):\n    return s.replace("I", "ı").replace("İ", "i").lower()\n\ndef vurgula(metin, sorgu):\n    if not sorgu:\n        return html.escape(metin)\n    km, ks = tr_kucuk(metin), tr_kucuk(sorgu)\n    parcalar, i = [], 0\n    while True:\n        j = km.find(ks, i)\n        if j == -1:\n            parcalar.append(html.escape(metin[i:]))\n            break\n        parcalar.append(html.escape(metin[i:j]))\n        parcalar.append("<mark>" + html.escape(metin[j:j + len(sorgu)]) + "</mark>")\n        i = j + len(sorgu)\n    return "".join(parcalar)\n\ndef arama_parcasi(sorgu):\n    ks = tr_kucuk(sorgu)\n    satirlar = [f"<li>{vurgula(u[\'name\'], sorgu)}</li>" for u in urunler if ks in tr_kucuk(u["name"])]\n    return "".join(satirlar) or \'<li class="bos">Sonuç yok</li>\'\n',
-        tests: 'assert vurgula("Seramik Kupa Seti", "set") == "Seramik Kupa <mark>Set</mark>i", "Orijinal yazım korunmalı"\nassert vurgula("İnce Memed", "ince") == "<mark>İnce</mark> Memed", "Türkçe İ eşleşmeli"\nassert vurgula("Ada <b>", "a") == "<mark>A</mark>d<mark>a</mark> &lt;b&gt;", "Tüm eşleşmeler ve kaçış"\nassert vurgula(\'27" Monitör\', "") == "27&quot; Monitör"\nassert vurgula("a<b>a", "<b>") == "a<mark>&lt;b&gt;</mark>a", "Eşleşen parça da kaçırılmalı"\nassert arama_parcasi("kahve") == "<li>Türk <mark>Kahve</mark>si Makinesi</li>"\nassert arama_parcasi("SET").count("<mark>Set</mark>") == 3, "Çaydanlık Seti, Seramik Kupa Seti, Dambıl Seti 10kg"\nassert arama_parcasi("xyz") == \'<li class="bos">Sonuç yok</li>\'\n',
-        hints: ['Aramayı küçültülmüş metinde yap ama dilimi orijinal metinden al; dönüşüm uzunluğu koruduğu için indeksler aynıdır.', 'str.find(alt, baslangic) bir sonraki eşleşmenin indeksini, yoksa -1 verir.', 'Kaçışı en son değil, her parçaya ayrı uygula; <mark> etiketlerini kaçırma.'],
-        why: 'Önce kaçırıp sonra vurgulamak <code>&amp;lt;</code> gibi parçaları bölebilir; önce vurgulayıp sonra kaçırmak da <code>&lt;mark&gt;</code> etiketini bozar. Doğru yol parçaları ayırıp her metin parçasını ayrı kaçırmaktır. Django şablonunda bu fonksiyonun sonucu mark_safe ile işaretlenir; içeride kaçış yapıldığı için güvenlidir.' }
-    ],
-    faq: [
-      { q: 'HTMX ile Django REST Framework birlikte kullanılır mı?',
-        a: 'Kullanılabilir ama genellikle gerekmez: HTMX HTML bekler, DRF JSON üretir. Yaygın düzen şudur: web arayüzü Django şablonları + HTMX ile, mobil uygulama ve dış ortaklar DRF API\'siyle beslenir; ikisi aynı modelleri ve servis fonksiyonlarını paylaşır.' },
-      { q: 'django-htmx paketini kurmalı mıyım?',
-        a: 'Zorunlu değil; <code>request.headers.get("HX-Request")</code> yeter. Paket (<code>pip install django-htmx</code>) <code>request.htmx</code> kısayolu, HTMX\'e özgü yanıt sınıfları (<code>HttpResponseClientRedirect</code> gibi) ve geliştirme sırasında hata sayfası desteği verir; birden çok HTMX görünümün varsa kullanışlıdır.' }
-    ],
-    mistakes: [
-      { bad: 'return JsonResponse(list(qs.values()))',
-        good: 'return JsonResponse(list(qs.values()), safe=False)',
-        why: 'JsonResponse varsayılan olarak yalnız sözlük kabul eder; liste için safe=False gerekir.' }
-    ] }
-);
-})(window);
-/* Kesit Python — 'excel-otomasyon' dersi uzantısı: Power BI ve Excel köprüsü: Python betik kaynağı/görseli, =PY, kesit_bi ile yıldız şemalı CSV hazırlama (AUDIT Ekle-4) */
-(function (W) {
-'use strict';
-const X = W.PY_EXT = W.PY_EXT || [];
-X.push(
-  { id: 'excel-otomasyon',
-    min: 28,
-    html: `<h2>Derinleş: Power BI ve Excel köprüsü</h2><p>Çoğu kurumda Python tek başına rapor aracı değildir; sonuçlar Excel'e ya da Power BI panolarına gider. Python'un bu dünyaya üç kapısı var: Power BI içinde <b>Python betik kaynağı</b> ve <b>Python görseli</b>, Excel içinde <b>=PY</b> formülü ve en sağlamı, Python'un temizleyip Power BI'a hazır <b>yıldız şemalı dosyalar</b> (CSV/Parquet) üretmesi. Bu bölümde Kesit Power BI'ın kullandığı <code>kesit_bi</code> modelini ve Kesit SQL'in <code>anadolu_market</code> tablolarını kullanacaksın; ikisi aynı kurgusal şirketin iki görünümü.</p><h3>Power BI'da Python: betik kaynağı ve görsel</h3><p><b>Veri al → Diğer → Python betiği</b> ile yazdığın betik çalışır ve betik bittiğinde ad alanındaki <b>her pandas DataFrame</b> ayrı bir tablo olarak seçime sunulur. Power BI Desktop, bilgisayarındaki Python yorumlayıcısını kullanır (Seçenekler → Python betiği oluşturma); pandas ve matplotlib orada kurulu olmalıdır. <b>Python görseli</b> ise rapor sayfasında çalışır: seçtiğin alanlar <code>dataset</code> adlı DataFrame olarak gelir, sen matplotlib ile çizersin.</p><pre class="code"># Power BI → Veri al → Python betiği
-import pandas as pd
-satis = pd.read_csv(r"C:\\veri\\kesit_bi\\Satislar.csv")
-satis = satis[satis["Durum"] != "İptal"]          # yalnız DataFrame'ler tablo olur
-ozet = satis.groupby("Kanal", as_index=False)["Tutar"].sum()
-
-# Python görseli (rapor sayfasında): Power BI "dataset" DataFrame'ini verir
-import matplotlib.pyplot as plt
-dataset.groupby("Kategori")["Tutar"].sum().sort_values().plot.barh()
-plt.show()</pre><div class="warn"><b>İki tuzak</b>1) Python görseline gelen <code>dataset</code> içinde <b>tekrarlanan satırlar silinir</b>; aynı ürün ve tutarlı iki satış tek satıra iner ve toplam yanlış çıkar. Alanlara benzersiz bir sütun (SatirNo) ekle. 2) Python kaynakları Power BI Hizmeti'nde (bulut) yenilenirken kişisel ağ geçidi ister; kurumsal yenilemelerde Python adımını Power BI dışına (zamanlanmış betik) taşımak daha sağlamdır.</div><h3>Excel'de Python: =PY</h3><p>Microsoft 365 Excel'de bir hücreye <code>=PY(</code> yazınca Python düzenleyicisi açılır. Kod Microsoft bulutunda (Anaconda dağıtımıyla) çalışır; yerel dosyalara ve internete erişemez. Hücre aralığı <code>xl("A1:D100", headers=True)</code> ile DataFrame olarak gelir; sonuç hücreye değer ya da Excel tablosu olarak dökülür.</p><pre class="code">=PY(
-df = xl("Satislar[#All]", headers=True)
-df.groupby("Kanal")["Tutar"].sum()
-)</pre><h3>Yıldız şeması: Power BI'ın sevdiği biçim</h3><p>Power BI modeli en iyi <b>yıldız şemasıyla</b> çalışır: ortada olayları (satış satırları) tutan uzun ve dar bir <b>olgu tablosu</b> (fact), çevresinde tanımlayıcı bilgileri tutan <b>boyut tabloları</b> (dimension: Ürünler, Müşteriler, Tarih). Olgu tablosunda yalnız anahtarlar ve ölçülebilir sayılar (Adet, Tutar) bulunur; boyutlarda her anahtar <b>bir kez</b> geçer. Tek dev düz tablo yerine yıldız şeması: dosya küçülür, DAX ölçüleri doğru filtrelenir ve aynı boyut birden çok olguya bağlanabilir.</p><pre class="py">import veri
-
-satis = veri.oku("kesit_bi", "Satislar")
-urun = veri.oku("kesit_bi", "Urunler")
-musteri = veri.oku("kesit_bi", "Musteriler")
-print("olgu:", satis.shape, "| ürün:", urun.shape, "| müşteri:", musteri.shape)
-
-# boyut anahtarları tekil mi? olgudaki her anahtarın boyutta karşılığı var mı?
-print(urun["UrunNo"].is_unique, musteri["MusteriNo"].is_unique)
-print(satis["UrunNo"].isin(urun["UrunNo"]).all(), satis["MusteriNo"].isin(musteri["MusteriNo"]).all())
-
-tablo = satis.merge(urun[["UrunNo", "Kategori"]], on="UrunNo", validate="many_to_one")
-print(tablo.groupby("Kategori")["Tutar"].sum().round(0).sort_values(ascending=False).head(3))</pre><p><code>validate="many_to_one"</code> birleştirmede boyut anahtarının tekil olduğunu denetler; tekil değilse hata verir. Bu tek parametre, raporda tutarların sessizce ikiye katlanmasını önler.</p><h3>Düz tablodan yıldız şemasına</h3><p>Kaynak sistemden çoğu zaman tek bir düz (denormalize) dışa aktarım gelir. Python'un işi: boyutları ayırmak (<code>drop_duplicates</code>), anahtarları denetlemek, bir <b>tarih boyutu</b> üretmek ve dosyaları Power BI'ın sorunsuz okuyacağı biçimde yazmaktır. Anadolu Market'in SQL tablolarını birleştirip yeniden ayıralım:</p><pre class="py">kalem = veri.oku("anadolu_market", "order_items")
-siparis = veri.oku("anadolu_market", "orders")
-urunler = veri.oku("anadolu_market", "products")
-duz = (kalem.merge(siparis, on="order_id")
-            .merge(urunler[["product_id", "name", "category"]], on="product_id"))
-print(duz.shape)
-
-dim_urun = duz[["product_id", "name", "category"]].drop_duplicates().sort_values("product_id")
-olgu = duz[["item_id", "order_id", "order_date", "product_id", "quantity", "unit_price", "discount"]].copy()
-olgu["TarihKey"] = olgu["order_date"].str.replace("-", "").astype(int)   # 20240131 biçimi
-olgu["tutar"] = (olgu["quantity"] * olgu["unit_price"] * (1 - olgu["discount"])).round(2)
-print(dim_urun.shape, olgu.shape)
-print(olgu[["TarihKey", "tutar"]].head(3))</pre><div class="tbl-wrap"><table><tr><th>Biçim</th><th>Artısı</th><th>Dikkat</th></tr><tr><td>CSV (UTF-8)</td><td>Her yerde açılır, okunabilir</td><td>Tür bilgisi yok; tarih ISO (YYYY-AA-GG), ondalık nokta, <code>index=False</code>. Excel'de açılacaksa <code>encoding="utf-8-sig"</code>.</td></tr><tr><td>Parquet</td><td>Tür bilgisi, sıkıştırma, hızlı; Power BI doğrudan okur</td><td><code>df.to_parquet("olgu.parquet")</code> için pyarrow gerekir</td></tr><tr><td>Excel (.xlsx)</td><td>İş kullanıcısı için tanıdık</td><td>1.048.576 satır sınırı; büyük olgu tablosu için uygun değil</td></tr></table></div><div class="note"><b>Gerçek işte</b>Analist ekiplerinin yaygın düzeni: Python (zamanlanmış betik ya da boru hattı) kaynakları çeker ve temizler, yıldız şemalı Parquet/CSV dosyalarını paylaşılan klasöre ya da veri ambarına yazar; Power BI bu dosyalara bağlanır ve yalnız modelleme ile DAX işini yapar. Böylece ağır dönüşümler sürüm kontrolündeki Python kodunda kalır. Modelleme, ilişkiler ve DAX ölçülerinin devamı Kesit Power BI'da; bu tablolar orada da aynı adlarla seni bekliyor.</div>`,
-    ex: [
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Power BI\'da "Python betiği" veri kaynağına şu betiği yazdın: <code>import pandas as pd</code>, <code>yol = "satis.csv"</code>, <code>df = pd.read_csv(yol)</code>, <code>toplam = df["Tutar"].sum()</code>, <code>ozet = df.groupby("Kanal").sum()</code>. Gezgin penceresinde hangi tablolar listelenir?',
-        o: ['df, ozet, toplam ve yol değişkenlerinin hepsi ayrı tablolar olarak listelenir', 'Yalnız df ve ozet; yalnız DataFrame\'ler tablo olur', 'Yalnız betikteki son satırın sonucu olan ozet tablosu listelenir', 'Hiçbiri; tabloyu return ile açıkça döndürmen gerekir'],
-        a: 1,
-        why: 'Power BI betik bittikten sonra ad alanındaki DataFrame\'leri arar. Sayı (toplam) ve metin (yol) tablo olmaz; return gerekmez, son satır da özel değildir.' },
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Neden Power BI\'a tek bir dev düz tablo yerine yıldız şeması (olgu + boyutlar) vermek tercih edilir?',
-        o: ['Power BI düz tabloları hiçbir şekilde içe aktaramadığı için yıldız şeması zorunludur', 'Boyut bilgisi her satırda tekrarlanmaz; model küçülür, filtreler öngörülebilir çalışır', 'Yıldız şeması verinin ilk kez ve tamamen Excel\'de açılmasını sağlar', 'Olgu tablosunda yalnız metin sütunlar bulunduğu için sıkıştırma çok artar'],
-        a: 1,
-        why: 'Düz tablo da yüklenebilir ama ürün adı, kategori, şehir gibi metinler her satırda tekrarlanır. Yıldız şemasında boyut bir kez tutulur, ilişkiler üzerinden filtrelenir; aynı Tarih boyutu Satışlar ve Hedefler gibi birden çok olguyu birlikte filtreleyebilir.' },
-      { t: 'predict',
-        stage: 'Kodu oku',
-        q: 'Power BI Python görselindeki <code>dataset</code> tekrarlanan satırları siler. Bu taklit kod ne yazdırır?',
-        code: 'import pandas as pd\nsatis = pd.DataFrame({"SatirNo": [1, 2, 3], "Urun": ["Şampuan", "Şampuan", "Cezve"], "Tutar": [129, 129, 320]})\ndataset = satis[["Urun", "Tutar"]].drop_duplicates()\ndogru = satis[["SatirNo", "Urun", "Tutar"]].drop_duplicates()\nprint(dataset["Tutar"].sum(), dogru["Tutar"].sum())\n',
-        o: ['449 578', '578 578', '449 449', '578 449'],
-        a: 0,
-        why: 'Urun ve Tutar alanları seçilince iki aynı Şampuan satırı teke iner: 129 + 320 = 449. SatirNo gibi benzersiz bir alan eklenince satırlar ayrışır ve gerçek toplam 578 korunur.' },
-      { t: 'order',
-        stage: 'Kodu oku',
-        q: '<p>Düz tablodan ürün boyutunu ayırıp anahtarın tekil olduğunu doğrulayan programın satırlarını sırala.</p>',
-        lines: ['import pandas as pd', 'duz = pd.DataFrame({"urun_no": [9, 9, 19], "urun": ["Suç ve Ceza", "Suç ve Ceza", "Bakır Cezve"], "adet": [1, 2, 1]})', 'dim_urun = duz[["urun_no", "urun"]].drop_duplicates()', 'dim_urun = dim_urun.sort_values("urun_no").reset_index(drop=True)', 'assert dim_urun["urun_no"].is_unique', 'print(len(duz), len(dim_urun))'],
-        expect: '3 2\n',
-        needs: ['pandas'],
-        hint: 'Boyut, tekrarlar atılarak çıkarılır; sıralama ve indeks sıfırlama ondan sonra gelir.',
-        why: 'Boyut tablosu düz tablonun tanımlayıcı sütunlarından tekrarlar atılarak çıkar; tekillik denetimi ilişkinin bire-çok kurulabileceğini garanti eder.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w1',
-        stage: 'Rehberli',
-        diff: 2,
-        needs: ['pandas'],
-        q: '<p>Power BI için tarih boyutu üret: <code>tarih_boyutu(bas, bit)</code> iki <code>"YYYY-AA-GG"</code> metni alıp her gün için bir satır içeren DataFrame döndürsün. Sütunlar: <code>TarihKey</code> (int, 20240131 biçimi), <code>Tarih</code> (metin, ISO), <code>Yil</code>, <code>AyNo</code>, <code>Ay</code> (Türkçe kısa ad, liste hazır), <code>Ceyrek</code> (<code>"Ç1"</code>…<code>"Ç4"</code>), <code>HaftaSonu</code> (<code>"Evet"</code>/<code>"Hayır"</code>). Test, Kesit Power BI\'daki gerçek <code>kesit_bi.Tarih</code> tablosuyla karşılaştırır.</p>',
-        guide: ['pd.date_range(bas, bit, freq="D") ile günleri üret.', 'Tarih metni ve TarihKey için strftime kullan (TarihKey\'i int\'e çevir).', 'Yıl, ay ve çeyrek için .year, .month, .quarter; Türkçe ay adını listeden al.', 'Hafta sonu: .dayofweek >= 5.'],
-        example: 'import pandas as pd\ng = pd.date_range("2024-03-30", "2024-04-01", freq="D")\nprint(list(g.strftime("%Y%m%d").astype(int)), list(g.quarter), list(g.dayofweek))\n',
-        start: 'import veri\nimport pandas as pd\n\nAYLAR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]\n\ndef tarih_boyutu(bas, bit):\n    gunler = pd.date_range(bas, bit, freq="D")\n    # TODO: sütunları üret\n    return pd.DataFrame()\n',
-        sol: 'import veri\nimport pandas as pd\n\nAYLAR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]\n\ndef tarih_boyutu(bas, bit):\n    g = pd.date_range(bas, bit, freq="D")\n    return pd.DataFrame({\n        "TarihKey": g.strftime("%Y%m%d").astype(int),\n        "Tarih": g.strftime("%Y-%m-%d"),\n        "Yil": g.year,\n        "AyNo": g.month,\n        "Ay": [AYLAR[m - 1] for m in g.month],\n        "Ceyrek": ["Ç" + str(q) for q in g.quarter],\n        "HaftaSonu": ["Evet" if w >= 5 else "Hayır" for w in g.dayofweek],\n    })\n',
-        tests: 't = tarih_boyutu("2022-01-01", "2024-12-31")\nref = veri.oku("kesit_bi", "Tarih")\nassert len(t) == len(ref) == 1096, f"2022-2024 arası 1096 gün; gelen {len(t)}"\nassert list(t.columns) == ["TarihKey", "Tarih", "Yil", "AyNo", "Ay", "Ceyrek", "HaftaSonu"]\nassert t["TarihKey"].iloc[0] == 20220101 and t["TarihKey"].dtype.kind == "i", "TarihKey int olmalı"\nassert t["Tarih"].tolist() == ref["Tarih"].tolist(), "Tarihler kesit_bi ile aynı olmalı"\nassert t["Ay"].tolist() == ref["Ay"].tolist(), "Türkçe ay adları kesit_bi ile aynı olmalı"\nassert t["Ceyrek"].tolist() == ref["Ceyrek"].tolist() and t["HaftaSonu"].tolist() == ref["HaftaSonu"].tolist()\n',
-        hints: ['DatetimeIndex\'in year, month, quarter, dayofweek alanları dizi döndürür.', 'g.strftime("%Y%m%d").astype(int) anahtar sütununu verir.', 'Ay adı: AYLAR[m - 1]; çeyrek: "Ç" + str(q).'],
-        why: 'Power BI\'da zaman zekâsı (time intelligence) fonksiyonları kesintisiz bir tarih tablosu ister; kaynakta satış olmayan günler de bulunmalıdır. Tamsayı anahtar ilişkiyi hızlandırır, Türkçe ad ve çeyrek sütunları rapor eksenleri içindir.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w2',
-        stage: 'Rehberli',
-        diff: 2,
-        needs: ['pandas'],
-        q: '<p>Anadolu Market\'in gerçek tablolarını birleştiren düz tablo (<code>duz</code>) hazır. <code>yildiz_semasi(duz)</code> yaz ve <code>{"olgu": .., "dim_urun": .., "dim_musteri": ..}</code> sözlüğü döndür:</p><ul><li><code>dim_urun</code>: <code>product_id, name, category</code>, tekrarsız, product_id\'ye göre sıralı, indeks sıfırlanmış.</li><li><code>dim_musteri</code>: <code>customer_id, city, segment</code>, aynı kurallarla.</li><li><code>olgu</code>: <code>item_id, order_id, TarihKey, product_id, customer_id, quantity, tutar</code>; TarihKey = order_date\'ten int (20240131), tutar = quantity × unit_price × (1 − discount), 2 basamak.</li></ul>',
-        guide: ['Bir boyut üreten küçük yardımcı yaz: sütunları seç → drop_duplicates → sort_values → reset_index(drop=True).', 'Olgu için kopya al; TarihKey\'i str.replace("-", "") ve astype(int) ile üret.', 'Tutarı hesapla, round(2) uygula, sütunları istenen sırayla seç.'],
-        example: 'import pandas as pd\nd = pd.DataFrame({"t": ["2024-01-31"], "a": [2], "f": [10.0], "i": [0.1]})\nprint(d["t"].str.replace("-", "").astype(int).tolist(), (d["a"] * d["f"] * (1 - d["i"])).round(2).tolist())\n',
-        start: 'import veri\nimport pandas as pd\n\nkalem = veri.oku("anadolu_market", "order_items")\nsiparis = veri.oku("anadolu_market", "orders")\nurunler = veri.oku("anadolu_market", "products")\nmusteriler = veri.oku("anadolu_market", "customers")\nduz = (kalem.merge(siparis, on="order_id")\n            .merge(urunler[["product_id", "name", "category"]], on="product_id")\n            .merge(musteriler[["customer_id", "city", "segment"]], on="customer_id"))\n\ndef yildiz_semasi(duz):\n    # TODO: dim_urun, dim_musteri\n    # TODO: olgu (TarihKey, tutar)\n    return {}\n',
-        sol: 'import veri\nimport pandas as pd\n\nkalem = veri.oku("anadolu_market", "order_items")\nsiparis = veri.oku("anadolu_market", "orders")\nurunler = veri.oku("anadolu_market", "products")\nmusteriler = veri.oku("anadolu_market", "customers")\nduz = (kalem.merge(siparis, on="order_id")\n            .merge(urunler[["product_id", "name", "category"]], on="product_id")\n            .merge(musteriler[["customer_id", "city", "segment"]], on="customer_id"))\ndef _boyut(df, sutunlar):\n    return df[sutunlar].drop_duplicates().sort_values(sutunlar[0]).reset_index(drop=True)\n\ndef yildiz_semasi(duz):\n    olgu = duz.copy()\n    olgu["TarihKey"] = olgu["order_date"].str.replace("-", "").astype(int)\n    olgu["tutar"] = (olgu["quantity"] * olgu["unit_price"] * (1 - olgu["discount"])).round(2)\n    olgu = olgu[["item_id", "order_id", "TarihKey", "product_id", "customer_id", "quantity", "tutar"]]\n    return {"olgu": olgu,\n            "dim_urun": _boyut(duz, ["product_id", "name", "category"]),\n            "dim_musteri": _boyut(duz, ["customer_id", "city", "segment"])}\n',
-        tests: 'y = yildiz_semasi(duz)\nassert y["olgu"].shape == (1620, 7), f"Olgu 1620 satır × 7 sütun olmalı; gelen {y[\'olgu\'].shape}"\nassert y["dim_urun"].shape == (38, 3) and y["dim_urun"]["product_id"].is_unique, "Satılmış 38 ürün, tekil anahtar"\nassert len(y["dim_musteri"]) == 136 and y["dim_musteri"]["customer_id"].is_unique, "Sipariş veren 136 müşteri"\nassert round(float(y["olgu"]["tutar"].sum()), 2) == 1346189.85, "Toplam ciro 1346189.85 TL olmalı"\nassert y["olgu"]["TarihKey"].dtype.kind == "i" and y["olgu"]["TarihKey"].min() == 20220622\nassert y["dim_urun"].index.tolist() == list(range(38)), "İndeks sıfırlanmalı"\nassert "name" not in y["olgu"].columns, "Olgu tablosunda tanımlayıcı metin olmamalı"\n',
-        hints: ['drop_duplicates boyut sütunlarında tekrarları atar.', 'Olguda yalnız anahtarlar ve ölçülebilir sayılar kalmalı.'],
-        why: 'Bu, Power BI\'a veri hazırlamanın özüdür: tanımlayıcı metinler boyutlara, sayılar ve anahtarlar olguya. Model küçülür ve ilişkiler bire-çok kurulur.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w3',
-        stage: 'Kendin yaz',
-        diff: 2,
-        needs: ['pandas'],
-        q: '<p>Model yüklenmeden önce bütünlük denetimi: <code>butunluk_raporu(olgu, boyutlar)</code>. <code>boyutlar</code> <code>{anahtar_sutun: boyut_df}</code> sözlüğü. Her anahtar için <code>{"tekil": bool, "yetim": int}</code> döndür: <code>tekil</code> boyuttaki anahtarın tekrarsız olup olmadığı, <code>yetim</code> olguda boyutta karşılığı olmayan <b>satır</b> sayısı (<code>int</code>). Test önce gerçek <code>kesit_bi</code> tablolarında, sonra bozulmuş bir kopyada çalışır.</p>',
-        start: 'import veri\nimport pandas as pd\nsatis = veri.oku("kesit_bi", "Satislar")\nurun = veri.oku("kesit_bi", "Urunler")\nmusteri = veri.oku("kesit_bi", "Musteriler")\n\ndef butunluk_raporu(olgu, boyutlar):\n    pass\n',
-        sol: 'import veri\nimport pandas as pd\nsatis = veri.oku("kesit_bi", "Satislar")\nurun = veri.oku("kesit_bi", "Urunler")\nmusteri = veri.oku("kesit_bi", "Musteriler")\n\ndef butunluk_raporu(olgu, boyutlar):\n    rapor = {}\n    for anahtar, boyut in boyutlar.items():\n        rapor[anahtar] = {"tekil": bool(boyut[anahtar].is_unique),\n                          "yetim": int((~olgu[anahtar].isin(boyut[anahtar])).sum())}\n    return rapor\n',
-        tests: 'r = butunluk_raporu(satis, {"UrunNo": urun, "MusteriNo": musteri})\nassert r == {"UrunNo": {"tekil": True, "yetim": 0}, "MusteriNo": {"tekil": True, "yetim": 0}}, f"Gerçek model temiz olmalı; gelen {r}"\nbozuk_urun = pd.concat([urun, urun.head(2)])\nbozuk_satis = satis.copy()\nbozuk_satis.loc[:2, "MusteriNo"] = 9999\nr2 = butunluk_raporu(bozuk_satis, {"UrunNo": bozuk_urun, "MusteriNo": musteri})\nassert r2["UrunNo"]["tekil"] is False, "Tekrarlanan ürün anahtarı yakalanmalı"\nassert r2["MusteriNo"]["yetim"] == 3, "Boyutta olmayan 3 satış satırı yetim"\nassert type(r2["MusteriNo"]["yetim"]) is int\n',
-        hints: ['Seri.is_unique tekillik verir.', '~olgu[anahtar].isin(boyut[anahtar]) yetim satırları işaretler; sum ile say.'],
-        why: 'Tekil olmayan boyut anahtarı Power BI\'da ilişkiyi çoka-çok yapar ve toplamları bozar; yetim satırlar raporda "(Boş)" kategorisi olarak görünür. İkisini Python\'da yakalamak, sorunu pano kullanıcısından önce görmeni sağlar.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w4',
-        stage: 'Kendin yaz',
-        diff: 2,
-        needs: ['pandas'],
-        q: '<p>Power BI ve Excel\'in sorunsuz okuyacağı CSV yaz: <code>pbi_csv(df)</code> metin döndürsün. Kurallar: indeks yazılmaz; ayraç virgül, ondalık nokta; <code>float</code> sütunlar 2 basamağa yuvarlanır; <code>datetime</code> sütunlar <code>YYYY-AA-GG</code> metnine çevrilir; eksik değerler boş hücre; satır sonu <code>\\n</code>. Orijinal DataFrame değişmemeli. Sonra <code>kanal_ozeti()</code> yaz: gerçek <code>kesit_bi.Satislar</code>\'dan iptal edilmemiş satışların kanal bazında <code>Tutar</code> toplamını <code>Kanal, Tutar</code> sütunlu DataFrame olarak (kanal adına göre sıralı) döndürsün.</p>',
-        start: 'import veri\nimport pandas as pd\n\ndef pbi_csv(df):\n    pass\n\ndef kanal_ozeti():\n    pass\n',
-        sol: 'import veri\nimport pandas as pd\n\ndef pbi_csv(df):\n    d = df.copy()\n    for c in d.columns:\n        if pd.api.types.is_datetime64_any_dtype(d[c]):\n            d[c] = d[c].dt.strftime("%Y-%m-%d")\n        elif pd.api.types.is_float_dtype(d[c]):\n            d[c] = d[c].round(2)\n    return d.to_csv(index=False, lineterminator="\\n")\n\ndef kanal_ozeti():\n    s = veri.oku("kesit_bi", "Satislar")\n    s = s[s["Durum"] != "İptal"]\n    return s.groupby("Kanal", as_index=False)["Tutar"].sum().sort_values("Kanal").reset_index(drop=True)\n',
-        tests: 'df = pd.DataFrame({"Tarih": pd.to_datetime(["2024-01-31", None]), "Tutar": [1234.5678, None], "Adet": [1, 2]})\nassert pbi_csv(df) == "Tarih,Tutar,Adet\\n2024-01-31,1234.57,1\\n,,2\\n", f"Gelen {pbi_csv(df)!r}"\nassert df["Tutar"].iloc[0] == 1234.5678, "Orijinal tablo değişmemeli"\nk = kanal_ozeti()\nassert k["Kanal"].tolist() == sorted(k["Kanal"].tolist()) and len(k) == 3\nsatis = veri.oku("kesit_bi", "Satislar")\nassert abs(k["Tutar"].sum() - satis.loc[satis["Durum"] != "İptal", "Tutar"].sum()) < 1e-6\nmetin = pbi_csv(k)\nassert metin.startswith("Kanal,Tutar\\n") and metin.count("\\n") == 4\n',
-        hints: ['pd.api.types.is_datetime64_any_dtype ve is_float_dtype sütun türünü sınar.', 'to_csv(index=False, lineterminator="\\n") metin döndürür (yol vermezsen).'],
-        why: 'Power BI ve Excel bölge ayarına göre CSV\'yi farklı yorumlayabilir; ISO tarih ve ondalık nokta her ayarda aynı okunur. Excel\'de Türkçe karakter sorunu yaşarsan dosyaya yazarken encoding="utf-8-sig" kullan.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w5',
-        stage: 'Hata avı',
-        kind: 'bug',
-        diff: 2,
-        needs: ['pandas'],
-        q: '<p>Hatayı bul ve düzelt. <code>bolge_cirosu(satis, musteri)</code> bölge bazında ciroyu döndürmeli. Analist müşteri boyutunu iki dışa aktarımın birleşiminden kurmuş ve bazı müşteriler iki kez gelmiş; panodaki toplam, satış tablosundaki toplamdan büyük çıkıyor. Ayrıca bölgesi boş olan 7 müşterinin satışları <code>groupby</code> tarafından sessizce atılıyor. Fonksiyonu boyutu tekilleştirecek, birleştirmede <code>validate="many_to_one"</code> kullanacak ve boş bölgeyi <code>"Bilinmiyor"</code> yapacak şekilde düzelt. Dönüş: <code>{bolge: tutar}</code> (2 basamak).</p>',
-        start: 'import veri\nimport pandas as pd\n\nsatis = veri.oku("kesit_bi", "Satislar")\nmusteri = veri.oku("kesit_bi", "Musteriler")\nmusteri_iki_kaynak = pd.concat([musteri, musteri.sample(20, random_state=1)])\n\ndef bolge_cirosu(satis, musteri):\n    t = satis.merge(musteri[["MusteriNo", "Bolge"]], on="MusteriNo")\n    return t.groupby("Bolge")["Tutar"].sum().round(2).to_dict()\n',
-        sol: 'import veri\nimport pandas as pd\n\nsatis = veri.oku("kesit_bi", "Satislar")\nmusteri = veri.oku("kesit_bi", "Musteriler")\nmusteri_iki_kaynak = pd.concat([musteri, musteri.sample(20, random_state=1)])\n\ndef bolge_cirosu(satis, musteri):\n    boyut = musteri[["MusteriNo", "Bolge"]].drop_duplicates("MusteriNo")\n    boyut = boyut.fillna({"Bolge": "Bilinmiyor"})\n    t = satis.merge(boyut, on="MusteriNo", validate="many_to_one")\n    return t.groupby("Bolge")["Tutar"].sum().round(2).to_dict()\n',
-        tests: 'r = bolge_cirosu(satis, musteri_iki_kaynak)\nassert abs(sum(r.values()) - satis["Tutar"].sum()) < 0.05, f"Bölge toplamı satış toplamına ({satis[\'Tutar\'].sum():.2f}) eşit olmalı; gelen {sum(r.values()):.2f}"\nassert r["Marmara"] == 358854.55 and r["İç Anadolu"] == 377322.4, f"Gelen {r}"\nassert "Bilinmiyor" in r and r["Bilinmiyor"] > 0, "Bölgesi boş müşterilerin satışı Bilinmiyor altında görünmeli"\nassert r == bolge_cirosu(satis, musteri), "Tekrarlı ve temiz boyut aynı sonucu vermeli"\n',
-        hints: ['Toplamın büyümesi satırların çoğaldığını, küçülmesi ise grupların atıldığını gösterir; groupby varsayılan olarak NaN anahtarı atar.', 'Boyutu drop_duplicates("MusteriNo") ile tekilleştir; merge\'e validate="many_to_one" ekle.'],
-        why: 'Boyutta tekrarlanan anahtar, birleştirmede her eşleşen satış satırını çoğaltır (fan-out). validate parametresi bu hatayı sessiz bir rakam farkı yerine açık bir MergeError\'a çevirir; Power BI\'da aynı sorun çoka-çok ilişki uyarısı olarak görünür.' },
-      { t: 'code',
-        id: 'excel-otomasyon-w6',
-        stage: 'Meydan okuma',
-        diff: 3,
-        needs: ['pandas'],
-        q: '<p>Hedef gerçekleşme tablosu (Kesit Power BI\'daki "Hedef vs Gerçek" sayfasının verisi). <code>gerceklesme(yil)</code>: gerçek <code>kesit_bi</code> tablolarını kullan. <code>Hedefler</code> ay başı tarihli ve kategori bazında (<code>Tarih, Kategori, Hedef</code>). <code>Satislar</code>\'dan <b>iptal edilmemiş</b> satırları al, <code>Urunler</code> ile kategoriyi ekle, <code>YilAy</code> (<code>"2024-01"</code>) ve kategori bazında <code>Tutar</code> topla. Hedeflerle <b>sol birleştirme</b> yap (satış olmayan ay 0 sayılır). Verilen yıl için kategori bazında <code>toplam gerçek / toplam hedef</code> oranını 3 basamakla <code>{kategori: oran}</code> döndür.</p>',
-        start: 'import veri\nimport pandas as pd\n\ndef gerceklesme(yil):\n    pass\n',
-        sol: 'import veri\nimport pandas as pd\n\ndef gerceklesme(yil):\n    s = veri.oku("kesit_bi", "Satislar")\n    u = veri.oku("kesit_bi", "Urunler")\n    h = veri.oku("kesit_bi", "Hedefler")\n    s = s[s["Durum"] != "İptal"].merge(u[["UrunNo", "Kategori"]], on="UrunNo", validate="many_to_one")\n    s["YilAy"] = s["Tarih"].str[:7]\n    gercek = s.groupby(["YilAy", "Kategori"], as_index=False)["Tutar"].sum()\n    h = h.assign(YilAy=h["Tarih"].str[:7])\n    m = h.merge(gercek, on=["YilAy", "Kategori"], how="left").fillna({"Tutar": 0})\n    m = m[m["YilAy"].str.startswith(str(yil))]\n    ozet = m.groupby("Kategori")[["Tutar", "Hedef"]].sum()\n    return {k: round(float(r["Tutar"] / r["Hedef"]), 3) for k, r in ozet.iterrows()}\n',
-        tests: 'r = gerceklesme(2024)\nassert r == {\'Elektronik\': 0.968, \'Ev & Yaşam\': 0.966, \'Giyim\': 0.995, \'Hediye\': 0.836, \'Kitap\': 1.002, \'Kozmetik\': 0.987, \'Spor\': 0.991}, f"2024 gerçekleşme oranları beklenenden farklı: {r}"\nassert r["Kitap"] > 1 > r["Hediye"], "Kitap hedefi aştı, Hediye geride kaldı"\nassert len(gerceklesme(2022)) == 7, "2022 için de 7 kategori"\n',
-        hints: ['Ay anahtarı için Tarih metninin ilk 7 karakteri yeter.', 'Hedeflerden başlayan sol birleştirme, satış olmayan ayları da tutar; fillna ile 0 yap.', 'Oranı aylık oranların ortalaması olarak değil, toplamların oranı olarak hesapla.'],
-        why: 'Oranların ortalaması küçük hedefli ayların etkisini büyütür; toplamların oranı doğru gerçekleşmedir (DAX\'taki DIVIDE(SUM, SUM) ile aynı). Hedeften başlayan sol birleştirme satış olmayan ayları sıfır olarak gösterir; iç birleştirme onları sessizce düşürürdü.' }
-    ],
-    faq: [
-      { q: 'Power BI\'da Python betiği mi kullanmalıyım, yoksa veriyi Python\'da önceden mi hazırlamalıyım?',
-        a: 'Küçük, kişisel raporlarda betik kaynağı pratiktir. Paylaşılan, zamanlanmış yenilenen raporlarda ise dönüşümü Python\'da (sürüm kontrollü bir betikte) yapıp çıktıyı CSV/Parquet ya da veri ambarı tablosu olarak Power BI\'a vermek daha sağlamdır: ağ geçidi ve Python ortamı bağımlılığı ortadan kalkar, hatalar test edilebilir.' },
-      { q: 'Excel\'deki =PY ile openpyxl arasındaki fark nedir?',
-        a: '=PY, Excel\'in içinde, Microsoft bulutunda çalışan Python\'dur; çalışma kitabındaki aralıkları okuyup sonucu hücreye yazar, yerel dosya ve ağ erişimi yoktur. openpyxl ise kendi bilgisayarında çalışan Python\'un Excel dosyasını dışarıdan okuyup yazmasıdır; otomasyon ve toplu rapor üretimi için kullanılır.' }
-    ],
-    mistakes: [
-      { bad: 't = satis.merge(musteri, on="MusteriNo")',
-        good: 't = satis.merge(musteri.drop_duplicates("MusteriNo"), on="MusteriNo", validate="many_to_one")',
-        why: 'Tekrarlı boyut anahtarı birleştirmede satırları çoğaltır ve toplamları şişirir.' }
-    ] }
-);
-})(window);
-/* Kesit Python — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
-(function (W) {
-'use strict';
-const X = W.PY_EXT = W.PY_EXT || [];
-X.push(
-  { id: 'fastapi',
-    min: 28,
-    html: `<h2>Derinleş: gerçek zamanlı uç noktalar, sayfalama, hız sınırı ve async veritabanı</h2><p>CRUD uç noktaları bir API'nin iskeletidir; canlıda ise şu sorular gelir: "Sipariş durumu değişince ekran kendiliğinden güncellensin", "910 siparişi sayfa sayfa getir ama yeni sipariş gelince kayma olmasın", "bir istemci saniyede 500 istek atıp sistemi düşürmesin", "veritabanı beklerken sunucu kilitlenmesin". Bu bölüm dört konuyu FastAPI kodu (kendi bilgisayarında) ve tarayıcıda çalışan çekirdek mantıkla anlatıyor; sayfalama örnekleri Anadolu Market'in gerçek <code>orders</code> tablosunu kullanıyor.</p><h3>WebSocket ve SSE</h3><p><b>WebSocket</b> iki yönlü, sürekli açık bir bağlantıdır: sohbet, canlı pano, ortak düzenleme. Sunucu birden çok istemciye aynı mesajı gönderecekse (yayın, broadcast) bağlantıları bir yöneticide tutar; kopan bağlantıyı listeden çıkarmayı unutmamalıdır. <b>SSE</b> ise tek yönlüdür (sunucu → istemci), düz HTTP üzerinden çalışır ve LLM cevabı ya da bildirim akışı için yeterlidir (LLM API dersindeki ek bölüm).</p><pre class="code">from fastapi import FastAPI, WebSocket, WebSocketDisconnect
-from fastapi.responses import StreamingResponse
-
-app = FastAPI()
-
-class Yonetici:
-    def __init__(self):
-        self.baglantilar: set[WebSocket] = set()
-    async def baglan(self, ws: WebSocket):
-        await ws.accept()
-        self.baglantilar.add(ws)
-    def ayril(self, ws: WebSocket):
-        self.baglantilar.discard(ws)
-    async def yayinla(self, mesaj: dict):
-        for ws in list(self.baglantilar):
-            try:
-                await ws.send_json(mesaj)
-            except Exception:
-                self.ayril(ws)          # kopmuş istemciyi temizle
-
-yonetici = Yonetici()
-
-@app.websocket("/ws/siparisler")
-async def siparis_akisi(ws: WebSocket):
-    await yonetici.baglan(ws)
-    try:
-        while True:
-            await ws.receive_text()     # istemciden gelen (ör. ping) mesajları dinle
-    except WebSocketDisconnect:
-        yonetici.ayril(ws)
-
-@app.get("/olaylar")
-async def olaylar():
-    async def uret():
-        for i in range(3):
-            yield f"data: {{\\"sira\\": {i}}}\\n\\n"
-    return StreamingResponse(uret(), media_type="text/event-stream")</pre><p>Birden çok sunucu süreci (worker) çalışıyorsa her sürecin kendi bağlantı listesi olur; yayını tüm süreçlere ulaştırmak için Redis Pub/Sub gibi ortak bir kanal gerekir.</p><h3>Sayfalama: offset mi, cursor mu?</h3><div class="tbl-wrap"><table><tr><th></th><th>Offset (<code>?sayfa=3&amp;boyut=20</code>)</th><th>Cursor / keyset (<code>?imlec=...</code>)</th></tr><tr><td>Sorgu</td><td><code>LIMIT 20 OFFSET 40</code></td><td><code>WHERE (tarih, id) &lt; (?, ?) LIMIT 20</code></td></tr><tr><td>Derin sayfa</td><td>Veritabanı atlanan satırları da okur; yavaşlar</td><td>İndeksle doğrudan konuma gider; hep hızlı</td></tr><tr><td>Araya kayıt girerse</td><td>Satırlar kayar: tekrar ya da atlama</td><td>Kayma yok</td></tr><tr><td>"7. sayfaya git"</td><td>Kolay</td><td>Yok; yalnız sonraki/önceki</td></tr></table></div><p>Cursor sayfalamanın kuralı: sıralama anahtarı <b>benzersiz</b> olmalıdır. Sipariş tarihi tek başına benzersiz değildir (aynı gün 6 sipariş olabiliyor); bu yüzden <code>(order_date, order_id)</code> ikilisi kullanılır. İmleç, son satırın anahtarını taşıyan opak bir metindir (base64 ile kodlanmış JSON).</p><pre class="py">import base64, json
-import veri
-
-con = veri.baglan("anadolu_market", tablolar=["orders"])
-
-def imlec_yap(tarih, sid):
-    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()
-
-def sayfa(imlec=None, limit=5):
-    sql, p = "SELECT order_id, order_date FROM orders", []
-    if imlec:
-        tarih, sid = json.loads(base64.urlsafe_b64decode(imlec))
-        sql += " WHERE (order_date, order_id) &lt; (?, ?)"
-        p = [tarih, sid]
-    satirlar = con.execute(sql + " ORDER BY order_date DESC, order_id DESC LIMIT ?", p + [limit]).fetchall()
-    sonraki = imlec_yap(*satirlar[-1][::-1]) if len(satirlar) == limit else None
-    return satirlar, sonraki
-
-s1, im = sayfa()
-print(s1)
-print("imleç:", im)
-s2, _ = sayfa(im)
-print(s2)</pre><p>Filtreleme de aynı uç noktada yapılır (<code>?status=delivered&amp;channel=mobile</code>). Güvenli kalıp: izin verilen filtreleri bir <b>beyaz listede</b> tut, değerleri her zaman <code>?</code> parametresiyle geçir, bilinmeyen parametreye 422 dön. Sütun adını kullanıcıdan alıp SQL'e yapıştırmak SQL enjeksiyonudur.</p><h3>Hız sınırı middleware'i</h3><p>En yaygın algoritma <b>jeton kovası</b>dır (token bucket): her istemcinin kovasında en fazla <code>kapasite</code> jeton vardır, kova saniyede <code>hiz</code> jeton dolar, her istek bir jeton harcar. Jeton yoksa <b>429 Too Many Requests</b> ve <code>Retry-After</code> başlığı dönülür. Kısa ani yüklere (burst) izin verir ama ortalama hızı sınırlar.</p><pre class="py">class Kova:
-    def __init__(self, kapasite, hiz):
-        self.kapasite, self.hiz = kapasite, hiz
-        self.jeton, self.son = float(kapasite), 0.0
-    def izin(self, simdi):
-        self.jeton = min(self.kapasite, self.jeton + (simdi - self.son) * self.hiz)
-        self.son = simdi
-        if self.jeton &gt;= 1:
-            self.jeton -= 1
-            return True
-        return False
-
-k = Kova(kapasite=3, hiz=1)          # 3'lük patlama, saniyede 1 istek
-print([k.izin(t) for t in (0, 0.1, 0.2, 0.3, 1.3, 1.4)])</pre><pre class="code">import time
-from fastapi import Request
-from fastapi.responses import JSONResponse
-
-kovalar: dict[str, Kova] = {}
-
-@app.middleware("http")
-async def hiz_siniri(request: Request, call_next):
-    anahtar = request.headers.get("X-API-Key") or request.client.host
-    kova = kovalar.setdefault(anahtar, Kova(kapasite=20, hiz=5))
-    if not kova.izin(time.monotonic()):
-        return JSONResponse({"detail": "Çok fazla istek"}, status_code=429, headers={"Retry-After": "1"})
-    return await call_next(request)</pre><p>Bu sözlük tek süreçte çalışır; çok süreçli üretimde sayaçlar Redis'te tutulur (ya da <code>slowapi</code> gibi bir kütüphane ve API ağ geçidi kullanılır). Zaman için <code>time.monotonic()</code> kullan: sistem saati geri alınsa bile ileri akar.</p><h3>Async veritabanı oturumu</h3><p><code>async def</code> uç noktada senkron veritabanı sürücüsü olay döngüsünü bloklar. SQLAlchemy 2'nin async motoru ve async sürücü (PostgreSQL için <code>asyncpg</code>, SQLite için <code>aiosqlite</code>) bekleme sırasında döngüyü serbest bırakır. Oturum, istek başına açılıp kapanan bir bağımlılıktır:</p><pre class="code"># pip install "sqlalchemy[asyncio]" asyncpg
-from typing import Annotated
-from fastapi import Depends
-from sqlalchemy import select
-from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
-
-motor = create_async_engine("postgresql+asyncpg://kullanici:sifre@db/market", pool_size=10)
-OturumYap = async_sessionmaker(motor, expire_on_commit=False)
-
-async def oturum_al():
-    async with OturumYap() as oturum:
-        yield oturum                    # istek bitince otomatik kapanır
-
-Oturum = Annotated[AsyncSession, Depends(oturum_al)]
-
-@app.get("/siparisler/{sid}")
-async def siparis(sid: int, oturum: Oturum):
-    sonuc = await oturum.execute(select(Siparis).where(Siparis.id == sid))
-    return sonuc.scalar_one_or_none()</pre><div class="note"><b>Gerçek işte</b>Mobil uygulamadaki sonsuz kaydırmalı listeler cursor sayfalamayla, kurye konumu ve sipariş durumu ekranları WebSocket ya da SSE ile çalışır. Kamuya açık API'lerde hız sınırı hem güvenlik hem maliyet konusudur; sınırı ve kalan kotayı <code>X-RateLimit-Remaining</code> gibi başlıklarla belgelemek iyi bir API tasarımıdır.</div>`,
-    ex: [
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Mobil uygulamada siparişler offset sayfalamayla (<code>LIMIT 20 OFFSET 20</code>) en yeniden eskiye listeleniyor. Kullanıcı 1. sayfayı okurken 3 yeni sipariş geldi. 2. sayfada ne olur?',
-        o: ['Hiçbir şey; veritabanı ilk sorgunun anlık görüntüsünü saklar ve 2. sayfa ona göre gelir', '1. sayfanın son 3 siparişi 2. sayfanın başında tekrar görünür', '2. sayfa boş döner çünkü OFFSET değeri artık geçersiz olur', 'Yeni 3 sipariş 2. sayfanın sonuna eklenir'],
-        a: 1,
-        why: 'Yeni kayıtlar listenin başına girince her şey 3 sıra kayar; OFFSET 20 artık eski 18. sıradan başlar. Cursor sayfalama "şu anahtardan sonrası" dediği için bu kaymadan etkilenmez.' },
-      { t: 'mc',
-        stage: 'Isınma',
-        q: 'Kurye uygulaması konumunu saniyede bir sunucuya gönderiyor, müşteri ekranı da kurye konumunu canlı izliyor. Kurye tarafı için en uygun teknoloji hangisi?',
-        o: ['SSE, çünkü düz HTTP üzerinden çalışır ve vekil sunucularla uyumludur', 'Her saniye konum için yeni bir POST isteği açıp kapatmak', 'WebSocket, çünkü istemci de sürekli veri gönderiyor', 'Her 10 saniyede bir GET isteğiyle sunucuyu yoklamak (polling)'],
-        a: 2,
-        why: 'SSE tek yönlüdür (sunucudan istemciye). Kurye sürekli veri gönderdiği için iki yönlü ve açık kalan WebSocket bağlantısı uygundur. Müşteri ekranı ise yalnız dinlediği için SSE ile de beslenebilir.' },
-      { t: 'predict',
-        stage: 'Kodu oku',
-        q: 'Jeton kovası (token bucket) simülasyonu. Bu kod ne yazdırır?',
-        code: 'kapasite, hiz = 2, 0.5\njeton, son = 2.0, 0.0\nsonuc = []\nfor t in (0, 0, 0, 2, 3, 4):\n    jeton = min(kapasite, jeton + (t - son) * hiz)\n    son = t\n    if jeton >= 1:\n        jeton -= 1\n        sonuc.append("+")\n    else:\n        sonuc.append("-")\nprint("".join(sonuc))\n',
-        o: ['++-+-+', '++-++-', '+++-+-', '++----'],
-        a: 0,
-        why: 'İlk iki istek kovadaki 2 jetonu harcar, üçüncü reddedilir. t=2\'de 2 sn × 0.5 = 1 jeton dolmuş: kabul. t=3\'te yalnız 0.5 jeton: red. t=4\'te 0.5 + 0.5 = 1: kabul.' },
-      { t: 'code',
-        id: 'fastapi-w1',
-        stage: 'Rehberli',
-        diff: 1,
-        q: '<p>Cursor sayfalama için imleç kodlayıcı yaz. <code>imlec_kodla(tarih, sid)</code>: <code>[tarih, sid]</code> listesini JSON\'a, sonra <code>base64.urlsafe_b64encode</code> ile metne çevirsin (dönüş <code>str</code>). <code>imlec_coz(metin)</code>: tersini yapıp <code>(tarih, sid)</code> demeti döndürsün; bozuk imleçte (<code>binascii.Error</code>, <code>json.JSONDecodeError</code>, <code>UnicodeDecodeError</code>, yanlış yapı) <code>ValueError("geçersiz imleç")</code> fırlatsın. Yapı denetimi: 2 elemanlı liste, ilki <code>str</code>, ikincisi <code>int</code>.</p>',
-        guide: ['Kodlarken: json.dumps → .encode() → urlsafe_b64encode → .decode().', 'Çözerken tersini yap; json.loads bytes da kabul eder.', 'Çözme adımlarını try içine al; yakaladığın hataları ValueError\'a çevir.', 'Yapıyı isinstance ile denetle.'],
-        example: 'import base64\nb = base64.urlsafe_b64encode("merhaba".encode()).decode()\nprint(b, base64.urlsafe_b64decode(b).decode())\n',
-        start: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    # TODO\n    pass\n\ndef imlec_coz(metin):\n    # TODO\n    pass\n',
-        sol: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    try:\n        veri = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) as h:\n        raise ValueError("geçersiz imleç") from h\n    if not (isinstance(veri, list) and len(veri) == 2 and isinstance(veri[0], str) and isinstance(veri[1], int)):\n        raise ValueError("geçersiz imleç")\n    return veri[0], veri[1]\n',
-        tests: 'i = imlec_kodla("2024-12-31", 905)\nassert isinstance(i, str), "Dönüş metin (str) olmalı"\nassert imlec_coz(i) == ("2024-12-31", 905), "Kodlanan imleç geri çözülebilmeli"\nfor bozuk in ("@@@", "bm90IGpzb24=", base64.urlsafe_b64encode(b\'{"a": 1}\').decode()):\n    try:\n        imlec_coz(bozuk)\n        assert False, f"{bozuk!r} için ValueError beklenirdi"\n    except ValueError as h:\n        assert str(h) == "geçersiz imleç"\n',
-        hints: ['base64 metin değil bytes ile çalışır: encode/decode adımlarını unutma.', 'except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) ile yakala; json.JSONDecodeError zaten ValueError alt sınıfıdır.'],
-        why: 'İmleç istemciye opak bir metin olarak verilir; içini kurcalayan ya da bozan istemci 500 değil, 400/422 almalıdır. Bu yüzden çözme hataları tek bir anlamlı hataya çevrilir.' },
-      { t: 'code',
-        id: 'fastapi-w2',
-        stage: 'Rehberli',
-        diff: 2,
-        needs: ['sqlite3'],
-        q: '<p>Anadolu Market\'in gerçek <code>orders</code> tablosu için cursor sayfalama yaz: <code>siparis_sayfasi(con, imlec=None, limit=20)</code>. Sıralama <code>order_date DESC, order_id DESC</code>. İmleç varsa çöz ve <code>WHERE (order_date, order_id) &lt; (?, ?)</code> uygula. Dönüş: <code>{"ogeler": [order_id, ...], "sonraki": imlec_ya_da_None}</code>. Sonraki imleç, sayfa tam doluysa son satırın <code>(order_date, order_id)</code> değerinden üretilsin. İmleç yardımcıları hazır.</p>',
-        guide: ['Temel SQL\'i ve boş parametre listesini hazırla.', 'İmleç varsa imlec_coz ile çöz, WHERE koşulunu ve iki parametreyi ekle.', 'ORDER BY ... LIMIT ? ile çalıştır.', 'Satır sayısı limit\'e eşitse son satırdan imleç üret, değilse None.'],
-        example: 'import sqlite3\nc = sqlite3.connect(":memory:")\nprint(c.execute("SELECT (1, 5) < (1, 7), (2, 1) < (1, 9)").fetchone())\n',
-        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\n\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    # TODO: imleç koşulu, sıralama, limit, sonraki imleç\n    return {"ogeler": [], "sonraki": None}\n',
-        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    if imlec:\n        tarih, sid = imlec_coz(imlec)\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        parametreler += [tarih, sid]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, parametreler + [limit]).fetchall()\n    sonraki = imlec_kodla(*satirlar[-1]) if len(satirlar) == limit else None\n    return {"ogeler": [s[1] for s in satirlar], "sonraki": sonraki}\n',
-        tests: 's = siparis_sayfasi(con)\nassert s["ogeler"] == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47], "İlk sayfa en yeni 20 sipariş olmalı"\nassert s["sonraki"] is not None, "Tam dolu sayfada sonraki imleç olmalı"\nhepsi, im, adim = [], None, 0\nwhile True:\n    s = siparis_sayfasi(con, im, limit=50)\n    hepsi += s["ogeler"]\n    im = s["sonraki"]\n    adim += 1\n    if im is None or adim > 30:\n        break\nassert len(hepsi) == 910 and len(set(hepsi)) == 910, f"Tüm sayfalar 910 benzersiz sipariş vermeli, gelen {len(hepsi)} / {len(set(hepsi))}"\nassert hepsi == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47, 397, 427, 770, 674, 437, 206, 597, 836, 566, 475, 797, 718, 344, 131, 63, 625, 517, 908, 535, 390, 842, 81, 18, 368, 335, 201, 127, 327, 302, 110, 654, 183, 803, 272, 102, 627, 582, 139, 881, 779, 740, 431, 487, 51, 209, 72, 910, 353, 284, 116, 46, 17, 680, 596, 205, 835, 604, 371, 238, 68, 750, 426, 150, 849, 516, 460, 217, 822, 653, 903, 534, 122, 24, 430, 568, 436, 769, 756, 581, 165, 130, 673, 453, 301, 887, 505, 237, 796, 343, 109, 727, 143, 101, 739, 515, 465, 204, 533, 425, 389, 595, 707, 652, 208, 182, 838, 768, 326, 271, 200, 749, 688, 525, 129, 565, 349, 57, 717, 514, 429, 138, 16, 342, 656, 607, 435, 45, 821, 841, 504, 198, 777, 532, 767, 886, 866, 325, 820, 121, 23, 564, 334, 471, 909, 679, 795, 455, 452, 434, 341, 802, 651, 603, 524, 424, 270, 128, 100, 590, 713, 181, 834, 687, 254, 170, 62, 538, 164, 441, 44, 50, 367, 513, 388, 115, 531, 626, 314, 80, 837, 748, 236, 300, 74, 708, 203, 672, 778, 594, 885, 99, 766, 580, 650, 142, 686, 523, 880, 720, 459, 329, 738, 324, 207, 726, 805, 678, 340, 197, 137, 548, 108, 43, 212, 15, 451, 819, 133, 22, 366, 348, 246, 613, 387, 186, 765, 503, 352, 149, 649, 685, 467, 848, 865, 716, 269, 433, 428, 281, 833, 794, 775, 617, 747, 671, 512, 71, 42, 884, 737, 180, 98, 14, 120, 907, 840, 339, 299, 628, 450, 163, 126, 530, 470, 593, 67, 235, 818, 432, 522, 423, 440, 563, 97, 41, 883, 537, 648, 323, 864, 764, 511, 479, 253, 202, 624, 268, 136, 21, 199, 793, 498, 234, 49, 13, 298, 844, 684, 589, 529, 502, 486, 386, 283, 879, 216, 179, 56, 832, 602, 746, 396, 817, 365, 313, 592, 474, 370, 567, 338, 185, 61, 579, 670, 736, 497, 677, 141, 804, 755, 763, 528, 510, 79, 12, 701, 521, 322, 267, 776, 233, 712, 536, 878, 816, 715, 73, 148, 119, 449, 337, 902, 612, 351, 297, 40, 616, 96, 162, 831, 439, 792, 647, 385, 606, 591, 801, 578, 266, 196, 168, 527, 464, 815, 328, 520, 496, 735, 509, 877, 683, 411, 501, 706, 588, 562, 66, 422, 20, 95, 70, 762, 333, 135, 321, 774, 11, 265, 167, 118, 39, 232, 347, 734, 682, 140, 364, 847, 245, 791, 336, 178, 473, 761, 485, 495, 296, 161, 60, 719, 601, 547, 700, 577, 669, 830, 107, 561, 876, 646, 526, 448, 384, 19, 410, 278, 38, 611, 395, 125, 814, 519, 508, 458, 10, 714, 463, 790, 745, 211, 906, 320, 264, 94, 725, 252, 231, 65, 760, 37, 645, 711, 147, 48, 623, 587, 134, 280, 132, 560, 494, 478, 295, 699, 177, 184, 363, 829, 681, 319, 843, 421, 383, 93, 875, 500, 409, 350, 195, 839, 69, 800, 230, 518, 36, 9, 615, 346, 215, 160, 705, 846, 644, 332, 507, 733, 676, 166, 600, 469, 318, 484, 813, 773, 263, 438, 176, 244, 106, 759, 472, 576, 668, 901, 559, 294, 92, 362, 282, 55, 610, 698, 8, 382, 447, 493, 369, 420, 317, 277, 499, 828, 789, 605, 78, 35, 812, 408, 546, 732, 643, 229, 124, 312, 262, 667, 159, 874, 279, 758, 91, 492, 419, 293, 407, 7, 34, 381, 64, 175, 724, 666, 642, 558, 457, 575, 331, 251, 811, 757, 406, 316, 276, 228, 731, 609, 6, 905, 462, 345, 827, 158, 788, 772, 380, 33, 599, 261, 898, 697, 446, 873, 641, 491, 90, 315, 292, 174, 5, 622, 418, 194, 640, 379, 214, 897, 227, 723, 54, 826, 260, 157, 275, 696, 405, 59, 675, 574, 730, 89, 545, 361, 190, 787, 259, 810, 173, 477, 404, 4, 394, 665, 291, 32, 896, 378, 863, 146, 88, 557, 704, 639, 490, 825, 744, 710, 695, 156, 483, 403, 226, 573, 311, 445, 786, 729, 586, 468, 3, 872, 225, 189, 845, 553, 544, 290, 330, 31, 824, 417, 904, 53, 862, 809, 799, 360, 377, 274, 258, 243, 87, 728, 621, 614, 895, 638, 572, 289, 188, 900, 771, 77, 155, 402, 694, 172, 105, 86, 393, 785, 556, 871, 664, 722, 257, 242, 861, 637, 571, 30, 58, 308, 224, 894, 754, 552, 114, 543, 376, 2, 416, 273, 193, 808, 187, 256, 85, 743, 693, 444, 288, 798, 154, 476, 401, 598, 359, 375, 29, 169, 307, 1, 250, 171, 807, 784, 551, 52, 663, 570, 860, 482, 542, 636, 104, 893, 585, 223, 703, 692, 84, 145, 870, 709, 555, 287, 28, 742, 550, 635, 443, 192, 306, 892, 222, 400, 489, 76, 859, 374, 415, 634, 691, 153, 620, 392, 869, 27, 305, 783, 286, 753, 358, 899, 541, 891, 633, 549, 662, 83, 221, 310, 103, 399, 554, 304, 26, 569, 373, 690, 249, 584, 858, 632, 398, 113, 144, 82, 303, 372, 285, 191, 782, 890, 241, 442, 481, 357, 220, 857, 152, 868, 25, 75, 631, 661, 540, 752, 414, 219, 741, 488, 689, 856, 660, 889, 112, 630, 855, 151, 309, 781, 218, 659, 413, 356, 867, 583, 854, 751, 355, 480, 702, 888, 853, 619, 240, 658, 111, 852, 391, 248, 412, 780, 851, 354, 657, 618, 850, 247], "Sayfalar birleşince tam sıralı liste çıkmalı"\n',
-        hints: ['SQLite satır değeri karşılaştırması (a, b) &lt; (?, ?) iki sütunlu sözlük sırası karşılaştırmasıdır.', 'Sonraki imleç: imlec_kodla(*satirlar[-1]) — satır zaten (order_date, order_id) sırasında.'],
-        why: 'Tarih tek başına benzersiz olmadığı için order_id eşitlik bozucu (tie-breaker) olarak eklenir. Böylece aynı gündeki 6 sipariş sayfa sınırına denk gelse de hiçbiri atlanmaz ya da tekrarlanmaz.' },
-      { t: 'code',
-        id: 'fastapi-w3',
-        stage: 'Kendin yaz',
-        diff: 2,
-        needs: ['sqlite3'],
-        q: '<p>Filtre kalıbı: <code>filtre_sorgusu(parametreler)</code> sorgu parametresi sözlüğünü <code>(sql, degerler)</code> demetine çevirsin. Temel: <code>SELECT COUNT(*) FROM orders</code>. İzinli filtreler ve SQL karşılıkları (bu sırayla eklenir): <code>status</code> → <code>status = ?</code>, <code>channel</code> → <code>channel = ?</code>, <code>baslangic</code> → <code>order_date &gt;= ?</code>, <code>bitis</code> → <code>order_date &lt;= ?</code>. Koşullar <code>" WHERE "</code> ve <code>" AND "</code> ile birleşir. İzinsiz anahtar varsa <code>ValueError</code> (mesajda anahtar adı geçsin). Testler sorguyu gerçek <code>orders</code> tablosunda çalıştırır.</p>',
-        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef filtre_sorgusu(parametreler):\n    pass\n',
-        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\nIZINLI = {"status": "status = ?", "channel": "channel = ?",\n          "baslangic": "order_date >= ?", "bitis": "order_date <= ?"}\n\ndef filtre_sorgusu(parametreler):\n    bilinmeyen = set(parametreler) - set(IZINLI)\n    if bilinmeyen:\n        raise ValueError(f"bilinmeyen filtre: {\', \'.join(sorted(bilinmeyen))}")\n    kosullar, degerler = [], []\n    for anahtar, kosul in IZINLI.items():\n        if anahtar in parametreler:\n            kosullar.append(kosul)\n            degerler.append(parametreler[anahtar])\n    sql = "SELECT COUNT(*) FROM orders"\n    if kosullar:\n        sql += " WHERE " + " AND ".join(kosullar)\n    return sql, degerler\n',
-        tests: 'sql, d = filtre_sorgusu({"channel": "mobile", "status": "delivered"})\nassert sql == "SELECT COUNT(*) FROM orders WHERE status = ? AND channel = ?", f"Sıra izinli listedeki gibi: {sql}"\nassert d == ["delivered", "mobile"]\nassert con.execute(sql, d).fetchone()[0] == 330, "Mobilde teslim edilen 330 sipariş var"\nsql2, d2 = filtre_sorgusu({"baslangic": "2024-01-01", "bitis": "2024-12-31", "status": "returned"})\nassert con.execute(sql2, d2).fetchone()[0] == con.execute("SELECT COUNT(*) FROM orders WHERE status=\'returned\' AND order_date LIKE \'2024%\'").fetchone()[0]\nassert filtre_sorgusu({}) == ("SELECT COUNT(*) FROM orders", [])\ntry:\n    filtre_sorgusu({"status": "x", "1=1; DROP TABLE orders": "1"})\n    assert False, "İzinsiz anahtar reddedilmeli"\nexcept ValueError as h:\n    assert "DROP" in str(h), "Hata mesajında anahtar adı geçmeli"\n',
-        hints: ['İzinli filtreleri sıralı bir sözlükte tut; sözlükler ekleme sırasını korur.', 'Değerleri asla SQL metnine yapıştırma; ? yer tutucusu ve parametre listesi kullan.'],
-        why: 'Beyaz liste hem SQL enjeksiyonunu hem yazım hatası olan parametrelerin sessizce yok sayılmasını önler. FastAPI\'de bu fonksiyon bir bağımlılık (Depends) olarak sorgu parametrelerini toplar.' },
-      { t: 'code',
-        id: 'fastapi-w4',
-        stage: 'Kendin yaz',
-        diff: 2,
-        q: '<p>Anahtar başına jeton kovası: <code>Sinirlayici(kapasite, hiz, saat)</code>. <code>saat</code> çağrıldığında saniye döndüren bir fonksiyon (testte sahte saat verilir). <code>izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürsün: jeton varsa <code>(True, 0.0)</code>; yoksa <code>(False, s)</code>, s bir jetonun dolması için gereken saniye (2 basamak). Her anahtarın kovası ilk istekte dolu başlar; kovalar birbirinden bağımsızdır.</p>',
-        start: 'class Sinirlayici:\n    pass\n',
-        sol: 'class Sinirlayici:\n    def __init__(self, kapasite, hiz, saat):\n        self.kapasite, self.hiz, self.saat = kapasite, hiz, saat\n        self.kovalar = {}\n\n    def izin_ver(self, anahtar):\n        simdi = self.saat()\n        jeton, son = self.kovalar.get(anahtar, (float(self.kapasite), simdi))\n        jeton = min(self.kapasite, jeton + (simdi - son) * self.hiz)\n        if jeton >= 1:\n            self.kovalar[anahtar] = (jeton - 1, simdi)\n            return True, 0.0\n        self.kovalar[anahtar] = (jeton, simdi)\n        return False, round((1 - jeton) / self.hiz, 2)\n',
-        tests: 't = [0.0]\ns = Sinirlayici(kapasite=2, hiz=0.5, saat=lambda: t[0])\nassert s.izin_ver("a") == (True, 0.0) and s.izin_ver("a") == (True, 0.0), "İlk iki istek kapasiteden"\nassert s.izin_ver("a") == (False, 2.0), "Jeton bitti: 1 jeton için 1/0.5 = 2 sn beklemeli"\nassert s.izin_ver("b") == (True, 0.0), "Başka anahtarın kovası ayrı"\nt[0] = 1.0\nassert s.izin_ver("a") == (False, 1.0), "1 sn sonra 0.5 jeton var; 1 sn daha gerek"\nt[0] = 2.0\nassert s.izin_ver("a") == (True, 0.0), "2. saniyede 1 jeton dolmuş olmalı"\nt[0] = 100.0\nassert [s.izin_ver("a")[0] for _ in range(3)] == [True, True, False], "Kova kapasiteden fazla dolmamalı"\n',
-        hints: ['Her anahtar için (jeton, son_zaman) sakla.', 'Dolum: min(kapasite, jeton + geçen_süre * hiz).', 'Bekleme: (1 - jeton) / hiz.'],
-        why: 'Retry-After için gereken süreyi hesaplamak istemciye "ne zaman tekrar dene" bilgisini verir; körlemesine yeniden deneme fırtınasını önler. Saat fonksiyonunu dışarıdan almak testi deterministik yapar.' },
-      { t: 'code',
-        id: 'fastapi-w5',
-        stage: 'Kendin yaz',
-        diff: 2,
-        q: '<p>WebSocket yayın yöneticisinin mantığını yaz: <code>YayinYoneticisi</code>. <code>baglan(ws)</code> ve <code>ayril(ws)</code> bağlantıyı kümeye ekler/çıkarır (olmayanı çıkarmak hata vermesin). <code>async yayinla(mesaj)</code> her bağlantının <code>await ws.send_json(mesaj)</code> metodunu çağırsın; gönderimde istisna fırlatan bağlantıyı kümeden çıkarsın ve diğerlerine göndermeye devam etsin. Başarılı gönderim sayısını döndürsün. <code>len(yonetici)</code> bağlı istemci sayısını versin.</p>',
-        start: 'class YayinYoneticisi:\n    pass\n',
-        sol: 'class YayinYoneticisi:\n    def __init__(self):\n        self.baglantilar = set()\n\n    def baglan(self, ws):\n        self.baglantilar.add(ws)\n\n    def ayril(self, ws):\n        self.baglantilar.discard(ws)\n\n    def __len__(self):\n        return len(self.baglantilar)\n\n    async def yayinla(self, mesaj):\n        basarili = 0\n        for ws in list(self.baglantilar):\n            try:\n                await ws.send_json(mesaj)\n                basarili += 1\n            except Exception:\n                self.ayril(ws)\n        return basarili\n',
-        tests: 'import asyncio\nclass WS:\n    def __init__(self, kopuk=False):\n        self.kopuk, self.gelen = kopuk, []\n    async def send_json(self, m):\n        if self.kopuk:\n            raise ConnectionError("koptu")\n        self.gelen.append(m)\ny = YayinYoneticisi()\na, b, c = WS(), WS(kopuk=True), WS()\nfor w in (a, b, c):\n    y.baglan(w)\nassert len(y) == 3\nn = asyncio.run(y.yayinla({"siparis": 905, "durum": "kargoda"}))\nassert n == 2, f"İki başarılı gönderim olmalı, gelen {n}"\nassert len(y) == 2 and b not in y.baglantilar, "Kopuk bağlantı çıkarılmalı"\nassert a.gelen == c.gelen == [{"siparis": 905, "durum": "kargoda"}]\ny.ayril(WS())\ny.ayril(a)\nassert len(y) == 1\n',
-        hints: ['Küme üzerinde gezerken ondan eleman çıkarmak RuntimeError verir: list(self.baglantilar) kopyası üzerinde gez.', 'discard, olmayan elemanda hata vermez.'],
-        why: 'Kopan istemciyi temizlemezsen her yayında aynı hata tekrar eder ve bellek sızar. Kopya üzerinde gezmek, döngü sırasında kümeyi güvenle değiştirmeni sağlar.' },
-      { t: 'code',
-        id: 'fastapi-w6',
-        stage: 'Hata avı',
-        kind: 'bug',
-        diff: 2,
-        needs: ['sqlite3'],
-        q: '<p>Hatayı bul ve düzelt. Mobil ekip "sonsuz kaydırmada bazı siparişler hiç görünmüyor" diyor. <code>sayfa_getir(con, son_tarih=None, limit=50)</code> imleç olarak yalnız son satırın tarihini kullanıyor. Aynı gün birden çok sipariş olduğunda sayfa sınırındaki siparişler atlanıyor. Fonksiyonu <code>(order_date, order_id)</code> ikilisiyle çalışacak şekilde düzelt: parametre adı <code>son</code> olsun (ya <code>None</code> ya da <code>(tarih, id)</code> demeti), dönüş <code>(id_listesi, yeni_son)</code>; sayfa eksik dolarsa <code>yeni_son</code> <code>None</code>.</p>',
-        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE order_date < ?"\n        p.append(son[0])\n    sql += " ORDER BY order_date DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
-        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        p += [son[0], son[1]]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
-        tests: 'hepsi, son = [], None\nfor _ in range(40):\n    ids, son = sayfa_getir(con, son, limit=50)\n    hepsi += ids\n    if son is None:\n        break\nassert len(set(hepsi)) == 910, f"910 siparişin hepsi görünmeli; görünen {len(set(hepsi))}"\nassert len(hepsi) == 910, "Hiçbir sipariş iki kez gelmemeli"\nids, _ = sayfa_getir(con, ("2024-11-27", 10**9), limit=6)\nassert len(ids) == 6 and len(set(ids)) == 6\n',
-        hints: ['Sıralama anahtarı benzersiz olmalı: tarih + id.', 'Hem WHERE koşulunda hem ORDER BY\'da ikinci anahtarı kullan.'],
-        why: 'Yalnız tarihe göre "&lt; son_tarih" demek, son tarihle aynı gündeki ama sayfaya sığmamış siparişleri atlar; sıralamada id olmadığı için aynı gündeki siparişlerin sırası da belirsizdir.' },
-      { t: 'code',
-        id: 'fastapi-w7',
-        stage: 'Meydan okuma',
-        diff: 3,
-        q: '<p>Hız sınırı ara katmanını (middleware) yaz. <code>hiz_siniri(uygulama, sinirlayici)</code> bir async fonksiyon döndürsün: <code>async def sarili(istek)</code>. <code>istek</code> sözlüğünde <code>"basliklar"</code> (sözlük) ve <code>"istemci"</code> (IP) var. Anahtar: <code>X-API-Key</code> başlığı varsa o, yoksa IP. <code>sinirlayici.izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürür (önceki görevdeki gibi). İzin yoksa uygulamayı <b>çağırmadan</b> <code>{"durum": 429, "govde": {"detail": "Çok fazla istek"}, "basliklar": {"Retry-After": str(math.ceil(bekle))}}</code> döndür. İzin varsa <code>await uygulama(istek)</code> sonucunu döndür ama yanıt başlıklarına <code>"X-RateLimit-Key"</code> olarak kullanılan anahtar türünü (<code>"api-key"</code> ya da <code>"ip"</code>) ekle (yanıtta <code>basliklar</code> yoksa oluştur; orijinal sözlüğü değiştirme).</p>',
-        start: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    pass\n',
-        sol: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    async def sarili(istek):\n        api_anahtari = istek.get("basliklar", {}).get("X-API-Key")\n        anahtar = api_anahtari or istek["istemci"]\n        izin, bekle = sinirlayici.izin_ver(anahtar)\n        if not izin:\n            return {"durum": 429, "govde": {"detail": "Çok fazla istek"},\n                    "basliklar": {"Retry-After": str(math.ceil(bekle))}}\n        yanit = await uygulama(istek)\n        basliklar = dict(yanit.get("basliklar", {}))\n        basliklar["X-RateLimit-Key"] = "api-key" if api_anahtari else "ip"\n        return {**yanit, "basliklar": basliklar}\n    return sarili\n',
-        tests: 'import asyncio\nclass S:\n    def __init__(self, izinler):\n        self.izinler, self.gorulen = list(izinler), []\n    def izin_ver(self, anahtar):\n        self.gorulen.append(anahtar)\n        return self.izinler.pop(0)\ncagri = []\nSABIT = {"durum": 200, "govde": {"ok": True}}\nasync def uygulama(istek):\n    cagri.append(istek["istemci"])\n    return SABIT\ns = S([(True, 0.0), (False, 1.2), (True, 0.0)])\nm = hiz_siniri(uygulama, s)\nr1 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r1 == {"durum": 200, "govde": {"ok": True}, "basliklar": {"X-RateLimit-Key": "ip"}}, f"Gelen {r1}"\nassert "basliklar" not in SABIT, "Uygulamanın döndürdüğü sözlük değiştirilmemeli"\nr2 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r2["durum"] == 429 and r2["basliklar"] == {"Retry-After": "2"}, "1.2 sn yukarı yuvarlanır: 2"\nassert cagri == ["10.0.0.1"], "Reddedilen istekte uygulama çağrılmamalı"\nr3 = asyncio.run(m({"basliklar": {"X-API-Key": "k-42"}, "istemci": "10.0.0.1"}))\nassert s.gorulen[-1] == "k-42" and r3["basliklar"]["X-RateLimit-Key"] == "api-key"\n',
-        hints: ['Kapanış (closure): dış fonksiyon uygulama ve sinirlayici\'yi yakalar, içteki async fonksiyonu döndürür.', 'Yanıtı kopyalamak için {**yanit, "basliklar": yeni_basliklar} kullan.', 'math.ceil(1.2) == 2'],
-        why: 'Gerçek FastAPI middleware\'i de aynı biçimdedir: isteği alır, ya kısa devre yapar (429) ya da call_next ile zinciri sürdürür ve yanıtı süsler. Orijinal yanıtı değiştirmemek paylaşılan nesnelerde sürpriz hataları önler.' }
-    ],
-    faq: [
-      { q: 'Toplam kayıt sayısını (toplam: 910) cursor sayfalamada da döndürmeli miyim?',
-        a: 'Zorunlu değil ve büyük tablolarda <code>COUNT(*)</code> pahalıdır. Sonsuz kaydırmada yalnız <code>sonraki</code> imleci yeter. Sayı gerekiyorsa ayrı bir uç noktada, önbellekli ya da yaklaşık olarak ver.' },
-      { q: 'Hız sınırını uygulamada mı, ağ geçidinde mi yapmalıyım?',
-        a: 'İkisi birlikte: Nginx, bulut API ağ geçidi ya da CDN kaba sınırları (IP başına) uygular; uygulama ise iş kurallarına bağlı sınırları (plan, kullanıcı, uç nokta) uygular. Çok süreçli uygulamada sayaçları Redis gibi ortak bir depoda tut.' }
-    ],
-    mistakes: [
-      { bad: 'sql += " WHERE order_date < ?"  # imleç = son tarih',
-        good: 'sql += " WHERE (order_date, order_id) < (?, ?)"',
-        why: 'Benzersiz olmayan sıralama anahtarı sayfa sınırındaki kayıtları atlatır; eşitlik bozucu olarak id ekle.' }
-    ] }
 );
 })(window);

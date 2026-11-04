@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Metin biçimlendirme ve rapor üretme</h1><p class="st-l">f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/string-bicimleme">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden biçimlendirme?</h2>
 <p>Ilgaz Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
@@ -184,6 +185,6 @@ print(textwrap.shorten(aciklama, width=40, placeholder="..."))</pre>
 <p>Kullanıcıdan gelen metni doğrudan <code>str.format</code> şablonu olarak kullanma: <code>kullanici_metni.format(...)</code> yazımı, kötü niyetli bir şablonun nesne özelliklerine erişmesine kapı açar. Şablon senin, veri kullanıcının olsun; f-string bu açıdan daha güvenlidir çünkü şablon kodun içindedir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/string-bicimleme">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/string-bicimleme/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../kapsam-moduller/">← Kapsam ve modüller</a><a href="../dosya-islemleri/">Dosya işlemleri →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

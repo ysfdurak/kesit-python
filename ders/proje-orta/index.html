@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Orta bitirme projesi: Ilgaz Bank işlem analizi</h1><p class="st-l">Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem kuralı, JSON rapor ve unittest ile doğrulama.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje tanımı</h2>
 <p>Ilgaz Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
@@ -340,6 +341,6 @@ python -m unittest discover -s tests</pre>
 <p>Veri CSV'den değil veritabanından gelir: sqlite3 dersindeki iş bölümü burada da geçerli; kart ve tarih aralığı filtresini SQL yapar, kuralları Python uygular. Rapor JSON olarak bir kuyruk ya da API'ye gider, operasyon ekibi panelde görür. Testler CI'da her commit'te koşar; bir kuralın eşiği değişince önce test güncellenir. Bu dersteki altı parça, o sistemin küçültülmüş ama eksiksiz bir modelidir: model, hesap, kural, rapor, test. Bir mülakatta "orta seviye Python projesi anlat" dendiğinde anlatacağın şey tam olarak bu.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../git-proje-yapisi/">← Git ve proje yapısı</a><a href="../numpy/">numpy: sayısal diziler ve vektörleştirme →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

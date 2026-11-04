@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel</h1><p class="st-l">Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker'a kısa bakış.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/paketleme-dagitim">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Ilgaz Bank'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
 
@@ -289,6 +290,6 @@ print(eklentiler["json"]({"sube": 34, "adet": 3}))</pre>
 <p>Bağımlılık güvenliği: lock dosyası tekrarlanabilir kurulum sağlar; <code>pip-audit</code> bilinen zafiyetleri tarar; Dependabot/Renovate güncellemeleri otomatik PR olarak açar. Docker imajında <code>root</code> olmayan kullanıcı, sabitlenmiş temel imaj etiketi ve <code>--no-cache-dir</code> standarttır.</p>
 <p>Alternatif araç zincirleri: <code>uv</code> (çok hızlı pip/venv/lock), <code>poetry</code> ve <code>hatch</code> (bağımlılık + derleme + yayın tek araç). Hepsi aynı <code>pyproject.toml</code> standardına dayanır; ekip hangisini seçerse seçsin bu dersteki kavramlar değişmez.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/paketleme-dagitim">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/paketleme-dagitim/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../veri-boru-hatti/">← Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a><a href="../kalite-ci/">Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

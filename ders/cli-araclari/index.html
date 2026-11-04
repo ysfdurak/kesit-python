@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Komut satırı araçları: argparse, click, rich ve boru hatları</h1><p class="st-l">Betiklerini gerçek komut satırı aracına dönüştürürsün: argparse ile alt komut, tür, seçenek ve grup; click ve typer ile kısa CLI; rich ile tablo; stdin/stdout, çıkış kodları ve yapılandırma önceliğiyle boru hattına uyumlu araç yazarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/cli-araclari">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in operasyon ekibi her sabah üç betik çalıştırıyor: stok uyarısı, kargo gecikme raporu, iade özeti. Betiklerin içinde sabit yazılmış dosya adları ve eşik değerleri var; bir şeyi değiştirmek için kodu açmak gerekiyor. Bir <b>komut satırı arayüzü</b> (CLI, command-line interface) ile aynı betik şöyle kullanılır: <code>stok-uyar satis.csv --esik 5 --bicim json</code>. Artık kodu açmadan farklı dosya ve eşikle çalışır, zamanlanmış görevlere (cron) ve CI hatlarına eklenir, başka araçlarla boru (pipe) ile birleşir.</p>
@@ -259,6 +260,6 @@ for dosya in track(["ocak.csv", "subat.csv", "mart.csv"], description="İşleniy
 <p>İş mantığını saf fonksiyonlarda tut, CLI katmanı yalnızca ayrıştırsın ve çağırsın. CLI testlerinde <code>main([...])</code>'i çağır, çıkış kodunu ve <code>io.StringIO</code>'ya yönlendirilen stdout/stderr'i denetle; pytest kullanıyorsan <code>capsys</code> ve <code>monkeypatch.setenv</code> bu işi kolaylaştırır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/cli-araclari">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/cli-araclari/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../yapilandirma/">← Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri</a><a href="../excel-otomasyon/">Excel otomasyonu: openpyxl, pandas ve rapor üretimi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

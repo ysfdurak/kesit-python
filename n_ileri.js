@@ -1244,7 +1244,7 @@ L.push(
     body: `<h2>Doğru soruya doğru grafik</h2>
 <p><b>matplotlib ile görselleştirme</b> dersinde Figure/Axes yapısını, çizgi, çubuk ve histogramı kurdun. Gerçek işte bunun bir üst katı gelir: "Sepet tutarı şehirlere göre nasıl dağılıyor?" sorusu için kutu grafiği, "Hangi değişkenler birlikte hareket ediyor?" için korelasyon ısı haritası, "Her şehirde trend aynı mı?" için küçük çoklu grafikler (small multiples), yöneticinin fareyle üzerine gelip değer okuyacağı etkileşimli bir grafik. Bu işler için Python dünyasında iki yıldız vardır: <b>seaborn</b> (istatistiksel grafik, matplotlib üstüne kurulu) ve <b>plotly</b> (etkileşimli, tarayıcıda çalışan grafik).</p>
 <p>Ama araçtan önemlisi karardır: hangi soru, hangi grafik, hangi renk ve hangi eksen. Kötü seçilmiş bir grafik, doğru veriyle yanlış karar aldırır. Bu ders hem araçları hem de bu karar rehberini verir.</p>
-<div class="note"><b>Bu ortamda</b>seaborn ve plotly tarayıcıdaki Python'da (Pyodide) çalışmaz. Bu yüzden kodlarını çalıştır düğmesi olmayan kutularda gösteriyoruz; kendi bilgisayarında denemen için kurulum komutunu altına yazdık. Çalıştırılabilir örnekler ve alıştırmalar aynı grafikleri <b>matplotlib</b> ile kurar ve grafiğin yapısını (başlık, çubuk sayısı, eksen etiketi) test eder. seaborn zaten matplotlib üstünde çalıştığı için burada öğrendiğin her yapı birebir geçerlidir.</div>
+<div class="note"><b>Bu ortamda</b>seaborn ve plotly bu sayfada çalışır, ilk kullanımda iner: seaborn yaklaşık 295 KB, plotly yaklaşık 9,7 MB. Gri kutulardaki kodları bilgisayarında ya da kod editöründe dene; dersin sonundaki "seaborn ve plotly'yi çalıştır" bölümünde gerçek görevler var. İlk alıştırmalar aynı grafikleri <b>matplotlib</b> ile kurar, çünkü seaborn onun üstünde çalışır ve yapıyı görmek öğreticidir.</div>
 
 <h2>seaborn: tidy veri ile tek satırlık grafikler</h2>
 <p>seaborn'un sihri şudur: veriyi <b>uzun (tidy)</b> biçimde verirsin, sütun adlarını eksenlere ve renk (<code>hue</code>), panel (<code>col</code>, <code>row</code>) gibi görsel kanallara bağlarsın; gruplama, renk paleti ve gösterge (legend) kendiliğinden gelir.</p>
@@ -24322,7 +24322,7 @@ KORPUS += ik_istatistik_belgeleri() + urun_belgeleri()
 print(len(KORPUS), "belge")
 print(KORPUS[2].metin)
 print(KORPUS[-1].metin)</pre>
-<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Tarayıcıda PDF okuyucu yok; kendi makinende <code>pip install pypdf python-docx</code> ile <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
+<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Kendi makinende <code>pip install pypdf python-docx</code> ile (ikisi bu sayfada da çalışır, bkz. <b>pdf-word-otomasyon</b>) <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
 
 <h2>2. Parçalama ve meta veri</h2>
 <p>Parçalama stratejilerini (sabit pencere, cümle, başlık, örtüşme) embedding dersinde ayrıntılı gördün. Üretimde bunları <b>birleştirirsin</b>: önce başlıklara göre bölümlere ayır, bölüm içinde cümleleri karakter sınırına kadar topla, ardışık parçalar arasında bir cümle örtüştür. En önemli iki ek:</p>

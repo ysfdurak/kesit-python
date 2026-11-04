@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</h1><p class="st-l">Anadolu Market günlük satış ETL'i: pathlib ile dosya düzeni, logging, şema doğrulama, hata kuyruğu, idempotent yükleme (sqlite3) ve zamanlama kavramı.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/veri-boru-hatti">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>Anadolu Market her gece mağaza sistemlerinden gelen satış dosyalarını merkez veritabanına yükler. Bu iş bir kez yazılıp yıllarca her gece çalışır; bu yüzden "çalışıyor" yetmez: dosya yarım gelirse ne olur, aynı dosya iki kez gelirse mükerrer kayıt oluşur mu, bozuk satır tüm yüklemeyi durdurur mu, sabah ekip neyin yüklendiğini nereden görür? Bu derste bir <b>veri boru hattı</b> (data pipeline) kurarken sorulan bu soruların standart cevaplarını öğreneceksin. ETL = Extract (çıkar), Transform (dönüştür), Load (yükle).</p>
 
@@ -338,6 +339,6 @@ quality:
 <p>Veri kalitesi kontrolleri (data quality checks) yüklemeden sonra çalışır: bugünün toplamı dünün yüzde ellisinden azsa uyar, şehir listesinde bilinmeyen değer varsa uyar. Great Expectations ve pandera bu kontrolleri bildirimsel yazmanı sağlar. Büyük hacimde satır satır Python yerine pandas (ya da Polars) ile vektörel dönüştürme ve <code>to_sql</code>/COPY ile toplu yükleme yapılır; ancak hata kuyruğu, idempotency ve log disiplini aynı kalır.</p>
 <p>Geriye dönük çalıştırma (backfill) için betik tarih parametresi almalı: <code>python -m etl.satis --tarih 2024-05-01</code>. Bugünün tarihini kodun içinde <code>date.today()</code> ile sabitlemek, bir hafta sonra "geçen pazartesiyi yeniden yükle" ihtiyacını imkânsız kılar.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/veri-boru-hatti">Alıştırmalara geç (30)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-boru-hatti/alistirma">Alıştırmalara geç (30)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../api-web/">← API tasarımına giriş: HTTP, doğrulama ve ilk servis</a><a href="../paketleme-dagitim/">Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market Sipariş API'si</h1><p class="st-l">Katmanlı mimariyle (şema → depo → servis → uç nokta) bir sipariş API'si kurarsın: pydantic şemaları, SQLAlchemy deposu, stok-indirim-durum kurallarını taşıyan servis, mini yönlendirici ve FastAPI karşılığı, hata→HTTP eşleme, hmac token, testler, Dockerfile ve README.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-api">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje: Anadolu Market Sipariş API'si</h2>
 <p>Bu bitirme projesinde, ileri seviyede öğrendiklerini tek bir üretim kalitesinde serviste birleştireceksin: müşterinin sepetini siparişe çeviren, stoğu düşen, kuponu uygulayan, sipariş durumunu yöneten ve bunu güvenli bir HTTP API'si olarak sunan <b>Anadolu Market Sipariş API'si</b>. İşe alım mülakatlarında "bana bir sipariş servisi tasarla" sorusunun cevabı tam olarak bu projedir.</p>
@@ -441,6 +442,6 @@ for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
 <p>Üretimde tablo yapısı <code>create_all</code> ile değil <b>Alembic</b> göçleriyle (migration) değişir. API'yi kıran değişiklikler <code>/v2/</code> önekiyle ya da yeni alanları isteğe bağlı ekleyerek yapılır; eski istemciler bir süre çalışmaya devam etmelidir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-api">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-api/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../docker-deploy/">← Docker ve dağıtım: konteyner, compose, bulut</a><a href="../test-ileri/">İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

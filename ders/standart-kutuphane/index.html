@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Standart kütüphane turu</h1><p class="st-l">pathlib, shutil, argparse, decimal, statistics, hashlib ve secrets gibi "pilleri dahil" modüllerle dosya, komut satırı, para hesabı ve güvenlik işlerini tek satır import ile çözersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/standart-kutuphane">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden "piller dahil"?</h2>
 <p>Python'ın sloganlarından biri "batteries included" (piller dahil): kurulumla birlikte gelen standart kütüphane (standard library) yüzlerce modül içerir. Anadolu Market'te bir analist olarak her gün şunlarla karşılaşırsın: rapor klasörünü taramak, betiğe komut satırından parametre vermek, kuruşu kuruşuna tutar hesaplamak, satış rakamlarının ortalamasını ve sapmasını almak, bir parolayı güvenli saklamak. Bunların hiçbiri için pip ile paket kurman gerekmez. Bu ders, en sık kullanacağın modülleri tek turda gezer; her birini derinlemesine değil, "ne zaman hangisine uzanırım" düzeyinde öğrenirsin.</p>
@@ -244,6 +245,6 @@ print(shlex.quote("dosya adı; rm -rf /"))   # kabuğa güvenli metin</pre>
 <p>Bir de kurumsal kodda sık görülen üç küçük kalıbı aklında tut. Birincisi, betiğin her zaman <code>main(argv=None)</code> fonksiyonuyla başlaması: <code>argv</code> None ise <code>sys.argv[1:]</code> kullanır, değilse verileni; böylece aynı fonksiyon hem terminalden hem testten çağrılır. İkincisi, para alanlarını veritabanından okuduğun anda <code>Decimal</code>'e çevirip raporun sonuna kadar Decimal tutmak; float'a yalnızca grafik çizerken dönmek. Üçüncüsü, <code>Enum</code> üyelerini veritabanında <code>.name</code> olarak saklamak; sayısal <code>.value</code> saklarsan üye sırası değişince veri bozulur.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/standart-kutuphane">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/standart-kutuphane/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../json-csv/">← JSON ve CSV: veri alışverişinin iki ortak dili</a><a href="../sqlite-python/">sqlite3 ile Python →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

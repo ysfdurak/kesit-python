@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</h1><p class="st-l">Belge yükleme ve temizlemeden başlık + cümle parçalamaya, meta veriye, TF-IDF ve sahte embedding ile hibrit indekse, bağlam bütçesine, kaynak gösterme ve "bilmiyorum" davranışına, önbelleğe ve güncelleme/silmeye kadar üretim kalitesinde bir RAG hattı kurar; FastAPI uç noktası ile LangChain/LlamaIndex karşılığını görür, gerçek Pusula İK verisiyle ölçülen bir politika asistanıyla bitirirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/rag-uygulamasi">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Demo RAG ile üretim RAG arasındaki fark</h2>
 <p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme (prompt) koydun; <a href="../embedding-vektor-arama/">Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</a> dersinde getirme (retrieval) katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
@@ -96,7 +97,7 @@ KORPUS += ik_istatistik_belgeleri() + urun_belgeleri()
 print(len(KORPUS), "belge")
 print(KORPUS[2].metin)
 print(KORPUS[-1].metin)</pre>
-<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Tarayıcıda PDF okuyucu yok; kendi makinende <code>pip install pypdf python-docx</code> ile <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
+<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Kendi makinende <code>pip install pypdf python-docx</code> ile (ikisi bu sayfada da çalışır, bkz. <a href="../pdf-word-otomasyon/">PDF ve Word belgeleriyle otomasyon</a>) <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
 
 <h2>2. Parçalama ve meta veri</h2>
 <p>Parçalama (chunking) stratejilerini (sabit pencere, cümle, başlık, örtüşme) embedding dersinde ayrıntılı gördün. Üretimde bunları <b>birleştirirsin</b>: önce başlıklara göre bölümlere ayır, bölüm içinde cümleleri karakter sınırına kadar topla, ardışık parçalar arasında bir cümle örtüştür. En önemli iki ek:</p>
@@ -409,6 +410,6 @@ print(yanit, [n.node.metadata for n in yanit.source_nodes])</pre>
 <p>"Geçen yıl kaç gün hastalık izni kullanıldı?" gibi toplama soruları metin aramasıyla değil SQL ile cevaplanır; bu soruları bir yönlendirici ile text-to-SQL ajanına (<a href="../llm-ajanlar/">LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</a>) gönder.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/rag-uygulamasi">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/rag-uygulamasi/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-ai/">← Bitirme projesi: Python ile yapay zekâ asistanı</a><a href="../yerel-modeller-hf/">Hugging Face ve yerel modellerle Python →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

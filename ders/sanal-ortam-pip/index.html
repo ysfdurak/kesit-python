@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Sanal ortam ve paket yönetimi</h1><p class="st-l">venv ile projeye özel ortam kurar, pip ile paket yükler, requirements.txt ve pyproject.toml ile bağımlılıkları sürüm sabitleyerek yönetir, çatışmaları tanır ve uv/poetry gibi modern araçları tanırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/sanal-ortam-pip">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Sorun: "Benim makinemde çalışıyordu"</h2>
 <p>Anadolu Market'in raporlama betiği senin bilgisayarında kusursuz çalışıyor; iş arkadaşın çalıştırınca <code>ModuleNotFoundError: No module named 'openpyxl'</code> alıyor. Bir başka projede pandas'ın eski sürümü gerekiyor, ama bilgisayarına yenisini kurdun ve eski proje bozuldu. İki sorunun da kaynağı aynı: paketler (package) bilgisayara <b>global</b> kurulmuş. Çözüm iki parçalı: her projeye kendi izole paket klasörü (sanal ortam, virtual environment) ve projenin hangi paketlerin hangi sürümünü istediğini yazan bir liste (requirements.txt ya da pyproject.toml).</p>
@@ -317,6 +318,6 @@ for paket, liste in isteyenler.items():
 <p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Ilgaz Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sanal-ortam-pip">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sanal-ortam-pip/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../test-yazma/">← Test yazma: unittest, pytest ve mock</a><a href="../git-proje-yapisi/">Git ve proje yapısı →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

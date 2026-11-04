@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz</h1><p class="st-l">Liste, sözlük ve küme comprehension ile üreteç ifadesini öğrenir; koşullu ve iç içe biçimlerini kullanır; ne zaman klasik döngüye dönmen gerektiğini anlarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kapsamli-ifadeler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in sipariş listesinde her gün binlerce kayıt var. Analist olarak en sık yaptığın iş üç adımdır: bir listeyi <b>dönüştür</b> (her siparişin tutarını KDV'li yap), <b>süz</b> (yalnız İstanbul siparişlerini al) ve <b>yeniden grupla</b> (ürün koduna göre sözlük kur). Temel seviyede bunu <code>for</code> döngüsü ve boş listeye <code>append</code> ile yaptın. Çalışır, ama dört satır tutar ve niyetin satırlar arasında kaybolur. Comprehension (kapsamlı ifade), aynı işi tek ve okunur bir satırda yazmanı sağlar. Python topluluğunun "Pythonic" dediği kodun ilk işareti budur.</p>
@@ -289,6 +290,6 @@ print([ad for ad, p in zip(musteriler, puanlar) if vip_mi(ad, p)])
 <p>Kod incelemelerinde (code review) comprehension'ın en sık iki eleştirisi vardır: "bu satır çok uzun, böl" ve "burada liste yerine üreteç yeterdi". Bir de ters yönde: "burada comprehension yazılabilirdi" diye işaretlenen üç satırlık <code>append</code> döngüleri. Her ikisini de otomatik tarayan ruff ve pylint gibi araçlar vardır; ekipler çoğu zaman satır uzunluğunu 88 ya da 100 karakterle sınırlar. İleride pandas öğrendiğinde comprehension'ların yerini büyük ölçüde sütun işlemleri alacak; ama JSON yanıtlarını, API verisini ve konfigürasyon listelerini şekillendirirken comprehension hep elinin altında olacak.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kapsamli-ifadeler">Alıştırmalara geç (23)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsamli-ifadeler/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-temel/">← Bitirme projesi: Anadolu Market sipariş raporu</a><a href="../iteratorler-uretecler/">Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Docker ve dağıtım: konteyner, compose, bulut</h1><p class="st-l">Python uygulamanı Dockerfile ile konteynere paketler, katman önbelleği ve çok aşamalı yapıyla imajı küçültür, compose ile PostgreSQL'le birlikte çalıştırır, ortam değişkeni, sağlık kontrolü ve stdout loglamayla 12-factor uyumlu biçimde buluta gönderirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/docker-deploy">Uygulamada aç, 31 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli? "Benim bilgisayarımda çalışıyordu"</h2>
 <p>Anadolu Market'in sipariş API'sini yazdın; testler yeşil, kendi bilgisayarında her şey kusursuz. Sunucuya kurduğunda ise bambaşka bir Python sürümü, eksik bir sistem kütüphanesi ve farklı bir saat dilimiyle karşılaşıyorsun. Bu derste uygulamanı <b>konteyner</b> (container) içine paketleyip her ortamda aynı şekilde çalıştırmayı, veritabanıyla birlikte ayağa kaldırmayı ve buluta göndermeyi öğreneceksin. Paketleme dersinde wheel ve <code>pyproject.toml</code> ile kütüphane dağıtmayı gördün; burada konu <b>uygulamayı</b> dağıtmak.</p>
@@ -375,6 +376,6 @@ for c in dep["spec"]["template"]["spec"]["containers"]:
 <p>Büyük projelerde ayar sınıfı elle yazılmaz: <code>pydantic-settings</code> ortam değişkenlerini tip ipuçlarına (type hint) göre çevirir ve eksikse açılışta hata verir. Mantık bu dersteki <code>Ayarlar.ortamdan</code> ile aynıdır: <b>hızlı başarısız ol</b> (fail fast), yanlış yapılandırmayla asla istek kabul etme.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/docker-deploy">Alıştırmalara geç (31)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/docker-deploy/alistirma">Alıştırmalara geç (31)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../yapay-zeka-ile-kod/">← Yapay zekâ asistanıyla Python yazmak</a><a href="../proje-api/">Bitirme projesi: Anadolu Market Sipariş API'si →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

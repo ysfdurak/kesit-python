@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>Tasarım kalıpları Python'da</h1><p class="st-l">Strateji, fabrika, gözlemci, tekil, adaptör ve komut kalıplarını Python'a özgü biçimde uygula; fonksiyonların birinci sınıf olduğu yerde kalıbın gereksizleştiğini gör.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/tasarim-kaliplari">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>Tasarım kalıpları (design patterns), tekrar eden tasarım sorunlarına verilmiş isimli çözümlerdir. Kod incelemesinde (code review) "burada strateji kalıbı daha uygun" cümlesi, dakikalarca anlatımın yerini tutar. Ama kalıpların çoğu Java/C++ dünyasında, fonksiyonların nesne olmadığı bir ortamda doğdu. Python'da fonksiyonlar birinci sınıf (first-class) değerdir, sınıflar çalışma zamanında oluşturulabilir, modüller zaten tekil nesnedir. Bu yüzden bu derste her kalıbı iki kez göreceksin: klasik biçimi ve Python'da sade biçimi. Hedef, kalıbı ezberlemek değil; <b>ne zaman gerektiğini ve ne zaman gerekmediğini</b> ayırt etmektir.</p>
 
@@ -328,6 +329,6 @@ print(depo.veri)
 <p>Buna karşılık bazı kalıplar Python'da bile sınıf ister: komut (durum + geri alma), gözlemci (abone yönetimi, hata izolasyonu), adaptör (dış sistem sınırı). Bunların ortak noktası, kodun bir sınırda durmasıdır: dış kütüphane, ağ, veritabanı, kullanıcı etkileşimi. Sınırlarda açık arayüz (Protocol) tanımla; içeride sade fonksiyonlarla kal.</p>
 <p>Testte kalıpların karşılığı: strateji sözlüğünü testte sahte fonksiyonla değiştir; gözlemcide aboneleri listeye toplayıp yayın sonrası kontrol et; komutlarda <code>uygula</code> + <code>geri_al</code> sonrası durumun başlangıca döndüğünü doğrula (round-trip testi). Tekil yerine modül düzeyi nesne kullanmanın en büyük getirisi de burada: <code>monkeypatch.setattr(config, 'kdv', 0)</code> ile tek satırda izole test.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/tasarim-kaliplari">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tasarim-kaliplari/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ileri-oop/">← İleri OOP: dunder metotlar, ABC, Protocol ve descriptor</a><a href="../tip-sistemi-ileri/">İleri tip sistemi: Generic, Protocol, TypedDict ve mypy →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Şablonla rapor üretme: string.Template ve Jinja2</h1><p class="st-l">string.Template ile güvenli basit metinler, Jinja2 ile değişken, filtre, döngü, koşul, makro ve kalıtım kullanan HTML/Markdown raporlar üretir; autoescape ile XSS'i önler, CSV'den HTML e-postaya giden bir rapor boru hattı kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/sablon-rapor">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>Anadolu Market her pazartesi 12 mağaza müdürüne haftalık satış raporu, her ay 40.000 müşteriye kişiselleştirilmiş kampanya e-postası gönderir. Bunları <code>print</code> ve metin birleştirmeyle üretmeye çalışırsan kod ile görünüm birbirine dolanır: tasarımcı bir tabloya sütun eklemek istediğinde Python kodunu değiştirmen gerekir, müşteri adında bir <code>&lt;</code> karakteri sayfayı bozar. Çözüm <b>şablon</b> (template) kullanmaktır: görünüm bir şablonda, veri Python'da durur; şablon motoru ikisini birleştirir (render).</p>
 <p><i>Metin biçimlendirme ve rapor üretme</i> dersinde f-string ve <code>format</code> ile küçük raporlar yazdın. Bu derste üç basamak çıkıyoruz: standart kütüphanedeki <code>string.Template</code>, endüstri standardı <b>Jinja2</b> (Flask, Ansible, dbt, Airflow ve sayısız raporlama aracı onu kullanır) ve bunlarla HTML e-posta, HTML ve Markdown rapor üreten bir boru hattı (pipeline). Jinja2 tarayıcı motorunda hazır; kendi bilgisayarında <code>pip install jinja2</code>.</p>
@@ -198,6 +199,6 @@ Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
 <p>HTML raporu PDF'e çevirmek için <code>weasyprint</code> (<code>HTML(string=html).write_pdf("rapor.pdf")</code>), Word şablonunu Jinja sözdizimiyle doldurmak için <code>docxtpl</code> kullanılır. İkisi de kendi bilgisayarında çalışır (<code>pip install weasyprint docxtpl</code>); mantık bu dersteki şablonlarla aynıdır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sablon-rapor">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sablon-rapor/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../pydantic-dogrulama/">← Veri doğrulama ve pydantic v2</a><a href="../proje-analist/">Bitirme projesi: Kanat Havayolları gecikme analizi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>İleri OOP: dunder metotlar, ABC, Protocol ve descriptor</h1><p class="st-l">Sınıflarını Python'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol, descriptor, __slots__ ve metaclass'a kısa bakış.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/ileri-oop">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden önemli?</h2>
 <p>Orta seviyede sınıf yazmayı, kalıtımı (inheritance) ve dataclass'ı öğrendin. Kurumsal kodda ise sınıfların "Python gibi" davranması beklenir: bir <code>Para</code> nesnesi <code>==</code> ile karşılaştırılabilmeli, bir kümeye konabilmeli, <code>sorted</code> ile sıralanabilmeli; bir <code>Sepet</code> nesnesi <code>len()</code> ve <code>for</code> ile kullanılabilmeli. Ilgaz Bank'ta bir işlem motoru yazarken "bu iki tutar eşit mi?" sorusunun cevabı <code>id()</code> karşılaştırması olursa raporlar yanlış çıkar. Bu dersin konusu, sınıflarını dil ile bütünleştiren <b>özel metotlar</b> (dunder methods, "double underscore") ve kodun sınırlarını tanımlayan soyutlama araçlarıdır.</p>
 
@@ -345,6 +346,6 @@ print(Disa.turler["csv"]().yaz([(1, "İzmir"), (2, "Bursa")]))
 <p>ABC mi Protocol mü sorusunda ekip kuralı genelde şudur: kendi yazdığın eklenti sistemi ve paylaşılan somut metotlar varsa ABC; fonksiyon parametresi için "şu metoda sahip olsun" diyorsan Protocol. İkisini birlikte de kullanabilirsin: ABC gerçekleştirmeyi zorunlu kılar, Protocol test çiftlerinin (test double) kalıtım olmadan geçmesini sağlar.</p>
 <p>Descriptor yazarken <code>__set_name__</code> kullan; alan adını elle tekrar etmek hata kaynağıdır. Performans kritik sınıflarda <code>__slots__</code> ile dataclass'ın <code>slots=True</code> seçeneğini birleştir. Metaclass'ı yalnızca bir çerçeve (framework) yazıyorsan düşün; uygulama kodunda görürsen önce <code>__init_subclass__</code> ya da sınıf dekoratörü ile çözülüp çözülemeyeceğini sor.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/ileri-oop">Alıştırmalara geç (23)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ileri-oop/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../bellek-ic-yapi/">← Python'ın iç yapısı: nesne, referans, bellek</a><a href="../tasarim-kaliplari/">Tasarım kalıpları Python'da →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

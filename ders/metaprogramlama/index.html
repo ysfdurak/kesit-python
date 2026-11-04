@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast</h1><p class="st-l">Kodu yöneten kod: type() ile sınıf üretir, __init_subclass__ ile eklenti kaydı kurar, descriptor ile alan doğrular, öznitelik kancalarını, metaclass'ı, inspect ve ast'ı doğru yerde kullanır, eval tuzağından kaçınırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/metaprogramlama">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Metaprogramlama (metaprogramming), <b>kodu yöneten kod</b> yazmaktır: sınıfları çalışma anında üretmek, bir sınıf tanımlandığı anda onu bir kayda eklemek, öznitelik atamasını araya girip doğrulamak, bir fonksiyonun imzasını okuyup ona göre davranmak ya da bir Python dosyasını çalıştırmadan çözümlemek. Kulağa egzotik gelir ama her gün kullandığın kütüphanelerin hepsi bunun üzerine kuruludur: <code>@dataclass</code> sınıfına <code>__init__</code> yazar, Django ve SQLAlchemy modelleri sınıf gövdesindeki alanları toplayıp tabloya çevirir, pytest test fonksiyonlarının parametre adlarına bakıp fixture enjekte eder, FastAPI fonksiyon imzasından API şeması çıkarır.</p>
@@ -323,6 +324,6 @@ for kotu in ["__import__('os').getcwd()", "open('x.txt', 'w')"]:
 <p>Her sihir bir bedel öder: hata izleri (traceback) uzar, IDE ve tip denetleyicisi dinamik üretilen öznitelikleri göremez, yeni gelen ekip arkadaşı kodun ne yaptığını anlamakta zorlanır. Kurumsal kodda kural: önce sade fonksiyon ve sınıf, sonra dekoratör, sonra <code>__init_subclass__</code>/descriptor, en son metaclass. Metaprogramlamayı uygulama kodunda değil, <b>çerçeve ve altyapı</b> katmanında, iyi test edilmiş ve belgelenmiş olarak kullan.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/metaprogramlama">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/metaprogramlama/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../flask/">← Flask ile web uygulaması</a><a href="../sqlalchemy-orm/">SQLAlchemy 2.0: Core, ORM, ilişkiler ve transaction →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

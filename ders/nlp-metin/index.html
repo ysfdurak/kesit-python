@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Metin işleme ve NLP: Türkçe metinden modele</h1><p class="st-l">Türkçe metni doğru temizler, tokenler ve n-gram'lara ayırır; CountVectorizer ve TF-IDF ile vektöre çevirip benzer şikayet bulur, yorumlarda duygu analizi yapar ve embedding/transformer dünyasına kavramsal olarak bakarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/nlp-metin">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Metin de veridir</h2>
 <p>Anadolu Market'e her gün yüzlerce ürün yorumu, Ilgaz Bank'ın çağrı merkezine yüzlerce şikayet kaydı geliyor. Bunlar sayı değil metin; ama "hangi konuda en çok şikayet var", "bu yorum olumlu mu", "bu şikayete benzeyen eski kayıtlar hangileri" soruları tamamen sayısal işlemlerle cevaplanır. Doğal dil işleme (Natural Language Processing, NLP) metni modelin anlayacağı sayılara çevirme ve sonra o sayılarla çalışma sanatıdır.</p>
@@ -239,6 +240,6 @@ print("gruplu bölme:", round(balanced_accuracy_score(y[te], model.predict(X.ilo
 <p>LogisticRegression'da <code>coef_</code> ile <code>get_feature_names_out()</code> eşleştirilerek her sınıf için en etkili kelimeler listelenir. Bu liste hem hata ayıklamaya (model "kargo" kelimesini olumsuzlukla mı eşleştirmiş?) hem iş ekibine güven vermeye yarar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/nlp-metin">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/nlp-metin/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ml-kumeleme/">← Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti</a><a href="../proje-ml/">Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Kapsam ve kapanışlar (closures) derinlemesine</h1><p class="st-l">LEGB kuralını, global ile nonlocal farkını, kapanışın değişkeni nasıl yakaladığını, döngüdeki geç bağlama tuzağını, fabrika fonksiyonlarını, __closure__ hücrelerini ve functools.partial ile ilişkisini iş senaryolarıyla derinlemesine öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kapanis-kapsam">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Ilgaz Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
@@ -216,6 +217,6 @@ print(sehir_tarifesi("Ankara")(4))</pre>
 <ul><li>İç fonksiyon dış adı okuyorsa bildirim gerekmez; atıyorsa <code>nonlocal</code> gerekir.</li><li>Dış fonksiyon döndükten sonra da iç fonksiyon dış değeri görür: kapanış.</li><li>Döngüde üretilen lambdalar son değeri görür; <code>i=i</code> ile düzelir.</li><li><code>__closure__</code> yoksa <code>None</code>; varsa hücre demeti, değer <code>cell_contents</code>'te.</li></ul>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kapanis-kapsam">Alıştırmalara geç (19)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapanis-kapsam/alistirma">Alıştırmalara geç (19)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../prompt-muhendisligi/">← Prompt mühendisliği ve yapılandırılmış çıktı</a><a href="../kutuphane-turu/">Python kütüphane haritası: hangi iş için hangi paket? →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

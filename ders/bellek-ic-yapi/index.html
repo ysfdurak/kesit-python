@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>Python'ın iç yapısı: nesne, referans, bellek</h1><p class="st-l">Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/bellek-ic-yapi">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden iç yapı?</h2>
 <p>Ilgaz Bank'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
 
@@ -253,6 +254,6 @@ print(len(kayit))               # kullanılmayan nesne önbellekten düştü
 <h3>Bellek ayırıcı</h3>
 <p>CPython küçük nesneler için kendi havuz ayırıcısını (pymalloc) kullanır; serbest bırakılan bellek işletim sistemine hemen dönmeyebilir. Uzun süreli süreçlerde "bellek düşmüyor" gözlemi çoğu zaman sızıntı değil bu havuzlamadır. Gerçek sızıntıyı <code>tracemalloc</code> ile iki anlık görüntü arasındaki farktan bul.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/bellek-ic-yapi">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/bellek-ic-yapi/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../performans/">← Profil ve optimizasyon</a><a href="../ileri-oop/">İleri OOP: dunder metotlar, ABC, Protocol ve descriptor →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

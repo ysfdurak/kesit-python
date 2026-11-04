@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İstatistik ve hipotez testi</h1><p class="st-l">Betimsel istatistik, normal/binom/Poisson dağılımları, merkezi limit teoremi, güven aralığı, t-testi, ki-kare, korelasyon, Anadolu Market A/B testi, p-değeri yanlışları, etki büyüklüğü ve statsmodels ile doğrusal regresyon.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/istatistik">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Veriden karara: neden istatistik?</h2>
 <p>Anadolu Market yeni bir kampanya sayfası denedi: ziyaretçilerin yarısı eski sayfayı (A), yarısı yeni sayfayı (B) gördü. A'da dönüşüm %12, B'de %15. Yönetim soruyor: "B'yi herkese açalım mı?" Üç puanlık fark gerçek bir iyileşme mi, yoksa şans eseri mi? Bin ziyaretçiyle mi ölçtük, yüz ziyaretçiyle mi? Bu sorunun cevabı tahmin değil, <b>istatistiksel çıkarım</b>dır (statistical inference).</p>
 <p>Bu derste betimsel istatistikten başlayıp dağılımlara, örneklemeye, güven aralığına, hipotez testlerine (t, ki-kare, korelasyon), A/B testine, etki büyüklüğüne ve doğrusal regresyona ilerleyeceğiz. Araçlar: <code>numpy</code> (bunu <a href="../numpy/">numpy: sayısal diziler ve vektörleştirme</a> dersinde gördün), <code>pandas</code>, <code>scipy.stats</code> ve <code>statsmodels</code>.</p>
@@ -251,6 +252,6 @@ for ad, m in [("ham", y), ("CUPED", y_c)]:
 <h3>Varsayım yoksa: bootstrap ve permütasyon</h3>
 <p>Medyan gibi formülü zor istatistikler için <b>bootstrap</b>: veriden yerine koyarak binlerce örneklem çek, istatistiği her birinde hesapla, yüzdelik dilimlerden güven aralığı al (<code>scipy.stats.bootstrap</code>). Dağılım varsayımı olmayan iki grup karşılaştırması için permütasyon testi (<code>scipy.stats.permutation_test</code>) ya da Mann-Whitney U (<code>mannwhitneyu</code>) kullan.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/istatistik">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/istatistik/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-mutabakat/">← Bitirme projesi: Lezzet Kurye kupon mutabakatı</a><a href="../pandas-ileri/">İleri pandas: şekil, pencere ve zincir →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Akış kontrolü</span><h1>Döngü kalıpları ve temel algoritmalar</h1><p class="st-l">Sayaç, biriktirici, en büyük/en küçük, doğrusal arama ve bayrak, komşu karşılaştırma, frekans, iç içe döngü, erken çıkış ve while ile hedefe kadar tekrar kalıplarını tanır; her yeni problemi bu kalıplarla çözmeyi öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/dongu-kaliplari">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Döngü yazmak, kalıp tanımaktır</h2>
 <p>Döngüler dersinde <code>for</code>, <code>while</code>, <code>range</code>, <code>enumerate</code>, <code>zip</code>, <code>break</code> ve <code>continue</code>'yu öğrendin. Bu ders bir adım geri çekilip şu soruyu soruyor: deneyimli bir geliştirici yeni bir problemi gördüğünde döngüyü nasıl bu kadar hızlı yazıyor? Cevap: yazdığı döngülerin büyük çoğunluğu bir avuç <b>kalıbın</b> (pattern) tekrarıdır. "Kaç tane?" sorusu sayaçtır, "toplam ne?" biriktiricidir, "en pahalısı hangisi?" en iyi değer kalıbıdır, "var mı?" aramadır.</p>
@@ -219,6 +220,6 @@ print(butce_ikilisi([10, 20], 100))</pre>
 <p>Kalıbı tanıdıktan sonra kısaltmasını kullanmak profesyonel koddur: sayaç → <code>sum(1 for x in v if ...)</code>, biriktirici → <code>sum</code>, en iyi → <code>max(v, key=...)</code>, arama → <code>next((x for x in v if ...), None)</code>, doğrulama → <code>all</code>, frekans → <code>collections.Counter</code>, komşu çiftleri → <code>itertools.pairwise</code>. Bunların çoğunu Orta seviyede göreceksin. Ama kısaltma çalışmadığında ya da kural karmaşıklaştığında açık döngüye dönebilmek, kalıbı bilmekle mümkün.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/dongu-kaliplari">Alıştırmalara geç (17)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dongu-kaliplari/alistirma">Alıştırmalara geç (17)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../unicode-metin/">← Karakterler, Unicode ve Türkçe</a><a href="../ic-ice-veri/">İç içe veri yapıları →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

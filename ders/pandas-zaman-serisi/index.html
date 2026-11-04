@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Zaman serisi analizi</h1><p class="st-l">to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling("7D"), eksik günleri doldurma, saat dilimi, iş günü ve mevsimsellik; Anadolu Market ve Ilgaz Bank verisiyle.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/pandas-zaman-serisi">Uygulamada aç, 35 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Zaman, verinin en önemli sütunu</h2>
 <p>Anadolu Market'in yönetimi "bu ay geçen aydan iyi mi?", "kampanya haftasında satış gerçekten arttı mı, yoksa her ayın ilk haftası zaten böyle mi?" diye sorar. Ilgaz Bank'ın operasyon ekibi ATM işlemlerinin saatlik yoğunluğuna, risk ekibi gece yarısı yapılan olağandışı işlemlere bakar. Bu soruların hepsinde satırların bir <b>zaman damgası</b> vardır ve cevap, zamanı doğru işlemekten geçer.</p>
 <p><b>groupby</b> dersinde <code>resample</code>'a kısaca, <b>ileri pandas</b> dersinde <code>rolling</code>'e değindin. Bu ders zaman serisi (time series) analizinin tamamını kurar: metni tarihe çevirmek, tarih index'iyle dilimlemek, kovalara toplamak, önceki dönemle kıyaslamak, eksik günleri doldurmak, saat dilimi, iş günü ve mevsimsellik.</p>
@@ -272,6 +273,6 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
 <h3>Tahmine giriş ve sızıntı</h3>
 <p>Tahmin (forecasting) için önce basit kıyas modellerini kur: "yarın = bugün" (naive) ve "gelecek salı = geçen salı" (seasonal naive). statsmodels'teki üstel düzeltme (ExponentialSmoothing) ve ARIMA bunların üstüne kurulur. Zaman serisinde rastgele train/test bölmesi yapma: modeli geçmişle eğit, gelecekle test et; aksi hâlde gelecekten bilgi sızar (leakage) ve model kâğıt üstünde parlak, gerçekte işe yaramaz çıkar.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-zaman-serisi">Alıştırmalara geç (35)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-zaman-serisi/alistirma">Alıştırmalara geç (35)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../pandas-ileri/">← İleri pandas: şekil, pencere ve zincir</a><a href="../seaborn-plotly/">İleri görselleştirme: seaborn, plotly ve doğru grafik →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

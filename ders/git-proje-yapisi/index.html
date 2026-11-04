@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Git ve proje yapısı</h1><p class="st-l">Temel Git akışını (init, add, commit, branch, merge, pull request) kavrar, .gitignore kurallarını fnmatch ile çözümler, src yerleşimli proje ağacı kurar, README yazar, config ve .env ile gizli bilgiyi koddan ayırır ve kod inceleme kültürünü tanırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/git-proje-yapisi">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden Git?</h2>
 <p>Ilgaz Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
@@ -337,6 +338,6 @@ for sehir, n, ciro in satirlar:
 <p>Otomasyon bunu destekler. Pre-commit kancaları (hook) commit'ten önce biçimlendiriciyi (ruff, black) ve basit kontrolleri çalıştırır; böylece inceleme, girinti ve boşluk tartışmasına harcanmaz. CI (GitHub Actions, GitLab CI) her PR'da testleri koşar ve kırmızıysa birleştirmeyi engeller. Commit mesajlarında "Conventional Commits" düzeni (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>) değişiklik günlüğünü otomatik üretmeyi sağlar. İleri seviyedeki "Kalite ve CI" dersinde bu zinciri uçtan uca kuracaksın; bugün için hedefin küçük: anlamlı commit, temiz .gitignore, gizli bilgi .env'de.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/git-proje-yapisi">Alıştırmalara geç (17)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/git-proje-yapisi/alistirma">Alıştırmalara geç (17)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../sanal-ortam-pip/">← Sanal ortam ve paket yönetimi</a><a href="../proje-orta/">Orta bitirme projesi: Ilgaz Bank işlem analizi →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

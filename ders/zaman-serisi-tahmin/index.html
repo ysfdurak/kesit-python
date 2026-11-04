@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye</h1><p class="st-l">Ufuk, sıklık ve toplama seviyesi; naive ve mevsimsel naive temel çizgileri; STL ayrıştırma ve ADF; Holt-Winters (ETS) ve dışsal değişkenli SARIMAX; lag özellikli ML, özyinelemeli ve doğrudan çok adımlı tahmin; genişleyen pencere backtest; MAE, RMSE, sMAPE, MASE ve tahmin aralığı. Pedal İzmir saatlik talep + hava verisiyle.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/zaman-serisi-tahmin">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Yarın kaç bisiklet gerekecek?</h2>
 <p>Pedal İzmir operasyon ekibi her gece kamyonlarla bisikletleri istasyonlar arasında taşıyor. Sabah 8'de Alsancak'ta bisiklet kalmazsa müşteri kaybediliyor, Bostanlı'da yığılırsa boş yuva kalmıyor. Bunun için <b>yarının saatlik talebini</b> bilmeleri gerekiyor. Bu bir <b>zaman serisi tahmini</b> (time series forecasting) problemidir: geçmiş gözlemlerin sırasından ve düzeninden geleceği çıkarmak.</p>
 <p>Zaman serisinin pandas tarafını (resample, shift, rolling) <a href="../pandas-zaman-serisi/">Zaman serisi analizi</a> dersinde gördün. Bu derste tahmin yapacaksın: önce yenmesi gereken <b>temel çizgiler</b>, sonra bileşen ayrıştırma, üstel düzeltme (ETS), ARIMA/SARIMAX, lag özellikli makine öğrenmesi ve hepsini dürüstçe karşılaştıran <b>geriye dönük test</b> (backtest). Veri: Pedal İzmir'in Haziran–Ağustos 2024 yolculukları (116 517 yolculuk) ve saatlik hava gözlemleri.</p>
@@ -138,6 +139,6 @@ for i, (egt, tst) in enumerate(TimeSeriesSplit(n_splits=3, test_size=168).split(
 <h3>Mülakat cümlesi</h3>
 <p>"Önce mevsimsel naive temel çizgisini ve MASE'i raporlarım. Bölmeyi zamana göre, genişleyen pencereyle yaparım; özellikleri tahmin anında bilinenlerle sınırlarım. MAPE'yi sıfırlı serilerde kullanmam; aralıkları backtest hatalarından kurar ve kapsamasını ölçerim."</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/zaman-serisi-tahmin">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/zaman-serisi-tahmin/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ozellik-muhendisligi/">← Özellik mühendisliği: ham veriden modele hazır özelliğe</a><a href="../bulut-temelleri/">Bulut temelleri: nesne depolama, IAM, serverless ve maliyet →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

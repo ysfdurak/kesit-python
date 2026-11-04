@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market müşteri analitiği paketi</h1><p class="st-l">pandas ile RFM segmentasyonu ve kohort analizi, async ile sayfalı veri çekme, argparse CLI ve unittest içeren uçtan uca bir analitik paket kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-ileri">Uygulamada aç, 32 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje: müşteri analitiği paketi</h2>
 <p>Anadolu Market'in pazarlama ekibi üç soru soruyor: "Hangi müşterilere kampanya gönderelim?", "Yeni gelen müşteriler ikinci ay geri dönüyor mu?", "Hangi ürün ve kategori ciroyu taşıyor?" Bu projede üç soruyu cevaplayan, komut satırından çalışan ve testli bir paket kuracaksın. Paket, önceki derslerin hepsini birleştirir: pandas (groupby, qcut, pivot), asyncio (sayfalı veri çekme), argparse (CLI), unittest (doğrulama).</p>
@@ -443,6 +444,6 @@ for ad, kume in [("tüm siparişler", o), ("iptal hariç", o[o["status"] != "can
 <h3>Performans</h3>
 <p>Milyonlarca satırda <code>apply(segment)</code> yavaşlar; <code>pd.cut</code> ile vektörel segmentleme ya da <code>np.select</code> kullan. Kohort tablosu için <code>pivot_table</code> ve kategorik türler belleği düşürür.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ileri">Alıştırmalara geç (32)</a></div>
-<nav class="st-n" aria-label="Ders sırası"><a href="../mulakat-hazirlik/">← Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama</a><a href="../fonksiyon-iskeleti/">Fonksiyon iskeleti: boşluğu doldur →</a></nav></main>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ileri/alistirma">Alıştırmalara geç (32)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../mulakat-hazirlik/">← Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama</a><a href="../ilk-kod/">İlk kodun: birkaç dakikada başla →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

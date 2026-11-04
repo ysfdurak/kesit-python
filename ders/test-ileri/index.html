@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi</h1><p class="st-l">Test piramidini kurar, unittest.mock'u side_effect, spec ve doğru patch hedefiyle ustalıkla kullanır, bağımlılık enjeksiyonuyla zamanı, rastgeleliği ve ağı izole eder; fabrikalar, özellik tabanlı ve mutasyon testiyle testlerinin gerçekten hata yakaladığını kanıtlarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/test-ileri">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden ileri test teknikleri?</h2>
 <p>Test yazma dersinde <code>unittest</code>, düz <code>assert</code>, <code>patch.object</code> ve TDD döngüsünü gördün. Gerçek projede ise testlerin kendisi bir kod tabanına dönüşür: yüzlerce test, dış servislere bağlı kod, saatle değişen kurallar, rastgele üretilen kimlikler. Kötü tasarlanmış bir test paketi ya yavaştır, ya rastgele kırılır (flaky), ya da daha kötüsü <b>her şey yeşilken hatayı kaçırır</b>. Bu derste Ilgaz Bank ve Anadolu Market örnekleriyle testlerini hızlı, güvenilir ve gerçekten hata yakalayan hâle getirmeyi öğreneceksin.</p>
@@ -306,6 +307,6 @@ class Musteri(HttpUser):
 <p>"Sahip olmadığın şeyi mock'lama" sık duyulan bir ilkedir: üçüncü taraf bir kütüphaneyi doğrudan mock'lamak yerine onu kendi küçük adaptör sınıfının arkasına koy, testte adaptörü değiştir. Böylece kütüphane değiştiğinde yalnızca adaptör ve onun entegrasyon testi etkilenir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/test-ileri">Alıştırmalara geç (29)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/test-ileri/alistirma">Alıştırmalara geç (29)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-api/">← Bitirme projesi: Anadolu Market Sipariş API'si</a><a href="../eda-kesifsel/">Keşifsel veri analizi (EDA): sorudan bulguya →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

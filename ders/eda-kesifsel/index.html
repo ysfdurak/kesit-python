@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Keşifsel veri analizi (EDA): sorudan bulguya</h1><p class="st-l">Hipotez defteriyle başlayan yöntemli EDA: profil fonksiyonu, eksikliğin nedeni, çarpık dağılım ve aykırı değer, iki değişkenli analiz (Spearman, crosstab, grup özeti), zaman boyutu, veri hatası ile sinyali ayırma (raw_signups, kirli_veri) ve Kanat Havayolları rötar mini projesiyle bulgu yazımı.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/eda-kesifsel">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>EDA neden ayrı bir beceri?</h2>
 <p>Keşifsel veri analizi (exploratory data analysis, EDA), modele, panoya ya da rapora geçmeden önce veriyi <b>tanıma</b> işidir: veri ne kadar, neyi temsil ediyor, nerede eksik, nerede yanlış, hangi örüntüler var? pandas'ı, gruplamayı ve grafikleri önceki derslerde gördün. EDA bunları bir <b>yöntem</b> içinde birleştirir. Yöntemsiz EDA, yüzlerce grafiğin içinde kaybolmaktır; yöntemli EDA ise üç beş net bulguyla biter.</p>
 <p>Bu derste Kanat Havayolları'nın Eylül–Aralık 2024 uçuşlarını (<code>hv_flights</code>, 3.173 uçuş) ve rötar nedenlerini (<code>hv_delays</code>) inceleyeceğiz. Veri hatası ile gerçek sinyali ayırmayı ise Anadolu Market'in form kayıtları (<code>raw_signups</code>) ve dağınık bayi raporu (<code>kirli_veri</code>) üzerinde göreceğiz.</p>
@@ -183,6 +184,6 @@ ProfileReport(df, title="Uçuşlar", minimal=True).to_file("profil.html")</pre>
 <h3>Simpson ve kompozisyon etkisi</h3>
 <p>Toplam ortalama değişirken her alt grup aynı kalabilir: örneğin Aralık'ta akşam uçuşlarının payı artarsa toplam rötar, hiçbir dilim kötüleşmese de yükselir. Zaman karşılaştırmalarında daima "karma (mix) değişti mi?" sorusunu sor. Bu konu <b>iş metrikleri</b> dersinde köprü analiziyle derinleşiyor.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/eda-kesifsel">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eda-kesifsel/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../test-ileri/">← İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi</a><a href="../is-metrikleri/">İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

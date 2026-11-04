@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>threading, concurrent.futures ve GIL</h1><p class="st-l">Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL'in etkisi ve ProcessPoolExecutor kavramı; hangi iş için hangi araç.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/eszamanlilik">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><div class="warn"><b>Bu derste örnekler tarayıcıda farklı davranır</b>Tarayıcıdaki Python gerçek iş parçacığı başlatamaz: thread'ler sırayla çalışır. Bu yüzden thread örneklerinde hız kazancı ya da yarış durumu burada görünmez. Her örneğin altında <b>kendi bilgisayarında beklenen çıktı</b> yazıyor; bu dersi bilgisayarında da çalıştırman iyi olur.</div>
 <h2>Üç araç, üç farklı iş</h2>
 <p>Anadolu Market'in gece işi: 200 tedarikçi dosyasını indir (ağ beklemesi), her birini ayrıştır (hafif), sonra 2 milyon satırda fiyat optimizasyonu hesapla (ağır hesap). Üçü de "aynı anda daha çok iş" ister ama farklı araçlarla: ağ için thread ya da asyncio, ağır hesap için süreç (process). Bu dersin amacı doğru aracı seçmeyi ve paylaşılan veriyi güvenle korumayı öğretmek.</p>
@@ -227,6 +228,6 @@ print("iptal edildi mi?", bekleyen.cancel(), bekleyen.cancelled())
 <h3>asyncio ile köprü</h3>
 <p>Async kodda senkron bir kütüphane çağırman gerekiyorsa <code>await asyncio.to_thread(func)</code> arka planda bir ThreadPoolExecutor kullanır. Tersine, senkron koddan async kütüphane çağırmak için ayrı bir thread'de olay döngüsü çalıştırılır. İki dünya birbirini dışlamaz; sınırı bilinçli çiz.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/eszamanlilik">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eszamanlilik/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../async/">← asyncio: eşzamansız kod, coroutine, await ve gather</a><a href="../performans/">Profil ve optimizasyon →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

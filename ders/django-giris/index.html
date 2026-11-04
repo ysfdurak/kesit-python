@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Django'ya giriş: MVT, ORM, admin ve DRF</h1><p class="st-l">Django projesi ve uygulaması kurar; URL, view, model, migration, admin, şablon, form ve kimlik doğrulamayı tanır; ORM sorgularını (filter, exclude, annotate, aggregate, select_related) SQL karşılıklarıyla birlikte düşünmeyi Anadolu Market örneğiyle öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/django-giris">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden Django?</h2>
 <p>Flask ve FastAPI derslerinde küçük, esnek çatıları (framework) gördün: yönlendirme verirler, gerisini sen seçersin. Django ise "pili içinde" (batteries included) yaklaşımıyla gelir: ORM, migration sistemi, admin paneli, kullanıcı ve yetki sistemi, form doğrulama, şablon motoru, önbellek (cache), e-posta ve güvenlik korumaları tek pakette ve birbiriyle uyumlu. Anadolu Market'in iç yönetim paneli, Ilgaz Bank'ın kredi başvuru takip ekranı ya da belediyenin randevu sistemi gibi <b>veritabanı ağırlıklı, formlu, yetkili kullanıcılı</b> uygulamalarda Django ile birkaç günde çalışan bir ürün çıkarabilirsin.</p>
@@ -395,6 +396,6 @@ def kategoriler(request):
 <p>İş kuralını view'a gömme; model metotlarına ya da ayrı bir <code>services.py</code> katmanına koy. Sinyalleri (signals) ölçülü kullan; gizli yan etkiler hata ayıklamayı zorlaştırır. Ayarları <code>django-environ</code> ya da ortam değişkenleriyle yönet, <code>pytest-django</code> ile test yaz. Uzun süren işleri (e-posta, rapor) Celery gibi bir kuyruğa ver; bunun mantığını Orkestrasyon dersinde göreceksin.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/django-giris">Alıştırmalara geç (30)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/django-giris/alistirma">Alıştırmalara geç (30)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../sqlalchemy-orm/">← SQLAlchemy 2.0: Core, ORM, ilişkiler ve transaction</a><a href="../orkestrasyon/">İş akışı orkestrasyonu: cron, DAG ve Airflow →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

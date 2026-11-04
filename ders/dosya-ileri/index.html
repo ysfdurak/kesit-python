@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma</h1><p class="st-l">Metin ve ikili modu ayırır; bytes/bytearray, seek/tell, OSError alt sınıfları, standart akışlar, pathlib glob, shutil, zipfile/tarfile, tempfile ve atomik yazmayla gerçek dosya işlerini sağlam yaparsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/dosya-ileri">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in gece çalışan işlerini düşün: her mağaza kasası günün satışlarını bir CSV dosyası olarak <code>gelen/2026-10-27/</code> klasörüne bırakıyor, ödeme sistemi ikili (binary) bir dekont arşivi gönderiyor, muhasebe sabah 08.00'de <code>rapor.json</code> dosyasını okuyor. Bu işte üç şey ters gidebilir: yanlış modda açılan dosya Türkçe karakterleri bozar, bir klasördeki 500 dosyadan biri bozuk olduğu için tüm iş durur, ya da program rapor yazarken çöker ve muhasebe yarım bir JSON okur.</p>
@@ -221,6 +222,6 @@ with tempfile.TemporaryDirectory() as d:
 <p>Kaynağını bilmediğin metin dosyasında <code>errors="replace"</code> bozuk baytları yerine koyma karakteriyle değiştirir, <code>errors="strict"</code> (varsayılan) hata verir. Veri kaybını görmezden gelmek yerine önce hatayı yakalayıp hangi dosyada olduğunu loglamak daha güvenlidir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-ileri">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-ileri/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../algoritmalar/">← Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS</a><a href="../veri-yapilari/">Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>asyncio: eşzamansız kod, coroutine, await ve gather</h1><p class="st-l">Olay döngüsü, coroutine ve await, gather/create_task ile eşzamanlı I/O, asyncio.sleep ile sahte gecikme, Semaphore ile sınırlama, timeout, async for/with.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/async">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Beklemek zaman kaybı</h2>
 <p>Ilgaz Bank'ın bir servisi, bir kredi başvurusu için üç dış sisteme soruyor: kimlik doğrulama, kredi skoru, kara liste. Her biri yaklaşık yarım saniye. Sırayla sorarsan 1,5 saniye; aynı anda sorup üçünü de beklersen yarım saniye. İşlemci bu süre boyunca zaten boştur, yalnızca ağ cevabını bekler. <b>asyncio</b> bu "beklerken başka işe geç" düşüncesini tek iş parçacığında (thread) gerçekleştirir. Kural: asyncio <b>I/O beklemesi</b> için iyidir; ağır hesap için değil (onun için bir sonraki ders).</p>
 
@@ -252,6 +253,6 @@ loop.close()
 <h3>Ne zaman async?</h3>
 <p>Binlerce eşzamanlı bağlantı, web sunucusu (FastAPI), çok sayıda API çağrısı: evet. Tek dosya işleme, CPU-yoğun analiz, basit betik: hayır; karmaşıklığı hak etmez.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/async">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/async/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../gorsellestirme/">← matplotlib ile görselleştirme</a><a href="../eszamanlilik/">threading, concurrent.futures ve GIL →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

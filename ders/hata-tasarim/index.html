@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Hata tasarımı: özel istisnalar, logging, EAFP</h1><p class="st-l">Kendi istisna hiyerarşini kurar, raise from ile nedeni korur, logging ile iz bırakır, EAFP ve assert'i doğru yerde kullanırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/hata-tasarim">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Ilgaz Bank'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
@@ -306,6 +307,6 @@ print(len(kayit), kayit[0].category.__name__, "-", kayit[0].message)</pre>
 <p>Her katman yalnızca anlamlı tepki verebildiği hatayı yakalar; gerisini yukarı bırakır. Hatayı en altta yakalayıp None döndürmek sorunu ertelemektir: "None nereden geldi?" sorusu üç katman yukarıda, saatler sonra sorulur. En dış katmanda (CLI giriş noktası, web isteği işleyicisi) tek bir <code>except BankaHatasi</code> kullanıcı mesajını, tek bir <code>except Exception</code> ile <code>log.exception</code> beklenmeyeni raporlar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/hata-tasarim">Alıştırmalara geç (22)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-tasarim/alistirma">Alıştırmalara geç (22)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../dataclass-typing/">← dataclass ve tip ipuçları (type hints)</a><a href="../collections-itertools/">collections ve itertools: hazır veri yapıları ve yineleme araçları →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

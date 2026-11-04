@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</h1><p class="st-l">Sohbet API kavramlarını, Anthropic ve OpenAI SDK kalıplarını, API anahtarı güvenliğini, JSON çıktıyı pydantic ile doğrulamayı, araç çağırmayı, yeniden denemeyi, maliyet hesabını, basit RAG'i, istem enjeksiyonu/KVKK risklerini ve değerlendirmeyi sahte bir istemciyle uygularsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/llm-api">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Kendi kodundan bir dil modeline soru sormak</h2>
 <p>Anadolu Market müşteri hizmetleri her gün aynı soruları cevaplıyor: "Siparişim nerede?", "İade nasıl yapılır?". Ilgaz Bank'ın operasyon ekibi ise yüzlerce şikayeti okuyup özetliyor. Büyük dil modelleri (Large Language Model, LLM) bu işleri hızlandırabilir; ama ürün içinde kullanmak sohbet ekranında soru sormaktan farklıdır. Kodun modele <b>API</b> üzerinden istek gönderir, cevabı ayrıştırır, doğrular, hata olursa yeniden dener, maliyeti izler ve kişisel veriyi korur. Bu ders o mühendislik katmanını öğretir.</p>
@@ -365,6 +366,6 @@ async def akis(soru: str):
 <p>Model adını, istem şablonunu ve sıcaklığı sürüm kontrolünde tut; her isteğe bir istem sürümü etiketi ekleyip logla. Böylece "geçen hafta neden farklı cevap verdi" sorusunu cevaplayabilirsin. Kişisel veriyi loglamamak için maskeleme logdan önce yapılır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/llm-api">Alıştırmalara geç (30)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/llm-api/alistirma">Alıştırmalara geç (30)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../polars-duckdb/">← polars, DuckDB ve Parquet: büyük veriye tek makinede</a><a href="../ml-kumeleme/">Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

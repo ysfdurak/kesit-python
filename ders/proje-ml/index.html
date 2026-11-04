@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini</h1><p class="st-l">Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer'lı pipeline'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre eşik seçer, modeli açıklar, f-string ile yönetim raporu yazar ve modeli BytesIO ile kaydedip yüklersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-ml">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Proje: Ilgaz Bank müşteri kaybı tahmini</h2>
 <p>Ilgaz Bank'ın bireysel bankacılık ekibi her ay bazı müşterilerin hesabını kapatıp başka bankaya geçtiğini görüyor. Yeni müşteri kazanmak, mevcut müşteriyi tutmaktan çok daha pahalı. Soru şu: <b>"Önümüzdeki dönemde hangi müşteriler ayrılmaya (churn) yakın, kime tutundurma teklifi yapalım?"</b> Bu bitirme projesinde makine öğrenmesi derslerinde (<a href="../ml-giris/">Makine öğrenmesine giriş</a>, <a href="../ml-regresyon-siniflandirma/">Regresyon ve sınıflandırma modelleri</a>, <a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a>) öğrendiğin her şeyi tek bir iş problemi etrafında birleştireceksin: veri, keşif, özellik mühendisliği (feature engineering), pipeline, çapraz doğrulama (cross-validation), eşik seçimi, açıklama, rapor ve model dosyası.</p>
@@ -464,6 +465,6 @@ for ad, yeni in [("Aralık", veri_seti(["2024-12-01"])), ("Mart (eksik pencere)"
 <p>Modeli bir paket fonksiyonu (<code>skorla(df) -&gt; olasılıklar</code>) arkasına koy, girdi şemasını pydantic ya da pandera ile doğrula, model sürümünü ve eğitim tarihini meta veri olarak kaydet, aylık dağılım değişimlerini izle (ör. churn oranı, özellik ortalamaları). <a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a> ve <a href="../orkestrasyon/">İş akışı orkestrasyonu: cron, DAG ve Airflow</a> dersleri bu kısmı ele alır.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ml">Alıştırmalara geç (30)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ml/alistirma">Alıştırmalara geç (30)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../nlp-metin/">← Metin işleme ve NLP: Türkçe metinden modele</a><a href="../fastapi/">FastAPI ile API geliştirme →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

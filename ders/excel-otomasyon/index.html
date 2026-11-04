@@ -4,7 +4,8 @@
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Excel otomasyonu: openpyxl, pandas ve rapor üretimi","description":"Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/excel-otomasyon/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Excel otomasyonu: openpyxl, pandas ve rapor üretimi</h1><p class="st-l">Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini doğru çevirirsin.</p>
-<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon">Uygulamada aç, 40 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market finans ekibinde her pazartesi aynı iş yapılıyor: satış sisteminden CSV indirilir, Excel'de açılır, şehirlere göre özet tablo hazırlanır, toplam satırına formül yazılır, başlık kalın yapılır, sütunlar genişletilir, bir grafik eklenir ve dosya yöneticilere gönderilir. Bu iş her hafta 1–2 saat sürer ve her seferinde küçük bir kopyala-yapıştır hatası riski taşır. Python ile aynı rapor birkaç saniyede, her hafta aynı biçimde ve hatasız üretilir.</p>
@@ -31,7 +32,7 @@ for h in ["A", "Z", "AA", "AZ", "BA", "XFD"]:
 <p>Son satırdaki <code>XFD</code> Excel'in en son sütunudur (16.384). Bir sayfada en fazla 1.048.576 satır bulunur; daha büyük veri için Excel doğru araç değildir.</p>
 
 <h2>openpyxl ile rapor yazmak</h2>
-<p>openpyxl tarayıcı motorunda çalışmaz; aşağıdaki kodu kendi bilgisayarında dene. Mantığını ise birazdan tarayıcıda çalışan alıştırmalarla kuracaksın.</p>
+<p>Aşağıdaki kod hem bilgisayarında hem de bu sayfada çalışır: dersin sonundaki "Gerçek .xlsx dosyasıyla çalışmak" bölümünde ve alıştırmalarda openpyxl tarayıcıda gerçek dosya yazar. İlk bölüm hücre modelini saf Python ile kurar, mantığı görmen için.</p>
 <pre class="code">from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.chart import BarChart, Reference
@@ -72,7 +73,7 @@ grafik.set_categories(etiket)
 ws.add_chart(grafik, "E2")
 
 wb.save("haftalik_rapor.xlsx")</pre>
-<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install openpyxl</code> (pandas ile Excel yazmak için de gerekir). Dosyayı Excel ya da LibreOffice ile açıp sonucu gör. Tarayıcıdaki motorda openpyxl bulunmaz.</div>
+<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install openpyxl</code> (pandas ile Excel yazmak için de gerekir). Dosyayı Excel ya da LibreOffice ile açıp sonucu gör. Bu sayfada openpyxl ilk kullanımda iner (yaklaşık 270 KB); pandas ile Excel de aynı paketi kullanır.</div>
 <p>Okumak için <code>load_workbook</code> kullanılır. <code>iter_rows(values_only=True)</code> hücre nesneleri yerine doğrudan değerleri demet (tuple) olarak verir; veriyi işlemenin en pratik yoludur:</p>
 <pre class="code">from openpyxl import load_workbook
 
@@ -140,7 +141,7 @@ with pd.ExcelWriter("rapor.xlsx", engine="openpyxl") as yazici:
     ozet.to_excel(yazici, sheet_name="Özet")
     yazici.sheets["Özet"].column_dimensions["A"].width = 18   # openpyxl sayfasına erişim</pre>
 <div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pandas openpyxl</code>. pandas <code>.xlsx</code> okumak ve yazmak için arka planda openpyxl kullanır; eski <code>.xls</code> için <code>xlrd</code> gerekir.</div>
-<p>Tarayıcıda Excel dosyası yazamayız ama aynı pivot mantığını CSV ile çalıştırabiliriz. Rapor üretiminin "hesap" kısmı her iki durumda da aynıdır:</p>
+<p>Rapor üretiminin "hesap" kısmı dosya biçiminden bağımsızdır. Aynı pivot mantığını CSV ile görelim; Excel'e yazmayı dersin sonundaki görevlerde yapacaksın:</p>
 <pre class="py">import io
 import pandas as pd
 
@@ -209,7 +210,25 @@ print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
 </ol></div>
 <div class="note"><b>Gerçek işte</b>Bir lojistik firmasının bölge müdürleri her sabah "dünkü teslimat başarısı" Excel'ini bekler. İyi kurulmuş otomasyon şablon dosyayı (<code>sablon.xlsx</code>) openpyxl ile açar, yalnızca veri hücrelerini doldurur, logoyu ve biçimleri olduğu gibi bırakır, dosyayı tarihli adla kaydeder. İş birimi tanıdığı görünümden vazgeçmek zorunda kalmaz, sen de biçimle uğraşmazsın.</div>
 
-<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Power BI ve Excel köprüsü</h2><p>Çoğu kurumda Python tek başına rapor aracı değildir; sonuçlar Excel'e ya da Power BI panolarına gider. Python'un bu dünyaya üç kapısı var: Power BI içinde <b>Python betik kaynağı</b> ve <b>Python görseli</b>, Excel içinde <b>=PY</b> formülü ve en sağlamı, Python'un temizleyip Power BI'a hazır <b>yıldız şemalı dosyalar</b> (CSV/Parquet) üretmesi. Bu bölümde Kesit Power BI'ın kullandığı <code>kesit_bi</code> modelini ve Kesit SQL'in <code>anadolu_market</code> tablolarını kullanacaksın; ikisi aynı kurgusal şirketin iki görünümü.</p><h3>Power BI'da Python: betik kaynağı ve görsel</h3><p><b>Veri al → Diğer → Python betiği</b> ile yazdığın betik çalışır ve betik bittiğinde ad alanındaki <b>her pandas DataFrame</b> ayrı bir tablo olarak seçime sunulur. Power BI Desktop, bilgisayarındaki Python yorumlayıcısını kullanır (Seçenekler → Python betiği oluşturma); pandas ve matplotlib orada kurulu olmalıdır. <b>Python görseli</b> ise rapor sayfasında çalışır: seçtiğin alanlar <code>dataset</code> adlı DataFrame olarak gelir, sen matplotlib ile çizersin.</p><pre class="code"># Power BI → Veri al → Python betiği
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Gerçek .xlsx dosyasıyla çalışmak</h2><p>Bu bölümdeki kod tarayıcıda gerçek Excel dosyası yazar ve okur. Dosya tarayıcının belleğinde durur; çıktının altındaki <b>İndir</b> düğmesiyle alıp Excel'de açabilirsin. openpyxl ilk kullanımda iner (yaklaşık 270 KB), XlsxWriter yaklaşık 180 KB.</p>
+<pre class="py">from openpyxl import Workbook, load_workbook
+from openpyxl.styles import Font
+
+wb = Workbook()
+ws = wb.active
+ws.title = "Satış"
+ws.append(["Ürün", "Adet"])
+ws.append(["Çay", 3])
+ws["A1"].font = Font(bold=True)
+ws["C2"] = "=B2*2"
+wb.save("ornek.xlsx")
+
+okunan = load_workbook("ornek.xlsx")
+print(okunan.sheetnames, okunan["Satış"]["C2"].value)
+print(load_workbook("ornek.xlsx", data_only=True)["Satış"]["C2"].value)</pre>
+<p>Son satır <code>None</code> yazar: openpyxl formülü hesaplamaz, yalnız yazar. Hesaplanmış değer dosyaya Excel açıp kaydedince girer. Bu yüzden Python'da hesap yapıp sonucu ayrıca denetlemek gerekir.</p>
+<div class="tbl-wrap"><table><tr><th>Araç</th><th>Ne zaman</th></tr><tr><td>openpyxl</td><td>Var olan dosyayı açmak, şablon doldurmak, okumak</td></tr><tr><td>XlsxWriter</td><td>Sıfırdan biçimli ve grafikli rapor; var olan dosyayı açamaz</td></tr><tr><td>pandas</td><td>Tabloyu toplu okumak ve yazmak; arka planda ikisini kullanır</td></tr></table></div>
+<div class="note"><b>Sınır</b>Tarayıcıda gerçek Excel yok: grafik ve koşullu biçim dosyaya doğru yazılır ve testler dosyayı yeniden okuyarak denetler, ama görünümü ancak indirip Excel'de açınca görürsün. xlwings ve makro bilgisayarında kurulu Excel ister; burada çalışmaz.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Power BI ve Excel köprüsü</h2><p>Çoğu kurumda Python tek başına rapor aracı değildir; sonuçlar Excel'e ya da Power BI panolarına gider. Python'un bu dünyaya üç kapısı var: Power BI içinde <b>Python betik kaynağı</b> ve <b>Python görseli</b>, Excel içinde <b>=PY</b> formülü ve en sağlamı, Python'un temizleyip Power BI'a hazır <b>yıldız şemalı dosyalar</b> (CSV/Parquet) üretmesi. Bu bölümde Kesit Power BI'ın kullandığı <code>kesit_bi</code> modelini ve Kesit SQL'in <code>anadolu_market</code> tablolarını kullanacaksın; ikisi aynı kurgusal şirketin iki görünümü.</p><h3>Power BI'da Python: betik kaynağı ve görsel</h3><p><b>Veri al → Diğer → Python betiği</b> ile yazdığın betik çalışır ve betik bittiğinde ad alanındaki <b>her pandas DataFrame</b> ayrı bir tablo olarak seçime sunulur. Power BI Desktop, bilgisayarındaki Python yorumlayıcısını kullanır (Seçenekler → Python betiği oluşturma); pandas ve matplotlib orada kurulu olmalıdır. <b>Python görseli</b> ise rapor sayfasında çalışır: seçtiğin alanlar <code>dataset</code> adlı DataFrame olarak gelir, sen matplotlib ile çizersin.</p><pre class="code"># Power BI → Veri al → Python betiği
 import pandas as pd
 satis = pd.read_csv(r"C:\veri\kesit_bi\Satislar.csv")
 satis = satis[satis["Durum"] != "İptal"]          # yalnız DataFrame'ler tablo olur
@@ -258,6 +277,6 @@ print(olgu[["TarihKey", "tutar"]].head(3))</pre><div class="tbl-wrap"><table><tr
 </ul>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon/alistirma">Alıştırmalara geç (40)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../cli-araclari/">← Komut satırı araçları: argparse, click, rich ve boru hatları</a><a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

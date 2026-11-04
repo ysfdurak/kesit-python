@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Test</span><h1>pytest ile test: fixture, parametrize ve gerçek proje düzeni</h1><p class="st-l">pytest'in test keşfini, düz assert ve assert yeniden yazımını, pytest.raises ve pytest.approx'u, fixture (scope, yield ile temizlik), parametrize, conftest.py, skip/xfail işaretlerini, tmp_path, monkeypatch ve capsys'i, coverage ölçümünü ve komut satırı seçeneklerini öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/pytest">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden pytest?</h2>
 <p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Ilgaz Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
@@ -244,6 +245,6 @@ except ConnectionError:
 <p><code>hypothesis</code> kütüphanesi senin yerine yüzlerce rastgele girdi üretip "her tutar için indirimli fiyat tutardan büyük olamaz" gibi genel özellikleri dener ve hatayı bulunca en küçük örneğe indirger. Parametrize ile seçtiğin durumların kaçırdığı köşeleri bulmakta çok güçlüdür.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/pytest">Alıştırmalara geç (19)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pytest/alistirma">Alıştırmalara geç (19)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../moduller-paketler/">← Modüller ve paketler: import sisteminin içi</a><a href="../coklu-kalitim/">Çoklu kalıtım, MRO ve mixin'ler →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

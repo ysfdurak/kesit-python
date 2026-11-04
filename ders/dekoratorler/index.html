@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Dekoratörler (decorators) ve bağlam yöneticileri (context managers)</h1><p class="st-l">Fonksiyonu saran fonksiyon fikrinden dekoratöre, functools.wraps ve parametreli dekoratöre geçer; zamanlama, loglama, yeniden deneme ve lru_cache yazar; with, contextlib.contextmanager ve sınıf tabanlı bağlam yöneticisi kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/dekoratorler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
@@ -389,6 +390,6 @@ print("yakalandı:", tampon.getvalue().strip())
 <p>Web çerçevelerinde <code>@app.get("/siparis")</code> bir fonksiyonu URL'ye bağlar; pytest'te <code>@pytest.fixture</code> ve <code>@pytest.mark.parametrize</code> test davranışını şekillendirir; <code>tenacity</code> gibi paketler burada yazdığın yeniden deneme dekoratörünün üretim sürümüdür. Bağlam yöneticisi tarafında veritabanı kütüphanelerinin <code>with conn:</code> (otomatik commit/rollback), <code>threading.Lock</code>'un <code>with kilit:</code> kullanımı ve <code>tempfile.TemporaryDirectory</code> aynı kalıptır. Bir kaynağı açıp kapatan her kodu gördüğünde "bu bir bağlam yöneticisi olmalı" refleksi, Python'da olgunluğun işaretidir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/dekoratorler">Alıştırmalara geç (23)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dekoratorler/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../fonksiyonel/">← Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)</a><a href="../siniflar-oop/">Sınıflar: veri ve davranışı bir arada tutmak →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

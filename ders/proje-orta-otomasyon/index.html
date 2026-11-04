@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Bitirme projesi: haftalık satış raporu otomasyonu</h1><p class="st-l">Anadolu Market'in günlük CSV dökümlerini okuyan, pydantic ile doğrulayıp tekrarları ayıklayan, collections/itertools ile özetleyen, Jinja2 ile HTML rapor ve EmailMessage taslağı üreten; log, dry-run ve argparse CLI ile zamanlanmaya hazır bir otomasyon aracı kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta-otomasyon">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Proje tanımı</h2>
 <p>Anadolu Market'in 12 mağazası her gün kasa sisteminden bir CSV dökümü üretir ve bunları ortak bir klasöre bırakır. Bölge müdürü her pazartesi sabahı bu dosyaları Excel'de birleştirir, hatalı satırları ayıklar, mağaza ve ürün bazında özet çıkarır, bir e-posta yazıp tabloyu yapıştırır. Bu iş yaklaşık iki saat sürüyor ve geçen ay iki kez aynı dosya iki kere eklendiği için ciro şişik raporlandı.</p>
 <p>Senin görevin bu süreci uçtan uca otomatikleştiren, cron ya da Görev Zamanlayıcı ile her pazartesi 07:45'te çalışacak bir komut satırı aracı yazmak: <b>"Anadolu Market haftalık satış raporu otomasyonu"</b>. Bu proje orta seviyedeki otomasyon derslerinin hepsini birleştirir: <i>Ofis ve iş akışı otomasyonu</i> (pathlib, dry-run, log, EmailMessage), <i>Veri doğrulama ve pydantic v2</i>, <i>collections ve itertools</i>, <i>Şablonla rapor üretme</i> (Jinja2) ve <i>Standart kütüphane turu</i> (argparse).</p>
@@ -460,6 +461,6 @@ schtasks /create /sc weekly /d MON /st 07:45 /tn HaftalikRapor /tr "C:\rapor\.ve
 </ul>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta-otomasyon">Alıştırmalara geç (19)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta-otomasyon/alistirma">Alıştırmalara geç (19)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ofis-otomasyon/">← Ofis ve iş akışı otomasyonu</a><a href="../pydantic-dogrulama/">Veri doğrulama ve pydantic v2 →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC</h1><p class="st-l">Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token döndürür, OAuth2 + PKCE akışını kurar, RBAC/ABAC ile IDOR açıklarını Pusula İK izin verisi üzerinde kapatırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kimlik-yetki">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Pusula A.Ş.'nin İK portalını düşün. Çalışan kendi izinlerini görür ve yeni izin ister; yönetici yalnız kendi ekibinin izinlerini onaylar; İK uzmanı herkesi görür ama maaş ekranına giremez; bordro servisi gece çalışıp izin günlerini çeker. Bir kullanıcının <b>kim olduğunu</b> kanıtlamak ile <b>neye dokunabileceğine</b> karar vermek ayrı işlerdir ve ikisinden birindeki tek bir açık, 2.199 çalışanın sağlık izni kayıtlarını herkese açar. OWASP listesinde "Bozuk erişim kontrolü" (Broken Access Control) yıllardır ilk sırada; bu dersi bu yüzden ayrı tuttuk.</p>
@@ -266,6 +267,6 @@ def izin_detay(request, pk):
 <p>Her yetki kararını (özellikle reddedilenleri) yapılandırılmış log olarak kaydet; birden çok 403 üreten kullanıcı IDOR taraması yapıyor olabilir. Servis hesaplarına yalnız gereken kapsamları ver, adım adım yükseltme (step-up authentication) ile hassas işlemlerde (maaş görüntüleme) ikinci faktör iste.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kimlik-yetki">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kimlik-yetki/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../gozlemlenebilirlik/">← Gözlemlenebilirlik: log, metrik, iz ve SLO</a><a href="../redis-kuyruk/">Redis, önbellek ve arka plan işleri (Celery/RQ) →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

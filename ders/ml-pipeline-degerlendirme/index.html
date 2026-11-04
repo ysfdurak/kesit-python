@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Ön işleme, pipeline ve model değerlendirme</h1><p class="st-l">StandardScaler, OneHotEncoder, SimpleImputer ve ColumnTransformer ile ön işleme; Pipeline ile sızıntısız akış; çapraz doğrulama, GridSearchCV/RandomizedSearchCV, öğrenme eğrisi, joblib ile kaydetme ve model kartı.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/ml-pipeline-degerlendirme">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Model kodunun %80'i model değildir</h2>
 <p>Önceki iki derste veriler hep tertemiz sayılardı. Gerçekte Ilgaz Bank'ın müşteri tablosunda yaş bazen boş, şehir metin, segment kategorik, bakiye 100 TL ile 2 milyon TL arasında değişiyor. Modeller metni anlamaz, boş hücrede durur, ölçek farkından etkilenir. Bu yüzden her projede bir <b>ön işleme</b> (preprocessing) katmanı vardır: eksik doldurma, ölçekleme, kategorik kodlama. Bu derste bu adımları scikit-learn'ün <b>Pipeline</b> ve <b>ColumnTransformer</b> yapılarıyla tek bir nesneye bağlamayı, modeli <b>çapraz doğrulamayla</b> dürüstçe ölçmeyi, hiperparametreleri <b>sistematik</b> aramayı, modeli <b>kaydetmeyi</b> ve sonuçları bir <b>model kartıyla</b> raporlamayı öğreneceksin.</p>
@@ -435,6 +436,6 @@ print(calisma.best_params)</pre><p><b>Erken durdurma</b> (early stopping) ise te
 <p>İşe özgü bir özellik (ör. bakiye / ürün sayısı) gerekiyorsa <code>FunctionTransformer</code> ile bir fonksiyonu pipeline adımına çevirebilir ya da <code>BaseEstimator</code> ve <code>TransformerMixin</code>'den türeyen bir sınıf yazabilirsin. Kural aynı: veriden öğrenilen her şey <code>fit</code>'te, uygulanan her şey <code>transform</code>'da.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/ml-pipeline-degerlendirme">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-pipeline-degerlendirme/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ml-giris/">← Makine öğrenmesine giriş</a><a href="../ml-regresyon-siniflandirma/">Regresyon ve sınıflandırma modelleri →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

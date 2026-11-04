@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>numpy: sayısal diziler ve vektörleştirme</h1><p class="st-l">ndarray, dtype ve şekil; döngüsüz (vektörleştirilmiş) hesap, broadcasting, maske ile seçim, eksen bazlı özet ve default_rng ile rastgele veri.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/numpy">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden numpy?</h2>
 <p>Anadolu Market'in 3 şubesi 7 gün boyunca saatlik satış kaydı tutuyor. Her şube için günlük ortalama, her gün için şube toplamı, 1000 TL üstü saatlerin sayısı... Bunları saf Python listeleriyle de yazabilirsin ama iç içe döngüler hem yavaş hem de okunması zor olur. <b>numpy</b>, bu tür sayısal işleri tek satırda ve C hızında yapan kütüphanedir; pandas da altında numpy dizileri kullanır. Önce numpy'ı anlayan, pandas'ı çok daha rahat öğrenir.</p>
 
@@ -193,6 +194,6 @@ print(adet @ fiyat)                         # şube başına ciro
 <h3>İş hayatında</h3>
 <p>numpy'ı çoğu zaman doğrudan değil, pandas sütunlarının altındaki motor olarak kullanırsın: <code>np.where</code> ile koşullu sütun, <code>np.percentile</code> ile eşik, <code>np.allclose</code> ile kayan nokta karşılaştırması. Lineer cebir (<code>np.linalg</code>) ve makine öğrenmesi kütüphaneleri de ndarray bekler.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/numpy">Alıştırmalara geç (19)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/numpy/alistirma">Alıştırmalara geç (19)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../proje-orta/">← Orta bitirme projesi: Ilgaz Bank işlem analizi</a><a href="../pandas-giris/">pandas giriş: Series ve DataFrame →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

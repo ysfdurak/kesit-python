@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</h1><p class="st-l">HTTP isteğinin anatomisini, metotları ve durum kodlarını öğrenir; requests/httpx ile kimlik doğrulamalı, zaman aşımlı, sayfalı ve hız sınırına saygılı API istemcisi yazar, sahte taşıyıcıyla test edersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/http-api">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Ilgaz Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
@@ -193,6 +194,6 @@ print("Retry-After ile:", bekleme(0, retry_after="7"))</pre>
 <p>Yüzlerce bağımsız isteği sırayla atmak yavaştır. <code>httpx.AsyncClient</code> ve <code>asyncio.gather</code> ile eşzamanlı istek atabilirsin; ama eşzamanlılığı (concurrency) bir semafor ile sınırla ki hız sınırına çarpmayasın. Ayrıntıları ileri seviyedeki async dersinde göreceksin.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/http-api">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/http-api/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../excel-otomasyon/">← Excel otomasyonu: openpyxl, pandas ve rapor üretimi</a><a href="../web-scraping/">Web kazıma: HTML, BeautifulSoup ve etik →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

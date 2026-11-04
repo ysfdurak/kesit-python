@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Güvenli Python ve web güvenliği</h1><p class="st-l">OWASP Top 10 çerçevesinde SQL enjeksiyonu, XSS, CSRF, yol geçişi, güvensiz serileştirme ve gizli bilgi sızıntısını Python koduyla gösterip kapatırsın; parolayı tuzlu PBKDF2 ile saklar, HMAC ile imzalı token üretir, KVKK için kişisel veriyi maskeler ve anonimleştirirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/web-guvenlik">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ın internet şubesinde tek bir parametresiz SQL sorgusu, saldırganın tüm müşteri tablosunu okumasına yeter. Anadolu Market'in yorum alanında kaçırılmamış tek bir HTML çıktısı, başka müşterilerin oturum çerezlerini çalan bir betiğe dönüşebilir. Güvenlik "sonra bakarız" denilecek bir katman değildir; her fonksiyonda verdiğin küçük kararların toplamıdır. Bu derste saldırıyı önce <b>kendi gözünle görecek</b> (sqlite3 ve saf Python ile, tamamen yerel ve zararsız), sonra doğru kalıpla kapatacaksın.</p>
@@ -256,6 +257,6 @@ for u in ["https://cdn.anadolu.example/a.png", "http://169.254.169.254/latest/me
 <p>Kendi şifreleme algoritmanı yazma; <code>cryptography</code> paketinin yüksek seviyeli <code>Fernet</code> API'si gibi denetlenmiş araçları kullan. Bu derste HMAC ile imza yazmamızın amacı mekanizmayı anlamaktır; üretimde PyJWT, itsdangerous gibi olgun kütüphaneler tercih edilir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/web-guvenlik">Alıştırmalara geç (28)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/web-guvenlik/alistirma">Alıştırmalara geç (28)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../orkestrasyon/">← İş akışı orkestrasyonu: cron, DAG ve Airflow</a><a href="../yapay-zeka-ile-kod/">Yapay zekâ asistanıyla Python yazmak →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

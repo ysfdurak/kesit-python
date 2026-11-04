@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions</h1><p class="st-l">Kod kalitesini otomatik araçlarla korumayı, test ve kapsam ölçmeyi, pre-commit ve GitHub Actions ile her commit'te kontrol çalıştırmayı öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kalite-ci">Uygulamada aç, 32 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden kalite otomasyonu?</h2>
 <p>Ilgaz Bank'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit'te, her pull request'te aynı standardı uygulamaktır.</p>
@@ -413,6 +414,6 @@ print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti 
 <h3>Tip denetimini kademeli açmak</h3>
 <p>Eski kod tabanında mypy önce yüzlerce hata verir. Çözüm: <code>[[tool.mypy.overrides]]</code> ile eski modüllere <code>ignore_errors = true</code>, yeni modüllere <code>strict = true</code>. Her dokunulan modül sıkı moda taşınır; birkaç ayda tüm taban temizlenir.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kalite-ci">Alıştırmalara geç (32)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalite-ci/alistirma">Alıştırmalara geç (32)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../paketleme-dagitim/">← Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel</a><a href="../mulakat-hazirlik/">Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

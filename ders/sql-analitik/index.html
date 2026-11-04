@@ -4,7 +4,8 @@
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları","description":"Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/sql-analitik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları</h1><p class="st-l">Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada, kohort sorgusu, JOIN yayılması ve NULL tuzakları, tarih fonksiyonları ve her kalıbın pandas karşılığı.</p>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Neden Python'dan SQL?</h2>
 <p>Veri ilanlarının neredeyse hepsinde ilk satır aynıdır: "İleri düzey SQL". Şirketin verisi bir veritabanında ya da veri ambarında (data warehouse) durur; analist, bilimci ve veri mühendisi günün büyük kısmında SQL yazar, sonucu Python'a alıp pandas ile işler, grafiğe ya da modele verir. <b>sqlite3 ile Python</b> dersinde bağlantı, parametreli sorgu ve transaction'ı gördün. Bu ders bir üst katman: <b>analitik SQL</b>. Yani CTE (Common Table Expression) ile sorguyu adım adım kurmak, pencere fonksiyonları (window functions) ile "satırı kaybetmeden" grup hesabı yapmak ve aynı işin pandas karşılığını bilmek.</p>
 <p>Bütün örnekler Anadolu Market'in gerçek şemasında: <code>orders</code> (910 sipariş), <code>order_items</code> (1.620 satır), <code>customers</code> (150), <code>products</code> (40). <code>veri.baglan("anadolu_market")</code> tüm tabloları bellek içi bir SQLite veritabanına yükler; SQLite 3.25 ve sonrası pencere fonksiyonlarını destekler (tarayıcıdaki sürüm çok daha yeni).</p>
@@ -240,7 +241,21 @@ print(con.execute(plan, (5,)).fetchall())        # SEARCH ... USING INDEX</pre>
 
 <div class="note"><b>Gerçek işte</b>Bir analist ekibinde en sık geri dönen hata ciro raporunun "neden Power BI ile tutmadığı" sorusudur. Neredeyse her seferinde neden aynı üç şeyden biridir: iptal/iade siparişlerin dahil edilip edilmediği, JOIN sonrası yayılma ya da filtrenin pencere hesabından önce uygulanması. Bu yüzden iyi ekipler ciro tanımını tek bir CTE'de (ya da veritabanında bir görünümde, view) tutar ve her rapor onu kullanır. Kod incelemesinde (code review) ilk sorulan soru da "bu tablonun tanecik düzeyi ne?" olur.</div>
 
-<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<section class="more"><span class="eyebrow">Derinleş</span><h2>pandas ve SQLAlchemy: read_sql ve to_sql</h2><p>İşte veri çoğu zaman bir veritabanındadır. pandas, SQLAlchemy motoru (engine) üzerinden okur ve yazar. Burada SQLite kullanıyoruz; aynı kod bağlantı adresi değişince başka veritabanında da çalışır.</p>
+<pre class="py">import pandas as pd
+from sqlalchemy import create_engine, text
+
+engine = create_engine("sqlite:///:memory:")
+pd.DataFrame({"sehir": ["İzmir", "Van"], "tutar": [100, 40]}).to_sql("satis", engine, index=False)
+print(pd.read_sql(text("SELECT * FROM satis WHERE tutar &gt; :esik"), engine, params={"esik": 50}))</pre>
+<p>Değeri f-string ile değil parametreyle ver: SQL enjeksiyonunu önler. <code>to_sql</code> için <code>if_exists</code> bu sitedeki pandas 2.2'de üç değer alır: <code>fail</code> (varsayılan), <code>replace</code>, <code>append</code>. pandas 3 ayrıca <code>delete_rows</code> ekler: tabloyu silmeden satırları temizleyip yazar. <code>replace</code> tabloyu silip yeniden kurar; indeks ve kısıtlar da gider, bu yüzden üretimde dikkatli kullan.</p>
+<h3>SQL Server, Oracle, MySQL</h3><p>Değişen yalnız bağlantı adresi ve sürücüdür. Bu sürücüler ağ ister, tarayıcıda çalışmaz; aşağıdaki görevi kendi bilgisayarında yap.</p>
+<div class="tbl-wrap"><table><tr><th>Veritabanı</th><th>Sürücü</th><th>SQLAlchemy adresi</th><th>İlk 10 satır</th></tr>
+<tr><td>SQL Server</td><td>pyodbc</td><td><code>mssql+pyodbc://kul:sifre@sunucu/db?driver=ODBC+Driver+18+for+SQL+Server</code></td><td><code>SELECT TOP 10 ...</code></td></tr>
+<tr><td>Oracle</td><td>oracledb</td><td><code>oracle+oracledb://kul:sifre@sunucu:1521/?service_name=ORCL</code></td><td><code>FETCH FIRST 10 ROWS ONLY</code></td></tr>
+<tr><td>MySQL</td><td>pymysql</td><td><code>mysql+pymysql://kul:sifre@sunucu:3306/db</code></td><td><code>LIMIT 10</code></td></tr>
+<tr><td>PostgreSQL</td><td>psycopg</td><td><code>postgresql+psycopg://kul:sifre@sunucu:5432/db</code></td><td><code>LIMIT 10</code></td></tr></table></div>
+<div class="warn"><b>Şifreyi koda yazma</b>Adresi ortam değişkeninden oku. SQL söz dizimi de değişir: SQL Server'da T-SQL, Oracle'da Oracle SQL; saklı yordamlar için PL/SQL ayrı bir dildir. Söz dizimi farkları Kesit SQL'de anlatılır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Pencere çerçevesi: ROWS ile RANGE</h3>
 <p><code>ORDER BY</code> olan bir pencerede varsayılan çerçeve <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>'dur. RANGE, sıralama değeri <i>eşit</i> olan tüm satırları "şimdiki satır" sayar; aynı günde iki sipariş varsa kümülatif toplam ikisinde de iki siparişin toplamını gösterir. Satır satır birikim istiyorsan çerçeveyi açıkça <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> yaz.</p>
 <h3>Özyinelemeli CTE</h3>
@@ -260,6 +275,6 @@ print(con.execute(sql).fetchall())</pre>
 <h3>Üretim ortamında</h3>
 <p>PostgreSQL, BigQuery, Snowflake ve DuckDB'de aynı pencere sözdizimi geçerlidir; farklar tarih fonksiyonlarında ve <code>QUALIFY</code> gibi eklerdedir. Python tarafında bağlantıyı SQLAlchemy ile kurup <code>pd.read_sql(text(sql), engine, params={...})</code> yazarsın (bkz. SQLAlchemy dersi). Büyük sonuçları <code>chunksize</code> ile parça parça okumak belleği korur.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../is-metrikleri/">← İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV</a><a href="../veri-mulakat/">Veri rolleri mülakatı: SQL, pandas, istatistik ve vaka soruları →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

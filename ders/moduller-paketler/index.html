@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Modüller ve paketler: import sisteminin içi</h1><p class="st-l">Tüm import biçimlerini, sys.path ve modül arama sırasını, __name__, __pycache__ ve .pyc dosyalarını, paket ve __init__.py yapısını, göreli import ve __all__ kurallarını, importlib.reload ile platform, math ve random modüllerini PCAP düzeyinde öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/moduller-paketler">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in kodu tek bir dosyada başladı: 200 satır. İki yıl sonra fiyatlama, kargo, raporlama ve kampanya kodu 15 000 satıra çıktı ve tek dosya kimsenin açmak istemediği bir canavara dönüştü. Çözüm, kodu anlamlı parçalara bölmektir: her dosya bir <b>modül</b> (module), ilgili modülleri toplayan klasör bir <b>paket</b> (package). Kapsam ve modüller dersinde <code>import math</code> yazmayı ve <code>if __name__ == "__main__"</code> kalıbını gördün. Bu derste import sisteminin içine giriyoruz: Python modülü nerede arar, neden bir kez yükler, paketi nasıl tanır, göreli import neden bazen patlar. Bu konular PCAP sınavının ilk bölümüdür ve gerçek projede en sık karşılaşılan "ModuleNotFoundError" sorunlarının kaynağıdır.</p>
@@ -206,6 +207,6 @@ print(musteriler)                          # orijinal aynı</pre>
 <p>Modül yalnızca bir kez yüklendiği için modül düzeyindeki bir sözlük tüm uygulamada paylaşılır. Bu, yapılandırma için kullanışlıdır ama testlerde gizli bağımlılık yaratır; ayarları fonksiyon parametresiyle geçirmek daha test edilebilirdir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/moduller-paketler">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/moduller-paketler/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../kutuphane-turu/">← Python kütüphane haritası: hangi iş için hangi paket?</a><a href="../pytest/">pytest ile test: fixture, parametrize ve gerçek proje düzeni →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

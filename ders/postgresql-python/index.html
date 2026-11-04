@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veritabanı</span><h1>PostgreSQL ile Python: psycopg, transaction, indeks ve toplu yükleme</h1><p class="st-l">Üretim veritabanı PostgreSQL'e psycopg 3 ile bağlanırsın: parametreli sorgu, havuz, transaction ve kilit, ON CONFLICT ile upsert, RETURNING, COPY ile toplu yükleme, indeks ve EXPLAIN; alıştırmalar sqlite3 ve DuckDB eşdeğerleriyle çalışır.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/postgresql-python">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden PostgreSQL?</h2>
 <p>Anadolu Market'in ilk sürümü tek bir SQLite dosyasıyla çalıştı. Sonra mobil uygulama, mağaza kasaları ve depo sistemi aynı anda sipariş yazmaya başladı. SQLite tek dosya ve tek yazar (single writer) mantığıyla tasarlanmıştır: aynı anda iki işlem yazmak isterse biri bekler, ağ üzerinden erişim yoktur, kullanıcı ve yetki kavramı yoktur. Bu noktada ekipler çoğunlukla <b>PostgreSQL</b>'e geçer: istemci-sunucu (client-server) mimarisinde çalışan, aynı anda yüzlerce bağlantıyı MVCC (çok sürümlü eşzamanlılık denetimi, multi-version concurrency control) ile yöneten, rolleri, şemaları, zengin türleri (JSONB, dizi, aralık, UUID) ve gelişmiş indeksleri olan açık kaynak ilişkisel veritabanı.</p>
@@ -207,6 +208,6 @@ print(con.execute("SELECT id, json_extract(ozellik, '$.garanti') FROM urun WHERE
 <p>psycopg 3 aynı API'yi <code>psycopg.AsyncConnection</code> ile async olarak da sunar; FastAPI gibi async çatılarda <code>await cur.execute(...)</code> yazarsın. Alternatif hızlı async sürücü <b>asyncpg</b>'dir (yer tutucusu <code>$1</code>).</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/postgresql-python">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/postgresql-python/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../dbt-elt/">← ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler</a><a href="../veri-modelleme/">Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

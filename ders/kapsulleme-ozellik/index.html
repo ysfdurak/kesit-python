@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Kapsülleme ve iç gözlem: property, __dict__ ve getattr</h1><p class="st-l">Örnek ve sınıf değişkenini, paylaşım tuzağını, _korunan ve __gizli adları (name mangling), property ile doğrulamayı, salt okunur alanları ve getattr/setattr/vars ile çalışma anında nesne incelemeyi öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/kapsulleme-ozellik">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ın mobil uygulamasında bir geliştirici, hata ayıklarken şu satırı yazıp unutuyor: <code>hesap.bakiye = -25000</code>. Kod çalışıyor, test geçiyor, ama müşterinin hesabı hiçbir işlem kaydı olmadan eksiye düşüyor. Sınıflar dersinde nesnenin veriyi ve davranışı bir arada tuttuğunu gördün. Bu derste o verinin <b>nasıl korunacağını</b> (kapsülleme, encapsulation) ve bir nesnenin içine çalışma anında <b>nasıl bakılacağını</b> (iç gözlem, introspection) öğreneceksin. İkisi de PCAP sınavının 4. bölümünün çekirdeğidir ve gerçek projelerde her gün kullanılır: doğrulayan setter'lar, salt okunur alanlar, nesneyi dinamik olarak JSON'a çeviren yardımcılar, eklenti sistemleri.</p>
@@ -238,6 +239,6 @@ print(Hesap._sayac)</pre>
 </ul>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/kapsulleme-ozellik">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsulleme-ozellik/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../gui-tkinter/">← Masaüstü arayüz: tkinter ve MVC</a><a href="../logging/">logging: profesyonel kayıt tutma →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</h1><p class="st-l">Embedding, normalizasyon ve benzerlik ölçülerinden numpy ile kNN'ye, ANN indekslerine (HNSW, IVF, FAISS, pgvector), parçalama stratejilerine, BM25 + vektör hibrit aramaya, RRF ve MMR'ye, recall@k/MRR ile değerlendirmeye ve yetki filtresine kadar getirme katmanını Lezzet Kurye yorumları üzerinde uygularsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/embedding-vektor-arama">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Kelimeyle değil anlamla aramak</h2>
 <p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" (retrieval) katmanı bu fikre dayanır.</p>
@@ -215,6 +216,6 @@ for yeni in ["Biraz geç geldi", "Ambalaj yırtıktı", "Kurye kapıyı çarptı
 <p>Belge güncellenince eski parçaları sil, yenileri ekle (upsert); belge kimliği + parça sırası anahtardır. Silinen belgelerin vektörlerinin kalması hem yanlış cevap hem gizlilik ihlalidir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/embedding-vektor-arama">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/embedding-vektor-arama/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../redis-kuyruk/">← Redis, önbellek ve arka plan işleri (Celery/RQ)</a><a href="../llm-ajanlar/">LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

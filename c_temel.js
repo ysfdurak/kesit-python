@@ -18,6 +18,8 @@ L.push(
     'print ile ekrana metin ve sayı yazdırabilirim.'
   ],
   body: `
+<div class="tip"><b>Önce dene</b>Okumadan önce bir kez çalıştır; gerisi sonra gelir.</div>
+<pre class="py">print("Merhaba, Python!")</pre>
 <h2>Python nedir?</h2>
 <p>Python, 1991'de Guido van Rossum'un yayımladığı, okunabilirliği her şeyin önüne koyan genel amaçlı bir programlama dili (programming language). Adını yılandan değil, Monty Python komedi grubundan alır. Bugün kullanılan sürüm ailesi Python 3; bu uygulamada Python 3.12 ile çalışacaksın. Yazdığın kod, tarayıcının içinde gerçek bir Python yorumlayıcısında (interpreter) koşar. Temel dil birebir aynıdır: burada öğrendiğin dil kuralları bilgisayarına kuracağın Python'da da aynı çalışır.</p>
 <p>Python'ı bu kadar sevdiren üç özellik var:</p>

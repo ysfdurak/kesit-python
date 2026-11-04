@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti</h1><p class="st-l">Etiketsiz veride k-means ile müşteri segmentleri kurar, k'yi dirsek ve silhouette ile seçer, PCA ile boyut indirger, IsolationForest ve z-skoru ile şüpheli işlemleri bulursun.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/ml-kumeleme">Uygulamada aç, 39 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Etiket yokken veriden anlam çıkarmak</h2>
 <p>Anadolu Market'in pazarlama ekibi 40 bin müşteriye aynı e-postayı gönderiyor ve dönüş oranı düşük. Elinde "bu müşteri sadık, bu müşteri kaçmak üzere" diye bir etiket yok; yalnızca her müşterinin ne zaman, ne sıklıkla ve ne kadar alışveriş yaptığı var. <a href="../ml-giris/">Makine öğrenmesine giriş</a> ve <a href="../ml-regresyon-siniflandirma/">Regresyon ve sınıflandırma modelleri</a> derslerinde gördüğün denetimli öğrenmede (supervised learning) modele doğru cevabı (y) verirdin. Bu derste doğru cevap yok: algoritma benzer satırları kendisi gruplayacak. Buna <b>denetimsiz öğrenme</b> (unsupervised learning) denir.</p>
@@ -298,6 +299,6 @@ for pid, s in enler.items():
 <p>Silhouette dışında <code>davies_bouldin_score</code> (küçük iyi) ve <code>calinski_harabasz_score</code> (büyük iyi) de var. Ama hiçbir iç ölçüt "bu segmentler işe yarar mı" sorusunu cevaplamaz; onu kampanya deneyi cevaplar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/ml-kumeleme">Alıştırmalara geç (39)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-kumeleme/alistirma">Alıştırmalara geç (39)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../llm-api/">← LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a><a href="../nlp-metin/">Metin işleme ve NLP: Türkçe metinden modele →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

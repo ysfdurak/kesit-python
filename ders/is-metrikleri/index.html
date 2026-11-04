@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV</h1><p class="st-l">KPI ağacı ve metrik sözleşmesi, web_events ile huni, çeyreklik kohort tutundurma ve churn penceresi, basit ve kohort bazlı LTV ile LTV/CAC, MoM/YoY/YTD ve aynı dönem kıyası, fiyat-hacim-karma köprüsü, Pareto (ABC) ve metrik tuzakları: oranların ortalaması, Simpson paradoksu, payda kayması.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/is-metrikleri">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Metrik, analistin ürünüdür</h2>
 <p>Yönetim "ciro neden düştü?", pazarlama "kampanya işe yaradı mı?", finans "bir müşteri bize ne kadar kazandırıyor?" diye sorar. Bu soruların hepsi bir <b>metrik</b> (metric) ve onun doğru hesaplanmış, doğru karşılaştırılmış bir değeri ister. pandas ile gruplamayı, istatistik dersinde A/B testini gördün. Bu ders analitik ekiplerin her gün kullandığı kalıpları toplar: KPI ağacı, huni, kohort ve tutundurma, LTV, dönem karşılaştırmaları, köprü analizi, Pareto ve en sık metrik tuzakları.</p>
 <p>Veri: Anadolu Market <code>orders</code>, <code>order_items</code>, <code>products</code> ve <code>web_events</code> (Ekim–Kasım 2024 site olayları); ayrıca Kesit Power BI'daki <code>kesit_bi</code> yıldız şemasının <code>Satislar</code> tablosu. Ciro tanımı bu derste de aynı: net = <code>quantity × unit_price × (1 − discount)</code>, yalnız <code>delivered</code> ve <code>shipped</code> siparişler.</p>
@@ -164,6 +165,6 @@ ozet = summary_data_from_transaction_data(df, "customer_id", "order_date", "net"
 bgf = BetaGeoFitter(penalizer_coef=0.01).fit(ozet["frequency"], ozet["recency"], ozet["T"])</pre>
 <p>Kendi bilgisayarında dene: bu model her müşterinin gelecekteki sipariş sayısını ve harcamasını tahmin eder; tarayıcıda çalışmaz.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/is-metrikleri">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/is-metrikleri/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../eda-kesifsel/">← Keşifsel veri analizi (EDA): sorudan bulguya</a><a href="../sql-analitik/">Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

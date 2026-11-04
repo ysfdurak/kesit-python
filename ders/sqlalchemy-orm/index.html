@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veritabanı</span><h1>SQLAlchemy 2.0: Core, ORM, ilişkiler ve transaction</h1><p class="st-l">Engine ve bağlı parametrelerle güvenli SQL çalıştırır, Core ile sorgu kurar, Mapped/mapped_column ile ORM modelleri ve ilişkiler tanımlar, Session ile CRUD yapar, N+1 problemini eager loading ile çözer, transaction ve Alembic migration mantığını öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/sqlalchemy-orm">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>sqlite3 ile Python dersinde veritabanına doğrudan SQL metni gönderdin. Küçük betiklerde bu yeterlidir. Ama gerçek bir uygulamada onlarca tablo, yüzlerce sorgu, farklı veritabanları (geliştirmede SQLite, üretimde PostgreSQL) ve iş nesneleri (müşteri, sipariş, hesap) vardır. Her sorgunun sonucunu elle sözlüğe çevirmek, her tabloda aynı INSERT kalıbını tekrar yazmak, bağlantıları ve transaction'ları doğru yönetmek zorlaşır.</p>
@@ -391,6 +392,6 @@ async def tablolari_kur():
 <p>Engine bağlantıları havuzda (pool) tutar; uygulama başına bir engine oluşturulur, her istekte yeniden oluşturulmaz. <code>pool_size</code>, <code>max_overflow</code> ve <code>pool_pre_ping=True</code> üretim ayarlarıdır. FastAPI gibi async çatılarda <code>sqlalchemy.ext.asyncio</code> içindeki <code>create_async_engine</code> ve <code>AsyncSession</code> kullanılır; async ortamda tembel yükleme yasaktır, bu yüzden eager loading orada zorunluluk hâline gelir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sqlalchemy-orm">Alıştırmalara geç (27)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sqlalchemy-orm/alistirma">Alıştırmalara geç (27)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../metaprogramlama/">← Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast</a><a href="../django-giris/">Django'ya giriş: MVT, ORM, admin ve DRF →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

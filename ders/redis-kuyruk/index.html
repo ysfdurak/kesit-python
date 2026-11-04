@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Redis, önbellek ve arka plan işleri (Celery/RQ)</h1><p class="st-l">Redis veri türlerini ve kullanım yerlerini tanır; enjekte edilen saatli bir FakeRedis ile cache-aside, TTL, geçersizleştirme ve stampede korumasını, token bucket ve kayan pencere hız sınırlamayı, dağıtık kilidi kurar; asyncio işçi havuzuyla yeniden deneme, idempotentlik ve ölü mektup kuyruğu olan bir görev hattını Lezzet Kurye verisiyle yazarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/redis-kuyruk">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Lezzet Kurye'nin uygulamasında restoran menüsü saniyede yüzlerce kez okunur ama günde birkaç kez değişir; her okumada veritabanına gitmek gereksiz yüktür. Sipariş verildiğinde müşteriye SMS, restorana bildirim, kuryeye atama gider; bunları HTTP isteğinin içinde yapmak yanıtı saniyelerce geciktirir ve SMS sağlayıcısı çökünce sipariş de çöker. Bir müşteri dakikada 200 istek atınca diğerlerini etkilememelidir. Bu üç sorunun ortak aracı <b>Redis</b>'tir: bellek içi, çok hızlı bir anahtar-değer veri yapısı sunucusu. Önbellek (cache), hız sınırlayıcı, oturum deposu, dağıtık kilit ve görev kuyruğu aracısı (broker) olarak kullanılır.</p>
@@ -217,6 +218,6 @@ print("tam jitter :", bekleme_plani(8, jitter=True))</pre>
 <p>SQS ve Redis Streams, alınan mesajı onaylanana kadar başkalarına göstermez; süre dolarsa mesaj yeniden görünür olur ve teslim sayısı artar. Teslim sayısı eşiği aşan mesaj DLQ'ya taşınır. Celery'deki <code>acks_late</code> + <code>visibility_timeout</code> ayarı aynı fikirdir; görev süresinden kısa bir zaman aşımı, işin iki işçide birden çalışmasına yol açar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/redis-kuyruk">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/redis-kuyruk/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../kimlik-yetki/">← Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC</a><a href="../embedding-vektor-arama/">Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

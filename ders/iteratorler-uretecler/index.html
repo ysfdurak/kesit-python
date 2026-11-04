@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle</h1><p class="st-l">iter/next protokolünü, __iter__/__next__ ile kendi yineleyici sınıfını ve yield ile üreteç fonksiyonlarını öğrenir; büyük log akışını belleğe almadan satır satır işlersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/iteratorler-uretecler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
@@ -343,6 +344,6 @@ print(list(ust()))
 <p>Veri mühendisliği işlerinde "dosyayı bir seferde okuma" kuralı neredeyse kutsaldır. Bir ETL betiği 20 GB'lık CSV'yi satır satır gezer, her satırı dönüştürür ve hedefe parça parça yazar; bu dersin boru hattı deseni birebir oradadır. API sayfalama (pagination) kodu da tipik bir üreteçtir: "sayfa çek, kayıtları yield et, sonraki sayfa varsa devam et"; tüketici tarafı sayfa kavramını hiç görmez. Kod incelemesinde (code review) "bu fonksiyon liste döndürmek yerine yield etmeli" notu, bellek sorununu daha oluşmadan önleyen klasik bir yorumdur.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/iteratorler-uretecler">Alıştırmalara geç (23)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/iteratorler-uretecler/alistirma">Alıştırmalara geç (23)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../kapsamli-ifadeler/">← Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz</a><a href="../fonksiyonel/">Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure) →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

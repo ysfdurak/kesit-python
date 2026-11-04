@@ -4,7 +4,8 @@
 <link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"JSON ve CSV: veri alışverişinin iki ortak dili","description":"json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/json-csv/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>JSON ve CSV: veri alışverişinin iki ortak dili</h1><p class="st-l">json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya çevirirsin.</p>
-<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv">Uygulamada aç, 25 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in sipariş API'si JSON döner; muhasebe ekibi ise Excel'de açacağı CSV ister. Ilgaz Bank'ın eski sistemi CSV üretir, yeni mikroservisler JSON konuşur. Bir veri analisti ya da geliştirici olarak işinin önemli bir kısmı bu iki biçim arasında güvenle dönüşüm yapmaktır. İkisi de "düz metin" olduğu için basit görünür; ama Türkçe karakter, tarih, ondalık sayı ve iç içe yapılar en çok hatanın çıktığı yerlerdir.</p>
@@ -256,13 +257,22 @@ print(c.getvalue())</pre>
 python -m json.tool --sort-keys a.json &gt; b.json
 python -m json.tool --json-lines log.jsonl  # her satırı ayrı doğrula</pre>
 <div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın entegrasyon ekibi dış kurumlardan gelen CSV'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>
-</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+</section><section class="more"><span class="eyebrow">Derinleş</span><h2>XML ve ElementTree</h2><p>Kurumsal entegrasyonlarda JSON kadar XML de karşına çıkar: e-Fatura, banka dosyaları, eski servisler. Python'ın standart kütüphanesi okur ve yazar, paket gerekmez.</p>
+<pre class="py">import xml.etree.ElementTree as ET
+
+kok = ET.fromstring('&lt;Siparis no="7"&gt;&lt;Kalem adet="2"&gt;Çay&lt;/Kalem&gt;&lt;Kalem adet="1"&gt;Kahve&lt;/Kalem&gt;&lt;/Siparis&gt;')
+print(kok.tag, kok.get("no"))
+for k in kok.findall("Kalem"):
+    print(k.text, k.get("adet"))</pre>
+<p><code>.text</code> etiketin içindeki metni, <code>.get()</code> özniteliği verir. Her şey metindir; sayıya kendin çevirirsin, para için <code>Decimal</code> kullan.</p>
+<h3>Ad alanları (namespace)</h3><p>e-Fatura gibi belgelerde her etiketin bir ad alanı vardır. <code>findall("InvoiceLine")</code> burada boş döner ve hata vermez; en sık yapılan hata budur. Ön ek sözlüğü vererek ararsın: <code>kok.findall("cac:InvoiceLine", NS)</code>.</p>
+<div class="note"><b>Kurgu örnek</b>Görevdeki fatura UBL biçimine benzetilmiş kurgu bir örnektir, geçerli bir e-Fatura değildir. Gerçek UBL-TR belgesi çok daha geniştir; şeması için Gelir İdaresi Başkanlığı kılavuzlarına bak. Güvenilmeyen kaynaktan gelen XML için <code>defusedxml</code> kullan.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Büyük dosyalar, şema ve güvenlik</h3>
 <p><code>json.load</code> tüm dosyayı belleğe alır; yüz megabaytlık bir dışa aktarımda bu sorun olabilir. Çözüm genellikle <b>JSON Lines</b> (her satırda bir JSON nesnesi, .jsonl) biçimidir: satır satır okur, her satıra <code>json.loads</code> uygularsın; log sistemleri ve veri hatları bu biçimi sever. CSV'de ise <code>csv.reader</code> zaten tembeldir; dosyayı satır satır tüketir.</p>
 <p>Şema (schema): CSV'de her alan metindir; "tutar" sütununun sayı olduğunu sen bilirsin. Üretim kodunda okuduğun her satırı bir <code>dataclass</code>'a ya da <code>pydantic</code> modeline geçirip tip dönüşümünü tek yerde yapmak, hataları (boş hücre, "1.250,50" gibi Türk biçimi) erkenden yakalar. Para için <code>float</code> yerine <code>Decimal</code> kullan; JSON'a yazarken <code>str</code> olarak çık.</p>
 <p>Güvenlik: <code>json.loads</code> güvenlidir (kod çalıştırmaz) ama <code>pickle</code> ve <code>eval</code> değildir; dış kaynaktan veri alırken asla kullanma. CSV'de "CSV enjeksiyonu" diye bir şey var: <code>=HYPERLINK(...)</code> ile başlayan hücre Excel'de formül olarak çalışır. Kullanıcı girdisini CSV'ye yazarken <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücrelerin önüne tek tırnak koymak yaygın önlemdir. Son olarak, iki sistem arasında veri taşırken <code>sort_keys=True</code> ve sabit <code>indent</code> ile üretilen JSON, git farklarını okunur tutar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv/alistirma">Alıştırmalara geç (25)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../regex/">← Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma</a><a href="../standart-kutuphane/">Standart kütüphane turu →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

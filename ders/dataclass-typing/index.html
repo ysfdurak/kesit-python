@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>dataclass ve tip ipuçları (type hints)</h1><p class="st-l">dataclass ile boilerplate'siz veri sınıfı tanımlar; tip ipuçları, Optional, TypedDict ve Protocol ile kodu kendini belgeleyen ve mypy ile denetlenebilir hale getirirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/dataclass-typing">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Önceki derste Hesap sınıfı için <code>__init__</code>, <code>__repr__</code> yazdın; iki hesabı karşılaştırmak için <code>__eq__</code> de gerekti. Anadolu Market'in sipariş, müşteri, ürün, kargo gibi onlarca veri tipi için bunu tekrarlamak hem sıkıcı hem hataya açıktır. <b>dataclass</b> bu metotları tip ipuçlarına bakarak otomatik üretir. <b>Tip ipuçları</b> (type hints) ise kodun "bu fonksiyon ne alır, ne döner" sorusunu okuyana ve araçlara söyler: editör otomatik tamamlar, <code>mypy</code> hataları çalıştırmadan yakalar, ekip arkadaşın fonksiyonu açmadan kullanır. Kurumsal Python kodunun bugünkü standardı budur.</p>
@@ -318,6 +319,6 @@ print(Siparis.sozlukten(json.loads(metin)) == s)</pre>
 <p>Dış dünyadan (API, dosya) gelen veriyi tip ipucu korumaz. Üretim ortamında <code>pydantic</code> gibi kütüphaneler dataclass benzeri sınıfları çalışma zamanında doğrular ve JSON'dan güvenle kurar. Standart kütüphanede kalacaksan <code>__post_init__</code> içinde elle kontrol et.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/dataclass-typing">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dataclass-typing/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../kalitim-polimorfizm/">← Kalıtım (inheritance) ve polimorfizm</a><a href="../hata-tasarim/">Hata tasarımı: özel istisnalar, logging, EAFP →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

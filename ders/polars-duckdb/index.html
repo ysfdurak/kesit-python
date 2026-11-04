@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>polars, DuckDB ve Parquet: büyük veriye tek makinede</h1><p class="st-l">pandas'ın bellek ve tek çekirdek sınırını aşarsın: chunksize ile parçalı okuma, polars ifadeleri ve lazy API, DuckDB ile DataFrame'e SQL, Arrow/Parquet ve PySpark'a giriş; veri boyutuna göre araç seçersin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/polars-duckdb">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>pandas yetmediğinde</h2>
 <p>Anadolu Market'in sipariş tablosu ilk yıl 200 bin satırdı; pandas ile saniyeler içinde gruplayıp raporladın (bunu <i>pandas-groupby</i> dersinde gördün). Üç yıl sonra tablo 400 milyon satır, CSV dosyası 60 GB. Dizüstü bilgisayarında 16 GB bellek var. <code>pd.read_csv</code> birkaç dakika diskle boğuştuktan sonra <b>MemoryError</b> verir ya da makine kilitlenir. Sorun senin kodunda değil, aracın tasarımında: pandas veriyi <b>tamamen belleğe</b> (eager, in-memory) yükler, çoğu işlemi <b>tek çekirdekte</b> çalıştırır ve ara sonuçlar için sık sık kopya üretir. Kabaca söylersek pandas'ın rahat çalıştığı sınır, verinin bellekte kapladığı alanın RAM'in beşte biri ile üçte biri arasında olmasıdır.</p>
@@ -248,6 +249,6 @@ print(isaretli["sehir_ort"].to_list())
 <p>Karar vermeden önce ölç: pandas'ta <code>df.memory_usage(deep=True).sum()</code>, polars'ta <code>df.estimated_size("mb")</code>. Metin sütunlarını kategoriye çevirmek ve 64 bit sayıları 32 bite indirmek (<code>pl.Int32</code>, <code>pl.Float32</code>) belleği ciddi azaltır; ancak para tutarlarında hassasiyet kaybını göze almadan float32 kullanma.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/polars-duckdb">Alıştırmalara geç (27)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/polars-duckdb/alistirma">Alıştırmalara geç (27)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ml-regresyon-siniflandirma/">← Regresyon ve sınıflandırma modelleri</a><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

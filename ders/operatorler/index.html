@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Değerler ve metinler</span><h1>Operatörler derinlemesine</h1><p class="st-l">Aritmetik ve atama, zincirleme karşılaştırma, değer döndüren and/or ve kısa devre, in ve is, izin bayraklarıyla bit operatörleri, PCEP öncelik tablosu ve mors operatörü := ile ifadeleri doğru ve okunur yazarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/operatorler">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Operatör: küçük sembol, büyük sonuç</h2>
 <p>Anadolu Market'in sepet ekranında tek bir satır şunu karar verir: "Tutar 500 TL'yi geçiyor <b>ve</b> müşteri premium <b>ya da</b> kampanya kodu girmişse kargo bedava." Bu satırda yanlış yere konmuş bir parantez, binlerce siparişte bedava kargo vermek ya da hiç vermemek demektir. <b>Operatörler</b> (operators), değerler üzerinde işlem yapan sembollerdir: <code>+</code>, <code>==</code>, <code>and</code>, <code>in</code>, <code>&amp;</code>... Sayılar dersinde aritmetiği, koşullar dersinde karşılaştırma ve mantık operatörlerine giriş yaptın. Bu ders bütün operatör ailesini bir arada, <b>öncelik</b> ve <b>değer döndürme</b> ayrıntılarıyla ele alıyor; Python Institute PCEP sınavının en çok soru sorduğu konulardan biridir.</p>
@@ -162,6 +163,6 @@ while (satir := satirlar[i]) != "":
 <p><code>n &amp; 1</code> sayının tek olup olmadığını, <code>n &amp; (n - 1) == 0</code> (n &gt; 0 iken) 2'nin kuvveti olup olmadığını söyler; <code>n.bit_count()</code> (3.10+) açık bit sayısını verir. Bunlar mülakatlarda sık sorulur, ama iş kodunda okunurluk için <code>enum.Flag</code> sınıfını tercih et: <code>Izin.OKU | Izin.YAZ</code> hem bit verimliliği hem anlamlı adlar verir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/operatorler">Alıştırmalara geç (18)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/operatorler/alistirma">Alıştırmalara geç (18)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../girdi-donusum/">← Kullanıcı girdisi ve tür dönüşümü</a><a href="../terminal-temelleri/">Terminal ve komut satırı →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

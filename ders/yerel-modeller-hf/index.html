@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Hugging Face ve yerel modellerle Python</h1><p class="st-l">transformers pipeline ve tokenizer kavramından (oyuncak BPE ile) Ollama ve llama.cpp ile yerel LLM'e, sentence-transformers'a, boyut-lisans-Türkçe ölçütleriyle model seçimine, numpy ile nicemlemeye ve LoRA ince ayarına kadar açık model dünyasını öğrenir; gerçek Lezzet Kurye yorumlarında scikit-learn temel çizgisini sahte bir yerel LLM ile ölçerek karşılaştırırsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/yerel-modeller-hf">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden kendi makinende model çalıştırasın?</h2>
 <p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde bulut sağlayıcılarının API'lerini kullandın ve dersin sonundaki "Derinleş" bölümünde Ollama'nın OpenAI uyumlu uç noktasını gördün. Bu derste bir adım geri çekilip açık modellerin dünyasına giriyorsun: <b>Hugging Face</b> ekosistemi, tokenizer'ın aslında ne yaptığı, bir modelin hangi donanıma sığacağı, <b>nicemleme</b> (quantization) ile modelin nasıl küçüldüğü, <b>LoRA</b> ile ince ayarın nasıl ucuzladığı ve en önemlisi: her işe LLM gerekmediği.</p>
@@ -250,6 +251,6 @@ print(model.named_steps["tfidfvectorizer"].transform(yeni).nnz, "bilinen kelime"
 <p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi (prompt) ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek</a> dersinde.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/yerel-modeller-hf">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yerel-modeller-hf/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../rag-uygulamasi/">← Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</a><a href="../proje-etl/">Bitirme projesi: Anadolu Market web olayları ETL →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

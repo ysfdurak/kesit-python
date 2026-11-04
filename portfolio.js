@@ -42,7 +42,7 @@ const doneCount = () => C.validDone();
 function welcomeHTML() {
   const door = (k, n, t, d) => '<button type="button" class="door" data-kdoor="' + k + '"><span class="door-ic" aria-hidden="true">' + n + '</span><b>' + t + '</b><small>' + d + '</small></button>';
   return '<section class="panel welcome"><div><span class="eyebrow">Hoş geldin</span><h2>Nereden başlayalım?</h2><p class="muted" style="margin:6px 0 0;max-width:70ch">Birini seç; istediğin zaman değiştirebilirsin. Kurulum ve hesap gerekmez.</p></div><div class="doors">' +
-    door('yeni', '1', 'Hiç bilmiyorum', 'İlk dersle başla. Kodu tarayıcında çalıştırarak adım adım ilerle.') +
+    door('yeni', '1', 'Hiç bilmiyorum', 'Birkaç dakikada ilk kodunu çalıştır. Kurulum yok.') +
     door('biraz', '2', 'Biraz biliyorum', 'Seviye testiyle nereden devam edeceğini bul.') +
     door('is', '3', 'İşim için lazım', 'Öğrenme yolunu seç: veri analisti, veri bilimci, web geliştirici, yapay zekâ ve diğerleri.') +
     '</div></section>';
@@ -52,7 +52,7 @@ function backupHTML() {
   return '<section class="panel bkcard"><div class="grow"><b>İlerlemeni yedekle</b><span class="muted" style="font-size:.88rem">' + d + ' ders bitirdin. İlerlemen bu tarayıcıda saklanıyor; Profil sayfasından dosyaya kaydedersen kaybolmaz, başka cihazda da devam edersin.</span></div><button type="button" class="btn sm pri" data-kbk="1">Profil’e git</button></section>';
 }
 const homeBase = VIEWS.home.html;
-VIEWS.home.html = function () { const show = !P.welcomed && doneCount() === 0; return (show ? welcomeHTML() : '') + backupHTML() + homeBase.call(this); };
+VIEWS.home.html = function () { const show = !P.welcomed && !C.hasProgress(); return (show ? welcomeHTML() : '') + backupHTML() + homeBase.call(this); };
 
 /* Ders sayfası: geri bildirim ve yorumlar */
 const lessonBase = VIEWS.lesson.html, lessonMount = VIEWS.lesson.mount;
@@ -80,7 +80,7 @@ VIEWS.hakkinda = { html() {
   if (sib.length) h += card('Kardeş uygulamalar', '<p style="margin:0">Aynı mantıkla hazırlanmış diğer eğitimler: ' + sib.join(' ve ') + '. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market\'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.</p>');
   h += card('Sorumluluk notu', '<p style="margin:0">Kesit Python ücretsiz, ticari olmayan bir eğitim ve bilgi paylaşımı projesidir. İçerik özenle hazırlandı ve alıştırmalar otomatik testlerden geçirildi; yine de hatasız olduğu garanti edilmez ve içerik “olduğu gibi” sunulur. Profesyonel bir eğitim, danışmanlık ya da resmî bir sertifika yerine geçmez; bu uygulamada tamamlama belgesi yoktur, sınav sonuçların Profil\'de durur.</p><p style="margin:0">Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir; gerçek kişi ve kurumlarla benzerlik tesadüftür. Python Software Foundation ya da Python Institute ile bir bağımız yoktur; Python, PCEP ve PCAP adları ilgili kuruluşların markalarıdır. Sınav denemeleri özgün olarak yazılmıştır, gerçek sınav soruları değildir.</p>');
   h += card('Gizlilik', '<p style="margin:0">Hesap yok ve site kişisel veri toplamaz. İlerlemen yalnızca kendi tarayıcında saklanır; istersen Profil sayfasından dosyaya kaydedip başka cihazda yükleyebilirsin. Yazı tipleri bu sitenin kendi dosyalarından yüklenir. Site dosyaları ilk ziyarette tarayıcı önbelleğine alınır; yeni sürüm gelince eski önbellek silinir.</p><p style="margin:0">Python motoru (Pyodide) ve kullandığın kütüphaneler, kodu ilk çalıştırdığında jsDelivr’dan iner; bu sırada tarayıcın o sunucuya bağlanır ve IP adresin gibi standart bağlantı bilgileri ona iletilir. Yazdığın kod ve ilerlemen bu sunucuya gönderilmez.' + (giscusOn() ? ' Yorumlar GitHub Discussions üzerinden (Giscus) yapılır ve GitHub’ın koşullarına tabidir.' : '') + ' Geri bildirim bağlantıları GitHub Issues\'a (ya da ayarlanmışsa bir form hizmetine) gider; yalnızca yazdıklarını paylaşırsın.' + (GC.code ? ' Ziyaretler GoatCounter ile çerezsiz ve anonim olarak sayılır; kişiyi tanımlayan bir kimlik tutulmaz.' : '') + '</p>');
-  h += card('Bilinen sınırlar', '<ul style="margin:0;padding-left:18px"><li>Python tarayıcıda çalışır (Pyodide, Python 3.12). Temel dil birebir aynıdır; gerçek iş parçacığı, süreç ve ağ yoktur. Bu derslerde ne beklemen gerektiği yazar, bilgisayarında dene görevleri verilir.</li><li>Flask, Django, Docker, Spark gibi araçların alıştırmaları taklit eder; gerçeği için "Kendi bilgisayarında" görevleri var.</li><li>input() girdileri çalıştırmadan önce verilir.</li><li>Çok uzun süren kod 60 saniyede durdurulur; Durdur düğmesi her zaman çalışır, motor yeniden başlar.</li></ul>');
+  h += card('Bilinen sınırlar', '<ul style="margin:0;padding-left:18px"><li>Python tarayıcıda çalışır (Pyodide, Python 3.12). Temel dil birebir aynıdır; gerçek iş parçacığı, süreç ve ağ yoktur. Bu derslerde ne beklemen gerektiği yazar, bilgisayarında dene görevleri verilir.</li><li>Flask, Django, Docker, Spark gibi araçların alıştırmaları taklit eder; gerçeği için "Kendi bilgisayarında" görevleri var. Excel, Word, PDF, seaborn ve plotly gerçek çalışır, ilk kullanımda iner.</li><li>input() girdileri çalıştırmadan önce verilir.</li><li>İlk ziyaretten sonra site internetsiz açılır. Python motoru ve kullandığın paketler bir kez inince bu cihazda çalışır; hiç inmemiş paket ve veri seti çalışmaz. Tarayıcı verisini silersen yeniden iner.</li><li>Çok uzun süren kod 60 saniyede durdurulur; Durdur düğmesi her zaman çalışır, motor yeniden başlar.</li></ul>');
   h += '<details class="panel about-card"><summary><b>Müfredat haritası</b></summary>' + C.curriculumHTML() + '</details>';
   h += card('Lisans', '<p style="margin:0">' + esc(c.license || 'Ders içerikleri ve veri setleri CC BY-NC 4.0 (kaynak göstererek, ticari olmayan amaçlarla paylaşılabilir); uygulama kodu MIT lisansıyla sunulur.') + '</p>');
   return h + '</div>';
@@ -93,7 +93,7 @@ document.addEventListener('click', ev => {
   const t = ev.target.closest('[data-kdoor],[data-kbk]'); if (!t) return;
   if (t.dataset.kdoor) {
     P.welcomed = true; C.save();
-    if (t.dataset.kdoor === 'yeni') C.go('lesson', C.LESSONS[0].id);
+    if (t.dataset.kdoor === 'yeni') C.go('lesson', 'ilk-kod');
     else if (t.dataset.kdoor === 'biraz') C.go('exam', 'seviye-tespit');
     else C.go('paths');
     return;

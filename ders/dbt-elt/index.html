@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler</h1><p class="st-l">ETL'den ELT'ye geçişi, dbt'nin sources-staging-intermediate-marts katmanlarını, ref() ve bağımlılık grafiğini, materializasyonları, testleri, köken, snapshot ve seed'i öğrenir; DuckDB ve jinja2 ile kendi mini-dbt'ni yazıp kanat_havayollari için katmanlı bir proje kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/dbt-elt">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>ETL'den ELT'ye</h2>
 <p><i>veri-boru-hatti</i> dersinde veriyi Python'da çıkarıp dönüştürdün, sonra veritabanına yükledin (ETL: extract, transform, load). Bulut ambarları (BigQuery, Snowflake, Redshift) ve DuckDB gibi hızlı analitik motorlar çıkınca sıra değişti: ham veri önce olduğu gibi ambara <b>yüklenir</b>, dönüşüm ambarın içinde <b>SQL ile</b> yapılır. Buna <b>ELT</b> denir. Avantajı: ham veri her zaman elindedir (yeniden hesaplanabilir), dönüşüm ambarın paralel gücüyle çalışır ve iş mantığı analistlerin de okuyabildiği SQL'dedir.</p>
@@ -187,6 +188,6 @@ select * from {{ source('kanat', 'hv_passengers') }}
 <p>Aynı "aktif müşteri" tanımının her panoda farklı hesaplanmasını önlemek için ölçüler (metrics) dbt'nin semantik katmanında bir kez tanımlanır; BI araçları bu tanımı sorgular. Power BI'daki ölçü tabloları ile aynı fikirdir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/dbt-elt">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dbt-elt/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../bulut-temelleri/">← Bulut temelleri: nesne depolama, IAM, serverless ve maliyet</a><a href="../postgresql-python/">PostgreSQL ile Python: psycopg, transaction, indeks ve toplu yükleme →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

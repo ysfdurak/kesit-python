@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı</h1><p class="st-l">Gereksinim çıkarma ve kaba kapasite hesabından yük dengeleme, önbellek, replikasyon, tutarlı hash, CAP/PACELC, kuyruklar, idempotentlik ve circuit breaker'a; URL kısaltıcı ve Lezzet Kurye sipariş akışı tasarımlarına kadar sistem tasarımının yapı taşlarını Python simülasyonlarıyla öğrenirsin.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/sistem-tasarimi">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden sistem tasarımı?</h2>
 <p>Bir fonksiyonu doğru yazmak ile bir <b>sistemi</b> doğru kurmak farklı becerilerdir. Lezzet Kurye akşam 19:00'da binlerce sipariş alır; restoran tableti donarsa, ödeme sağlayıcısı yavaşlarsa ya da veritabanı diski dolarsa müşteri yalnızca "uygulama çalışmıyor" der. Sistem tasarımı (system design), bu tür yükleri ve arızaları <b>önceden</b> düşünüp bileşenleri (servis, veritabanı, önbellek, kuyruk) doğru yere koyma işidir. Orta ve kıdemli backend mülakatlarının neredeyse hepsinde 45 dakikalık bir tasarım oturumu vardır; işte de her yeni özellik küçük bir tasarım belgesiyle başlar.</p>
@@ -232,6 +233,6 @@ for sayi in [61, 62, 125, 3_521_614_606_207]:
 <p>Tasarım varsayımlarını yük testiyle (Locust, k6) doğrula, p50/p95/p99 gecikmeyi izle; <code>gozlemlenebilirlik</code> yaklaşımıyla SLO'ları tanımla. Çoğu sistem ilk gün tek bir veritabanı ve birkaç uygulama kopyasıyla gayet iyi çalışır; sharding'i gerçekten gerektiğinde, ölçüme dayanarak ekle.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/sistem-tasarimi">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sistem-tasarimi/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../llm-ajanlar/">← LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</a><a href="../akis-isleme/">Akış işleme ve mesaj kuyrukları: Kafka kavramları →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

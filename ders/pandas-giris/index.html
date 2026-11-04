@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>pandas giriş: Series ve DataFrame</h1><p class="st-l">Series/DataFrame yapısı, read_csv ile veri yükleme, head/info/describe ile tanıma, loc/iloc ve boolean seçim, yeni sütun ve sıralama.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/pandas-giris">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory"><h2>Tablo düşünmek</h2>
 <p>Anadolu Market'in sipariş verisi bir tablodur: her satır bir sipariş, her sütun bir alan (müşteri, şehir, tutar, tarih). Excel'de yaptığın filtreleme, sıralama, yeni sütun ekleme işlerini kodla ve tekrarlanabilir biçimde yapmanın aracı <b>pandas</b>'tır. İki temel yapı var: <b>Series</b> (tek sütun, etiketli dizi) ve <b>DataFrame</b> (sütunlardan oluşan tablo). DataFrame'in her sütunu bir Series'tir.</p>
 
@@ -170,7 +171,7 @@ print(df["sehir"].tolist())
 df["ciro"] = df["ciro"] / 3
 df.to_csv("rapor.csv", sep=";", decimal=",", encoding="utf-8-sig", index=False, float_format="%.2f")
 print(open("rapor.csv", encoding="utf-8-sig").read())
-</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir; tarayıcıda çalışmaz, kendi bilgisayarında dene:</p><pre class="code"># python -m pip install openpyxl
+</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir. Bu sayfada ilk kullanımda kendiliğinden iner (yaklaşık 270 KB); bilgisayarında şöyle kurarsın:</p><pre class="code"># python -m pip install openpyxl
 import pandas as pd
 
 df = pd.read_excel("satislar.xlsx", sheet_name="Mart", skiprows=2,
@@ -231,6 +232,6 @@ con.close()
 <h3>İş hayatında</h3>
 <p>Analist olarak ilk saatin hep aynıdır: yükle, <code>info</code>, <code>describe</code>, <code>value_counts</code>, birkaç maske. Bu "keşif" aşamasını küçük fonksiyonlara ayırırsan (yükle, filtrele, türet) hem test yazabilir hem de aynı raporu her ay tek komutla üretirsin.</p>
 </section></article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-giris">Alıştırmalara geç (29)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-giris/alistirma">Alıştırmalara geç (29)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../numpy/">← numpy: sayısal diziler ve vektörleştirme</a><a href="../pandas-temizlik/">Veri temizleme: eksik, tür, metin, yinelenen →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

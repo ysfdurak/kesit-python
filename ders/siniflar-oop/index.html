@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Sınıflar: veri ve davranışı bir arada tutmak</h1><p class="st-l">class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/siniflar-oop">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Ilgaz Bank'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
@@ -335,6 +336,6 @@ print(max(hesaplar, key=attrgetter("bakiye")))</pre>
 <p>Veri sadece taşınıyorsa ve davranışı yoksa sözlük ya da dataclass yeter. Verinin kuralları (bakiye eksiye inemez), davranışı (çek, yatır) ve tutarlılığı (işlem kaydı) varsa sınıf yaz. Fonksiyonlarına hep aynı sözlüğü ilk parametre olarak geçiriyorsan bu bir sınıf olmak istiyor demektir.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/siniflar-oop">Alıştırmalara geç (21)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/siniflar-oop/alistirma">Alıştırmalara geç (21)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../dekoratorler/">← Dekoratörler (decorators) ve bağlam yöneticileri (context managers)</a><a href="../kalitim-polimorfizm/">Kalıtım (inheritance) ve polimorfizm →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

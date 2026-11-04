@@ -287,6 +287,13 @@ button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
 .guide ul{margin:0; padding-left:18px; display:grid; gap:4px}
 .guide li b{margin-right:4px}
 .guide li{overflow-wrap:anywhere}
+.netbar{position:fixed; left:12px; right:12px; bottom:calc(12px + env(safe-area-inset-bottom,0px)); z-index:40; max-width:620px; margin:0 auto; display:flex; gap:10px; align-items:flex-start; background:var(--surface); color:var(--ink); border:1px solid var(--line); border-left:3px solid var(--warn); border-radius:10px; padding:10px 12px; font-size:.86rem; box-shadow:0 6px 20px rgba(0,0,0,.18)}
+.plotframe{width:100%; height:420px; border:1px solid var(--line); border-radius:8px; background:#fff; margin-top:8px}
+.dosyalar{margin-top:8px; flex-wrap:wrap}
+@media (max-width:640px){:not(pre)>code{white-space:normal; overflow-wrap:anywhere}}
+.netbar p{margin:0; flex:1; min-width:0}
+.pilotbox{width:100%; min-height:120px; font-family:var(--f-mono); font-size:.78rem; resize:vertical}
+details.more>summary{cursor:pointer; font-weight:600}
 .lnav .btn{white-space:normal; text-align:left; min-width:0}
 @media (max-width:640px){.lnav{flex-direction:column; align-items:stretch}}
 
@@ -420,6 +427,7 @@ svg.viz text{pointer-events:none}
   .topbar .mini b{color:var(--ink)}
   .topbar select{border:1px solid var(--line); background:var(--surface-2); border-radius:7px; padding:5px 6px; font-size:.8rem; font-weight:600; max-width:120px}
   main{padding-block:18px calc(90px + env(safe-area-inset-bottom,0px))}
+  .netbar{bottom:calc(72px + env(safe-area-inset-bottom,0px))}
   .tabbar{display:grid; grid-template-columns:repeat(5,1fr); position:fixed; left:0; right:0; bottom:0; z-index:20; background:var(--surface); border-top:1px solid var(--line); padding-bottom:env(safe-area-inset-bottom,0px); padding-left:env(safe-area-inset-left,0px); padding-right:env(safe-area-inset-right,0px)}
   .tabbar button{border:0; background:none; display:flex; flex-direction:column; align-items:center; gap:2px; padding:8px 2px 9px; font-size:.68rem; color:var(--muted); font-weight:500}
   .tabbar button[aria-current="true"]{color:var(--accent-text)}
@@ -647,13 +655,14 @@ button.chip.lk{text-decoration:none; padding:2px 8px; border:1px solid var(--lin
 @media (max-width: 560px){ .hero-main .stripe{display:none} }
 
 .navgrp{color:color-mix(in srgb,var(--muted) 78%,var(--ink))}
+.ic[style*="--s6"]{color:#fff}@media (prefers-color-scheme:light){.ic[style*="--s7"]{color:#fff}}[data-theme="light"] .ic[style*="--s7"]{color:#fff}[data-theme="dark"] .ic[style*="--s7"]{color:#000}
 
 html,body.st{height:auto;overflow:auto}body.st{display:block;margin:0;background:var(--bg);color:var(--ink);padding:0}
 .st-skip{position:absolute;left:-999px}.st-skip:focus{left:12px;top:12px;background:var(--surface);padding:8px 12px;z-index:9;border-radius:6px}
 .st-h,.st-m,.st-f{max-width:820px;margin:0 auto;padding-left:24px;padding-right:24px}.st-h{display:flex;justify-content:space-between;align-items:center;padding-top:20px;padding-bottom:6px}.st-b{font-weight:800;color:inherit;text-decoration:none;font-size:1.1rem}
 .st-m{padding-top:22px;padding-bottom:30px;display:block}.st-e{font-size:.78rem;font-weight:600;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}.st-m h1{font-size:clamp(1.8rem,4.6vw,2.6rem);line-height:1.12;margin:8px 0 10px}.st-l{color:var(--muted);font-size:1.05rem;margin:0 0 14px}
 .st-c{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin:14px 0 18px;font-size:.88rem;color:var(--muted)}.st-p{display:inline-block;background:var(--ink);color:var(--bg)!important;padding:10px 16px;border-radius:8px;font-weight:600;text-decoration:none;font-size:.95rem}
-.st-n{display:flex;justify-content:space-between;gap:16px;margin-top:20px;font-size:.92rem}.st-f{padding-top:14px;padding-bottom:30px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
+.st-not{font-size:.88rem;color:var(--muted);margin:0 0 12px}.st-n{display:flex;justify-content:space-between;gap:16px;margin-top:20px;font-size:.92rem}.st-f{padding-top:14px;padding-bottom:30px;border-top:1px solid var(--line);font-size:.85rem;color:var(--muted)}
 .st-d ul{padding-left:18px;margin:6px 0 12px}.st-d li{margin-bottom:5px}.st-d h3{margin:16px 0 4px;font-size:1rem}.st-d h2{margin:26px 0 4px}
 article.theory{padding:22px;overflow-wrap:anywhere}article.theory pre{white-space:pre-wrap;overflow-x:auto}article.theory .tbl-wrap{overflow-x:auto}
 @media (max-width:640px){.st-h,.st-m,.st-f{padding-left:16px;padding-right:16px}article.theory{padding:14px}}

@@ -5,6 +5,7 @@
 <body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
 <main id="icerik" class="st-m"><span class="st-e">Temel · Dosya ve hata</span><h1>Hata ayıklama (debugging)</h1><p class="st-l">Traceback'i alttan yukarı okur, print ve f"{x=}" ile izler, assert ile varsayımları denetler, pdb ve VS Code ile adım adım ilerler, sorunu küçültüp doğru soruyu sorarak hatayı yöntemle bulursun.</p>
 <div class="st-c"><a class="st-p" href="../../#/lesson/hata-ayiklama">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
 <article class="panel theory">
 <h2>Neden önemli?</h2>
 <p>Anadolu Market'in gece çalışan ciro raporu bu sabah İzmir için 0 TL gösterdi. Program hata vermedi, sadece yanlış sonuç üretti. Ekipte biri "dün çalışıyordu" dedi, bir başkası kodu baştan yazmayı önerdi. Deneyimli geliştirici ise şunu yaptı: hatayı tekrar üretti, veriyi küçülttü, iki <code>print</code> ekledi ve on dakikada sorunun bir sözlük anahtarındaki tek harf olduğunu buldu. Hata ayıklama (debugging), yazılımcının günlük işinin belki de yarısıdır ve şansa değil <b>yönteme</b> dayanır. Bu derste o yöntemi öğreneceksin.</p>
@@ -180,6 +181,6 @@ for i, k in enumerate(kayitlar):
 <p>Uzun süren bir iş gecenin üçünde çöktüyse, interaktif konsolda <code>import pdb; pdb.pm()</code> son istisnanın yığınına girip o anki değişkenleri gösterir. Üretimde ise log ve hata izleme servisleri (Sentry gibi) traceback'i değişken değerleriyle birlikte saklar.</p>
 </section>
 </article>
-<div class="st-c"><a class="st-p" href="../../#/lesson/hata-ayiklama">Alıştırmalara geç (20)</a></div>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-ayiklama/alistirma">Alıştırmalara geç (20)</a></div>
 <nav class="st-n" aria-label="Ders sırası"><a href="../ozyineleme/">← Özyineleme (recursion)</a><a href="../kod-stili/">Temiz kod ve PEP 8 →</a></nav></main>
 <footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>
