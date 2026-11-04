@@ -1,3 +1,553 @@
+/* Kesit Python — 'django-giris' dersi uzantısı: HTMX ile kısmi güncelleme, CSRF, fetch ile JSON, form hataları ve SPA kararı (AUDIT Ekle-12) */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+  { id: 'django-giris',
+    min: 25,
+    html: `<h2>Derinleş: Django'da HTMX, form, fetch ile JSON ve SPA kararı</h2><p>Django'nun şablon sistemi, formları ve admin paneli sunucu tarafı oluşturma (SSR) için kurulmuştur. Bir noktada şu karar gelir: arayüzü ayrı bir SPA (React) ve DRF API'siyle mi kuracağız, yoksa Django şablonlarını koruyup yalnız gereken yerleri dinamik mi yapacağız? İkinci yolun en yaygın aracı HTMX'tir. Flask dersindeki ek bölümde HTMX'in temel özniteliklerini (<code>hx-get</code>, <code>hx-target</code>, <code>hx-swap</code>, <code>hx-trigger</code>) gördüysen, burada aynı fikrin Django'daki karşılığını, CSRF'yi ve JSON uç noktalarını öğreneceksin.</p><div class="tbl-wrap"><table><tr><th>Soru</th><th>Django şablonu + HTMX</th><th>DRF + SPA</th></tr><tr><td>Arama motoru (SEO) önemli mi?</td><td>Hazır HTML, doğal</td><td>Ek sunucu tarafı oluşturma gerekir</td></tr><tr><td>Mobil uygulama da aynı veriyi kullanacak mı?</td><td>Ayrı JSON uç noktaları gerekir</td><td>Aynı API</td></tr><tr><td>Ekip</td><td>Python ağırlıklı</td><td>Ayrı ön yüz uzmanlığı</td></tr><tr><td>Admin, form, yetki</td><td>Django'nun hazır araçları aynen</td><td>API ve istemcide yeniden kurulur</td></tr></table></div><h3>Parça şablonu ve HX-Request</h3><p>Django'da parça şablonu ayrı bir dosyadır ve tam sayfa şablonunda <code>{% include %}</code> ile kullanılır. Görünüm, <code>request.headers</code> ile HTMX isteğini tanır; <code>django-htmx</code> paketi bunu <code>request.htmx</code> olarak kısaltır. Sayfalamada Django'nun <code>Paginator</code> sınıfı kullanılır.</p><pre class="code"># urunler/views.py
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import Urun
+
+def urun_listesi(request):
+    q = request.GET.get("q", "")
+    qs = Urun.objects.filter(ad__icontains=q).order_by("id")
+    sayfa = Paginator(qs, 12).get_page(request.GET.get("sayfa"))
+    baglam = {"sayfa": sayfa, "q": q}
+    if request.headers.get("HX-Request") == "true":          # ya da request.htmx
+        return render(request, "urunler/_satirlar.html", baglam)
+    return render(request, "urunler/liste.html", baglam)</pre><pre class="code">{# urunler/_satirlar.html #}
+{% for u in sayfa %}
+  &lt;tr&gt;&lt;td&gt;{{ u.ad }}&lt;/td&gt;&lt;td&gt;{{ u.fiyat }} TL&lt;/td&gt;&lt;/tr&gt;
+{% endfor %}
+{% if sayfa.has_next %}
+  &lt;tr hx-get="?q={{ q|urlencode }}&amp;sayfa={{ sayfa.next_page_number }}"
+      hx-trigger="revealed" hx-swap="outerHTML"&gt;&lt;td&gt;Yükleniyor...&lt;/td&gt;&lt;/tr&gt;
+{% endif %}</pre><h3>CSRF: Django'nun kapısı</h3><p>Django, POST/PUT/PATCH/DELETE isteklerinde CSRF belirteci (token) ister. Klasik formda <code>{% csrf_token %}</code> gizli bir <code>csrfmiddlewaretoken</code> alanı ekler. HTMX ve <code>fetch</code> isteklerinde belirteç <b>başlıkla</b> gönderilir: <code>X-CSRFToken</code>. Belirtecin değeri <code>csrftoken</code> çerezinde de durur.</p><pre class="code">&lt;body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'&gt;   {# tüm HTMX istekleri başlığı taşır #}
+
+&lt;script&gt;
+function cerez(ad) {
+  return document.cookie.split("; ").find(c =&gt; c.startsWith(ad + "="))?.split("=")[1];
+}
+const r = await fetch("/api/sepet/", {
+  method: "POST",
+  headers: {"Content-Type": "application/json", "X-CSRFToken": cerez("csrftoken")},
+  body: JSON.stringify({urun_id: 19, adet: 2}),
+});
+&lt;/script&gt;</pre><p>Çerezden belirteç okumak tarayıcıda çalışan kodun işidir; mantığı Python'la görelim. Gerçek Anadolu Market ürünlerini <code>veri</code> modülünden okuyup JSON'a çeviriyoruz:</p><pre class="py">import json
+from decimal import Decimal
+from http.cookies import SimpleCookie
+import veri
+
+c = SimpleCookie()
+c.load("sessionid=abc123; csrftoken=Xy9QeT2k")
+print("çerezdeki belirteç:", c["csrftoken"].value)
+
+urunler = veri.kayitlar("anadolu_market", "products")
+kitaplar = [{"id": u["product_id"], "ad": u["name"], "fiyat": Decimal(str(u["price"]))}
+            for u in urunler if u["category"] == "Kitap"][:3]
+
+def ondalik(o):                      # DjangoJSONEncoder'ın yaptığı gibi
+    if isinstance(o, Decimal):
+        return str(o)
+    raise TypeError(f"{type(o).__name__} JSON'a çevrilemez")
+
+print(json.dumps(kitaplar, default=ondalik, ensure_ascii=False))</pre><h3>JsonResponse ve fetch</h3><p>JSON uç noktası için DRF şart değildir; küçük işlerde <code>JsonResponse</code> yeter. İki ayrıntı: varsayılan <code>safe=True</code> yalnız sözlük kabul eder (liste için <code>safe=False</code>), ve <code>DecimalField</code> değerleri Django'nun kodlayıcısında metne çevrilir. Türkçe karakterlerin kaçırılmaması için <code>json_dumps_params={"ensure_ascii": False}</code> verilebilir.</p><pre class="code">import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def sepet_api(request):
+    try:
+        govde = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"hata": "geçersiz JSON"}, status=400)
+    form = SepetFormu(govde)                       # Django formu JSON ile de çalışır
+    if not form.is_valid():
+        return JsonResponse({"hatalar": form.errors}, status=422)
+    return JsonResponse({"tutar": str(form.tutar())})
+
+def kategoriler(request):
+    return JsonResponse(list(Kategori.objects.values("id", "ad")), safe=False,
+                        json_dumps_params={"ensure_ascii": False})</pre><h3>Form hataları HTMX ile</h3><p>HTMX 2, varsayılan olarak 4xx/5xx yanıtları sayfaya yerleştirmez. Form hatalarını göstermek için iki yol var: hatalı formu 200 ile parça olarak döndürmek, ya da 422 dönüp <code>HX-Retarget</code> ve <code>HX-Reswap</code> yanıt başlıklarıyla hataların nereye konacağını söylemek (ve istemcide 422'yi yerleştirmeye izin veren yapılandırmayı açmak). Hangi yolu seçersen seç, kural aynıdır: doğrulama her zaman sunucuda yapılır.</p><div class="note"><b>Gerçek işte</b>Django + HTMX, özellikle iç sistemlerde (bayi portalı, İK izin ekranı, stok paneli) yaygınlaşıyor: admin paneli, kimlik doğrulama ve form doğrulaması hazır gelir; ön yüz projesi gerekmez. Mobil uygulama ya da dış ortaklar için ise aynı modeller üzerine DRF API eklenir. Mülakatta "Django ile SPA" sorulursa CSRF'nin başlıkla gönderildiğini ve CORS'un ayrı bir konu olduğunu söyleyebilmelisin.</div>`,
+    ex: [
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Bir Django görünümü <code>return JsonResponse([{"id": 1}, {"id": 2}])</code> satırında <code>TypeError</code> veriyor. Neden?',
+        o: ['JsonResponse varsayılan olarak yalnız sözlük kabul eder; liste için safe=False', 'Django, JSON yanıtlarında yalnızca DRF serializer kullanılmasını zorunlu kılar', 'Liste elemanları sözlükse önce json.dumps ile metne çevrilmeleri gerekir', 'JsonResponse yalnızca POST isteklerine cevap olarak kullanılabilen bir sınıftır'],
+        a: 0,
+        why: 'safe=True varsayılanı eski tarayıcılardaki bir JSON dizisi güvenlik açığına karşı konmuştur; bilinçli olarak liste döndürmek için safe=False verirsin. JsonResponse serileştirmeyi kendisi yapar.' },
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Django sayfasındaki JavaScript, <code>fetch</code> ile <code>/api/sepet/</code> adresine POST atıyor ve <b>403 CSRF verification failed</b> alıyor. En doğru çözüm hangisi?',
+        o: ['Görünüme @csrf_exempt dekoratörü ekleyip korumayı o uç nokta için kaldırmak', 'csrftoken çerezindeki belirteci X-CSRFToken başlığıyla göndermek', 'İsteği POST yerine GET ile gönderip verileri sorgu dizesine koymak', 'settings.py içinde CSRF_COOKIE_SECURE ayarını False yapmak'],
+        a: 1,
+        why: 'Django başlıktaki belirteci çerezdekiyle karşılaştırır. csrf_exempt korumayı kapatır; GET ile veri değiştirmek HTTP anlamını bozar ve önbelleğe/yeniden denemeye açıktır.' },
+      { t: 'predict',
+        stage: 'Kodu oku',
+        q: 'Django Paginator\'ı taklit eden hesap: 40 ürün, sayfa başına 12. Bu kod ne yazdırır?',
+        code: 'import math\ntoplam, boyut = 40, 12\nsayfa_sayisi = math.ceil(toplam / boyut)\nfor n in (1, 4):\n    bas = (n - 1) * boyut\n    son = min(bas + boyut, toplam)\n    print(n, son - bas, n < sayfa_sayisi)\n',
+        o: ['1 12 True\n4 4 False', '1 12 True\n4 12 False', '1 12 True\n4 4 True', '1 12 False\n4 4 False'],
+        a: 0,
+        why: '40 / 12 = 3.33 → 4 sayfa. 4. sayfa 36. elemandan başlar ve 40\'ta biter: 4 ürün. Son sayfa olduğu için has_next False.' },
+      { t: 'code',
+        id: 'django-giris-w1',
+        stage: 'Rehberli',
+        diff: 2,
+        q: '<p>Django\'nun CSRF denetimini basitleştirilmiş hâliyle yaz: <code>csrf_gecerli_mi(istek)</code>. <code>istek</code> sözlüğünde <code>"metot"</code>, <code>"cerez"</code> (ham <code>Cookie</code> başlık metni), <code>"basliklar"</code> ve <code>"form"</code> var. Kurallar:</p><ul><li>Güvenli metotlar (<code>GET</code>, <code>HEAD</code>, <code>OPTIONS</code>, <code>TRACE</code>) her zaman <code>True</code>.</li><li>Diğerlerinde <code>csrftoken</code> çerezi yoksa <code>False</code>.</li><li>Gönderilen belirteç: önce <code>form["csrfmiddlewaretoken"]</code>, yoksa <code>X-CSRFToken</code> başlığı. Yoksa <code>False</code>.</li><li>Karşılaştırma <code>hmac.compare_digest</code> ile yapılsın.</li></ul>',
+        guide: ['Metot güvenliyse hemen True döndür.', 'http.cookies.SimpleCookie ile çerez metnini ayrıştır, csrftoken\'ı al.', 'Belirteci önce formdan, sonra başlıktan oku.', 'İkisi de varsa hmac.compare_digest ile karşılaştır.'],
+        example: 'from http.cookies import SimpleCookie\nc = SimpleCookie()\nc.load("a=1; b=2")\nprint(c["b"].value, "c" in c)\n',
+        start: 'import hmac\nfrom http.cookies import SimpleCookie\n\nGUVENLI = {"GET", "HEAD", "OPTIONS", "TRACE"}\n\ndef csrf_gecerli_mi(istek):\n    # TODO: güvenli metot kontrolü\n    # TODO: çerezden csrftoken\n    # TODO: formdan ya da başlıktan gönderilen belirteç\n    return None\n',
+        sol: 'import hmac\nfrom http.cookies import SimpleCookie\n\nGUVENLI = {"GET", "HEAD", "OPTIONS", "TRACE"}\n\ndef csrf_gecerli_mi(istek):\n    if istek["metot"].upper() in GUVENLI:\n        return True\n    c = SimpleCookie()\n    c.load(istek.get("cerez", ""))\n    if "csrftoken" not in c:\n        return False\n    gelen = istek.get("form", {}).get("csrfmiddlewaretoken") or istek.get("basliklar", {}).get("X-CSRFToken")\n    if not gelen:\n        return False\n    return hmac.compare_digest(gelen, c["csrftoken"].value)\n',
+        tests: 'cerez = "sessionid=s1; csrftoken=T0k3n"\nassert csrf_gecerli_mi({"metot": "GET", "cerez": "", "basliklar": {}, "form": {}}) is True, "GET güvenli"\nassert csrf_gecerli_mi({"metot": "POST", "cerez": cerez, "basliklar": {"X-CSRFToken": "T0k3n"}, "form": {}}) is True, "fetch başlıkla"\nassert csrf_gecerli_mi({"metot": "POST", "cerez": cerez, "basliklar": {}, "form": {"csrfmiddlewaretoken": "T0k3n"}}) is True, "klasik form"\nassert csrf_gecerli_mi({"metot": "DELETE", "cerez": cerez, "basliklar": {"X-CSRFToken": "baska"}, "form": {}}) is False\nassert csrf_gecerli_mi({"metot": "POST", "cerez": "sessionid=s1", "basliklar": {"X-CSRFToken": "T0k3n"}, "form": {}}) is False, "çerez yoksa red"\nassert csrf_gecerli_mi({"metot": "post", "cerez": cerez, "basliklar": {}, "form": {}}) is False, "belirteç yoksa red"\n',
+        hints: ['Metodu upper() ile normalize et.', 'SimpleCookie nesnesinde "csrftoken" in c ile varlık kontrolü yapılır; değer c["csrftoken"].value.', 'compare_digest zamanlama saldırısına karşı sabit sürede karşılaştırır.'],
+        why: 'Saldırgan site, kurbanın tarayıcısına çerez gönderttirebilir ama çerezi okuyamaz; bu yüzden aynı değerin form alanında ya da başlıkta da gelmesi isteğin gerçekten senin sayfandan geldiğini kanıtlar. Gerçek Django ayrıca Origin/Referer denetimi ve belirteç maskeleme yapar.' },
+      { t: 'code',
+        id: 'django-giris-w2',
+        stage: 'Rehberli',
+        diff: 2,
+        q: '<p>Django <code>Paginator</code>\'ının özünü yaz: <code>SayfaBolucu(nesneler, sayfa_basi)</code>. Özellikler/metotlar: <code>num_pages</code> (en az 1), <code>sayfa(n)</code> → bir <code>Sayfa</code> nesnesi. <code>Sayfa</code>\'nın alanları: <code>object_list</code> (liste), <code>number</code>, <code>has_next()</code>, <code>has_previous()</code>, <code>next_page_number()</code> (sonraki yoksa <code>ValueError</code>). <code>get_page(n)</code> ise hoşgörülü olsun: <code>n</code> sayıya çevrilemezse 1. sayfa, aralık dışındaysa son sayfa. Testler gerçek 40 üründe çalışır.</p>',
+        guide: ['num_pages = max(1, ceil(len / sayfa_basi)).', 'Sayfa sınıfı bölücüye ve numaraya bakarak has_next ve has_previous\'ı hesaplar.', 'sayfa(n) dilimi (n-1)*boyut ile başlatır; aralık dışı n için ValueError.', 'get_page içinde int() hatasını yakala ve sınırla.'],
+        example: 'import math\nprint(math.ceil(40 / 12), max(1, math.ceil(0 / 12)))\n',
+        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport math\n\nclass Sayfa:\n    pass\n\nclass SayfaBolucu:\n    def __init__(self, nesneler, sayfa_basi):\n        self.nesneler = list(nesneler)\n        self.sayfa_basi = sayfa_basi\n    # TODO: num_pages, sayfa, get_page\n',
+        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport math\n\nclass Sayfa:\n    def __init__(self, object_list, number, bolucu):\n        self.object_list, self.number, self.bolucu = object_list, number, bolucu\n\n    def has_next(self):\n        return self.number < self.bolucu.num_pages\n\n    def has_previous(self):\n        return self.number > 1\n\n    def next_page_number(self):\n        if not self.has_next():\n            raise ValueError("sonraki sayfa yok")\n        return self.number + 1\n\nclass SayfaBolucu:\n    def __init__(self, nesneler, sayfa_basi):\n        self.nesneler = list(nesneler)\n        self.sayfa_basi = sayfa_basi\n\n    @property\n    def num_pages(self):\n        return max(1, math.ceil(len(self.nesneler) / self.sayfa_basi))\n\n    def sayfa(self, n):\n        if not 1 <= n <= self.num_pages:\n            raise ValueError("geçersiz sayfa")\n        bas = (n - 1) * self.sayfa_basi\n        return Sayfa(self.nesneler[bas:bas + self.sayfa_basi], n, self)\n\n    def get_page(self, n):\n        try:\n            n = int(n)\n        except (TypeError, ValueError):\n            n = 1\n        return self.sayfa(min(max(n, 1), self.num_pages))\n',
+        tests: 'b = SayfaBolucu(urunler, 12)\nassert b.num_pages == 4, "40 ürün / 12 = 4 sayfa"\ns = b.sayfa(1)\nassert [u["product_id"] for u in s.object_list] == list(range(1, 13)) and s.has_next() and not s.has_previous()\nassert s.next_page_number() == 2\nson = b.sayfa(4)\nassert len(son.object_list) == 4 and not son.has_next() and son.object_list[-1]["name"] == "Gurme Lokum Kutusu"\ntry:\n    son.next_page_number(); assert False, "Son sayfada ValueError"\nexcept ValueError:\n    pass\nassert b.get_page("abc").number == 1 and b.get_page(None).number == 1, "Sayıya çevrilemeyen değer 1. sayfa"\nassert b.get_page("99").number == 4, "Aralık dışı son sayfa"\nassert SayfaBolucu([], 10).num_pages == 1 and SayfaBolucu([], 10).sayfa(1).object_list == []\n',
+        hints: ['num_pages için @property kullan: b.num_pages parantezsiz okunur.', 'int(None) TypeError, int("abc") ValueError verir; ikisini birden yakala.', 'Sınırlamak için min(max(n, 1), num_pages).'],
+        why: 'Paginator.page katı (hatalı sayfada hata), get_page hoşgörülüdür; URL\'den gelen ?sayfa= değeri her şey olabileceği için görünümlerde get_page tercih edilir. has_next sonsuz kaydırmadaki gözcü satırının koşuludur.' },
+      { t: 'code',
+        id: 'django-giris-w3',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p><code>JsonResponse</code>\'u taklit et: <code>json_yanit(veri, safe=True, status=200)</code> <code>(status, govde, basliklar)</code> döndürsün. <code>safe</code> doğruyken <code>veri</code> sözlük değilse <code>TypeError("In order to allow non-dict objects to be serialized set the safe parameter to False.")</code>. Gövde <code>json.dumps(..., ensure_ascii=False)</code>; <code>Decimal</code> → <code>str</code>, <code>datetime.date</code>/<code>datetime</code> → <code>isoformat()</code>, diğer bilinmeyen tipler <code>TypeError</code>. Başlık: <code>{"Content-Type": "application/json"}</code>.</p>',
+        start: 'import datetime\nimport json\nfrom decimal import Decimal\n\ndef json_yanit(veri, safe=True, status=200):\n    pass\n',
+        sol: 'import datetime\nimport json\nfrom decimal import Decimal\n\ndef _kodla(o):\n    if isinstance(o, Decimal):\n        return str(o)\n    if isinstance(o, (datetime.date, datetime.datetime)):\n        return o.isoformat()\n    raise TypeError(f"{type(o).__name__} JSON\'a çevrilemez")\n\ndef json_yanit(veri, safe=True, status=200):\n    if safe and not isinstance(veri, dict):\n        raise TypeError("In order to allow non-dict objects to be serialized set the safe parameter to False.")\n    govde = json.dumps(veri, ensure_ascii=False, default=_kodla)\n    return status, govde, {"Content-Type": "application/json"}\n',
+        tests: 'r = json_yanit({"ad": "Bakır Cezve", "fiyat": Decimal("320.00"), "tarih": datetime.date(2024, 12, 31)})\nassert r == (200, \'{"ad": "Bakır Cezve", "fiyat": "320.00", "tarih": "2024-12-31"}\', {"Content-Type": "application/json"}), f"Gelen {r}"\ntry:\n    json_yanit([1, 2]); assert False, "Liste safe=True ile reddedilmeli"\nexcept TypeError as h:\n    assert "safe parameter" in str(h)\nassert json_yanit([1, 2], safe=False, status=201)[:2] == (201, "[1, 2]")\ntry:\n    json_yanit({"x": {1, 2}}); assert False, "Küme JSON\\\'a çevrilemez"\nexcept TypeError:\n    pass\n',
+        hints: ['json.dumps\'ın default parametresine bilinmeyen tipleri çeviren bir fonksiyon ver.', 'default fonksiyonu çeviremediği tipte TypeError fırlatmalı; None döndürürse "null" yazılır.'],
+        why: 'Django modellerindeki DecimalField ve DateField değerleri standart json modülünde hata verir; DjangoJSONEncoder bunları metne çevirir. Para tutarını float yerine metin olarak göndermek kuruş hassasiyetini korur.' },
+      { t: 'code',
+        id: 'django-giris-w4',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p>HTMX formu için yanıt seçici: <code>form_yaniti(gecerli, hatalar, htmx)</code> <code>(status, govde, basliklar)</code> döndürsün.</p><ul><li>Geçerli + HTMX: <code>(200, \'&lt;p class="ok"&gt;Kaydedildi&lt;/p&gt;\', {"HX-Trigger": "kayitEklendi"})</code></li><li>Geçerli + klasik: <code>(302, "", {"Location": "/basvurular/"})</code></li><li>Geçersiz + HTMX: <code>(422, govde, {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"})</code>; govde, hatalar sözlüğünden (alan adına göre sıralı) <code>&lt;li&gt;alan: mesaj&lt;/li&gt;</code> satırlarıyla kurulan <code>&lt;ul&gt;...&lt;/ul&gt;</code>; alan ve mesaj <code>html.escape</code> ile kaçırılır, bir alanın birden çok mesajı varsa her biri ayrı <code>li</code>.</li><li>Geçersiz + klasik: aynı <code>&lt;ul&gt;</code> gövdesiyle <code>(400, govde, {})</code>.</li></ul>',
+        start: 'import html\n\ndef form_yaniti(gecerli, hatalar, htmx):\n    pass\n',
+        sol: 'import html\n\ndef _hata_listesi(hatalar):\n    satirlar = "".join(f"<li>{html.escape(alan)}: {html.escape(m)}</li>"\n                       for alan in sorted(hatalar) for m in hatalar[alan])\n    return "<ul>" + satirlar + "</ul>"\n\ndef form_yaniti(gecerli, hatalar, htmx):\n    if gecerli:\n        if htmx:\n            return 200, \'<p class="ok">Kaydedildi</p>\', {"HX-Trigger": "kayitEklendi"}\n        return 302, "", {"Location": "/basvurular/"}\n    govde = _hata_listesi(hatalar)\n    if htmx:\n        return 422, govde, {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"}\n    return 400, govde, {}\n',
+        tests: 'assert form_yaniti(True, {}, True) == (200, \'<p class="ok">Kaydedildi</p>\', {"HX-Trigger": "kayitEklendi"})\nassert form_yaniti(True, {}, False) == (302, "", {"Location": "/basvurular/"})\nh = {"tutar": ["Tutar 0\\\'dan büyük olmalı"], "eposta": ["Geçersiz <e-posta>", "Zorunlu alan"]}\ns, g, b = form_yaniti(False, h, True)\nassert s == 422 and b == {"HX-Retarget": "#form-hatalari", "HX-Reswap": "innerHTML"}\nassert g == "<ul><li>eposta: Geçersiz &lt;e-posta&gt;</li><li>eposta: Zorunlu alan</li><li>tutar: Tutar 0&#x27;dan büyük olmalı</li></ul>", f"Gelen {g}"\nassert form_yaniti(False, h, False) == (400, g, {})\n',
+        hints: ['Hata listesini üreten küçük bir yardımcı fonksiyon yaz; iki geçersiz dalda da kullan.', 'İç içe comprehension: for alan in sorted(hatalar) for m in hatalar[alan].'],
+        why: 'HTMX isteğinde yönlendirme yerine parça ve olay başlığı, hatada ise hedefi değiştiren başlıklar döndürmek; klasik formda PRG ve 400 kullanmak. Aynı görünüm iki istemci türünü de doğru karşılar.' },
+      { t: 'code',
+        id: 'django-giris-w5',
+        stage: 'Hata avı',
+        kind: 'bug',
+        diff: 2,
+        q: '<p>Hatayı bul ve düzelt. <code>kategori_urunleri(kategori)</code> görünümü <code>fetch</code> ile çağrılıyor ve gerçek ürünlerden o kategoridekileri <code>[{"id", "ad", "fiyat"}]</code> listesi olarak JSON\'a çevirmeli (fiyat <code>Decimal</code>, JSON\'da metin, <b>iki ondalık</b>: <code>"145.00"</code>). Üç sorun var: yanıt <code>TypeError</code> veriyor (Decimal), JSON\'da Türkçe karakterler <code>\\u00e7</code> gibi kaçırılıyor ve fiyatlar <code>"145.0"</code> biçiminde çıkıyor. Dönüş: JSON metni.</p>',
+        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport json\nfrom decimal import Decimal\n\ndef kategori_urunleri(kategori):\n    liste = [{"id": u["product_id"], "ad": u["name"], "fiyat": Decimal(str(u["price"]))}\n             for u in urunler if u["category"] == kategori]\n    return json.dumps(liste)\n',
+        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport json\nfrom decimal import Decimal\n\ndef _kodla(o):\n    if isinstance(o, Decimal):\n        return str(o)\n    raise TypeError(type(o).__name__)\n\ndef kategori_urunleri(kategori):\n    liste = [{"id": u["product_id"], "ad": u["name"],\n              "fiyat": Decimal(str(u["price"])).quantize(Decimal("0.01"))}\n             for u in urunler if u["category"] == kategori]\n    return json.dumps(liste, ensure_ascii=False, default=_kodla)\n',
+        tests: 'r = json.loads(kategori_urunleri("Kitap"))\nassert len(r) == 7, "Kitap kategorisinde 7 ürün var"\nassert r[0] == {"id": 9, "ad": "Suç ve Ceza", "fiyat": "145.00"}, f"Gelen {r[0]}"\nassert "Suç ve Ceza" in kategori_urunleri("Kitap"), "Türkçe karakterler kaçırılmamalı (ensure_ascii=False)"\nassert json.loads(kategori_urunleri("Hediye"))[0]["fiyat"] == "500.00"\nassert kategori_urunleri("Yok") == "[]"\n',
+        hints: ['json.dumps\'a Decimal\'i metne çeviren bir default fonksiyonu ver.', 'Decimal("145.0").quantize(Decimal("0.01")) iki ondalığa sabitler.', 'ensure_ascii=False Türkçe karakterleri olduğu gibi bırakır.'],
+        why: 'Django\'nun DecimalField\'ı kendi ondalık hassasiyetini (decimal_places=2) korur ve DjangoJSONEncoder bunu metne çevirir. Standart json modülü Decimal\'i tanımaz; ensure_ascii varsayılanı da Türkçe metni okunmaz kılar.' },
+      { t: 'code',
+        id: 'django-giris-w6',
+        stage: 'Meydan okuma',
+        diff: 3,
+        q: '<p>Aktif aramada eşleşen kısmı vurgula: <code>vurgula(metin, sorgu)</code> metindeki <code>sorgu</code> eşleşmelerini (Türkçe büyük/küçük harf duyarsız) <code>&lt;mark&gt;...&lt;/mark&gt;</code> içine alsın, <b>orijinal yazımı koruyarak</b>. Metnin geri kalanı ve eşleşen parça <code>html.escape</code> ile kaçırılsın (XSS!). Boş sorguda yalnız kaçırılmış metin döner. Türkçe küçültme: <code>"I"→"ı"</code>, <code>"İ"→"i"</code>, sonra <code>lower()</code> (bu dönüşüm uzunluğu korur). Sonra <code>arama_parcasi(sorgu)</code> yaz: gerçek ürünlerden adı sorguyu içerenler için <code>&lt;li&gt;{vurgulu ad}&lt;/li&gt;</code> satırlarını birleştirsin; sonuç yoksa <code>&lt;li class="bos"&gt;Sonuç yok&lt;/li&gt;</code>.</p>',
+        start: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\n\ndef tr_kucuk(s):\n    return s.replace("I", "ı").replace("İ", "i").lower()\n\ndef vurgula(metin, sorgu):\n    pass\n\ndef arama_parcasi(sorgu):\n    pass\n',
+        sol: 'import veri\nurunler = veri.kayitlar("anadolu_market", "products")\nimport html\n\ndef tr_kucuk(s):\n    return s.replace("I", "ı").replace("İ", "i").lower()\n\ndef vurgula(metin, sorgu):\n    if not sorgu:\n        return html.escape(metin)\n    km, ks = tr_kucuk(metin), tr_kucuk(sorgu)\n    parcalar, i = [], 0\n    while True:\n        j = km.find(ks, i)\n        if j == -1:\n            parcalar.append(html.escape(metin[i:]))\n            break\n        parcalar.append(html.escape(metin[i:j]))\n        parcalar.append("<mark>" + html.escape(metin[j:j + len(sorgu)]) + "</mark>")\n        i = j + len(sorgu)\n    return "".join(parcalar)\n\ndef arama_parcasi(sorgu):\n    ks = tr_kucuk(sorgu)\n    satirlar = [f"<li>{vurgula(u[\'name\'], sorgu)}</li>" for u in urunler if ks in tr_kucuk(u["name"])]\n    return "".join(satirlar) or \'<li class="bos">Sonuç yok</li>\'\n',
+        tests: 'assert vurgula("Seramik Kupa Seti", "set") == "Seramik Kupa <mark>Set</mark>i", "Orijinal yazım korunmalı"\nassert vurgula("İnce Memed", "ince") == "<mark>İnce</mark> Memed", "Türkçe İ eşleşmeli"\nassert vurgula("Ada <b>", "a") == "<mark>A</mark>d<mark>a</mark> &lt;b&gt;", "Tüm eşleşmeler ve kaçış"\nassert vurgula(\'27" Monitör\', "") == "27&quot; Monitör"\nassert vurgula("a<b>a", "<b>") == "a<mark>&lt;b&gt;</mark>a", "Eşleşen parça da kaçırılmalı"\nassert arama_parcasi("kahve") == "<li>Türk <mark>Kahve</mark>si Makinesi</li>"\nassert arama_parcasi("SET").count("<mark>Set</mark>") == 3, "Çaydanlık Seti, Seramik Kupa Seti, Dambıl Seti 10kg"\nassert arama_parcasi("xyz") == \'<li class="bos">Sonuç yok</li>\'\n',
+        hints: ['Aramayı küçültülmüş metinde yap ama dilimi orijinal metinden al; dönüşüm uzunluğu koruduğu için indeksler aynıdır.', 'str.find(alt, baslangic) bir sonraki eşleşmenin indeksini, yoksa -1 verir.', 'Kaçışı en son değil, her parçaya ayrı uygula; <mark> etiketlerini kaçırma.'],
+        why: 'Önce kaçırıp sonra vurgulamak <code>&amp;lt;</code> gibi parçaları bölebilir; önce vurgulayıp sonra kaçırmak da <code>&lt;mark&gt;</code> etiketini bozar. Doğru yol parçaları ayırıp her metin parçasını ayrı kaçırmaktır. Django şablonunda bu fonksiyonun sonucu mark_safe ile işaretlenir; içeride kaçış yapıldığı için güvenlidir.' }
+    ],
+    faq: [
+      { q: 'HTMX ile Django REST Framework birlikte kullanılır mı?',
+        a: 'Kullanılabilir ama genellikle gerekmez: HTMX HTML bekler, DRF JSON üretir. Yaygın düzen şudur: web arayüzü Django şablonları + HTMX ile, mobil uygulama ve dış ortaklar DRF API\'siyle beslenir; ikisi aynı modelleri ve servis fonksiyonlarını paylaşır.' },
+      { q: 'django-htmx paketini kurmalı mıyım?',
+        a: 'Zorunlu değil; <code>request.headers.get("HX-Request")</code> yeter. Paket (<code>pip install django-htmx</code>) <code>request.htmx</code> kısayolu, HTMX\'e özgü yanıt sınıfları (<code>HttpResponseClientRedirect</code> gibi) ve geliştirme sırasında hata sayfası desteği verir; birden çok HTMX görünümün varsa kullanışlıdır.' }
+    ],
+    mistakes: [
+      { bad: 'return JsonResponse(list(qs.values()))',
+        good: 'return JsonResponse(list(qs.values()), safe=False)',
+        why: 'JsonResponse varsayılan olarak yalnız sözlük kabul eder; liste için safe=False gerekir.' }
+    ] }
+);
+})(window);
+/* Kesit Python — 'excel-otomasyon' dersi uzantısı: Power BI ve Excel köprüsü: Python betik kaynağı/görseli, =PY, kesit_bi ile yıldız şemalı CSV hazırlama (AUDIT Ekle-4) */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+  { id: 'excel-otomasyon',
+    min: 28,
+    html: `<h2>Derinleş: Power BI ve Excel köprüsü</h2><p>Çoğu kurumda Python tek başına rapor aracı değildir; sonuçlar Excel'e ya da Power BI panolarına gider. Python'un bu dünyaya üç kapısı var: Power BI içinde <b>Python betik kaynağı</b> ve <b>Python görseli</b>, Excel içinde <b>=PY</b> formülü ve en sağlamı, Python'un temizleyip Power BI'a hazır <b>yıldız şemalı dosyalar</b> (CSV/Parquet) üretmesi. Bu bölümde Kesit Power BI'ın kullandığı <code>kesit_bi</code> modelini ve Kesit SQL'in <code>anadolu_market</code> tablolarını kullanacaksın; ikisi aynı kurgusal şirketin iki görünümü.</p><h3>Power BI'da Python: betik kaynağı ve görsel</h3><p><b>Veri al → Diğer → Python betiği</b> ile yazdığın betik çalışır ve betik bittiğinde ad alanındaki <b>her pandas DataFrame</b> ayrı bir tablo olarak seçime sunulur. Power BI Desktop, bilgisayarındaki Python yorumlayıcısını kullanır (Seçenekler → Python betiği oluşturma); pandas ve matplotlib orada kurulu olmalıdır. <b>Python görseli</b> ise rapor sayfasında çalışır: seçtiğin alanlar <code>dataset</code> adlı DataFrame olarak gelir, sen matplotlib ile çizersin.</p><pre class="code"># Power BI → Veri al → Python betiği
+import pandas as pd
+satis = pd.read_csv(r"C:\\veri\\kesit_bi\\Satislar.csv")
+satis = satis[satis["Durum"] != "İptal"]          # yalnız DataFrame'ler tablo olur
+ozet = satis.groupby("Kanal", as_index=False)["Tutar"].sum()
+
+# Python görseli (rapor sayfasında): Power BI "dataset" DataFrame'ini verir
+import matplotlib.pyplot as plt
+dataset.groupby("Kategori")["Tutar"].sum().sort_values().plot.barh()
+plt.show()</pre><div class="warn"><b>İki tuzak</b>1) Python görseline gelen <code>dataset</code> içinde <b>tekrarlanan satırlar silinir</b>; aynı ürün ve tutarlı iki satış tek satıra iner ve toplam yanlış çıkar. Alanlara benzersiz bir sütun (SatirNo) ekle. 2) Python kaynakları Power BI Hizmeti'nde (bulut) yenilenirken kişisel ağ geçidi ister; kurumsal yenilemelerde Python adımını Power BI dışına (zamanlanmış betik) taşımak daha sağlamdır.</div><h3>Excel'de Python: =PY</h3><p>Microsoft 365 Excel'de bir hücreye <code>=PY(</code> yazınca Python düzenleyicisi açılır. Kod Microsoft bulutunda (Anaconda dağıtımıyla) çalışır; yerel dosyalara ve internete erişemez. Hücre aralığı <code>xl("A1:D100", headers=True)</code> ile DataFrame olarak gelir; sonuç hücreye değer ya da Excel tablosu olarak dökülür.</p><pre class="code">=PY(
+df = xl("Satislar[#All]", headers=True)
+df.groupby("Kanal")["Tutar"].sum()
+)</pre><h3>Yıldız şeması: Power BI'ın sevdiği biçim</h3><p>Power BI modeli en iyi <b>yıldız şemasıyla</b> çalışır: ortada olayları (satış satırları) tutan uzun ve dar bir <b>olgu tablosu</b> (fact), çevresinde tanımlayıcı bilgileri tutan <b>boyut tabloları</b> (dimension: Ürünler, Müşteriler, Tarih). Olgu tablosunda yalnız anahtarlar ve ölçülebilir sayılar (Adet, Tutar) bulunur; boyutlarda her anahtar <b>bir kez</b> geçer. Tek dev düz tablo yerine yıldız şeması: dosya küçülür, DAX ölçüleri doğru filtrelenir ve aynı boyut birden çok olguya bağlanabilir.</p><pre class="py">import veri
+
+satis = veri.oku("kesit_bi", "Satislar")
+urun = veri.oku("kesit_bi", "Urunler")
+musteri = veri.oku("kesit_bi", "Musteriler")
+print("olgu:", satis.shape, "| ürün:", urun.shape, "| müşteri:", musteri.shape)
+
+# boyut anahtarları tekil mi? olgudaki her anahtarın boyutta karşılığı var mı?
+print(urun["UrunNo"].is_unique, musteri["MusteriNo"].is_unique)
+print(satis["UrunNo"].isin(urun["UrunNo"]).all(), satis["MusteriNo"].isin(musteri["MusteriNo"]).all())
+
+tablo = satis.merge(urun[["UrunNo", "Kategori"]], on="UrunNo", validate="many_to_one")
+print(tablo.groupby("Kategori")["Tutar"].sum().round(0).sort_values(ascending=False).head(3))</pre><p><code>validate="many_to_one"</code> birleştirmede boyut anahtarının tekil olduğunu denetler; tekil değilse hata verir. Bu tek parametre, raporda tutarların sessizce ikiye katlanmasını önler.</p><h3>Düz tablodan yıldız şemasına</h3><p>Kaynak sistemden çoğu zaman tek bir düz (denormalize) dışa aktarım gelir. Python'un işi: boyutları ayırmak (<code>drop_duplicates</code>), anahtarları denetlemek, bir <b>tarih boyutu</b> üretmek ve dosyaları Power BI'ın sorunsuz okuyacağı biçimde yazmaktır. Anadolu Market'in SQL tablolarını birleştirip yeniden ayıralım:</p><pre class="py">kalem = veri.oku("anadolu_market", "order_items")
+siparis = veri.oku("anadolu_market", "orders")
+urunler = veri.oku("anadolu_market", "products")
+duz = (kalem.merge(siparis, on="order_id")
+            .merge(urunler[["product_id", "name", "category"]], on="product_id"))
+print(duz.shape)
+
+dim_urun = duz[["product_id", "name", "category"]].drop_duplicates().sort_values("product_id")
+olgu = duz[["item_id", "order_id", "order_date", "product_id", "quantity", "unit_price", "discount"]].copy()
+olgu["TarihKey"] = olgu["order_date"].str.replace("-", "").astype(int)   # 20240131 biçimi
+olgu["tutar"] = (olgu["quantity"] * olgu["unit_price"] * (1 - olgu["discount"])).round(2)
+print(dim_urun.shape, olgu.shape)
+print(olgu[["TarihKey", "tutar"]].head(3))</pre><div class="tbl-wrap"><table><tr><th>Biçim</th><th>Artısı</th><th>Dikkat</th></tr><tr><td>CSV (UTF-8)</td><td>Her yerde açılır, okunabilir</td><td>Tür bilgisi yok; tarih ISO (YYYY-AA-GG), ondalık nokta, <code>index=False</code>. Excel'de açılacaksa <code>encoding="utf-8-sig"</code>.</td></tr><tr><td>Parquet</td><td>Tür bilgisi, sıkıştırma, hızlı; Power BI doğrudan okur</td><td><code>df.to_parquet("olgu.parquet")</code> için pyarrow gerekir</td></tr><tr><td>Excel (.xlsx)</td><td>İş kullanıcısı için tanıdık</td><td>1.048.576 satır sınırı; büyük olgu tablosu için uygun değil</td></tr></table></div><div class="note"><b>Gerçek işte</b>Analist ekiplerinin yaygın düzeni: Python (zamanlanmış betik ya da boru hattı) kaynakları çeker ve temizler, yıldız şemalı Parquet/CSV dosyalarını paylaşılan klasöre ya da veri ambarına yazar; Power BI bu dosyalara bağlanır ve yalnız modelleme ile DAX işini yapar. Böylece ağır dönüşümler sürüm kontrolündeki Python kodunda kalır. Modelleme, ilişkiler ve DAX ölçülerinin devamı Kesit Power BI'da; bu tablolar orada da aynı adlarla seni bekliyor.</div>`,
+    ex: [
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Power BI\'da "Python betiği" veri kaynağına şu betiği yazdın: <code>import pandas as pd</code>, <code>yol = "satis.csv"</code>, <code>df = pd.read_csv(yol)</code>, <code>toplam = df["Tutar"].sum()</code>, <code>ozet = df.groupby("Kanal").sum()</code>. Gezgin penceresinde hangi tablolar listelenir?',
+        o: ['df, ozet, toplam ve yol değişkenlerinin hepsi ayrı tablolar olarak listelenir', 'Yalnız df ve ozet; yalnız DataFrame\'ler tablo olur', 'Yalnız betikteki son satırın sonucu olan ozet tablosu listelenir', 'Hiçbiri; tabloyu return ile açıkça döndürmen gerekir'],
+        a: 1,
+        why: 'Power BI betik bittikten sonra ad alanındaki DataFrame\'leri arar. Sayı (toplam) ve metin (yol) tablo olmaz; return gerekmez, son satır da özel değildir.' },
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Neden Power BI\'a tek bir dev düz tablo yerine yıldız şeması (olgu + boyutlar) vermek tercih edilir?',
+        o: ['Power BI düz tabloları hiçbir şekilde içe aktaramadığı için yıldız şeması zorunludur', 'Boyut bilgisi her satırda tekrarlanmaz; model küçülür, filtreler öngörülebilir çalışır', 'Yıldız şeması verinin ilk kez ve tamamen Excel\'de açılmasını sağlar', 'Olgu tablosunda yalnız metin sütunlar bulunduğu için sıkıştırma çok artar'],
+        a: 1,
+        why: 'Düz tablo da yüklenebilir ama ürün adı, kategori, şehir gibi metinler her satırda tekrarlanır. Yıldız şemasında boyut bir kez tutulur, ilişkiler üzerinden filtrelenir; aynı Tarih boyutu Satışlar ve Hedefler gibi birden çok olguyu birlikte filtreleyebilir.' },
+      { t: 'predict',
+        stage: 'Kodu oku',
+        q: 'Power BI Python görselindeki <code>dataset</code> tekrarlanan satırları siler. Bu taklit kod ne yazdırır?',
+        code: 'import pandas as pd\nsatis = pd.DataFrame({"SatirNo": [1, 2, 3], "Urun": ["Şampuan", "Şampuan", "Cezve"], "Tutar": [129, 129, 320]})\ndataset = satis[["Urun", "Tutar"]].drop_duplicates()\ndogru = satis[["SatirNo", "Urun", "Tutar"]].drop_duplicates()\nprint(dataset["Tutar"].sum(), dogru["Tutar"].sum())\n',
+        o: ['449 578', '578 578', '449 449', '578 449'],
+        a: 0,
+        why: 'Urun ve Tutar alanları seçilince iki aynı Şampuan satırı teke iner: 129 + 320 = 449. SatirNo gibi benzersiz bir alan eklenince satırlar ayrışır ve gerçek toplam 578 korunur.' },
+      { t: 'order',
+        stage: 'Kodu oku',
+        q: '<p>Düz tablodan ürün boyutunu ayırıp anahtarın tekil olduğunu doğrulayan programın satırlarını sırala.</p>',
+        lines: ['import pandas as pd', 'duz = pd.DataFrame({"urun_no": [9, 9, 19], "urun": ["Suç ve Ceza", "Suç ve Ceza", "Bakır Cezve"], "adet": [1, 2, 1]})', 'dim_urun = duz[["urun_no", "urun"]].drop_duplicates()', 'dim_urun = dim_urun.sort_values("urun_no").reset_index(drop=True)', 'assert dim_urun["urun_no"].is_unique', 'print(len(duz), len(dim_urun))'],
+        expect: '3 2\n',
+        needs: ['pandas'],
+        hint: 'Boyut, tekrarlar atılarak çıkarılır; sıralama ve indeks sıfırlama ondan sonra gelir.',
+        why: 'Boyut tablosu düz tablonun tanımlayıcı sütunlarından tekrarlar atılarak çıkar; tekillik denetimi ilişkinin bire-çok kurulabileceğini garanti eder.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w1',
+        stage: 'Rehberli',
+        diff: 2,
+        needs: ['pandas'],
+        q: '<p>Power BI için tarih boyutu üret: <code>tarih_boyutu(bas, bit)</code> iki <code>"YYYY-AA-GG"</code> metni alıp her gün için bir satır içeren DataFrame döndürsün. Sütunlar: <code>TarihKey</code> (int, 20240131 biçimi), <code>Tarih</code> (metin, ISO), <code>Yil</code>, <code>AyNo</code>, <code>Ay</code> (Türkçe kısa ad, liste hazır), <code>Ceyrek</code> (<code>"Ç1"</code>…<code>"Ç4"</code>), <code>HaftaSonu</code> (<code>"Evet"</code>/<code>"Hayır"</code>). Test, Kesit Power BI\'daki gerçek <code>kesit_bi.Tarih</code> tablosuyla karşılaştırır.</p>',
+        guide: ['pd.date_range(bas, bit, freq="D") ile günleri üret.', 'Tarih metni ve TarihKey için strftime kullan (TarihKey\'i int\'e çevir).', 'Yıl, ay ve çeyrek için .year, .month, .quarter; Türkçe ay adını listeden al.', 'Hafta sonu: .dayofweek >= 5.'],
+        example: 'import pandas as pd\ng = pd.date_range("2024-03-30", "2024-04-01", freq="D")\nprint(list(g.strftime("%Y%m%d").astype(int)), list(g.quarter), list(g.dayofweek))\n',
+        start: 'import veri\nimport pandas as pd\n\nAYLAR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]\n\ndef tarih_boyutu(bas, bit):\n    gunler = pd.date_range(bas, bit, freq="D")\n    # TODO: sütunları üret\n    return pd.DataFrame()\n',
+        sol: 'import veri\nimport pandas as pd\n\nAYLAR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]\n\ndef tarih_boyutu(bas, bit):\n    g = pd.date_range(bas, bit, freq="D")\n    return pd.DataFrame({\n        "TarihKey": g.strftime("%Y%m%d").astype(int),\n        "Tarih": g.strftime("%Y-%m-%d"),\n        "Yil": g.year,\n        "AyNo": g.month,\n        "Ay": [AYLAR[m - 1] for m in g.month],\n        "Ceyrek": ["Ç" + str(q) for q in g.quarter],\n        "HaftaSonu": ["Evet" if w >= 5 else "Hayır" for w in g.dayofweek],\n    })\n',
+        tests: 't = tarih_boyutu("2022-01-01", "2024-12-31")\nref = veri.oku("kesit_bi", "Tarih")\nassert len(t) == len(ref) == 1096, f"2022-2024 arası 1096 gün; gelen {len(t)}"\nassert list(t.columns) == ["TarihKey", "Tarih", "Yil", "AyNo", "Ay", "Ceyrek", "HaftaSonu"]\nassert t["TarihKey"].iloc[0] == 20220101 and t["TarihKey"].dtype.kind == "i", "TarihKey int olmalı"\nassert t["Tarih"].tolist() == ref["Tarih"].tolist(), "Tarihler kesit_bi ile aynı olmalı"\nassert t["Ay"].tolist() == ref["Ay"].tolist(), "Türkçe ay adları kesit_bi ile aynı olmalı"\nassert t["Ceyrek"].tolist() == ref["Ceyrek"].tolist() and t["HaftaSonu"].tolist() == ref["HaftaSonu"].tolist()\n',
+        hints: ['DatetimeIndex\'in year, month, quarter, dayofweek alanları dizi döndürür.', 'g.strftime("%Y%m%d").astype(int) anahtar sütununu verir.', 'Ay adı: AYLAR[m - 1]; çeyrek: "Ç" + str(q).'],
+        why: 'Power BI\'da zaman zekâsı (time intelligence) fonksiyonları kesintisiz bir tarih tablosu ister; kaynakta satış olmayan günler de bulunmalıdır. Tamsayı anahtar ilişkiyi hızlandırır, Türkçe ad ve çeyrek sütunları rapor eksenleri içindir.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w2',
+        stage: 'Rehberli',
+        diff: 2,
+        needs: ['pandas'],
+        q: '<p>Anadolu Market\'in gerçek tablolarını birleştiren düz tablo (<code>duz</code>) hazır. <code>yildiz_semasi(duz)</code> yaz ve <code>{"olgu": .., "dim_urun": .., "dim_musteri": ..}</code> sözlüğü döndür:</p><ul><li><code>dim_urun</code>: <code>product_id, name, category</code>, tekrarsız, product_id\'ye göre sıralı, indeks sıfırlanmış.</li><li><code>dim_musteri</code>: <code>customer_id, city, segment</code>, aynı kurallarla.</li><li><code>olgu</code>: <code>item_id, order_id, TarihKey, product_id, customer_id, quantity, tutar</code>; TarihKey = order_date\'ten int (20240131), tutar = quantity × unit_price × (1 − discount), 2 basamak.</li></ul>',
+        guide: ['Bir boyut üreten küçük yardımcı yaz: sütunları seç → drop_duplicates → sort_values → reset_index(drop=True).', 'Olgu için kopya al; TarihKey\'i str.replace("-", "") ve astype(int) ile üret.', 'Tutarı hesapla, round(2) uygula, sütunları istenen sırayla seç.'],
+        example: 'import pandas as pd\nd = pd.DataFrame({"t": ["2024-01-31"], "a": [2], "f": [10.0], "i": [0.1]})\nprint(d["t"].str.replace("-", "").astype(int).tolist(), (d["a"] * d["f"] * (1 - d["i"])).round(2).tolist())\n',
+        start: 'import veri\nimport pandas as pd\n\nkalem = veri.oku("anadolu_market", "order_items")\nsiparis = veri.oku("anadolu_market", "orders")\nurunler = veri.oku("anadolu_market", "products")\nmusteriler = veri.oku("anadolu_market", "customers")\nduz = (kalem.merge(siparis, on="order_id")\n            .merge(urunler[["product_id", "name", "category"]], on="product_id")\n            .merge(musteriler[["customer_id", "city", "segment"]], on="customer_id"))\n\ndef yildiz_semasi(duz):\n    # TODO: dim_urun, dim_musteri\n    # TODO: olgu (TarihKey, tutar)\n    return {}\n',
+        sol: 'import veri\nimport pandas as pd\n\nkalem = veri.oku("anadolu_market", "order_items")\nsiparis = veri.oku("anadolu_market", "orders")\nurunler = veri.oku("anadolu_market", "products")\nmusteriler = veri.oku("anadolu_market", "customers")\nduz = (kalem.merge(siparis, on="order_id")\n            .merge(urunler[["product_id", "name", "category"]], on="product_id")\n            .merge(musteriler[["customer_id", "city", "segment"]], on="customer_id"))\ndef _boyut(df, sutunlar):\n    return df[sutunlar].drop_duplicates().sort_values(sutunlar[0]).reset_index(drop=True)\n\ndef yildiz_semasi(duz):\n    olgu = duz.copy()\n    olgu["TarihKey"] = olgu["order_date"].str.replace("-", "").astype(int)\n    olgu["tutar"] = (olgu["quantity"] * olgu["unit_price"] * (1 - olgu["discount"])).round(2)\n    olgu = olgu[["item_id", "order_id", "TarihKey", "product_id", "customer_id", "quantity", "tutar"]]\n    return {"olgu": olgu,\n            "dim_urun": _boyut(duz, ["product_id", "name", "category"]),\n            "dim_musteri": _boyut(duz, ["customer_id", "city", "segment"])}\n',
+        tests: 'y = yildiz_semasi(duz)\nassert y["olgu"].shape == (1620, 7), f"Olgu 1620 satır × 7 sütun olmalı; gelen {y[\'olgu\'].shape}"\nassert y["dim_urun"].shape == (38, 3) and y["dim_urun"]["product_id"].is_unique, "Satılmış 38 ürün, tekil anahtar"\nassert len(y["dim_musteri"]) == 136 and y["dim_musteri"]["customer_id"].is_unique, "Sipariş veren 136 müşteri"\nassert round(float(y["olgu"]["tutar"].sum()), 2) == 1346189.85, "Toplam ciro 1346189.85 TL olmalı"\nassert y["olgu"]["TarihKey"].dtype.kind == "i" and y["olgu"]["TarihKey"].min() == 20220622\nassert y["dim_urun"].index.tolist() == list(range(38)), "İndeks sıfırlanmalı"\nassert "name" not in y["olgu"].columns, "Olgu tablosunda tanımlayıcı metin olmamalı"\n',
+        hints: ['drop_duplicates boyut sütunlarında tekrarları atar.', 'Olguda yalnız anahtarlar ve ölçülebilir sayılar kalmalı.'],
+        why: 'Bu, Power BI\'a veri hazırlamanın özüdür: tanımlayıcı metinler boyutlara, sayılar ve anahtarlar olguya. Model küçülür ve ilişkiler bire-çok kurulur.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w3',
+        stage: 'Kendin yaz',
+        diff: 2,
+        needs: ['pandas'],
+        q: '<p>Model yüklenmeden önce bütünlük denetimi: <code>butunluk_raporu(olgu, boyutlar)</code>. <code>boyutlar</code> <code>{anahtar_sutun: boyut_df}</code> sözlüğü. Her anahtar için <code>{"tekil": bool, "yetim": int}</code> döndür: <code>tekil</code> boyuttaki anahtarın tekrarsız olup olmadığı, <code>yetim</code> olguda boyutta karşılığı olmayan <b>satır</b> sayısı (<code>int</code>). Test önce gerçek <code>kesit_bi</code> tablolarında, sonra bozulmuş bir kopyada çalışır.</p>',
+        start: 'import veri\nimport pandas as pd\nsatis = veri.oku("kesit_bi", "Satislar")\nurun = veri.oku("kesit_bi", "Urunler")\nmusteri = veri.oku("kesit_bi", "Musteriler")\n\ndef butunluk_raporu(olgu, boyutlar):\n    pass\n',
+        sol: 'import veri\nimport pandas as pd\nsatis = veri.oku("kesit_bi", "Satislar")\nurun = veri.oku("kesit_bi", "Urunler")\nmusteri = veri.oku("kesit_bi", "Musteriler")\n\ndef butunluk_raporu(olgu, boyutlar):\n    rapor = {}\n    for anahtar, boyut in boyutlar.items():\n        rapor[anahtar] = {"tekil": bool(boyut[anahtar].is_unique),\n                          "yetim": int((~olgu[anahtar].isin(boyut[anahtar])).sum())}\n    return rapor\n',
+        tests: 'r = butunluk_raporu(satis, {"UrunNo": urun, "MusteriNo": musteri})\nassert r == {"UrunNo": {"tekil": True, "yetim": 0}, "MusteriNo": {"tekil": True, "yetim": 0}}, f"Gerçek model temiz olmalı; gelen {r}"\nbozuk_urun = pd.concat([urun, urun.head(2)])\nbozuk_satis = satis.copy()\nbozuk_satis.loc[:2, "MusteriNo"] = 9999\nr2 = butunluk_raporu(bozuk_satis, {"UrunNo": bozuk_urun, "MusteriNo": musteri})\nassert r2["UrunNo"]["tekil"] is False, "Tekrarlanan ürün anahtarı yakalanmalı"\nassert r2["MusteriNo"]["yetim"] == 3, "Boyutta olmayan 3 satış satırı yetim"\nassert type(r2["MusteriNo"]["yetim"]) is int\n',
+        hints: ['Seri.is_unique tekillik verir.', '~olgu[anahtar].isin(boyut[anahtar]) yetim satırları işaretler; sum ile say.'],
+        why: 'Tekil olmayan boyut anahtarı Power BI\'da ilişkiyi çoka-çok yapar ve toplamları bozar; yetim satırlar raporda "(Boş)" kategorisi olarak görünür. İkisini Python\'da yakalamak, sorunu pano kullanıcısından önce görmeni sağlar.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w4',
+        stage: 'Kendin yaz',
+        diff: 2,
+        needs: ['pandas'],
+        q: '<p>Power BI ve Excel\'in sorunsuz okuyacağı CSV yaz: <code>pbi_csv(df)</code> metin döndürsün. Kurallar: indeks yazılmaz; ayraç virgül, ondalık nokta; <code>float</code> sütunlar 2 basamağa yuvarlanır; <code>datetime</code> sütunlar <code>YYYY-AA-GG</code> metnine çevrilir; eksik değerler boş hücre; satır sonu <code>\\n</code>. Orijinal DataFrame değişmemeli. Sonra <code>kanal_ozeti()</code> yaz: gerçek <code>kesit_bi.Satislar</code>\'dan iptal edilmemiş satışların kanal bazında <code>Tutar</code> toplamını <code>Kanal, Tutar</code> sütunlu DataFrame olarak (kanal adına göre sıralı) döndürsün.</p>',
+        start: 'import veri\nimport pandas as pd\n\ndef pbi_csv(df):\n    pass\n\ndef kanal_ozeti():\n    pass\n',
+        sol: 'import veri\nimport pandas as pd\n\ndef pbi_csv(df):\n    d = df.copy()\n    for c in d.columns:\n        if pd.api.types.is_datetime64_any_dtype(d[c]):\n            d[c] = d[c].dt.strftime("%Y-%m-%d")\n        elif pd.api.types.is_float_dtype(d[c]):\n            d[c] = d[c].round(2)\n    return d.to_csv(index=False, lineterminator="\\n")\n\ndef kanal_ozeti():\n    s = veri.oku("kesit_bi", "Satislar")\n    s = s[s["Durum"] != "İptal"]\n    return s.groupby("Kanal", as_index=False)["Tutar"].sum().sort_values("Kanal").reset_index(drop=True)\n',
+        tests: 'df = pd.DataFrame({"Tarih": pd.to_datetime(["2024-01-31", None]), "Tutar": [1234.5678, None], "Adet": [1, 2]})\nassert pbi_csv(df) == "Tarih,Tutar,Adet\\n2024-01-31,1234.57,1\\n,,2\\n", f"Gelen {pbi_csv(df)!r}"\nassert df["Tutar"].iloc[0] == 1234.5678, "Orijinal tablo değişmemeli"\nk = kanal_ozeti()\nassert k["Kanal"].tolist() == sorted(k["Kanal"].tolist()) and len(k) == 3\nsatis = veri.oku("kesit_bi", "Satislar")\nassert abs(k["Tutar"].sum() - satis.loc[satis["Durum"] != "İptal", "Tutar"].sum()) < 1e-6\nmetin = pbi_csv(k)\nassert metin.startswith("Kanal,Tutar\\n") and metin.count("\\n") == 4\n',
+        hints: ['pd.api.types.is_datetime64_any_dtype ve is_float_dtype sütun türünü sınar.', 'to_csv(index=False, lineterminator="\\n") metin döndürür (yol vermezsen).'],
+        why: 'Power BI ve Excel bölge ayarına göre CSV\'yi farklı yorumlayabilir; ISO tarih ve ondalık nokta her ayarda aynı okunur. Excel\'de Türkçe karakter sorunu yaşarsan dosyaya yazarken encoding="utf-8-sig" kullan.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w5',
+        stage: 'Hata avı',
+        kind: 'bug',
+        diff: 2,
+        needs: ['pandas'],
+        q: '<p>Hatayı bul ve düzelt. <code>bolge_cirosu(satis, musteri)</code> bölge bazında ciroyu döndürmeli. Analist müşteri boyutunu iki dışa aktarımın birleşiminden kurmuş ve bazı müşteriler iki kez gelmiş; panodaki toplam, satış tablosundaki toplamdan büyük çıkıyor. Ayrıca bölgesi boş olan 7 müşterinin satışları <code>groupby</code> tarafından sessizce atılıyor. Fonksiyonu boyutu tekilleştirecek, birleştirmede <code>validate="many_to_one"</code> kullanacak ve boş bölgeyi <code>"Bilinmiyor"</code> yapacak şekilde düzelt. Dönüş: <code>{bolge: tutar}</code> (2 basamak).</p>',
+        start: 'import veri\nimport pandas as pd\n\nsatis = veri.oku("kesit_bi", "Satislar")\nmusteri = veri.oku("kesit_bi", "Musteriler")\nmusteri_iki_kaynak = pd.concat([musteri, musteri.sample(20, random_state=1)])\n\ndef bolge_cirosu(satis, musteri):\n    t = satis.merge(musteri[["MusteriNo", "Bolge"]], on="MusteriNo")\n    return t.groupby("Bolge")["Tutar"].sum().round(2).to_dict()\n',
+        sol: 'import veri\nimport pandas as pd\n\nsatis = veri.oku("kesit_bi", "Satislar")\nmusteri = veri.oku("kesit_bi", "Musteriler")\nmusteri_iki_kaynak = pd.concat([musteri, musteri.sample(20, random_state=1)])\n\ndef bolge_cirosu(satis, musteri):\n    boyut = musteri[["MusteriNo", "Bolge"]].drop_duplicates("MusteriNo")\n    boyut = boyut.fillna({"Bolge": "Bilinmiyor"})\n    t = satis.merge(boyut, on="MusteriNo", validate="many_to_one")\n    return t.groupby("Bolge")["Tutar"].sum().round(2).to_dict()\n',
+        tests: 'r = bolge_cirosu(satis, musteri_iki_kaynak)\nassert abs(sum(r.values()) - satis["Tutar"].sum()) < 0.05, f"Bölge toplamı satış toplamına ({satis[\'Tutar\'].sum():.2f}) eşit olmalı; gelen {sum(r.values()):.2f}"\nassert r["Marmara"] == 358854.55 and r["İç Anadolu"] == 377322.4, f"Gelen {r}"\nassert "Bilinmiyor" in r and r["Bilinmiyor"] > 0, "Bölgesi boş müşterilerin satışı Bilinmiyor altında görünmeli"\nassert r == bolge_cirosu(satis, musteri), "Tekrarlı ve temiz boyut aynı sonucu vermeli"\n',
+        hints: ['Toplamın büyümesi satırların çoğaldığını, küçülmesi ise grupların atıldığını gösterir; groupby varsayılan olarak NaN anahtarı atar.', 'Boyutu drop_duplicates("MusteriNo") ile tekilleştir; merge\'e validate="many_to_one" ekle.'],
+        why: 'Boyutta tekrarlanan anahtar, birleştirmede her eşleşen satış satırını çoğaltır (fan-out). validate parametresi bu hatayı sessiz bir rakam farkı yerine açık bir MergeError\'a çevirir; Power BI\'da aynı sorun çoka-çok ilişki uyarısı olarak görünür.' },
+      { t: 'code',
+        id: 'excel-otomasyon-w6',
+        stage: 'Meydan okuma',
+        diff: 3,
+        needs: ['pandas'],
+        q: '<p>Hedef gerçekleşme tablosu (Kesit Power BI\'daki "Hedef vs Gerçek" sayfasının verisi). <code>gerceklesme(yil)</code>: gerçek <code>kesit_bi</code> tablolarını kullan. <code>Hedefler</code> ay başı tarihli ve kategori bazında (<code>Tarih, Kategori, Hedef</code>). <code>Satislar</code>\'dan <b>iptal edilmemiş</b> satırları al, <code>Urunler</code> ile kategoriyi ekle, <code>YilAy</code> (<code>"2024-01"</code>) ve kategori bazında <code>Tutar</code> topla. Hedeflerle <b>sol birleştirme</b> yap (satış olmayan ay 0 sayılır). Verilen yıl için kategori bazında <code>toplam gerçek / toplam hedef</code> oranını 3 basamakla <code>{kategori: oran}</code> döndür.</p>',
+        start: 'import veri\nimport pandas as pd\n\ndef gerceklesme(yil):\n    pass\n',
+        sol: 'import veri\nimport pandas as pd\n\ndef gerceklesme(yil):\n    s = veri.oku("kesit_bi", "Satislar")\n    u = veri.oku("kesit_bi", "Urunler")\n    h = veri.oku("kesit_bi", "Hedefler")\n    s = s[s["Durum"] != "İptal"].merge(u[["UrunNo", "Kategori"]], on="UrunNo", validate="many_to_one")\n    s["YilAy"] = s["Tarih"].str[:7]\n    gercek = s.groupby(["YilAy", "Kategori"], as_index=False)["Tutar"].sum()\n    h = h.assign(YilAy=h["Tarih"].str[:7])\n    m = h.merge(gercek, on=["YilAy", "Kategori"], how="left").fillna({"Tutar": 0})\n    m = m[m["YilAy"].str.startswith(str(yil))]\n    ozet = m.groupby("Kategori")[["Tutar", "Hedef"]].sum()\n    return {k: round(float(r["Tutar"] / r["Hedef"]), 3) for k, r in ozet.iterrows()}\n',
+        tests: 'r = gerceklesme(2024)\nassert r == {\'Elektronik\': 0.968, \'Ev & Yaşam\': 0.966, \'Giyim\': 0.995, \'Hediye\': 0.836, \'Kitap\': 1.002, \'Kozmetik\': 0.987, \'Spor\': 0.991}, f"2024 gerçekleşme oranları beklenenden farklı: {r}"\nassert r["Kitap"] > 1 > r["Hediye"], "Kitap hedefi aştı, Hediye geride kaldı"\nassert len(gerceklesme(2022)) == 7, "2022 için de 7 kategori"\n',
+        hints: ['Ay anahtarı için Tarih metninin ilk 7 karakteri yeter.', 'Hedeflerden başlayan sol birleştirme, satış olmayan ayları da tutar; fillna ile 0 yap.', 'Oranı aylık oranların ortalaması olarak değil, toplamların oranı olarak hesapla.'],
+        why: 'Oranların ortalaması küçük hedefli ayların etkisini büyütür; toplamların oranı doğru gerçekleşmedir (DAX\'taki DIVIDE(SUM, SUM) ile aynı). Hedeften başlayan sol birleştirme satış olmayan ayları sıfır olarak gösterir; iç birleştirme onları sessizce düşürürdü.' }
+    ],
+    faq: [
+      { q: 'Power BI\'da Python betiği mi kullanmalıyım, yoksa veriyi Python\'da önceden mi hazırlamalıyım?',
+        a: 'Küçük, kişisel raporlarda betik kaynağı pratiktir. Paylaşılan, zamanlanmış yenilenen raporlarda ise dönüşümü Python\'da (sürüm kontrollü bir betikte) yapıp çıktıyı CSV/Parquet ya da veri ambarı tablosu olarak Power BI\'a vermek daha sağlamdır: ağ geçidi ve Python ortamı bağımlılığı ortadan kalkar, hatalar test edilebilir.' },
+      { q: 'Excel\'deki =PY ile openpyxl arasındaki fark nedir?',
+        a: '=PY, Excel\'in içinde, Microsoft bulutunda çalışan Python\'dur; çalışma kitabındaki aralıkları okuyup sonucu hücreye yazar, yerel dosya ve ağ erişimi yoktur. openpyxl ise kendi bilgisayarında çalışan Python\'un Excel dosyasını dışarıdan okuyup yazmasıdır; otomasyon ve toplu rapor üretimi için kullanılır.' }
+    ],
+    mistakes: [
+      { bad: 't = satis.merge(musteri, on="MusteriNo")',
+        good: 't = satis.merge(musteri.drop_duplicates("MusteriNo"), on="MusteriNo", validate="many_to_one")',
+        why: 'Tekrarlı boyut anahtarı birleştirmede satırları çoğaltır ve toplamları şişirir.' }
+    ] }
+);
+})(window);
+/* Kesit Python — 'fastapi' dersi uzantısı: WebSocket/SSE, cursor sayfalama ve filtre, hız sınırı middleware, async DB oturumu (AUDIT Ekle-11) */
+(function (W) {
+'use strict';
+const X = W.PY_EXT = W.PY_EXT || [];
+X.push(
+  { id: 'fastapi',
+    min: 28,
+    html: `<h2>Derinleş: gerçek zamanlı uç noktalar, sayfalama, hız sınırı ve async veritabanı</h2><p>CRUD uç noktaları bir API'nin iskeletidir; canlıda ise şu sorular gelir: "Sipariş durumu değişince ekran kendiliğinden güncellensin", "910 siparişi sayfa sayfa getir ama yeni sipariş gelince kayma olmasın", "bir istemci saniyede 500 istek atıp sistemi düşürmesin", "veritabanı beklerken sunucu kilitlenmesin". Bu bölüm dört konuyu FastAPI kodu (kendi bilgisayarında) ve tarayıcıda çalışan çekirdek mantıkla anlatıyor; sayfalama örnekleri Anadolu Market'in gerçek <code>orders</code> tablosunu kullanıyor.</p><h3>WebSocket ve SSE</h3><p><b>WebSocket</b> iki yönlü, sürekli açık bir bağlantıdır: sohbet, canlı pano, ortak düzenleme. Sunucu birden çok istemciye aynı mesajı gönderecekse (yayın, broadcast) bağlantıları bir yöneticide tutar; kopan bağlantıyı listeden çıkarmayı unutmamalıdır. <b>SSE</b> ise tek yönlüdür (sunucu → istemci), düz HTTP üzerinden çalışır ve LLM cevabı ya da bildirim akışı için yeterlidir (LLM API dersindeki ek bölüm).</p><pre class="code">from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+
+app = FastAPI()
+
+class Yonetici:
+    def __init__(self):
+        self.baglantilar: set[WebSocket] = set()
+    async def baglan(self, ws: WebSocket):
+        await ws.accept()
+        self.baglantilar.add(ws)
+    def ayril(self, ws: WebSocket):
+        self.baglantilar.discard(ws)
+    async def yayinla(self, mesaj: dict):
+        for ws in list(self.baglantilar):
+            try:
+                await ws.send_json(mesaj)
+            except Exception:
+                self.ayril(ws)          # kopmuş istemciyi temizle
+
+yonetici = Yonetici()
+
+@app.websocket("/ws/siparisler")
+async def siparis_akisi(ws: WebSocket):
+    await yonetici.baglan(ws)
+    try:
+        while True:
+            await ws.receive_text()     # istemciden gelen (ör. ping) mesajları dinle
+    except WebSocketDisconnect:
+        yonetici.ayril(ws)
+
+@app.get("/olaylar")
+async def olaylar():
+    async def uret():
+        for i in range(3):
+            yield f"data: {{\\"sira\\": {i}}}\\n\\n"
+    return StreamingResponse(uret(), media_type="text/event-stream")</pre><p>Birden çok sunucu süreci (worker) çalışıyorsa her sürecin kendi bağlantı listesi olur; yayını tüm süreçlere ulaştırmak için Redis Pub/Sub gibi ortak bir kanal gerekir.</p><h3>Sayfalama: offset mi, cursor mu?</h3><div class="tbl-wrap"><table><tr><th></th><th>Offset (<code>?sayfa=3&amp;boyut=20</code>)</th><th>Cursor / keyset (<code>?imlec=...</code>)</th></tr><tr><td>Sorgu</td><td><code>LIMIT 20 OFFSET 40</code></td><td><code>WHERE (tarih, id) &lt; (?, ?) LIMIT 20</code></td></tr><tr><td>Derin sayfa</td><td>Veritabanı atlanan satırları da okur; yavaşlar</td><td>İndeksle doğrudan konuma gider; hep hızlı</td></tr><tr><td>Araya kayıt girerse</td><td>Satırlar kayar: tekrar ya da atlama</td><td>Kayma yok</td></tr><tr><td>"7. sayfaya git"</td><td>Kolay</td><td>Yok; yalnız sonraki/önceki</td></tr></table></div><p>Cursor sayfalamanın kuralı: sıralama anahtarı <b>benzersiz</b> olmalıdır. Sipariş tarihi tek başına benzersiz değildir (aynı gün 6 sipariş olabiliyor); bu yüzden <code>(order_date, order_id)</code> ikilisi kullanılır. İmleç, son satırın anahtarını taşıyan opak bir metindir (base64 ile kodlanmış JSON).</p><pre class="py">import base64, json
+import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders"])
+
+def imlec_yap(tarih, sid):
+    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()
+
+def sayfa(imlec=None, limit=5):
+    sql, p = "SELECT order_id, order_date FROM orders", []
+    if imlec:
+        tarih, sid = json.loads(base64.urlsafe_b64decode(imlec))
+        sql += " WHERE (order_date, order_id) &lt; (?, ?)"
+        p = [tarih, sid]
+    satirlar = con.execute(sql + " ORDER BY order_date DESC, order_id DESC LIMIT ?", p + [limit]).fetchall()
+    sonraki = imlec_yap(*satirlar[-1][::-1]) if len(satirlar) == limit else None
+    return satirlar, sonraki
+
+s1, im = sayfa()
+print(s1)
+print("imleç:", im)
+s2, _ = sayfa(im)
+print(s2)</pre><p>Filtreleme de aynı uç noktada yapılır (<code>?status=delivered&amp;channel=mobile</code>). Güvenli kalıp: izin verilen filtreleri bir <b>beyaz listede</b> tut, değerleri her zaman <code>?</code> parametresiyle geçir, bilinmeyen parametreye 422 dön. Sütun adını kullanıcıdan alıp SQL'e yapıştırmak SQL enjeksiyonudur.</p><h3>Hız sınırı middleware'i</h3><p>En yaygın algoritma <b>jeton kovası</b>dır (token bucket): her istemcinin kovasında en fazla <code>kapasite</code> jeton vardır, kova saniyede <code>hiz</code> jeton dolar, her istek bir jeton harcar. Jeton yoksa <b>429 Too Many Requests</b> ve <code>Retry-After</code> başlığı dönülür. Kısa ani yüklere (burst) izin verir ama ortalama hızı sınırlar.</p><pre class="py">class Kova:
+    def __init__(self, kapasite, hiz):
+        self.kapasite, self.hiz = kapasite, hiz
+        self.jeton, self.son = float(kapasite), 0.0
+    def izin(self, simdi):
+        self.jeton = min(self.kapasite, self.jeton + (simdi - self.son) * self.hiz)
+        self.son = simdi
+        if self.jeton &gt;= 1:
+            self.jeton -= 1
+            return True
+        return False
+
+k = Kova(kapasite=3, hiz=1)          # 3'lük patlama, saniyede 1 istek
+print([k.izin(t) for t in (0, 0.1, 0.2, 0.3, 1.3, 1.4)])</pre><pre class="code">import time
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+kovalar: dict[str, Kova] = {}
+
+@app.middleware("http")
+async def hiz_siniri(request: Request, call_next):
+    anahtar = request.headers.get("X-API-Key") or request.client.host
+    kova = kovalar.setdefault(anahtar, Kova(kapasite=20, hiz=5))
+    if not kova.izin(time.monotonic()):
+        return JSONResponse({"detail": "Çok fazla istek"}, status_code=429, headers={"Retry-After": "1"})
+    return await call_next(request)</pre><p>Bu sözlük tek süreçte çalışır; çok süreçli üretimde sayaçlar Redis'te tutulur (ya da <code>slowapi</code> gibi bir kütüphane ve API ağ geçidi kullanılır). Zaman için <code>time.monotonic()</code> kullan: sistem saati geri alınsa bile ileri akar.</p><h3>Async veritabanı oturumu</h3><p><code>async def</code> uç noktada senkron veritabanı sürücüsü olay döngüsünü bloklar. SQLAlchemy 2'nin async motoru ve async sürücü (PostgreSQL için <code>asyncpg</code>, SQLite için <code>aiosqlite</code>) bekleme sırasında döngüyü serbest bırakır. Oturum, istek başına açılıp kapanan bir bağımlılıktır:</p><pre class="code"># pip install "sqlalchemy[asyncio]" asyncpg
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+motor = create_async_engine("postgresql+asyncpg://kullanici:sifre@db/market", pool_size=10)
+OturumYap = async_sessionmaker(motor, expire_on_commit=False)
+
+async def oturum_al():
+    async with OturumYap() as oturum:
+        yield oturum                    # istek bitince otomatik kapanır
+
+Oturum = Annotated[AsyncSession, Depends(oturum_al)]
+
+@app.get("/siparisler/{sid}")
+async def siparis(sid: int, oturum: Oturum):
+    sonuc = await oturum.execute(select(Siparis).where(Siparis.id == sid))
+    return sonuc.scalar_one_or_none()</pre><div class="note"><b>Gerçek işte</b>Mobil uygulamadaki sonsuz kaydırmalı listeler cursor sayfalamayla, kurye konumu ve sipariş durumu ekranları WebSocket ya da SSE ile çalışır. Kamuya açık API'lerde hız sınırı hem güvenlik hem maliyet konusudur; sınırı ve kalan kotayı <code>X-RateLimit-Remaining</code> gibi başlıklarla belgelemek iyi bir API tasarımıdır.</div>`,
+    ex: [
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Mobil uygulamada siparişler offset sayfalamayla (<code>LIMIT 20 OFFSET 20</code>) en yeniden eskiye listeleniyor. Kullanıcı 1. sayfayı okurken 3 yeni sipariş geldi. 2. sayfada ne olur?',
+        o: ['Hiçbir şey; veritabanı ilk sorgunun anlık görüntüsünü saklar ve 2. sayfa ona göre gelir', '1. sayfanın son 3 siparişi 2. sayfanın başında tekrar görünür', '2. sayfa boş döner çünkü OFFSET değeri artık geçersiz olur', 'Yeni 3 sipariş 2. sayfanın sonuna eklenir'],
+        a: 1,
+        why: 'Yeni kayıtlar listenin başına girince her şey 3 sıra kayar; OFFSET 20 artık eski 18. sıradan başlar. Cursor sayfalama "şu anahtardan sonrası" dediği için bu kaymadan etkilenmez.' },
+      { t: 'mc',
+        stage: 'Isınma',
+        q: 'Kurye uygulaması konumunu saniyede bir sunucuya gönderiyor, müşteri ekranı da kurye konumunu canlı izliyor. Kurye tarafı için en uygun teknoloji hangisi?',
+        o: ['SSE, çünkü düz HTTP üzerinden çalışır ve vekil sunucularla uyumludur', 'Her saniye konum için yeni bir POST isteği açıp kapatmak', 'WebSocket, çünkü istemci de sürekli veri gönderiyor', 'Her 10 saniyede bir GET isteğiyle sunucuyu yoklamak (polling)'],
+        a: 2,
+        why: 'SSE tek yönlüdür (sunucudan istemciye). Kurye sürekli veri gönderdiği için iki yönlü ve açık kalan WebSocket bağlantısı uygundur. Müşteri ekranı ise yalnız dinlediği için SSE ile de beslenebilir.' },
+      { t: 'predict',
+        stage: 'Kodu oku',
+        q: 'Jeton kovası (token bucket) simülasyonu. Bu kod ne yazdırır?',
+        code: 'kapasite, hiz = 2, 0.5\njeton, son = 2.0, 0.0\nsonuc = []\nfor t in (0, 0, 0, 2, 3, 4):\n    jeton = min(kapasite, jeton + (t - son) * hiz)\n    son = t\n    if jeton >= 1:\n        jeton -= 1\n        sonuc.append("+")\n    else:\n        sonuc.append("-")\nprint("".join(sonuc))\n',
+        o: ['++-+-+', '++-++-', '+++-+-', '++----'],
+        a: 0,
+        why: 'İlk iki istek kovadaki 2 jetonu harcar, üçüncü reddedilir. t=2\'de 2 sn × 0.5 = 1 jeton dolmuş: kabul. t=3\'te yalnız 0.5 jeton: red. t=4\'te 0.5 + 0.5 = 1: kabul.' },
+      { t: 'code',
+        id: 'fastapi-w1',
+        stage: 'Rehberli',
+        diff: 1,
+        q: '<p>Cursor sayfalama için imleç kodlayıcı yaz. <code>imlec_kodla(tarih, sid)</code>: <code>[tarih, sid]</code> listesini JSON\'a, sonra <code>base64.urlsafe_b64encode</code> ile metne çevirsin (dönüş <code>str</code>). <code>imlec_coz(metin)</code>: tersini yapıp <code>(tarih, sid)</code> demeti döndürsün; bozuk imleçte (<code>binascii.Error</code>, <code>json.JSONDecodeError</code>, <code>UnicodeDecodeError</code>, yanlış yapı) <code>ValueError("geçersiz imleç")</code> fırlatsın. Yapı denetimi: 2 elemanlı liste, ilki <code>str</code>, ikincisi <code>int</code>.</p>',
+        guide: ['Kodlarken: json.dumps → .encode() → urlsafe_b64encode → .decode().', 'Çözerken tersini yap; json.loads bytes da kabul eder.', 'Çözme adımlarını try içine al; yakaladığın hataları ValueError\'a çevir.', 'Yapıyı isinstance ile denetle.'],
+        example: 'import base64\nb = base64.urlsafe_b64encode("merhaba".encode()).decode()\nprint(b, base64.urlsafe_b64decode(b).decode())\n',
+        start: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    # TODO\n    pass\n\ndef imlec_coz(metin):\n    # TODO\n    pass\n',
+        sol: 'import base64\nimport binascii\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    try:\n        veri = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) as h:\n        raise ValueError("geçersiz imleç") from h\n    if not (isinstance(veri, list) and len(veri) == 2 and isinstance(veri[0], str) and isinstance(veri[1], int)):\n        raise ValueError("geçersiz imleç")\n    return veri[0], veri[1]\n',
+        tests: 'i = imlec_kodla("2024-12-31", 905)\nassert isinstance(i, str), "Dönüş metin (str) olmalı"\nassert imlec_coz(i) == ("2024-12-31", 905), "Kodlanan imleç geri çözülebilmeli"\nfor bozuk in ("@@@", "bm90IGpzb24=", base64.urlsafe_b64encode(b\'{"a": 1}\').decode()):\n    try:\n        imlec_coz(bozuk)\n        assert False, f"{bozuk!r} için ValueError beklenirdi"\n    except ValueError as h:\n        assert str(h) == "geçersiz imleç"\n',
+        hints: ['base64 metin değil bytes ile çalışır: encode/decode adımlarını unutma.', 'except (binascii.Error, json.JSONDecodeError, UnicodeDecodeError) ile yakala; json.JSONDecodeError zaten ValueError alt sınıfıdır.'],
+        why: 'İmleç istemciye opak bir metin olarak verilir; içini kurcalayan ya da bozan istemci 500 değil, 400/422 almalıdır. Bu yüzden çözme hataları tek bir anlamlı hataya çevrilir.' },
+      { t: 'code',
+        id: 'fastapi-w2',
+        stage: 'Rehberli',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Anadolu Market\'in gerçek <code>orders</code> tablosu için cursor sayfalama yaz: <code>siparis_sayfasi(con, imlec=None, limit=20)</code>. Sıralama <code>order_date DESC, order_id DESC</code>. İmleç varsa çöz ve <code>WHERE (order_date, order_id) &lt; (?, ?)</code> uygula. Dönüş: <code>{"ogeler": [order_id, ...], "sonraki": imlec_ya_da_None}</code>. Sonraki imleç, sayfa tam doluysa son satırın <code>(order_date, order_id)</code> değerinden üretilsin. İmleç yardımcıları hazır.</p>',
+        guide: ['Temel SQL\'i ve boş parametre listesini hazırla.', 'İmleç varsa imlec_coz ile çöz, WHERE koşulunu ve iki parametreyi ekle.', 'ORDER BY ... LIMIT ? ile çalıştır.', 'Satır sayısı limit\'e eşitse son satırdan imleç üret, değilse None.'],
+        example: 'import sqlite3\nc = sqlite3.connect(":memory:")\nprint(c.execute("SELECT (1, 5) < (1, 7), (2, 1) < (1, 9)").fetchone())\n',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\n\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    # TODO: imleç koşulu, sıralama, limit, sonraki imleç\n    return {"ogeler": [], "sonraki": None}\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\nimport base64\nimport json\n\ndef imlec_kodla(tarih, sid):\n    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()\n\ndef imlec_coz(metin):\n    tarih, sid = json.loads(base64.urlsafe_b64decode(metin.encode()))\n    return tarih, sid\ndef siparis_sayfasi(con, imlec=None, limit=20):\n    sql = "SELECT order_date, order_id FROM orders"\n    parametreler = []\n    if imlec:\n        tarih, sid = imlec_coz(imlec)\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        parametreler += [tarih, sid]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, parametreler + [limit]).fetchall()\n    sonraki = imlec_kodla(*satirlar[-1]) if len(satirlar) == limit else None\n    return {"ogeler": [s[1] for s in satirlar], "sonraki": sonraki}\n',
+        tests: 's = siparis_sayfasi(con)\nassert s["ogeler"] == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47], "İlk sayfa en yeni 20 sipariş olmalı"\nassert s["sonraki"] is not None, "Tam dolu sayfada sonraki imleç olmalı"\nhepsi, im, adim = [], None, 0\nwhile True:\n    s = siparis_sayfasi(con, im, limit=50)\n    hepsi += s["ogeler"]\n    im = s["sonraki"]\n    adim += 1\n    if im is None or adim > 30:\n        break\nassert len(hepsi) == 910 and len(set(hepsi)) == 910, f"Tüm sayfalar 910 benzersiz sipariş vermeli, gelen {len(hepsi)} / {len(set(hepsi))}"\nassert hepsi == [655, 882, 461, 255, 210, 117, 466, 454, 506, 456, 629, 239, 123, 539, 721, 608, 213, 806, 823, 47, 397, 427, 770, 674, 437, 206, 597, 836, 566, 475, 797, 718, 344, 131, 63, 625, 517, 908, 535, 390, 842, 81, 18, 368, 335, 201, 127, 327, 302, 110, 654, 183, 803, 272, 102, 627, 582, 139, 881, 779, 740, 431, 487, 51, 209, 72, 910, 353, 284, 116, 46, 17, 680, 596, 205, 835, 604, 371, 238, 68, 750, 426, 150, 849, 516, 460, 217, 822, 653, 903, 534, 122, 24, 430, 568, 436, 769, 756, 581, 165, 130, 673, 453, 301, 887, 505, 237, 796, 343, 109, 727, 143, 101, 739, 515, 465, 204, 533, 425, 389, 595, 707, 652, 208, 182, 838, 768, 326, 271, 200, 749, 688, 525, 129, 565, 349, 57, 717, 514, 429, 138, 16, 342, 656, 607, 435, 45, 821, 841, 504, 198, 777, 532, 767, 886, 866, 325, 820, 121, 23, 564, 334, 471, 909, 679, 795, 455, 452, 434, 341, 802, 651, 603, 524, 424, 270, 128, 100, 590, 713, 181, 834, 687, 254, 170, 62, 538, 164, 441, 44, 50, 367, 513, 388, 115, 531, 626, 314, 80, 837, 748, 236, 300, 74, 708, 203, 672, 778, 594, 885, 99, 766, 580, 650, 142, 686, 523, 880, 720, 459, 329, 738, 324, 207, 726, 805, 678, 340, 197, 137, 548, 108, 43, 212, 15, 451, 819, 133, 22, 366, 348, 246, 613, 387, 186, 765, 503, 352, 149, 649, 685, 467, 848, 865, 716, 269, 433, 428, 281, 833, 794, 775, 617, 747, 671, 512, 71, 42, 884, 737, 180, 98, 14, 120, 907, 840, 339, 299, 628, 450, 163, 126, 530, 470, 593, 67, 235, 818, 432, 522, 423, 440, 563, 97, 41, 883, 537, 648, 323, 864, 764, 511, 479, 253, 202, 624, 268, 136, 21, 199, 793, 498, 234, 49, 13, 298, 844, 684, 589, 529, 502, 486, 386, 283, 879, 216, 179, 56, 832, 602, 746, 396, 817, 365, 313, 592, 474, 370, 567, 338, 185, 61, 579, 670, 736, 497, 677, 141, 804, 755, 763, 528, 510, 79, 12, 701, 521, 322, 267, 776, 233, 712, 536, 878, 816, 715, 73, 148, 119, 449, 337, 902, 612, 351, 297, 40, 616, 96, 162, 831, 439, 792, 647, 385, 606, 591, 801, 578, 266, 196, 168, 527, 464, 815, 328, 520, 496, 735, 509, 877, 683, 411, 501, 706, 588, 562, 66, 422, 20, 95, 70, 762, 333, 135, 321, 774, 11, 265, 167, 118, 39, 232, 347, 734, 682, 140, 364, 847, 245, 791, 336, 178, 473, 761, 485, 495, 296, 161, 60, 719, 601, 547, 700, 577, 669, 830, 107, 561, 876, 646, 526, 448, 384, 19, 410, 278, 38, 611, 395, 125, 814, 519, 508, 458, 10, 714, 463, 790, 745, 211, 906, 320, 264, 94, 725, 252, 231, 65, 760, 37, 645, 711, 147, 48, 623, 587, 134, 280, 132, 560, 494, 478, 295, 699, 177, 184, 363, 829, 681, 319, 843, 421, 383, 93, 875, 500, 409, 350, 195, 839, 69, 800, 230, 518, 36, 9, 615, 346, 215, 160, 705, 846, 644, 332, 507, 733, 676, 166, 600, 469, 318, 484, 813, 773, 263, 438, 176, 244, 106, 759, 472, 576, 668, 901, 559, 294, 92, 362, 282, 55, 610, 698, 8, 382, 447, 493, 369, 420, 317, 277, 499, 828, 789, 605, 78, 35, 812, 408, 546, 732, 643, 229, 124, 312, 262, 667, 159, 874, 279, 758, 91, 492, 419, 293, 407, 7, 34, 381, 64, 175, 724, 666, 642, 558, 457, 575, 331, 251, 811, 757, 406, 316, 276, 228, 731, 609, 6, 905, 462, 345, 827, 158, 788, 772, 380, 33, 599, 261, 898, 697, 446, 873, 641, 491, 90, 315, 292, 174, 5, 622, 418, 194, 640, 379, 214, 897, 227, 723, 54, 826, 260, 157, 275, 696, 405, 59, 675, 574, 730, 89, 545, 361, 190, 787, 259, 810, 173, 477, 404, 4, 394, 665, 291, 32, 896, 378, 863, 146, 88, 557, 704, 639, 490, 825, 744, 710, 695, 156, 483, 403, 226, 573, 311, 445, 786, 729, 586, 468, 3, 872, 225, 189, 845, 553, 544, 290, 330, 31, 824, 417, 904, 53, 862, 809, 799, 360, 377, 274, 258, 243, 87, 728, 621, 614, 895, 638, 572, 289, 188, 900, 771, 77, 155, 402, 694, 172, 105, 86, 393, 785, 556, 871, 664, 722, 257, 242, 861, 637, 571, 30, 58, 308, 224, 894, 754, 552, 114, 543, 376, 2, 416, 273, 193, 808, 187, 256, 85, 743, 693, 444, 288, 798, 154, 476, 401, 598, 359, 375, 29, 169, 307, 1, 250, 171, 807, 784, 551, 52, 663, 570, 860, 482, 542, 636, 104, 893, 585, 223, 703, 692, 84, 145, 870, 709, 555, 287, 28, 742, 550, 635, 443, 192, 306, 892, 222, 400, 489, 76, 859, 374, 415, 634, 691, 153, 620, 392, 869, 27, 305, 783, 286, 753, 358, 899, 541, 891, 633, 549, 662, 83, 221, 310, 103, 399, 554, 304, 26, 569, 373, 690, 249, 584, 858, 632, 398, 113, 144, 82, 303, 372, 285, 191, 782, 890, 241, 442, 481, 357, 220, 857, 152, 868, 25, 75, 631, 661, 540, 752, 414, 219, 741, 488, 689, 856, 660, 889, 112, 630, 855, 151, 309, 781, 218, 659, 413, 356, 867, 583, 854, 751, 355, 480, 702, 888, 853, 619, 240, 658, 111, 852, 391, 248, 412, 780, 851, 354, 657, 618, 850, 247], "Sayfalar birleşince tam sıralı liste çıkmalı"\n',
+        hints: ['SQLite satır değeri karşılaştırması (a, b) &lt; (?, ?) iki sütunlu sözlük sırası karşılaştırmasıdır.', 'Sonraki imleç: imlec_kodla(*satirlar[-1]) — satır zaten (order_date, order_id) sırasında.'],
+        why: 'Tarih tek başına benzersiz olmadığı için order_id eşitlik bozucu (tie-breaker) olarak eklenir. Böylece aynı gündeki 6 sipariş sayfa sınırına denk gelse de hiçbiri atlanmaz ya da tekrarlanmaz.' },
+      { t: 'code',
+        id: 'fastapi-w3',
+        stage: 'Kendin yaz',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Filtre kalıbı: <code>filtre_sorgusu(parametreler)</code> sorgu parametresi sözlüğünü <code>(sql, degerler)</code> demetine çevirsin. Temel: <code>SELECT COUNT(*) FROM orders</code>. İzinli filtreler ve SQL karşılıkları (bu sırayla eklenir): <code>status</code> → <code>status = ?</code>, <code>channel</code> → <code>channel = ?</code>, <code>baslangic</code> → <code>order_date &gt;= ?</code>, <code>bitis</code> → <code>order_date &lt;= ?</code>. Koşullar <code>" WHERE "</code> ve <code>" AND "</code> ile birleşir. İzinsiz anahtar varsa <code>ValueError</code> (mesajda anahtar adı geçsin). Testler sorguyu gerçek <code>orders</code> tablosunda çalıştırır.</p>',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef filtre_sorgusu(parametreler):\n    pass\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\nIZINLI = {"status": "status = ?", "channel": "channel = ?",\n          "baslangic": "order_date >= ?", "bitis": "order_date <= ?"}\n\ndef filtre_sorgusu(parametreler):\n    bilinmeyen = set(parametreler) - set(IZINLI)\n    if bilinmeyen:\n        raise ValueError(f"bilinmeyen filtre: {\', \'.join(sorted(bilinmeyen))}")\n    kosullar, degerler = [], []\n    for anahtar, kosul in IZINLI.items():\n        if anahtar in parametreler:\n            kosullar.append(kosul)\n            degerler.append(parametreler[anahtar])\n    sql = "SELECT COUNT(*) FROM orders"\n    if kosullar:\n        sql += " WHERE " + " AND ".join(kosullar)\n    return sql, degerler\n',
+        tests: 'sql, d = filtre_sorgusu({"channel": "mobile", "status": "delivered"})\nassert sql == "SELECT COUNT(*) FROM orders WHERE status = ? AND channel = ?", f"Sıra izinli listedeki gibi: {sql}"\nassert d == ["delivered", "mobile"]\nassert con.execute(sql, d).fetchone()[0] == 330, "Mobilde teslim edilen 330 sipariş var"\nsql2, d2 = filtre_sorgusu({"baslangic": "2024-01-01", "bitis": "2024-12-31", "status": "returned"})\nassert con.execute(sql2, d2).fetchone()[0] == con.execute("SELECT COUNT(*) FROM orders WHERE status=\'returned\' AND order_date LIKE \'2024%\'").fetchone()[0]\nassert filtre_sorgusu({}) == ("SELECT COUNT(*) FROM orders", [])\ntry:\n    filtre_sorgusu({"status": "x", "1=1; DROP TABLE orders": "1"})\n    assert False, "İzinsiz anahtar reddedilmeli"\nexcept ValueError as h:\n    assert "DROP" in str(h), "Hata mesajında anahtar adı geçmeli"\n',
+        hints: ['İzinli filtreleri sıralı bir sözlükte tut; sözlükler ekleme sırasını korur.', 'Değerleri asla SQL metnine yapıştırma; ? yer tutucusu ve parametre listesi kullan.'],
+        why: 'Beyaz liste hem SQL enjeksiyonunu hem yazım hatası olan parametrelerin sessizce yok sayılmasını önler. FastAPI\'de bu fonksiyon bir bağımlılık (Depends) olarak sorgu parametrelerini toplar.' },
+      { t: 'code',
+        id: 'fastapi-w4',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p>Anahtar başına jeton kovası: <code>Sinirlayici(kapasite, hiz, saat)</code>. <code>saat</code> çağrıldığında saniye döndüren bir fonksiyon (testte sahte saat verilir). <code>izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürsün: jeton varsa <code>(True, 0.0)</code>; yoksa <code>(False, s)</code>, s bir jetonun dolması için gereken saniye (2 basamak). Her anahtarın kovası ilk istekte dolu başlar; kovalar birbirinden bağımsızdır.</p>',
+        start: 'class Sinirlayici:\n    pass\n',
+        sol: 'class Sinirlayici:\n    def __init__(self, kapasite, hiz, saat):\n        self.kapasite, self.hiz, self.saat = kapasite, hiz, saat\n        self.kovalar = {}\n\n    def izin_ver(self, anahtar):\n        simdi = self.saat()\n        jeton, son = self.kovalar.get(anahtar, (float(self.kapasite), simdi))\n        jeton = min(self.kapasite, jeton + (simdi - son) * self.hiz)\n        if jeton >= 1:\n            self.kovalar[anahtar] = (jeton - 1, simdi)\n            return True, 0.0\n        self.kovalar[anahtar] = (jeton, simdi)\n        return False, round((1 - jeton) / self.hiz, 2)\n',
+        tests: 't = [0.0]\ns = Sinirlayici(kapasite=2, hiz=0.5, saat=lambda: t[0])\nassert s.izin_ver("a") == (True, 0.0) and s.izin_ver("a") == (True, 0.0), "İlk iki istek kapasiteden"\nassert s.izin_ver("a") == (False, 2.0), "Jeton bitti: 1 jeton için 1/0.5 = 2 sn beklemeli"\nassert s.izin_ver("b") == (True, 0.0), "Başka anahtarın kovası ayrı"\nt[0] = 1.0\nassert s.izin_ver("a") == (False, 1.0), "1 sn sonra 0.5 jeton var; 1 sn daha gerek"\nt[0] = 2.0\nassert s.izin_ver("a") == (True, 0.0), "2. saniyede 1 jeton dolmuş olmalı"\nt[0] = 100.0\nassert [s.izin_ver("a")[0] for _ in range(3)] == [True, True, False], "Kova kapasiteden fazla dolmamalı"\n',
+        hints: ['Her anahtar için (jeton, son_zaman) sakla.', 'Dolum: min(kapasite, jeton + geçen_süre * hiz).', 'Bekleme: (1 - jeton) / hiz.'],
+        why: 'Retry-After için gereken süreyi hesaplamak istemciye "ne zaman tekrar dene" bilgisini verir; körlemesine yeniden deneme fırtınasını önler. Saat fonksiyonunu dışarıdan almak testi deterministik yapar.' },
+      { t: 'code',
+        id: 'fastapi-w5',
+        stage: 'Kendin yaz',
+        diff: 2,
+        q: '<p>WebSocket yayın yöneticisinin mantığını yaz: <code>YayinYoneticisi</code>. <code>baglan(ws)</code> ve <code>ayril(ws)</code> bağlantıyı kümeye ekler/çıkarır (olmayanı çıkarmak hata vermesin). <code>async yayinla(mesaj)</code> her bağlantının <code>await ws.send_json(mesaj)</code> metodunu çağırsın; gönderimde istisna fırlatan bağlantıyı kümeden çıkarsın ve diğerlerine göndermeye devam etsin. Başarılı gönderim sayısını döndürsün. <code>len(yonetici)</code> bağlı istemci sayısını versin.</p>',
+        start: 'class YayinYoneticisi:\n    pass\n',
+        sol: 'class YayinYoneticisi:\n    def __init__(self):\n        self.baglantilar = set()\n\n    def baglan(self, ws):\n        self.baglantilar.add(ws)\n\n    def ayril(self, ws):\n        self.baglantilar.discard(ws)\n\n    def __len__(self):\n        return len(self.baglantilar)\n\n    async def yayinla(self, mesaj):\n        basarili = 0\n        for ws in list(self.baglantilar):\n            try:\n                await ws.send_json(mesaj)\n                basarili += 1\n            except Exception:\n                self.ayril(ws)\n        return basarili\n',
+        tests: 'import asyncio\nclass WS:\n    def __init__(self, kopuk=False):\n        self.kopuk, self.gelen = kopuk, []\n    async def send_json(self, m):\n        if self.kopuk:\n            raise ConnectionError("koptu")\n        self.gelen.append(m)\ny = YayinYoneticisi()\na, b, c = WS(), WS(kopuk=True), WS()\nfor w in (a, b, c):\n    y.baglan(w)\nassert len(y) == 3\nn = asyncio.run(y.yayinla({"siparis": 905, "durum": "kargoda"}))\nassert n == 2, f"İki başarılı gönderim olmalı, gelen {n}"\nassert len(y) == 2 and b not in y.baglantilar, "Kopuk bağlantı çıkarılmalı"\nassert a.gelen == c.gelen == [{"siparis": 905, "durum": "kargoda"}]\ny.ayril(WS())\ny.ayril(a)\nassert len(y) == 1\n',
+        hints: ['Küme üzerinde gezerken ondan eleman çıkarmak RuntimeError verir: list(self.baglantilar) kopyası üzerinde gez.', 'discard, olmayan elemanda hata vermez.'],
+        why: 'Kopan istemciyi temizlemezsen her yayında aynı hata tekrar eder ve bellek sızar. Kopya üzerinde gezmek, döngü sırasında kümeyi güvenle değiştirmeni sağlar.' },
+      { t: 'code',
+        id: 'fastapi-w6',
+        stage: 'Hata avı',
+        kind: 'bug',
+        diff: 2,
+        needs: ['sqlite3'],
+        q: '<p>Hatayı bul ve düzelt. Mobil ekip "sonsuz kaydırmada bazı siparişler hiç görünmüyor" diyor. <code>sayfa_getir(con, son_tarih=None, limit=50)</code> imleç olarak yalnız son satırın tarihini kullanıyor. Aynı gün birden çok sipariş olduğunda sayfa sınırındaki siparişler atlanıyor. Fonksiyonu <code>(order_date, order_id)</code> ikilisiyle çalışacak şekilde düzelt: parametre adı <code>son</code> olsun (ya <code>None</code> ya da <code>(tarih, id)</code> demeti), dönüş <code>(id_listesi, yeni_son)</code>; sayfa eksik dolarsa <code>yeni_son</code> <code>None</code>.</p>',
+        start: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE order_date < ?"\n        p.append(son[0])\n    sql += " ORDER BY order_date DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
+        sol: 'import veri\ncon = veri.baglan("anadolu_market", tablolar=["orders"])\n\ndef sayfa_getir(con, son=None, limit=50):\n    sql, p = "SELECT order_date, order_id FROM orders", []\n    if son:\n        sql += " WHERE (order_date, order_id) < (?, ?)"\n        p += [son[0], son[1]]\n    sql += " ORDER BY order_date DESC, order_id DESC LIMIT ?"\n    satirlar = con.execute(sql, p + [limit]).fetchall()\n    yeni = (satirlar[-1][0], satirlar[-1][1]) if len(satirlar) == limit else None\n    return [s[1] for s in satirlar], yeni\n',
+        tests: 'hepsi, son = [], None\nfor _ in range(40):\n    ids, son = sayfa_getir(con, son, limit=50)\n    hepsi += ids\n    if son is None:\n        break\nassert len(set(hepsi)) == 910, f"910 siparişin hepsi görünmeli; görünen {len(set(hepsi))}"\nassert len(hepsi) == 910, "Hiçbir sipariş iki kez gelmemeli"\nids, _ = sayfa_getir(con, ("2024-11-27", 10**9), limit=6)\nassert len(ids) == 6 and len(set(ids)) == 6\n',
+        hints: ['Sıralama anahtarı benzersiz olmalı: tarih + id.', 'Hem WHERE koşulunda hem ORDER BY\'da ikinci anahtarı kullan.'],
+        why: 'Yalnız tarihe göre "&lt; son_tarih" demek, son tarihle aynı gündeki ama sayfaya sığmamış siparişleri atlar; sıralamada id olmadığı için aynı gündeki siparişlerin sırası da belirsizdir.' },
+      { t: 'code',
+        id: 'fastapi-w7',
+        stage: 'Meydan okuma',
+        diff: 3,
+        q: '<p>Hız sınırı ara katmanını (middleware) yaz. <code>hiz_siniri(uygulama, sinirlayici)</code> bir async fonksiyon döndürsün: <code>async def sarili(istek)</code>. <code>istek</code> sözlüğünde <code>"basliklar"</code> (sözlük) ve <code>"istemci"</code> (IP) var. Anahtar: <code>X-API-Key</code> başlığı varsa o, yoksa IP. <code>sinirlayici.izin_ver(anahtar)</code> <code>(izin, bekle)</code> döndürür (önceki görevdeki gibi). İzin yoksa uygulamayı <b>çağırmadan</b> <code>{"durum": 429, "govde": {"detail": "Çok fazla istek"}, "basliklar": {"Retry-After": str(math.ceil(bekle))}}</code> döndür. İzin varsa <code>await uygulama(istek)</code> sonucunu döndür ama yanıt başlıklarına <code>"X-RateLimit-Key"</code> olarak kullanılan anahtar türünü (<code>"api-key"</code> ya da <code>"ip"</code>) ekle (yanıtta <code>basliklar</code> yoksa oluştur; orijinal sözlüğü değiştirme).</p>',
+        start: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    pass\n',
+        sol: 'import math\n\ndef hiz_siniri(uygulama, sinirlayici):\n    async def sarili(istek):\n        api_anahtari = istek.get("basliklar", {}).get("X-API-Key")\n        anahtar = api_anahtari or istek["istemci"]\n        izin, bekle = sinirlayici.izin_ver(anahtar)\n        if not izin:\n            return {"durum": 429, "govde": {"detail": "Çok fazla istek"},\n                    "basliklar": {"Retry-After": str(math.ceil(bekle))}}\n        yanit = await uygulama(istek)\n        basliklar = dict(yanit.get("basliklar", {}))\n        basliklar["X-RateLimit-Key"] = "api-key" if api_anahtari else "ip"\n        return {**yanit, "basliklar": basliklar}\n    return sarili\n',
+        tests: 'import asyncio\nclass S:\n    def __init__(self, izinler):\n        self.izinler, self.gorulen = list(izinler), []\n    def izin_ver(self, anahtar):\n        self.gorulen.append(anahtar)\n        return self.izinler.pop(0)\ncagri = []\nSABIT = {"durum": 200, "govde": {"ok": True}}\nasync def uygulama(istek):\n    cagri.append(istek["istemci"])\n    return SABIT\ns = S([(True, 0.0), (False, 1.2), (True, 0.0)])\nm = hiz_siniri(uygulama, s)\nr1 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r1 == {"durum": 200, "govde": {"ok": True}, "basliklar": {"X-RateLimit-Key": "ip"}}, f"Gelen {r1}"\nassert "basliklar" not in SABIT, "Uygulamanın döndürdüğü sözlük değiştirilmemeli"\nr2 = asyncio.run(m({"basliklar": {}, "istemci": "10.0.0.1"}))\nassert r2["durum"] == 429 and r2["basliklar"] == {"Retry-After": "2"}, "1.2 sn yukarı yuvarlanır: 2"\nassert cagri == ["10.0.0.1"], "Reddedilen istekte uygulama çağrılmamalı"\nr3 = asyncio.run(m({"basliklar": {"X-API-Key": "k-42"}, "istemci": "10.0.0.1"}))\nassert s.gorulen[-1] == "k-42" and r3["basliklar"]["X-RateLimit-Key"] == "api-key"\n',
+        hints: ['Kapanış (closure): dış fonksiyon uygulama ve sinirlayici\'yi yakalar, içteki async fonksiyonu döndürür.', 'Yanıtı kopyalamak için {**yanit, "basliklar": yeni_basliklar} kullan.', 'math.ceil(1.2) == 2'],
+        why: 'Gerçek FastAPI middleware\'i de aynı biçimdedir: isteği alır, ya kısa devre yapar (429) ya da call_next ile zinciri sürdürür ve yanıtı süsler. Orijinal yanıtı değiştirmemek paylaşılan nesnelerde sürpriz hataları önler.' }
+    ],
+    faq: [
+      { q: 'Toplam kayıt sayısını (toplam: 910) cursor sayfalamada da döndürmeli miyim?',
+        a: 'Zorunlu değil ve büyük tablolarda <code>COUNT(*)</code> pahalıdır. Sonsuz kaydırmada yalnız <code>sonraki</code> imleci yeter. Sayı gerekiyorsa ayrı bir uç noktada, önbellekli ya da yaklaşık olarak ver.' },
+      { q: 'Hız sınırını uygulamada mı, ağ geçidinde mi yapmalıyım?',
+        a: 'İkisi birlikte: Nginx, bulut API ağ geçidi ya da CDN kaba sınırları (IP başına) uygular; uygulama ise iş kurallarına bağlı sınırları (plan, kullanıcı, uç nokta) uygular. Çok süreçli uygulamada sayaçları Redis gibi ortak bir depoda tut.' }
+    ],
+    mistakes: [
+      { bad: 'sql += " WHERE order_date < ?"  # imleç = son tarih',
+        good: 'sql += " WHERE (order_date, order_id) < (?, ?)"',
+        why: 'Benzersiz olmayan sıralama anahtarı sayfa sınırındaki kayıtları atlatır; eşitlik bozucu olarak id ekle.' }
+    ] }
+);
+})(window);
 /* Kesit Python — 'flask' dersi uzantısı: HTMX ile kısmi güncelleme, temel form, fetch ile JSON, SSR ve SPA farkı (AUDIT Ekle-12) */
 (function (W) {
 'use strict';
