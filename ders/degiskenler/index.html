@@ -1,0 +1,131 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Değişkenler ve veri türleri | Kesit Python</title><meta name="description" content="int, float, str, bool ve None türlerini tanır; type() ile türü sorgular, dönüşüm yapar ve doğru adlandırma kurallarıyla değişken tanımlarsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/degiskenler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Değişkenler ve veri türleri"><meta property="og:description" content="int, float, str, bool ve None türlerini tanır; type() ile türü sorgular, dönüşüm yapar ve doğru adlandırma kurallarıyla değişken tanımlarsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/degiskenler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Değişkenler ve veri türleri","description":"int, float, str, bool ve None türlerini tanır; type() ile türü sorgular, dönüşüm yapar ve doğru adlandırma kurallarıyla değişken tanımlarsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/degiskenler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Değerler ve metinler</span><h1>Değişkenler ve veri türleri</h1><p class="st-l">int, float, str, bool ve None türlerini tanır; type() ile türü sorgular, dönüşüm yapar ve doğru adlandırma kurallarıyla değişken tanımlarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/degiskenler">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Değişken: değere takılan etiket</h2>
+<p>Anadolu Market'in sipariş sisteminde bir siparişin tutarı, müşterinin adı, kargonun teslim edilip edilmediği gibi bilgileri saklamak gerekir. Python'da bu bilgiler <b>değişkenlerde</b> (variable) tutulur. Değişken, bir değere taktığın etikettir: <code>tutar = 1500</code> dediğinde Python bellekte 1500 değerini oluşturur ve ona <code>tutar</code> etiketini yapıştırır.</p>
+<pre class="py">tutar = 1500
+musteri = "Ayşe Yılmaz"
+print(musteri, "için tutar:", tutar)
+tutar = tutar + 250      # etiketi yeni değere taşı
+print("Güncel tutar:", tutar)</pre>
+<p>Eşittir işareti matematikteki "eşittir" değil, <b>atama</b> (assignment) işlemidir: sağdaki hesaplanır, soldaki ada bağlanır. Bu yüzden <code>tutar = tutar + 250</code> gayet mantıklıdır: önce sağdaki toplanır (1750), sonra etiket oraya taşınır. Aynı satırda birden fazla değişkene atama da yapabilirsin: <code>ad, yas = "Ali", 30</code>.</p>
+
+<h2>Beş temel tür</h2>
+<p>Her değerin bir <b>türü</b> (type) vardır ve tür, o değerle ne yapılabileceğini belirler. <code>type()</code> fonksiyonu türü söyler:</p>
+<pre class="py">siparis_no = 10452            # int: tam sayı
+tutar = 1499.90               # float: ondalıklı sayı
+sehir = "İzmir"               # str: metin
+teslim_edildi = False         # bool: True ya da False
+iade_tarihi = None            # None: henüz değer yok
+print(type(siparis_no), type(tutar))
+print(type(sehir), type(teslim_edildi), type(iade_tarihi))</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Tür</th><th>Adı</th><th>Örnek</th><th>Ne için</th></tr>
+<tr><td><code>int</code></td><td>tam sayı (integer)</td><td><code>42</code>, <code>-7</code>, <code>0</code></td><td>Adet, sipariş numarası, yıl</td></tr>
+<tr><td><code>float</code></td><td>kayan noktalı sayı</td><td><code>3.14</code>, <code>1499.90</code></td><td>Tutar, oran, ölçüm</td></tr>
+<tr><td><code>str</code></td><td>metin (string)</td><td><code>"İzmir"</code>, <code>'A'</code></td><td>Ad, adres, kod</td></tr>
+<tr><td><code>bool</code></td><td>mantıksal (boolean)</td><td><code>True</code>, <code>False</code></td><td>Evet/hayır durumları</td></tr>
+<tr><td><code>NoneType</code></td><td>yokluk</td><td><code>None</code></td><td>"Henüz bilinmiyor"</td></tr>
+</table></div>
+<p>Birkaç ayrıntı: Python'da tam sayıların üst sınırı yoktur, bankanın toplam mevduatını bile <code>int</code> tutar. Ondalık ayracı her zaman noktadır (<code>1499.90</code>), virgül değil. <code>True</code> ve <code>False</code> büyük harfle başlar. <code>None</code> ise "boş" ya da "henüz atanmadı" anlamına gelen özel bir değerdir; iade edilmemiş bir siparişin iade tarihi <code>None</code>'dır.</p>
+<div class="note"><b>bool aslında bir sayıdır</b><code>True</code> 1, <code>False</code> 0 gibi davranır: <code>True + True</code> 2 verir. Bu, bir listede kaç koşulun sağlandığını saymak için ileride işine yarayacak.</div>
+
+<h2>Tür dönüşümü</h2>
+<p>Veri çoğu zaman yanlış türde gelir: CSV dosyasından okunan tutar metindir, formdan gelen yaş metindir. Dönüşüm (conversion) fonksiyonları türü değiştirir:</p>
+<pre class="py">metin_tutar = "1499.90"
+tutar = float(metin_tutar)
+print(tutar + 100)              # artık hesap yapılabilir
+adet = int("3")
+print(adet * tutar)
+etiket = "Adet: " + str(adet)   # sayıyı metne çevirip birleştir
+print(etiket)
+print(int(7.99), float(5))      # 7 ve 5.0</pre>
+<p>Dikkat: <code>int(7.99)</code> yuvarlamaz, ondalık kısmı atar ve 7 verir. <code>int("7.99")</code> ise hata verir; metin önce <code>float</code> olmalı. <code>bool()</code> dönüşümünün de bir kuralı vardır: 0, boş metin <code>""</code> ve <code>None</code> False'a, geri kalan her şey True'ya dönüşür.</p>
+<pre class="py">print(bool(0), bool(1500), bool(""), bool("İzmir"), bool(None))</pre>
+<div class="warn"><b>Metin sayı değildir</b><code>"1500" + 250</code> TypeError verir, <code>"1500" * 2</code> ise <code>"15001500"</code> üretir. İkincisi hata vermediği için daha tehlikelidir; raporda tutarın iki kere yan yana yazıldığını görürsün. Sayı olarak kullanacağın her metni önce çevir.</div>
+
+<h2>Adlandırma kuralları</h2>
+<p>Python'ın zorunlu kuralları az: ad harf ya da alt çizgiyle başlar, rakam içerebilir ama rakamla başlayamaz, boşluk ve tire içeremez, <code>if</code>, <code>for</code>, <code>class</code> gibi anahtar sözcükler (keyword) ad olamaz. Türkçe karakter teknik olarak çalışır ama kurumsal kodda kullanılmaz. Geri kalanı stil rehberi <b>PEP 8</b>'den gelir:</p>
+<ul>
+<li><b>snake_case:</b> küçük harf, kelimeler alt çizgiyle: <code>toplam_tutar</code>, <code>musteri_adi</code>.</li>
+<li><b>Anlamlı ad:</b> <code>t</code> yerine <code>tutar</code>, <code>x1</code> yerine <code>siparis_adedi</code>. Üç ay sonra kodu okuyan sen olacaksın.</li>
+<li><b>Sabitler BÜYÜK_HARF:</b> değişmeyecek değerler için: <code>KDV_ORANI = 0.20</code>. Python bunu zorlamaz, ekip arkadaşlarına mesajdır.</li>
+<li><b>Hazır adları gölgeleme:</b> <code>print</code>, <code>list</code>, <code>sum</code>, <code>type</code> gibi adlara değer atama; o fonksiyonu kaybedersin.</li>
+</ul>
+<pre class="py">KDV_ORANI = 0.20
+urun_fiyati = 1250
+kdv_tutari = urun_fiyati * KDV_ORANI
+print("KDV:", kdv_tutari)
+print("KDV dahil:", urun_fiyati + kdv_tutari)</pre>
+<div class="tip"><b>Ad seçerken soru sor</b>"Bu değişkenin içinde ne var?" sorusunun cevabı adın kendisi olmalı. <code>veri</code> ya da <code>deger</code> gibi genel adlar hiçbir şey anlatmaz; <code>aylik_ciro</code> anlatır.</div>
+
+<h2>Birden fazla değişkenle küçük bir rapor</h2>
+<p>Türleri ve adlandırmayı öğrendin; şimdi hepsini bir sipariş özetinde birleştir. Her değişkenin türünün görevine uyduğuna dikkat et: adet için <code>int</code>, fiyat için <code>float</code>, durum için <code>bool</code>, henüz bilinmeyen kargo numarası için <code>None</code>.</p>
+<pre class="py">siparis_no = 10452
+musteri_adi = "Ayşe Yılmaz"
+adet = 3
+birim_fiyat = 1499.9
+odendi = True
+kargo_no = None
+toplam = adet * birim_fiyat
+print("Sipariş", siparis_no, "-", musteri_adi)
+print("Toplam:", round(toplam, 2), "TL")
+print("Ödendi mi?", odendi)
+print("Kargo numarası:", kargo_no)
+print("Kargo verildi mi?", kargo_no is not None)</pre>
+<p>Son satır küçük ama kıymetli bir kalıp: bir alanın dolu olup olmadığını <code>is not None</code> ile sorarsın. Kargo numarası geldiğinde değişkene gerçek değeri atayacak ve aynı satır <code>True</code> verecek.</p>
+
+<h2>Dinamik tipleme</h2>
+<p>Python'da değişkenin türü yoktur, değerin türü vardır. Aynı etiket önce bir sayıya, sonra bir metne takılabilir; buna <b>dinamik tipleme</b> (dynamic typing) denir:</p>
+<pre class="py">deger = 42
+print(type(deger))
+deger = "kırk iki"
+print(type(deger))
+deger = None
+print(type(deger), deger is None)</pre>
+<p>Bu esneklik hızlı yazdırır ama bir bedeli var: Python, <code>tutar</code> değişkenine yanlışlıkla metin atadığını sana söylemez; hata ancak o değişkenle hesap yapmaya çalıştığında çıkar. İki alışkanlık bunu yönetir: bir değişkene hep aynı türde değer koymak ve belirsiz durumda <code>type()</code> ya da <code>isinstance()</code> ile kontrol etmek. Son satırdaki <code>is None</code> ise bir değerin None olup olmadığını sormanın doğru yoludur.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Çoklu atama, takas ve açma</h2><p>Python aynı satırda birden fazla değişkene değer atamana izin verir. Bu yalnızca kısalık değil, bazı işleri çok daha güvenli yapar. En bilinen örnek iki değişkenin değerini takas etmektir (swap): başka dillerde geçici bir değişken gerekir, Python'da tek satır yeter.</p><pre class="py">sol_raf, sag_raf = "Çay", "Kahve"
+print("Önce:", sol_raf, sag_raf)
+sol_raf, sag_raf = sag_raf, sol_raf     # takas
+print("Sonra:", sol_raf, sag_raf)
+
+siparis = ("AM-417", "İzmir", 1499.9)   # bir kayıt
+no, sehir, tutar = siparis              # açma (unpacking)
+print(no, "|", sehir, "|", tutar)
+
+stok = rezerve = 0                      # zincirleme atama
+stok += 40
+print("stok:", stok, "rezerve:", rezerve)</pre><p>Takas neden çalışır? Python önce sağ tarafın tamamını hesaplar ve geçici bir demet (tuple) kurar, sonra soldaki adlara sırayla dağıtır. Açmada (unpacking) soldaki ad sayısı sağdaki eleman sayısıyla aynı olmalıdır; değilse <code>ValueError: too many values to unpack</code> alırsın. Bu katılık iyi bir şeydir: CSV satırında beklenmedik fazladan bir sütun varsa hata hemen ortaya çıkar.</p><div class="warn"><b>Zincirleme atamada paylaşım</b><code>stok = rezerve = 0</code> sayılarla güvenlidir çünkü sayı değişmezdir; <code>+=</code> yeni bir sayı üretir. Ama <code>a = b = []</code> yazarsan iki ad <b>aynı</b> listeyi gösterir ve birine eklediğin eleman ötekinde de görünür. Listelerde her değişkene ayrı ayrı <code>[]</code> ata.</div><h2>Değer, kimlik ve değiştirilebilirlik</h2><p>Her nesnenin üç özelliği vardır: <b>değer</b> (içeriği), <b>tür</b> ve <b>kimlik</b> (bellekteki yeri). <code>==</code> değerleri, <code>is</code> kimlikleri karşılaştırır; <code>id()</code> ise kimliği bir sayı olarak verir.</p><pre class="py">a = [1, 2, 3]
+b = [1, 2, 3]
+c = a
+print(a == b, a is b)    # eşit değerler, farklı nesneler
+print(a is c)            # aynı nesneye iki etiket
+print(id(a) == id(c))
+
+kargo_no = None
+print(kargo_no is None)  # None için hep is kullan</pre><div class="tbl-wrap"><table><tr><th>Değiştirilemez (immutable)</th><th>Değiştirilebilir (mutable)</th></tr><tr><td><code>int</code>, <code>float</code>, <code>bool</code>, <code>complex</code></td><td><code>list</code></td></tr><tr><td><code>str</code></td><td><code>dict</code></td></tr><tr><td><code>tuple</code>, <code>frozenset</code></td><td><code>set</code></td></tr><tr><td><code>None</code></td><td>Kendi yazdığın çoğu sınıf</td></tr></table></div><p>Değiştirilemez bir nesneyi "değiştiren" her işlem aslında yeni bir nesne üretir ve adı ona taşır. <code>tutar += 250</code> satırından sonra <code>id(tutar)</code> farklıdır. Değiştirilebilir nesneler ise yerinde değişir; liste, sözlük ve küme derslerinde bu farkın sonuçlarını sık sık göreceksin.</p><div class="tip"><b>is ile sayı karşılaştırma</b>Küçük tam sayılar ve kısa metinler bellekte önbelleğe (cache) alınabildiği için <code>x is 5</code> bazen True çıkar, bazen çıkmaz; Python 3.8+ bunun için uyarı da verir. Kural basit: <code>is</code> yalnızca <code>None</code>, <code>True</code>/<code>False</code> ve "aynı nesne mi" sorusu için; değer karşılaştırmasında hep <code>==</code>.</div><h2>Tür dönüşümünün tuzakları</h2><p>Dönüşüm fonksiyonlarının kuralları sezgine her zaman uymaz. Bu tablo, gerçek veride en sık karşılaşılan durumları topluyor; Girdi ve dönüşüm dersinde girdiyi güvenli çevirmeyi ayrıca göreceksin.</p><div class="tbl-wrap"><table><tr><th>İfade</th><th>Sonuç</th><th>Neden</th></tr><tr><td><code>int(" 42\n")</code></td><td><code>42</code></td><td>Baştaki/sondaki boşluklar yok sayılır</td></tr><tr><td><code>int("3.0")</code></td><td><code>ValueError</code></td><td>int metni yalnız tam sayı yazımı olarak kabul eder</td></tr><tr><td><code>int(float("3.0"))</code></td><td><code>3</code></td><td>Önce float, sonra int</td></tr><tr><td><code>int(-3.9)</code></td><td><code>-3</code></td><td>Sıfıra doğru keser, yuvarlamaz</td></tr><tr><td><code>float("1e3")</code></td><td><code>1000.0</code></td><td>Bilimsel gösterim kabul edilir</td></tr><tr><td><code>bool("False")</code></td><td><code>True</code></td><td>Boş olmayan her metin True'dur</td></tr><tr><td><code>bool(0.0)</code>, <code>bool([])</code></td><td><code>False</code></td><td>Sıfır ve boş koleksiyonlar False</td></tr><tr><td><code>str(None)</code></td><td><code>"None"</code></td><td>Dört harflik bir metin olur, boş değil</td></tr><tr><td><code>int(True)</code></td><td><code>1</code></td><td>bool, int'in alt türüdür</td></tr></table></div><pre class="py">print(int(" 42\n") + 1)
+print(bool("False"), bool(""), bool("0"))
+print(repr(str(None)), len(str(None)))
+print(isinstance(True, int), type(True) == int)</pre><p>Son satırdaki fark ince ama önemli: <code>isinstance</code> alt türleri de kabul eder (<code>True</code> bir <code>int</code> sayılır), <code>type(x) == int</code> ise tam tür eşleşmesi ister. Bir değerin bool mu sayı mı olduğunu ayırt etmen gerekiyorsa bool kontrolünü <b>önce</b> yap. Birden fazla türe izin vermek için <code>isinstance(x, (int, float))</code> yazabilirsin.</p><h2>Adlandırmanın ince ayrıntıları</h2><div class="tbl-wrap"><table><tr><th>Biçim</th><th>Anlamı</th><th>Örnek</th></tr><tr><td><code>snake_case</code></td><td>Normal değişken ve fonksiyon</td><td><code>toplam_tutar</code></td></tr><tr><td><code>BUYUK_HARF</code></td><td>Sabit (değiştirme sözü)</td><td><code>KDV_ORANI</code></td></tr><tr><td><code>_</code></td><td>Kullanılmayacak değer</td><td><code>no, _, tutar = kayit</code></td></tr><tr><td><code>_on_ek</code></td><td>"İç kullanım" işareti</td><td><code>_gecici_toplam</code></td></tr><tr><td><code>son_ek_</code></td><td>Anahtar sözcükle çakışmayı önler</td><td><code>class_</code>, <code>type_</code></td></tr><tr><td><code>__cift__</code></td><td>Python'ın özel adları (dunder)</td><td><code>__name__</code>; kendin uydurma</td></tr></table></div><p>Bir adı <code>del</code> ile silebilirsin; nesneyi değil, etiketi kaldırır. Silinen adı kullanmaya çalışırsan NameError alırsın. Pratikte <code>del</code>'i değişkenler için nadiren, büyük ara verileri bellekten erken bırakmak için kullanırsın.</p><pre class="py">kayit = ("AM-418", "Bursa", 3200)
+no, _, tutar = kayit       # şehri kullanmayacağız
+print(no, tutar)
+gecici = tutar * 2
+del gecici
+print("gecici" in dir())   # artık tanımlı değil</pre><div class="note"><b>Gerçek işte</b>Uygulama ayarları çoğunlukla ortam değişkenlerinden ya da yapılandırma dosyalarından <b>metin</b> olarak gelir: <code>DEBUG="false"</code>, <code>PORT="8080"</code>. <code>bool("false")</code> True döndürdüğü için "hata ayıklama (debugging) kapalı" sandığın sistem canlıda açık kalabilir; bu, gerçek projelerde sık görülen bir hatadır. Ayarları okurken metni açıkça karşılaştır (<code>deger.strip().lower() in ("1", "true", "evet")</code>) ve sayıları <code>int()</code> ile çevir. Yapılandırma dersinde bunu pydantic gibi araçlarla otomatikleştirmeyi göreceksin.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tip ipuçları: dinamik dilde belgeleme</h3>
+<p>Python 3'te değişkene beklenen türü yazabilirsin: <code>tutar: float = 1499.90</code>. Buna tip ipucu (type hint) denir. Python bunu çalışırken denetlemez; ama VS Code ve mypy gibi araçlar okur, yanlış türde atama yapınca altını çizer. Kurumsal projelerde fonksiyon imzalarında neredeyse standarttır; Orta seviyede ayrıntılı göreceksin.</p>
+<h3>Para için float mı?</h3>
+<p>Bankacılıkta kuruş hatası kabul edilmez ve <code>float</code> bazı ondalıkları tam temsil edemez (Sayılar dersinde göreceksin). Finans yazılımları ya tutarı kuruş cinsinden <code>int</code> tutar (1499.90 TL yerine 149990 kuruş) ya da <code>decimal</code> modülünü kullanır. Raporlama ve analizde <code>float</code> yeterlidir; muhasebe kaydında değildir.</p>
+<h3>Değişken aslında neye işaret eder?</h3>
+<p>Python'da her değer bellekte bir nesnedir (object) ve değişken ona bir referanstır. <code>a = b</code> dediğinde değer kopyalanmaz, ikinci bir etiket aynı nesneye takılır. Sayı ve metinler değiştirilemez olduğundan bunu fark etmezsin; ama liste gibi değiştirilebilir nesnelerde bu "kopyalama tuzağı"na dönüşür. Listeler dersinde başına gelmeden önce burada duymuş ol.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/degiskenler">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ilk-program/">← İlk program: print, yorum, input</a><a href="../sayilar-islemler/">Sayılar ve işlemler →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

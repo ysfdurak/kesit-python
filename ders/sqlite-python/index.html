@@ -1,0 +1,298 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>sqlite3 ile Python | Kesit Python</title><meta name="description" content="Bellek içi SQLite veritabanı kurar, parametreli sorguyla SQL enjeksiyonundan korunur, executemany ile toplu yükler, Row factory ile satırları sözlük gibi…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sqlite-python/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="sqlite3 ile Python"><meta property="og:description" content="Bellek içi SQLite veritabanı kurar, parametreli sorguyla SQL enjeksiyonundan korunur, executemany ile toplu yükler, Row factory ile satırları sözlük gibi…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sqlite-python/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"sqlite3 ile Python","description":"Bellek içi SQLite veritabanı kurar, parametreli sorguyla SQL enjeksiyonundan korunur, executemany ile toplu yükler, Row factory ile satırları sözlük gibi…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/sqlite-python/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veritabanı (giriş)</span><h1>sqlite3 ile Python</h1><p class="st-l">Bellek içi SQLite veritabanı kurar, parametreli sorguyla SQL enjeksiyonundan korunur, executemany ile toplu yükler, Row factory ile satırları sözlük gibi okur ve transaction mantığını kavrarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sqlite-python">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden SQLite?</h2>
+<p>SQLite, tek bir dosyada (ya da bellekte) yaşayan, sunucu gerektirmeyen bir ilişkisel veritabanıdır (relational database). Python ile birlikte gelen <code>sqlite3</code> modülü sayesinde kurulum yapmadan SQL yazabilirsin. Anadolu Market'te bir analist için tipik kullanım şu: binlerce satırlık sipariş CSV'sini bir SQLite tablosuna yükle, SQL ile grupla ve filtrele, sonucu Python ile raporla. Masaüstü uygulamaları, mobil uygulamalar ve tarayıcılar da yerel verisini SQLite'ta tutar; yani öğrendiğin şey oyuncak değil, dünyanın en yaygın veritabanı motoru.</p>
+<p>Kesit SQL'de SQL'in kendisini öğrendin. Bu derste sorulan soru farklı: <b>Python, SQL ile nasıl konuşur?</b> Üç kavram yeter: bağlantı (connection), imleç (cursor) ve transaction.</p>
+
+<h2>Bağlantı, tablo, ekleme, sorgu</h2>
+<p><code>sqlite3.connect(":memory:")</code> yalnızca RAM'de yaşayan bir veritabanı açar; program bitince kaybolur. Derste ve testte idealdir. Dosya istersen <code>connect("market.db")</code> yazarsın. <code>execute</code> bir SQL cümlesi çalıştırır, <code>fetchall</code> sonuç satırlarını demet listesi olarak getirir.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("""
+    CREATE TABLE siparis (
+        id INTEGER PRIMARY KEY,
+        musteri TEXT NOT NULL,
+        sehir TEXT NOT NULL,
+        tutar REAL NOT NULL
+    )
+""")
+con.execute("INSERT INTO siparis (musteri, sehir, tutar) VALUES (?, ?, ?)", ("Ayşe", "Ankara", 1250.0))
+con.execute("INSERT INTO siparis (musteri, sehir, tutar) VALUES (?, ?, ?)", ("Mehmet", "İzmir", 480.5))
+con.commit()
+
+satirlar = con.execute("SELECT id, musteri, sehir, tutar FROM siparis ORDER BY id").fetchall()
+print(satirlar)
+print("ilk satır türü:", type(satirlar[0]).__name__)
+toplam = con.execute("SELECT SUM(tutar) FROM siparis").fetchone()[0]
+print("toplam:", toplam)
+con.close()</pre>
+<p>Dikkat edilecek nokta: <code>fetchall</code> demet (tuple) listesi döner, sütun adları yoktur. <code>fetchone</code> tek satır (ya da None) getirir; tek değerli sonuçlarda <code>[0]</code> ile içini alırsın. <code>con.execute</code>, arka planda bir imleç oluşturup çalıştırmanın kısa yoludur; <code>cur = con.cursor()</code> ile açık imleç de kullanabilirsin.</p>
+
+<h2>Parametreli sorgu ve SQL enjeksiyonu</h2>
+<p>Yukarıdaki <code>?</code> işaretleri yer tutucudur (placeholder). Değerleri SQL metnine f-string ile gömmek yerine ayrı bir demetle verirsin. Bunun iki nedeni var: sqlite3 tırnak ve özel karakterleri doğru kaçırır, ve kullanıcıdan gelen metin SQL olarak <b>yorumlanmaz</b>. Aşağıdaki örnek, kötü niyetli bir girdinin f-string'li sorguyu nasıl ele geçirdiğini, parametreli sorgunun ise aynı metni sadece veri olarak gördüğünü gösterir.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE musteri (ad TEXT, sehir TEXT)")
+con.executemany("INSERT INTO musteri VALUES (?, ?)", [("Ayşe", "Ankara"), ("Can", "Bursa"), ("Elif", "Ankara")])
+
+girdi = "Ankara' OR '1'='1"   # arama kutusuna yazılan kötü niyetli metin
+
+# YANLIŞ: metin SQL'in parçası olur, koşul her zaman doğru çıkar
+kotu = con.execute(f"SELECT ad FROM musteri WHERE sehir = '{girdi}'").fetchall()
+print("f-string ile:", [r[0] for r in kotu])
+
+# DOĞRU: metin yalnızca bir değerdir, hiçbir şehirle eşleşmez
+iyi = con.execute("SELECT ad FROM musteri WHERE sehir = ?", (girdi,)).fetchall()
+print("parametre ile:", [r[0] for r in iyi])
+
+# İsimli parametre: okunur ve sıraya bağlı değil
+isimli = con.execute("SELECT ad FROM musteri WHERE sehir = :s ORDER BY ad", {"s": "Ankara"}).fetchall()
+print("isimli parametre:", [r[0] for r in isimli])</pre>
+<div class="warn"><b>Tek değerli parametre demet olmalı</b><code>(girdi,)</code> sondaki virgüle dikkat. <code>(girdi)</code> yazarsan parantez bir işlem önceliği parantezi olur, demet değil; sqlite3 metni karakter karakter parametre sanıp hata verir.</div>
+<p><code>executemany</code>, aynı sorguyu bir dizi parametreyle tekrar tekrar çalıştırır; CSV'den yüzlerce satır yüklerken döngüde tek tek <code>execute</code> çağırmaktan hem kısa hem hızlıdır.</p>
+
+<h2>Row factory: satırı sözlük gibi okumak</h2>
+<p><code>r[2]</code> yazıp "üçüncü sütun hangisiydi" diye düşünmek hata kaynağıdır. <code>con.row_factory = sqlite3.Row</code> dedikten sonra her satır hem indeksle hem sütun adıyla okunur; <code>dict(satir)</code> ile gerçek sözlüğe çevrilir ve JSON'a gitmeye hazır olur.</p>
+<pre class="py">import json
+import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.row_factory = sqlite3.Row
+con.execute("CREATE TABLE siparis (id INTEGER PRIMARY KEY, sehir TEXT, tutar REAL)")
+con.executemany("INSERT INTO siparis (sehir, tutar) VALUES (?, ?)", [
+    ("Ankara", 1250.0), ("İzmir", 480.5), ("Ankara", 300.0), ("Bursa", 920.0), ("İzmir", 150.0)
+])
+
+for row in con.execute("SELECT sehir, COUNT(*) AS adet, SUM(tutar) AS toplam FROM siparis GROUP BY sehir ORDER BY toplam DESC"):
+    print(row["sehir"], row["adet"], row["toplam"])
+
+ilk = con.execute("SELECT * FROM siparis WHERE id = ?", (1,)).fetchone()
+print("sütunlar:", ilk.keys())
+print("sözlük:", dict(ilk))
+print(json.dumps([dict(r) for r in con.execute("SELECT id, sehir FROM siparis WHERE sehir = 'İzmir'")], ensure_ascii=False))</pre>
+<p>GROUP BY, SUM ve ORDER BY işini SQL yaptı; Python yalnızca sonucu dolaştı. Bu iş bölümü dersin sonundaki "köprü" bölümünün özeti.</p>
+
+<h2>Transaction: commit, rollback, bağlam yöneticisi</h2>
+<p>Ilgaz Bank'ta bir havale iki UPDATE'tir: gönderenden düş, alıcıya ekle. İlki olup ikincisi olmazsa para buharlaşır. Transaction (işlem bütünlüğü) tam bunu çözer: bir grup değişiklik ya hep birlikte kalıcı olur (<code>commit</code>) ya da hep birlikte geri alınır (<code>rollback</code>). sqlite3'te bağlantı nesnesi <code>with</code> ile kullanılınca blok hatasız biterse otomatik commit, istisna çıkarsa otomatik rollback yapar. Dikkat: <code>with con:</code> bağlantıyı <b>kapatmaz</b>, yalnızca transaction'ı yönetir.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE hesap (no TEXT PRIMARY KEY, bakiye REAL NOT NULL CHECK (bakiye &gt;= 0))")
+con.executemany("INSERT INTO hesap VALUES (?, ?)", [("TR01", 1000.0), ("TR02", 200.0)])
+con.commit()
+
+def havale(gonderen: str, alici: str, tutar: float) -&gt; bool:
+    try:
+        with con:
+            con.execute("UPDATE hesap SET bakiye = bakiye - ? WHERE no = ?", (tutar, gonderen))
+            con.execute("UPDATE hesap SET bakiye = bakiye + ? WHERE no = ?", (tutar, alici))
+        return True
+    except sqlite3.IntegrityError as e:
+        print("geri alındı:", e)
+        return False
+
+def bakiyeler():
+    return dict(con.execute("SELECT no, bakiye FROM hesap ORDER BY no").fetchall())
+
+print("başlangıç:", bakiyeler())
+print("300 havale:", havale("TR01", "TR02", 300.0), bakiyeler())
+print("5000 havale:", havale("TR01", "TR02", 5000.0), bakiyeler())</pre>
+<p>İkinci havalede ilk UPDATE bakiyeyi eksiye düşürmeye çalışınca CHECK kısıtı <code>IntegrityError</code> fırlattı; <code>with con</code> bloğu bu istisnayı görüp her şeyi geri aldı. Bakiyeler ilk havaleden sonraki halinde kaldı. Kısıtı veritabanına yazmak, Python tarafındaki <code>if</code> kontrolünü unutsan bile veriyi korur.</p>
+<div class="tip"><b>Bağlantıyı kapatmayı unutma</b>Dosya tabanlı veritabanında işin bitince <code>con.close()</code> çağır; en temizi bağlantıyı <code>contextlib.closing(sqlite3.connect(...))</code> ile açmak ya da sınıfına <code>__enter__/__exit__</code> yazmaktır. Bellek içi veritabanında kapatma, veriyi de siler.</div>
+<div class="note"><b>Tür eşlemesi</b>SQLite'ın INTEGER, REAL, TEXT, BLOB türleri sırasıyla int, float, str, bytes olarak gelir. Tarih tipi yoktur: tarihleri ISO metni ("2024-03-15") olarak sakla, karşılaştırma yine doğru çalışır. NULL ise Python'da None olur.</div>
+
+<h2>Kesit SQL'e köprü: SQL ne yapar, Python ne yapar?</h2>
+<p>İki araç rakip değil, iş arkadaşı. Küme işlemleri (filtre, gruplama, birleştirme, sıralama) veritabanı motorunun uzmanlık alanıdır; milyon satırda Python döngüsünden kat kat hızlıdır ve veriyi belleğe taşımaz. Python ise SQL'in beceremediği yerde devreye girer: karmaşık iş kuralları, dış sistemlerle konuşma, rapor biçimleme, test.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İş</th><th>SQL'e bırak</th><th>Python'a bırak</th></tr>
+<tr><td>Şehre göre toplam ciro</td><td>GROUP BY sehir, SUM(tutar)</td><td>Sonucu tabloya/JSON'a dök</td></tr>
+<tr><td>Son 30 günün siparişleri</td><td>WHERE tarih &gt;= ?</td><td>Tarih aralığını hesapla, parametre olarak ver</td></tr>
+<tr><td>Şüpheli işlem kuralı (çok adımlı)</td><td>Ham satırları getir</td><td>Kuralı fonksiyonla uygula, test et</td></tr>
+<tr><td>CSV'den yükleme</td><td>INSERT (executemany)</td><td>CSV'yi oku, temizle, türleri çevir</td></tr>
+<tr><td>Müşteriye e-posta</td><td>Alıcı listesini seç</td><td>Şablon doldur, gönder</td></tr>
+</table></div>
+<p>Pratik kural: "Veriyi azaltan iş SQL'de, veriyi anlamlandıran iş Python'da." Bir SELECT'in döndürdüğü satır sayısı ne kadar azsa, Python tarafı o kadar hızlı ve basit olur.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: sqlite3 ile gerçek uygulama kalıpları</h2>
+<p>Tablo kurmayı, parametreli sorguyu ve transaction'ı öğrendin. Gerçek bir stok ya da müşteri uygulamasında ise şu sorular gelir: "Eklediğim satırın id'si ne?", "Ürün varsa stoğu artır, yoksa ekle", "Kaç satır güncellendi?", "Sipariş silinmiş müşteriye bağlı kalmasın", "Liste uzunluğu belli olmayan IN sorgusu nasıl yazılır?", "Sorgu neden yavaş?". Bu bölüm bunları yanıtlar. SQL dilinin kendisi (JOIN, GROUP BY, pencere fonksiyonları) için Kesit SQL'e; ORM için <i>sqlalchemy-orm</i>, DataFrame'e okumak için <i>pandas-giris</i> dersine bakabilirsin.</p>
+<h3>İmlecin verdiği bilgiler: lastrowid, rowcount, fetchmany</h3>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE musteri (id INTEGER PRIMARY KEY, ad TEXT, sehir TEXT)")
+cur = con.execute("INSERT INTO musteri (ad, sehir) VALUES (?, ?)", ("Ayşe", "İzmir"))
+print("yeni id:", cur.lastrowid)
+con.executemany("INSERT INTO musteri (ad, sehir) VALUES (?, ?)", [("Can", "Van"), ("Ece", "Van"), ("Ali", "Bursa")])
+
+cur = con.execute("UPDATE musteri SET sehir = ? WHERE sehir = ?", ("Van Merkez", "Van"))
+print("güncellenen satır:", cur.rowcount)
+
+cur = con.execute("SELECT id, ad FROM musteri ORDER BY id")
+while parca := cur.fetchmany(2):      # büyük sonuçları parça parça çek
+    print("parça:", parca)
+print("sütunlar:", [k[0] for k in con.execute("SELECT * FROM musteri").description])</pre>
+<h3>UPSERT: varsa güncelle, yoksa ekle</h3>
+<p>Depodan gelen stok dosyasında bazı ürünler yeni, bazıları mevcut. Önce SELECT ile bakıp sonra INSERT ya da UPDATE yazmak hem yavaş hem de iki işlem arasında yarış durumuna (race condition) açıktır. SQLite 3.24+ <code>INSERT ... ON CONFLICT ... DO UPDATE</code> sözdizimini destekler; <code>excluded</code> eklenmeye çalışılan satırı temsil eder.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE stok (sku TEXT PRIMARY KEY, ad TEXT, adet INTEGER NOT NULL)")
+con.execute("INSERT INTO stok VALUES ('LP-1', 'Laptop', 5)")
+
+gelen = [("LP-1", "Laptop", 3), ("MS-7", "Mouse", 40)]
+with con:
+    con.executemany("""
+        INSERT INTO stok (sku, ad, adet) VALUES (?, ?, ?)
+        ON CONFLICT(sku) DO UPDATE SET adet = adet + excluded.adet
+    """, gelen)
+print(con.execute("SELECT * FROM stok ORDER BY sku").fetchall())
+
+# Yalnızca yoksa ekle, varsa dokunma:
+con.execute("INSERT OR IGNORE INTO stok VALUES ('MS-7', 'Mouse', 999)")
+print(con.execute("SELECT adet FROM stok WHERE sku = 'MS-7'").fetchone()[0])</pre>
+<div class="warn"><b>INSERT OR REPLACE tuzağı</b><code>OR REPLACE</code> çakışan satırı <b>silip</b> yeniden ekler: belirtmediğin sütunlar varsayılana döner ve yabancı anahtarla bağlı satırlar etkilenebilir. Güncelleme niyetin varsa <code>ON CONFLICT DO UPDATE</code> kullan.</div>
+<h3>Yabancı anahtar, kısıt ve IntegrityError</h3>
+<p>SQLite geriye uyumluluk için yabancı anahtar (foreign key) denetimini <b>varsayılan olarak kapalı</b> tutar. Her bağlantıda <code>PRAGMA foreign_keys = ON</code> çalıştırmazsan var olmayan müşteriye sipariş yazabilirsin. Kısıt ihlallerinin hepsi <code>sqlite3.IntegrityError</code> olarak gelir; yakalayıp anlamlı mesaja çevir.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("PRAGMA foreign_keys = ON")
+con.executescript("""
+    CREATE TABLE musteri (id INTEGER PRIMARY KEY, eposta TEXT UNIQUE NOT NULL);
+    CREATE TABLE siparis (
+        id INTEGER PRIMARY KEY,
+        musteri_id INTEGER NOT NULL REFERENCES musteri(id) ON DELETE CASCADE,
+        tutar REAL CHECK (tutar &gt; 0)
+    );
+    INSERT INTO musteri (eposta) VALUES ('ayse@ornek.com');
+    INSERT INTO siparis (musteri_id, tutar) VALUES (1, 120);
+""")
+for sql, p in [("INSERT INTO musteri (eposta) VALUES (?)", ("ayse@ornek.com",)),
+               ("INSERT INTO siparis (musteri_id, tutar) VALUES (?, ?)", (99, 10)),
+               ("INSERT INTO siparis (musteri_id, tutar) VALUES (?, ?)", (1, -5))]:
+    try:
+        con.execute(sql, p)
+    except sqlite3.IntegrityError as e:
+        print("Reddedildi:", e)
+con.execute("DELETE FROM musteri WHERE id = 1")
+print("kalan sipariş:", con.execute("SELECT COUNT(*) FROM siparis").fetchone()[0])</pre>
+<h3>Dinamik IN listesi, indeks ve sorgu planı</h3>
+<p>Kullanıcı birden çok şehir seçtiğinde <code>IN (?, ?, ?)</code> yer tutucularını listenin uzunluğu kadar üretirsin; değerleri yine parametre olarak verirsin. Sık filtrelenen sütuna indeks eklemek sorguyu tam tablo taramasından (SCAN) indeks aramasına (SEARCH) çevirir; <code>EXPLAIN QUERY PLAN</code> bunu gösterir.</p>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE siparis (id INTEGER PRIMARY KEY, sehir TEXT, tutar REAL)")
+con.executemany("INSERT INTO siparis (sehir, tutar) VALUES (?, ?)",
+                [("Ankara", 10), ("Van", 20), ("İzmir", 30), ("Ankara", 5)])
+
+secilen = ["Ankara", "İzmir"]
+yer = ", ".join("?" * len(secilen))
+sql = f"SELECT sehir, SUM(tutar) FROM siparis WHERE sehir IN ({yer}) GROUP BY sehir ORDER BY sehir"
+print(sql)
+print(con.execute(sql, secilen).fetchall())
+
+plan = lambda: con.execute("EXPLAIN QUERY PLAN SELECT * FROM siparis WHERE sehir = ?", ("Van",)).fetchall()[0][-1]
+print("indeks yok:", plan())
+con.execute("CREATE INDEX ix_siparis_sehir ON siparis(sehir)")
+print("indeks var:", plan())
+
+# Python fonksiyonunu SQL içinde kullan
+con.create_function("kdvli", 1, lambda t: round(t * 1.2, 2), deterministic=True)
+print(con.execute("SELECT id, kdvli(tutar) FROM siparis ORDER BY id LIMIT 2").fetchall())</pre>
+<div class="tip"><b>f-string burada neden güvenli?</b>f-string yalnızca <code>?, ?</code> yer tutucularını üretir; kullanıcı değerleri hâlâ ayrı parametre listesindedir. Kural: SQL metnine yalnızca <b>senin kontrolündeki</b> parçalar (yer tutucu, beyaz listeden seçilmiş sütun adı) girer, kullanıcı verisi asla.</div>
+<div class="tbl-wrap"><table><tr><th>Araç</th><th>Ne işe yarar</th><th>Not</th></tr><tr><td><code>cur.lastrowid</code></td><td>Son eklenen satırın id'si</td><td>executemany sonrası güvenilmez</td></tr><tr><td><code>cur.rowcount</code></td><td>UPDATE/DELETE'in etkilediği satır</td><td>SELECT'te -1</td></tr><tr><td><code>fetchone / fetchmany / fetchall</code></td><td>Tek, parça, tümü</td><td>Büyük sonuçta fetchmany ya da imleçte döngü</td></tr><tr><td><code>executescript</code></td><td>Çok cümleli SQL (şema)</td><td>Parametre almaz, önce COMMIT yapar</td></tr><tr><td><code>ON CONFLICT DO UPDATE</code></td><td>UPSERT</td><td>Çakışma hedefi UNIQUE/PK olmalı</td></tr><tr><td><code>PRAGMA foreign_keys = ON</code></td><td>Yabancı anahtar denetimi</td><td>Her bağlantıda tekrar</td></tr><tr><td><code>PRAGMA journal_mode = WAL</code></td><td>Okuyucular yazarı beklemez</td><td>Dosya veritabanında</td></tr><tr><td><code>create_function</code></td><td>Python fonksiyonunu SQL'de kullan</td><td>deterministic=True indekslenebilir</td></tr><tr><td><code>con.backup(hedef)</code></td><td>Canlı veritabanını kopyala</td><td>Dosyayı elle kopyalamaktan güvenli</td></tr></table></div>
+<h3>Tarihleri saklamak ve dosya veritabanı</h3>
+<p>SQLite'ın ayrı bir tarih tipi yoktur. Tarihi <b>ISO 8601 metni</b> (<code>2026-03-15</code>, <code>2026-03-15T14:30:00</code>) olarak sakla: alfabetik sıralama kronolojik sıralamayla aynı olur ve <code>date()</code>, <code>strftime()</code> SQL fonksiyonları çalışır. Python 3.12'de sqlite3'ün varsayılan tarih dönüştürücüleri kullanımdan kaldırıldı (deprecated); dönüşümü kendin açıkça yap. Kendi bilgisayarında gerçek dosyayla çalışırken şu iskeleti kullan:</p>
+<pre class="code">import sqlite3
+from contextlib import closing
+
+with closing(sqlite3.connect("anadolu.db", timeout=10)) as con:
+    con.execute("PRAGMA foreign_keys = ON")
+    con.execute("PRAGMA journal_mode = WAL")
+    with con:                       # transaction: başarıda commit, hatada rollback
+        con.execute("INSERT INTO log (zaman, mesaj) VALUES (?, ?)", ("2026-03-15T09:00:00", "başladı"))
+    with closing(sqlite3.connect("yedek.db")) as hedef:
+        con.backup(hedef)</pre>
+<p>Komut satırından incelemek için <code>sqlite3 anadolu.db</code> (Windows'ta sqlite.org'dan <code>sqlite-tools</code> indir), içinde <code>.tables</code>, <code>.schema siparis</code>, <code>.mode box</code> komutlarını kullan. Görsel araç istersen "DB Browser for SQLite" ücretsizdir. <code>database is locked</code> hatası alırsan başka bir program (ya da kapanmamış bir bağlantı) yazma kilidini tutuyordur: <code>timeout</code> ver, bağlantıları <code>closing</code> ile kapat, WAL modunu aç.</p>
+<div class="note"><b>Gerçek işte</b>SQLite telefonlarda, tarayıcılarda, masaüstü uygulamalarında ve test ortamlarında her yerde. Anadolu Market'in depo el terminalleri çevrimdışı çalışırken taramaları yerel SQLite'a UPSERT ile yazar, bağlantı gelince merkeze aktarır. Ekipler ayrıca birim testlerde üretim PostgreSQL'i yerine <code>:memory:</code> SQLite kullanır; ama dikkat: tip denetimi ve bazı SQL özellikleri farklıdır, kritik sorguları gerçek veritabanında da test et.</div>
+</section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: pencere fonksiyonları ve CTE ile analitik SQL</h2><p>Derste <code>GROUP BY</code> ile özet çıkarmayı gördün. GROUP BY satırları <b>daraltır</b>: 910 sipariş, kanal başına 3 satıra iner. Analist sorularının çoğu ise satırları koruyup yanına bir özet eklemeyi ister: "her siparişin, müşterinin kaçıncı siparişi olduğu", "her ayın bir önceki aya göre değişimi", "her şehirde en çok harcayan müşteri". Bunun aracı <b>pencere fonksiyonlarıdır</b> (window functions). Uzun sorguları okunur adımlara bölmek için de <b>CTE</b> (common table expression, <code>WITH ... AS</code>) kullanılır. SQLite 3.25'ten beri ikisini de destekler; tarayıcıdaki ve Python'la gelen sqlite3 bu sürümlerin çok üstündedir. Bu bölümde gerçek Anadolu Market verisini <code>veri.baglan</code> ile yükleyeceğiz. Konunun tam hâli Kesit SQL'in analitik SQL derslerindedir; burada Python tarafından nasıl kullanılacağına odaklanıyoruz.</p><h3>CTE: sorguyu adımlara bölmek</h3><p>Sipariş tutarı kalemlerden hesaplanır. Bunu her sorguda alt sorgu olarak tekrar yazmak yerine bir kez <code>sip</code> adlı CTE olarak tanımlarız; sonraki adımlar onu tablo gibi kullanır. Birden çok CTE virgülle zincirlenir ve her biri öncekileri görebilir.</p><pre class="py">import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders", "order_items", "customers", "products"])
+SQL = """
+WITH sip AS (
+    SELECT o.order_id, o.customer_id, o.order_date, o.channel,
+           SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS tutar
+    FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.status = 'delivered'
+    GROUP BY o.order_id
+),
+aylik AS (
+    SELECT substr(order_date, 1, 7) AS ay, ROUND(SUM(tutar), 2) AS ciro
+    FROM sip WHERE order_date &gt;= '2024-01-01'
+    GROUP BY ay
+)
+SELECT ay, ciro FROM aylik ORDER BY ciro DESC LIMIT 3
+"""
+for satir in con.execute(SQL):
+    print(satir)
+</pre><h3>Pencere fonksiyonunun anatomisi</h3><p><code>fonksiyon() OVER (PARTITION BY ... ORDER BY ... çerçeve)</code>. <code>PARTITION BY</code> pencereyi gruplara böler (GROUP BY gibi ama satırları daraltmadan), <code>ORDER BY</code> pencere içindeki sırayı, çerçeve (<code>ROWS BETWEEN 2 PRECEDING AND CURRENT ROW</code>) ise hesaba hangi satırların gireceğini belirler.</p><div class="tbl-wrap"><table><tr><th>Fonksiyon</th><th>Ne verir</th><th>Tipik soru</th></tr><tr><td><code>ROW_NUMBER()</code></td><td>1, 2, 3... (eşitlikte de farklı)</td><td>Müşterinin ilk siparişi, her gruptan tek satır</td></tr><tr><td><code>RANK()</code> / <code>DENSE_RANK()</code></td><td>Eşitlere aynı sıra; RANK sonra boşluk bırakır (5, 5, 7), DENSE_RANK bırakmaz (5, 5, 6)</td><td>Satış liderleri tablosu</td></tr><tr><td><code>LAG(x)</code> / <code>LEAD(x)</code></td><td>Önceki / sonraki satırın değeri</td><td>Aydan aya değişim, siparişler arası gün</td></tr><tr><td><code>SUM(x) OVER (ORDER BY ...)</code></td><td>Kümülatif toplam</td><td>Yıl başından bugüne ciro, Pareto</td></tr><tr><td><code>AVG(x) OVER (... ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code></td><td>Hareketli ortalama</td><td>3 aylık trend</td></tr><tr><td><code>SUM(x) OVER ()</code></td><td>Tüm tablonun toplamı her satırda</td><td>Pay (yüzde) hesabı</td></tr></table></div><pre class="py">import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders", "order_items", "customers", "products"])
+SQL = """
+WITH sip AS (
+    SELECT o.order_id, o.customer_id, o.order_date, o.channel,
+           SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS tutar
+    FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.status = 'delivered'
+    GROUP BY o.order_id
+),
+aylik AS (
+    SELECT substr(order_date, 1, 7) AS ay, SUM(tutar) AS ciro
+    FROM sip WHERE order_date &gt;= '2024-01-01' GROUP BY ay
+)
+SELECT ay, ROUND(ciro, 0) AS ciro,
+       ROUND(100.0 * (ciro - LAG(ciro) OVER (ORDER BY ay)) / LAG(ciro) OVER (ORDER BY ay), 1) AS degisim,
+       ROUND(AVG(ciro) OVER (ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW), 0) AS ort3
+FROM aylik ORDER BY ay
+"""
+for satir in con.execute(SQL).fetchall()[-4:]:
+    print(satir)
+</pre><h3>Grup içinde ilk N: CTE + ROW_NUMBER</h3><p>Pencere fonksiyonları <code>WHERE</code>'den <b>sonra</b> hesaplanır; bu yüzden <code>WHERE sira &lt;= 3</code> aynı SELECT içinde yazılamaz. Kalıp her zaman aynıdır: sırayı bir CTE'de hesapla, dış sorguda filtrele.</p><pre class="py">import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders", "order_items", "customers", "products"])
+SQL = """
+WITH sip AS (
+    SELECT o.order_id, o.customer_id, o.order_date, o.channel,
+           SUM(oi.quantity * oi.unit_price * (1 - oi.discount)) AS tutar
+    FROM orders o JOIN order_items oi ON oi.order_id = o.order_id
+    WHERE o.status = 'delivered'
+    GROUP BY o.order_id
+),
+siralama AS (
+    SELECT c.city, c.customer_id, ROUND(SUM(s.tutar), 2) AS harcama,
+           ROW_NUMBER() OVER (PARTITION BY c.city ORDER BY SUM(s.tutar) DESC) AS sira
+    FROM sip s JOIN customers c ON c.customer_id = s.customer_id
+    WHERE c.city IS NOT NULL
+    GROUP BY c.city, c.customer_id
+)
+SELECT city, customer_id, harcama FROM siralama WHERE sira = 1
+ORDER BY harcama DESC LIMIT 4
+"""
+print(con.execute(SQL).fetchall())
+</pre><div class="tip"><b>SQL mi pandas mı?</b>Aynı hesapları pandas'ta <code>groupby().cumcount()</code>, <code>shift()</code>, <code>rolling()</code> ve <code>rank()</code> ile yaparsın. Veri bir veritabanında duruyorsa hesabı SQL'de yapıp yalnızca sonucu Python'a çekmek, milyonlarca satırı ağdan taşımaktan çok daha hızlıdır. Python'un işi burada sorguyu parametreyle çalıştırmak, sonucu test etmek ve raporlamaktır.</div><div class="note"><b>Gerçek işte</b>Analist mülakatlarının SQL bölümü büyük ölçüde bu kalıplardan oluşur: "her departmanda en yüksek maaşlı 3 kişi", "aydan aya büyüme", "ardışık günler", "kümülatif pay". Üretimde ise bu sorgular bir <code>.sql</code> dosyasında durur; Python betiği dosyayı okuyup <code>con.execute(sql, parametreler)</code> ile çalıştırır ve sonucu testle doğrular.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretimde sqlite3: kalıplar ve sınırlar</h3>
+<p>Bir veri katmanı (data layer) yazarken sorguları uygulamanın her yerine dağıtma; bir <code>Depo</code> sınıfında topla. Sınıfın kurucusu bağlantıyı alır, metotları (<code>ekle</code>, <code>sehre_gore_toplam</code>) SQL'i saklar, geri kalan kod SQL görmez. Böylece bir gün PostgreSQL'e geçersen yalnızca bu sınıfı değiştirirsin. Testlerde ise aynı sınıfa <code>":memory:"</code> bağlantısı verirsin; her test temiz bir veritabanıyla başlar, dosya kirliliği olmaz.</p>
+<p>Şema değişiklikleri (migration) için <code>CREATE TABLE IF NOT EXISTS</code> başlangıçtır; büyüyen projede <code>PRAGMA user_version</code> ile şema sürümü tutup sırayla ALTER TABLE betikleri çalıştırırsın. Performans için iki not: toplu eklemede her satırdan sonra commit yapma, executemany + tek commit kullan; sık filtrelenen sütuna <code>CREATE INDEX</code> ekle. SQLite'ın sınırı eşzamanlı yazmadır: aynı anda tek yazar kabul eder. Çok kullanıcılı web uygulaması ya da gigabaytlarca büyüyen veri için PostgreSQL gibi sunucu tabanlı bir motora geçersin; ama Python tarafındaki kalıp (bağlantı, parametreli sorgu, transaction) birebir aynı kalır, çünkü hepsi DB-API 2.0 standardını izler.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sqlite-python">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../standart-kutuphane/">← Standart kütüphane turu</a><a href="../test-yazma/">Test yazma: unittest, pytest ve mock →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

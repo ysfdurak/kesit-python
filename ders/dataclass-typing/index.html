@@ -1,0 +1,323 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>dataclass ve tip ipuçları (type hints) | Kesit Python</title><meta name="description" content="dataclass ile boilerplate'siz veri sınıfı tanımlar; tip ipuçları, Optional, TypedDict ve Protocol ile kodu kendini belgeleyen ve mypy ile denetlenebilir…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dataclass-typing/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="dataclass ve tip ipuçları (type hints)"><meta property="og:description" content="dataclass ile boilerplate'siz veri sınıfı tanımlar; tip ipuçları, Optional, TypedDict ve Protocol ile kodu kendini belgeleyen ve mypy ile denetlenebilir…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dataclass-typing/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"dataclass ve tip ipuçları (type hints)","description":"dataclass ile boilerplate'siz veri sınıfı tanımlar; tip ipuçları, Optional, TypedDict ve Protocol ile kodu kendini belgeleyen ve mypy ile denetlenebilir…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/dataclass-typing/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>dataclass ve tip ipuçları (type hints)</h1><p class="st-l">dataclass ile boilerplate'siz veri sınıfı tanımlar; tip ipuçları, Optional, TypedDict ve Protocol ile kodu kendini belgeleyen ve mypy ile denetlenebilir hale getirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dataclass-typing">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Önceki derste Hesap sınıfı için <code>__init__</code>, <code>__repr__</code> yazdın; iki hesabı karşılaştırmak için <code>__eq__</code> de gerekti. Anadolu Market'in sipariş, müşteri, ürün, kargo gibi onlarca veri tipi için bunu tekrarlamak hem sıkıcı hem hataya açıktır. <b>dataclass</b> bu metotları tip ipuçlarına bakarak otomatik üretir. <b>Tip ipuçları</b> (type hints) ise kodun "bu fonksiyon ne alır, ne döner" sorusunu okuyana ve araçlara söyler: editör otomatik tamamlar, <code>mypy</code> hataları çalıştırmadan yakalar, ekip arkadaşın fonksiyonu açmadan kullanır. Kurumsal Python kodunun bugünkü standardı budur.</p>
+
+<h2>dataclass temelleri</h2>
+<pre class="py">from dataclasses import dataclass
+
+@dataclass
+class Urun:
+    kod: str
+    ad: str
+    fiyat: float
+    stok: int = 0          # varsayılanlı alanlar sona
+
+k = Urun("K-100", "Klavye", 850.0, 12)
+m = Urun("M-200", "Mouse", fiyat=320.0)
+print(k)                                   # __repr__ hazır
+print(m.stok)
+print(k == Urun("K-100", "Klavye", 850.0, 12))   # __eq__ alan bazlı
+k.stok -= 1
+print(k.stok)</pre>
+
+<p>Dataclass sıradan bir sınıftır: metot, property, classmethod ekleyebilirsin. Kurucudan sonra çalışması gereken doğrulama için <code>__post_init__</code> vardır.</p>
+<pre class="py">from dataclasses import dataclass
+
+@dataclass
+class Urun:
+    kod: str
+    ad: str
+    fiyat: float
+    stok: int = 0
+
+    def __post_init__(self):
+        if self.fiyat &lt; 0:
+            raise ValueError("fiyat negatif olamaz")
+        self.kod = self.kod.upper()
+
+    @property
+    def kdvli(self) -&gt; float:
+        return round(self.fiyat * 1.2, 2)
+
+    def satis(self, adet: int) -&gt; float:
+        if adet &gt; self.stok:
+            raise ValueError("stok yetersiz")
+        self.stok -= adet
+        return round(self.kdvli * adet, 2)
+
+u = Urun("k-100", "Klavye", 850.0, 5)
+print(u.kod, u.kdvli)
+print(u.satis(2), "TL;", u.stok, "kaldı")
+try:
+    Urun("x", "Bozuk", -1)
+except ValueError as e:
+    print("Hata:", e)</pre>
+
+<h2>field, frozen, order, asdict</h2>
+<p>Değiştirilebilir varsayılan (liste, sözlük) doğrudan yazılamaz; sınıf niteliği tuzağını hatırla. Bunun için <code>field(default_factory=list)</code> kullanılır. <code>frozen=True</code> nesneyi değiştirilemez (ve hashlenebilir) yapar; <code>order=True</code> karşılaştırma metotlarını alan sırasına göre üretir; <code>asdict</code> nesneyi iç içe sözlüğe çevirir (JSON'a hazırlamak için).</p>
+<pre class="py">from dataclasses import dataclass, field, asdict
+
+@dataclass(frozen=True, order=True)
+class Para:
+    tutar: float
+    birim: str = "TL"
+
+@dataclass
+class Siparis:
+    no: int
+    musteri: str
+    kalemler: list[str] = field(default_factory=list)   # her örneğe yeni liste
+    toplam: Para = Para(0.0)
+    notlar: dict[str, str] = field(default_factory=dict, repr=False)
+
+s1 = Siparis(1001, "Ayşe")
+s2 = Siparis(1002, "Can")
+s1.kalemler.append("K-100")
+print(s1.kalemler, s2.kalemler)       # paylaşılmıyor
+
+p = Para(100.0)
+try:
+    p.tutar = 5
+except Exception as e:
+    print(type(e).__name__)
+print(sorted([Para(30), Para(5), Para(12)]))      # order=True
+print({Para(1), Para(1)})                          # frozen -&gt; hashlenebilir
+
+print(asdict(s1))</pre>
+
+<div class="warn"><b>field(default=[]) de olmaz</b>dataclass liste/sözlük/küme varsayılanı görünce <code>ValueError</code> ile seni durdurur. Doğru yol her zaman <code>default_factory</code>: çağrılabilir bir şey ver, her örnek için yeniden çağrılsın.</div>
+
+<div class="tbl-wrap"><table>
+<tr><th>Seçenek</th><th>Nerede</th><th>Ne yapar</th></tr>
+<tr><td><code>default=</code></td><td>field</td><td>Sabit varsayılan (değişmez değerler için)</td></tr>
+<tr><td><code>default_factory=</code></td><td>field</td><td>Her örnek için yeni nesne üretir (list, dict, set)</td></tr>
+<tr><td><code>repr=False</code></td><td>field</td><td>Alanı __repr__ dışında bırakır (uzun ya da gizli veri)</td></tr>
+<tr><td><code>compare=False</code></td><td>field</td><td>Alanı __eq__ ve sıralamadan çıkarır</td></tr>
+<tr><td><code>frozen=True</code></td><td>dataclass</td><td>Değiştirilemez, hashlenebilir (küme/sözlük anahtarı)</td></tr>
+<tr><td><code>order=True</code></td><td>dataclass</td><td>&lt;, &gt; vb. alan sırasına göre</td></tr>
+<tr><td><code>slots=True</code></td><td>dataclass (3.10+)</td><td>__slots__ üretir, bellek azalır</td></tr>
+<tr><td><code>kw_only=True</code></td><td>dataclass (3.10+)</td><td>Tüm alanlar anahtar kelimeyle verilir</td></tr>
+</table></div>
+
+<h2>Tip ipuçları: sözdizimi</h2>
+<p>Parametreye <code>ad: tip</code>, dönüşe <code>-&gt; tip</code> yazılır. Python 3.9+ ile yerleşik koleksiyonlar doğrudan genel tip olur (<code>list[int]</code>, <code>dict[str, float]</code>); 3.10+ ile <code>X | None</code>, eski <code>Optional[X]</code>'in yerini alır. Tip ipuçları <b>çalışma zamanında zorlanmaz</b>: yanlış tip verirsen Python ses çıkarmaz; denetim editörün ve mypy'nin işidir.</p>
+<pre class="py">def ortalama(tutarlar: list[float]) -&gt; float:
+    return sum(tutarlar) / len(tutarlar) if tutarlar else 0.0
+
+def musteri_bul(musteriler: dict[str, str], no: str) -&gt; str | None:
+    return musteriler.get(no)          # yoksa None: imza bunu açıkça söylüyor
+
+def etiketle(no: int, kalemler: list[str], oncelik: bool = False) -&gt; tuple[int, str]:
+    etiket = ("ACİL " if oncelik else "") + ", ".join(kalemler)
+    return no, etiket
+
+print(ortalama([450.0, 120.0, 980.0]))
+print(musteri_bul({"M1": "Ayşe"}, "M1"), musteri_bul({"M1": "Ayşe"}, "M9"))
+print(etiketle(1001, ["K-100", "M-200"], oncelik=True))
+
+# Çalışma zamanında zorlanmaz:
+print(ortalama.__annotations__)
+print(etiketle("hatalı", []))      # mypy bunu yakalar, Python çalıştırır</pre>
+
+<div class="tip"><b>None dönebilen fonksiyonlar</b><code>-&gt; str | None</code> yazdığında çağıran taraf None kontrolü yapmak zorunda kalır (mypy uyarır). Bu, "boş sonuç" hatalarının yarısını kodu çalıştırmadan yakalar.</div>
+
+<h3>Takma ad, Literal ve Callable</h3>
+<pre class="py">from typing import Literal, Callable
+
+HesapNo = str                                 # tip takma adı: okunurluk
+Durum = Literal["bekliyor", "onaylandi", "reddedildi"]
+
+def durum_guncelle(no: HesapNo, durum: Durum) -&gt; str:
+    return f"{no}: {durum}"
+
+def uygula(tutarlar: list[float], f: Callable[[float], float]) -&gt; list[float]:
+    return [f(t) for t in tutarlar]
+
+print(durum_guncelle("TR01", "onaylandi"))
+print(uygula([100.0, 250.0], lambda t: round(t * 1.2, 2)))</pre>
+
+<h2>TypedDict ve Protocol (kısa)</h2>
+<p><b>TypedDict</b>, elindeki veri zaten sözlükse (JSON'dan geldi, dataclass'a çevirmek istemiyorsun) anahtarlarını ve tiplerini belgelemeni sağlar; çalışma zamanında düz sözlüktür. <b>Protocol</b>, "şu metotlara sahip olan her nesne" demektir; ördek tiplemenin tip sistemindeki karşılığıdır ve kalıtım (inheritance) gerektirmez.</p>
+<pre class="py">from typing import TypedDict, Protocol
+
+class SiparisKaydi(TypedDict):
+    no: int
+    sehir: str
+    tutar: float
+
+def sehir_toplam(kayitlar: list[SiparisKaydi], sehir: str) -&gt; float:
+    return sum(k["tutar"] for k in kayitlar if k["sehir"] == sehir)
+
+veri: list[SiparisKaydi] = [
+    {"no": 1, "sehir": "Ankara", "tutar": 450.0},
+    {"no": 2, "sehir": "İzmir", "tutar": 120.0},
+    {"no": 3, "sehir": "Ankara", "tutar": 980.0},
+]
+print(sehir_toplam(veri, "Ankara"))
+print(type(veri[0]).__name__)        # düz dict
+
+class Odenebilir(Protocol):
+    def ode(self, tutar: float) -&gt; str: ...
+
+class KrediKarti:                    # Odenebilir'den kalıtım almıyor
+    def ode(self, tutar: float) -&gt; str:
+        return f"KK ile {tutar} ödendi"
+
+def tahsil_et(yontem: Odenebilir, tutar: float) -&gt; str:
+    return yontem.ode(tutar)
+
+print(tahsil_et(KrediKarti(), 149.9))</pre>
+
+<h2>mypy mantığı</h2>
+<p><code>mypy dosya.py</code> komutu kodu çalıştırmadan tip ipuçlarını denetler: <code>ortalama("abc")</code> gibi çağrıları, None kontrolü yapılmadan kullanılan değerleri, eksik dönüşleri raporlar. Tarayıcıdaki bu ortamda mypy yok, ama mantığı şudur: tip ipucu <b>belgeleme + statik denetim</b>dir, performans ya da çalışma zamanı güvenliği değildir. Gerçek projede CI'da mypy (ya da pyright) çalıştırılır; "Kalite ve CI" dersinde kuracaksın.</p>
+
+<div class="note"><b>Aşamalı tipleme</b>Her şeyi tiplemek zorunda değilsin. Önce fonksiyon imzalarını, özellikle modül sınırlarını ve veri sınıflarını tiple; iç değişkenleri Python zaten çıkarsar. mypy varsayılan olarak tiplenmemiş fonksiyonları denetlemez; <code>--strict</code> ile hepsini ister.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: dataclass'ın az bilinen araçları ve tiplerle yaşamak</h2>
+<p>Temel <code>@dataclass</code> kullanımını, <code>field</code>, <code>frozen</code> ve <code>asdict</code>'i gördün. Gerçek projede hemen şu sorularla karşılaşırsın: Kurucuda verilmeyen ama hesaplanan bir alanı nasıl tutarım? Değişmez bir nesnenin "bir alanı farklı" kopyasını nasıl üretirim? Sınıf sabiti neden alan sanılıyor? Kalıtımda neden <code>TypeError</code> alıyorum? JSON'dan iç içe dataclass nasıl kurulur? Bu bölüm bunları yanıtlıyor. Generic, overload ve NewType "İleri tip sistemi" dersinde, çalışma zamanı doğrulaması "Pydantic" dersinde.</p>
+
+<h3>1. Hesaplanan alanlar: init=False, InitVar ve ClassVar</h3>
+<p><code>field(init=False)</code> alanı kurucudan çıkarır; değerini <code>__post_init__</code> içinde sen verirsin ama <code>repr</code>, <code>==</code> ve <code>asdict</code>'te görünmeye devam eder. <code>InitVar</code> ise tersidir: kurucuya verilir, <code>__post_init__</code>'e parametre olarak gelir ama alan olarak <b>saklanmaz</b> (ör. ham şifre, ham metin). <code>ClassVar</code> ile işaretlenen ad ise alan değil, sınıf niteliğidir; dataclass ona hiç dokunmaz.</p>
+<pre class="py">from dataclasses import dataclass, field, InitVar, fields, asdict
+from typing import ClassVar
+
+@dataclass
+class Fatura:
+    KDV: ClassVar[float] = 0.20                 # sınıf sabiti: alan DEĞİL
+    no: str
+    kalemler: list[float]
+    indirim_kodu: InitVar[str | None] = None    # kurucuya gelir, saklanmaz
+    indirim: float = field(init=False, default=0.0)
+    toplam: float = field(init=False)
+
+    def __post_init__(self, indirim_kodu):
+        ara = sum(self.kalemler)
+        if indirim_kodu == "YAZ10":
+            self.indirim = round(ara * 0.10, 2)
+        self.toplam = round((ara - self.indirim) * (1 + self.KDV), 2)
+
+f = Fatura("F-1", [400.0, 600.0], indirim_kodu="YAZ10")
+print(f)
+print([x.name for x in fields(f)])             # KDV ve indirim_kodu yok
+print(asdict(f))</pre>
+
+<h3>2. Değişmez nesneyi "değiştirmek": replace</h3>
+<p><code>frozen=True</code> nesneye atama yapamazsın; ama çoğu zaman "aynısı, yalnız şu alanı farklı" bir nesne istersin. <code>dataclasses.replace(nesne, alan=yeni)</code> tam bunu yapar: yeni bir nesne üretir, <code>__post_init__</code>'i yeniden çalıştırır (doğrulama atlanmaz). Frozen sınıfın <code>__post_init__</code>'inde bir alanı düzeltmen gerekirse <code>self.x = ...</code> hata verir; çıkış yolu <code>object.__setattr__(self, "x", deger)</code>'dir.</p>
+<pre class="py">from dataclasses import dataclass, replace, FrozenInstanceError
+
+@dataclass(frozen=True)
+class Adres:
+    sehir: str
+    ilce: str
+    posta_kodu: str
+
+    def __post_init__(self):
+        if len(self.posta_kodu) != 5 or not self.posta_kodu.isdigit():
+            raise ValueError(f"geçersiz posta kodu: {self.posta_kodu}")
+        object.__setattr__(self, "sehir", self.sehir.strip().title())
+
+a = Adres(" ankara ", "Çankaya", "06690")
+b = replace(a, ilce="Yenimahalle", posta_kodu="06170")
+print(a)
+print(b, a is b)
+try:
+    a.ilce = "Keçiören"
+except FrozenInstanceError:
+    print("frozen: atama yok, replace kullan")
+try:
+    replace(a, posta_kodu="6")
+except ValueError as e:
+    print(e)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne işe yarar</th><th>Örnek</th></tr>
+<tr><td><code>fields(cls)</code></td><td>Alanların listesi (ad, tip, varsayılan)</td><td>CSV başlığı üretmek</td></tr>
+<tr><td><code>asdict</code> / <code>astuple</code></td><td>İç içe sözlüğe / demete çevir</td><td>JSON'a, veritabanı satırına yazmak</td></tr>
+<tr><td><code>replace(n, **d)</code></td><td>Değişikliklerle yeni nesne</td><td>frozen nesneyi güncellemek</td></tr>
+<tr><td><code>field(init=False)</code></td><td>Kurucuda yok, hesaplanır</td><td>toplam, oluşturulma no</td></tr>
+<tr><td><code>InitVar[T]</code></td><td>Kurucuda var, saklanmaz</td><td>ham şifre, ham metin</td></tr>
+<tr><td><code>ClassVar[T]</code></td><td>Alan değil, sınıf niteliği</td><td>KDV oranı, sayaç</td></tr>
+<tr><td><code>kw_only=True</code></td><td>Alanlar yalnız adla verilir</td><td>kalıtımda sıra sorunu</td></tr>
+</table></div>
+
+<h3>3. Kalıtım ve "non-default argument follows default argument"</h3>
+<p>Dataclass alt sınıfının alanları üst sınıfınkilerin <b>arkasına</b> eklenir. Üst sınıfta varsayılanlı bir alan varsa alt sınıfa varsayılansız alan ekleyemezsin, çünkü üretilen <code>__init__</code> geçersiz olur ve <code>TypeError</code> alırsın. Python 3.10+ çözümü <code>kw_only=True</code>'dur: anahtar kelimeyle verilen parametrelerde sıra sorunu yoktur.</p>
+<pre class="py">from dataclasses import dataclass, field
+
+@dataclass(kw_only=True)
+class Kayit:
+    olusturan: str = "sistem"
+    etiketler: list[str] = field(default_factory=list)
+
+@dataclass(kw_only=True)
+class Talep(Kayit):
+    no: int                       # varsayılansız: kw_only sayesinde sorun yok
+    konu: str
+
+t = Talep(no=42, konu="Sokak lambası arızası", olusturan="çağrı merkezi")
+print(t)
+try:
+    Talep(42, "Çukur")            # konumsal verilemez
+except TypeError as e:
+    print("TypeError:", e)</pre>
+
+<h3>4. JSON'dan iç içe dataclass kurmak</h3>
+<p><code>asdict</code> gidiş yolunu çözer ama dönüş yolu (sözlükten nesneye) senin işindir: <code>Urun(**d)</code> düz sınıflar için yeter, iç içe listeler için her alt sözlüğü kendi sınıfına çevirmen gerekir. Bilinmeyen anahtarlar (<code>**d</code> ile <code>TypeError</code> verir) için <code>fields()</code> ile süzersin. Bu "dönüştürücü" kodu tek bir <code>@classmethod</code> içinde topla.</p>
+<pre class="py">import json
+from dataclasses import dataclass, field, fields, asdict
+
+@dataclass
+class Kalem:
+    sku: str
+    adet: int
+    fiyat: float
+
+@dataclass
+class Siparis:
+    no: int
+    kalemler: list[Kalem] = field(default_factory=list)
+
+    @classmethod
+    def sozlukten(cls, d: dict) -&gt; "Siparis":
+        izinli = {f.name for f in fields(Kalem)}
+        kalemler = [Kalem(**{k: v for k, v in x.items() if k in izinli})
+                    for x in d.get("kalemler", [])]
+        return cls(no=int(d["no"]), kalemler=kalemler)
+
+ham = '{"no": "7", "kalemler": [{"sku": "K-1", "adet": 2, "fiyat": 90.0, "renk": "siyah"}]}'
+s = Siparis.sozlukten(json.loads(ham))
+print(s)
+metin = json.dumps(asdict(s))
+print(metin)
+print(Siparis.sozlukten(json.loads(metin)) == s)</pre>
+
+<h3>5. Tiplerle yaşamak: daraltma, Final ve Self</h3>
+<p><code>str | None</code> dönen bir değeri kullanmadan önce <code>if x is None: return ...</code> yazdığında, tip denetleyici o satırdan sonra <code>x</code>'in <code>str</code> olduğunu bilir; buna tip daraltma (narrowing) denir. <code>isinstance</code> da daraltır. <code>typing.Final</code> bir adın yeniden atanmaması gerektiğini söyler (<code>MAX_TUTAR: Final = 50_000</code>); <code>typing.Self</code> (3.11+) ise <code>return self</code> ya da <code>return cls(...)</code> yapan metotların dönüş tipidir, alt sınıflarda da doğru tipi verir. Hiçbiri çalışma zamanında zorlanmaz; mypy/pyright ve editörün denetler.</p>
+<div class="warn"><b>from __future__ import annotations</b>Bu satır tüm ipuçlarını metin olarak saklar; ileri başvurular (<code>-&gt; "Siparis"</code> yerine <code>-&gt; Siparis</code>) tırnaksız yazılabilir. Ama <code>__annotations__</code>'a bakan kodlar artık tip nesnesi değil dize görür; gerçek tipleri almak için <code>typing.get_type_hints(fonksiyon)</code> kullan.</div>
+<div class="tip"><b>Ne zaman Any?</b><code>Any</code> denetimi kapatır; "her şey olabilir ve umurumda değil" demektir. "Her şey olabilir ama kullanmadan önce türünü kontrol edeceğim" diyorsan <code>object</code> yaz: mypy seni <code>isinstance</code> ile daraltmaya zorlar.</div>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal projelerde veri sınıfları genellikle bir <code>models.py</code> ya da <code>domain/</code> klasöründe durur; dış dünyayla temas eden her yerde (API yanıtı, CSV satırı, kuyruk mesajı) <code>sozlukten</code>/<code>sozluge</code> gibi tek bir dönüştürücü bulunur. Değer nesneleri (para, adres, tarih aralığı) <code>frozen=True</code> yapılır ve <code>replace</code> ile güncellenir; böylece bir fonksiyonun adresini "yanlışlıkla" değiştirmesi imkânsızlaşır. CI'da <code>mypy --strict</code> ya da pyright çalıştıran ekiplerde imzasız fonksiyon kod incelemesinden (code review) geçmez.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>dataclass mı NamedTuple mı sözlük mü?</h3>
+<ul>
+<li><b>dataclass</b>: varsayılan seçim; değiştirilebilir ya da frozen, metotlu, tipli.</li>
+<li><b>typing.NamedTuple</b>: küçük, değişmez, demet gibi açılabilir kayıtlar (koordinat, tarih aralığı).</li>
+<li><b>TypedDict</b>: veri zaten JSON/sözlük biçimindeyse ve öyle kalacaksa.</li>
+<li><b>düz sözlük</b>: anahtarlar çalışma zamanında belirleniyorsa (ör. şehir → toplam).</li>
+</ul>
+<h3>Generic ve TypeVar</h3>
+<p><code>def ilk(x: list[T]) -&gt; T</code> gibi "içeri ne girerse o çıkar" imzalar <code>TypeVar</code> ile yazılır; Python 3.12 bunu <code>def ilk[T](x: list[T]) -&gt; T</code> kısa sözdizimine indirdi. "İleri tip sistemi" dersinde Generic sınıflar, ParamSpec ve overload gelecek.</p>
+<h3>Çalışma zamanı doğrulama</h3>
+<p>Dış dünyadan (API, dosya) gelen veriyi tip ipucu korumaz. Üretim ortamında <code>pydantic</code> gibi kütüphaneler dataclass benzeri sınıfları çalışma zamanında doğrular ve JSON'dan güvenle kurar. Standart kütüphanede kalacaksan <code>__post_init__</code> içinde elle kontrol et.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dataclass-typing">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kalitim-polimorfizm/">← Kalıtım (inheritance) ve polimorfizm</a><a href="../hata-tasarim/">Hata tasarımı: özel istisnalar, logging, EAFP →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

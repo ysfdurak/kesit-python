@@ -1,0 +1,469 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini | Kesit Python</title><meta name="description" content="Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer'lı pipeline'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-ml/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini"><meta property="og:description" content="Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer'lı pipeline'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-ml/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini","description":"Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer'lı pipeline'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-ml/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini</h1><p class="st-l">Sentetik banka verisi üretip keşfeder, özellik mühendisliği yapar, ColumnTransformer'lı pipeline'ı çapraz doğrulamayla değerlendirir, iş maliyetine göre eşik seçer, modeli açıklar, f-string ile yönetim raporu yazar ve modeli BytesIO ile kaydedip yüklersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ml">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: Ilgaz Bank müşteri kaybı tahmini</h2>
+<p>Ilgaz Bank'ın bireysel bankacılık ekibi her ay bazı müşterilerin hesabını kapatıp başka bankaya geçtiğini görüyor. Yeni müşteri kazanmak, mevcut müşteriyi tutmaktan çok daha pahalı. Soru şu: <b>"Önümüzdeki dönemde hangi müşteriler ayrılmaya (churn) yakın, kime tutundurma teklifi yapalım?"</b> Bu bitirme projesinde makine öğrenmesi derslerinde (<a href="../ml-giris/">Makine öğrenmesine giriş</a>, <a href="../ml-regresyon-siniflandirma/">Regresyon ve sınıflandırma modelleri</a>, <a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a>) öğrendiğin her şeyi tek bir iş problemi etrafında birleştireceksin: veri, keşif, özellik mühendisliği (feature engineering), pipeline, çapraz doğrulama (cross-validation), eşik seçimi, açıklama, rapor ve model dosyası.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Adım</th><th>Soru</th><th>Araç</th><th>Çıktı</th></tr>
+<tr><td>1. Veri</td><td>Elimizde ne var?</td><td>numpy <code>default_rng(seed)</code></td><td><code>veri_uret</code></td></tr>
+<tr><td>2. Keşif</td><td>Churn oranı ne, kimde yüksek?</td><td>pandas groupby</td><td>Oran tabloları</td></tr>
+<tr><td>3. Özellikler</td><td>Hangi türetilmiş bilgi işe yarar?</td><td>pandas</td><td><code>ozellik_ekle</code></td></tr>
+<tr><td>4. Pipeline</td><td>Hazırlık + model tek nesnede</td><td>ColumnTransformer, Pipeline</td><td><code>pipeline_kur</code></td></tr>
+<tr><td>5. Doğrulama</td><td>Model ne kadar iyi?</td><td>StratifiedKFold, ROC AUC</td><td>CV skoru</td></tr>
+<tr><td>6. Eşik</td><td>Kime teklif gidecek?</td><td>Maliyet fonksiyonu</td><td>En ucuz eşik</td></tr>
+<tr><td>7. Açıklama</td><td>Neden ayrılıyorlar?</td><td>Katsayılar</td><td>Özellik önemi</td></tr>
+<tr><td>8. Rapor ve teslim</td><td>Yönetime ne söyleyeceğiz?</td><td>f-string, pickle + BytesIO</td><td>Rapor metni, model dosyası</td></tr>
+</table></div>
+<div class="note"><b>Her kutu bağımsız</b>Sayfadaki her kod kutusu kendi başına çalışır; bu yüzden veri üretimi gibi parçalar kutularda tekrar eder. Gerçek projede bunlar <code>veri.py</code>, <code>ozellik.py</code>, <code>model.py</code>, <code>rapor.py</code> modüllerinde bir kez yazılır.</div>
+
+<h2>1. Sentetik veri üretimi</h2>
+<p>Gerçek müşteri verisi bu derste kullanılamaz (KVKK), o yüzden gerçekçi ilişkiler taşıyan sentetik veri üretiyoruz: şikayet sayısı arttıkça ayrılma olasılığı artar; ürün sayısı, kıdem, işlem sıklığı ve mobil uygulama kullanımı ise müşteriyi bağlar. Churn, bu etkilerden hesaplanan olasılıkla rastgele çekilir; böylece model mükemmel değil, gerçek hayattaki gibi "iyi ama hatalı" olur. <code>seed</code> sabitlendiği için herkes aynı veriyi alır.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+
+def veri_uret(n=1000, seed=42):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({
+        "yas": rng.integers(18, 75, n),
+        "kidem_ay": rng.integers(1, 120, n),
+        "urun_sayisi": rng.integers(1, 5, n),
+        "aylik_islem": rng.poisson(12, n),
+        "bakiye": np.round(rng.gamma(2.0, 15000, n), 2),
+        "sehir": rng.choice(SEHIRLER, n, p=[0.4, 0.25, 0.2, 0.15]),
+        "mobil_aktif": rng.integers(0, 2, n),
+        "sikayet_sayisi": rng.poisson(0.6, n),
+    })
+    z = (-0.6 + 1.1 * df["sikayet_sayisi"] - 0.5 * (df["urun_sayisi"] - 1)
+         - 0.015 * df["kidem_ay"] - 0.06 * (df["aylik_islem"] - 12) - 0.9 * df["mobil_aktif"])
+    olasilik = 1 / (1 + np.exp(-z))
+    df["churn"] = (rng.random(n) &lt; olasilik).astype(int)
+    return df
+
+df = veri_uret()
+print(df.shape)
+print(df.head(3).to_string())
+print("churn oranı:", round(df["churn"].mean(), 3))</pre>
+<div class="warn"><b>Sentetik veri kendi cevabını bilir</b>Formülü biz yazdığımız için modelin "şikayet sayısı önemli" demesi bizi şaşırtmaz. Bu bir öğrenme düzeneğidir; gerçek projede ilişkileri veri söyler ve sürprizler olur.</div>
+
+<h2>2. Keşifsel analiz ve 3. özellik mühendisliği</h2>
+<p>Modelden önce veriye bak: churn oranı ne (sınıf dengesizliği var mı), hangi gruplarda yüksek? Sonra ham sütunlardan iş anlamı olan yeni sütunlar türet. Kural: her özellik <b>tahmin anında bilinebilir</b> olmalı. "Hesap kapanış tarihi" ya da "kapanış nedeni" gibi churn'den sonra oluşan bilgiler modele girerse sahte bir başarı elde edersin (veri sızıntısı, data leakage).</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+
+def veri_uret(n=1000, seed=42):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({
+        "yas": rng.integers(18, 75, n),
+        "kidem_ay": rng.integers(1, 120, n),
+        "urun_sayisi": rng.integers(1, 5, n),
+        "aylik_islem": rng.poisson(12, n),
+        "bakiye": np.round(rng.gamma(2.0, 15000, n), 2),
+        "sehir": rng.choice(SEHIRLER, n, p=[0.4, 0.25, 0.2, 0.15]),
+        "mobil_aktif": rng.integers(0, 2, n),
+        "sikayet_sayisi": rng.poisson(0.6, n),
+    })
+    z = (-0.6 + 1.1 * df["sikayet_sayisi"] - 0.5 * (df["urun_sayisi"] - 1)
+         - 0.015 * df["kidem_ay"] - 0.06 * (df["aylik_islem"] - 12) - 0.9 * df["mobil_aktif"])
+    olasilik = 1 / (1 + np.exp(-z))
+    df["churn"] = (rng.random(n) &lt; olasilik).astype(int)
+    return df
+def ozellik_ekle(df):
+    df = df.copy()
+    df["islem_urun_orani"] = df["aylik_islem"] / df["urun_sayisi"]
+    df["yeni_musteri"] = (df["kidem_ay"] &lt; 12).astype(int)
+    df["bakiye_log"] = np.log1p(df["bakiye"])
+    return df
+
+df = ozellik_ekle(veri_uret())
+print("Genel churn:", round(df["churn"].mean(), 3))
+print(df.groupby("sikayet_sayisi")["churn"].agg(["mean", "size"]).round(3).head(4))
+print(df.groupby("mobil_aktif")["churn"].mean().round(3).to_dict())
+df["kidem_grubu"] = pd.cut(df["kidem_ay"], [0, 12, 36, 120], labels=["&lt;1 yıl", "1-3 yıl", "3+ yıl"])
+print(df.groupby("kidem_grubu", observed=True)["churn"].mean().round(3).to_dict())
+print(df[["aylik_islem", "urun_sayisi", "islem_urun_orani", "yeni_musteri", "bakiye_log"]].head(2).round(2).to_string())</pre>
+<p>Şikayet sayısı arttıkça churn oranı belirgin biçimde artıyor, mobil uygulama kullananlar daha az ayrılıyor, 3 yıldan uzun süredir müşteri olanlar daha sadık. Churn oranı %18 civarında: dengesiz bir sınıf, bu yüzden doğruluk (accuracy) yerine ROC AUC ve maliyet odaklı değerlendirme kullanacağız.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Formül</th><th>İş anlamı</th></tr>
+<tr><td><code>islem_urun_orani</code></td><td>aylık işlem / ürün sayısı</td><td>Ürün başına kullanım yoğunluğu</td></tr>
+<tr><td><code>yeni_musteri</code></td><td>kıdem &lt; 12 ay</td><td>İlk yıl kritik dönem</td></tr>
+<tr><td><code>bakiye_log</code></td><td>log(1 + bakiye)</td><td>Çarpık dağılımı yumuşatır</td></tr>
+</table></div>
+
+<h2>4. Pipeline ve 5. çapraz doğrulama</h2>
+<p>Sayısal sütunlar ölçeklenir, şehir one-hot kodlanır, sonra lojistik regresyon. Hepsi tek <code>Pipeline</code> içinde olduğu için çapraz doğrulamada her katta hazırlık yalnızca eğitim kısmına fit edilir ve yeni müşteriye tahmin yaparken aynı adımlar otomatik uygulanır. <code>handle_unknown="ignore"</code>, eğitimde görülmemiş bir şehir (ör. "Antalya") geldiğinde hata yerine sıfır vektör üretir. <b>StratifiedKFold</b> her katta churn oranını korur; skorun ortalaması kadar dağılımı (±) da önemlidir.</p>
+<h2>6. Eşik seçimi ve iş maliyeti</h2>
+<p>Model bir olasılık verir; "teklif gönder" kararı için bir eşik gerekir. Varsayılan 0.5 bir iş kararı değil, bir varsayımdır. Hataların maliyeti eşit değildir:</p>
+<ul>
+<li><b>Yanlış pozitif</b> (FP): kalacak müşteriye teklif gönderdik; maliyet = teklif bedeli (ör. 300 TL).</li>
+<li><b>Yanlış negatif</b> (FN): gidecek müşteriyi kaçırdık; maliyet = müşterinin bırakacağı değer (ör. 1.500 TL).</li>
+</ul>
+<p>FN daha pahalıysa eşik düşer: daha çok kişiye teklif gönderip daha az kişiyi kaçırırız. Rakamlar örnektir; gerçek değerleri finans ekibiyle belirlersin.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+
+def veri_uret(n=1000, seed=42):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({
+        "yas": rng.integers(18, 75, n),
+        "kidem_ay": rng.integers(1, 120, n),
+        "urun_sayisi": rng.integers(1, 5, n),
+        "aylik_islem": rng.poisson(12, n),
+        "bakiye": np.round(rng.gamma(2.0, 15000, n), 2),
+        "sehir": rng.choice(SEHIRLER, n, p=[0.4, 0.25, 0.2, 0.15]),
+        "mobil_aktif": rng.integers(0, 2, n),
+        "sikayet_sayisi": rng.poisson(0.6, n),
+    })
+    z = (-0.6 + 1.1 * df["sikayet_sayisi"] - 0.5 * (df["urun_sayisi"] - 1)
+         - 0.015 * df["kidem_ay"] - 0.06 * (df["aylik_islem"] - 12) - 0.9 * df["mobil_aktif"])
+    olasilik = 1 / (1 + np.exp(-z))
+    df["churn"] = (rng.random(n) &lt; olasilik).astype(int)
+    return df
+def ozellik_ekle(df):
+    df = df.copy()
+    df["islem_urun_orani"] = df["aylik_islem"] / df["urun_sayisi"]
+    df["yeni_musteri"] = (df["kidem_ay"] &lt; 12).astype(int)
+    df["bakiye_log"] = np.log1p(df["bakiye"])
+    return df
+SAYISAL = ["yas", "kidem_ay", "urun_sayisi", "aylik_islem", "bakiye_log", "mobil_aktif",
+           "sikayet_sayisi", "islem_urun_orani", "yeni_musteri"]
+KATEGORIK = ["sehir"]
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+def pipeline_kur(sayisal, kategorik):
+    hazirlik = ColumnTransformer([
+        ("sayi", StandardScaler(), sayisal),
+        ("kat", OneHotEncoder(handle_unknown="ignore"), kategorik),
+    ])
+    return Pipeline([("hazirlik", hazirlik), ("model", LogisticRegression(max_iter=1000))])
+
+from sklearn.model_selection import StratifiedKFold, cross_val_score, train_test_split
+from sklearn.metrics import roc_auc_score
+
+df = ozellik_ekle(veri_uret())
+X, y = df[SAYISAL + KATEGORIK], df["churn"].to_numpy()
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+skorlar = cross_val_score(pipeline_kur(SAYISAL, KATEGORIK), X, y, cv=cv, scoring="roc_auc")
+print(f"CV ROC AUC: {skorlar.mean():.3f} ± {skorlar.std():.3f}")
+
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=0)
+olas = pipeline_kur(SAYISAL, KATEGORIK).fit(X_tr, y_tr).predict_proba(X_te)[:, 1]
+
+def is_maliyeti(y_gercek, olas, esik, fp_maliyet=300, fn_maliyet=1500):
+    tahmin = olas &gt;= esik
+    fp = int((tahmin &amp; (y_gercek == 0)).sum())
+    fn = int((~tahmin &amp; (y_gercek == 1)).sum())
+    return fp * fp_maliyet + fn * fn_maliyet
+
+for e in [0.1, 0.2, 0.3, 0.5, 0.7]:
+    print(f"eşik {e:.1f}: {is_maliyeti(y_te, olas, e):&gt;7,} TL")
+print("hiç teklif yok:", is_maliyeti(y_te, olas, 1.01))</pre>
+<p>Tablo, 0.5 eşiğinin bu maliyet yapısında pahalı olduğunu, daha düşük bir eşiğin binlerce lira tasarruf ettirdiğini gösterir. "Hiç teklif yok" satırı da modelin iş değerini ölçmek için temel çizgidir.</p>
+<div class="tip"><b>Eşiği test setinde seçme</b>En iyi eşiği test setinde arayıp aynı sette raporlarsan iyimser bir rakam verirsin. Doğrusu, eşiği eğitim verisinden (ör. çapraz doğrulama tahminleriyle, <code>cross_val_predict</code>) seçip test setinde bir kez raporlamaktır. Bitirme çözümünde böyle yapacağız.</div>
+
+<h2>7. Model açıklama: özellik önemi</h2>
+<p>Yönetim "neden?" diye soracak. Lojistik regresyonda ölçeklenmiş sütunların katsayıları, o özelliğin bir standart sapma artışının churn log-olasılığını ne kadar değiştirdiğini söyler: pozitif katsayı riski artırır, negatif azaltır. <code>pipe.named_steps["hazirlik"].get_feature_names_out()</code> ColumnTransformer'ın ürettiği sütun adlarını (<code>sayi__sikayet_sayisi</code>, <code>kat__sehir_İzmir</code>) verir; bunları <code>pipe.named_steps["model"].coef_[0]</code> ile eşleştirip mutlak değere göre sıralarsın. Tam çözümde bu tabloyu göreceksin. Ağaç modellerinde <code>feature_importances_</code>, model türünden bağımsız olarak da <code>permutation_importance</code> kullanılır. Unutma: katsayı nedensellik değil ilişkidir; "mobil uygulamayı zorunlu yapalım, churn düşsün" sonucu bir deney (A/B testi) olmadan çıkarılamaz.</p>
+
+<h2>8. İş raporu ve modeli kaydetmek</h2>
+<p>Rapor, teknik olmayan biri için yazılır: kaç müşteriye teklif, beklenen tasarruf, ana nedenler. <a href="../sablon-rapor/">Şablonla rapor üretme: string.Template ve Jinja2</a> dersindeki jinja2 burada gerekmez; düz f-string yeter. Model ise <code>pickle</code> ile bayta çevrilip dosyaya, nesne deposuna ya da veritabanına yazılır. Tarayıcıda disk yerine bellekte bir dosya gibi davranan <code>io.BytesIO</code> kullanıyoruz.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+
+def veri_uret(n=1000, seed=42):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({
+        "yas": rng.integers(18, 75, n),
+        "kidem_ay": rng.integers(1, 120, n),
+        "urun_sayisi": rng.integers(1, 5, n),
+        "aylik_islem": rng.poisson(12, n),
+        "bakiye": np.round(rng.gamma(2.0, 15000, n), 2),
+        "sehir": rng.choice(SEHIRLER, n, p=[0.4, 0.25, 0.2, 0.15]),
+        "mobil_aktif": rng.integers(0, 2, n),
+        "sikayet_sayisi": rng.poisson(0.6, n),
+    })
+    z = (-0.6 + 1.1 * df["sikayet_sayisi"] - 0.5 * (df["urun_sayisi"] - 1)
+         - 0.015 * df["kidem_ay"] - 0.06 * (df["aylik_islem"] - 12) - 0.9 * df["mobil_aktif"])
+    olasilik = 1 / (1 + np.exp(-z))
+    df["churn"] = (rng.random(n) &lt; olasilik).astype(int)
+    return df
+def ozellik_ekle(df):
+    df = df.copy()
+    df["islem_urun_orani"] = df["aylik_islem"] / df["urun_sayisi"]
+    df["yeni_musteri"] = (df["kidem_ay"] &lt; 12).astype(int)
+    df["bakiye_log"] = np.log1p(df["bakiye"])
+    return df
+SAYISAL = ["yas", "kidem_ay", "urun_sayisi", "aylik_islem", "bakiye_log", "mobil_aktif",
+           "sikayet_sayisi", "islem_urun_orani", "yeni_musteri"]
+KATEGORIK = ["sehir"]
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+def pipeline_kur(sayisal, kategorik):
+    hazirlik = ColumnTransformer([
+        ("sayi", StandardScaler(), sayisal),
+        ("kat", OneHotEncoder(handle_unknown="ignore"), kategorik),
+    ])
+    return Pipeline([("hazirlik", hazirlik), ("model", LogisticRegression(max_iter=1000))])
+
+import io
+import pickle
+
+df = ozellik_ekle(veri_uret())
+X = df[SAYISAL + KATEGORIK]
+pipe = pipeline_kur(SAYISAL, KATEGORIK).fit(X, df["churn"])
+
+tampon = io.BytesIO()
+pickle.dump(pipe, tampon)
+print("model boyutu:", len(tampon.getvalue()), "bayt")
+
+tampon.seek(0)
+yuklenen = pickle.load(tampon)
+print("aynı tahmin:", (yuklenen.predict_proba(X)[:, 1] == pipe.predict_proba(X)[:, 1]).all())
+
+yeni = pd.DataFrame([{"yas": 34, "kidem_ay": 5, "urun_sayisi": 1, "aylik_islem": 3, "bakiye": 1200.0,
+                      "sehir": "Antalya", "mobil_aktif": 0, "sikayet_sayisi": 3}])
+print("yeni müşteri churn olasılığı:", round(float(yuklenen.predict_proba(ozellik_ekle(yeni)[SAYISAL + KATEGORIK])[0, 1]), 2))</pre>
+<div class="warn"><b>pickle güvenliği ve sürümler</b><code>pickle.load</code> güvenilmeyen bir dosyayı açarsa keyfi kod çalıştırabilir; yalnızca kendi ürettiğin modelleri yükle. Model, kaydedildiği scikit-learn sürümüyle yüklenmelidir; sürümü <code>requirements.txt</code>'e sabitle. Büyük modellerde <code>joblib.dump</code> daha verimlidir.</div>
+
+<h2>Tam çözüm</h2>
+<p>Aşağıdaki kutu tüm adımları birleştirir: eşik, eğitim verisinde çapraz doğrulama tahminleriyle seçilir, test setinde bir kez raporlanır.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+SEHIRLER = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+
+def veri_uret(n=1000, seed=42):
+    rng = np.random.default_rng(seed)
+    df = pd.DataFrame({
+        "yas": rng.integers(18, 75, n),
+        "kidem_ay": rng.integers(1, 120, n),
+        "urun_sayisi": rng.integers(1, 5, n),
+        "aylik_islem": rng.poisson(12, n),
+        "bakiye": np.round(rng.gamma(2.0, 15000, n), 2),
+        "sehir": rng.choice(SEHIRLER, n, p=[0.4, 0.25, 0.2, 0.15]),
+        "mobil_aktif": rng.integers(0, 2, n),
+        "sikayet_sayisi": rng.poisson(0.6, n),
+    })
+    z = (-0.6 + 1.1 * df["sikayet_sayisi"] - 0.5 * (df["urun_sayisi"] - 1)
+         - 0.015 * df["kidem_ay"] - 0.06 * (df["aylik_islem"] - 12) - 0.9 * df["mobil_aktif"])
+    olasilik = 1 / (1 + np.exp(-z))
+    df["churn"] = (rng.random(n) &lt; olasilik).astype(int)
+    return df
+def ozellik_ekle(df):
+    df = df.copy()
+    df["islem_urun_orani"] = df["aylik_islem"] / df["urun_sayisi"]
+    df["yeni_musteri"] = (df["kidem_ay"] &lt; 12).astype(int)
+    df["bakiye_log"] = np.log1p(df["bakiye"])
+    return df
+SAYISAL = ["yas", "kidem_ay", "urun_sayisi", "aylik_islem", "bakiye_log", "mobil_aktif",
+           "sikayet_sayisi", "islem_urun_orani", "yeni_musteri"]
+KATEGORIK = ["sehir"]
+from sklearn.compose import ColumnTransformer
+from sklearn.preprocessing import StandardScaler, OneHotEncoder
+from sklearn.pipeline import Pipeline
+from sklearn.linear_model import LogisticRegression
+
+def pipeline_kur(sayisal, kategorik):
+    hazirlik = ColumnTransformer([
+        ("sayi", StandardScaler(), sayisal),
+        ("kat", OneHotEncoder(handle_unknown="ignore"), kategorik),
+    ])
+    return Pipeline([("hazirlik", hazirlik), ("model", LogisticRegression(max_iter=1000))])
+
+from sklearn.model_selection import train_test_split, StratifiedKFold, cross_val_predict
+from sklearn.metrics import roc_auc_score
+
+FP_TL, FN_TL = 300, 1500
+
+def is_maliyeti(y, olas, esik):
+    t = olas &gt;= esik
+    return int(((t == 1) &amp; (y == 0)).sum()) * FP_TL + int(((t == 0) &amp; (y == 1)).sum()) * FN_TL
+
+df = ozellik_ekle(veri_uret())
+X, y = df[SAYISAL + KATEGORIK], df["churn"].to_numpy()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, stratify=y, random_state=0)
+pipe = pipeline_kur(SAYISAL, KATEGORIK)
+
+cv = StratifiedKFold(n_splits=5, shuffle=True, random_state=0)
+oof = cross_val_predict(pipe, X_tr, y_tr, cv=cv, method="predict_proba")[:, 1]
+esikler = [round(e, 2) for e in np.arange(0.05, 0.95, 0.05)]
+esik = min(esikler, key=lambda e: (is_maliyeti(y_tr, oof, e), e))
+
+pipe.fit(X_tr, y_tr)
+olas = pipe.predict_proba(X_te)[:, 1]
+model_maliyet = is_maliyeti(y_te, olas, esik)
+bos_maliyet = is_maliyeti(y_te, olas, 1.01)
+adlar = [a.split("__", 1)[1] for a in pipe.named_steps["hazirlik"].get_feature_names_out()]
+katsayi = pipe.named_steps["model"].coef_[0]
+sira = np.argsort(-np.abs(katsayi))
+ilk3 = [adlar[i] for i in sira[:3]]
+print("özellik önemi:", {adlar[i]: round(float(katsayi[i]), 2) for i in sira[:5]})
+
+rapor = (
+    f"ILGAZ BANK | Müşteri kaybı modeli raporu\n"
+    f"Test müşteri sayısı: {len(y_te)} (gerçek churn oranı %{100 * y_te.mean():.1f})\n"
+    f"ROC AUC: {roc_auc_score(y_te, olas):.3f}\n"
+    f"Seçilen eşik: {esik:.2f} -&gt; teklif gönderilecek: {int((olas &gt;= esik).sum())} müşteri\n"
+    f"Maliyet: model ile {model_maliyet:,} TL, modelsiz {bos_maliyet:,} TL\n"
+    f"Tahmini tasarruf: {bos_maliyet - model_maliyet:,} TL\n"
+    f"Riski en çok etkileyen özellikler: {', '.join(ilk3)}"
+)
+print(rapor)</pre>
+
+<div class="note"><b>Gerçek işte</b>Bankalarda churn modeli genelde aylık çalışan bir toplu işin (batch) parçasıdır: veri ambarından son 6-12 ayın davranış özellikleri çekilir, model skorları üretilir, en riskli müşteriler CRM'e "tutundurma listesi" olarak düşer ve şube/çağrı merkezi aksiyon alır. Model, kampanya grubu ile kontrol grubu karşılaştırılarak (A/B testi) değerlendirilir; çünkü asıl soru "kimin gideceğini bildik mi" değil, "teklif gerçekten fark yarattı mı"dır. Ayrıca model risk yönetimi ekipleri modelin açıklanabilirliğini, adil olup olmadığını (ör. yaş gruplarına göre hata oranları) ve veri kaymasını (data drift) düzenli denetler.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: sentetik veriden gerçek bankaya</h2><p>Projenin ilk hâlinde churn verisini kendin ürettin; etiketi de sen yazdığın için model doğal olarak iyi çıktı. Gerçek işte etiket hazır gelmez, onu <b>tanımlarsın</b>. Bu bölümde aynı hattı <code>ilgaz_bank</code> setiyle kuracağız: <code>bank_accounts</code> (849 hesap, <code>closed_date</code> kapanış tarihi), <code>bank_customers</code> (500 müşteri) ve <code>bank_txns</code> (2024 yılına ait 42.284 işlem). Sonuçlar sentetik veridekinden çok daha mütevazı çıkacak ve bu bir başarısızlık değil, gerçekçiliğin kendisi.</p><h3>1. Etiketi tanımlamak: anlık görüntü ve ufuk</h3><p>Manifestte <code>closed_date</code> "Kapanış tarihi (açıksa boş)" olarak tanımlı ve <code>status = "kapali"</code> ile birebir örtüşüyor. 2024 boyunca 42 müşteri 43 hesap kapatmış. Churn tanımımız: <b>kesim tarihinde (snapshot) en az bir açık hesabı olan müşteri, sonraki 60 gün içinde herhangi bir hesabını kapatırsa churn = 1</b>. Kesim tarihi, modelin canlıda skor üreteceği günü taklit eder: o güne kadar olan her şey özellik, sonrası etikettir.</p><pre class="py">import veri
+import numpy as np
+import pandas as pd
+
+A = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date", "closed_date"])
+C = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["joined_date"])
+TX = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"],
+              parse_dates=["txn_time"]).merge(A[["account_id", "customer_id"]], on="account_id")
+
+def etiket_tablosu(snap, ufuk=60):
+    s = pd.Timestamp(snap)
+    acik = A[(A["opened_date"] &lt;= s) &amp; (A["closed_date"].isna() | (A["closed_date"] &gt; s))]
+    kapanan = acik[(acik["closed_date"] &gt; s) &amp; (acik["closed_date"] &lt;= s + pd.Timedelta(days=ufuk))]
+    e = pd.DataFrame({"customer_id": sorted(acik["customer_id"].unique())})
+    e["churn"] = e["customer_id"].isin(kapanan["customer_id"]).astype(int)
+    e["snap"] = s
+    return e
+
+for sn in ["2024-04-01", "2024-07-01", "2024-10-01"]:
+    e = etiket_tablosu(sn)
+    print(sn, len(e), "müşteri,", int(e["churn"].sum()), "churn")
+</pre><p>Her kesimde yalnızca 5–8 pozitif örnek var. Tek bir kesimle model kurulamaz; bu yüzden aylık kesimleri <b>üst üste koyarız</b> (Nisan–Temmuz eğitim, Ağustos–Ekim test). Bir müşteri birden çok kesimde yer alır; bu yüzden bölme rastgele değil <b>zamana göre</b> yapılır, aksi hâlde aynı müşterinin komşu ayları eğitim ve teste dağılıp sızıntı yaratır.</p><h3>2. 90 günlük pencere özellikleri</h3><p>Özellikler yalnızca kesimden önceki 90 günün işlemlerinden hesaplanır: işlem sayısı (90 ve 30 gün), maaş yatışı sayısı, son işlemden bu yana geçen gün ve <b>ivme</b> (son 30 günün, 90 günlük aylık ortalamaya oranı). Sınır koşulu kritiktir: <code>txn_time &lt; snap</code>. Bir gün bile fazlası geleceği sızdırır.</p><pre class="py">import veri
+import numpy as np
+import pandas as pd
+
+A = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date", "closed_date"])
+C = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["joined_date"])
+TX = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"],
+              parse_dates=["txn_time"]).merge(A[["account_id", "customer_id"]], on="account_id")
+
+def ozellikler(snap, gun=90):
+    s = pd.Timestamp(snap)
+    t = TX[(TX["txn_time"] &lt; s) &amp; (TX["txn_time"] &gt;= s - pd.Timedelta(days=gun))]
+    son30 = t[t["txn_time"] &gt;= s - pd.Timedelta(days=30)]
+    g = pd.DataFrame({
+        "islem_90": t.groupby("customer_id").size(),
+        "islem_30": son30.groupby("customer_id").size(),
+        "maas_90": t[t["txn_type"] == "maas"].groupby("customer_id").size(),
+        "son": t.groupby("customer_id")["txn_time"].max(),
+    }).fillna({"islem_30": 0, "maas_90": 0})
+    g["son_islem_gun"] = (s - g["son"]).dt.days
+    g["ivme"] = g["islem_30"] / (g["islem_90"] / 3)
+    return g.drop(columns="son")
+
+f = ozellikler("2024-07-01")
+print(len(f), "müşterinin 90 günde işlemi var")
+print(f.loc[[1, 41]].round(2))
+</pre><div class="warn"><b>Pencerenin başı da önemli</b><code>bank_txns</code> 1 Ocak 2024'te başlıyor. 1 Mart kesiminde 90 günlük pencerenin bir kısmı veri öncesine düşer; işlem sayıları düşük, ivme yapay olarak yüksek çıkar. İlk geçerli kesim 1 Nisan'dır. Aşağıdaki PSI hesabı bu hatayı nasıl yakalayacağını gösteriyor.</div><h3>3. Model ve dürüst değerlendirme</h3><p>Derste kurduğun <code>ColumnTransformer</code> + <code>LogisticRegression(class_weight="balanced")</code> hattını aynen kullan. Zaman bölmeli testte ROC AUC yaklaşık 0,64, en riskli %10'luk dilimde churn oranı ortalamanın yaklaşık 2,8 katı. Sentetik verideki 0,8+ AUC'ye göre düşük, ama 26 pozitif örnekle eğitilen bir model için anlamlı bir sinyal. Raporda bu sayıyı güven aralığı ya da "pozitif sayısı az" notuyla verirsin; kampanya ekibi için önemli olan lift'tir.</p><h3>4. Servisleme: FastAPI ile skor uç noktası</h3><p>Eğitilen hattı <code>joblib</code> ile kaydedip küçük bir API arkasına koyarsın. Tarayıcıda FastAPI çalışmaz; kod gösterim amaçlıdır.</p><pre class="code"># servis.py  (pip install fastapi uvicorn joblib scikit-learn pandas)
+import joblib
+import pandas as pd
+from fastapi import FastAPI
+from pydantic import BaseModel
+
+model = joblib.load("churn_model.joblib")
+app = FastAPI(title="Ilgaz Bank churn")
+
+class Musteri(BaseModel):
+    islem_90: float
+    islem_30: float
+    maas_90: float
+    son_islem_gun: float
+    ivme: float
+    risk_score: int
+    kidem_yil: float
+    segment: str
+
+@app.post("/skor")
+def skor(m: Musteri):
+    olasilik = model.predict_proba(pd.DataFrame([m.model_dump()]))[0, 1]
+    return {"churn_olasiligi": round(float(olasilik), 4)}
+# Çalıştır: uvicorn servis:app --reload  -&gt;  http://127.0.0.1:8000/docs
+</pre><div class="note"><b>Kendi bilgisayarında dene</b>Komut: <code>pip install fastapi uvicorn joblib</code>. Modeli eğittiğin defterde <code>joblib.dump(pipe, "churn_model.joblib")</code> çalıştır, sonra <code>uvicorn servis:app --reload</code>. Ayrıntılar FastAPI dersinde.</div><h3>5. İzleme: PSI ile veri kayması</h3><p>Etiket 60 gün sonra gelir; o zamana kadar modelin bozulduğunu <b>girdilere bakarak</b> anlarsın. <b>PSI</b> (population stability index) eğitim dağılımını referans alıp kutulara (genellikle 10 kantil) böler ve yeni dönemin aynı kutulardaki payıyla karşılaştırır: <code>PSI = Σ (yeni − ref) · ln(yeni / ref)</code>. Yaygın eşikler: &lt; 0,1 kararlı, 0,1–0,25 izle, &gt; 0,25 alarm. Aynı hesap model skorlarına da uygulanır.</p><pre class="py">import veri
+import numpy as np
+import pandas as pd
+
+A = veri.oku("ilgaz_bank", "bank_accounts", parse_dates=["opened_date", "closed_date"])
+C = veri.oku("ilgaz_bank", "bank_customers", parse_dates=["joined_date"])
+TX = veri.oku("ilgaz_bank", "bank_txns", usecols=["account_id", "txn_time", "amount", "txn_type"],
+              parse_dates=["txn_time"]).merge(A[["account_id", "customer_id"]], on="account_id")
+
+def etiket_tablosu(snap, ufuk=60):
+    s = pd.Timestamp(snap)
+    acik = A[(A["opened_date"] &lt;= s) &amp; (A["closed_date"].isna() | (A["closed_date"] &gt; s))]
+    kapanan = acik[(acik["closed_date"] &gt; s) &amp; (acik["closed_date"] &lt;= s + pd.Timedelta(days=ufuk))]
+    e = pd.DataFrame({"customer_id": sorted(acik["customer_id"].unique())})
+    e["churn"] = e["customer_id"].isin(kapanan["customer_id"]).astype(int)
+    e["snap"] = s
+    return e
+
+def ozellikler(snap, gun=90):
+    s = pd.Timestamp(snap)
+    t = TX[(TX["txn_time"] &lt; s) &amp; (TX["txn_time"] &gt;= s - pd.Timedelta(days=gun))]
+    son30 = t[t["txn_time"] &gt;= s - pd.Timedelta(days=30)]
+    g = pd.DataFrame({
+        "islem_90": t.groupby("customer_id").size(),
+        "islem_30": son30.groupby("customer_id").size(),
+        "maas_90": t[t["txn_type"] == "maas"].groupby("customer_id").size(),
+        "son": t.groupby("customer_id")["txn_time"].max(),
+    }).fillna({"islem_30": 0, "maas_90": 0})
+    g["son_islem_gun"] = (s - g["son"]).dt.days
+    g["ivme"] = g["islem_30"] / (g["islem_90"] / 3)
+    return g.drop(columns="son")
+
+def veri_seti(snaplar):
+    parcalar = []
+    for sn in snaplar:
+        d = etiket_tablosu(sn).merge(ozellikler(sn), on="customer_id", how="left")
+        d = d.merge(C[["customer_id", "segment", "risk_score", "joined_date"]], on="customer_id")
+        d["kidem_yil"] = (d["snap"] - d["joined_date"]).dt.days / 365.25
+        d = d.fillna({"islem_90": 0, "islem_30": 0, "maas_90": 0, "son_islem_gun": 90, "ivme": 0})
+        parcalar.append(d.drop(columns="joined_date"))
+    return pd.concat(parcalar, ignore_index=True)
+
+def psi(beklenen, gercek, kutu=10):
+    beklenen = np.asarray(beklenen, dtype=float)
+    gercek = np.asarray(gercek, dtype=float)
+    kenar = np.unique(np.quantile(beklenen, np.linspace(0, 1, kutu + 1)))
+    kenar[0], kenar[-1] = -np.inf, np.inf
+    pb = np.histogram(beklenen, kenar)[0] / len(beklenen)
+    pg = np.histogram(gercek, kenar)[0] / len(gercek)
+    pb, pg = np.clip(pb, 1e-4, None), np.clip(pg, 1e-4, None)
+    return float(np.sum((pg - pb) * np.log(pg / pb)))
+
+egitim = veri_seti(pd.date_range("2024-04-01", "2024-07-01", freq="MS"))
+for ad, yeni in [("Aralık", veri_seti(["2024-12-01"])), ("Mart (eksik pencere)", veri_seti(["2024-03-01"]))]:
+    print(ad, {c: round(psi(egitim[c], yeni[c]), 3) for c in ["islem_90", "islem_30", "ivme"]})
+</pre><p>Aralık kesiminde tüm PSI değerleri 0,03'ün altında: model güvenle skorlamaya devam edebilir. Mart kesiminde ivme için PSI 4'ün üstünde: bu bir pazar değişimi değil, veri hattı hatasıdır (pencere eksik). İzleme, modelin kendisinden çok veri hattını korur.</p></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Daha iyi model ve kalibrasyon</h3>
+<p>Lojistik regresyon güçlü ve açıklanabilir bir temel çizgidir. <code>HistGradientBoostingClassifier</code> gibi ağaç tabanlı modeller etkileşimleri kendiliğinden yakalayıp AUC'yi artırabilir. Maliyet hesabı olasılıklara dayandığı için olasılıkların <b>kalibre</b> olması (0.3 diyen müşterilerin gerçekten ~%30'unun ayrılması) önemlidir; <code>CalibratedClassifierCV</code> ve kalibrasyon eğrisi (<code>calibration_curve</code>) ile kontrol et.</p>
+<h3>Hedef: kim ayrılacak değil, kim ikna edilebilir</h3>
+<p>Churn modeli riskli müşteriyi bulur ama teklife kimin olumlu tepki vereceğini söylemez. Bir sonraki adım "uplift modeling"dir: kampanya ve kontrol grubu verisiyle, teklifin ayrılma olasılığını en çok düşürdüğü müşterileri hedeflemek.</p>
+<h3>Üretime alma</h3>
+<p>Modeli bir paket fonksiyonu (<code>skorla(df) -&gt; olasılıklar</code>) arkasına koy, girdi şemasını pydantic ya da pandera ile doğrula, model sürümünü ve eğitim tarihini meta veri olarak kaydet, aylık dağılım değişimlerini izle (ör. churn oranı, özellik ortalamaları). <a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a> ve <a href="../orkestrasyon/">İş akışı orkestrasyonu: cron, DAG ve Airflow</a> dersleri bu kısmı ele alır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ml">Alıştırmalara geç (30)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../nlp-metin/">← Metin işleme ve NLP: Türkçe metinden modele</a><a href="../fastapi/">FastAPI ile API geliştirme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

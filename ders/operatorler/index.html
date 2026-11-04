@@ -1,0 +1,167 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Operatörler derinlemesine | Kesit Python</title><meta name="description" content="Aritmetik ve atama, zincirleme karşılaştırma, değer döndüren and/or ve kısa devre, in ve is, izin bayraklarıyla bit operatörleri, PCEP öncelik tablosu ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/operatorler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Operatörler derinlemesine"><meta property="og:description" content="Aritmetik ve atama, zincirleme karşılaştırma, değer döndüren and/or ve kısa devre, in ve is, izin bayraklarıyla bit operatörleri, PCEP öncelik tablosu ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/operatorler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Operatörler derinlemesine","description":"Aritmetik ve atama, zincirleme karşılaştırma, değer döndüren and/or ve kısa devre, in ve is, izin bayraklarıyla bit operatörleri, PCEP öncelik tablosu ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/operatorler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Değerler ve metinler</span><h1>Operatörler derinlemesine</h1><p class="st-l">Aritmetik ve atama, zincirleme karşılaştırma, değer döndüren and/or ve kısa devre, in ve is, izin bayraklarıyla bit operatörleri, PCEP öncelik tablosu ve mors operatörü := ile ifadeleri doğru ve okunur yazarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/operatorler">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Operatör: küçük sembol, büyük sonuç</h2>
+<p>Anadolu Market'in sepet ekranında tek bir satır şunu karar verir: "Tutar 500 TL'yi geçiyor <b>ve</b> müşteri premium <b>ya da</b> kampanya kodu girmişse kargo bedava." Bu satırda yanlış yere konmuş bir parantez, binlerce siparişte bedava kargo vermek ya da hiç vermemek demektir. <b>Operatörler</b> (operators), değerler üzerinde işlem yapan sembollerdir: <code>+</code>, <code>==</code>, <code>and</code>, <code>in</code>, <code>&amp;</code>... Sayılar dersinde aritmetiği, koşullar dersinde karşılaştırma ve mantık operatörlerine giriş yaptın. Bu ders bütün operatör ailesini bir arada, <b>öncelik</b> ve <b>değer döndürme</b> ayrıntılarıyla ele alıyor; Python Institute PCEP sınavının en çok soru sorduğu konulardan biridir.</p>
+
+<h2>Aritmetik ve atama operatörleri</h2>
+<p>Hatırlatma: <code>+ - * /</code> bildiğin dört işlem, <code>//</code> tam bölme (floor division), <code>%</code> kalan (modulo), <code>**</code> üs alma. <code>/</code> her zaman float döndürür, <code>//</code> iki int arasında int döndürür.</p>
+<p><b>Artırılmış atama</b> (augmented assignment) operatörleri "değişkeni kendisiyle işleme sok ve geri yaz" kısaltmasıdır: <code>x += 3</code>, <code>x = x + 3</code> ile aynı sonucu verir. Hepsinin karşılığı vardır: <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>//=</code>, <code>%=</code>, <code>**=</code>, hatta bit operatörleri için <code>&amp;=</code>, <code>|=</code>.</p>
+<pre class="py">stok = 120
+stok -= 15        # satış
+stok += 40        # tedarik geldi
+stok //= 2        # yarısı başka depoya
+print("Stok:", stok)
+
+puan = 3
+puan **= 2
+puan %= 5
+print("Puan:", puan)
+
+etiket = "AM-"
+etiket += "00417"     # metinlerde de çalışır
+etiket *= 2
+print(etiket)</pre>
+<div class="note"><b>Python'da ++ yok</b>C, Java ya da JavaScript'ten gelenler <code>sayac++</code> yazmayı dener. Python'da bu sözdizimi hatasıdır; <code>sayac += 1</code> yaz. <code>++sayac</code> ise hata bile vermez: iki tekli artı işaretidir ve değeri değiştirmez. Sinsi bir tuzaktır.</div>
+
+<h3>// ve % negatif sayılarda</h3>
+<p>Python'da <code>//</code> sonucu her zaman <b>aşağıya</b> (eksi sonsuza doğru) yuvarlar; <code>%</code> de bu kurala uyacak şekilde <b>bölenin işaretini</b> alır. Kural her zaman şudur: <code>a == (a // b) * b + a % b</code>.</p>
+<pre class="py">print(7 // 2, 7 % 2)       # 3 1
+print(-7 // 2, -7 % 2)     # -4 1   (−3.5 aşağıya: −4)
+print(7 // -2, 7 % -2)     # -4 -1
+print(int(-7 / 2))         # -3     (int sıfıra doğru keser!)
+
+# Pratik fayda: haftanın günlerinde geriye sarma
+gunler = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+bugun = 1                     # Salı
+print("3 gün önce:", gunler[(bugun - 3) % 7])</pre>
+<p>C ve Java'da <code>-7 % 2</code> sonucu -1'dir; Python'da 1. Bu fark sayesinde Python'da <code>% 7</code> negatif sayılarda bile geçerli bir indeks verir.</p>
+
+<h2>Karşılaştırma ve zincirleme</h2>
+<p><code>==</code>, <code>!=</code>, <code>&lt;</code>, <code>&lt;=</code>, <code>&gt;</code>, <code>&gt;=</code> her zaman <code>True</code> ya da <code>False</code> döndürür. Python'un az dilde bulunan bir güzelliği <b>zincirleme karşılaştırmadır</b> (chained comparison): <code>0 &lt; x &lt; 10</code>, matematikteki gibi okunur ve <code>0 &lt; x and x &lt; 10</code> anlamına gelir; <code>x</code> yalnızca bir kez hesaplanır.</p>
+<pre class="py">tutar = 750
+print(500 &lt; tutar &lt;= 1000)        # True
+print(1 &lt; 3 &gt; 2)                   # True: 1 &lt; 3 and 3 &gt; 2
+print(1 == 1.0, "a" &lt; "b", [1, 2] &lt; [1, 3])
+print(3 == 3 == 3.0, 1 &lt; 2 &lt; 2)</pre>
+<div class="warn"><b>Zincir sezgiye ters düşebilir</b><code>1 &lt; 3 &gt; 2</code> geçerlidir ama okuması zordur; zinciri yalnızca aynı yönde (<code>a &lt; b &lt; c</code>) kullan. <code>x == y == 0</code> "ikisi de sıfır mı" demektir, "x, y==0 sonucuna eşit mi" değil.</div>
+
+<h2>Mantıksal operatörler: and, or, not</h2>
+<p><code>and</code> iki koşul da doğruysa, <code>or</code> en az biri doğruysa doğrudur, <code>not</code> tersine çevirir. İki önemli ayrıntı var:</p>
+<ol>
+<li><b>Kısa devre</b> (short-circuit): <code>and</code> ilk değer yanlışsa ikinciye hiç bakmaz; <code>or</code> ilk değer doğruysa ikinciye bakmaz. Bu sayede <code>adet != 0 and toplam / adet &gt; 100</code> sıfıra bölme hatası vermez.</li>
+<li><b>Değer döndürme</b>: <code>and</code> ve <code>or</code> True/False değil, <b>son baktıkları işleneni</b> döndürür. <code>or</code> ilk doğru (truthy) değeri, hepsi yanlışsa sonuncuyu; <code>and</code> ilk yanlış (falsy) değeri, hepsi doğruysa sonuncuyu verir. <code>not</code> ise her zaman bool döndürür.</li>
+</ol>
+<pre class="py">print("" or "misafir")          # misafir
+print("Ayşe" or "misafir")      # Ayşe
+print(0 and 1 / 0)              # 0  (1/0 hiç çalışmadı!)
+print(5 and "ok")               # ok
+print([] or {} or None)         # None (hepsi falsy, sonuncusu)
+print(not "", not 42)           # True False
+
+def pahali_kontrol():
+    print("  (pahalı kontrol çalıştı)")
+    return True
+
+print(False and pahali_kontrol())   # pahalı kontrol hiç çağrılmaz
+print(True or pahali_kontrol())</pre>
+<p>Bu davranış günlük kodda varsayılan değer vermek için kullanılır: <code>ad = girilen_ad or "Misafir"</code>. Ama dikkat: <code>0</code> ve boş metin de falsy'dir; sayısal değerlerde <code>if x is None</code> kontrolü daha güvenlidir.</p>
+
+<h2>Üyelik ve kimlik: in ve is</h2>
+<p><code>in</code> / <code>not in</code> bir değerin koleksiyonda olup olmadığını sorar: metinde alt metin, listede eleman, sözlükte <b>anahtar</b>. <code>is</code> / <code>is not</code> ise iki adın <b>aynı nesneyi</b> gösterip göstermediğini sorar; <code>==</code> ise değerlerin eşitliğini.</p>
+<pre class="py">sepet = ["çay", "şeker"]
+stok = {"çay": 40, "kahve": 0}
+print("çay" in sepet, "kahve" not in sepet)
+print("kahve" in stok, 40 in stok)          # sözlükte anahtar aranır
+print("AM-" in "AM-00417")
+
+a = [1, 2, 3]
+b = a
+c = [1, 2, 3]
+print(a == c, a is c, a is b)              # True False True
+indirim = None
+print(indirim is None)                     # None için doğru yol</pre>
+<div class="tip"><b>is'i yalnız None (ve True/False) için kullan</b>Küçük tam sayılar ve kısa metinler bellekte önbelleğe (cache) alındığından <code>is</code> bazen "tesadüfen" doğru çalışır ve hatayı gizler. Değer karşılaştırması her zaman <code>==</code> ile yapılır. Python 3.8'den beri <code>x is 5</code> gibi bir literalle <code>is</code> karşılaştırması SyntaxWarning üretir.</div>
+
+<h2>Bit operatörleri ve izin bayrakları</h2>
+<p>Bilgisayar sayıları ikili (binary) tutar. <b>Bit operatörleri</b> (bitwise operators) sayıların bitleri üzerinde çalışır: <code>&amp;</code> (VE), <code>|</code> (VEYA), <code>^</code> (ÖZEL VEYA, XOR), <code>~</code> (tümleyen: <code>~x == -x - 1</code>), <code>&lt;&lt;</code> (sola kaydır: 2 ile çarpar), <code>&gt;&gt;</code> (sağa kaydır: 2'ye tam böler). İş hayatında en sık karşılaştığın yer <b>izin bayraklarıdır</b> (flags): her bit bir yetkiyi temsil eder ve birden fazla izin tek bir sayıda saklanır. Linux dosya izinleri (<code>chmod 755</code>) tam olarak böyle çalışır.</p>
+<pre class="py">OKU, YAZ, SIL = 1, 2, 4          # 0b001, 0b010, 0b100
+
+analist = OKU                    # 0b001
+editor = OKU | YAZ               # 0b011 -&gt; 3
+print("editör:", editor, bin(editor))
+
+print("Editör yazabilir mi?", editor &amp; YAZ == YAZ)
+print("Editör silebilir mi?", bool(editor &amp; SIL))
+
+editor |= SIL                    # izin ekle
+print("Sil eklendi:", bin(editor))
+editor &amp;= ~YAZ                   # izin kaldır
+print("Yaz kaldırıldı:", bin(editor))
+print("Değişen bitler:", bin((OKU | YAZ) ^ editor))
+print(1 &lt;&lt; 3, 40 &gt;&gt; 2, ~5)</pre>
+<div class="warn"><b>&amp; ile and aynı şey değil</b><code>and</code> mantıksal doğruluğa bakar ve işlenen döndürür; <code>&amp;</code> bit bit işlem yapar. <code>2 and 4</code> sonucu 4'tür, <code>2 &amp; 4</code> sonucu 0. Ayrıca <code>&amp;</code>, <code>==</code>'den <b>daha yüksek</b> önceliklidir; bu yüzden <code>editor &amp; YAZ == YAZ</code> doğru çalışır ama okunurluk için parantez eklemek iyi bir alışkanlıktır.</div>
+
+<h2>Operatör önceliği</h2>
+<p>Birden fazla operatör yan yana gelince Python hangisini önce yapacağına <b>öncelik</b> (precedence) tablosuyla karar verir. Yukarıdaki satırlar önce işlenir; aynı satırdakiler soldan sağa gider (tek istisna <code>**</code>).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Öncelik</th><th>Operatör</th><th>Açıklama</th></tr>
+<tr><td>1 (en yüksek)</td><td><code>()</code></td><td>Parantez</td></tr>
+<tr><td>2</td><td><code>**</code></td><td>Üs (sağdan sola!)</td></tr>
+<tr><td>3</td><td><code>+x</code>, <code>-x</code>, <code>~x</code></td><td>Tekli (unary) işaret, bit tümleyen</td></tr>
+<tr><td>4</td><td><code>*</code>, <code>/</code>, <code>//</code>, <code>%</code></td><td>Çarpma ailesi</td></tr>
+<tr><td>5</td><td><code>+</code>, <code>-</code></td><td>Toplama, çıkarma</td></tr>
+<tr><td>6</td><td><code>&lt;&lt;</code>, <code>&gt;&gt;</code></td><td>Kaydırma</td></tr>
+<tr><td>7</td><td><code>&amp;</code></td><td>Bit VE</td></tr>
+<tr><td>8</td><td><code>^</code></td><td>Bit XOR</td></tr>
+<tr><td>9</td><td><code>|</code></td><td>Bit VEYA</td></tr>
+<tr><td>10</td><td><code>==  !=  &lt;  &lt;=  &gt;  &gt;=  in  not in  is  is not</code></td><td>Karşılaştırma, üyelik, kimlik</td></tr>
+<tr><td>11</td><td><code>not</code></td><td>Mantıksal DEĞİL</td></tr>
+<tr><td>12</td><td><code>and</code></td><td>Mantıksal VE</td></tr>
+<tr><td>13</td><td><code>or</code></td><td>Mantıksal VEYA</td></tr>
+<tr><td>14 (en düşük)</td><td><code>:=</code></td><td>Mors (walrus) ataması</td></tr>
+</table></div>
+<pre class="py">print(2 + 3 * 4)          # 14
+print(2 ** 3 ** 2)        # 512: 3 ** 2 önce, sonra 2 ** 9
+print((2 ** 3) ** 2)      # 64
+print(-3 ** 2)            # -9: ** tekli eksiden önce
+print(not 1 == 2)         # True: not (1 == 2)
+print(True or False and False)   # True: and, or'dan önce</pre>
+<p>PCEP sınavında <code>-3 ** 2</code>, <code>2 ** 3 ** 2</code> ve <code>and/or</code> karışımı klasik sorulardır. Gerçek kodda kural basit: <b>emin değilsen parantez koy</b>. Parantez hiçbir şeyi yavaşlatmaz, okuyanın zihnini rahatlatır.</p>
+
+<h2>Mors operatörü :=</h2>
+<p>Python 3.8 ile gelen <code>:=</code> (assignment expression, görünüşü mors bıyığına benzediği için walrus) bir <b>ifadenin içinde</b> atama yapar: değeri hem değişkene koyar hem de döndürür. En çok, bir değeri hesaplayıp hemen kontrol etmek istediğin yerlerde işe yarar.</p>
+<pre class="py">kodlar = ["  AM-417 ", "AM-9", " AM-10022  ", ""]
+
+# Uzunluğu bir kez hesapla, hem koşulda hem sonuçta kullan
+uzunlar = [(k.strip(), n) for k in kodlar if (n := len(k.strip())) &gt;= 6]
+print(uzunlar)
+
+satirlar = ["120", "85", "", "40"]
+i = 0
+while (satir := satirlar[i]) != "":
+    print("Okunan:", satir)
+    i += 1</pre>
+<p>Önceliği en düşük operatör olduğu için koşul içinde genellikle parantez gerekir: <code>(n := len(x)) &gt; 5</code>. Parantezsiz <code>n := len(x) &gt; 5</code>, n'ye <code>True/False</code> atar. Okunurluğu artırdığı yerde kullan; her atamayı mors'a çevirmek kodu zorlaştırır.</p>
+
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kullanıcı yetki tablosunda her personelin izinleri tek bir tam sayı sütununda tutulur: 1 = hesap görüntüleme, 2 = havale başlatma, 4 = havale onaylama, 8 = limit değiştirme. Denetim ekibi "havale başlatıp aynı zamanda onaylayabilen" riskli kullanıcıları <code>(izin &amp; 6) == 6</code> sorgusuyla bulur. Aynı bit mantığı Linux dosya izinlerinde, ağ maskelerinde (IP alt ağları) ve oyun motorlarındaki çarpışma katmanlarında da karşına çıkacak.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Operatörler aslında metot çağrısıdır</h3>
+<p><code>a + b</code> yazdığında Python <code>a.__add__(b)</code> çağırır; <code>a == b</code> için <code>__eq__</code>, <code>x in y</code> için <code>y.__contains__(x)</code>. Bu yüzden <code>+</code> sayılarda toplar, metinlerde birleştirir, listelerde ekler. Sınıflar dersinde kendi sınıfların için bu "sihirli metotları" (dunder methods) yazıp <code>para1 + para2</code> gibi okunur kod üreteceksin. Standart kütüphanedeki <code>operator</code> modülü de operatörlerin fonksiyon hâlini verir: <code>operator.add(2, 3)</code>, <code>sorted(liste, key=operator.itemgetter(1))</code>.</p>
+<h3>Kısa devre ile korumalı erişim</h3>
+<p><code>musteri and musteri.get("adres") and musteri["adres"].get("il")</code> zinciri, ara değerlerden biri None/boş olduğunda hata vermeden durur. Okunur ama uzar; orta seviyede <code>dict.get</code> zincirleri ve try/except ile alternatiflerini karşılaştıracaksın.</p>
+<h3>Kayan noktada == kullanma</h3>
+<p><code>0.1 + 0.2 == 0.3</code> False'tur (sayılar dersinde gördün). Para ve ölçüm karşılaştırmalarında <code>math.isclose(a, b)</code> ya da <code>abs(a - b) &lt; 1e-9</code> kullan; para için Decimal tercih et.</p>
+<h3>Bit hileleri</h3>
+<p><code>n &amp; 1</code> sayının tek olup olmadığını, <code>n &amp; (n - 1) == 0</code> (n &gt; 0 iken) 2'nin kuvveti olup olmadığını söyler; <code>n.bit_count()</code> (3.10+) açık bit sayısını verir. Bunlar mülakatlarda sık sorulur, ama iş kodunda okunurluk için <code>enum.Flag</code> sınıfını tercih et: <code>Izin.OKU | Izin.YAZ</code> hem bit verimliliği hem anlamlı adlar verir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/operatorler">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../girdi-donusum/">← Kullanıcı girdisi ve tür dönüşümü</a><a href="../terminal-temelleri/">Terminal ve komut satırı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

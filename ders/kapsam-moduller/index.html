@@ -1,0 +1,227 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kapsam ve modüller | Kesit Python</title><meta name="description" content="Bir adın nerede geçerli olduğunu (LEGB) öğrenir, global tuzağından kaçınır, import biçimlerini ve __name__ kalıbını kavrar, math/random/statistics ile…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kapsam-moduller/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kapsam ve modüller"><meta property="og:description" content="Bir adın nerede geçerli olduğunu (LEGB) öğrenir, global tuzağından kaçınır, import biçimlerini ve __name__ kalıbını kavrar, math/random/statistics ile…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kapsam-moduller/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kapsam ve modüller","description":"Bir adın nerede geçerli olduğunu (LEGB) öğrenir, global tuzağından kaçınır, import biçimlerini ve __name__ kalıbını kavrar, math/random/statistics ile…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/kapsam-moduller/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Kapsam ve modüller</h1><p class="st-l">Bir adın nerede geçerli olduğunu (LEGB) öğrenir, global tuzağından kaçınır, import biçimlerini ve __name__ kalıbını kavrar, math/random/statistics ile standart kütüphaneye ilk adımı atarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsam-moduller">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Bir isim nerede görünür?</h2>
+<p>Ilgaz Bank'ta günlük işlem raporu üreten bir betik yazdın. Fonksiyonun içinde <code>toplam</code> adında bir değişken var, dışarıda da başka bir <code>toplam</code>. Hangisi hangisi? Python bunu <b>kapsam</b> (scope) kurallarıyla çözer: her ad belirli bir bölgede geçerlidir. Fonksiyon içinde atanan ad o fonksiyona aittir, dışarıdan görünmez; fonksiyon bittiğinde silinir.</p>
+<pre class="py">komisyon_orani = 0.002          # global (modül düzeyi)
+
+def komisyon(tutar):
+    kesinti = tutar * komisyon_orani   # global okunur
+    return round(kesinti, 2)
+
+print(komisyon(15000))
+print(komisyon_orani)
+try:
+    print(kesinti)               # yerel ad dışarıdan görünmez
+except NameError as e:
+    print("Hata:", e)</pre>
+<p><code>kesinti</code> fonksiyonun <b>yerel</b> (local) değişkenidir; dışarıda yoktur. <code>komisyon_orani</code> ise <b>global</b>: modülün en üst düzeyinde tanımlandı, her fonksiyon onu okuyabilir.</p>
+
+<h2>LEGB sırası</h2>
+<p>Python bir adı gördüğünde dört katmanı sırayla arar: <b>L</b>ocal (içinde bulunulan fonksiyon), <b>E</b>nclosing (iç içe fonksiyonlarda dıştaki fonksiyon), <b>G</b>lobal (modül), <b>B</b>uilt-in (print, len gibi yerleşikler). İlk bulduğunda durur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Katman</th><th>Nerede tanımlanır</th><th>Örnek</th></tr>
+<tr><td>Local</td><td>Fonksiyon gövdesinde atanan adlar ve parametreler</td><td><code>kesinti</code>, <code>tutar</code></td></tr>
+<tr><td>Enclosing</td><td>İç fonksiyonu saran dış fonksiyonun yerelleri</td><td>iç fonksiyonun gördüğü <code>oran</code></td></tr>
+<tr><td>Global</td><td>Dosyanın en üst düzeyi</td><td><code>komisyon_orani</code></td></tr>
+<tr><td>Built-in</td><td>Python'ın kendisi</td><td><code>print</code>, <code>len</code>, <code>sum</code></td></tr>
+</table></div>
+<pre class="py">def rapor_hazirla(hesaplar):
+    baslik = "Ilgaz Bank Günlük Özet"     # enclosing
+
+    def satir(ad, bakiye):
+        return baslik[:12] + " | " + ad + ": " + str(bakiye)   # baslik dıştan okunur
+
+    for ad, bakiye in hesaplar:
+        print(satir(ad, bakiye))
+
+rapor_hazirla([("Ayşe", 12500), ("Mehmet", 830)])
+print(len("deneme"))      # built-in katmanı</pre>
+<div class="warn"><b>Yerleşik adı ezme</b><code>sum = 0</code> ya da <code>list = [1, 2]</code> yazarsan built-in <code>sum</code>/<code>list</code> gölgelenir ve sonraki satırlarda <code>sum(fiyatlar)</code> "int object is not callable" hatası verir. Değişken adlarını yerleşiklerden seçme: <code>toplam</code>, <code>liste</code> de.</div>
+
+<h2>global tuzağı</h2>
+<p>Globali okumak serbesttir. Ama fonksiyon içinde ona <b>atama</b> yaparsan Python yeni bir yerel oluşturur; global değişmez. Hem okuyup hem değiştirmeye kalkarsan <code>UnboundLocalError</code> alırsın.</p>
+<pre class="py">sayac = 0
+
+def islem_kaydet_yanlis():
+    sayac_yerel = sayac + 1      # okumak sorun değil
+    return sayac_yerel
+
+def islem_kaydet_global():
+    global sayac
+    sayac += 1
+
+islem_kaydet_global()
+islem_kaydet_global()
+print("global sayaç:", sayac)
+
+def islem_kaydet_temiz(sayac):
+    return sayac + 1             # saf: değer al, yeni değer döndür
+
+yeni = islem_kaydet_temiz(sayac)
+print("temiz yol:", yeni)</pre>
+<p><code>global sayac</code> satırı "bu fonksiyonda sayac derken modüldekini kastediyorum" der. Çalışır, ama bir programda on tane fonksiyon aynı globali değiştiriyorsa hangi değeri kimin bozduğunu bulmak kabusa döner. Kural: <b>değeri parametre olarak al, yenisini return et</b>. <code>global</code> yalnızca küçük betiklerde ve bilinçli kullanılan bir istisnadır.</p>
+<div class="note"><b>nonlocal</b>İç içe fonksiyonlarda dıştaki fonksiyonun değişkenini değiştirmek için <code>nonlocal</code> kullanılır. Nadir gerekir; dekoratör (decorator) ve kapanış (closure) konularında karşına çıkacak.</div>
+
+<h2>Modül nedir, nasıl içe aktarılır?</h2>
+<p>Bir <code>.py</code> dosyası aynı zamanda bir <b>modüldür</b> (module). <code>fiyat.py</code> içine <code>kdv_hesapla</code> yazdıysan başka dosyadan <code>import fiyat</code> deyip <code>fiyat.kdv_hesapla(100)</code> diye çağırırsın. Python'la gelen yüzlerce modüle <b>standart kütüphane</b> (standard library) denir; hiçbir şey kurmadan kullanılır. Dört import biçimi var:</p>
+<pre class="py">import math                      # 1) modülü tümüyle al, math. öneki ile kullan
+print(math.ceil(1234.1))
+
+from math import sqrt, floor     # 2) yalnızca istenen adları al
+print(sqrt(144), floor(7.9))
+
+import statistics as st          # 3) kısa takma ad (alias)
+print(st.mean([120, 85, 230]))
+
+from random import randint as rastgele_tam   # 4) ada takma ad
+print(type(rastgele_tam(1, 6)))</pre>
+<p>Kurumsal kodda en yaygın olanlar 1 ve 3: <code>math.sqrt</code> yazımı, <code>sqrt</code>'nin nereden geldiğini okuyana söyler. <code>from x import *</code> ise bütün adları dosyaya boca eder; hangi ad nereden geldi belli olmaz, kaçın.</p>
+
+<h2>if __name__ == "__main__"</h2>
+<p>Her modülün <code>__name__</code> adlı bir değişkeni vardır. Dosya doğrudan çalıştırılıyorsa değeri <code>"__main__"</code>, başka bir dosya tarafından <code>import</code> edildiyse dosyanın adıdır. Bu sayede aynı dosya hem kütüphane hem de çalıştırılabilir betik olabilir: fonksiyonlar her zaman tanımlanır, ama "demo" ya da "ana akış" kodu yalnızca doğrudan çalıştırıldığında koşar.</p>
+<pre class="py">def faiz_hesapla(anapara, yillik_oran, ay):
+    """Basit faiz: anapara * oran * (ay / 12)"""
+    return round(anapara * yillik_oran * ay / 12, 2)
+
+def main():
+    print("Ilgaz Bank mevduat hesabı")
+    print("6 ay, 50.000 TL, %40:", faiz_hesapla(50000, 0.40, 6))
+
+print("__name__ değeri:", __name__)
+if __name__ == "__main__":
+    main()</pre>
+<p>Bu dosyayı başka bir yerden <code>import faiz</code> dersen yalnızca <code>faiz_hesapla</code> ve <code>main</code> tanımlanır; demo satırları basılmaz. Yazdığın her betiğe bu kalıbı koymak, ileride test yazarken ve kodu başkasıyla paylaşırken hayat kurtarır.</p>
+
+<h2>Standart kütüphaneye giriş: math, random, statistics</h2>
+<pre class="py">import math, random, statistics
+
+# math: matematik
+print(math.ceil(2.1), math.floor(2.9), round(2.5), round(3.5))
+print(math.sqrt(2), math.pi)
+
+# statistics: temel istatistik
+bakiyeler = [1200, 4500, 980, 4500, 13000]
+print("ortalama:", statistics.mean(bakiyeler))
+print("medyan:", statistics.median(bakiyeler))
+print("mod:", statistics.mode(bakiyeler))
+
+# random: rastgelelik, seed ile tekrarlanabilir
+random.seed(42)
+print(random.randint(1, 100))
+print(random.choice(["İstanbul", "Ankara", "İzmir"]))
+print(random.sample(range(1000, 2000), 3))</pre>
+<p><code>random.seed(42)</code> rastgele sayı üretecini (generator) sabit bir başlangıca getirir; aynı seed, aynı dizi. Test yazarken ve sahte veri üretirken bu şart: aksi hâlde testin her koşuda farklı veri görür. <code>round</code>'un 2.5'i 2'ye, 3.5'i 4'e yuvarladığına dikkat et; bu "bankacı yuvarlaması"dır (round half to even), <code>math.floor</code> ve <code>math.ceil</code> ise her zaman aşağı/yukarı gider.</p>
+<div class="tip"><b>os ve sys kısaca</b><code>os.getcwd()</code> çalışma klasörünü, <code>os.listdir()</code> dosyaları, <code>sys.argv</code> komut satırı argümanlarını, <code>sys.version</code> Python sürümünü verir. Dosya işlemleri dersinde <code>os</code> ve <code>pathlib</code>'e döneceğiz. Tarayıcı ortamında dosya sistemi bellek içidir, o yüzden burada <code>os.listdir</code> çıktısı bilgisayarındakinden farklı görünür.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>UnboundLocalError'u gerçekten anlamak</h2>
+<p>Python bir fonksiyonu <b>çalıştırmadan önce</b> derler ve gövdede atama yapılan her adı o fonksiyonun yerel adı olarak işaretler. Bu karar satır sırasına bakmaz: atama gövdenin sonunda bile olsa, ad baştan itibaren yereldir. <code>sayac += 1</code> hem okuma hem atama yaptığı için <code>sayac</code> yerel sayılır; okunmak istendiğinde yerel <code>sayac</code> henüz bir değere bağlanmamıştır.</p>
+<pre class="py">sayac = 0
+
+def oku():
+    print("okuma serbest:", sayac)    # atama yok: global okunur
+
+def artir():
+    try:
+        sayac += 1                     # atama var: sayac yerel!
+    except UnboundLocalError as h:
+        print("Hata:", h)
+
+def artir_dogru(deger):
+    return deger + 1                   # en temizi: parametre al, sonuç döndür
+
+oku()
+artir()
+sayac = artir_dogru(sayac)
+print(sayac)</pre>
+<p>İç içe fonksiyonlarda dıştaki fonksiyonun değişkenini değiştirmek için <code>global</code>'in kardeşi <code>nonlocal</code> var. Onu ve fonksiyon döndüren fonksiyonları Kapanışlar ve kapsam dersinde ayrıntılı göreceksin.</p>
+
+<h2>Döngü ve comprehension değişkenlerinin kapsamı</h2>
+<p>Python'da <code>if</code> ve <code>for</code> blokları yeni bir kapsam açmaz: döngü değişkeni döngü bittikten sonra da yaşar ve son değerini korur. Comprehension'lar (<code>[x * 2 for x in ...]</code>) ise kendi küçük kapsamlarına sahiptir; içlerindeki değişken dışarı sızmaz.</p>
+<pre class="py">for i in range(3):
+    pass
+print("döngüden sonra i =", i)
+
+kareler = [j * j for j in range(4)]
+print(kareler, "j" in globals())       # j dışarı sızmadı
+
+if True:
+    blok_ici = "if bloğu kapsam açmaz"
+print(blok_ici)</pre>
+
+<h2>Yerleşik adları gölgelemek</h2>
+<p>LEGB'nin son halkası B (built-in): <code>print</code>, <code>len</code>, <code>sum</code>, <code>list</code>, <code>id</code>, <code>input</code>, <code>max</code> gibi adlar yerleşik (builtins) modülündedir. Aynı adla bir değişken oluşturursan, o kapsamda yerleşik fonksiyon <b>gölgelenir</b> (shadowing) ve çağırmaya çalıştığında anlamsız hatalar alırsın. Hangi adların yerleşik olduğunu <code>builtins</code> modülüne, Python'un ayrılmış sözcüklerini (<code>if</code>, <code>for</code>, <code>class</code>...) <code>keyword</code> modülüne sorabilirsin.</p>
+<pre class="py">import builtins, keyword
+
+fiyatlar = [10, 20, 30]
+sum = 0                                 # gölgeleme!
+for f in fiyatlar:
+    sum += f
+try:
+    print(sum(fiyatlar))
+except TypeError as h:
+    print("Hata:", h)
+del sum                                 # yerel adı sil, yerleşik geri gelir
+print(sum(fiyatlar))
+
+for ad in ["list", "toplam", "class", "id", "2sehir"]:
+    print(ad, hasattr(builtins, ad), keyword.iskeyword(ad), ad.isidentifier())</pre>
+<div class="tip"><b>Güvenli ad seçimi</b>Sık gölgelenen yerleşikler için Türkçe ya da daha açıklayıcı adlar kullan: <code>list</code> yerine <code>urunler</code>, <code>sum</code> yerine <code>toplam</code>, <code>id</code> yerine <code>musteri_id</code>, <code>type</code> yerine <code>tur</code>. Bir yerleşik adını gerçekten kullanman gerekiyorsa PEP 8 sona alt çizgi önerir: <code>type_</code>, <code>id_</code>.</div>
+
+<h2>import'un incelikleri ve modül adı çakışması</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Ne getirir?</th><th>Ne zaman?</th></tr>
+<tr><td><code>import math</code></td><td><code>math</code> adını</td><td>Varsayılan; kaynağı her kullanımda belli</td></tr>
+<tr><td><code>import statistics as st</code></td><td>Kısa takma adı</td><td>Uzun adlı ya da gelenekli modüller (<code>np</code>, <code>pd</code>)</td></tr>
+<tr><td><code>from math import ceil, floor</code></td><td>Yalnız seçilen adları</td><td>Birkaç adı sık kullanıyorsan</td></tr>
+<tr><td><code>from math import sqrt as kok</code></td><td>Seçilen adı yeni adla</td><td>Ad çakışmasını önlemek için</td></tr>
+<tr><td><code>from math import *</code></td><td>Her şeyi</td><td>Etkileşimli denemeler dışında kullanma</td></tr>
+</table></div>
+<p>Python bir modülü ararken önce <b>çalıştırdığın dosyanın klasörüne</b>, sonra standart kütüphaneye ve yüklü paketlere bakar (bu liste <code>sys.path</code>'te). Bu yüzden kendi dosyana <code>random.py</code>, <code>statistics.py</code> ya da <code>math.py</code> adını verirsen, <code>import random</code> standart kütüphaneyi değil seninkini yükler ve <code>AttributeError: module 'random' has no attribute 'randint'</code> gibi şaşırtıcı hatalar alırsın. Dosyalarına standart modüllerin adlarını verme.</p>
+<p>Bir modül ilk <code>import</code>'ta bir kez çalıştırılır ve <code>sys.modules</code> önbelleğine (cache) konur; sonraki import'lar aynı nesneyi döndürür. Aşağıdaki örnek bunu dosya bile oluşturmadan, modülü elle kurarak gösteriyor:</p>
+<pre class="py">import sys, types
+
+kaynak = 'print("ayarlar yükleniyor...")\nKDV = 0.20\ndef kdv_dahil(x):\n    return round(x * (1 + KDV), 2)\n'
+modul = types.ModuleType("ayarlar")
+exec(kaynak, modul.__dict__)            # modül kodunu kendi ad alanında çalıştır
+sys.modules["ayarlar"] = modul          # önbelleğe koy
+
+import ayarlar                          # önbellekten gelir, kod tekrar çalışmaz
+print(ayarlar.kdv_dahil(100), ayarlar is modul, ayarlar.__name__)</pre>
+
+<h2>random ve statistics: ders dışında kalanlar</h2>
+<pre class="py">import random, statistics
+
+rng = random.Random(42)                  # kendi tohumlu üreteci: global random'u etkilemez
+urunler = ["çay", "kahve", "su", "kek"]
+print(rng.choice(urunler))
+print(rng.sample(urunler, 2))            # tekrarsız 2 seçim
+print(rng.choices(urunler, weights=[5, 3, 1, 1], k=4))   # ağırlıklı, tekrarlı
+kopya = urunler[:]
+rng.shuffle(kopya)                       # yerinde karıştırır, None döner
+print(kopya)
+
+sureler = [12, 7, 9, 8, 10, 11, 95, 9, 10, 1]
+print(statistics.median(sureler), statistics.mode(sureler))
+print(statistics.quantiles(sureler, n=4))   # çeyrekler: Q1, Q2, Q3
+print(round(statistics.stdev(sureler), 2))</pre>
+<p><code>random.Random(tohum)</code> nesnesi, testlerde ve simülasyonlarda tekrarlanabilir sonuç verirken programın geri kalanındaki <code>random</code> çağrılarını etkilemez; global <code>random.seed</code> ise herkesin sırasını değiştirir. Çeyrekler (quantiles) ise aykırı değer (outlier) bulmanın en yaygın yolu olan IQR kuralının temelidir.</p>
+<div class="note"><b>Gerçek işte</b>Projelerde modül düzeni genellikle şöyledir: sabitler ve ayarlar bir modülde (<code>ayarlar.py</code>, BÜYÜK_HARF adlarla), iş kuralları saf fonksiyonlar olarak başka modüllerde, giriş noktası ise <code>if __name__ == "__main__":</code> ile korunan küçük bir <code>main()</code>. Global değişkenle durum taşımak yerine fonksiyonlar parametre alıp sonuç döndürür. Paket yapısı, <code>__init__.py</code> ve göreli import'ları Modüller ve paketler dersinde, üçüncü parti paket kurmayı Sanal ortam (virtual environment) ve pip dersinde göreceksin.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Modül bir kez yüklenir</h3>
+<p>Aynı modülü on dosyada import etsen de Python onu bir kez çalıştırır ve <code>sys.modules</code> sözlüğünde saklar; sonraki importlar oradan döner. Bu yüzden modülün en üst düzeyine yazdığın kod (örneğin bir veritabanı bağlantısı) yalnızca ilk importta koşar. Modülün üst düzeyinde "iş" yapma; fonksiyon tanımla, işi <code>main()</code> içinde yap.</p>
+<h3>Paketler ve kendi modüllerin</h3>
+<p>Klasörün içine <code>__init__.py</code> koyarsan o klasör bir <b>paket</b> (package) olur: <code>from anadolu.fiyat import kdv_hesapla</code>. Python modülü bulmak için <code>sys.path</code> listesindeki klasörlere sırayla bakar; ilk sırada çalıştırılan dosyanın klasörü vardır. "ModuleNotFoundError" aldığında ilk kontrol edeceğin şey bu listedir. Git ve proje yapısı dersinde paket düzenine ayrıntılı gireceğiz.</p>
+<h3>Kapsam neden önemli?</h3>
+<p>Globale bağımlı fonksiyon, dışarıdaki durumu bilmeden test edilemez. Bir üretim sisteminde "fonksiyon dün çalışıyordu, bugün bozuldu" hatalarının büyük kısmı bir yerde değiştirilen global bir değerden çıkar. Fonksiyona ihtiyacı olan her şeyi parametre olarak vermek (dependency injection fikrinin en sade hâli) kodu hem test edilebilir hem taşınabilir yapar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsam-moduller">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../fonksiyonlar/">← Fonksiyonlar</a><a href="../string-bicimleme/">Metin biçimlendirme ve rapor üretme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

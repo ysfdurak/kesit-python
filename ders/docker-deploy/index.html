@@ -1,0 +1,380 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Docker ve dağıtım: konteyner, compose, bulut | Kesit Python</title><meta name="description" content="Python uygulamanı Dockerfile ile konteynere paketler, katman önbelleği ve çok aşamalı yapıyla imajı küçültür, compose ile PostgreSQL'le birlikte…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/docker-deploy/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Docker ve dağıtım: konteyner, compose, bulut"><meta property="og:description" content="Python uygulamanı Dockerfile ile konteynere paketler, katman önbelleği ve çok aşamalı yapıyla imajı küçültür, compose ile PostgreSQL'le birlikte…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/docker-deploy/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Docker ve dağıtım: konteyner, compose, bulut","description":"Python uygulamanı Dockerfile ile konteynere paketler, katman önbelleği ve çok aşamalı yapıyla imajı küçültür, compose ile PostgreSQL'le birlikte…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/docker-deploy/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Docker ve dağıtım: konteyner, compose, bulut</h1><p class="st-l">Python uygulamanı Dockerfile ile konteynere paketler, katman önbelleği ve çok aşamalı yapıyla imajı küçültür, compose ile PostgreSQL'le birlikte çalıştırır, ortam değişkeni, sağlık kontrolü ve stdout loglamayla 12-factor uyumlu biçimde buluta gönderirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/docker-deploy">Uygulamada aç, 31 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli? "Benim bilgisayarımda çalışıyordu"</h2>
+<p>Anadolu Market'in sipariş API'sini yazdın; testler yeşil, kendi bilgisayarında her şey kusursuz. Sunucuya kurduğunda ise bambaşka bir Python sürümü, eksik bir sistem kütüphanesi ve farklı bir saat dilimiyle karşılaşıyorsun. Bu derste uygulamanı <b>konteyner</b> (container) içine paketleyip her ortamda aynı şekilde çalıştırmayı, veritabanıyla birlikte ayağa kaldırmayı ve buluta göndermeyi öğreneceksin. Paketleme dersinde wheel ve <code>pyproject.toml</code> ile kütüphane dağıtmayı gördün; burada konu <b>uygulamayı</b> dağıtmak.</p>
+<p>Tarayıcıda Docker çalışmaz; bu yüzden komutları gri kutularda göreceksin, alıştırmalarda ise Docker'ın mantığını Python ile kuracaksın: Dockerfile denetleyen bir "linter", compose dosyasından başlatma sırası çıkaran bir planlayıcı, ortam değişkeninden ayar okuyan bir sınıf ve sağlık kontrolü işleyicisi. Bunlar gerçek ekiplerin CI hattında koşturduğu araçların küçük kardeşleri.</p>
+
+<h2>Konteyner mi, sanal makine mi?</h2>
+<p><b>Sanal makine</b> (virtual machine, VM) bütün bir işletim sistemini çekirdeğiyle birlikte taklit eder. <b>Konteyner</b> ise ana makinenin çekirdeğini paylaşır; yalnızca uygulamanın dosya sistemini, kütüphanelerini ve süreçlerini yalıtır. <b>İmaj</b> (image) salt okunur bir şablondur, konteyner o imajın çalışan bir kopyasıdır: sınıf ile nesne gibi düşünebilirsin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Sanal makine</th><th>Konteyner</th></tr>
+<tr><td>Yalıtım</td><td>Ayrı çekirdek, güçlü yalıtım</td><td>Ortak çekirdek, süreç düzeyinde yalıtım</td></tr>
+<tr><td>Açılış süresi</td><td>Dakikalar</td><td>Saniyeler</td></tr>
+<tr><td>Boyut</td><td>GB düzeyinde</td><td>Onlarca–yüzlerce MB</td></tr>
+<tr><td>Tipik kullanım</td><td>Farklı işletim sistemleri, eski sistemler</td><td>Mikroservis, API, toplu iş, CI</td></tr>
+<tr><td>Tanım dosyası</td><td>Kurulum betikleri, Packer şablonu</td><td><code>Dockerfile</code></td></tr>
+</table></div>
+
+<h2>İlk Dockerfile</h2>
+<p>Dockerfile, imajı adım adım nasıl inşa edeceğini anlatan bir tariftir. Her satır bir <b>komut</b> (instruction) ve bir argümandan oluşur:</p>
+<pre class="code"># Dockerfile — Anadolu Market API
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+RUN useradd --create-home app
+USER app
+EXPOSE 8000
+CMD ["gunicorn", "-k", "uvicorn.workers.UvicornWorker", "-b", "0.0.0.0:8000", "market.main:app"]</pre>
+<pre class="code">docker build -t anadolu-market-api:1.4.0 .
+docker run --rm -p 8000:8000 --env-file .env anadolu-market-api:1.4.0
+docker ps            # çalışan konteynerler
+docker logs -f &lt;id&gt;  # stdout'a yazılan loglar</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar</th><th>Dikkat</th></tr>
+<tr><td><code>FROM</code></td><td>Temel imajı seçer</td><td>Her zaman ilk komut; <code>latest</code> yerine sabit sürüm (<code>3.12-slim</code>)</td></tr>
+<tr><td><code>WORKDIR</code></td><td>Çalışma klasörünü ayarlar (yoksa oluşturur)</td><td><code>RUN cd</code> kalıcı değildir; WORKDIR kullan</td></tr>
+<tr><td><code>COPY</code></td><td>Dosyaları imaja kopyalar</td><td><code>.dockerignore</code> ile gereksizleri dışla</td></tr>
+<tr><td><code>RUN</code></td><td>İnşa sırasında komut çalıştırır, yeni katman üretir</td><td><code>--no-cache-dir</code> pip önbelleğini imaja koymaz</td></tr>
+<tr><td><code>ENV</code></td><td>Ortam değişkeni tanımlar</td><td>Sır (şifre, token) asla buraya yazılmaz</td></tr>
+<tr><td><code>USER</code></td><td>Sonraki komutların kullanıcısı</td><td>Varsayılan root'tur; yetkisiz kullanıcıya geç</td></tr>
+<tr><td><code>EXPOSE</code></td><td>Uygulamanın dinlediği portu belgeler</td><td>Portu açmaz; <code>-p</code> açar</td></tr>
+<tr><td><code>CMD</code></td><td>Konteyner başlarken çalışacak komut</td><td>JSON (exec) biçimi sinyalleri doğru iletir</td></tr>
+</table></div>
+<p>Dockerfile düz bir metin olduğu için Python ile kolayca ayrıştırılır. Aşağıdaki kod yorumları atlayıp her satırı (komut, argüman) çiftine ayırıyor; alıştırmalarda bunu bir denetleyiciye dönüştüreceksin.</p>
+<pre class="py">dockerfile = """
+# Anadolu Market
+FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY . .
+CMD ["python", "app.py"]
+"""
+
+adimlar = []
+for satir in dockerfile.splitlines():
+    satir = satir.strip()
+    if not satir or satir.startswith("#"):
+        continue
+    komut, _, arguman = satir.partition(" ")
+    adimlar.append((komut.upper(), arguman))
+
+for no, (komut, arguman) in enumerate(adimlar, 1):
+    print(f"{no}. {komut:&lt;8} {arguman}")</pre>
+
+<h2>Katman önbelleği ve .dockerignore</h2>
+<p>Her <code>RUN</code>, <code>COPY</code> ve <code>ADD</code> yeni bir <b>katman</b> (layer) üretir. Docker bir adımı yeniden inşa ederken önceki inşadan kalan katmanı kullanabilir: komut metni aynıysa ve kopyalanan dosyalar değişmediyse adım <b>önbellekten</b> gelir. Bir adım değiştiği anda ondan sonraki <b>bütün</b> adımlar yeniden çalışır. Bu yüzden sık değişen şeyler (uygulama kodu) sona, seyrek değişenler (bağımlılıklar) başa yazılır.</p>
+<pre class="py">adimlar = ["FROM python:3.12-slim", "COPY requirements.txt .",
+           "RUN pip install -r requirements.txt", "COPY . .", "CMD python app.py"]
+
+def yeniden_insa(adimlar, ilk_degisen):
+    for i, adim in enumerate(adimlar):
+        durum = "önbellek" if i &lt; ilk_degisen else "YENİDEN"
+        print(f"  {durum:&lt;9} {adim}")
+
+print("Yalnızca kod değişti:")
+yeniden_insa(adimlar, 3)
+print("requirements.txt değişti:")
+yeniden_insa(adimlar, 1)</pre>
+<p>İlk durumda en pahalı adım olan <code>pip install</code> önbellekten gelir ve inşa saniyeler sürer. <code>COPY . .</code>'yu en başa koysaydın her kod değişikliğinde bütün paketler yeniden inerdi.</p>
+<p><code>.dockerignore</code>, <code>.gitignore</code> gibi çalışır: inşa bağlamına (build context) girmeyecek dosyaları listeler. Hem imajı küçültür hem de <code>.env</code> gibi sır dosyalarının yanlışlıkla imaja girmesini engeller.</p>
+<pre class="code">.git
+.venv
+__pycache__/
+*.pyc
+.env
+tests/
+*.log</pre>
+
+<h2>Çok aşamalı yapı (multi-stage build)</h2>
+<p>Bazı paketler derlenirken derleyici ister (<code>gcc</code>, başlık dosyaları), ama çalışırken istemez. Çok aşamalı yapıda ilk aşama "inşaat alanı"dır; ikinci aşama yalnızca bitmiş ürünü alır. Sonuç: daha küçük ve saldırı yüzeyi daha dar bir imaj.</p>
+<pre class="code">FROM python:3.12-slim AS insa
+RUN apt-get update &amp;&amp; apt-get install -y --no-install-recommends build-essential
+COPY requirements.txt .
+RUN pip wheel --no-cache-dir --wheel-dir /wheels -r requirements.txt
+
+FROM python:3.12-slim
+WORKDIR /app
+COPY --from=insa /wheels /wheels
+RUN pip install --no-cache-dir /wheels/* &amp;&amp; rm -rf /wheels
+COPY . .
+RUN useradd --create-home app
+USER app
+CMD ["python", "-m", "market"]</pre>
+<div class="warn"><b>root ve latest tuzakları</b>USER yazmazsan konteyner içindeki süreç root olarak çalışır; uygulamadaki bir açık, saldırgana konteyner içinde tam yetki verir. <code>FROM python</code> ya da <code>FROM python:latest</code> ise bugün 3.12, yarın 3.13 demektir: aynı Dockerfile bir gün habersizce farklı imaj üretir. Sürümü her zaman sabitle.</div>
+
+<h2>docker compose: uygulama + PostgreSQL</h2>
+<p>Gerçek uygulama tek başına yaşamaz; veritabanı, önbellek, kuyruk ister. <b>docker compose</b> birden fazla servisi tek bir YAML dosyasıyla tanımlar ve birlikte başlatır.</p>
+<pre class="code"># compose.yaml
+services:
+  db:
+    image: postgres:16
+    environment:
+      POSTGRES_DB: market
+      POSTGRES_PASSWORD: $POSTGRES_PASSWORD
+    volumes: ["pgdata:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      retries: 5
+  api:
+    build: .
+    ports: ["8000:8000"]
+    environment:
+      DATABASE_URL: postgresql://postgres:$POSTGRES_PASSWORD@db:5432/market
+    depends_on:
+      db:
+        condition: service_healthy
+volumes:
+  pgdata: {}</pre>
+<pre class="code">docker compose up -d --build   # inşa et ve arka planda başlat
+docker compose logs -f api      # api servisinin logları
+docker compose down             # durdur (volume'lar kalır)</pre>
+<p>Servisler birbirine adıyla ulaşır: API, veritabanına <code>localhost</code> ile değil <code>db</code> adıyla bağlanır. <code>depends_on</code> başlatma sırasını belirler; <code>condition: service_healthy</code> ise "veritabanı sağlık kontrolünü geçene kadar bekle" der. Compose dosyası YAML olduğu için <code>yaml.safe_load</code> ile okunur ve bağımlılıklardan başlatma sırası <b>topolojik sıralama</b> (topological sort) ile çıkarılır:</p>
+<pre class="py">import yaml
+
+metin = """
+services:
+  api:
+    depends_on: [db, cache]
+  worker:
+    depends_on: [db]
+  db: {}
+  cache: {}
+"""
+servisler = yaml.safe_load(metin)["services"]
+bagimlilik = {ad: set(s.get("depends_on", [])) for ad, s in servisler.items()}
+
+sira = []
+while bagimlilik:
+    hazir = sorted(ad for ad, b in bagimlilik.items() if b &lt;= set(sira))
+    sira.extend(hazir)
+    for ad in hazir:
+        del bagimlilik[ad]
+print("Başlatma sırası:", sira)</pre>
+<div class="tip"><b>safe_load, load değil</b><code>yaml.load</code> uygun yükleyiciyle keyfi Python nesnesi oluşturabilir; dışarıdan gelen YAML'ı her zaman <code>yaml.safe_load</code> ile oku.</div>
+
+<h2>Ortam değişkenleri, sırlar ve 12-factor</h2>
+<p><b>12-factor uygulama</b> (twelve-factor app), bulutta çalışan uygulamalar için yaygın kabul görmüş bir ilkeler listesidir. En sık başvurulanları:</p>
+<div class="tbl-wrap"><table>
+<tr><th>İlke</th><th>Anlamı</th><th>Python'da karşılığı</th></tr>
+<tr><td>Yapılandırma ortamda</td><td>Ortama göre değişen her şey ortam değişkenidir</td><td><code>os.environ</code>, pydantic-settings</td></tr>
+<tr><td>Bağımlılıklar açık</td><td>Her paket sürümüyle beyan edilir</td><td><code>requirements.txt</code>, kilit dosyası</td></tr>
+<tr><td>Destek servisleri eklenti</td><td>Veritabanı bir URL'dir, kod değişmeden değişir</td><td><code>DATABASE_URL</code></td></tr>
+<tr><td>Durumsuz süreçler</td><td>Oturum, dosya yerel diskte tutulmaz</td><td>Redis, nesne deposu</td></tr>
+<tr><td>Port bağlama</td><td>Uygulama kendi portunu dinler</td><td>gunicorn/uvicorn <code>-b 0.0.0.0:$PORT</code></td></tr>
+<tr><td>Atılabilirlik</td><td>Hızlı açılır, SIGTERM'de düzgün kapanır</td><td>signal işleyici, bağlantıları kapat</td></tr>
+<tr><td>Loglar akıştır</td><td>Dosyaya değil stdout'a yazılır</td><td><code>logging.StreamHandler(sys.stdout)</code></td></tr>
+</table></div>
+<p>Ortam değişkenleri her zaman <b>metin</b> gelir. <code>"8000"</code> sayıya, <code>"false"</code> mantıksal değere senin çevirmen gerekir; <code>bool("false")</code> <b>True</b> verir çünkü boş olmayan her metin doğrudur. Ayarları tek bir yerde, açılışta doğrulayan bir sınıf yazmak bu hataları erkenden yakalar:</p>
+<pre class="py">from dataclasses import dataclass
+
+DOGRU = {"1", "true", "yes", "evet", "on"}
+
+@dataclass(frozen=True)
+class Ayarlar:
+    database_url: str
+    port: int = 8000
+    debug: bool = False
+
+    @classmethod
+    def ortamdan(cls, env):
+        if "DATABASE_URL" not in env:
+            raise ValueError("DATABASE_URL tanımlı değil")
+        return cls(
+            database_url=env["DATABASE_URL"],
+            port=int(env.get("PORT", "8000")),
+            debug=env.get("DEBUG", "").strip().lower() in DOGRU,
+        )
+
+ayar = Ayarlar.ortamdan({"DATABASE_URL": "postgresql://db/market", "DEBUG": "false", "PORT": "9000"})
+print(ayar)
+print("bool('false') =", bool("false"))</pre>
+<p>Gerçek kodda <code>env</code> yerine <code>os.environ</code> verirsin; testte ise küçük bir sözlük. Bu, bağımlılık enjeksiyonunun (dependency injection) en basit hâlidir. <b>Sırlar</b> (secrets: veritabanı şifresi, API anahtarı) imaja, Dockerfile'a ya da git'e girmez; çalışma anında ortam değişkeni ya da bulutun sır yöneticisiyle (AWS Secrets Manager, GCP Secret Manager, Azure Key Vault) verilir.</p>
+
+<h2>Sağlık kontrolü ve loglama</h2>
+<p>Orkestratör (Docker, Kubernetes, Render) uygulamanın yaşayıp yaşamadığını HTTP uç noktalarıyla sorar. İki ayrı soru vardır: <b>canlılık</b> (liveness, <code>/health</code>): "Süreç takıldı mı?" ve <b>hazırlık</b> (readiness, <code>/ready</code>): "Veritabanına ulaşıp istek alabilir misin?" Hazırlık başarısızsa trafik o kopyaya yönlendirilmez; canlılık başarısızsa konteyner yeniden başlatılır.</p>
+<pre class="py">def hazirlik(kontroller):
+    sonuc = {}
+    for ad, kontrol in kontroller.items():
+        try:
+            kontrol()
+            sonuc[ad] = "ok"
+        except Exception as e:
+            sonuc[ad] = f"hata: {e}"
+    kod = 200 if all(v == "ok" for v in sonuc.values()) else 503
+    return kod, sonuc
+
+def veritabani():
+    return True
+
+def onbellek():
+    raise ConnectionError("redis:6379 yanıt vermiyor")
+
+print(hazirlik({"db": veritabani}))
+print(hazirlik({"db": veritabani, "cache": onbellek}))</pre>
+<p>Loglar konteyner içinde dosyaya yazılırsa konteyner silinince kaybolur. 12-factor kuralı: <b>stdout'a yaz</b>, toplamayı platform yapsın (Docker <code>docker logs</code>, bulutta CloudWatch, Cloud Logging). Makinenin okuyabilmesi için tek satırlık JSON en iyisidir:</p>
+<pre class="py">import io, json, logging
+
+class JsonBicim(logging.Formatter):
+    def format(self, kayit):
+        return json.dumps({"seviye": kayit.levelname, "kaydedici": kayit.name,
+                           "mesaj": kayit.getMessage()}, ensure_ascii=False)
+
+akis = io.StringIO()            # gerçekte sys.stdout
+isleyici = logging.StreamHandler(akis)
+isleyici.setFormatter(JsonBicim())
+log = logging.getLogger("market.api")
+log.addHandler(isleyici)
+log.setLevel(logging.INFO)
+
+log.info("sipariş alındı: %s", "S-1001")
+log.warning("stok azaldı: %d adet", 3)
+print(akis.getvalue(), end="")</pre>
+
+<h2>gunicorn, uvicorn ve bulut seçenekleri</h2>
+<p>Geliştirme sunucusu (<code>flask run</code>, <code>uvicorn --reload</code>) üretim için değildir. Üretimde bir <b>süreç yöneticisi</b> birden fazla işçi (worker) başlatır: WSGI (Flask, Django) için <b>gunicorn</b>, ASGI (FastAPI) için <b>uvicorn</b> ya da uvicorn işçili gunicorn. İşçi sayısı için başlangıç kuralı <code>2 × çekirdek + 1</code>'dir, ama ölçerek ayarlanır.</p>
+<pre class="code">gunicorn -w 4 -b 0.0.0.0:8000 market.wsgi:app                    # Flask/Django
+uvicorn market.main:app --host 0.0.0.0 --port 8000 --workers 4    # FastAPI
+gunicorn -k uvicorn.workers.UvicornWorker -w 4 market.main:app    # ikisi birlikte</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Platform</th><th>Model</th><th>Ne zaman?</th></tr>
+<tr><td>Render, Railway</td><td>Git'e bağla, Dockerfile'ı kendisi inşa etsin; yönetilen PostgreSQL</td><td>Prototip, küçük ekip, hızlı başlangıç</td></tr>
+<tr><td>Fly.io</td><td>Konteyneri dünyanın farklı bölgelerinde çalıştırır</td><td>Kullanıcıya yakın, düşük gecikme</td></tr>
+<tr><td>AWS (ECS/Fargate, App Runner)</td><td>Konteyner servisleri, RDS veritabanı</td><td>Kurumsal ölçek, ayrıntılı ağ ve yetki</td></tr>
+<tr><td>GCP Cloud Run</td><td>İstek geldikçe ölçeklenen konteyner</td><td>Değişken trafik, sıfıra ölçeklenme</td></tr>
+<tr><td>Azure Container Apps / App Service</td><td>Yönetilen konteyner ve web uygulaması</td><td>Microsoft ekosistemindeki şirketler</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Bir bankacılık ekibinde canlıya çıkış genellikle şöyle akar: geliştirici birleştirme isteği (pull request) açar, CI testleri koşturur, Dockerfile'ı hadolint gibi bir denetleyiciden geçirir, imajı git commit kimliğiyle etiketleyip (<code>api:3f2a9c1</code>) şirketin imaj deposuna iter, imaj güvenlik açığı taramasından geçer ve önce test ortamına, onaydan sonra üretime aynı imaj gönderilir. "Aynı imaj" kısmı kritiktir: test edilen şey ile canlıya çıkan şey bit bit aynıdır, yalnızca ortam değişkenleri farklıdır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>İmajın hazır ve compose ile yerelde çalışıyor. Şimdi üç gerçek soru var: uygulamanın önüne ne koyarsın (Nginx), en hızlı nasıl yayına alırsın (PaaS) ve ekip büyüdüğünde konteynerleri kim yönetir (Kubernetes)?</p>
+<h2>Nginx: ters vekil sunucu (reverse proxy)</h2>
+<p>gunicorn ya da uvicorn Python kodunu çalıştırmakta iyidir ama internete doğrudan açılmak için tasarlanmamıştır. Önlerine Nginx konur ve şu işleri üstlenir: HTTPS sertifikasını sonlandırmak (TLS termination), statik dosyaları Python'a hiç uğratmadan sunmak, yavaş istemcileri tamponlayıp (buffering) uygulama işçilerini boşta bekletmemek, gzip sıkıştırma, istek boyutu ve hız sınırı.</p>
+<pre class="code"># /etc/nginx/conf.d/market.conf
+upstream api {
+    server 127.0.0.1:8000;          # gunicorn/uvicorn; compose'da: server api:8000;
+}
+server {
+    listen 443 ssl;
+    server_name market.example.com;
+    ssl_certificate     /etc/letsencrypt/live/market.example.com/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/market.example.com/privkey.pem;
+    client_max_body_size 10m;
+
+    location /static/ {
+        alias /srv/market/static/;   # Python'a uğramaz
+        expires 7d;
+    }
+    location / {
+        proxy_pass http://api;
+        proxy_set_header Host $host;
+        proxy_set_header X-Real-IP $remote_addr;
+        proxy_set_header X-Forwarded-For $proxy_add_x_forwarded_for;
+        proxy_set_header X-Forwarded-Proto $scheme;
+        proxy_read_timeout 30s;
+    }
+}
+server { listen 80; server_name market.example.com; return 301 https://$host$request_uri; }</pre>
+<p><code>X-Forwarded-*</code> başlıkları önemlidir: uygulama artık isteği Nginx'ten aldığı için gerçek istemci IP'sini ve isteğin HTTPS olup olmadığını bu başlıklardan öğrenir (uvicorn'da <code>--proxy-headers</code>, Flask'ta <code>ProxyFix</code>). Nginx, <code>location</code> bloklarından isteğin yoluyla <b>en uzun eşleşen öneki</b> seçer; <code>/static/logo.png</code> için <code>/static/</code>, <code>/api/siparis</code> için <code>/</code> çalışır. Yapılandırmayı her değişiklikten sonra <code>nginx -t</code> ile denetle, sonra <code>nginx -s reload</code> ile kesintisiz yeniden yükle.</p>
+<h2>PaaS'a adım adım dağıtım</h2>
+<p>Platform hizmeti (PaaS) sunucu, Nginx ve sertifika işini senin yerine yapar. Render, Railway ve Fly.io'da akış neredeyse aynıdır:</p>
+<div class="steps-list"><ol>
+<li>Depoda çalışan bir <code>Dockerfile</code> olsun; uygulama portu <b><code>PORT</code> ortam değişkeninden</b> okusun (<code>--bind 0.0.0.0:$PORT</code>). Platform portu kendisi atar.</li>
+<li>GitHub deposunu platforma bağla; her <code>main</code> push'unda imaj otomatik inşa edilir.</li>
+<li>Yönetilen PostgreSQL ekle; platform <code>DATABASE_URL</code>'i ortam değişkeni olarak verir. Sırları panelden gir, depoya koyma.</li>
+<li>Sağlık kontrolü yolunu (<code>/health</code>) tanımla; yeni sürüm sağlıklı olmadan trafik ona geçmez.</li>
+<li>Migration'ı yayın öncesi komut olarak ayarla (Render'da pre-deploy command, Fly'da <code>release_command = "alembic upgrade head"</code>).</li>
+</ol></div>
+<pre class="code"># Fly.io
+fly launch            # fly.toml üretir, bölge ve uygulama adı sorar
+fly secrets set SECRET_KEY=... DATABASE_URL=...
+fly deploy            # imajı inşa eder, sağlık kontrolüyle yayına alır
+fly logs              # canlı log</pre>
+<h2>Kubernetes'in temel nesneleri</h2>
+<p>Kubernetes (k8s), konteynerleri bir makine kümesinde çalıştıran orkestratördür. Ona "ne istediğini" YAML ile söylersin (bildirimsel, declarative), o da gerçek durumu sürekli istenen duruma yaklaştırır: bir pod çökerse yenisini başlatır.</p>
+<div class="tbl-wrap"><table><tr><th>Nesne</th><th>Ne yapar?</th><th>Compose karşılığı</th></tr>
+<tr><td>Pod</td><td>Bir ya da birkaç konteynerin en küçük çalışma birimi; geçicidir</td><td>Tek konteyner</td></tr>
+<tr><td>Deployment</td><td>İstenen kopya sayısını (replicas) korur, sürüm geçişini kademeli yapar</td><td><code>services.api</code> + <code>deploy.replicas</code></td></tr>
+<tr><td>Service</td><td>Etiketle seçilen podlara sabit ad ve IP verir, yükü dağıtır</td><td>Servis adıyla erişim</td></tr>
+<tr><td>ConfigMap</td><td>Gizli olmayan ayarlar (metin değerler)</td><td><code>environment:</code></td></tr>
+<tr><td>Secret</td><td>Parola, anahtar; değerler base64 ile kodlanır (şifreleme değildir)</td><td><code>.env</code> / secrets</td></tr>
+<tr><td>Probe</td><td>liveness: takıldıysa yeniden başlat; readiness: hazır değilse trafik verme</td><td><code>healthcheck</code></td></tr></table></div>
+<pre class="code">apiVersion: apps/v1
+kind: Deployment
+metadata: {name: market-api}
+spec:
+  replicas: 3
+  selector: {matchLabels: {app: market-api}}
+  template:
+    metadata: {labels: {app: market-api}}
+    spec:
+      containers:
+        - name: api
+          image: ghcr.io/anadolu/market-api:1.4.2
+          ports: [{containerPort: 8000}]
+          envFrom: [{configMapRef: {name: market-ayar}}, {secretRef: {name: market-sir}}]
+          resources: {requests: {cpu: 100m, memory: 128Mi}, limits: {memory: 256Mi}}
+          readinessProbe: {httpGet: {path: /ready, port: 8000}, periodSeconds: 5}
+          livenessProbe: {httpGet: {path: /health, port: 8000}, initialDelaySeconds: 10}
+---
+apiVersion: v1
+kind: Service
+metadata: {name: market-api}
+spec:
+  selector: {app: market-api}      # template.labels ile AYNI olmalı
+  ports: [{port: 80, targetPort: 8000}]</pre>
+<pre class="code">kubectl apply -f k8s/                 # istenen durumu gönder
+kubectl get pods -l app=market-api     # durum
+kubectl logs deploy/market-api -f      # log
+kubectl rollout status deploy/market-api
+kubectl rollout undo deploy/market-api # bir önceki sürüme dön</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Docker Desktop'ta Kubernetes'i açabilir ya da <code>kind</code> veya <code>minikube</code> ile yerel küme kurabilirsin. Tarayıcıda küme yok; ama manifestler sadece YAML'dır ve en sık hatalar (seçici uyuşmazlığı, eksik probe, <code>latest</code> etiketi) Python ile yakalanabilir:</div>
+<pre class="py">import yaml
+metin = """
+apiVersion: apps/v1
+kind: Deployment
+metadata: {name: market-api}
+spec:
+  replicas: 2
+  selector: {matchLabels: {app: market-api}}
+  template:
+    metadata: {labels: {app: market-api, katman: web}}
+    spec:
+      containers: [{name: api, image: "market-api:latest"}]
+---
+apiVersion: v1
+kind: Service
+metadata: {name: market-api}
+spec: {selector: {app: market-apı}, ports: [{port: 80, targetPort: 8000}]}
+"""
+belgeler = list(yaml.safe_load_all(metin))
+dep = next(b for b in belgeler if b["kind"] == "Deployment")
+etiketler = dep["spec"]["template"]["metadata"]["labels"]
+for b in belgeler:
+    if b["kind"] == "Service":
+        secici = b["spec"]["selector"]
+        uyar = all(etiketler.get(k) == v for k, v in secici.items())
+        print(b["metadata"]["name"], "podları buluyor mu?", uyar)
+for c in dep["spec"]["template"]["spec"]["containers"]:
+    print(c["name"], "etiket:", c["image"].rpartition(":")[2], "| probe var mı?", "readinessProbe" in c)</pre>
+<p>Tek harflik bir fark (<code>market-apı</code>) Service'in hiçbir podu bulamamasına yol açar; kubectl hata vermez, istekler sadece yanıtsız kalır. Bu tür denetimler CI'da <code>kubeconform</code> ve <code>kube-linter</code> gibi araçlarla yapılır.</p>
+<div class="note"><b>Gerçek işte</b>Çoğu ekip Kubernetes'e doğrudan değil, Helm şablonları ya da Kustomize ile ortam başına (staging, prod) farklı değerler vererek dağıtım yapar. Yeni başlayan biri için önemli olan YAML'ı okuyabilmek, probe ve kaynak sınırlarını anlamak ve <code>kubectl get/describe/logs</code> ile sorunu bulabilmektir.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>PID 1 ve düzgün kapanma</h3>
+<p>Konteynerde <code>CMD</code> ile başlayan süreç PID 1 olur ve <code>docker stop</code> ona SIGTERM gönderir. <code>CMD python app.py</code> (shell biçimi) önce <code>/bin/sh</code> başlatır ve sinyal Python'a ulaşmayabilir; 10 saniye sonra SIGKILL gelir, yarım kalan istekler kopar. JSON biçimi (<code>CMD ["python", "app.py"]</code>) kullan ve Python'da <code>signal.signal(signal.SIGTERM, ...)</code> ile bağlantı havuzunu kapat.</p>
+<h3>İmaj boyutu ve güvenlik</h3>
+<p><code>python:3.12</code> yaklaşık 1 GB, <code>python:3.12-slim</code> çok daha küçüktür; <code>alpine</code> daha da küçük ama musl libc yüzünden bazı tekerlek (wheel) paketleri derleme ister. Trivy ya da Docker Scout ile imajı bilinen açıklara karşı tara; temel imajı düzenli güncelle. Etiket yerine özet (digest: <code>python:3.12-slim@sha256:...</code>) ile sabitlemek tam tekrarlanabilirlik sağlar.</p>
+<h3>Yapılandırmayı doğrulamak</h3>
+<p>Büyük projelerde ayar sınıfı elle yazılmaz: <code>pydantic-settings</code> ortam değişkenlerini tip ipuçlarına (type hint) göre çevirir ve eksikse açılışta hata verir. Mantık bu dersteki <code>Ayarlar.ortamdan</code> ile aynıdır: <b>hızlı başarısız ol</b> (fail fast), yanlış yapılandırmayla asla istek kabul etme.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/docker-deploy">Alıştırmalara geç (31)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../yapay-zeka-ile-kod/">← Yapay zekâ asistanıyla Python yazmak</a><a href="../proje-api/">Bitirme projesi: Anadolu Market Sipariş API'si →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

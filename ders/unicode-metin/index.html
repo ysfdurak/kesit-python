@@ -1,0 +1,146 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Karakterler, Unicode ve Türkçe | Kesit Python</title><meta name="description" content="ASCII, Unicode ve UTF-8 farkı, kod noktası ve ord/chr, kaçış dizileri ve ham dize, bytes ile encode/decode, encoding=&quot;utf-8&quot;, Türkçe I/İ tuzakları, Türk…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/unicode-metin/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Karakterler, Unicode ve Türkçe"><meta property="og:description" content="ASCII, Unicode ve UTF-8 farkı, kod noktası ve ord/chr, kaçış dizileri ve ham dize, bytes ile encode/decode, encoding=&quot;utf-8&quot;, Türkçe I/İ tuzakları, Türk…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/unicode-metin/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Karakterler, Unicode ve Türkçe","description":"ASCII, Unicode ve UTF-8 farkı, kod noktası ve ord/chr, kaçış dizileri ve ham dize, bytes ile encode/decode, encoding=\"utf-8\", Türkçe I/İ tuzakları, Türk…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/unicode-metin/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Karakterler, Unicode ve Türkçe</h1><p class="st-l">ASCII, Unicode ve UTF-8 farkı, kod noktası ve ord/chr, kaçış dizileri ve ham dize, bytes ile encode/decode, encoding="utf-8", Türkçe I/İ tuzakları, Türk alfabesine göre sıralama ve unicodedata ile normalleştirmeyi öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/unicode-metin">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Bir harf neden bu kadar sorun çıkarır?</h2>
+<p>Anadolu Market'in müşteri listesini Excel'den aldın; "Şişli" yerine "ÅžiÅŸli", "İzmir" yerine "Ä°zmir" görüyorsun. Aramada "istanbul" yazan müşteri "İSTANBUL" kaydını bulamıyor. Alfabetik sıralı raporda "Çorum" listenin en sonunda, "Zonguldak"tan sonra çıkıyor. Bunların hepsi aynı kökten gelir: bilgisayar harf bilmez, <b>sayı</b> bilir. Bir harfin hangi sayıyla, o sayının da hangi baytlarla saklandığını anlamayan geliştirici, Türkçe veriyle her gün bu hatalarla boğuşur. Bu ders metinlerin "altını" gösteriyor: Unicode, UTF-8, bytes ve Türkçeye özel tuzaklar. Metin metotlarını (split, strip, replace) metinler dersinde gördün; burada karakterin kendisine iniyoruz.</p>
+<p>Bu bozulmayı kendin üret: UTF-8 baytlarını Windows'un Batı Avrupa tablosu (cp1252) ile okuyan program, Türkçe harfi iki ayrı karakter sanır. Aynı yoldan geri dönersen metin düzelir.</p>
+<pre class="py">bozuk = "Şişli".encode("utf-8").decode("cp1252")
+print(bozuk)
+print("İzmir".encode("utf-8").decode("cp1252"))
+print(bozuk.encode("cp1252").decode("utf-8"))</pre>
+<h2>ASCII, Unicode ve UTF-8</h2>
+<p><b>ASCII</b> (1960'lar) 128 karakterlik bir tablodur: İngilizce harfler, rakamlar, noktalama. "A" = 65, "a" = 97. ç, ş, ğ, ı, İ, ö, ü yoktur. Bu yüzden her ülke kendi 256'lık tablosunu yaptı; Türkçe için Windows'ta <b>cp1254</b>, standartlarda <b>ISO-8859-9</b>. Aynı sayı farklı tabloda farklı harf demekti ve karmaşa buradan doğdu.</p>
+<p><b>Unicode</b> bu karmaşayı bitiren evrensel katalogdur: dünyadaki her karaktere (emoji dâhil) tek bir numara verir. Bu numaraya <b>kod noktası</b> (code point) denir ve <code>U+00E7</code> (ç) biçiminde yazılır. Unicode "hangi numara" sorusunu çözer; "bu numara diske hangi baytlarla yazılır" sorusunu ise bir <b>kodlama</b> (encoding) çözer. Bugünün standardı <b>UTF-8</b>'dir: ASCII karakterlerini 1 bayt, Türkçe harfleri 2 bayt, çoğu Asya karakterini 3, emojileri 4 baytla yazar. ASCII ile geriye dönük uyumludur; web sayfalarının çok büyük bölümü UTF-8'dir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Karakter</th><th>Kod noktası</th><th>ord()</th><th>UTF-8 baytları</th><th>cp1254</th></tr>
+<tr><td>A</td><td>U+0041</td><td>65</td><td>41 (1 bayt)</td><td>41</td></tr>
+<tr><td>ç</td><td>U+00E7</td><td>231</td><td>C3 A7 (2 bayt)</td><td>E7</td></tr>
+<tr><td>ş</td><td>U+015F</td><td>351</td><td>C5 9F (2 bayt)</td><td>FE</td></tr>
+<tr><td>ı</td><td>U+0131</td><td>305</td><td>C4 B1 (2 bayt)</td><td>FD</td></tr>
+<tr><td>İ</td><td>U+0130</td><td>304</td><td>C4 B0 (2 bayt)</td><td>DD</td></tr>
+<tr><td>₺</td><td>U+20BA</td><td>8378</td><td>E2 82 BA (3 bayt)</td><td>yok</td></tr>
+<tr><td>😀</td><td>U+1F600</td><td>128512</td><td>F0 9F 98 80 (4 bayt)</td><td>yok</td></tr>
+</table></div>
+
+<h2>ord, chr ve kaçış dizileri</h2>
+<p>Python 3'te <code>str</code> türü bir Unicode kod noktaları dizisidir. <code>ord(karakter)</code> kod noktasını, <code>chr(sayi)</code> karakteri verir. Klavyede olmayan karakterleri metin içinde <b>kaçış dizileriyle</b> (escape sequences) yazarsın.</p>
+<pre class="py">print(ord("A"), ord("a"), ord("ç"), ord("₺"))
+print(chr(65), chr(304), chr(0x20BA))
+print(f"U+{ord('ş'):04X}")              # kod noktası gösterimi
+
+print("Fiyat: 120\u20ba")               # \u + 4 hane
+print("\N{LATIN CAPITAL LETTER I WITH DOT ABOVE}zmir")   # adıyla
+print("Ad\tŞehir\nAyşe\tİzmir")         # sekme ve satır sonu
+print("C:\\raporlar\\yeni", 'Market\'in', "\"tırnak\"")
+print(r"C:\raporlar\yeni")              # ham dize: \ olduğu gibi</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Dizi</th><th>Anlamı</th><th>Dizi</th><th>Anlamı</th></tr>
+<tr><td><code>\n</code></td><td>Satır sonu (newline)</td><td><code>\\</code></td><td>Ters eğik çizginin kendisi</td></tr>
+<tr><td><code>\t</code></td><td>Sekme (tab)</td><td><code>\'</code> <code>\"</code></td><td>Tırnak işareti</td></tr>
+<tr><td><code>\r</code></td><td>Satır başına dön (Windows satır sonu <code>\r\n</code>)</td><td><code>\xhh</code></td><td>2 haneli onaltılık kod</td></tr>
+<tr><td><code>\uhhhh</code></td><td>4 haneli kod noktası</td><td><code>\U0001F600</code></td><td>8 haneli kod noktası</td></tr>
+</table></div>
+<div class="warn"><b>Windows yolu tuzağı</b><code>"C:\yeni\tablo.csv"</code> yazarsan <code>\t</code> sekmeye dönüşür ve dosya bulunamaz (<code>\y</code> ise Python 3.12'de SyntaxWarning verir). Üç çözüm: ham dize <code>r"C:\yeni\tablo.csv"</code>, ileri eğik çizgi <code>"C:/yeni/tablo.csv"</code> (Windows bunu da kabul eder) ya da en iyisi <code>pathlib.Path</code>. Ham dize tek ters eğik çizgiyle bitemez: <code>r"C:\"</code> sözdizimi hatasıdır.</div>
+
+<h2>bytes: metnin disk ve ağdaki hâli</h2>
+<p>Dosyalar, ağ paketleri ve veritabanı sürücüleri <b>bayt</b> taşır. Python'da bunun türü <code>bytes</code>'tır ve <code>b"..."</code> ile yazılır. Metni bayta çevirmeye <b>encode</b> (kodlama), bayttan metne dönmeye <b>decode</b> (kod çözme) denir. Kural: <b>içeride str, sınırda bytes</b>. Programına giren baytı hemen decode et, çıkarken encode et.</p>
+<pre class="py">metin = "Şube: İzmir ₺"
+veri = metin.encode("utf-8")
+print(veri)
+print(len(metin), "karakter,", len(veri), "bayt")
+print(veri.decode("utf-8") == metin)
+
+eski = metin[:-2].encode("cp1254")          # eski Windows Türkçe tablosu
+print(eski, len(eski), "bayt")
+try:
+    eski.decode("utf-8")
+except UnicodeDecodeError as e:
+    print("Hata:", e.reason, "| konum:", e.start)
+print(eski.decode("cp1254"))
+print(eski.decode("utf-8", errors="replace"))</pre>
+<p>Son satırdaki <code>errors="replace"</code> çözülemeyen baytları <code>&#xFFFD;</code> ile değiştirir; <code>"ignore"</code> sessizce atar. İkisi de veri kaybıdır, yalnızca son çare olarak kullan. Asıl çözüm: verinin hangi kodlamayla yazıldığını öğrenip onunla açmak.</p>
+<h3>Dosyalarda encoding="utf-8"</h3>
+<p><code>open()</code> kodlama belirtilmezse işletim sisteminin varsayılanını kullanır; Türkçe Windows'ta bu genellikle cp1254'tür, macOS/Linux'ta UTF-8. Aynı kod iki bilgisayarda farklı davranır. Bu yüzden metin dosyası açarken <b>her zaman</b> <code>encoding="utf-8"</code> yaz. Excel'in "CSV UTF-8" kaydı dosyanın başına görünmez bir BOM işareti koyar; böyle dosyaları <code>encoding="utf-8-sig"</code> ile açarsan ilk sütun adı bozulmaz.</p>
+<pre class="py">with open("musteriler.csv", "w", encoding="utf-8") as f:
+    f.write("ad;şehir\nAyşe;İzmir\nÇağrı;Muğla\n")
+
+with open("musteriler.csv", encoding="utf-8") as f:
+    print(f.read())
+
+with open("musteriler.csv", "rb") as f:          # ikili mod: bytes gelir
+    print(f.read()[:12])</pre>
+
+<h2>Türkçe I/İ/ı/i: büyük-küçük harf tuzağı</h2>
+<p>Türkçede dört ayrı i harfi vardır: noktalı <b>i/İ</b> ve noktasız <b>ı/I</b>. Python'un <code>upper()</code> ve <code>lower()</code> metotları Unicode'un <b>dilden bağımsız</b> kurallarını uygular; o kurallarda <code>i</code>'nin büyüğü <code>I</code>'dır. Sonuç:</p>
+<pre class="py">print("istanbul".upper())          # ISTANBUL  (İSTANBUL değil!)
+print("IĞDIR".lower())             # iğdir     (ığdır değil!)
+print("ırmak".upper())             # IRMAK     (doğru)
+kucuk = "İzmir".lower()
+print(kucuk, len(kucuk), len("İzmir"))   # i + birleşik nokta: 6 karakter!
+print(kucuk == "izmir")
+print("Straße".lower(), "Straße".casefold())   # casefold daha agresif</pre>
+<p><code>"İ".lower()</code>, <code>i</code> ve ardından görünmez bir <b>birleşik nokta</b> (U+0307) üretir; uzunluk 2 olur ve "izmir" ile eşleşmez. <code>casefold()</code> büyük/küçük harf duyarsız karşılaştırma için tasarlanmıştır (Almanca ß → ss) ama Türkçe I sorununu o da çözmez. Çözüm basit: büyütmeden/küçültmeden önce dört harfi elle eşle.</p>
+<pre class="py">def tr_upper(metin):
+    return metin.replace("i", "İ").replace("ı", "I").upper()
+
+def tr_lower(metin):
+    return metin.replace("İ", "i").replace("I", "ı").lower()
+
+print(tr_upper("istanbul ılgaz"))     # İSTANBUL ILGAZ
+print(tr_lower("IĞDIR İZMİR"))        # ığdır izmir
+print(tr_lower("İzmir") == "izmir")   # True</pre>
+<div class="tip"><b>str.maketrans ile daha hızlı</b>Çok sayıda kayıtta <code>TR_BUYUK = str.maketrans("iı", "İI")</code> tablosunu bir kez oluşturup <code>metin.translate(TR_BUYUK).upper()</code> kullanmak, zincirleme replace'ten daha hızlı ve okunurdur.</div>
+
+<h2>Metin karşılaştırma ve Türkçe sıralama</h2>
+<p>Python metinleri <b>kod noktası sırasıyla</b>, karakter karakter karşılaştırır (sözlükbilimsel, lexicographic). İlk farklı karakter kazananı belirler; biri diğerinin başıysa kısa olan küçüktür. Bu, PCAP sınavının sevdiği bir konudur ve üç sürpriz içerir: büyük harfler küçüklerden önce gelir (<code>"Z" &lt; "a"</code>), rakamlar metin gibi karşılaştırılır (<code>"10" &lt; "9"</code>) ve Türkçe harfler İngilizce alfabenin <b>sonuna</b> düşer (ç = 231, z = 122).</p>
+<pre class="py">print("Zeytin" &lt; "armut", "10" &lt; "9", "elma" &lt; "elmas")
+sehirler = ["Zonguldak", "çorum", "Ankara", "Iğdır", "İzmir", "ağrı", "Bursa", "Şanlıurfa"]
+print(sorted(sehirler))
+
+ALFABE = "abcçdefgğhıijklmnoöpqrsştuüvwxyz"
+SIRA = {harf: i for i, harf in enumerate(ALFABE)}
+
+def tr_anahtar(kelime):
+    kucuk = kelime.replace("İ", "i").replace("I", "ı").lower()
+    return [SIRA.get(h, 100 + ord(h)) for h in kucuk]
+
+print(sorted(sehirler, key=tr_anahtar))</pre>
+<p><code>sorted</code>'a verdiğin <code>key</code> fonksiyonu her elemanı karşılaştırılabilir bir değere çevirir; burada her harfi Türk alfabesindeki sırasına. Alfabede olmayan karakterler (boşluk, rakam) 100'den sonraya, kendi kod noktası sırasıyla yerleşir. Kendi bilgisayarında <code>locale.setlocale(locale.LC_COLLATE, "tr_TR.UTF-8")</code> ve <code>key=locale.strxfrm</code> da kullanılabilir, ama yerel ayarın sistemde kurulu olmasına bağlıdır; sunucularda çoğu zaman yoktur.</p>
+
+<h2>Normalleştirme: aynı görünen, farklı olan</h2>
+<p>"ç" harfi Unicode'da iki biçimde yazılabilir: tek kod noktası <code>U+00E7</code> (birleşik, NFC) ya da <code>c</code> + birleşik çengel <code>U+0327</code> (ayrışık, NFD). Ekranda aynı görünürler ama <code>==</code> False döner. macOS dosya adları ve bazı kopyala-yapıştır kaynakları NFD üretir. <code>unicodedata.normalize</code> ikisini aynı biçime getirir; aynı araç aksanları silmek (URL kısaltması, "slug") için de kullanılır.</p>
+<pre class="py">import unicodedata
+
+a = "\u00e7ay"           # ç tek kod noktası
+b = "c\u0327ay"          # c + birleşik çengel
+print(a, b, a == b, len(a), len(b))
+print(unicodedata.normalize("NFC", a) == unicodedata.normalize("NFC", b))
+
+def aksansiz(metin):
+    ayrik = unicodedata.normalize("NFD", metin)
+    sade = "".join(h for h in ayrik if not unicodedata.combining(h))
+    return sade.replace("ı", "i")      # ı ayrışmaz, elle eşle
+
+print(aksansiz("Çağrı Şüküroğlu Gölbaşı"))
+print(unicodedata.name("ğ"))</pre>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank müşteri eşleştirme ekibi, şubelerden gelen "İSMAİL ÖZTÜRK", "ismail ozturk" ve "Ismail Öztürk" kayıtlarının aynı kişi olup olmadığını bulmak zorunda. Kullandıkları "anahtar üretici" tam olarak bu dersin adımlarıdır: NFC normalleştirme, Türkçe kurallarıyla küçük harf, aksanları silme, fazla boşlukları teke indirme. Bu anahtar üzerinden yapılan eşleştirme, mükerrer müşteri kaydını ve bunun yol açtığı yanlış risk raporlarını büyük ölçüde azaltır. E-ticaret aramasında da aynı mantık çalışır: "cagri" yazan kullanıcı "Çağrı" ürününü bulmalıdır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Karakter mi, kod noktası mı, grafem mi?</h3>
+<p><code>len()</code> kod noktası sayar. Kullanıcının "bir karakter" gördüğü şeye <b>grafem</b> (grapheme) denir ve birden fazla kod noktasından oluşabilir: ayrışık "ç" 2, bayrak emojisi 2, aile emojisi 7 kod noktasıdır. SMS karakter sayacı ya da isim kısaltma gibi işlerde bu fark hataya yol açar. Grafem kümelemesi için <code>regex</code> paketinin <code>\X</code> deseni ya da <code>grapheme</code> paketi kullanılır (kendi bilgisayarında: <code>pip install regex</code>).</p>
+<h3>Bayt sınırı olan alanlar</h3>
+<p>Bazı veritabanı sütunları ve protokoller sınırı karakter değil <b>bayt</b> olarak koyar. "50 karakter" sandığın "ŞŞŞ..." metni UTF-8'de 100 bayttır. Kırparken baytı ortadan bölersen geçersiz UTF-8 üretirsin; doğru yol karakter karakter ilerleyip bayt toplamını izlemek ya da <code>veri[:sinir].decode("utf-8", errors="ignore")</code> ile yarım kalan son karakteri atmaktır.</p>
+<h3>Varsayılan kodlamanın geleceği</h3>
+<p>PEP 686 ile Python 3.15'te UTF-8 modu varsayılan oldu; bu sürümden itibaren <code>open()</code> her platformda UTF-8 kullanır. 3.14 ve öncesini destekleyen her kodda <code>encoding="utf-8"</code> yazmak tek güvenli yoldur; açıkça yazmak okuyana da niyetini gösterir. <code>python -X utf8</code> ya da <code>PYTHONUTF8=1</code> ortam değişkeni bu modu eski sürümlerde de açar.</p>
+<h3>Gerçek dilbilimsel sıralama</h3>
+<p>Kendi anahtar fonksiyonun Türkçe için yeterlidir; çok dilli ürünlerde ise Unicode Collation Algorithm (UCA) gerekir. PyICU paketi bunu sağlar: <code style="overflow-wrap:anywhere">icu.Collator.createInstance(icu.Locale("tr_TR"))</code>. Veritabanı tarafında PostgreSQL'in <code>COLLATE "tr-TR-x-icu"</code> ayarı aynı işi yapar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/unicode-metin">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../terminal-temelleri/">← Terminal ve komut satırı</a><a href="../dongu-kaliplari/">Döngü kalıpları ve temel algoritmalar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

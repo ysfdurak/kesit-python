@@ -1,0 +1,271 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC | Kesit Python</title><meta name="description" content="Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kimlik-yetki/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC"><meta property="og:description" content="Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kimlik-yetki/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC","description":"Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/kimlik-yetki/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Kimlik doğrulama ve yetkilendirme: oturum, JWT, OAuth2 ve RBAC</h1><p class="st-l">Kimlik doğrulamayı yetkilendirmeden ayırır; oturum ile token arasında seçim yapar, JWT'yi exp/aud/iss ve anahtar döndürmeyle doğru doğrular, refresh token döndürür, OAuth2 + PKCE akışını kurar, RBAC/ABAC ile IDOR açıklarını Pusula İK izin verisi üzerinde kapatırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kimlik-yetki">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Pusula A.Ş.'nin İK portalını düşün. Çalışan kendi izinlerini görür ve yeni izin ister; yönetici yalnız kendi ekibinin izinlerini onaylar; İK uzmanı herkesi görür ama maaş ekranına giremez; bordro servisi gece çalışıp izin günlerini çeker. Bir kullanıcının <b>kim olduğunu</b> kanıtlamak ile <b>neye dokunabileceğine</b> karar vermek ayrı işlerdir ve ikisinden birindeki tek bir açık, 2.199 çalışanın sağlık izni kayıtlarını herkese açar. OWASP listesinde "Bozuk erişim kontrolü" (Broken Access Control) yıllardır ilk sırada; bu dersi bu yüzden ayrı tuttuk.</p>
+<p>Web güvenliği dersinde parolayı tuzlu PBKDF2 ile saklamayı, HMAC ile imzalı token üretmeyi ve <code>hmac.compare_digest</code> ile sabit zamanlı karşılaştırmayı gördün. Burada o temelin üstüne gerçek bir kimlik sistemi kuruyoruz: oturum ve token seçimi, JWT'nin doğru doğrulanması, access/refresh döngüsü, OAuth2 akışları, rol ve öznitelik tabanlı yetki, nesne düzeyinde yetki (IDOR) ve parola sıfırlama.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>Sorduğu soru</th><th>Başarısızsa HTTP kodu</th><th>Pusula İK örneği</th></tr>
+<tr><td>Kimlik doğrulama (authentication, authN)</td><td>Sen kimsin?</td><td>401 Unauthorized</td><td>Token yok, süresi dolmuş ya da imzası bozuk</td></tr>
+<tr><td>Yetkilendirme (authorization, authZ)</td><td>Bunu yapmaya iznin var mı?</td><td>403 Forbidden (ya da 404)</td><td>Çalışan, başkasının izin kaydını onaylamaya çalışıyor</td></tr>
+<tr><td>Hesap verebilirlik (audit)</td><td>Kim, ne zaman, ne yaptı?</td><td>-</td><td>"Rıza Karabulut 19 numaralı izni onayladı" kaydı</td></tr>
+</table></div>
+<div class="note"><b>401 adı yanıltıcıdır</b>HTTP standardında 401'in adı "Unauthorized" olsa da anlamı "kimliğini doğrulayamadım"dır. Kim olduğunu bildiğin ama izin vermediğin durum 403'tür. Kaydın varlığını bile sızdırmak istemiyorsan 404 döndürmek de meşru bir seçimdir.</div>
+
+<h2>Oturum çerezi mi, token mı?</h2>
+<p>Klasik yöntemde sunucu giriş başarılı olunca rastgele bir oturum kimliği (session id) üretir, bunu sunucu tarafında (veritabanı ya da Redis) saklar ve tarayıcıya çerez olarak verir. Token yönteminde ise sunucu kullanıcının bilgilerini (claim) imzalayıp verir; sonraki isteklerde imzayı doğrulamak yeter, depoya bakmak gerekmez.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Sunucu oturumu + çerez</th><th>İmzalı token (JWT)</th></tr>
+<tr><td>Sunucuda durum</td><td>Var (oturum deposu)</td><td>Yok ya da az (iptal listesi)</td></tr>
+<tr><td>Anında iptal</td><td>Kolay: kaydı sil</td><td>Zor: süre dolana kadar geçerli; iptal listesi gerekir</td></tr>
+<tr><td>Ölçekleme</td><td>Ortak depo ister</td><td>Her servis anahtarla doğrular</td></tr>
+<tr><td>Uygun olduğu yer</td><td>Tarayıcıdaki klasik web uygulaması</td><td>Mobil, servisler arası çağrı, birden çok API</td></tr>
+<tr><td>Başlıca risk</td><td>CSRF (SameSite ve CSRF token ile kapanır)</td><td>XSS ile çalınma (localStorage), uzun ömür</td></tr>
+</table></div>
+<p>Tarayıcıda hangi yöntemi seçersen seç, kimlik taşıyan çerez <code>HttpOnly</code> (JavaScript okuyamaz), <code>Secure</code> (yalnız HTTPS) ve <code>SameSite=Lax</code> ya da <code>Strict</code> bayraklarıyla verilmelidir. Tek sayfalı uygulamalarda yaygın ve güvenli desen: kısa ömürlü access token bellekte, refresh token HttpOnly çerezde.</p>
+
+<h2>Giriş akışı ve deneme sınırlama</h2>
+<p>Parolanın nasıl saklandığını web güvenliği dersinde gördün. Giriş uç noktasının iki ek görevi var: kullanıcı numaralandırmayı (user enumeration) önlemek ve kaba kuvvet (brute force) denemelerini yavaşlatmak. "Böyle bir kullanıcı yok" ile "parola yanlış" mesajları farklıysa saldırgan geçerli e-postaları toplar; bu yüzden tek bir mesaj kullan. Deneme sınırlaması için her hesap (ve ayrıca her IP) için kayan bir pencerede başarısız denemeleri say. Saati dışarıdan vermek, kodu test edilebilir yapar.</p>
+<pre class="py">from collections import defaultdict, deque
+
+class GirisKoruyucu:
+    def __init__(self, limit=3, pencere=300):
+        self.limit, self.pencere = limit, pencere
+        self.hatalar = defaultdict(deque)      # hesap -&gt; başarısız deneme zamanları
+
+    def izin_var_mi(self, hesap, simdi):
+        q = self.hatalar[hesap]
+        while q and q[0] &lt;= simdi - self.pencere:   # pencereden çıkanları at
+            q.popleft()
+        return len(q) &lt; self.limit
+
+    def basarisiz(self, hesap, simdi):
+        self.hatalar[hesap].append(simdi)
+
+k = GirisKoruyucu()
+for t in (0, 10, 20, 30, 400):
+    izin = k.izin_var_mi("cem@pusula.com", t)
+    print(t, "deneyebilir" if izin else "429 Too Many Requests")
+    if izin:
+        k.basarisiz("cem@pusula.com", t)</pre>
+<p>Üçüncü başarısız denemeden sonra pencere dolana kadar istek reddedilir; 400. saniyede eski kayıtlar pencereden düştüğü için yeniden denenebilir. Gerçek sistemde sayaç Redis'te tutulur (bunu Redis ve kuyruk dersinde göreceksin) ve kilit yerine artan gecikme ya da CAPTCHA tercih edilir; kalıcı kilit, saldırganın başkasının hesabını kilitlemesine izin verir.</p>
+
+<h2>JWT'yi doğru kullanmak</h2>
+<p>JWT (JSON Web Token) üç base64url parçadan oluşur: <code>başlık.yük.imza</code>. Başlıkta algoritma (<code>alg</code>) ve anahtar kimliği (<code>kid</code>), yükte claim'ler bulunur. Yük <b>şifreli değildir</b>, yalnız imzalıdır; içine parola, TC kimlik no ya da maaş koyma. İmzalı olmak "değiştirilemez" demektir, "gizli" demek değildir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Claim</th><th>Anlamı</th><th>Doğrulamada ne yapılır?</th></tr>
+<tr><td><code>sub</code></td><td>Konu: kullanıcı kimliği</td><td>Yetki kararında kullanılır</td></tr>
+<tr><td><code>exp</code></td><td>Bitiş zamanı (Unix saniye)</td><td><code>simdi &gt;= exp</code> ise reddet (küçük saat kayması toleransı olabilir)</td></tr>
+<tr><td><code>nbf</code>, <code>iat</code></td><td>Bundan önce geçersiz / üretilme anı</td><td><code>simdi &lt; nbf</code> ise reddet</td></tr>
+<tr><td><code>iss</code></td><td>Tokenı kim üretti</td><td>Beklenen yayıncıya eşit olmalı</td></tr>
+<tr><td><code>aud</code></td><td>Token kimin için</td><td>Bu servis listede yoksa reddet; başka API'nin tokenı burada geçmemeli</td></tr>
+<tr><td><code>jti</code></td><td>Tokenın benzersiz kimliği</td><td>İptal listesinde mi diye bakılır</td></tr>
+<tr><td><code>scope</code></td><td>Verilen kapsamlar</td><td>Uç nokta gereken kapsamı ister</td></tr>
+</table></div>
+<p>Aşağıdaki kutu PyJWT kütüphanesinin HS256 için ürettiği tokenın aynısını saf Python ile üretir ve doğrular. Sırayla: algoritmayı sabitle, imzayı sabit zamanlı karşılaştır, <b>sonra</b> claim'lere bak.</p>
+<pre class="py">import base64, hashlib, hmac, json
+
+def b64e(b):
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+
+def b64d(s):
+    return base64.urlsafe_b64decode(s + "=" * (-len(s) % 4))
+
+def imzala(yuk, anahtar):
+    baslik = {"alg": "HS256", "typ": "JWT"}
+    govde = b64e(json.dumps(baslik, separators=(",", ":")).encode()) + "." + \
+            b64e(json.dumps(yuk, separators=(",", ":")).encode())
+    imza = hmac.new(anahtar, govde.encode(), hashlib.sha256).digest()
+    return govde + "." + b64e(imza)
+
+def dogrula(token, anahtar, simdi, aud, iss):
+    b, y, i = token.split(".")
+    if json.loads(b64d(b)).get("alg") != "HS256":       # alg=none saldırısına kapı açma
+        return "algoritma reddedildi"
+    beklenen = hmac.new(anahtar, f"{b}.{y}".encode(), hashlib.sha256).digest()
+    if not hmac.compare_digest(beklenen, b64d(i)):
+        return "imza geçersiz"
+    yuk = json.loads(b64d(y))
+    if simdi &gt;= yuk["exp"]:
+        return "süresi dolmuş"
+    if yuk.get("iss") != iss or aud not in (yuk["aud"] if isinstance(yuk["aud"], list) else [yuk["aud"]]):
+        return "yanlış yayıncı ya da hedef"
+    return yuk
+
+ANAHTAR = b"pusula-ik-ornek-anahtar-32-bayt!"
+t = imzala({"sub": "418", "iss": "pusula-sso", "aud": "izin-api", "exp": 1_000_900}, ANAHTAR)
+print(t[:40] + "...")
+print(dogrula(t, ANAHTAR, 1_000_000, "izin-api", "pusula-sso"))
+print(dogrula(t, ANAHTAR, 1_000_000, "bordro-api", "pusula-sso"))
+print(dogrula(t, ANAHTAR, 1_001_000, "izin-api", "pusula-sso"))
+sahte = t.rsplit(".", 1)[0][:-2] + "fQ." + t.rsplit(".", 1)[1]
+print(dogrula(sahte, ANAHTAR, 1_000_000, "izin-api", "pusula-sso"))</pre>
+<div class="warn"><b>Bilinen JWT saldırıları</b><b>alg=none</b>: başlıkta algoritmayı "none" yapıp imzayı silmek; tokendaki <code>alg</code> alanına güvenen kütüphane kandırılır. <b>Algoritma karışıklığı</b>: RS256 bekleyen sunucuya, açık anahtarı HMAC anahtarı gibi kullanılan HS256 token yollamak. Çözüm aynı: kabul edilen algoritmaları sunucuda sabitle (<code>jwt.decode(t, key, algorithms=["HS256"])</code>), tokendaki <code>alg</code>'a göre davranma.</div>
+<h3>Anahtar döndürme ve kid</h3>
+<p>İmza anahtarı bir gün değişecek (sızma, periyodik döndürme). Başlıktaki <code>kid</code> hangi anahtarla imzalandığını söyler; sunucu birkaç anahtarı aynı anda tanır: yeni tokenlar yeni anahtarla imzalanır, eski anahtar yalnız doğrulama için en uzun token ömrü kadar tutulur, sonra silinir. Asimetrik algoritmalarda (RS256, ES256) açık anahtarlar bir JWKS uç noktasında yayınlanır.</p>
+
+<h2>Access ve refresh token</h2>
+<p>JWT'yi iptal etmek zor olduğu için access token kısa ömürlü olur (5–15 dakika). Kullanıcıyı her 15 dakikada bir giriş ekranına göndermemek için yanında uzun ömürlü bir <b>refresh token</b> verilir; bu token yalnız yetki sunucusuna gider ve yeni bir access token alır. Refresh token sunucuda (özeti) saklanan, iptal edilebilen bir kayıttır.</p>
+<ul>
+<li><b>Döndürme (rotation):</b> her yenilemede eski refresh token geçersiz olur, yenisi verilir.</li>
+<li><b>Yeniden kullanım tespiti (reuse detection):</b> geçersiz olmuş bir refresh token tekrar gelirse token çalınmış demektir; o "aileye" ait tüm tokenlar iptal edilir, kullanıcı yeniden giriş yapar.</li>
+<li><b>İptal listesi (denylist):</b> çıkışta ya da hesap kapatılınca access tokenın <code>jti</code>'si süresi dolana kadar listede tutulur.</li>
+</ul>
+<pre class="py">import itertools
+
+sayac = itertools.count(1)
+gecerli, kullanilmis, aile_of = {}, set(), {}
+
+def ver(kullanici, aile):
+    t = f"rt-{next(sayac)}"
+    gecerli[t] = kullanici
+    aile_of[t] = aile
+    return t
+
+def yenile(t):
+    if t in kullanilmis:                        # çalıntı token tekrar geldi
+        aile = aile_of[t]
+        for x in [x for x in gecerli if aile_of[x] == aile]:
+            del gecerli[x]
+        return "ALARM: aile iptal edildi"
+    kullanici = gecerli.pop(t)
+    kullanilmis.add(t)
+    return ver(kullanici, aile_of[t])
+
+r1 = ver("emp-418", aile="cihaz-A")
+r2 = yenile(r1)
+print(r1, "-&gt;", r2)
+print(yenile(r1))           # saldırgan eski tokenı denedi
+print("geçerli tokenlar:", gecerli)</pre>
+
+<h2>Yetkilendirme modelleri: RBAC ve ABAC</h2>
+<p><b>RBAC</b> (Role-Based Access Control) kullanıcıya rol, role izin verir: <code>calisan → izin:oku_kendi, izin:iste</code>; <code>yonetici → calisan'ın her şeyi + izin:onayla</code>. Basit ve denetlenebilirdir. Ama "yönetici yalnız <b>kendi ekibinin</b> iznini onaylar" kuralını rol tek başına ifade edemez. Burada <b>ABAC</b> (Attribute-Based Access Control) devreye girer: karar, kullanıcının, kaynağın ve ortamın özniteliklerine bakan kurallarla verilir (<code>kaynak.calisan.manager_id == kullanici.emp_id</code>, mesai saati, şehir...). Pratikte ikisi birlikte kullanılır: rol kaba kapıyı açar, öznitelik kuralı satırı süzer.</p>
+<pre class="py">import veri
+
+calisanlar = {c["emp_id"]: c for c in veri.kayitlar("pusula_ik", "ik_employees")}
+izinler = veri.kayitlar("pusula_ik", "ik_leaves")
+
+ROL_IZIN = {"calisan": {"izin:oku"}, "yonetici": {"izin:oku", "izin:onayla"}, "ik": {"izin:oku", "izin:onayla"}}
+
+def gorebilir_mi(kullanici, izin_kaydi):
+    if "izin:oku" not in ROL_IZIN[kullanici["rol"]]:          # RBAC kapısı
+        return False
+    if kullanici["rol"] == "ik":
+        return True
+    sahip = calisanlar[izin_kaydi["emp_id"]]
+    return sahip["emp_id"] == kullanici["emp_id"] or sahip["manager_id"] == kullanici["emp_id"]   # ABAC
+
+riza = {"emp_id": 13, "rol": "yonetici"}
+cem = {"emp_id": 418, "rol": "calisan"}
+print("Rıza görebilir:", sum(gorebilir_mi(riza, k) for k in izinler))
+print("Cem görebilir:", sum(gorebilir_mi(cem, k) for k in izinler))</pre>
+<p>Rıza Karabulut'un doğrudan bağlı 122 kişisi (ayrılanlar dahil) var; 1.042 ekip izni ve kendi 4 izni ona görünür. Cem yalnız kendi 7 kaydını görür. Gerçek sistemde bu süzme Python döngüsüyle değil SQL'in <code>WHERE</code> koşuluyla yapılır; aksi hâlde tüm tabloyu çekip süzersin.</p>
+
+<h2>Nesne düzeyinde yetki ve IDOR</h2>
+<p>IDOR (Insecure Direct Object Reference), kullanıcının URL'deki kimliği değiştirerek başkasının kaydına ulaşmasıdır: <code>GET /izinler/3319</code> Cem'in yıllık iznini döndürüyorsa, <code>/izinler/3320</code> denemek başkasının hastalık iznini açar. Uç noktada "giriş yapmış mı?" kontrolü vardır ama "<b>bu kayıt onun mu?</b>" kontrolü yoktur. API güvenliği listesinde (OWASP API Top 10) bu açık BOLA (Broken Object Level Authorization) adıyla ilk sıradadır.</p>
+<div class="steps-list"><ol>
+<li>Kaydı her zaman kullanıcının kapsamıyla sorgula: <code>WHERE leave_id = ? AND emp_id = ?</code> ya da yönetici için ekip alt sorgusu.</li>
+<li>Yetki kontrolünü tek bir yerde topla (servis katmanı, Django'da <code>get_queryset</code>); her view'da yeniden yazma.</li>
+<li>Tahmin edilemez kimlik (UUID) kullanmak saldırıyı zorlaştırır ama <b>yetki kontrolünün yerini tutmaz</b>.</li>
+<li>Yetkisiz erişimde 404 dönmek kaydın varlığını gizler; denemeleri logla.</li>
+</ol></div>
+
+<h2>OAuth2 ve OpenID Connect</h2>
+<p>OAuth2 bir <b>yetki devri</b> çerçevesidir: kullanıcı (resource owner), bir uygulamaya (client) kendi parolasını vermeden, yetki sunucusunun (authorization server) verdiği token ile kaynak sunucusundaki (resource server) verisine sınırlı erişim tanır. OAuth2 tek başına "kim giriş yaptı" sorusunu cevaplamaz; bunun için üstüne kurulan <b>OpenID Connect (OIDC)</b> bir <code>id_token</code> (kullanıcı bilgisi taşıyan JWT) ekler. "Google ile giriş", kurumsal SSO (tek oturum açma; Azure AD/Entra ID, Okta, Keycloak) OIDC'dir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Akış (grant)</th><th>Kim kullanır?</th><th>Durum</th></tr>
+<tr><td>Authorization code + PKCE</td><td>Web, mobil, tek sayfalı uygulama (kullanıcı var)</td><td>Önerilen</td></tr>
+<tr><td>Client credentials</td><td>Servisten servise (kullanıcı yok): bordro işi izin API'sini çağırır</td><td>Önerilen</td></tr>
+<tr><td>Refresh token</td><td>Access token yenileme</td><td>Döndürmeyle birlikte</td></tr>
+<tr><td>Implicit, Password (ROPC)</td><td>Eski SPA'lar, birinci taraf uygulamalar</td><td>OAuth 2.1 ile kaldırıldı</td></tr>
+</table></div>
+<div class="steps-list"><ol>
+<li>Uygulama rastgele bir <code>code_verifier</code> üretir, SHA-256 özetinin base64url hâlini <code>code_challenge</code> olarak hesaplar; ayrıca CSRF'e karşı rastgele bir <code>state</code> üretir.</li>
+<li>Kullanıcıyı <code>/authorize?response_type=code&amp;client_id=...&amp;scope=openid izin:oku&amp;code_challenge=...&amp;code_challenge_method=S256&amp;state=...</code> adresine yönlendirir.</li>
+<li>Kullanıcı yetki sunucusunda giriş yapar ve onay verir; sunucu <code>redirect_uri?code=...&amp;state=...</code> ile geri döner. Uygulama <code>state</code>'in kendi ürettiğiyle aynı olduğunu kontrol eder.</li>
+<li>Uygulama arka kanaldan <code>/token</code> uç noktasına <code>code</code> ve <code>code_verifier</code>'ı yollar. Sunucu verifier'ın özetini saklı challenge ile karşılaştırır; tutarsa access, refresh (ve OIDC'de id) token verir.</li>
+</ol></div>
+<pre class="py">import base64, hashlib
+
+def challenge(verifier):
+    ozet = hashlib.sha256(verifier.encode("ascii")).digest()
+    return base64.urlsafe_b64encode(ozet).rstrip(b"=").decode()
+
+# RFC 7636 ekindeki resmi örnek değerler
+verifier = "dBjftJeZ4CVP-mB92K27uhbUJU1p1r_wW1gFWFOEjXk"
+print(challenge(verifier))
+print(challenge(verifier) == "E9Melhoa2OwvFrEMTJguCHaoeK1t8URWbuGJSstw-cM")</pre>
+<p>PKCE (Proof Key for Code Exchange) sayesinde yönlendirme sırasında <code>code</code> çalınsa bile, verifier'ı bilmeyen saldırgan onu tokena çeviremez. Client credentials akışında ise kullanıcı ve tarayıcı yoktur: servis kendi <code>client_id</code> ve <code>client_secret</code>'ı (ya da imzalı bir JWT'yi) doğrudan <code>/token</code>'a yollar ve yalnız kendi kapsamlarını alır.</p>
+
+<h2>FastAPI'de güvenlik bağımlılıkları</h2>
+<p>FastAPI dersinde <code>Depends</code>'i gördün. Kimlik doğrulama da bir bağımlılıktır: <code>OAuth2PasswordBearer</code>, <code>Authorization: Bearer ...</code> başlığını okur ve OpenAPI belgesine kilit simgesini ekler; <code>Security</code> ise <code>Depends</code>'in kapsam (scope) taşıyan hâlidir.</p>
+<pre class="code"># pip install "fastapi[standard]" pyjwt
+from typing import Annotated
+import jwt
+from fastapi import FastAPI, HTTPException, Security, status
+from fastapi.security import OAuth2PasswordBearer, SecurityScopes
+
+ANAHTAR = "ortam-degiskeninden-oku"
+oauth2 = OAuth2PasswordBearer(tokenUrl="token", scopes={"izin:oku": "İzinleri oku", "izin:onayla": "İzin onayla"})
+app = FastAPI()
+
+def aktif_kullanici(guvenlik: SecurityScopes, token: Annotated[str, Security(oauth2)]):
+    try:
+        yuk = jwt.decode(token, ANAHTAR, algorithms=["HS256"], audience="izin-api", issuer="pusula-sso")
+    except jwt.PyJWTError:
+        raise HTTPException(status.HTTP_401_UNAUTHORIZED, "Geçersiz token",
+                            headers={"WWW-Authenticate": "Bearer"})
+    eksik = set(guvenlik.scopes) - set(yuk.get("scope", "").split())
+    if eksik:
+        raise HTTPException(status.HTTP_403_FORBIDDEN, f"Eksik kapsam: {sorted(eksik)}")
+    return yuk
+
+@app.post("/izinler/{izin_id}/onay")
+def onayla(izin_id: int, k: Annotated[dict, Security(aktif_kullanici, scopes=["izin:onayla"])]):
+    # kapsam yetmez: bu izin, k["sub"] yöneticisinin ekibinden mi? (nesne düzeyinde kontrol)
+    ...</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install "fastapi[standard]" pyjwt</code> kur, dosyayı <code>main.py</code> olarak kaydet, <code>fastapi dev main.py</code> ile başlat ve <code>http://127.0.0.1:8000/docs</code> sayfasındaki "Authorize" düğmesini dene. Bu kutu tarayıcıda çalışmaz; alıştırmalar aynı mantığı saf Python ile kuruyor.</div>
+
+<h2>Django'da kimlik ve izinler</h2>
+<p>Django kullanıcı modeli, gruplar ve model başına otomatik izinlerle (<code>add_</code>, <code>change_</code>, <code>delete_</code>, <code>view_</code>) RBAC'ı hazır verir. Nesne düzeyinde kontrolü ise sen yazarsın; en güvenli yer, kullanıcının görebileceği satırları döndüren <code>get_queryset</code>'tir. DRF izin sınıflarını İleri Django dersinde yazacaksın.</p>
+<pre class="code">from django.contrib.auth.decorators import login_required, permission_required
+from django.shortcuts import get_object_or_404
+from django.db.models import Q
+
+@login_required
+@permission_required("izin.view_izin", raise_exception=True)   # RBAC: 403
+def izin_detay(request, pk):
+    u = request.user
+    kapsam = Q(calisan=u.calisan) | Q(calisan__yonetici=u.calisan)    # ABAC: kendi + ekip
+    izin = get_object_or_404(Izin.objects.filter(kapsam), pk=pk)     # IDOR yerine 404
+    ...</pre>
+
+<h2>Parola sıfırlama ve e-posta doğrulama</h2>
+<p>Parola sıfırlama, giriş ekranının arka kapısıdır; zayıf tasarlanırsa parolayı bilmeden hesap ele geçirilir. Güvenli tasarımın kuralları:</p>
+<ul>
+<li>Yanıt, e-posta kayıtlı olsun olmasın <b>aynıdır</b>: "Hesap varsa bağlantı gönderdik."</li>
+<li>Token <code>secrets.token_urlsafe(32)</code> ile üretilir; veritabanında yalnız <b>SHA-256 özeti</b> saklanır (veritabanı sızsa da bağlantı kullanılamaz).</li>
+<li>Kısa ömürlüdür (15–60 dk) ve <b>tek kullanımlıktır</b>; yeni istek eski tokenları geçersiz kılar.</li>
+<li>Başarılı sıfırlamadan sonra kullanıcının tüm oturumları ve refresh tokenları iptal edilir ve kullanıcıya bilgilendirme e-postası gider.</li>
+<li>Bağlantı adresi yapılandırmadan gelir, isteğin <code>Host</code> başlığından kurulmaz (Host başlığı zehirleme).</li>
+</ul>
+<p>E-posta doğrulama bağlantısı da aynı kalıptır; ek olarak <code>purpose</code> alanı tutulur ki doğrulama tokenı sıfırlamada kullanılamasın.</p>
+<div class="note"><b>Gerçek işte</b>Kurumsal projelerde kimlik sistemini genellikle sıfırdan yazmazsın: şirketin kimlik sağlayıcısı (Entra ID, Okta, Keycloak) OIDC ile bağlanır, uygulama yalnız tokenı doğrular ve yetki kurallarını uygular. Senden beklenen; tokenı doğru doğrulamak (alg, imza, exp, aud, iss), kapsam ve rolleri doğru eşlemek ve her uç noktada nesne düzeyinde kontrolü unutmamaktır. Güvenlik testlerinde ilk denenen şey de budur: iki kullanıcıyla giriş yapıp birinin kimliğini diğerinin isteğine koymak.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kriptografiyi kütüphaneye bırak</h3>
+<p>Bu dersteki saf Python imzalar öğretim içindir. Üretimde <code>PyJWT</code> ya da <code>authlib</code> kullan, <code>algorithms</code> listesini her zaman ver, <code>audience</code> ve <code>issuer</code> doğrulamasını aç. Servisler arası güvende asimetrik imza (RS256/ES256) tercih edilir: yalnız kimlik sağlayıcısı özel anahtarı bilir, diğer servisler JWKS'ten açık anahtarı çeker.</p>
+<h3>Politikayı koddan ayır</h3>
+<p>Kurallar çoğaldıkça <code>if rol == ...</code> zincirleri dağılır. Olgun sistemler yetki kararını tek bir "politika karar noktasına" toplar: Open Policy Agent (Rego), Cedar ya da Google Zanzibar esinli ilişki tabanlı (ReBAC) sistemler (OpenFGA, SpiceDB). Uygulama yalnız "bu özne bu eylemi bu kaynakta yapabilir mi?" diye sorar.</p>
+<h3>Denetim izi ve en az yetki</h3>
+<p>Her yetki kararını (özellikle reddedilenleri) yapılandırılmış log olarak kaydet; birden çok 403 üreten kullanıcı IDOR taraması yapıyor olabilir. Servis hesaplarına yalnız gereken kapsamları ver, adım adım yükseltme (step-up authentication) ile hassas işlemlerde (maaş görüntüleme) ikinci faktör iste.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kimlik-yetki">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../gozlemlenebilirlik/">← Gözlemlenebilirlik: log, metrik, iz ve SLO</a><a href="../redis-kuyruk/">Redis, önbellek ve arka plan işleri (Celery/RQ) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

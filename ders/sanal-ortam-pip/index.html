@@ -1,0 +1,322 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sanal ortam ve paket yönetimi | Kesit Python</title><meta name="description" content="venv ile projeye özel ortam kurar, pip ile paket yükler, requirements.txt ve pyproject.toml ile bağımlılıkları sürüm sabitleyerek yönetir, çatışmaları…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sanal-ortam-pip/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sanal ortam ve paket yönetimi"><meta property="og:description" content="venv ile projeye özel ortam kurar, pip ile paket yükler, requirements.txt ve pyproject.toml ile bağımlılıkları sürüm sabitleyerek yönetir, çatışmaları…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sanal-ortam-pip/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sanal ortam ve paket yönetimi","description":"venv ile projeye özel ortam kurar, pip ile paket yükler, requirements.txt ve pyproject.toml ile bağımlılıkları sürüm sabitleyerek yönetir, çatışmaları…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/sanal-ortam-pip/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Sanal ortam ve paket yönetimi</h1><p class="st-l">venv ile projeye özel ortam kurar, pip ile paket yükler, requirements.txt ve pyproject.toml ile bağımlılıkları sürüm sabitleyerek yönetir, çatışmaları tanır ve uv/poetry gibi modern araçları tanırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sanal-ortam-pip">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Sorun: "Benim makinemde çalışıyordu"</h2>
+<p>Anadolu Market'in raporlama betiği senin bilgisayarında kusursuz çalışıyor; iş arkadaşın çalıştırınca <code>ModuleNotFoundError: No module named 'openpyxl'</code> alıyor. Bir başka projede pandas'ın eski sürümü gerekiyor, ama bilgisayarına yenisini kurdun ve eski proje bozuldu. İki sorunun da kaynağı aynı: paketler (package) bilgisayara <b>global</b> kurulmuş. Çözüm iki parçalı: her projeye kendi izole paket klasörü (sanal ortam, virtual environment) ve projenin hangi paketlerin hangi sürümünü istediğini yazan bir liste (requirements.txt ya da pyproject.toml).</p>
+<div class="note"><b>Bu derste terminal komutları gösterilir</b>Tarayıcıdaki Python'da pip ya da venv çalıştıramayız; komutları kendi bilgisayarında dene. Kod alıştırmaları ise bu araçların ürettiği metin dosyalarını Python ile ayrıştırmak üzerine; iş hayatında da tam bunu yaparsın: CI betiği requirements'ı okur, sürümü kontrol eder.</div>
+
+<h2>Sanal ortam: venv</h2>
+<p><code>venv</code>, standart kütüphanenin parçasıdır. Proje klasöründe şu üç komut yeter:</p>
+<div class="steps-list"><ol>
+<li><code>python -m venv .venv</code> — proje içinde <code>.venv</code> klasörü oluşturur; içinde ayrı bir Python ve boş bir paket klasörü vardır.</li>
+<li>Etkinleştir: Windows'ta <code>.venv\Scripts\activate</code>, macOS/Linux'ta <code>source .venv/bin/activate</code>. Terminal satırının başında <code>(.venv)</code> belirir.</li>
+<li>Artık <code>pip install</code> yalnızca bu klasöre kurar; <code>deactivate</code> ile çıkarsın.</li>
+</ol></div>
+<p>Kural: her proje kendi <code>.venv</code>'ine sahip olur ve bu klasör <b>asla</b> Git'e girmez (sonraki derste <code>.gitignore</code>'a yazacağız). Ortamı başkasıyla paylaşmazsın; paylaştığın şey bağımlılık listesidir, ortamı herkes kendi makinesinde o listeden yeniden kurar.</p>
+<pre class="py">import sys
+from pathlib import Path
+
+# Sanal ortam etkin mi? sys.prefix sanal ortamın yolunu, base_prefix gerçek kurulumu gösterir
+etkin = sys.prefix != sys.base_prefix
+print("sanal ortam etkin mi?", etkin)
+print("Python sürümü:", sys.version_info.major, ".", sys.version_info.minor, sep="")
+
+# Tipik bir proje yerleşimi (gösterim)
+agac = {
+    "anadolu-rapor/": ["pyproject.toml", "requirements.txt", "README.md", ".gitignore", ".venv/  (Git'e girmez)", "src/anadolu_rapor/", "tests/"],
+}
+for kok, parcalar in agac.items():
+    print(kok)
+    for p in parcalar:
+        print("  ", p)</pre>
+
+<h2>pip: kur, listele, dondur</h2>
+<p><code>pip</code> Python'ın paket yöneticisidir ve PyPI (Python Package Index) deposundan indirir. Günlük komutlar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar</th></tr>
+<tr><td>pip install pandas</td><td>En yeni uyumlu sürümü kurar</td></tr>
+<tr><td>pip install "pandas==2.2.2"</td><td>Tam o sürümü kurar</td></tr>
+<tr><td>pip install -r requirements.txt</td><td>Listedeki her şeyi kurar</td></tr>
+<tr><td>pip install -e .</td><td>Projenin kendisini düzenlenebilir modda kurar (pyproject gerekir)</td></tr>
+<tr><td>pip list</td><td>Kurulu paketleri gösterir</td></tr>
+<tr><td>pip freeze &gt; requirements.txt</td><td>Kurulu paketleri tam sürümle dosyaya yazar</td></tr>
+<tr><td>pip uninstall pandas</td><td>Kaldırır</td></tr>
+<tr><td>pip install --upgrade pip</td><td>pip'in kendisini günceller</td></tr>
+</table></div>
+<p><code>pip freeze</code> çıktısı <code>paket==sürüm</code> satırlarından oluşur. Bu, "o gün çalışan tam kombinasyon"un fotoğrafıdır; dağıtımda (deployment) bu dosyayı kullanırsın ki sunucuda da birebir aynı sürümler kurulsun.</p>
+
+<h2>Sürüm belirteçleri ve semver</h2>
+<p>Paketler çoğunlukla anlamsal sürümleme (semantic versioning, semver) kullanır: <code>MAJOR.MINOR.PATCH</code>. PATCH hata düzeltmesidir, MINOR geriye uyumlu yeni özellik, MAJOR ise uyumu bozabilen değişiklik. requirements.txt satırında hangi sürümleri kabul ettiğini belirtirsin:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Belirteç</th><th>Anlamı</th><th>Ne zaman</th></tr>
+<tr><td>pandas==2.2.2</td><td>Tam olarak 2.2.2</td><td>Dağıtım, tekrarlanabilirlik</td></tr>
+<tr><td>pandas&gt;=2.0</td><td>2.0 ve üstü, sınırsız</td><td>Kütüphane yazarken (esnek)</td></tr>
+<tr><td>pandas~=2.2.0</td><td>&gt;=2.2.0 ve &lt;2.3 (son basamak serbest)</td><td>Yama güncellemelerine açık</td></tr>
+<tr><td>pandas&gt;=2.0,&lt;3</td><td>2.x serisi</td><td>MAJOR kırılmasından korunmak</td></tr>
+<tr><td>pandas</td><td>Herhangi bir sürüm</td><td>Hızlı deneme; üretimde kaçın</td></tr>
+</table></div>
+<p>Sürüm metnini karşılaştırırken metin karşılaştırması yanıltır: <code>"2.10.0" &lt; "2.9.0"</code> metin olarak doğru ama sürüm olarak yanlıştır. Parçalara bölüp tam sayıya çevirmek gerekir; aşağıdaki küçük ayrıştırıcı requirements satırlarını sözlüğe döker ve sürümü doğru karşılaştırır.</p>
+<pre class="py">import re
+
+def surum_demeti(s: str) -&gt; tuple[int, ...]:
+    return tuple(int(p) for p in s.split("."))
+
+print('"2.10.0" &lt; "2.9.0" metin olarak:', "2.10.0" &lt; "2.9.0")
+print("demet olarak:", surum_demeti("2.10.0") &lt; surum_demeti("2.9.0"))
+
+requirements = """
+# Anadolu Market rapor aracı
+pandas==2.2.2
+openpyxl&gt;=3.1
+requests~=2.31.0
+
+rich
+"""
+desen = re.compile(r"^([A-Za-z0-9_.-]+)\s*(==|&gt;=|~=|&lt;=|&gt;|&lt;)?\s*([0-9.]+)?$")
+for satir in requirements.splitlines():
+    satir = satir.strip()
+    if not satir or satir.startswith("#"):
+        continue
+    ad, op, ver = desen.match(satir).groups()
+    print(f"{ad:10} {op or '(her sürüm)':12} {ver or ''}")</pre>
+<p>Düzenli ifade üç parça yakalar: paket adı, işleç, sürüm. Yorum ve boş satırlar atlanır. Gerçek requirements dosyalarında ek kurallar da bulunur (ortam işaretleri, <code>-r</code> ile başka dosya), ama günlük işte bu kadarı yeter.</p>
+<div class="warn"><b>~= tuzağı</b><code>~=2.2</code> ile <code>~=2.2.0</code> farklıdır. İlki "&gt;=2.2, &lt;3.0" (minor serbest), ikincisi "&gt;=2.2.0, &lt;2.3" (yalnızca patch serbest). Son basamak kaç haneli yazıldıysa o basamak serbest kalır.</div>
+
+<h2>pyproject.toml: modern standart</h2>
+<p>Yeni projelerde bağımlılıklar <code>requirements.txt</code> yerine (ya da onunla birlikte) <code>pyproject.toml</code> içinde tutulur. TOML, okunur bir yapılandırma biçimidir; Python 3.11'den beri standart kütüphanedeki <code>tomllib</code> ile okunur (yalnızca okuma; yazmak için dış paket gerekir). Aynı dosya projenin adını, sürümünü ve araç ayarlarını da taşır.</p>
+<pre class="py">import tomllib
+
+pyproject = """
+[project]
+name = "anadolu-rapor"
+version = "0.3.1"
+requires-python = "&gt;=3.11"
+dependencies = [
+    "pandas==2.2.2",
+    "openpyxl&gt;=3.1",
+]
+
+[project.optional-dependencies]
+dev = ["pytest&gt;=8", "ruff"]
+
+[tool.ruff]
+line-length = 100
+"""
+veri = tomllib.loads(pyproject)
+proje = veri["project"]
+print(proje["name"], proje["version"], "| Python:", proje["requires-python"])
+print("bağımlılıklar:", proje["dependencies"])
+print("geliştirme:", proje["optional-dependencies"]["dev"])
+print("ruff satır uzunluğu:", veri["tool"]["ruff"]["line-length"])</pre>
+<p><code>optional-dependencies</code> altındaki <code>dev</code> grubu yalnızca geliştiricilerin kurduğu paketlerdir (test, biçimlendirici); <code>pip install -e ".[dev]"</code> ile kurulur. Üretim sunucusuna pytest kurmazsın.</p>
+<div class="tip"><b>uv ve poetry</b>pip + venv her yerde çalışır ama yavaş ve elle yönetimlidir. <code>uv</code> (Rust ile yazılmış, çok hızlı) ve <code>poetry</code>, sanal ortamı ve kilit dosyasını (lock file) otomatik yönetir: <code>uv add pandas</code> hem pyproject'e yazar hem kurar hem <code>uv.lock</code> üretir. Kilit dosyası, pip freeze'in modern karşılığıdır: her bağımlılığın bağımlılığının bile tam sürümünü tutar.</div>
+
+<h2>Bağımlılık çatışması</h2>
+<p>Paket A, <code>requests&gt;=2.31</code> isterken paket B <code>requests&lt;2.30</code> isterse pip "ResolutionImpossible" hatası verir: iki koşulu aynı anda sağlayan sürüm yok. Çatışma (dependency conflict) genellikle eski bir paketin güncellenmemesinden doğar. Çözüm sırası: önce iki paketin daha yeni sürümlerini dene; olmuyorsa birini değiştir; son çare, çatışan işi ayrı sanal ortamda çalışan ayrı bir araca taşı. Çatışmayı erken fark etmek için bağımlılık listesini küçük tut: gerçekten kullandığın paketleri yaz, "bir gün lazım olur" diye ekleme.</p>
+<pre class="py">def aralikta(ver: tuple, kosullar: list[tuple[str, tuple]]) -&gt; bool:
+    for op, hedef in kosullar:
+        if op == "&gt;=" and not ver &gt;= hedef: return False
+        if op == "&lt;" and not ver &lt; hedef: return False
+        if op == "==" and not ver == hedef: return False
+    return True
+
+# A: requests&gt;=2.31  |  B: requests&lt;2.30
+kosullar = [("&gt;=", (2, 31, 0)), ("&lt;", (2, 30, 0))]
+adaylar = [(2, 28, 0), (2, 29, 0), (2, 31, 0), (2, 32, 3)]
+uygun = [v for v in adaylar if aralikta(v, kosullar)]
+print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Kurulumdan kilit dosyasına paket yönetimi</h2>
+<p>Bu bölüm bir başvuru kılavuzudur: her işletim sisteminde sanal ortamı kurup etkinleştirme, pip'in tüm günlük komutları, requirements ve constraints dosyaları, pip-tools, uv, poetry, conda ve pipx ile iş akışları ve en sık karşılaşılan hataların çözümü. Komutları kendi bilgisayarında, proje klasöründe dene; tarayıcıdaki örnekler ise ortamı ve sürümleri <b>Python'dan</b> nasıl sorgulayacağını gösterir. Altın kural: <code>pip</code> yerine <code>python -m pip</code> yaz; böylece paket, o an çalışan Python'a kurulur.</p>
+<h3>1. venv: her işletim sisteminde oluştur, etkinleştir, doğrula</h3>
+<div class="tbl-wrap"><table><tr><th>Sistem / kabuk</th><th>Oluştur</th><th>Etkinleştir</th></tr><tr><td>Windows – PowerShell</td><td><code>py -3.12 -m venv .venv</code></td><td><code>.venv\Scripts\Activate.ps1</code></td></tr><tr><td>Windows – cmd</td><td><code>py -m venv .venv</code></td><td><code>.venv\Scripts\activate.bat</code></td></tr><tr><td>Windows – Git Bash</td><td><code>py -m venv .venv</code></td><td><code>source .venv/Scripts/activate</code></td></tr><tr><td>macOS / Linux – bash, zsh</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate</code></td></tr><tr><td>Linux/macOS – fish</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate.fish</code></td></tr><tr><td>csh / tcsh</td><td><code>python3 -m venv .venv</code></td><td><code>source .venv/bin/activate.csh</code></td></tr></table></div>
+<p>Etkinleşince istemde (prompt) <code>(.venv)</code> görünür. Çıkmak için her kabukta <code>deactivate</code>. Etkinleştirmeden de çalışabilirsin: <code>.venv/bin/python betik.py</code> (Windows'ta <code>.venv\Scripts\python.exe betik.py</code>) doğrudan o ortamın Python'ını kullanır; zamanlanmış görevlerde ve CI'da en güvenli yol budur.</p>
+<pre class="code"># Windows PowerShell: "running scripts is disabled on this system" hatası
+Set-ExecutionPolicy -Scope CurrentUser -ExecutionPolicy RemoteSigned
+.venv\Scripts\Activate.ps1
+where.exe python             # ilk satır ...\.venv\Scripts\python.exe olmalı
+
+# Debian/Ubuntu: "ensurepip is not available" hatası
+sudo apt install python3-venv          # (ya da python3.12-venv)
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate
+which python                 # .../proje/.venv/bin/python olmalı
+
+# Ortamı sıfırdan kurmak (bozulduysa): klasörü sil, yeniden oluştur
+rm -rf .venv                 # Windows: Remove-Item -Recurse -Force .venv
+python3 -m venv .venv --upgrade-deps   # pip'i de güncel kurar</pre>
+<p>Hangi ortamda olduğunu kodla da anlayabilirsin: sanal ortamda <code>sys.prefix</code> ortam klasörünü, <code>sys.base_prefix</code> ise ana kurulumu gösterir.</p>
+<pre class="py">import sys, sysconfig, platform
+from pathlib import Path
+
+print("Python:", platform.python_version(), "| sistem:", platform.system())
+print("Çalışan yorumlayıcı:", sys.executable)
+print("Sanal ortamda mı?", sys.prefix != sys.base_prefix)
+print("Paketler buraya kurulur:", sysconfig.get_paths()["purelib"])
+
+isaret = Path(sysconfig.get_paths()["stdlib"]) / "EXTERNALLY-MANAGED"
+print("PEP 668 korumalı sistem Python\'ı mı?", isaret.exists())</pre>
+<h3>2. pip: günlük komutların tamamı</h3>
+<pre class="code">python -m pip install requests                 # en son sürüm
+python -m pip install "pandas&gt;=2.2,&lt;3"         # aralık (tırnak şart: &lt; ve &gt; kabuk yönlendirmesidir)
+python -m pip install pandas==2.2.3            # tam sürüm
+python -m pip install -U pandas                # güncelle (--upgrade)
+python -m pip install -U pip                   # pip'in kendisini güncelle
+python -m pip install -r requirements.txt      # dosyadan
+python -m pip install -e .                     # projeyi düzenlenebilir (editable) kur
+python -m pip install "httpx[http2]"           # ekstralarla (extras)
+python -m pip install --dry-run -r requirements.txt   # ne kurulacağını göster, kurma
+
+python -m pip uninstall -y requests            # kaldır (bağımlılıkları KALDIRMAZ)
+python -m pip show pandas                      # sürüm, konum, Requires, Required-by
+python -m pip list                             # kurulu paketler
+python -m pip list --outdated                  # güncellenebilenler
+python -m pip freeze &gt; requirements.txt        # tam sürümlerle döküm
+python -m pip check                            # kırık bağımlılık var mı?
+python -m pip download -d paketler -r requirements.txt   # internetsiz kurulum için indir
+python -m pip install --no-index --find-links paketler -r requirements.txt
+python -m pip cache purge                      # bozuk önbelleği temizle
+python -m pip config list                      # aktif pip ayarları</pre>
+<div class="warn"><b>uninstall yetim bırakır</b><code>pip uninstall pandas</code> numpy'ı kaldırmaz. Ortam karıştıysa paket paket temizlemek yerine <code>.venv</code>'i silip <code>requirements.txt</code>'den yeniden kurmak daha hızlı ve güvenlidir.</div>
+<h3>3. requirements ve constraints</h3>
+<p><code>requirements.txt</code> "bunları kur" der. <code>constraints.txt</code> (<code>-c</code>) ise "kurarsan şu sürümü kullan" der ama kendisi hiçbir şey kurmaz. Şirket genelinde onaylı sürümleri tek dosyada tutmak için idealdir: her proje kendi requirements'ını yazar, sürümler ortak constraints'ten gelir.</p>
+<pre class="code"># requirements.txt
+pandas&gt;=2.2
+requests
+-c constraints.txt        # dosya içinden de bağlanabilir
+
+# constraints.txt  (şirket onaylı sürümler)
+pandas==2.2.3
+numpy==2.1.3
+requests==2.32.3
+django==5.1.4             # kimse istemezse kurulmaz
+
+python -m pip install -r requirements.txt -c constraints.txt</pre>
+<p>Kurulu sürümleri Python içinden okumak (ör. bir betiğin başında "doğru sürüm mü?" kontrolü) için <code>importlib.metadata</code> kullanılır:</p>
+<pre class="py">from importlib.metadata import version, PackageNotFoundError
+
+for paket in ("pip", "pandas", "olmayan-paket-xyz"):
+    try:
+        print(f"{paket:20} {version(paket)}")
+    except PackageNotFoundError:
+        print(f"{paket:20} KURULU DEĞİL -&gt; python -m pip install {paket}")</pre>
+<h3>4. pip-tools: elle yazılan liste + otomatik kilit</h3>
+<pre class="code">python -m pip install pip-tools
+# requirements.in : yalnız doğrudan ihtiyaçlar
+#   pandas&gt;=2.2
+#   httpx
+pip-compile requirements.in              # -&gt; requirements.txt (tüm alt bağımlılıklar sabit, yorumlu)
+pip-compile --upgrade-package httpx      # yalnız birini güncelle
+pip-compile --generate-hashes            # özet doğrulamalı kilit (güvenlik)
+pip-sync requirements.txt                # ortamı dosyayla BİREBİR eşitle (fazlaları kaldırır)</pre>
+<h3>5. uv: hızlı, hepsi bir arada</h3>
+<p>uv, Rust ile yazılmış, pip'ten kat kat hızlı bir araçtır; Python sürümü kurmayı, sanal ortamı, kilit dosyasını ve araç kurulumunu tek komutta toplar.</p>
+<pre class="code"># Kurulum: macOS/Linux
+curl -LsSf https://astral.sh/uv/install.sh | sh
+# Windows PowerShell
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+
+uv python install 3.12            # Python'ı uv kursun
+uv venv                           # .venv oluşturur (--python 3.12 ile sürüm seç)
+uv pip install -r requirements.txt     # pip ile aynı arayüz, çok daha hızlı
+uv pip compile requirements.in -o requirements.txt   # pip-tools karşılığı
+uv pip sync requirements.txt
+
+# Proje modu (pyproject.toml + uv.lock)
+uv init anadolu-rapor &amp;&amp; cd anadolu-rapor
+uv add pandas "httpx&gt;=0.27"       # pyproject'e yazar, kilitler, kurar
+uv add --dev pytest ruff          # geliştirme bağımlılığı
+uv remove httpx
+uv lock                           # uv.lock'u güncelle (kurmadan)
+uv lock --upgrade-package pandas
+uv sync                           # ortamı kilide göre kur (CI'da: uv sync --locked)
+uv run python rapor.py            # ortamı etkinleştirmeden çalıştır
+uv tool install ruff              # pipx karşılığı</pre>
+<h3>6. poetry</h3>
+<pre class="code">pipx install poetry
+poetry new ilgaz-bank   # ya da mevcut projede: poetry init
+poetry add pandas@^2.2    # ^2.2 = &gt;=2.2,&lt;3.0
+poetry add --group dev pytest
+poetry install            # poetry.lock'tan kur
+poetry lock               # kilidi yenile
+poetry run pytest
+poetry env info --path    # ortamın yeri
+poetry export -f requirements.txt -o requirements.txt   # (poetry-plugin-export gerekir)</pre>
+<h3>7. conda (Anaconda / Miniconda / Miniforge)</h3>
+<p>Conda yalnız Python paketlerini değil, C/C++ kütüphaneleri ve hatta Python'ın kendisini yönetir; GDAL, CUDA gibi derlenmiş bağımlılıklarda ve veri bilimi ekiplerinde yaygındır. Kurumsal lisans koşulları nedeniyle birçok şirket varsayılan kanal yerine <code>conda-forge</code> ve Miniforge kullanır.</p>
+<pre class="code">conda create -n anadolu python=3.12 pandas -c conda-forge
+conda activate anadolu            # çıkış: conda deactivate
+conda install -c conda-forge scikit-learn
+conda env export --from-history &gt; environment.yml   # yalnız senin istediklerin
+conda env create -f environment.yml
+conda env list
+conda remove -n anadolu --all
+
+# environment.yml
+name: anadolu
+channels: [conda-forge]
+dependencies:
+  - python=3.12
+  - pandas&gt;=2.2
+  - pip
+  - pip:
+      - rich==13.9.4       # conda'da olmayanlar en sonda pip ile</pre>
+<div class="tip"><b>conda + pip karışımı</b>Önce conda ile olabildiğince çok paket kur, en son pip ile kalanları; tersini yaparsan conda pip'in kurduğunu bilmeden üzerine yazabilir. venv ile conda ortamını iç içe etkinleştirme.</div>
+<h3>8. pipx: komut satırı araçları için</h3>
+<pre class="code">python -m pip install --user pipx   # Ubuntu: sudo apt install pipx | macOS: brew install pipx
+pipx ensurepath                      # ~/.local/bin'i PATH'e ekler; terminali yeniden aç
+pipx install ruff                    # her araç kendi izole ortamında
+pipx run cowsay "merhaba"            # kurmadan bir kez çalıştır
+pipx upgrade-all
+pipx list</pre>
+<div class="tbl-wrap"><table><tr><th>Araç</th><th>En iyi olduğu iş</th><th>Kilit dosyası</th></tr><tr><td>venv + pip</td><td>Her yerde var, öğrenme ve basit projeler</td><td>requirements.txt (freeze)</td></tr><tr><td>pip-tools</td><td>pip akışını bozmadan sağlam kilit</td><td>requirements.txt (compile)</td></tr><tr><td>uv</td><td>Hız, Python sürümü + ortam + kilit tek araçta</td><td>uv.lock</td></tr><tr><td>poetry</td><td>Kütüphane yayımlama, grup bağımlılıkları</td><td>poetry.lock</td></tr><tr><td>conda</td><td>Derlenmiş bilimsel/GPU bağımlılıkları</td><td>environment.yml (+ conda-lock)</td></tr><tr><td>pipx / uv tool</td><td>Global CLI araçları (ruff, black, httpie)</td><td>gerekmez</td></tr></table></div>
+<h3>9. Sık hatalar: PEP 668, SSL, proxy, sürüm çakışması</h3>
+<p><b>PEP 668 – <code>error: externally-managed-environment</code>.</b> Ubuntu 23.04+, Debian 12+, Fedora ve Homebrew Python'ı sistem paket yöneticisine aittir; pip ile global kurulum engellenir. Çözüm her zaman bir sanal ortam (proje için) ya da pipx (araç için) kullanmaktır. <code>--break-system-packages</code> bayrağı adının söylediğini yapar: işletim sistemi araçlarını bozabilir.</p>
+<p><b>SSL – <code>CERTIFICATE_VERIFY_FAILED</code>.</b> Kurumsal ağlarda güvenlik cihazı trafiği kendi sertifikasıyla yeniden imzalar. Doğru çözüm şirketin kök sertifikasını tanıtmaktır; doğrulamayı kapatmak değil.</p>
+<pre class="code">python -m pip install --upgrade pip              # pip 24.2+ sistem sertifika deposunu (truststore) kullanır
+python -m pip config set global.cert C:\sertifikalar\sirket-kok.pem
+# ya da ortam değişkeniyle (PowerShell: $env:PIP_CERT = "...")
+export PIP_CERT=/etc/ssl/certs/sirket-kok.pem
+export REQUESTS_CA_BUNDLE=/etc/ssl/certs/sirket-kok.pem   # requests/httpx için
+# macOS python.org kurulumunda: "Install Certificates.command" dosyasını çalıştır
+
+# Proxy: 407 Proxy Authentication Required / ProxyError
+export HTTPS_PROXY=http://kullanici:parola@proxy.sirket.local:8080
+python -m pip install --proxy http://proxy.sirket.local:8080 pandas
+# Şirket içi ayna (Artifactory/Nexus)
+python -m pip config set global.index-url https://nexus.sirket.local/repository/pypi/simple</pre>
+<div class="warn"><b>--trusted-host son çaredir</b><code>--trusted-host pypi.org</code> o sunucu için sertifika doğrulamasını kapatır; araya giren herkes sahte paket verebilir. Yalnızca BT ekibinin bildiği şirket içi bir aynada, geçici olarak kullan.</div>
+<div class="tbl-wrap"><table><tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr><tr><td><code>ResolutionImpossible</code>, "conflicting dependencies"</td><td>İki paket aynı bağımlılığın uyuşmaz aralıklarını istiyor</td><td>Hatadaki "requires" satırlarını oku; birini güncelle/düşür, gereksiz sabit (==) sürümleri gevşet</td></tr><tr><td>"pandas 2.2.3 has requirement numpy&gt;=1.26, but you have numpy 1.24"</td><td>Elle kurulan eski sürüm</td><td><code>pip install -U numpy</code>, sonra <code>pip check</code></td></tr><tr><td><code>No matching distribution found for X==9.9</code></td><td>Sürüm yok ya da Python sürümünle uyumlu wheel yok</td><td><code>pip index versions X</code>; Python sürümünü kontrol et</td></tr><tr><td><code>ModuleNotFoundError</code> ama "Requirement already satisfied"</td><td>Paket başka bir Python'a kurulu</td><td><code>python -m pip</code> kullan; editörde yorumlayıcıyı .venv seç</td></tr><tr><td><code>error: Microsoft Visual C++ 14.0 is required</code></td><td>Wheel yok, kaynak derleniyor</td><td>pip'i güncelle, wheel olan sürümü seç ya da conda</td></tr><tr><td><code>Permission denied</code> / <code>[Errno 13]</code></td><td>Sistem klasörüne yazma</td><td><code>sudo pip</code> değil: sanal ortam</td></tr><tr><td>Yükseltme sonrası her şey bozuldu</td><td>Kilit yoktu, her şey en yeni geldi</td><td>Önceki kilitten kur; pip-tools/uv ile kilit tut</td></tr></table></div>
+<p>Uzun bir <code>ResolutionImpossible</code> çıktısında asıl bilgi "X depends on Y" satırlarındadır. Onları ayıklayıp aynı paketi kimin hangi aralıkla istediğini yan yana görmek çakışmayı hemen ortaya çıkarır:</p>
+<pre class="py">import re
+from collections import defaultdict
+
+hata = """ERROR: Cannot install anadolu-rapor and eski-grafik because these package versions have conflicting dependencies.
+The conflict is caused by:
+    anadolu-rapor 1.4.0 depends on numpy&gt;=2.0
+    eski-grafik 0.9.1 depends on numpy&lt;1.25
+    anadolu-rapor 1.4.0 depends on pandas&gt;=2.2
+ERROR: ResolutionImpossible"""
+
+isteyenler = defaultdict(list)
+for kim, surum, paket, kosul in re.findall(r"([\w.-]+) ([\d.]+) depends on ([\w.-]+)(\S*)", hata):
+    isteyenler[paket].append(f"{kim} {surum} -&gt; {kosul or 'herhangi'}")
+for paket, liste in isteyenler.items():
+    isaret = "ÇAKIŞMA ADAYI" if len(liste) &gt; 1 else "tamam"
+    print(f"{paket}: {isaret}")
+    for satir in liste:
+        print("   ", satir)</pre>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın veri ekibinde yeni gelen birinin ilk günü şu üç komutla başlar: depoyu klonla, <code>uv sync --locked</code>, <code>uv run pytest</code>. Kilit dosyası depodadır; CI aynı kilitle kurar, böylece "bende çalışıyor" tartışması biter. Bağımlılık güncellemeleri haftalık ayrı bir PR'da yapılır (Dependabot/Renovate), testler geçerse birleştirilir. Kurumsal ağda pip ayarları (<code>index-url</code>, <code>cert</code>) BT tarafından <code>pip.conf</code>/<code>pip.ini</code> ile dağıtılır; sen yalnızca <code>python -m pip config list</code> ile hangi ayarın etkin olduğunu kontrol edersin.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tekrarlanabilir ortam: kurumsal pratik</h3>
+<p>Kurumsal projelerde iki dosya birlikte yaşar: <code>pyproject.toml</code> geniş aralıklarla "ne istiyoruz"u söyler (<code>pandas&gt;=2.2,&lt;3</code>), kilit dosyası (<code>uv.lock</code>, <code>poetry.lock</code> ya da <code>pip freeze</code> çıktısı) "bugün tam olarak ne kuruldu"yu. Geliştirici esnek aralıkla çalışır, sunucu ve CI kilit dosyasıyla kurar; böylece "testler geçti ama üretimde patladı" sürprizi kalkar. Kilit dosyasını Git'e koyarsın; <code>.venv</code>'i koymazsın.</p>
+<p>Üç alışkanlık daha: Birincisi, <code>requires-python</code> alanını yaz; ekip üyeleri 3.9 ile 3.12 arasında dağılmışsa <code>match</code> gibi yeni sözdizimi bir makinede çalışıp diğerinde çalışmaz. İkincisi, bağımlılıkları düzenli olarak güncelle ama tek tek: hepsini aynı anda yükseltirsen kırılan testin hangi paketten kaynaklandığını bulamazsın. Üçüncüsü, güvenlik taraması: <code>pip audit</code> (ya da uv/poetry'nin eşdeğeri) bilinen açıklı sürümleri listeler; Ilgaz Bank gibi düzenlemeye tabi kurumlarda bu tarama CI'da zorunlu adımdır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sanal-ortam-pip">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../test-yazma/">← Test yazma: unittest, pytest ve mock</a><a href="../git-proje-yapisi/">Git ve proje yapısı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

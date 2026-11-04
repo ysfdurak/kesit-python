@@ -1,0 +1,311 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hata tasarımı: özel istisnalar, logging, EAFP | Kesit Python</title><meta name="description" content="Kendi istisna hiyerarşini kurar, raise from ile nedeni korur, logging ile iz bırakır, EAFP ve assert'i doğru yerde kullanırsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/hata-tasarim/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Hata tasarımı: özel istisnalar, logging, EAFP"><meta property="og:description" content="Kendi istisna hiyerarşini kurar, raise from ile nedeni korur, logging ile iz bırakır, EAFP ve assert'i doğru yerde kullanırsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/hata-tasarim/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Hata tasarımı: özel istisnalar, logging, EAFP","description":"Kendi istisna hiyerarşini kurar, raise from ile nedeni korur, logging ile iz bırakır, EAFP ve assert'i doğru yerde kullanırsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/hata-tasarim/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Hata tasarımı: özel istisnalar, logging, EAFP</h1><p class="st-l">Kendi istisna hiyerarşini kurar, raise from ile nedeni korur, logging ile iz bırakır, EAFP ve assert'i doğru yerde kullanırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-tasarim">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Temel seviyede <code>try/except</code> ile hatayı yakaladın. Ama Ilgaz Bank'ın transfer servisinde "bir hata oldu" demek yetmez: yetersiz bakiye mi, hesap bulunamadı mı, günlük limit mi aşıldı? Çağıran kod bunları ayırt edip farklı tepki vermeli: birinde müşteriye mesaj, diğerinde operasyon ekibine alarm. Hata <b>tasarımı</b> bu ayrımı kodun bir parçası yapar: anlamlı istisna sınıfları, nedeni koruyan zincirleme, sonradan araştırılabilen log kayıtları. Üretimde gece üçte uyandıran hataların çoğu, kötü yakalanmış ve sessizce yutulmuş istisnalardır.</p>
+
+<h2>Özel istisna hiyerarşisi</h2>
+<p><code>Exception</code>'dan türeyen bir temel sınıf ve ondan türeyen özel sınıflar tanımlarsın. Hiyerarşi sayesinde çağıran, ister tek tek ister hepsini birden yakalar. Gövde genellikle boştur (<code>pass</code> ya da docstring); gerekirse ek nitelik taşır.</p>
+<pre class="py">class BankaHatasi(Exception):
+    """Ilgaz Bank iş kurallarının temel hatası."""
+
+class HesapBulunamadi(BankaHatasi):
+    def __init__(self, no):
+        super().__init__(f"hesap bulunamadı: {no}")
+        self.no = no
+
+class YetersizBakiye(BankaHatasi):
+    def __init__(self, hesap_no, istenen, mevcut):
+        super().__init__(f"{hesap_no}: {istenen} istendi, {mevcut} var")
+        self.eksik = istenen - mevcut
+
+class LimitAsildi(BankaHatasi):
+    pass
+
+hesaplar = {"TR01": 500.0, "TR02": 12000.0}
+
+def cek(no, tutar):
+    if no not in hesaplar:
+        raise HesapBulunamadi(no)
+    if tutar &gt; 10000:
+        raise LimitAsildi(f"günlük limit 10000, istenen {tutar}")
+    if tutar &gt; hesaplar[no]:
+        raise YetersizBakiye(no, tutar, hesaplar[no])
+    hesaplar[no] -= tutar
+    return hesaplar[no]
+
+for no, t in [("TR01", 100), ("TR09", 50), ("TR01", 900), ("TR02", 11000)]:
+    try:
+        print("Kalan:", cek(no, t))
+    except YetersizBakiye as e:
+        print("Müşteriye:", e, "| eksik:", e.eksik)
+    except BankaHatasi as e:           # kalan tüm banka hataları
+        print("Operasyona:", type(e).__name__, "-", e)</pre>
+
+<div class="tip"><b>Sıralama önemli</b>except blokları yukarıdan aşağı denenir. Özel sınıfı (<code>YetersizBakiye</code>) temel sınıftan (<code>BankaHatasi</code>) önce yaz; tersini yazarsan özel blok hiç çalışmaz.</div>
+
+<h3>Hiyerarşi nasıl kurulur?</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Katman</th><th>Örnek</th><th>Kim yakalar</th></tr>
+<tr><td>Kök</td><td><code>BankaHatasi(Exception)</code></td><td>En dış katman: "bizim hatamız mı, Python'ın mı"</td></tr>
+<tr><td>Alan</td><td><code>HesapHatasi</code>, <code>TransferHatasi</code></td><td>Servis katmanı: alana göre tepki</td></tr>
+<tr><td>Somut</td><td><code>YetersizBakiye</code>, <code>HesapBulunamadi</code></td><td>Kullanıcı arayüzü: anlamlı mesaj</td></tr>
+<tr><td>Yerleşik</td><td><code>ValueError</code>, <code>KeyError</code></td><td>Genel programlama hataları; iş hatasına çevrilir</td></tr>
+</table></div>
+
+<h2>raise from: nedeni koru</h2>
+<p>Alt seviyede <code>KeyError</code> ya da <code>ValueError</code> fırladı, sen bunu iş diline çevirmek istiyorsun. <code>raise YeniHata(...) from eski</code> yazarsan Python iki hatayı zincirler: iz kaydında "The above exception was the direct cause of the following exception" satırıyla asıl neden görünür. <code>from None</code> ise zinciri bilinçli olarak keser (nedeni gizlemek istediğin, örneğin kullanıcıya iç detay sızdırmamak gerektiği durumlarda).</p>
+<pre class="py">class VeriHatasi(Exception):
+    pass
+
+def tutar_oku(kayit):
+    try:
+        return float(kayit["tutar"])
+    except KeyError as e:
+        raise VeriHatasi(f"kayıtta 'tutar' alanı yok: {kayit}") from e
+    except ValueError as e:
+        raise VeriHatasi(f"tutar sayı değil: {kayit['tutar']!r}") from e
+
+for k in [{"tutar": "12.5"}, {"fiyat": 3}, {"tutar": "abc"}]:
+    try:
+        print(tutar_oku(k))
+    except VeriHatasi as e:
+        print("VeriHatasi:", e)
+        print("   neden:", type(e.__cause__).__name__, "-", e.__cause__)</pre>
+
+<div class="note"><b>except içinde çıplak raise</b>Hatayı sadece loglayıp yukarı iletmek istiyorsan <code>raise</code> yaz (argümansız); aynı istisna izi kaybolmadan devam eder. <code>raise e</code> yazmak da çalışır ama iz kaydına gereksiz bir satır ekler.</div>
+
+<h2>logging: print değil</h2>
+<p>Üretim kodunda <code>print</code> ile hata takibi yapılmaz: seviyesi yok, zamanı yok, kapatılamaz, dosyaya yönlendirilemez. <code>logging</code> modülü bunları verir. Beş seviye vardır: DEBUG &lt; INFO &lt; WARNING &lt; ERROR &lt; CRITICAL; yapılandırılan eşiğin altındakiler yazılmaz. Bu ortamda çıktıyı stdout'a yönlendiriyoruz.</p>
+<pre class="py">import logging, sys
+
+logging.basicConfig(
+    stream=sys.stdout,
+    level=logging.INFO,
+    format="%(asctime)s %(levelname)-8s %(name)s: %(message)s",
+    datefmt="%H:%M:%S",
+)
+log = logging.getLogger("anadolu.transfer")
+
+def transfer(gonderen, alici, tutar):
+    log.info("transfer başlıyor %s -&gt; %s, %.2f", gonderen, alici, tutar)
+    if tutar &gt; 10000:
+        log.warning("yüksek tutar, ek onay gerekebilir: %.2f", tutar)
+    log.debug("bu satır görünmez: seviye INFO")
+    return True
+
+transfer("TR01", "TR02", 250)
+transfer("TR01", "TR03", 25000)</pre>
+
+<p>Dikkat: mesajı <code>%s</code> ile ve argümanları ayrı veriyoruz, f-string ile değil. Böylece seviye kapalıysa dize hiç biçimlenmez ve log kayıtları toplayan araçlar (Sentry, ELK) aynı mesaj şablonunu gruplayabilir.</p>
+
+<h3>İstisnayı logla: exception()</h3>
+<p>except bloğunda <code>log.exception("...")</code> çağırırsan mesajla birlikte tam iz kaydı (traceback) yazılır; seviye ERROR'dur. Hatayı yutmadan loglayıp yeniden yükseltmek en sağlıklı kalıptır.</p>
+<pre class="py">import logging, sys
+
+logging.basicConfig(stream=sys.stdout, level=logging.INFO, format="%(levelname)s %(message)s")
+log = logging.getLogger("anadolu.rapor")
+
+def kayit_isle(kayit):
+    try:
+        return kayit["tutar"] / kayit["adet"]
+    except ZeroDivisionError:
+        log.exception("adet sıfır, kayıt atlandı: %s", kayit)
+        return None
+
+print(kayit_isle({"tutar": 100, "adet": 4}))
+print(kayit_isle({"tutar": 100, "adet": 0}))</pre>
+
+<div class="warn"><b>except Exception: pass</b>En tehlikeli üç satır. Hata yutulur, program yanlış veriyle devam eder, kimse fark etmez. En azından <code>log.exception</code> yaz; mümkünse yakaladığın hatayı dar tut (<code>except KeyError</code>) ve gerisini yukarı bırak.</div>
+
+<h2>EAFP ile LBYL</h2>
+<p>İki yaklaşım: <b>LBYL</b> (Look Before You Leap, önce bak sonra atla) koşulla kontrol eder; <b>EAFP</b> (Easier to Ask Forgiveness than Permission, izin istemektense af dile) dener ve hatayı yakalar. Python topluluğu çoğunlukla EAFP'yi tercih eder: daha az kod, daha az yarış durumu (kontrol ile kullanım arasında dünya değişebilir), ve istisna yolu nadir durumsa daha hızlıdır.</p>
+<pre class="py">musteriler = {"M1": {"ad": "Ayşe", "eposta": "ayse@mail.com"}, "M2": {"ad": "Can"}}
+
+# LBYL
+def eposta_lbyl(no):
+    if no in musteriler and "eposta" in musteriler[no]:
+        return musteriler[no]["eposta"]
+    return None
+
+# EAFP
+def eposta_eafp(no):
+    try:
+        return musteriler[no]["eposta"]
+    except KeyError:
+        return None
+
+for no in ["M1", "M2", "M9"]:
+    print(no, eposta_lbyl(no), eposta_eafp(no))
+
+# Tip kontrolü yerine davranışa güven (ördek tipleme ile EAFP)
+def toplam(kaynak):
+    try:
+        return sum(kaynak.values())      # sözlük mü?
+    except AttributeError:
+        return sum(kaynak)               # değilse liste gibi davran
+
+print(toplam({"a": 1, "b": 2}), toplam([3, 4]))</pre>
+
+<p>LBYL'in haklı olduğu yerler: kontrol ucuzsa ve hata yolu pahalıysa (dosya silmeden önce var mı diye bakmak), ya da istisna çok sık oluşuyorsa (istisna yakalamak başarılı yoldan daha yavaştır).</p>
+
+<h2>assert'in yeri</h2>
+<p><code>assert koşul, "mesaj"</code> koşul yanlışsa <code>AssertionError</code> yükseltir. Amacı <b>programcı varsayımlarını</b> geliştirme sırasında doğrulamaktır: "bu noktada liste boş olamaz". Kullanıcı girdisi, dış veri ya da iş kuralı doğrulamak için <b>kullanılmaz</b>, çünkü Python <code>-O</code> bayrağıyla çalıştırıldığında tüm assert'ler silinir ve kontroller yok olur.</p>
+<pre class="py">def ortalama(tutarlar):
+    assert isinstance(tutarlar, list), "iç kullanım: liste bekleniyor"   # programcı varsayımı
+    if not tutarlar:                                                      # iş kuralı: gerçek istisna
+        raise ValueError("boş liste için ortalama tanımsız")
+    return sum(tutarlar) / len(tutarlar)
+
+print(ortalama([10, 20]))
+try:
+    ortalama([])
+except ValueError as e:
+    print("ValueError:", e)
+try:
+    ortalama("abc")
+except AssertionError as e:
+    print("AssertionError:", e)</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: zincirler, notlar, gruplar ve sınırlar</h2>
+<p>Hiyerarşi kurmayı, <code>raise from</code>'u ve loglamayı gördün. Bu bölümde gerçek sistemlerde fark yaratan dört konuya iniyoruz: iz kaydındaki iki farklı zincir cümlesini okumak, hataya bağlam notu eklemek (<code>add_note</code>), birden çok hatayı birlikte taşımak (<code>ExceptionGroup</code> ve <code>except*</code>) ve hataları sistem sınırında (API, CLI) anlamlı yanıtlara çevirmek. Sonunda <code>finally</code> tuzaklarını ve <code>warnings</code> modülünü ekliyoruz. Logger yapılandırmasının ayrıntısı "logging" dersinde, <code>with</code> ve bağlam yöneticisi (context manager) yazmak "Dekoratörler (decorator)" dersinde.</p>
+
+<h3>1. İki zincir cümlesi: cause ve context</h3>
+<p>İz kaydında iki farklı cümle görebilirsin ve anlamları farklıdır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>İz kaydındaki cümle</th><th>Nasıl oluşur</th><th>Nitelik</th><th>Anlamı</th></tr>
+<tr><td>The above exception was the direct cause of the following exception</td><td><code>raise B from a</code></td><td><code>__cause__</code></td><td>Bilinçli çeviri: "B'nin nedeni a"</td></tr>
+<tr><td>During handling of the above exception, another exception occurred</td><td><code>except</code> içinde <code>from</code>'suz yeni hata</td><td><code>__context__</code></td><td>Çoğunlukla <b>kaza</b>: hata işlenirken ikinci hata çıktı</td></tr>
+<tr><td>(yalnız son hata)</td><td><code>raise B from None</code></td><td><code>__suppress_context__ = True</code></td><td>Nedeni bilinçli gizle</td></tr>
+</table></div>
+<p>"During handling..." cümlesini görürsen önce <code>except</code> bloğunun içine bak: çoğu zaman log mesajını biçimlerken ya da temizlik yaparken yeni bir hata çıkmıştır.</p>
+<pre class="py">def kur_al(kurlar, birim):
+    try:
+        return kurlar[birim]
+    except KeyError:
+        print("bilinmeyen birim: " + birim.upper())   # birim None ise burada 2. hata!
+
+try:
+    kur_al({"USD": 32.5}, None)
+except AttributeError as e:
+    print(type(e).__name__, "| context:", type(e.__context__).__name__, "| cause:", e.__cause__)</pre>
+
+<h3>2. add_note: hatayı değiştirmeden bağlam eklemek</h3>
+<p>Python 3.11 ile her istisnaya <code>e.add_note("...")</code> ile not eklenebilir; notlar iz kaydının altında görünür ve <code>e.__notes__</code> listesinde durur. Asıl farkı: hatanın <b>türünü değiştirmezsin</b>. Çağıran hâlâ <code>ValueError</code> yakalar ama ekstra bilgi (hangi satır, hangi dosya, hangi müşteri) kaybolmaz. Yeni istisna sınıfına çevirmek (raise from) ile not eklemek arasındaki seçim şudur: çağıranın tepkisi değişecekse çevir, yalnız teşhis bilgisi ekliyorsan not düş.</p>
+<pre class="py">satirlar = ["Ayşe;1200", "Can;12OO", "Ece;300"]
+
+def toplam(satirlar):
+    t = 0
+    for no, satir in enumerate(satirlar, start=1):
+        try:
+            ad, tutar = satir.split(";")
+            t += int(tutar)
+        except ValueError as e:
+            e.add_note(f"satır {no}: {satir!r}")
+            raise                       # aynı hata, ek notla
+    return t
+
+try:
+    toplam(satirlar)
+except ValueError as e:
+    print("Hata:", e)
+    print("Notlar:", e.__notes__)</pre>
+
+<h3>3. ExceptionGroup ve except*: hepsini birden bildir</h3>
+<p>Kredi başvuru formunda üç alan hatalıysa kullanıcıyı üç kez geri göndermek kötü deneyimdir. Tüm hataları bir listede toplayıp sonunda <code>raise ExceptionGroup("mesaj", hatalar)</code> yaparsın. Yakalayan taraf <code>except*</code> ile gruptan türe göre parça seçer: her <code>except*</code> bloğu kendi türündeki hataları <b>alt grup</b> olarak alır ve birden çok blok aynı grup için çalışabilir.</p>
+<pre class="py">def basvuru_dogrula(b):
+    hatalar = []
+    if b.get("yas", 0) &lt; 18:
+        hatalar.append(ValueError(f"yaş 18'den küçük: {b.get('yas')}"))
+    if not str(b.get("tckn", "")).isdigit():
+        hatalar.append(ValueError("TCKN yalnız rakam olmalı"))
+    if not isinstance(b.get("gelir"), (int, float)):
+        hatalar.append(TypeError("gelir sayı olmalı"))
+    if hatalar:
+        raise ExceptionGroup("başvuru geçersiz", hatalar)
+    return True
+
+try:
+    basvuru_dogrula({"yas": 16, "tckn": "12a", "gelir": "yok"})
+except* ValueError as g:
+    for h in g.exceptions:
+        print("Değer hatası:", h)
+except* TypeError as g:
+    print("Tür hatası:", [str(h) for h in g.exceptions])</pre>
+<div class="tip"><b>except* kuralları</b><code>except*</code> ile düz <code>except</code> aynı <code>try</code>'da karıştırılamaz. Hiçbir <code>except*</code> bloğunun yakalamadığı parçalar yeni bir grup olarak yukarı fırlatılır. Grubu düz <code>except ExceptionGroup as g</code> ile de yakalayıp <code>g.exceptions</code>'ı dolaşabilirsin (testlerde pratik).</div>
+
+<h3>4. Sınırda çeviri: hata → kullanıcı yanıtı</h3>
+<p>Bir web servisinde iç katmanlar anlamlı istisnalar fırlatır; en dış katman (istek işleyicisi) bunları HTTP durum koduna ve kullanıcıya gösterilecek kısa koda çevirir. Bu eşlemeyi istisna sınıflarına sınıf niteliği olarak koymak, devasa bir <code>if/elif</code> zincirini ortadan kaldırır. Beklenmeyen her şey <code>500</code> olur, ayrıntısı yalnız loga gider.</p>
+<pre class="py">class UygulamaHatasi(Exception):
+    http, kod = 400, "GENEL"
+
+class Bulunamadi(UygulamaHatasi):
+    http, kod = 404, "BULUNAMADI"
+
+class YetkiYok(UygulamaHatasi):
+    http, kod = 403, "YETKI_YOK"
+
+def yanitla(f, *args):
+    try:
+        return 200, f(*args)
+    except UygulamaHatasi as e:
+        return e.http, {"kod": e.kod, "mesaj": str(e)}
+    except Exception:
+        # gerçek kodda: log.exception("beklenmeyen hata")
+        return 500, {"kod": "IC_HATA", "mesaj": "beklenmeyen bir hata oluştu"}
+
+def hesap_getir(no):
+    if no == "TR00":
+        raise YetkiYok("bu hesaba erişim yetkiniz yok")
+    if no != "TR01":
+        raise Bulunamadi(f"hesap yok: {no}")
+    return {"no": no, "bakiye": 1500}
+
+for no in ["TR01", "TR09", "TR00", None]:
+    print(yanitla(hesap_getir, no) if no else yanitla(lambda: 1 / 0))</pre>
+
+<h3>5. finally tuzakları ve else'in yeri</h3>
+<p><code>finally</code> her durumda çalışır; bu yüzden içine <code>return</code>, <code>break</code> ya da <code>continue</code> yazarsan <b>fırlatılmakta olan istisnayı sessizce yutar</b>. Python 3.14 bunun için uyarı vermeye başladı; kural basit: <code>finally</code> yalnız temizlik yapar (dosya kapat, kilidi bırak), sonuç döndürmez. <code>else</code> bloğu ise "try başarılı olduysa" çalışır; yalnız hata çıkarabilecek satırı <code>try</code>'da tutup gerisini <code>else</code>'e koymak, yanlışlıkla başka bir satırın hatasını yakalamanı engeller.</p>
+
+<h3>6. warnings: hata değil, uyarı</h3>
+<p>Bazı durumlar programı durdurmayı gerektirmez ama bilinmelidir: eskiyen (deprecated) bir fonksiyonun kullanılması, şüpheli ama işlenebilen veri. <code>warnings.warn("mesaj", DeprecationWarning, stacklevel=2)</code> bunu yapar; <code>stacklevel=2</code> uyarıyı çağıranın satırında gösterir. Testlerde <code>warnings.catch_warnings(record=True)</code> ile uyarıları yakalayıp doğrularsın; <code>python -W error</code> ile çalıştırınca uyarılar hataya dönüşür (CI'da yaygın).</p>
+<pre class="py">import warnings
+
+def cevir(tutar, kur):
+    return round(tutar / kur, 2)
+
+def eski_cevir(tutar):
+    warnings.warn("eski_cevir kaldırılacak; cevir(tutar, kur) kullanın",
+                  DeprecationWarning, stacklevel=2)
+    return cevir(tutar, 32.5)
+
+with warnings.catch_warnings(record=True) as kayit:
+    warnings.simplefilter("always")
+    print(eski_cevir(650))
+print(len(kayit), kayit[0].category.__name__, "-", kayit[0].message)</pre>
+
+<div class="note"><b>Gerçek işte</b>Olgun ekiplerde hata politikası yazılıdır: "İç katmanlar yerleşik hataları (KeyError, ValueError) alan istisnalarına <code>from</code> ile çevirir; yalnız sınır katmanı (API/CLI) HTTP koduna ya da çıkış koduna çevirir; beklenmeyen her hata tam iz kaydıyla loglanır ve kullanıcıya iç ayrıntı sızmaz." Toplu veri yüklemelerde de iki mod bulunur: <b>katı</b> mod ilk grupta durur (<code>ExceptionGroup</code>), <b>esnek</b> mod hatalı satırları rapora yazıp geçerlileri işler. Hangi modun çalıştığı her zaman loglanır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İstisna gruplarıyla toplu doğrulama (3.11+)</h3>
+<p>Bir formda beş alan hatalıysa kullanıcıya ilkini değil hepsini göstermek istersin. <code>ExceptionGroup("doğrulama", [h1, h2, ...])</code> birden çok istisnayı tek nesnede taşır; <code>except*</code> sözdizimi gruptan türe göre seçer. Toplu veri yükleme ve eşzamanlı görevlerde (asyncio TaskGroup) standart araçtır.</p>
+<h3>Hata mesajı yazma kuralları</h3>
+<ul>
+<li>Ne bekleniyordu, ne geldi: <code>"tutar pozitif olmalı, gelen: -5"</code>.</li>
+<li>Bağlam ekle: hangi hesap, hangi satır, hangi dosya.</li>
+<li>Çözümü ima et: <code>"hesap bulunamadı: TR09 (numara TR ile başlamalı)"</code>.</li>
+<li>Kullanıcıya giden mesajla loga giden mesajı ayır: iç detay (SQL, dosya yolu) loga, sade cümle kullanıcıya.</li>
+</ul>
+<h3>Logger hiyerarşisi</h3>
+<p><code>getLogger("anadolu.transfer")</code> adı noktayla ayrılmış bir ağaçtır: <code>anadolu</code> logger'ının seviyesi ve işleyicileri alt loggerlara miras geçer. Modül başında <code>log = logging.getLogger(__name__)</code> yazmak standarttır; uygulama girişinde bir kez <code>basicConfig</code> ya da <code>dictConfig</code> ile yapılandırma yapılır, kütüphane kodu asla basicConfig çağırmaz.</p>
+<h3>Hata yönetimi stratejisi</h3>
+<p>Her katman yalnızca anlamlı tepki verebildiği hatayı yakalar; gerisini yukarı bırakır. Hatayı en altta yakalayıp None döndürmek sorunu ertelemektir: "None nereden geldi?" sorusu üç katman yukarıda, saatler sonra sorulur. En dış katmanda (CLI giriş noktası, web isteği işleyicisi) tek bir <code>except BankaHatasi</code> kullanıcı mesajını, tek bir <code>except Exception</code> ile <code>log.exception</code> beklenmeyeni raporlar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-tasarim">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../dataclass-typing/">← dataclass ve tip ipuçları (type hints)</a><a href="../collections-itertools/">collections ve itertools: hazır veri yapıları ve yineleme araçları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,228 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Döngüler: for ve while | Kesit Python</title><meta name="description" content="Yüzlerce siparişi tek tek elden geçir: for ile range, enumerate ve zip; while; break/continue/else; sayaç ve birikim kalıpları; sonsuz döngü tuzağı."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/donguler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Döngüler: for ve while"><meta property="og:description" content="Yüzlerce siparişi tek tek elden geçir: for ile range, enumerate ve zip; while; break/continue/else; sayaç ve birikim kalıpları; sonsuz döngü tuzağı."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/donguler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Döngüler: for ve while","description":"Yüzlerce siparişi tek tek elden geçir: for ile range, enumerate ve zip; while; break/continue/else; sayaç ve birikim kalıpları; sonsuz döngü tuzağı.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/donguler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Akış kontrolü</span><h1>Döngüler: for ve while</h1><p class="st-l">Yüzlerce siparişi tek tek elden geçir: for ile range, enumerate ve zip; while; break/continue/else; sayaç ve birikim kalıpları; sonsuz döngü tuzağı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/donguler">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<div class="note"><b>Önce küçük bir not</b>Döngülerde sık göreceğin <code>[10, 20, 30]</code> yazımı bir <b>liste</b>dir: birkaç değeri sırayla tutar. Şimdilik bu kadarını bilmen yeter; ayrıntısı bir sonraki modülde, Listeler dersinde.</div>
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'te bir günde yüzlerce sipariş oluşur. "Her siparişin tutarını topla", "İstanbul'a gidenleri say", "stoğu 5'in altına düşen ilk ürünü bul" gibi işler aynı adımı tekrar tekrar uygulamaktır. Bilgisayarın asıl gücü de budur: tekrar. Döngü (loop) bu tekrarı sen yorulmadan yapar.</p>
+
+<h2>for: bir koleksiyonu baştan sona gez</h2>
+<p><code>for</code> döngüsü bir koleksiyonun (liste, metin, sözlük, demet, range) her elemanını sırayla bir değişkene koyar ve bloğu çalıştırır.</p>
+<pre class="py">siparisler = [
+    {"id": 1001, "sehir": "Ankara", "tutar": 900.0},
+    {"id": 1002, "sehir": "İzmir", "tutar": 820.0},
+    {"id": 1003, "sehir": "Ankara", "tutar": 930.0},
+    {"id": 1004, "sehir": "İstanbul", "tutar": 450.0},
+]
+
+toplam = 0            # birikim (accumulator) değişkeni
+for siparis in siparisler:
+    toplam += siparis["tutar"]
+print("Toplam ciro:", toplam)
+
+ankara_sayisi = 0     # sayaç (counter)
+for siparis in siparisler:
+    if siparis["sehir"] == "Ankara":
+        ankara_sayisi += 1
+print("Ankara siparişi:", ankara_sayisi)</pre>
+<p>Bu iki kalıp, yazacağın döngülerin büyük kısmını kapsar: döngüden önce bir değişkeni başlat (0, boş liste, boş sözlük), döngü içinde güncelle, döngüden sonra kullan.</p>
+
+<h3>range: sayı dizisi üret</h3>
+<pre class="py">for i in range(5):          # 0, 1, 2, 3, 4
+    print(i, end=" ")
+print()
+for i in range(1, 6):       # 1..5
+    print(i, end=" ")
+print()
+for i in range(10, 0, -3):  # 10, 7, 4, 1 (adım -3)
+    print(i, end=" ")
+print()
+print(list(range(0, 20, 5)))</pre>
+<div class="note"><b>Bitiş dahil değil</b><code>range(1, 6)</code> 6'yı üretmez. Python'daki tüm aralıklar (dilimleme dahil) "başlangıç dahil, bitiş hariç" çalışır; böylece <code>range(len(liste))</code> tam olarak indeksleri verir.</div>
+
+<h3>enumerate: elemanla birlikte sıra numarası</h3>
+<p>"Kaçıncı eleman?" sorusuna <code>range(len(liste))</code> yerine <code>enumerate</code> ile cevap ver; hem eleman hem indeks gelir.</p>
+<pre class="py">sehirler = ["Ankara", "İzmir", "İstanbul"]
+for sira, sehir in enumerate(sehirler, start=1):
+    print(f"{sira}. {sehir}")</pre>
+
+<h3>zip: paralel listeleri yan yana gez</h3>
+<pre class="py">urunler = ["Kulaklık", "Klavye", "Mouse"]
+adetler = [12, 3, 25]
+for urun, adet in zip(urunler, adetler):
+    durum = "AZ" if adet &lt; 5 else "ok"
+    print(f"{urun}: {adet} ({durum})")</pre>
+<p><code>zip</code> en kısa liste bitince durur. Sözlük gezerken de aynı "çift" mantığı var: <code>for anahtar, deger in sozluk.items():</code>.</p>
+
+<h2>while: koşul doğru olduğu sürece</h2>
+<p>Kaç kez döneceğini baştan bilmiyorsan <code>while</code> kullan. Her turdan önce koşul yeniden kontrol edilir.</p>
+<pre class="py">bakiye = 1000
+ay = 0
+while bakiye &gt; 0:
+    bakiye -= 350
+    ay += 1
+    print(f"{ay}. ay sonunda bakiye: {bakiye}")
+print("Bakiye", ay, "ayda tükendi")</pre>
+<div class="warn"><b>Sonsuz döngü tuzağı</b>Koşulu değiştiren bir şey yoksa döngü asla bitmez. Yukarıdaki kodda <code>bakiye -= 350</code> satırını unutursan program donar. Her <code>while</code> yazdığında kendine sor: "Koşulu False yapacak satır hangisi ve kesin çalışıyor mu?"</div>
+
+<h2>break, continue ve döngü else</h2>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Ne yapar</th><th>Tipik kullanım</th></tr>
+<tr><td><code>break</code></td><td>Döngüyü hemen bitirir</td><td>Aranan bulundu, devam etmeye gerek yok</td></tr>
+<tr><td><code>continue</code></td><td>Bu turu atlar, sonraki tura geçer</td><td>İstenmeyen kaydı pas geç</td></tr>
+<tr><td><code>else</code></td><td>Döngü <b>break ile kesilmeden</b> biterse çalışır</td><td>"Hiçbiri eşleşmedi" mesajı</td></tr>
+</table></div>
+<pre class="py">stok = {"Kulaklık": 12, "Klavye": 3, "Mouse": 25, "Monitör": 0}
+
+# break: ilk kritik ürünü bul
+for urun, adet in stok.items():
+    if adet &lt; 5:
+        print("İlk kritik ürün:", urun)
+        break
+
+# continue: stoğu sıfır olanları atla
+for urun, adet in stok.items():
+    if adet == 0:
+        continue
+    print(f"{urun} satışa açık ({adet})")
+
+# else: arama sonuçsuz kaldıysa
+aranan = "Webcam"
+for urun in stok:
+    if urun == aranan:
+        print("Bulundu")
+        break
+else:
+    print(aranan, "stok listesinde yok")</pre>
+
+<h2>İç içe döngü</h2>
+<p>Döngü içine döngü yazabilirsin; iç döngü dış döngünün her turunda baştan sona döner. Toplam tur sayısı çarpılır (3 şehir × 4 ürün = 12 tur), bu yüzden büyük verilerde dikkatli ol.</p>
+<pre class="py">sehirler = ["Ankara", "İzmir"]
+urunler = ["Kulaklık", "Mouse"]
+for sehir in sehirler:
+    for urun in urunler:
+        print(f"{sehir} - {urun}")</pre>
+
+<h2>"En büyüğü bul" kalıbı</h2>
+<pre class="py">siparisler = [("Ayşe", 900.0), ("Mehmet", 820.0), ("Elif", 1250.0), ("Can", 450.0)]
+en_yuksek_ad = None
+en_yuksek_tutar = 0
+for ad, tutar in siparisler:
+    if tutar &gt; en_yuksek_tutar:
+        en_yuksek_ad, en_yuksek_tutar = ad, tutar
+print(f"En yüksek sipariş: {en_yuksek_ad} ({en_yuksek_tutar} TL)")
+
+# Aynı iş tek satırda (ileride sık kullanacaksın)
+print(max(siparisler, key=lambda s: s[1]))</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>range'i tam tanı</h2>
+<p><code>range</code> bir liste değil, sayıları <b>istendikçe</b> üreten hafif bir nesnedir: <code>range(1_000_000)</code> bellekte bir milyon sayı tutmaz. Üç parametresi vardır: başlangıç (dahil), bitiş (hariç) ve adım. Adım negatif olursa geriye sayar; bu durumda başlangıç bitişten büyük olmalıdır, yoksa hiç tur dönmez.</p>
+<pre class="py">print(list(range(5)))            # 0..4
+print(list(range(2, 11, 4)))     # 2, 6, 10
+print(list(range(10, 0, -3)))    # geri sayım: 10, 7, 4, 1
+print(list(range(0, 10, -1)))    # boş: yön yanlış
+r = range(0, 100, 5)
+print(len(r), 35 in r, r[-1])    # len, in ve indeks de çalışır
+
+aylar = ["Oca", "Şub", "Mar", "Nis"]
+for ay in reversed(aylar):       # listeyi kopyalamadan tersten gez
+    print(ay, end=" ")
+print()</pre>
+<div class="tip"><b>Sayılarda alt çizgi</b><code>1_000_000</code> yazımı Python 3.6'dan beri geçerlidir ve <code>1000000</code> ile aynıdır; büyük sayıları okunur kılar. Tutar sabitlerinde (<code>LIMIT = 50_000</code>) kullanman tavsiye edilir.</div>
+
+<h2>enumerate ve zip'in ayrıntıları</h2>
+<p><code>enumerate(liste, start=1)</code> sıra numarasını 1'den başlatır; raporlarda "1. satır" demek için idealdir. <code>zip</code> ise listelerden <b>en kısası</b> bitince durur ve uzun listedeki fazla elemanları <b>sessizce</b> atar. Veri hatasını gizleyen bu davranış yerine, Python 3.10'dan beri <code>strict=True</code> ile uzunluklar farklıysa hata alabilirsin.</p>
+<pre class="py">urunler = ["çay", "kahve", "şeker"]
+fiyatlar = [120, 340]                    # bir fiyat eksik!
+print(list(zip(urunler, fiyatlar)))      # şeker sessizce kayboldu
+try:
+    for u, f in zip(urunler, fiyatlar, strict=True):
+        print(u, f)
+except ValueError as h:
+    print("Veri hatası:", h)
+
+for no, (u, f) in enumerate(zip(urunler, [120, 340, 45]), start=1):
+    print(f"{no}. {u:&lt;6} {f:&gt;4} TL")</pre>
+<p>Çıktıya dikkat et: <code>strict=True</code> farkı ancak kısa liste bittiği anda anlar; o ana kadarki turlar (çay ve kahve) zaten çalışmıştır. Veritabanına yazma gibi geri alınması zor işlemlerden önce uzunlukları baştan karşılaştırmak (<code>if len(a) != len(b): ...</code>) daha güvenlidir.</p>
+<p>Dikkat: <code>zip</code> ve <code>enumerate</code> de <code>range</code> gibi tembeldir ama bir farkla: <b>bir kez</b> tüketilirler. <code>z = zip(a, b)</code> nesnesini bir kez gezdikten sonra ikinci gezişte boş gelir. Nedenini Yineleyiciler (iterator) ve üreteçler (generator) dersinde göreceksin; şimdilik zip'i ya doğrudan döngü başlığında kullan ya da <code>list(zip(...))</code> ile listeye çevir.</p>
+
+<h2>İç içe döngüden çıkmak</h2>
+<p><code>break</code> yalnızca <b>içinde bulunduğu</b> döngüyü kırar. İç döngüde aradığını bulduğunda dıştaki döngüyü de durdurmak istiyorsan üç yolun var. En temizi aramayı bir fonksiyona koyup <code>return</code> etmektir; return tüm döngülerden birden çıkar.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Nasıl?</th><th>Ne zaman?</th></tr>
+<tr><td>Fonksiyon + return</td><td>Bulunca <code>return sonuc</code></td><td>Hemen her zaman en okunaklısı</td></tr>
+<tr><td>Bayrak değişkeni</td><td><code>bulundu = True</code>, iç break, dışta <code>if bulundu: break</code></td><td>Fonksiyona ayıramıyorsan</td></tr>
+<tr><td>for-else</td><td>İç döngü break etmezse <code>else: continue</code>, sonra dışta <code>break</code></td><td>Kısa kodlarda; okuması zordur</td></tr>
+</table></div>
+<pre class="py">raflar = [["çay", "kahve"], ["şeker", "tuz", "un"], ["su"]]
+
+def raf_bul(raflar, aranan):
+    for i, raf in enumerate(raflar):
+        for j, urun in enumerate(raf):
+            if urun == aranan:
+                return (i, j)          # iki döngüden birden çıkar
+    return None
+
+print(raf_bul(raflar, "tuz"), raf_bul(raflar, "pirinç"))
+
+bulundu = None
+for i, raf in enumerate(raflar):
+    for j, urun in enumerate(raf):
+        if urun == "tuz":
+            bulundu = (i, j)
+            break                       # yalnız iç döngü
+    if bulundu:
+        break                           # dış döngü
+print(bulundu)</pre>
+
+<h2>while True ve sınırlı deneme</h2>
+<p>Kaç tur süreceği bilinmeyen ama "şu olunca dur" dediğin döngülerde <code>while True</code> + <code>break</code> kalıbı okunaklıdır: menü döngüleri, kuyruktan iş çekme, kullanıcı doğru girene kadar sorma. Gerçek sistemlerde her zaman bir <b>üst sınır</b> koyarsın: ATM üç yanlış PIN'de kartı bloke eder, bir API isteği beş denemeden sonra vazgeçer.</p>
+<pre class="py">denemeler = ["1111", "2580", "1234"]     # kullanıcının sırayla girdikleri
+dogru_pin = "1234"
+hak = 3
+deneme = 0
+while True:
+    if deneme == hak or deneme == len(denemeler):
+        print("Kart bloke / deneme bitti")
+        break
+    girilen = denemeler[deneme]
+    deneme += 1
+    if girilen == dogru_pin:
+        print(f"Giriş başarılı ({deneme}. deneme)")
+        break
+    print("Hatalı PIN, kalan hak:", hak - deneme)</pre>
+
+<h2>Döngüde metin biriktirme: join</h2>
+<p>Döngüde <code>metin += parca</code> yazmak küçük verilerde sorun değildir ama her adımda yeni bir metin oluşturur. Parçaları listede toplayıp sonunda <code>"ayraç".join(liste)</code> demek hem daha hızlı hem de "son elemandan sonra ayraç olmasın" derdini ortadan kaldırır. Kullanmadığın döngü değişkenine <code>_</code> adını vermek de yaygın bir alışkanlıktır.</p>
+<pre class="py">sehirler = ["İzmir", "Ankara", "Bursa"]
+parcalar = []
+for s in sehirler:
+    parcalar.append(s.upper())
+print(", ".join(parcalar))
+
+for _ in range(3):
+    print("-" * 10)
+
+satirlar = []
+for no, s in enumerate(sehirler, start=1):
+    satirlar.append(f"{no};{s}")
+print("\n".join(["no;sehir"] + satirlar))</pre>
+<p>Son satırdaki <code>\n</code> satır sonu karakteridir; <code>join</code> ile CSV benzeri bir metni tek seferde oluşturduk. Döngülerin yaygın kalıplarını (sayaç, en iyi değer, komşu karşılaştırma, frekans) bir sonraki derste, Döngü kalıpları dersinde sistematik olarak çalışacaksın.</p>
+<div class="note"><b>Gerçek işte</b>Üretimdeki döngülerin en sık iki hatası: "bir eksik/bir fazla" (off-by-one) ve sessiz veri kaybı. Birincisi <code>range(1, n)</code> yazıp n'inci elemanı atlamaktır; ikincisi farklı uzunluktaki iki listeyi <code>zip</code>'leyip fazlalığı fark etmemektir. Ekipler bu yüzden indeksle gezmek yerine doğrudan elemanı gezer (<code>for x in liste</code>), paralel listeleri <code>strict=True</code> ile birleştirir ve her yeniden deneme döngüsüne bir üst sınır koyar.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Döngü yerine yerleşik fonksiyon</h3>
+<p>Toplam için <code>sum()</code>, en büyük/küçük için <code>max()/min()</code>, "hiç var mı / hepsi mi" için <code>any()/all()</code> yazmak hem daha kısa hem de daha hızlıdır; bu fonksiyonlar C ile yazılmıştır. Döngüyü kalıbı anlamak için öğren; işte ise önce yerleşik fonksiyon var mı diye bak. Orta seviyede liste comprehension ile bu kalıplar tek satıra inecek.</p>
+<h3>Döngü içinde listeyi değiştirme</h3>
+<p>Üzerinde dolaştığın listeden eleman silmek elemanların atlanmasına yol açar. Ya yeni bir liste kur (<code>kalanlar = []</code> ve koşula uyanları ekle) ya da kopyası üzerinde dön: <code>for x in liste[:]:</code>.</p>
+<h3>Sonsuz döngü bazen kasıtlıdır</h3>
+<p>Sunucular ve menü ekranları <code>while True:</code> ile yazılır ve içeride <code>break</code> ile çıkılır. Tuzak olan "sonsuz" değil, "çıkış yolu olmayan" döngüdür. Kasıtlı yazıyorsan çıkış koşulunu ilk satırlarda açıkça göster.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/donguler">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kosullar/">← Koşullar: if / elif / else</a><a href="../fonksiyonlar/">Fonksiyonlar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

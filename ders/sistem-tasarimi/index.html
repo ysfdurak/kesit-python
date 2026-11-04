@@ -1,0 +1,237 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı | Kesit Python</title><meta name="description" content="Gereksinim çıkarma ve kaba kapasite hesabından yük dengeleme, önbellek, replikasyon, tutarlı hash, CAP/PACELC, kuyruklar, idempotentlik ve circuit…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sistem-tasarimi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı"><meta property="og:description" content="Gereksinim çıkarma ve kaba kapasite hesabından yük dengeleme, önbellek, replikasyon, tutarlı hash, CAP/PACELC, kuyruklar, idempotentlik ve circuit…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sistem-tasarimi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı","description":"Gereksinim çıkarma ve kaba kapasite hesabından yük dengeleme, önbellek, replikasyon, tutarlı hash, CAP/PACELC, kuyruklar, idempotentlik ve circuit…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/sistem-tasarimi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı</h1><p class="st-l">Gereksinim çıkarma ve kaba kapasite hesabından yük dengeleme, önbellek, replikasyon, tutarlı hash, CAP/PACELC, kuyruklar, idempotentlik ve circuit breaker'a; URL kısaltıcı ve Lezzet Kurye sipariş akışı tasarımlarına kadar sistem tasarımının yapı taşlarını Python simülasyonlarıyla öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sistem-tasarimi">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden sistem tasarımı?</h2>
+<p>Bir fonksiyonu doğru yazmak ile bir <b>sistemi</b> doğru kurmak farklı becerilerdir. Lezzet Kurye akşam 19:00'da binlerce sipariş alır; restoran tableti donarsa, ödeme sağlayıcısı yavaşlarsa ya da veritabanı diski dolarsa müşteri yalnızca "uygulama çalışmıyor" der. Sistem tasarımı (system design), bu tür yükleri ve arızaları <b>önceden</b> düşünüp bileşenleri (servis, veritabanı, önbellek, kuyruk) doğru yere koyma işidir. Orta ve kıdemli backend mülakatlarının neredeyse hepsinde 45 dakikalık bir tasarım oturumu vardır; işte de her yeni özellik küçük bir tasarım belgesiyle başlar.</p>
+<p>Bu derste ezber mimari şemalar yerine <b>hesap yapan ve simülasyon kuran</b> bir yaklaşım izleyeceksin: kaba kapasite tahmini, tutarlı hash, önbellek, circuit breaker, idempotent ödeme ve sipariş durum makinesi gibi parçaları Python ile modelleyeceksin. Gerçek teknolojilerin (Redis, Kafka, PostgreSQL, Nginx) kodunu gri kutularda göreceksin; mantığını ise tarayıcıda çalışan sahte sınıflarla deneyeceksin.</p>
+
+<h2>1. Gereksinim çıkarma ve kaba tahmin</h2>
+<p>Tasarıma kutu çizerek değil <b>soru sorarak</b> başlanır. İşlevsel gereksinimler (functional requirements) sistemin ne yaptığıdır: "müşteri sipariş verir, kurye konum paylaşır". İşlevsel olmayan gereksinimler (non-functional requirements) ise nasıl yaptığıdır: gecikme hedefi, erişilebilirlik (availability), tutarlılık, maliyet. Ardından kaba tahmin (back-of-the-envelope estimation) gelir: saniyedeki istek (QPS, queries per second), depolama ve bant genişliği.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Akılda tutulacak sayı</th><th>Yaklaşık değer</th><th>Kullanım</th></tr>
+<tr><td>Bir gün</td><td>86 400 sn ≈ 10<sup>5</sup> sn</td><td>Günlük istek / 10<sup>5</sup> ≈ ortalama QPS</td></tr>
+<tr><td>Tepe çarpanı</td><td>Ortalamanın 2–10 katı</td><td>Yemek siparişinde akşam tepesi çok sivridir</td></tr>
+<tr><td>Bellekten okuma</td><td>Mikrosaniyeler</td><td>Önbellek neden hızlı?</td></tr>
+<tr><td>Aynı veri merkezinde ağ turu</td><td>~0,5 ms</td><td>Servisler arası çağrı maliyeti</td></tr>
+<tr><td>SSD'den rastgele okuma</td><td>~0,1 ms</td><td>Veritabanı indeks okuması</td></tr>
+<tr><td>Kıtalar arası ağ turu</td><td>~100–150 ms</td><td>CDN neden gerekli?</td></tr>
+<tr><td>%99,9 erişilebilirlik</td><td>Yılda ~8,8 saat kesinti</td><td>SLA pazarlığı</td></tr>
+</table></div>
+<pre class="py">GUNLUK_SIPARIS = 2_000_000   # hedef: günde 2 milyon sipariş
+TEPE_CARPANI = 7             # akşam tepesi ortalamanın ~7 katı
+OKUMA_ORANI = 20             # her siparişe ~20 okuma (menü, durum, takip)
+KAYIT_KB = 2                 # bir sipariş kaydı ~2 KB
+SANIYE_GUN = 24 * 60 * 60
+
+yazma_qps = GUNLUK_SIPARIS / SANIYE_GUN
+tepe_yazma = yazma_qps * TEPE_CARPANI
+tepe_okuma = tepe_yazma * OKUMA_ORANI
+yillik_gb = GUNLUK_SIPARIS * KAYIT_KB * 365 / 1024 / 1024
+
+print(f"Ortalama yazma : {yazma_qps:,.0f}/sn")
+print(f"Tepe yazma     : {tepe_yazma:,.0f}/sn")
+print(f"Tepe okuma     : {tepe_okuma:,.0f}/sn")
+print(f"Yıllık veri    : {yillik_gb:,.0f} GB")</pre>
+<p>Sonuçlar kesin değil, <b>büyüklük mertebesi</b> (order of magnitude) önemli: saniyede 160 yazma tek bir PostgreSQL sunucusu için rahattır; saniyede 3 000 okuma için ise önbellek ve okuma replikası düşünmeye başlarsın. Tepe çarpanını uydurmak yerine gerçek veriden ölçebilirsin. Lezzet Kurye'nin sipariş tablosunda saatlik dağılıma bakalım:</p>
+<pre class="py">import veri
+from collections import Counter
+
+siparisler = veri.kayitlar("lezzet_kurye", "lk_orders")
+saatlik = Counter(s["placed_at"][:13] for s in siparisler)   # "2024-11-10 20"
+gun_sayisi = len({s["placed_at"][:10] for s in siparisler})
+ortalama = len(siparisler) / (gun_sayisi * 24)
+tepe_saat, tepe = saatlik.most_common(1)[0]
+print(f"{len(siparisler)} sipariş, {gun_sayisi} gün")
+print(f"Saatlik ortalama {ortalama:.2f}, en yoğun saat {tepe_saat}: {tepe}")
+print(f"Tepe çarpanı ≈ {tepe / ortalama:.1f}")</pre>
+<div class="tip"><b>Mülakatta yüksek sesle hesapla</b>Değerlendirici kesin sayıyı değil, varsayımlarını açıkça söyleyip yuvarlayarak ilerlemeni ister: "Günde 2 milyon, yaklaşık 10<sup>5</sup> saniye; ortalama 20 QPS... hayır, 2·10<sup>6</sup>/10<sup>5</sup> = 20 değil, 2·10<sup>6</sup>/8,64·10<sup>4</sup> ≈ 23". Kendi hatanı yakalaman artı puandır.</div>
+
+<h2>2. Ölçekleme: dikey, yatay ve durumsuz servis</h2>
+<p><b>Dikey ölçekleme</b> (scale up) sunucuya daha çok CPU/RAM eklemektir: basit ama tavanı ve tek arıza noktası vardır. <b>Yatay ölçekleme</b> (scale out) aynı servisten çok kopya çalıştırıp önüne <b>yük dengeleyici</b> (load balancer) koymaktır. Yatay ölçeklemenin ön koşulu servisin <b>durumsuz</b> (stateless) olmasıdır: oturum, sepet ya da yüklenen dosya sunucunun belleğinde değil, ortak bir depoda (Redis, veritabanı, nesne deposu) durur. Böylece herhangi bir istek herhangi bir kopyaya gidebilir ve bir kopya ölünce kimse fark etmez.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Dengeleme stratejisi</th><th>Nasıl seçer?</th><th>Ne zaman?</th></tr>
+<tr><td>Sırayla (round robin)</td><td>Sıradaki sunucu</td><td>İstekler benzer maliyetteyse</td></tr>
+<tr><td>En az bağlantı (least connections)</td><td>Açık isteği en az olan</td><td>Uzun süren isteklerde</td></tr>
+<tr><td>Hash (IP, kullanıcı)</td><td>Aynı anahtar aynı sunucuya</td><td>Yerel önbellek isabeti önemliyse</td></tr>
+</table></div>
+<pre class="code"># nginx.conf — üç uygulama kopyasının önünde yük dengeleyici
+upstream siparis_api {
+    least_conn;
+    server 10.0.0.11:8000 max_fails=3 fail_timeout=10s;
+    server 10.0.0.12:8000 max_fails=3 fail_timeout=10s;
+    server 10.0.0.13:8000 max_fails=3 fail_timeout=10s;
+}
+server {
+    listen 80;
+    location / { proxy_pass http://siparis_api; proxy_read_timeout 5s; }
+}</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Nginx ve Docker Compose ile üç kopyalı bir FastAPI servisi kurmayı <a href="../docker-deploy/">Docker ve dağıtım: konteyner, compose, bulut</a> dersinde gördün. <code>docker compose up --scale api=3</code> ile kopyaları artırıp yukarıdaki yapılandırmayı deneyebilirsin.</div>
+
+<h2>3. Önbellek katmanları ve CDN</h2>
+<p>Okuma yazmadan çok fazlaysa önbellek (cache) ilk silahtır. En yaygın kalıp <b>cache-aside</b> (tembel yükleme): uygulama önce önbelleğe bakar, yoksa veritabanından okur ve önbelleğe <b>TTL</b> (yaşam süresi) ile yazar. Statik dosyalar (menü fotoğrafları, JS) kullanıcıya yakın sunuculardan, yani <b>CDN</b>'den (Content Delivery Network) servis edilir. Katmanlar: tarayıcı → CDN → uygulama içi bellek → dağıtık önbellek (Redis) → veritabanı.</p>
+<pre class="py">class TTLOnbellek:
+    def __init__(self, ttl, saat):
+        self.ttl, self.saat, self.veri = ttl, saat, {}
+        self.isabet = self.kacirma = 0
+
+    def al(self, anahtar, yukle):
+        simdi = self.saat()
+        kayit = self.veri.get(anahtar)
+        if kayit and simdi - kayit[1] &lt; self.ttl:
+            self.isabet += 1
+            return kayit[0]
+        self.kacirma += 1
+        deger = yukle(anahtar)              # veritabanına git
+        self.veri[anahtar] = (deger, simdi)
+        return deger
+
+zaman = [0, 1, 2, 31, 32]
+saat = iter(zaman).__next__
+menu = TTLOnbellek(ttl=30, saat=saat)
+for _ in zaman:
+    menu.al("restoran:5", lambda k: f"{k} menüsü (DB)")
+print("isabet:", menu.isabet, "kaçırma:", menu.kacirma)</pre>
+<div class="warn"><b>Önbelleğin iki zor problemi</b>1) <b>Geçersiz kılma</b> (invalidation): fiyat değişince eski menü 30 saniye daha görünür; kabul edilebilir mi? Kritik veride yazınca anahtarı silmek gerekir. 2) <b>Sürü etkisi</b> (thundering herd / cache stampede): popüler bir anahtarın süresi dolunca yüzlerce istek aynı anda veritabanına koşar; çözüm kilit, erken yenileme ya da TTL'ye rastgele sapma eklemektir.</div>
+<pre class="code"># Gerçek dünyada: redis-py ile cache-aside (pip install redis)
+import json, redis
+r = redis.Redis(host="localhost", port=6379)
+
+def menu_getir(restoran_id, db):
+    anahtar = f"menu:{restoran_id}"
+    if (veri := r.get(anahtar)) is not None:
+        return json.loads(veri)
+    menu = db.menu_oku(restoran_id)
+    r.set(anahtar, json.dumps(menu), ex=300)   # 5 dk TTL
+    return menu</pre>
+
+<h2>4. Veri katmanı: replikasyon, sharding ve tutarlı hash</h2>
+<p><b>Replikasyon</b> (replication) verinin kopyalarını tutmaktır. Lider-takipçi (leader-follower) düzeninde yazmalar lidere gider, okumalar takipçilere dağıtılır. Takipçiler birkaç milisaniye-saniye geride kalabilir (replication lag): müşteri adresini güncelleyip sayfayı yenilediğinde eski adresi görebilir. Bunun yaygın çözümü "kendi yazdığını oku" (read-your-writes) kuralıdır: kullanıcı yeni yazdıysa bir süre onun okumalarını lidere yönlendir.</p>
+<p><b>Sharding</b> (bölümleme) veri tek makineye sığmadığında veriyi anahtara göre parçalara ayırmaktır. Aralık bazlı (A–M, N–Z) bölümleme sıcak noktalar üretebilir; hash bazlı bölümleme dengelidir. Ama naif <code>hash(anahtar) % N</code> yönteminin büyük bir kusuru var: sunucu sayısı değişince anahtarların neredeyse tamamı yer değiştirir. <b>Tutarlı hash</b> (consistent hashing) anahtarları ve sunucuları aynı halkaya yerleştirir; her anahtar saat yönünde ilk sunucuya gider. Yeni sunucu eklenince yalnız onun komşu dilimindeki anahtarlar taşınır. Dengeyi sağlamak için her sunucu halkaya birçok <b>sanal düğüm</b> (virtual node) ile konur.</p>
+<pre class="py">import hashlib, bisect
+
+def ozet(s):
+    return int(hashlib.md5(s.encode()).hexdigest(), 16)   # süreçten bağımsız, kararlı
+
+anahtarlar = [f"siparis-{i}" for i in range(3000)]
+mod3 = {a: ozet(a) % 3 for a in anahtarlar}
+mod4 = {a: ozet(a) % 4 for a in anahtarlar}
+print("mod N ile taşınan:", sum(mod3[a] != mod4[a] for a in anahtarlar))
+
+def halka_kur(dugumler, sanal=100):
+    halka = sorted((ozet(f"{d}#{i}"), d) for d in dugumler for i in range(sanal))
+    return [h for h, _ in halka], [d for _, d in halka]
+
+def bul(halka, anahtar):
+    noktalar, sahipler = halka
+    i = bisect.bisect(noktalar, ozet(anahtar)) % len(noktalar)
+    return sahipler[i]
+
+h3, h4 = halka_kur("ABC"), halka_kur("ABCD")
+tasinan = [a for a in anahtarlar if bul(h3, a) != bul(h4, a)]
+print("tutarlı hash ile taşınan:", len(tasinan), "→ hepsi", set(bul(h4, a) for a in tasinan))</pre>
+<p>3 000 anahtarın mod N ile yaklaşık dörtte üçü taşınırken tutarlı hash ile yalnız yeni düğüme düşen ~dörtte biri taşınır. Cassandra, DynamoDB ve birçok dağıtık önbellek istemcisi bu fikri kullanır.</p>
+<h3>CAP ve PACELC</h3>
+<p><b>CAP</b> teoremi: ağ bölünmesi (Partition) olduğunda sistem ya <b>tutarlılık</b> (Consistency: herkes son yazılanı görür) ya da <b>erişilebilirlik</b> (Availability: her istek cevap alır) seçer. <b>PACELC</b> bunu tamamlar: bölünme yokken (Else) bile <b>gecikme</b> (Latency) ile tutarlılık arasında seçim yaparsın.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Veri</th><th>Seçim</th><th>Gerekçe</th></tr>
+<tr><td>Cüzdan bakiyesi, ödeme</td><td>Tutarlılık (CP)</td><td>Çift harcama kabul edilemez; gerekirse hata ver</td></tr>
+<tr><td>Restoran puanı, beğeni sayısı</td><td>Erişilebilirlik (AP)</td><td>Birkaç saniye eski olması sorun değil</td></tr>
+<tr><td>Kurye konumu</td><td>Düşük gecikme (EL)</td><td>2 saniye eski konum, bekleyen bir cevaptan iyidir</td></tr>
+</table></div>
+
+<h2>5. Kuyruklar ve olay güdümlü mimari</h2>
+<p><b>Senkron</b> iletişimde servis A, B'nin cevabını bekler (HTTP/gRPC). <b>Asenkron</b> iletişimde A bir mesajı kuyruğa (RabbitMQ, Kafka, Redis Streams, SQS) bırakır ve devam eder; B kendi hızında tüketir. Sipariş verildiğinde müşteriye "alındı" demek için SMS, fatura, puan ve analitik işlerinin bitmesini beklemek gerekmez: "siparis_olustu" olayı (event) yayınlanır, her servis kendi işini yapar. Bu <b>olay güdümlü</b> (event-driven) mimari servisleri birbirinden ayırır ve tepe yükü kuyrukta biriktirerek yumuşatır.</p>
+<p>Bedeli: mesajlar <b>en az bir kez</b> (at-least-once) teslim edilir, yani aynı olay iki kez gelebilir. Bu yüzden tüketiciler <b>idempotent</b> olmalıdır (aynı olayı ikinci kez işlemek sonucu değiştirmemeli). Ödeme gibi dış çağrılarda istemci her isteğe bir <b>idempotency key</b> ekler; sunucu aynı anahtarı gördüğünde ilk sonucu döndürür. Veritabanına yazıp olayı yayınlamak arasında çökme olursa olay kaybolmasın diye olaylar aynı işlemde bir "giden kutusu" (outbox) tablosuna yazılır ve ayrı bir süreç onları kuyruğa aktarır (transactional outbox).</p>
+
+<h2>6. Dayanıklılık: zaman aşımı, retry, circuit breaker, backpressure</h2>
+<p>Dağıtık sistemde bir bağımlılık er geç yavaşlar. <a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</a> dersinde gördüğün <b>zaman aşımı</b> (timeout) ve <b>üstel geri çekilmeli yeniden deneme</b> (exponential backoff + jitter) ilk savunmadır. Ama ödeme sağlayıcısı tamamen çökmüşse her isteği 3 kez denemek yükü üçe katlar. <b>Circuit breaker</b> (sigorta) üst üste hatalardan sonra "açılır" ve bir süre çağrıyı hiç yapmadan hızlıca hata döndürür; süre dolunca "yarı açık" duruma geçip tek bir deneme isteğine izin verir; başarılıysa kapanır, değilse yeniden açılır.</p>
+<pre class="py">class SigortaAcik(Exception):
+    pass
+
+class Sigorta:
+    def __init__(self, esik=3, bekleme=10):
+        self.esik, self.bekleme = esik, bekleme
+        self.durum, self.hata, self.acilma = "kapali", 0, None
+
+    def cagir(self, fn, t):
+        if self.durum == "acik" and t - self.acilma &gt;= self.bekleme:
+            self.durum = "yari_acik"
+        if self.durum == "acik":
+            raise SigortaAcik("bağımlılık dinleniyor")
+        try:
+            sonuc = fn()
+        except Exception:
+            self.hata += 1
+            if self.durum == "yari_acik" or self.hata &gt;= self.esik:
+                self.durum, self.acilma = "acik", t
+            raise
+        self.durum, self.hata = "kapali", 0
+        return sonuc
+
+def odeme_coktu():
+    raise ConnectionError("ödeme servisi cevap vermiyor")
+
+s = Sigorta(esik=3, bekleme=10)
+for t, fn in [(0, odeme_coktu), (1, odeme_coktu), (2, odeme_coktu), (3, odeme_coktu), (13, lambda: "onay")]:
+    try:
+        print(t, s.cagir(fn, t), s.durum)
+    except Exception as e:
+        print(t, type(e).__name__, s.durum)</pre>
+<p><b>Backpressure</b> (geri basınç) üreticinin tüketiciden hızlı olduğu durumda sistemin "yavaşla" diyebilmesidir: sınırlı kuyruk dolunca yeni işi reddetmek (HTTP 429/503), hız sınırlama (rate limiting, ör. token bucket) ya da üreticiyi bekletmek. Sınırsız kuyruk backpressure değildir; yalnızca belleğin dolmasını erteler. <b>Bulkhead</b> (bölme) ise farklı bağımlılıklar için ayrı bağlantı havuzları kullanarak birinin tükenmesinin diğerlerini boğmasını engeller.</p>
+
+<h2>7. Örnek tasarımlar</h2>
+<h3>URL kısaltıcı</h3>
+<p>Okuma ağırlıklıdır (bir link milyonlarca kez açılır). Kısa kod, artan bir sayacın <b>base62</b> gösterimidir (0-9, a-z, A-Z): 7 karakter 62<sup>7</sup> ≈ 3,5 trilyon link demektir. Kod → URL eşlemesi anahtar-değer deposunda tutulur, popüler kodlar önbellekte durur, yönlendirme 301/302 ile yapılır. Sayacın tek arıza noktası olmaması için her sunucuya sayı blokları dağıtılır.</p>
+<pre class="py">ALFABE = "0123456789abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+
+def kodla(n):
+    if n == 0:
+        return ALFABE[0]
+    parcalar = []
+    while n:
+        n, kalan = divmod(n, 62)
+        parcalar.append(ALFABE[kalan])
+    return "".join(reversed(parcalar))
+
+for sayi in [61, 62, 125, 3_521_614_606_207]:
+    print(sayi, "→", kodla(sayi))</pre>
+<h3>Bildirim servisi</h3>
+<p>Diğer servisler "şu kullanıcıya şu şablonla bildir" olayı yayınlar. Bildirim servisi kullanıcı tercihlerine (SMS mi, push mu, sessiz saatler) bakar, kanal başına ayrı kuyruklara dağıtır, sağlayıcı hız sınırlarına uyar, başarısızları geri çekilmeyle yeniden dener ve olay numarasıyla tekrarları eler (aynı SMS'in iki kez gitmesi müşteri şikâyetidir).</p>
+<h3>Lezzet Kurye sipariş akışı</h3>
+<div class="steps-list"><ol>
+<li><b>Sipariş API</b> isteği idempotency key ile alır; sepeti doğrular, siparişi <code>olusturuldu</code> durumunda yazar ve aynı işlemde outbox'a <code>siparis_olustu</code> olayını ekler.</li>
+<li><b>Ödeme servisi</b> olayı tüketir, sağlayıcıyı circuit breaker arkasından çağırır; sonuç olayını yayınlar.</li>
+<li><b>Restoran servisi</b> tablete bildirim gönderir; restoran onaylayınca durum <code>hazirlaniyor</code> olur.</li>
+<li><b>Kurye atama servisi</b> yakındaki uygun kuryeleri (konum indeksi, ör. geohash) bulur, teklif gönderir; kabul edilince <code>yolda</code>.</li>
+<li>Teslimde <code>teslim</code>; her geçiş bir olaydır. Bildirim, analitik ve puanlama servisleri bu olayları bağımsız tüketir.</li>
+</ol></div>
+<p>Durumlar arasındaki izinli geçişleri bir <b>durum makinesi</b> (state machine) ile açıkça tanımlamak, "teslim edilmiş sipariş iptal edildi" gibi imkânsız durumları kod düzeyinde engeller.</p>
+
+<h2>8. Tasarım mülakatı: format ve rubrik</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Süre</th><th>Adım</th><th>Değerlendirici neye bakar?</th></tr>
+<tr><td>5 dk</td><td>Gereksinimleri netleştir</td><td>Doğru soruları sordun mu, kapsamı daralttın mı?</td></tr>
+<tr><td>5 dk</td><td>Kaba tahmin</td><td>QPS, depolama, okuma/yazma oranı mantıklı mı?</td></tr>
+<tr><td>10 dk</td><td>Üst düzey tasarım ve API</td><td>Bileşenler ve veri akışı tutarlı mı?</td></tr>
+<tr><td>15 dk</td><td>Derinleşme (veri modeli, ölçekleme, darboğaz)</td><td>Ödünleşimleri (trade-off) gerekçelendirebiliyor musun?</td></tr>
+<tr><td>5 dk</td><td>Arızalar, izleme, özet</td><td>Tek arıza noktası, gözlemlenebilirlik, gelecekteki büyüme</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Şirketlerde tasarım genelde bir RFC ya da "tasarım belgesi" ile yürür: bağlam, hedefler ve hedef olmayanlar, alternatifler ve neden elendikleri, kapasite tahmini, geçiş planı, izleme ve geri dönüş planı. Ekip belgeyi yorumlar, ardından küçük bir prototip ve yük testiyle varsayımlar doğrulanır. En pahalı hatalar yanlış teknolojiden değil, sorulmamış bir gereksinimden ("iptal edilen siparişin parası kaç dakikada iade edilmeli?") çıkar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Dağıtık işlemler ve saga</h3>
+<p>Sipariş, ödeme ve stok farklı veritabanlarındaysa tek bir ACID işlem yoktur. <b>Saga</b> kalıbı her adımı yerel bir işlem olarak yapar ve hata olursa önceki adımları <b>telafi eden işlemlerle</b> (ödemeyi iade et, stoğu geri ekle) geri alır. Koreografi (olaylarla) ya da orkestrasyon (merkezi bir yönetici) ile kurulur.</p>
+<h3>CQRS ve okuma modelleri</h3>
+<p>Yazma modeli normalleştirilmiş kalırken okuma için olaylardan beslenen ayrı, sorguya hazır tablolar (materialized view) tutulur. Restoran paneli "bugünkü siparişlerim" sorgusunu ağır JOIN'ler yerine hazır bir tablodan okur. Bedeli: okuma modeli birkaç saniye gecikmeli tutarlıdır (eventual consistency).</p>
+<h3>Ölçmeden ölçekleme</h3>
+<p>Tasarım varsayımlarını yük testiyle (Locust, k6) doğrula, p50/p95/p99 gecikmeyi izle; <code>gozlemlenebilirlik</code> yaklaşımıyla SLO'ları tanımla. Çoğu sistem ilk gün tek bir veritabanı ve birkaç uygulama kopyasıyla gayet iyi çalışır; sharding'i gerçekten gerektiğinde, ölçüme dayanarak ekle.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sistem-tasarimi">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../llm-ajanlar/">← LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</a><a href="../akis-isleme/">Akış işleme ve mesaj kuyrukları: Kafka kavramları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

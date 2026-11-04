@@ -1,0 +1,220 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>match-case: yapısal desen eşleme | Kesit Python</title><meta name="description" content="Python 3.10 ile gelen match-case ile değer, birleşik, dizi, sözlük ve sınıf desenlerini; guard ve yakalamayı öğrenir, komut ayrıştırıcı ve banka işlem…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/match-case/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="match-case: yapısal desen eşleme"><meta property="og:description" content="Python 3.10 ile gelen match-case ile değer, birleşik, dizi, sözlük ve sınıf desenlerini; guard ve yakalamayı öğrenir, komut ayrıştırıcı ve banka işlem…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/match-case/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"match-case: yapısal desen eşleme","description":"Python 3.10 ile gelen match-case ile değer, birleşik, dizi, sözlük ve sınıf desenlerini; guard ve yakalamayı öğrenir, komut ayrıştırıcı ve banka işlem…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/match-case/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>match-case: yapısal desen eşleme</h1><p class="st-l">Python 3.10 ile gelen match-case ile değer, birleşik, dizi, sözlük ve sınıf desenlerini; guard ve yakalamayı öğrenir, komut ayrıştırıcı ve banka işlem yönlendirici yazarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/match-case">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden yeni bir dallanma aracı?</h2>
+<p>Koşullar dersinde <code>match</code>'i kısaca gördün: bir değeri birkaç sabitle karşılaştırmanın düzenli yolu. Ama <code>match</code> aslında bundan çok daha güçlüdür. Adı <b>yapısal desen eşleme</b> (structural pattern matching): yalnızca "değer şuna eşit mi" diye sormaz, "veri <b>şu şekilde</b> mi" diye sorar ve şekle uyuyorsa parçalarını tek hamlede değişkenlere ayırır.</p>
+<p>Ilgaz Bank'ın işlem kuyruğunu düşün. Kuyruğa gelen her mesaj bir sözlüktür ama türü farklıdır: havalede alıcı IBAN'ı ve tutar vardır, fatura ödemesinde kurum kodu, kart işleminde kart numarası ve taksit sayısı. if/elif ile yazarsan her dalda önce türü kontrol eder, sonra anahtarların var olup olmadığına bakar, sonra değerleri tek tek çekersin. <code>match</code> bunların üçünü tek satırda yapar.</p>
+
+<h2>Temel söz dizimi ve değer desenleri</h2>
+<pre class="py">def kargo_durumu(kod):
+    match kod:
+        case "H":
+            return "Hazırlanıyor"
+        case "K":
+            return "Kargoda"
+        case "T":
+            return "Teslim edildi"
+        case _:
+            return "Bilinmeyen kod"
+
+for k in ["H", "T", "X"]:
+    print(k, "→", kargo_durumu(k))</pre>
+<p><code>match</code>'ten sonraki ifadeye <b>konu</b> (subject) denir. Her <code>case</code> bir <b>desen</b> (pattern) taşır; desenler yukarıdan aşağıya denenir ve <b>ilk eşleşen</b> çalışır, sonrakilere bakılmaz. C ya da Java'daki <code>switch</code>'ten farklı olarak "düşme" (fall-through) yoktur, <code>break</code> yazmazsın. <code>_</code> joker (wildcard) desendir: her şeyle eşleşir, bu yüzden en sona konur ve <code>else</code> görevini görür. Hiçbir desen eşleşmezse ve <code>_</code> yoksa <code>match</code> sessizce hiçbir şey yapmaz.</p>
+<p>Değer desenleri (literal patterns) sayı, metin, <code>True</code>, <code>False</code> ve <code>None</code> olabilir. Sayılarda <code>==</code> ile, <code>True/False/None</code>'da <code>is</code> ile karşılaştırılır.</p>
+
+<h2>Birleşik desen: |</h2>
+<p>Birkaç değer aynı sonuca gidiyorsa onları <code>|</code> ("veya") ile birleştirirsin.</p>
+<pre class="py">def gun_tipi(gun):
+    match gun.lower():
+        case "cumartesi" | "pazar":
+            return "Hafta sonu: şube kapalı"
+        case "pazartesi" | "salı" | "çarşamba" | "perşembe" | "cuma":
+            return "İş günü"
+        case _:
+            return "Geçersiz gün"
+
+print(gun_tipi("Pazar"))
+print(gun_tipi("salı"))
+print(gun_tipi("bayram"))</pre>
+
+<h2>Yakalama deseni ve en önemli tuzak</h2>
+<p>Desende tırnaksız, noktasız bir <b>ad</b> yazarsan Python onu karşılaştırılacak bir değer olarak değil, <b>yakalanacak bir değişken</b> olarak görür. Yakalama deseni (capture pattern) her şeyle eşleşir ve konuyu o ada bağlar.</p>
+<pre class="py">ONAY = "onay"
+
+def durum_eski(durum):
+    match durum:
+        case "iptal":
+            return "İptal"
+        case ONAY:                 # DİKKAT: bu bir karşılaştırma DEĞİL
+            return "Onaylandı (" + ONAY + ")"
+
+print(durum_eski("onay"))
+print(durum_eski("beklemede"))     # yanlışlıkla "Onaylandı" der!</pre>
+<p><code>case ONAY:</code> satırı "durum ONAY'a eşit mi" diye sormaz; "ne gelirse gelsin, adı ONAY olsun" der. İkinci çağrıda <code>"beklemede"</code> bu dala girer ve ONAY artık <code>"beklemede"</code>dir. Arkasından başka bir <code>case</code> yazsaydın Python bunu fark edip SyntaxError verirdi; en sonda olduğu için sessizce yanlış çalışır.</p>
+<div class="warn"><b>Sabitle karşılaştırmak için nokta gerekir</b>Bir sabitle karşılaştırmak istiyorsan ya değeri doğrudan yaz (<code>case "onay":</code>) ya da <b>noktalı ad</b> kullan: <code>case Durum.ONAY:</code>. Noktalı adlar (sınıf özelliği, enum üyesi, modül sabiti) değer deseni sayılır. Düz ad her zaman yakalamadır.</div>
+
+<h2>Guard: desene ek koşul</h2>
+<p>Bazen şekil yetmez, değere bir koşul da koymak istersin. <code>case desen if koşul:</code> yazımına <b>guard</b> (koruma) denir. Desen eşleşir, değişkenler bağlanır, sonra koşul denetlenir; koşul yanlışsa sıradaki <code>case</code>'e geçilir.</p>
+<pre class="py">def tutar_sinifi(tutar):
+    match tutar:
+        case 0:
+            return "Boş işlem"
+        case t if t &lt; 0:
+            return "İade"
+        case t if t &gt;= 50_000:
+            return "Yüksek tutar: onay gerekir"
+        case _:
+            return "Normal"
+
+for t in [0, -120, 75_000, 900]:
+    print(t, tutar_sinifi(t))</pre>
+<p>Guard'lı dallarda sıra önemlidir: daha özel koşulu üste yaz. Genel bir desen (<code>case t:</code>) üstte kalırsa altındaki özel dallar hiç çalışmaz.</p>
+
+<h2>Dizi desenleri: komut ayrıştırıcı</h2>
+<p>Konu bir liste ya da demetse eleman sayısına ve elemanlara göre eşleştirebilirsin. <code>[x, y]</code> tam iki elemanlı dizilerle eşleşir ve elemanları <code>x</code> ile <code>y</code>'ye bağlar. <code>*rest</code> "geri kalanların hepsi" demektir (demet açmadaki yıldızlı ad gibi).</p>
+<pre class="py">def komut(satir):
+    match satir.split():
+        case []:
+            return "Boş komut"
+        case ["yardım"] | ["help"]:
+            return "Komutlar: ekle, sil, listele"
+        case ["listele"]:
+            return "Sepet listeleniyor"
+        case ["ekle", urun]:
+            return f"{urun} sepete eklendi (1 adet)"
+        case ["ekle", urun, adet] if adet.isdigit():
+            return f"{urun} sepete eklendi ({adet} adet)"
+        case ["sil", *urunler] if urunler:
+            return f"Silindi: {', '.join(urunler)}"
+        case [bilinmeyen, *_]:
+            return f"Bilinmeyen komut: {bilinmeyen}"
+
+for s in ["", "help", "ekle çay", "ekle çay 3", "ekle çay üç", "sil çay kahve", "uç"]:
+    print(repr(s), "→", komut(s))</pre>
+<p>Bu örnekte birçok kavram birlikte çalışıyor: <code>[]</code> boş listeyle, <code>["yardım"] | ["help"]</code> iki tek elemanlı listeden biriyle eşleşir; <code>urun</code> ve <code>adet</code> yakalanır; guard (<code>adet.isdigit()</code>) "üç" gibi geçersiz adedi dışarıda bırakır ve son dala düşürür. <code>*_</code> geri kalanı yakalamadan yok sayar.</p>
+<div class="note"><b>Metin dizi deseniyle eşleşmez</b>Metin teknik olarak bir dizi olsa da <code>match "abc": case [a, b, c]:</code> eşleşmez; Python bu karışıklığı önlemek için str, bytes ve bytearray'i dizi desenlerinden hariç tutar. Metni parçalara ayırmak istiyorsan önce <code>split()</code> ile listeye çevir.</div>
+
+<h2>Sözlük desenleri: banka işlem yönlendirme</h2>
+<p>JSON benzeri mesajlar için en kullanışlı desen budur. <code>{"tip": "havale", "tutar": t}</code> deseni, konu bir sözlükse, <code>"tip"</code> anahtarı <code>"havale"</code> ise ve <code>"tutar"</code> anahtarı varsa eşleşir; tutarı <code>t</code>'ye bağlar. Desende yazmadığın <b>fazladan anahtarlar yok sayılır</b>; bu, sürekli alan eklenen gerçek mesajlarla çalışırken çok işe yarar.</p>
+<pre class="py">def yonlendir(islem):
+    match islem:
+        case {"tip": "havale", "tutar": t, "alici": alici} if t &gt; 50_000:
+            return f"Uyum ekibine: {alici} için {t} TL havale"
+        case {"tip": "havale" | "eft", "tutar": t, "alici": alici}:
+            return f"Transfer: {alici} ← {t} TL"
+        case {"tip": "fatura", "kurum": kurum, "tutar": t}:
+            return f"Fatura ödemesi: {kurum} {t} TL"
+        case {"tip": "kart", "taksit": int(n)} if n &gt; 1:
+            return f"Taksitli kart işlemi ({n} taksit)"
+        case {"tip": "kart"}:
+            return "Tek çekim kart işlemi"
+        case {"tip": tip}:
+            return f"Desteklenmeyen işlem türü: {tip}"
+        case _:
+            return "Geçersiz mesaj"
+
+islemler = [
+    {"tip": "havale", "tutar": 75_000, "alici": "TR12", "kanal": "mobil"},
+    {"tip": "eft", "tutar": 1_200, "alici": "TR34"},
+    {"tip": "fatura", "kurum": "Su", "tutar": 310},
+    {"tip": "kart", "taksit": 6},
+    {"tip": "kart", "taksit": 1},
+    {"tip": "kripto"},
+    ["havale", 100],
+]
+for i in islemler:
+    print(yonlendir(i))</pre>
+<p>Desenler iç içe girebilir: <code>"havale" | "eft"</code> bir sözlük deseninin içinde birleşik desendir, <code>int(n)</code> ise "değer int olsun ve n'ye bağlansın" diyen bir sınıf desenidir. Liste olarak gelen son mesaj hiçbir sözlük deseniyle eşleşmez ve joker dala düşer. Geri kalan anahtarları toplamak istersen <code>**diger</code> yazabilirsin: <code>case {"tip": "havale", **diger}:</code>.</p>
+<div class="tip"><b>as ile alt deseni adlandır</b><code>case {"tip": ("havale" | "eft") as tur, "tutar": t}:</code> yazarsan hangi alternatifin eşleştiğini <code>tur</code> değişkeninde bulursun. <code>as</code>, bir desenin tamamını bir ada bağlar.</div>
+
+<h2>Sınıf desenleri: dataclass ile</h2>
+<p>Konu bir nesneyse türüne ve özelliklerine göre eşleştirebilirsin. <code>int()</code>, <code>str()</code>, <code>float()</code> gibi yerleşik türler zaten sınıf desenidir. Kendi sınıfların için en kolay yol <code>dataclass</code>'tır (orta seviyede ayrıntılı göreceksin; burada yalnızca kısa bir kayıt tanımlamak için kullanıyoruz). dataclass, alanlarını sırayla desene açar; böylece konumsal yazabilirsin.</p>
+<pre class="py">from dataclasses import dataclass
+
+@dataclass
+class Havale:
+    alici: str
+    tutar: float
+
+@dataclass
+class Fatura:
+    kurum: str
+    tutar: float
+
+def ozet(islem):
+    match islem:
+        case Havale(alici, tutar) if tutar &gt; 10_000:
+            return f"Büyük havale → {alici}"
+        case Havale(alici=a):
+            return f"Havale → {a}"
+        case Fatura(kurum="Elektrik" | "Doğalgaz", tutar=t):
+            return f"Enerji faturası: {t}"
+        case Fatura():
+            return "Diğer fatura"
+        case int() | float() as tutar:
+            return f"Ham tutar: {tutar}"
+        case _:
+            return "Tanınmadı"
+
+for i in [Havale("TR12", 25_000), Havale("TR34", 50), Fatura("Elektrik", 640.5), Fatura("Su", 90), 42, "x"]:
+    print(ozet(i))</pre>
+<p><code>Havale(alici, tutar)</code> konumsal, <code>Havale(alici=a)</code> anahtar sözcüklü yazımdır. <code>Fatura()</code> boş parantezle "türü Fatura olsun, alanları önemli değil" demektir. Parantezsiz <code>case Fatura:</code> yazmak ise yine yakalama tuzağıdır.</p>
+
+<h2>match mi if/elif mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th><th>Neden</th></tr>
+<tr><td>Bir değeri birkaç sabitle karşılaştırmak</td><td>İkisi de olur</td><td>3-4 dalda if/elif yeterince açık; daha fazlasında match okunur</td></tr>
+<tr><td>Aralık ve eşik (tutar &gt;= 500)</td><td>if/elif</td><td>match'te her dal guard ister, kazanç yok</td></tr>
+<tr><td>Birden fazla değişkene bağlı karmaşık mantık</td><td>if/elif</td><td>match tek bir konu üzerine kuruludur</td></tr>
+<tr><td>Listenin uzunluğuna ve elemanlarına göre dallanma</td><td>match</td><td>Uzunluk kontrolü ve açma tek desende</td></tr>
+<tr><td>JSON/sözlük mesajın türüne göre yönlendirme</td><td>match</td><td>Anahtar varlığı, değer ve çekme bir arada</td></tr>
+<tr><td>Nesnenin türüne ve alanlarına göre işlem</td><td>match</td><td>isinstance + özellik okuma tek satırda</td></tr>
+<tr><td>Python 3.9 ve öncesini desteklemesi gereken kod</td><td>if/elif</td><td>match 3.10'da geldi; eski sürümde SyntaxError</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Bir bankanın ya da e-ticaret sitesinin arka planında olay güdümlü (event-driven) sistemler çalışır: mesaj kuyruğundan "sipariş_oluştu", "ödeme_alındı", "iade_talebi" gibi türü farklı JSON olaylar gelir ve her biri farklı bir işleyiciye yönlendirilir. Webhook alıcıları, sohbet botlarının komut ayrıştırıcıları, CLI araçları ve basit yorumlayıcılar da aynı işi yapar. Bu kodu match ile yazmak, kod incelemesinde (code review) "hangi mesaj nereye gidiyor" sorusunu tek bakışta yanıtlatır; yeni bir olay türü eklemek tek bir case eklemektir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Desen türlerinin özeti</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Desen</th><th>Örnek</th><th>Eşleşir</th></tr>
+<tr><td>Değer</td><td><code>case 404:</code></td><td>Konu 404'e eşitse</td></tr>
+<tr><td>Noktalı değer</td><td><code>case Durum.ONAY:</code></td><td>Sabite eşitse</td></tr>
+<tr><td>Yakalama</td><td><code>case x:</code></td><td>Her zaman; x'e bağlar</td></tr>
+<tr><td>Joker</td><td><code>case _:</code></td><td>Her zaman; bağlamaz</td></tr>
+<tr><td>Birleşik</td><td><code>case 301 | 302:</code></td><td>Alternatiflerden biri</td></tr>
+<tr><td>Dizi</td><td><code>case [x, *rest]:</code></td><td>En az bir elemanlı liste/demet</td></tr>
+<tr><td>Sözlük</td><td><code>case {"tip": t}:</code></td><td>"tip" anahtarı olan sözlük</td></tr>
+<tr><td>Sınıf</td><td><code>case Havale(tutar=t):</code></td><td>Havale örneği</td></tr>
+<tr><td>as</td><td><code>case [_, _] as cift:</code></td><td>Desen + tümünü bağlama</td></tr>
+</table></div>
+<h3>Enum ile güvenli sabitler</h3>
+<p>Durum kodlarını metin olarak dağıtmak yerine <code>enum.Enum</code> tanımlarsan hem yazım hatası riskini azaltır hem de noktalı adla güvenle eşleştirirsin.</p>
+<pre class="py">from enum import Enum
+
+class Durum(Enum):
+    BEKLIYOR = "bekliyor"
+    ONAY = "onay"
+    RED = "red"
+
+def mesaj(d):
+    match d:
+        case Durum.ONAY:
+            return "Kredi onaylandı"
+        case Durum.RED:
+            return "Başvuru reddedildi"
+        case Durum.BEKLIYOR:
+            return "İnceleniyor"
+
+print(mesaj(Durum("onay")), "|", mesaj(Durum.BEKLIYOR))</pre>
+<h3>Performans ve sınırlar</h3>
+<p>match bir "atlama tablosu" değildir; desenler sırayla denenir, yani if/elif zincirinden hızlı değildir. Avantajı hız değil okunabilirlik ve doğruluktur. Yüzlerce sabit değere göre dallanıyorsan sözlükle eşleme (<code>{"H": "Hazırlanıyor", ...}.get(kod)</code>) hem daha hızlı hem daha kısadır. Ayrıca derleyici, eksik dalları (exhaustiveness) denetlemez; tüm durumları kapsadığından emin olmak için sonda <code>case _:</code> ile açıkça hata fırlatmak iyi bir alışkanlıktır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/match-case">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ic-ice-veri/">← İç içe veri yapıları</a><a href="../ozyineleme/">Özyineleme (recursion) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

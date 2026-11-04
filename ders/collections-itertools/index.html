@@ -1,0 +1,267 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>collections ve itertools: hazır veri yapıları ve yineleme araçları | Kesit Python</title><meta name="description" content="Counter, defaultdict, deque, namedtuple ile veriyi daha az kodla tutar; chain, groupby, product, combinations, accumulate ve islice ile yinelemeyi tek…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/collections-itertools/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="collections ve itertools: hazır veri yapıları ve yineleme araçları"><meta property="og:description" content="Counter, defaultdict, deque, namedtuple ile veriyi daha az kodla tutar; chain, groupby, product, combinations, accumulate ve islice ile yinelemeyi tek…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/collections-itertools/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"collections ve itertools: hazır veri yapıları ve yineleme araçları","description":"Counter, defaultdict, deque, namedtuple ile veriyi daha az kodla tutar; chain, groupby, product, combinations, accumulate ve islice ile yinelemeyi tek…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/collections-itertools/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>collections ve itertools: hazır veri yapıları ve yineleme araçları</h1><p class="st-l">Counter, defaultdict, deque, namedtuple ile veriyi daha az kodla tutar; chain, groupby, product, combinations, accumulate ve islice ile yinelemeyi tek geçişte kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/collections-itertools">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in raporlama ekibinde çalıştığını düşün. Her gün "hangi şehirden kaç sipariş geldi", "son 5 işlem neydi", "ürün çiftlerinin hangisi birlikte alınıyor" gibi sorular geliyor. Bunların hepsini sözlük ve for döngüsüyle yazabilirsin; ama Python'ın standart kütüphanesindeki <code>collections</code> ve <code>itertools</code> modülleri aynı işi daha kısa, daha hızlı ve daha az hatayla yapar. Bu ders, "elle yazdığın yardımcı kodun" yerine hazır ve test edilmiş araçları koymayı öğretir.</p>
+
+<h2>collections modülü</h2>
+<h3>Counter: sayım yapan sözlük</h3>
+<p><code>Counter</code> (sayaç), bir yinelenebilirdeki (iterable) elemanları sayar ve <code>eleman: adet</code> sözlüğü üretir. En çok geçenleri <code>most_common(n)</code> ile alırsın; olmayan anahtar için hata değil <code>0</code> döner.</p>
+<pre class="py">from collections import Counter
+
+siparis_sehirleri = ["İstanbul", "Ankara", "İstanbul", "İzmir", "Ankara", "İstanbul", "Bursa"]
+sayac = Counter(siparis_sehirleri)
+print(sayac)
+print("En çok 2 şehir:", sayac.most_common(2))
+print("Adana siparişi:", sayac["Adana"])      # KeyError yok, 0 döner
+
+# Counter'lar toplanabilir
+dun = Counter({"İstanbul": 3, "Ankara": 1})
+bugun = Counter({"İstanbul": 2, "İzmir": 4})
+print("İki gün toplam:", dun + bugun)
+print("Toplam sipariş:", sum(sayac.values()))</pre>
+
+<h3>defaultdict: eksik anahtarı kendisi üreten sözlük</h3>
+<p>Klasik gruplama kodunda <code>if sehir not in gruplar: gruplar[sehir] = []</code> satırı hep tekrar eder. <code>defaultdict(list)</code> bu satırı kaldırır: olmayan bir anahtara eriştiğinde fabrika fonksiyonunu (<code>list</code>, <code>int</code>, <code>set</code>...) çağırıp varsayılan değeri yerleştirir.</p>
+<pre class="py">from collections import defaultdict
+
+islemler = [
+    ("TR01", 250.0), ("TR02", 80.0), ("TR01", 120.5), ("TR03", 999.0), ("TR02", 15.0),
+]
+
+hesap_toplam = defaultdict(float)
+hesap_hareket = defaultdict(list)
+for hesap, tutar in islemler:
+    hesap_toplam[hesap] += tutar        # ilk erişimde 0.0 ile başlar
+    hesap_hareket[hesap].append(tutar)  # ilk erişimde [] ile başlar
+
+print(dict(hesap_toplam))
+print(dict(hesap_hareket))
+print("TR09 toplam:", hesap_toplam["TR09"])  # dikkat: erişim anahtarı OLUŞTURUR
+print("Anahtarlar:", list(hesap_toplam))</pre>
+<div class="warn"><b>Erişim yan etkisi</b>defaultdict'te bir anahtarı okumak bile onu oluşturur. Yalnızca "var mı?" diye bakmak istiyorsan <code>"TR09" in d</code> kullan ya da <code>d.get("TR09")</code> çağır; köşeli parantezle okuma.</div>
+
+<h3>deque: iki uçlu kuyruk</h3>
+<p>Listenin başından eleman çıkarmak (<code>pop(0)</code>) tüm elemanları kaydırdığı için yavaştır. <code>deque</code> (double-ended queue) iki uçtan da O(1) ekleme/çıkarma yapar. <code>maxlen</code> verirsen "son N kayıt" penceresi elde edersin: yeni eleman gelince en eski kendiliğinden düşer.</p>
+<pre class="py">from collections import deque
+
+son_islemler = deque(maxlen=3)
+for tutar in [100, 250, 80, 999, 42]:
+    son_islemler.append(tutar)
+    print("Pencere:", list(son_islemler))
+
+kuyruk = deque(["müşteri-1", "müşteri-2"])
+kuyruk.append("müşteri-3")       # sağa ekle
+kuyruk.appendleft("acil")        # sola ekle
+print(kuyruk.popleft(), "işleme alındı")
+print("Kalan:", list(kuyruk))
+kuyruk.rotate(1)                 # döndür
+print("Döndürülmüş:", list(kuyruk))</pre>
+
+<h3>namedtuple: adlandırılmış demet</h3>
+<p>Bir işlemi <code>("TR01", 250.0, "havale")</code> diye tutarsan üç ay sonra <code>islem[2]</code> ne demekti diye bakarsın. <code>namedtuple</code> demete alan adı verir: <code>islem.tur</code>. Değiştirilemez (immutable) ve hafiftir; sözlükten az yer kaplar. Daha fazla özellik (varsayılan değer, metot) istersen <code>dataclass</code> dersine dön.</p>
+<pre class="py">from collections import namedtuple
+
+Islem = namedtuple("Islem", ["hesap", "tutar", "tur"])
+i1 = Islem("TR01", 250.0, "havale")
+i2 = Islem(hesap="TR02", tutar=80.0, tur="kart")
+
+print(i1.hesap, i1.tutar, i1.tur)
+print(i1[0], "=", i1.hesap)              # indeksle de çalışır
+hesap, tutar, tur = i2                   # paketten çıkarma
+print(tutar)
+print(i1._asdict())                      # sözlüğe çevir
+print(i1._replace(tutar=300.0))          # yeni kopya (orijinal değişmez)</pre>
+
+<div class="note"><b>OrderedDict notu</b>Python 3.7'den beri normal <code>dict</code> ekleme sırasını korur; bu yüzden <code>OrderedDict</code> çoğu kodda gerekmez. Hâlâ iki farkı var: eşitlik karşılaştırmasında sırayı dikkate alır ve <code>move_to_end()</code> metodu vardır (LRU önbellek (cache) gibi yapılarda kullanılır). Eski kodda görürsen şaşırma.</div>
+
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne zaman</th><th>Yerine geçtiği elle yazılan kod</th></tr>
+<tr><td>Counter</td><td>Sayım, en çok geçen</td><td>d[x] = d.get(x, 0) + 1</td></tr>
+<tr><td>defaultdict</td><td>Gruplama, toplama</td><td>if k not in d: d[k] = []</td></tr>
+<tr><td>deque</td><td>Kuyruk, son N kayıt</td><td>lst.pop(0), lst = lst[-N:]</td></tr>
+<tr><td>namedtuple</td><td>Hafif, değişmez kayıt</td><td>t[0], t[1] ile indeks erişimi</td></tr>
+<tr><td>ChainMap</td><td>Katmanlı ayar (varsayılan + kullanıcı)</td><td>{**varsayilan, **kullanici}</td></tr>
+</table></div>
+
+<h2>itertools modülü</h2>
+<p><code>itertools</code> fonksiyonları tembel (lazy) çalışır: sonuç listesini bellekte kurmaz, istendikçe üretir. Bu yüzden büyük verilerle ve üreteçlerle (generator) iyi anlaşır. Sonucu görmek için <code>list()</code> ile sarman gerekir.</p>
+
+<h3>chain ve islice</h3>
+<p><code>chain(a, b)</code> birden çok yinelenebiliri tek akış gibi gezer; <code>chain.from_iterable</code> iç içe listeyi düzleştirir. <code>islice(it, start, stop, step)</code> ise üreteçlerde dilimleme yapar; listeye çevirmeden "ilk 3" almak için kullanılır.</p>
+<pre class="py">from itertools import chain, islice, count
+
+subat = ["S-101", "S-102"]
+mart = ["S-201", "S-202", "S-203"]
+print(list(chain(subat, mart)))
+print(list(chain.from_iterable([subat, mart, ["S-301"]])))
+
+# Sonsuz sayaçtan ilk 4 sipariş numarası
+numaralar = (f"S-{n}" for n in count(1000))
+print(list(islice(numaralar, 4)))
+print(list(islice(mart, 1, None)))   # 1. indeksten sona</pre>
+
+<h3>groupby: ardışık grupları ayırma</h3>
+<p><code>groupby</code> SQL'deki GROUP BY'a benzer ama bir tuzağı var: yalnızca <b>ardışık</b> eşit anahtarları gruplar. Bu yüzden önce aynı anahtara göre <code>sorted()</code> yapmalısın. Grup nesnesi tembel bir yineleyicidir (iterator); bir kez tüketilir.</p>
+<pre class="py">from itertools import groupby
+
+siparisler = [
+    {"sehir": "Ankara", "tutar": 120}, {"sehir": "İzmir", "tutar": 300},
+    {"sehir": "Ankara", "tutar": 80},  {"sehir": "İstanbul", "tutar": 50},
+]
+anahtar = lambda s: s["sehir"]
+for sehir, grup in groupby(sorted(siparisler, key=anahtar), key=anahtar):
+    grup = list(grup)                      # tüketmeden önce listeye al
+    print(sehir, len(grup), "sipariş, toplam", sum(s["tutar"] for s in grup))
+
+# Sıralamadan: Ankara iki ayrı gruba bölünür!
+print([k for k, _ in groupby(siparisler, key=anahtar)])</pre>
+
+<h3>product, combinations, permutations</h3>
+<pre class="py">from itertools import product, combinations, permutations
+
+bedenler = ["S", "M"]
+renkler = ["kırmızı", "siyah", "beyaz"]
+print("Varyant sayısı:", len(list(product(bedenler, renkler))))
+print(list(product(bedenler, renkler))[:3])
+
+sepet = ["laptop", "mouse", "çanta", "kulaklık"]
+print("İkili kombinasyon:", list(combinations(sepet, 2))[:4])   # sıra önemsiz
+print("Sıralı ikili:", list(permutations(sepet[:3], 2)))        # sıra önemli
+print("Kendisiyle çarpım:", list(product("01", repeat=2)))</pre>
+
+<h3>accumulate: kümülatif değerler</h3>
+<p><code>accumulate</code> birikimli toplam üretir; <code>func</code> ile başka işlem (örneğin <code>max</code>) verebilirsin. Banka bakiyesi, yılbaşından bugüne satış, tepe değer gibi raporlar için birebir.</p>
+<pre class="py">from itertools import accumulate
+import operator
+
+hareketler = [1000, -250, 400, -1200, 300]
+print("Bakiye:", list(accumulate(hareketler)))
+print("Bakiye (başlangıç 500):", list(accumulate(hareketler, initial=500)))
+print("Şimdiye kadarki tepe:", list(accumulate(hareketler, max)))
+print("Çarpımsal:", list(accumulate([1.1, 1.2, 0.9], operator.mul)))</pre>
+
+<div class="tip"><b>zip_longest ve pairwise</b><code>zip</code> en kısa listede durur; eşit olmayan uzunluklarda <code>itertools.zip_longest(a, b, fillvalue=None)</code> kullan. Ardışık çiftler (bugün-dün farkı gibi) için <code>itertools.pairwise(lst)</code> (3.10+) vardır: <code>[(1,2),(2,3),...]</code>.</div>
+
+<h2>Birlikte kullanım: küçük bir rapor</h2>
+<pre class="py">from collections import Counter, defaultdict, namedtuple
+from itertools import accumulate
+
+Satis = namedtuple("Satis", "gun kategori tutar")
+veri = [
+    Satis("Pzt", "elektronik", 1500), Satis("Pzt", "giyim", 300),
+    Satis("Sal", "elektronik", 700),  Satis("Sal", "kitap", 120),
+    Satis("Çar", "giyim", 450),
+]
+print("Kategori adedi:", Counter(s.kategori for s in veri))
+gunluk = defaultdict(int)
+for s in veri:
+    gunluk[s.gun] += s.tutar
+print("Günlük:", dict(gunluk))
+print("Kümülatif:", list(accumulate(gunluk.values())))</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: sayaç aritmetiği, katmanlı ayarlar ve itertools'un geri kalanı</h2>
+<p>Counter, defaultdict, deque ve temel itertools fonksiyonlarını tanıdın. Bu bölümde iş hayatında sık kullanılıp derslerde az anlatılan parçaları ekliyoruz: Counter ile stok farkı çıkarmak, iç içe defaultdict, <code>ChainMap</code> ile katmanlı ayarlar, namedtuple'ın yardımcı metotları ve <code>pairwise</code>, <code>batched</code>, <code>zip_longest</code>, <code>takewhile</code> gibi araçlar. Öncelik kuyruğu (<code>heapq</code>) "Veri yapıları", <code>reduce</code> ve <code>partial</code> "Fonksiyonel programlama" dersinde.</p>
+
+<h3>1. Counter aritmetiği: stok sayımı farkı</h3>
+<p>Counter'lar birer çoklu küme (multiset) gibi davranır. <code>+</code> toplar, <code>-</code> çıkarır ve <b>sıfır ya da negatif sonuçları atar</b>; <code>&amp;</code> ortak en küçük, <code>|</code> en büyük adetleri verir. Negatifleri korumak istersen yerinde çalışan <code>subtract()</code> kullanırsın. <code>total()</code> (3.10+) tüm adetlerin toplamıdır.</p>
+<pre class="py">from collections import Counter
+
+sistem = Counter({"koli": 40, "bant": 12, "etiket": 5})
+sayim  = Counter({"koli": 37, "bant": 12, "etiket": 9, "makas": 1})
+
+print("eksik:", sistem - sayim)        # sistemde olup rafta olmayan
+print("fazla:", sayim - sistem)        # rafta olup sistemde olmayan
+print("ortak:", sistem &amp; sayim)
+fark = Counter(sistem)
+fark.subtract(sayim)                    # negatifler korunur
+print("net  :", dict(fark))
+print("toplam adet:", sayim.total(), "| çeşit:", len(sayim))
+print(sorted(Counter("abaca").elements()))</pre>
+
+<h3>2. İç içe defaultdict</h3>
+<p>"Şehir → kategori → ciro" gibi iki seviyeli toplamalarda iç içe <code>if</code>'ler yerine <code>defaultdict(lambda: defaultdict(float))</code> yazarsın. Fabrika <b>çağrılabilir</b> olmalıdır; <code>defaultdict(defaultdict(float))</code> hatalıdır çünkü dış sözlüğe bir nesne verir, fabrika değil. JSON'a ya da teste vermeden önce düz <code>dict</code>'e çevir.</p>
+<pre class="py">from collections import defaultdict
+
+satislar = [("Ankara", "Elektronik", 1200.0), ("İzmir", "Gıda", 85.5),
+            ("Ankara", "Gıda", 40.0), ("Ankara", "Elektronik", 300.0)]
+
+ciro = defaultdict(lambda: defaultdict(float))
+for sehir, kategori, tutar in satislar:
+    ciro[sehir][kategori] += tutar
+
+duz = {s: dict(k) for s, k in ciro.items()}
+print(duz)
+print(ciro["Bursa"]["Gıda"], "Bursa" in ciro)   # okumak bile anahtar oluşturur!</pre>
+
+<h3>3. ChainMap: katmanlı ayarlar</h3>
+<p>Bir uygulamanın ayarları genellikle üç katmandan gelir: kod içi varsayılanlar, ortam (sunucu) ayarları ve kullanıcının komut satırı seçenekleri. <code>ChainMap(kullanici, ortam, varsayilan)</code> bunları kopyalamadan tek sözlük gibi gösterir: okumada soldan sağa ilk bulunan kazanır, <b>yazma ve silme yalnız ilk sözlüğe</b> yapılır. Katmanlar sonradan değişirse ChainMap bunu anında yansıtır; <code>{**a, **b}</code> birleştirmesi ise bir kopyadır.</p>
+<pre class="py">from collections import ChainMap
+
+varsayilan = {"para_birimi": "TRY", "sayfa": 20, "dil": "tr"}
+ortam      = {"sayfa": 50}
+kullanici  = {"dil": "en"}
+
+ayar = ChainMap(kullanici, ortam, varsayilan)
+print(ayar["para_birimi"], ayar["sayfa"], ayar["dil"])
+ayar["sayfa"] = 10                    # yalnız kullanici'ya yazılır
+print(kullanici, ortam)
+ortam["zaman_asimi"] = 30             # sonradan eklenen katman verisi görünür
+print(ayar["zaman_asimi"], dict(ayar))
+print([k for k in varsayilan if ayar[k] != varsayilan[k]])   # değişen ayarlar</pre>
+
+<h3>4. namedtuple'ın yardımcıları</h3>
+<p>namedtuple değiştirilemez; bir alanı "güncellemek" için <code>_replace(alan=...)</code> yeni bir kayıt döndürür. <code>_asdict()</code> sözlüğe, <code>_fields</code> alan adlarına, <code>_make(iterable)</code> tam alan sayısındaki bir diziden kayıt üretir (varsayılanları kullanmaz; eksik sütunlu satırda <code>Urun(*satir)</code> yaz). <code>defaults=</code> ile sondaki alanlara varsayılan verilir. Alt çizgi burada "özel" demek değildir; alan adlarıyla çakışmasın diye konmuştur.</p>
+<pre class="py">from collections import namedtuple
+import csv, io
+
+Urun = namedtuple("Urun", ["sku", "ad", "fiyat", "stok"], defaults=[0])
+metin = "K-1,Kulaklık,750\nF-2,Fare,300\n"
+urunler = [Urun(*r) for r in csv.reader(io.StringIO(metin))]   # stok varsayılan 0
+print(Urun._make(["M-3", "Monitör", "4200", "2"]))                 # _make: tüm alanlar
+print(urunler[0])
+zamli = [u._replace(fiyat=round(float(u.fiyat) * 1.1, 2)) for u in urunler]
+print(zamli[1]._asdict(), Urun._fields)</pre>
+
+<h3>5. itertools'un geri kalanı</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Fonksiyon</th><th>Ne yapar</th><th>İş örneği</th></tr>
+<tr><td><code>pairwise(x)</code> (3.10+)</td><td>Ardışık çiftler: (a,b), (b,c)...</td><td>Günlük değişim, iki olay arası süre</td></tr>
+<tr><td><code>batched(x, n)</code> (3.12+)</td><td>n'lik demet parçaları</td><td>API'ye 100'erli gönderim</td></tr>
+<tr><td><code>zip_longest(a, b, fillvalue=)</code></td><td>Kısa olanı doldurarak eşler</td><td>Eksik ayları 0 ile hizalamak</td></tr>
+<tr><td><code>takewhile(p, x)</code> / <code>dropwhile(p, x)</code></td><td>Koşul bozulana kadar al / atla</td><td>Dosya başlığını atlamak</td></tr>
+<tr><td><code>compress(x, maske)</code></td><td>Maskede doğru olanları seç</td><td>Onaylı kayıtları süzmek</td></tr>
+<tr><td><code>starmap(f, demetler)</code></td><td><code>f(*demet)</code> uygular</td><td>(fiyat, adet) çiftlerinden tutar</td></tr>
+<tr><td><code>cycle(x)</code></td><td>Sonsuz döngüyle tekrarlar</td><td>Vardiyaya sırayla personel atamak</td></tr>
+</table></div>
+<pre class="py">from itertools import pairwise, batched, zip_longest, takewhile, dropwhile, compress, starmap, cycle
+
+kapanis = [100, 104, 101, 110]
+print([b - a for a, b in pairwise(kapanis)])
+print(list(batched(["S1", "S2", "S3", "S4", "S5"], 2)))
+print(list(zip_longest(["Oca", "Şub", "Mar"], [120, 95], fillvalue=0)))
+satirlar = ["# rapor", "# v2", "TR01;100", "# not", "TR02;50"]
+print(list(dropwhile(lambda s: s.startswith("#"), satirlar)))
+print(list(takewhile(lambda s: s.startswith("#"), satirlar)))
+print(list(compress(["A", "B", "C"], [True, False, True])))
+print(list(starmap(lambda f, a: f * a, [(10.0, 3), (2.5, 4)])))
+print(list(zip(["Pzt", "Sal", "Çar", "Per"], cycle(["Ayşe", "Can"]))))</pre>
+<div class="warn"><b>Yineleyici tek kullanımlıktır</b><code>map</code>, <code>filter</code>, üreteçler ve itertools sonuçları bir kez tüketilir. Aynı sonucu iki kez dolaşacaksan önce <code>list()</code>'e çevir ya da <code>itertools.tee</code> kullan. İkinci <code>sum(...)</code>'ın sessizce 0 döndürmesi raporlarda en sinsi hatalardandır.</div>
+<div class="tip"><b>batched yoksa</b>Python 3.11 ve öncesinde parçalamayı (chunking) <code>islice</code> ile yaparsın: <code>it = iter(veri)</code>, sonra <code>while parca := list(islice(it, n)): ...</code>. Bu kalıp her sürümde çalışır.</div>
+
+<div class="note"><b>Gerçek işte</b>Depo sayımlarında "sistem stoğu ile raf sayımı farkı" Counter aritmetiğiyle iki satırda çıkar; muhasebe mutabakatında (reconciliation) aynı fikir iki kaynaktaki kayıtları karşılaştırmaya uygulanır. Toplu API çağrılarında servisler genellikle istek başına kayıt sınırı koyar; <code>batched</code> ile parçalayıp her parçayı ayrı gönderirsin. CLI araçlarında ayarlar varsayılan → yapılandırma dosyası → ortam değişkeni → komut satırı katmanlarından gelir; <code>ChainMap</code> bu öncelik sırasını kodda açıkça gösterir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İş hayatında nerede karşına çıkar?</h3>
+<p>Günlük (log) analizinde <code>Counter</code> ile en çok hata veren uç noktayı bulmak, <code>deque(maxlen=1000)</code> ile "son 1000 istek" üzerinden hareketli ortalama hesaplamak, <code>defaultdict(set)</code> ile "her müşteri hangi ürünleri aldı" tablosunu kurmak çok yaygın kalıplardır. Pazar sepeti (market basket) analizine giriş düzeyinde <code>combinations(sepet, 2)</code> ile ürün çiftlerini sayıp <code>Counter</code> ile birleştirince "birlikte alınan ürünler" raporu elde edersin.</p>
+<p>Performans tarafında: <code>Counter</code> ve <code>defaultdict</code> C düzeyinde yazılmıştır; elle yazdığın <code>get</code> döngüsünden genelde hızlıdır. <code>itertools</code> tembel olduğu için milyonlarca satırı diske yazmadan akış halinde işleyebilirsin; pandas yüklemeden önce denenecek ilk araç budur. Ancak <code>groupby</code> için önce sıralama gerekir; sıralama O(n log n) olduğundan büyük veride tek <code>defaultdict</code> geçişi (O(n)) daha ucuza gelebilir. Aracı seçerken "sıralı sonuç mu, yoksa toplam mı istiyorum?" sorusunu sor.</p>
+<p>Son bir not: <code>namedtuple</code> okunurluğu artırır ama değiştirilemez; kaydı güncellemek istiyorsan <code>_replace</code> yeni nesne döndürür. Mutasyon gerekiyorsa <code>@dataclass</code>; bellek kritikse <code>@dataclass(slots=True)</code> tercih et.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/collections-itertools">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../hata-tasarim/">← Hata tasarımı: özel istisnalar, logging, EAFP</a><a href="../tarih-saat/">Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

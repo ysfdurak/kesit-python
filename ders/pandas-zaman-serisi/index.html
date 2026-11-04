@@ -1,0 +1,277 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zaman serisi analizi | Kesit Python</title><meta name="description" content="to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling(&quot;7D&quot;), eksik günleri doldurma, saat…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pandas-zaman-serisi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Zaman serisi analizi"><meta property="og:description" content="to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling(&quot;7D&quot;), eksik günleri doldurma, saat…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pandas-zaman-serisi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Zaman serisi analizi","description":"to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling(\"7D\"), eksik günleri doldurma, saat…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/pandas-zaman-serisi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Zaman serisi analizi</h1><p class="st-l">to_datetime, DatetimeIndex ve dt erişimcisi, resample ile kovalama, shift/diff/pct_change ile dönem kıyası, rolling("7D"), eksik günleri doldurma, saat dilimi, iş günü ve mevsimsellik; Anadolu Market ve Ilgaz Bank verisiyle.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-zaman-serisi">Uygulamada aç, 35 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Zaman, verinin en önemli sütunu</h2>
+<p>Anadolu Market'in yönetimi "bu ay geçen aydan iyi mi?", "kampanya haftasında satış gerçekten arttı mı, yoksa her ayın ilk haftası zaten böyle mi?" diye sorar. Ilgaz Bank'ın operasyon ekibi ATM işlemlerinin saatlik yoğunluğuna, risk ekibi gece yarısı yapılan olağandışı işlemlere bakar. Bu soruların hepsinde satırların bir <b>zaman damgası</b> vardır ve cevap, zamanı doğru işlemekten geçer.</p>
+<p><b>groupby</b> dersinde <code>resample</code>'a kısaca, <b>ileri pandas</b> dersinde <code>rolling</code>'e değindin. Bu ders zaman serisi (time series) analizinin tamamını kurar: metni tarihe çevirmek, tarih index'iyle dilimlemek, kovalara toplamak, önceki dönemle kıyaslamak, eksik günleri doldurmak, saat dilimi, iş günü ve mevsimsellik.</p>
+
+<h2>Metni tarihe çevirmek: to_datetime</h2>
+<p>CSV'den gelen tarih her zaman metindir. <code>pd.to_datetime</code> onu <code>datetime64</code> türüne çevirir. Biçimi (<code>format</code>) açıkça ver: hem hızlıdır hem de "03.05.2024 üç mayıs mı, beş mart mı?" belirsizliğini ortadan kaldırır. Bozuk değerler için <code>errors="coerce"</code> hata yerine <code>NaT</code> (Not a Time, tarihin NaN'ı) üretir.</p>
+<pre class="py">import pandas as pd
+
+ham = pd.DataFrame({
+    "tarih": ["05.03.2024", "17.03.2024", "31.02.2024", "02.04.2024", "bilinmiyor"],
+    "tutar": [120.0, 340.5, 99.0, 410.0, 55.0],
+})
+ham["tarih"] = pd.to_datetime(ham["tarih"], format="%d.%m.%Y", errors="coerce")
+print(ham)
+print("bozuk tarih sayısı:", ham["tarih"].isna().sum())
+temiz = ham.dropna(subset=["tarih"])
+
+# Unix zaman damgası (saniye) de sık gelir: bankacılık API'leri böyle verir
+print(pd.to_datetime([1709251200, 1709337600], unit="s"))</pre>
+<p>31 Şubat diye bir gün yok; <code>coerce</code> onu sessizce <code>NaT</code> yaptı. Bozuk satır sayısını mutlaka raporla: on satırsa yazım hatasıdır, binlerce satırsa biçimi yanlış seçmişsindir.</p>
+
+<h2>DatetimeIndex: tarihle dilimleme</h2>
+<p>Tarih sütununu index yapınca (<code>set_index("tarih")</code>) pandas zamanı anlayan bir index kurar: <b>DatetimeIndex</b>. Artık "Mart ayı" ya da "5-10 Mart arası" gibi kısmi metinlerle dilimleyebilirsin. Önce <code>sort_index()</code> çağır; sırasız tarih index'inde dilimleme güvenilmezdir.</p>
+<pre class="py">import pandas as pd
+
+gunler = pd.date_range("2024-02-26", "2024-03-12", freq="D")
+ciro = pd.Series(range(100, 100 + 10 * len(gunler), 10), index=gunler, name="ciro")
+
+print(ciro.loc["2024-03"].head(3))               # Mart'ın ilk üç günü
+print(ciro.loc["2024-03-05":"2024-03-07"])       # iki uç dahil
+print(ciro.index.min().date(), "→", ciro.index.max().date(), len(ciro), "gün")</pre>
+
+<h2>dt erişimcisi: tarihin parçaları</h2>
+<p>Tarih <b>sütun</b> olarak duruyorsa parçalarına <code>.dt</code> ile, index olarak duruyorsa doğrudan <code>index.month</code> gibi erişirsin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Sonuç (2024-03-04 Pazartesi)</th><th>Kullanım</th></tr>
+<tr><td><code>.dt.year</code>, <code>.dt.month</code>, <code>.dt.day</code></td><td>2024, 3, 4</td><td>Yıl/ay kırılımı</td></tr>
+<tr><td><code>.dt.dayofweek</code></td><td>0 (Pazartesi=0, Pazar=6)</td><td>Hafta içi/sonu analizi</td></tr>
+<tr><td><code>.dt.quarter</code></td><td>1</td><td>Çeyrek raporu</td></tr>
+<tr><td><code>.dt.hour</code></td><td>0</td><td>Saatlik yoğunluk</td></tr>
+<tr><td><code>.dt.to_period("M")</code></td><td>2024-03</td><td>Ay anahtarı (raporda gruplama)</td></tr>
+<tr><td><code>.dt.normalize()</code></td><td>2024-03-04 00:00</td><td>Saati at, günü tut</td></tr>
+<tr><td><code>.dt.is_month_end</code></td><td>False</td><td>Ay sonu kapanışları</td></tr>
+</table></div>
+<pre class="py">import pandas as pd
+
+islem = pd.DataFrame({
+    "zaman": pd.to_datetime(["2024-03-04 09:15", "2024-03-09 23:40", "2024-03-10 14:05", "2024-03-29 18:30"]),
+    "tutar": [1500, 250, 980, 4300],
+})
+islem["gun"] = islem["zaman"].dt.dayofweek
+islem["hafta_sonu"] = islem["gun"] &gt;= 5
+islem["saat"] = islem["zaman"].dt.hour
+islem["ay"] = islem["zaman"].dt.to_period("M").astype(str)
+print(islem)
+print(islem.groupby("hafta_sonu")["tutar"].sum())</pre>
+<div class="tip"><b>Gün adı için sözlük kullan</b><code>dt.day_name()</code> İngilizce ad döndürür ve Türkçe yerel ayarı her ortamda bulunmaz. Raporda Türkçe ad istiyorsan <code>dayofweek</code> ile bir listeden eşle: <code>["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]</code>.</div>
+
+<h2>resample: zamanı kovalara bölmek</h2>
+<p><code>resample</code> bir DatetimeIndex'i düzenli aralıklara böler, her aralığa bir özet uygular: günlük işlemlerden haftalık ciro, aylık ortalama, çeyreklik toplam. groupby'ın zamana özel hâlidir; fark, veride hiç kaydı olmayan aralıkları da üretmesidir (boş ay 0 ya da NaN olarak görünür).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Takma ad</th><th>Anlamı</th><th>Etiket</th><th>Not</th></tr>
+<tr><td><code>"D"</code></td><td>Gün</td><td>O gün</td><td>Her sürümde aynı</td></tr>
+<tr><td><code>"W"</code></td><td>Hafta (Pazartesi–Pazar)</td><td>Pazar günü</td><td><code>"W-MON"</code> gibi çapa seçilebilir</td></tr>
+<tr><td><code>"MS"</code></td><td>Ay</td><td>Ayın ilk günü</td><td>Rapor için en okunur</td></tr>
+<tr><td><code>"ME"</code></td><td>Ay</td><td>Ayın son günü</td><td>pandas 2.2+; eski <code>"M"</code> kaldırılıyor</td></tr>
+<tr><td><code>"QS"</code> / <code>"QE"</code></td><td>Çeyrek</td><td>Başı / sonu</td><td>Eski <code>"Q"</code> yerine</td></tr>
+<tr><td><code>"h"</code></td><td>Saat</td><td>Saat başı</td><td>Büyük <code>"H"</code> kaldırılıyor</td></tr>
+</table></div>
+<pre class="py">import pandas as pd
+
+siparis = pd.DataFrame({
+    "tarih": pd.to_datetime(["2024-01-05", "2024-01-20", "2024-03-02", "2024-03-15", "2024-03-28"]),
+    "tutar": [100.0, 200.0, 50.0, 80.0, 120.0],
+}).set_index("tarih")
+
+aylik = siparis["tutar"].resample("MS").sum()
+print(aylik)                                  # Şubat 0 olarak geldi
+print(siparis["tutar"].resample("MS").agg(["sum", "count", "mean"]))
+print(siparis.resample("QS")["tutar"].sum())
+
+# DatetimeIndex yapmadan: on= parametresi
+print(siparis.reset_index().resample("MS", on="tarih")["tutar"].sum().tolist())</pre>
+<div class="warn"><b>"M" yazma</b>pandas 2.2 <code>"M"</code>, <code>"Q"</code>, <code>"H"</code> için uyarı verir, pandas 3 bunları reddeder. Uygulamada tarayıcı pandas 2.2, senin bilgisayarın 3.x olabilir; iki sürümde de çalışan <code>"MS"</code>, <code>"ME"</code>, <code>"QS"</code>, <code>"QE"</code>, <code>"h"</code> kullan ya da <code>dt.to_period("M")</code> ile grupla.</div>
+
+<h2>shift, diff, pct_change: önceki dönemle kıyas</h2>
+<p><code>shift(1)</code> seriyi bir adım aşağı kaydırır: her satır "bir önceki dönemin değerini" görür (SQL'deki LAG). <code>diff()</code> farkı, <code>pct_change()</code> oransal değişimi verir. Aylık seride <code>shift(12)</code> "geçen yılın aynı ayı"dır: yıldan yıla (year over year, YoY) büyüme böyle hesaplanır ve mevsimselliği kendiliğinden ayıklar; Aralık'ı Kasım'la değil, geçen Aralık'la kıyaslarsın.</p>
+<pre class="py">import pandas as pd
+
+aylar = pd.date_range("2023-01-01", periods=15, freq="MS")
+ciro = pd.Series([100, 95, 110, 120, 118, 130, 125, 128, 135, 140, 160, 210,
+                  112, 104, 121], index=aylar, name="ciro")
+tablo = pd.DataFrame({
+    "ciro": ciro,
+    "onceki_ay": ciro.shift(1),
+    "fark": ciro.diff(),
+    "aylik_%": (ciro.pct_change() * 100).round(1),
+    "yoy_%": ((ciro / ciro.shift(12) - 1) * 100).round(1),
+})
+print(tablo.tail(4))</pre>
+<p>Ocak 2024'te aylık değişim -46,7% görünüyor; panik yok, Aralık her yıl zirvedir. YoY sütunu gerçeği söylüyor: geçen Ocak'a göre +12%. Yönetime giden raporda iki ölçüyü birlikte vermek yanlış alarmı önler.</p>
+
+<h2>Hareketli ortalama: satır mı, zaman mı?</h2>
+<p><code>rolling(7)</code> son 7 <b>satırı</b>, <code>rolling("7D")</code> son 7 <b>günü</b> alır. Her gün kaydın varsa ikisi aynıdır. Ama mağaza pazar günleri kapalıysa ya da veri bazı günlerde eksikse <code>rolling(7)</code> fark etmeden 9-10 güne yayılır. Zaman tabanlı pencere DatetimeIndex ister ve pencere dolmasa da değer üretir.</p>
+<pre class="py">import pandas as pd
+
+s = pd.Series([10, 12, 30, 11, 13],
+              index=pd.to_datetime(["2024-05-01", "2024-05-02", "2024-05-06", "2024-05-07", "2024-05-08"]))
+print(pd.DataFrame({
+    "satis": s,
+    "son3_satir": s.rolling(3, min_periods=1).mean().round(2),
+    "son3_gun": s.rolling("3D").mean().round(2),
+}))</pre>
+
+<h2>Eksik tarihleri doldurmak</h2>
+<p>Satış olmayan gün tabloda hiç yoktur; ama "satış 0" ile "veri yok" farklı şeylerdir ve grafikte, ortalamada, <code>shift</code>'te fark yaratır. Tam takvimi <code>pd.date_range</code> ile kurup <code>reindex</code> et ya da <code>asfreq("D")</code> kullan.</p>
+<pre class="py">import pandas as pd
+
+satis = pd.Series([5, 7, 3], index=pd.to_datetime(["2024-05-01", "2024-05-03", "2024-05-06"]))
+takvim = pd.date_range(satis.index.min(), satis.index.max(), freq="D")
+print(satis.reindex(takvim, fill_value=0).tolist())     # satış: yoksa 0
+
+stok = pd.Series([40, 32, 28], index=satis.index)
+print(stok.asfreq("D").ffill().tolist())               # stok seviyesi: son bilinen değer</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçü türü</th><th>Eksik gün nasıl doldurulur?</th><th>Örnek</th></tr>
+<tr><td>Akış (flow)</td><td>0</td><td>Satış adedi, işlem sayısı, ciro</td></tr>
+<tr><td>Durum (stock)</td><td>Son bilinen değer (<code>ffill</code>)</td><td>Stok, hesap bakiyesi, döviz kuru</td></tr>
+<tr><td>Ölçüm</td><td>Ara değer (<code>interpolate</code>) ya da boş bırak</td><td>Sıcaklık, sensör verisi</td></tr>
+</table></div>
+
+<h2>Saat dilimi: tz_localize ve tz_convert</h2>
+<p>Sunucular genellikle UTC saklar; rapor ise İstanbul saatiyle istenir. Saat dilimi bilgisi olmayan (naive) bir zamana önce <code>tz_localize("UTC")</code> ile "bu UTC'dir" dersin, sonra <code>tz_convert("Europe/Istanbul")</code> ile çevirirsin. Türkiye 2016'dan beri yıl boyu UTC+3'tür; yaz saati uygulayan bölgelerde (Europe/Berlin gibi) dönüşümü elle +3 eklemek yerine mutlaka bu fonksiyonlarla yap.</p>
+<pre class="py">import pandas as pd
+
+kayit = pd.DataFrame({"zaman_utc": pd.to_datetime(["2024-03-01 21:30", "2024-03-02 06:10", "2024-07-15 12:00"])})
+kayit["istanbul"] = kayit["zaman_utc"].dt.tz_localize("UTC").dt.tz_convert("Europe/Istanbul")
+kayit["berlin"] = kayit["istanbul"].dt.tz_convert("Europe/Berlin")
+kayit["ist_saat"] = kayit["istanbul"].dt.hour
+print(kayit.to_string())
+print("İstanbul'da gün değişti mi:", (kayit["istanbul"].dt.date != kayit["zaman_utc"].dt.date).tolist())</pre>
+<div class="warn"><b>Naive ile aware karışmaz</b>Saat dilimli bir zamanı dilimsiz bir zamanla karşılaştırmak <code>TypeError</code> verir. Bir tabloda tek bir kural seç: ya hepsi UTC-aware ya hepsi yerel-naive. Gece yarısına yakın işlemlerde yanlış dilim, işlemi bir önceki güne yazar ve günlük mutabakatı bozar.</div>
+
+<h2>İş günü</h2>
+<p>"Kredi başvurusu 5 iş günü içinde sonuçlanır" kuralı hafta sonlarını ve resmî tatilleri saymaz. <code>pd.bdate_range</code> Pazartesi–Cuma günlerini üretir; <code>pd.offsets.BDay(n)</code> tarihe n iş günü ekler; <code>np.busday_count</code> iki tarih arasındaki iş gününü (bitiş hariç) tatil listesiyle sayar. Resmî tatil takvimini sen verirsin; kütüphane Türkiye tatillerini bilmez.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+
+basvuru = pd.Timestamp("2024-04-19")          # Cuma
+print("5 iş günü sonra:", (basvuru + pd.offsets.BDay(5)).date())
+nisan = pd.bdate_range("2024-04-01", "2024-04-30")
+print("Nisan iş günü:", len(nisan))
+tatiller = ["2024-04-10", "2024-04-11", "2024-04-12", "2024-04-23"]   # bayram ve 23 Nisan
+print("tatiller hariç:", np.busday_count("2024-04-01", "2024-05-01", holidays=tatiller))</pre>
+
+<h2>Mevsimsellik: haftanın günü etkisi</h2>
+<p>Perakende satışı haftanın gününe göre düzenli dalgalanır: hafta sonu yüksek, salı düşük. Bu <b>mevsimsellik</b> (seasonality) bilinmeden "salı satışı düştü" alarmı anlamsızdır. En basit ölçü gün endeksidir: her günün ortalaması / genel ortalama. Daha sistematik yol, seriyi <b>trend</b> + <b>mevsimsel</b> + <b>artık</b> (residual) bileşenlerine ayıran <code>seasonal_decompose</code>'dur (statsmodels).</p>
+<pre class="py">import numpy as np
+import pandas as pd
+from statsmodels.tsa.seasonal import seasonal_decompose
+
+rng = np.random.default_rng(42)
+gun = pd.date_range("2024-01-01", periods=56, freq="D")          # 8 tam hafta
+hafta_deseni = np.array([90, 80, 85, 95, 110, 140, 130])          # Pzt..Paz
+trend = np.linspace(0, 20, len(gun))
+satis = pd.Series(np.tile(hafta_deseni, 8) + trend + rng.normal(0, 3, len(gun)), index=gun)
+
+endeks = (satis.groupby(satis.index.dayofweek).mean() / satis.mean()).round(2)
+print("gün endeksi:", endeks.tolist())
+
+ayrisim = seasonal_decompose(satis, model="additive", period=7)
+print("mevsimsel (ilk hafta):", ayrisim.seasonal.iloc[:7].round(1).tolist())
+print("trend başı-sonu:", round(ayrisim.trend.dropna().iloc[0], 1), "→", round(ayrisim.trend.dropna().iloc[-1], 1))</pre>
+<p>Cumartesi endeksi 1.3 civarında: normal bir cumartesi ortalamanın %30 üstündedir. Kampanya etkisini ölçerken ham satışı değil, bu endekse göre düzeltilmiş satışı karşılaştır.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir e-ticaret şirketinin haftalık performans toplantısındaki standart tablo: bu haftanın cirosu, geçen haftaya göre değişim, geçen yılın aynı haftasına göre değişim ve 4 haftalık hareketli ortalama. Bankacılıkta gün sonu mutabakatı UTC kayıtların İstanbul saatine doğru çevrilmesine, SLA (hizmet süresi) raporları iş günü hesabına dayanır. Bu tabloların hepsi bu dersteki on kadar fonksiyonla kurulur; hata çoğunlukla eksik günlerin 0 yerine yok sayılmasından ve saat diliminden gelir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: 117 bin bisiklet yolculuğuyla zaman serisi</h2><p>Zaman serisi tekniklerinin gücü, veri büyüyünce ortaya çıkar. Pedal İzmir, İzmir'de bir bisiklet paylaşım sistemi: <code>pedal_izmir</code> setinde Haziran–Ağustos 2024 arasındaki <b>116.517 yolculuk</b> (<code>bk_trips</code>) ve aynı dönemin <b>saatlik hava durumu</b> (<code>bk_weather</code>) var. Bu bölümde olay düzeyindeki (her satır bir yolculuk) veriyi günlük ve saatlik serilere çevirecek, mevsimsellik ve dış etken (yağmur) analizi yapacaksın.</p><h3>Büyük tabloyu akıllı okumak</h3><p>Tablonun tüm sütunlarına ihtiyacın yoksa <code>usecols</code> ile yalnız gerekenleri oku ve tarih sütunlarını <code>parse_dates</code> ile doğrudan datetime yap. Tarayıcıda bu, okuma süresini ve belleği belirgin biçimde azaltır. Kapanmamış yolculuklarda <code>ended_at</code> boştur; süre hesabında bunlar NaN olur ve <code>median</code>, <code>mean</code> onları kendiliğinden atlar.</p><pre class="py">import veri
+
+t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at", "ended_at", "fare"],
+             parse_dates=["started_at", "ended_at"])
+print(len(t), t["started_at"].min(), t["started_at"].max())
+sure = (t["ended_at"] - t["started_at"]).dt.total_seconds() / 60
+print("açık yolculuk:", int(sure.isna().sum()), "| medyan süre (dk):", sure.median())
+</pre><h3>Olaydan seriye: resample ile sayım</h3><p>Her satır bir olay olduğunda, <code>set_index("started_at").resample("D").size()</code> günlük yolculuk sayısını verir. <code>size</code> hiç yolculuk olmayan günü de 0 olarak gösterir; <code>groupby(dt.date)</code> ise boş günleri atlar. Bu yüzden takvim tamlığı gereken her hesapta resample tercih edilir.</p><pre class="py">import veri
+
+t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
+gunluk = t.set_index("started_at").resample("D").size()
+print(len(gunluk), "gün, toplam", int(gunluk.sum()))
+print("en yoğun:", gunluk.idxmax().date(), int(gunluk.max()))
+print("7 günlük hareketli ortalama (son gün):", round(gunluk.rolling("7D").mean().iloc[-1], 1))
+
+GUNLER = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
+hafta = gunluk.groupby(gunluk.index.dayofweek).mean().round(0)
+print(dict(zip(GUNLER, hafta.astype(int).tolist())))
+</pre><div class="tip"><b>Gün adlarını sen ver</b><code>dt.day_name()</code> İngilizce ad döndürür; <code>locale</code> parametresi işletim sistemine bağlıdır ve tarayıcıda çalışmayabilir. <code>dayofweek</code> (0 = Pazartesi) ile bir Türkçe ad listesi kullanmak her ortamda aynı sonucu verir.</div><h3>Saatlik profil ve iki seriyi zamanda eşlemek</h3><p>Hava durumu saatlik ölçülür (<code>obs_hour</code> tam saat). Yolculukları saatlik seriye çevirirsen iki tabloyu aynı zaman anahtarıyla birleştirebilirsin. Sayım serisinde yolculuk olmayan saat 0 olmalıdır; bunu <code>how="left"</code> ve <code>fillna(0)</code> sağlar.</p><pre class="py">import veri
+
+t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
+w = veri.oku("pedal_izmir", "bk_weather", parse_dates=["obs_hour"])
+
+saatlik = t.set_index("started_at").resample("h").size().rename("yolculuk")
+m = w.set_index("obs_hour").join(saatlik, how="left").fillna({"yolculuk": 0})
+print(len(m), "saat")
+print(m.groupby(m["rain_mm"] &gt; 0)["yolculuk"].mean().round(1).to_dict())
+print("yağmurlu saatler:", sorted(m.index[m["rain_mm"] &gt; 0].hour.unique().tolist()))
+</pre><h3>Gün × saat matrisi: talebin parmak izi</h3><p>Operasyon ekipleri talebi çoğu zaman bir matris olarak görmek ister: satırlarda haftanın günü, sütunlarda saat, hücrede o gün-saat ikilisinin <b>ortalama</b> yolculuk sayısı. Toplam değil ortalama alınır, çünkü her gün adı dönemde farklı sayıda geçer. Bu matris ısı haritasına (heatmap) dönüştürüldüğünde hafta içi sabah ve akşam iki tepeyi, hafta sonu ise öğleden sonraya yayılan tek bir tepeyi açıkça gösterir.</p><pre class="py">import veri
+
+t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
+saatlik = t.set_index("started_at").resample("h").size().rename("n").to_frame()
+saatlik["gun"] = saatlik.index.dayofweek
+saatlik["saat"] = saatlik.index.hour
+matris = saatlik.pivot_table(index="gun", columns="saat", values="n", aggfunc="mean").round(0)
+print(matris.loc[:, [8, 12, 18, 23]])
+</pre><div class="warn"><b>Karıştırıcı değişken: saat</b>Yukarıdaki ham karşılaştırma "yağmurda yolculuk %60 düşüyor" der. Ama bu veride yağmur yalnızca gündüz saatlerinde yağmış; gündüz zaten yoğun saatlerdir. Adil karşılaştırma için <b>aynı saat dilimindeki</b> yağmurlu ve kuru saatleri kıyaslamalısın. Saat kontrolü yapınca etki çok daha büyük çıkar. Zaman serisinde "neyle kıyaslıyorum?" sorusu, hesaplama tekniğinden daha önemlidir.</div><div class="note"><b>Gerçek işte</b>Paylaşımlı ulaşım, yemek teslimatı ve çağrı merkezi gibi işlerde kapasite planı saatlik talep profiline dayanır: kaç bisiklet hangi istasyona, kaç kurye hangi saate, kaç temsilci hangi vardiyaya. Bu profil hafta içi ve hafta sonu ayrı çıkarılır, hava durumu ve tatil gibi dış etkenler ayrı sütun olarak eklenir. Tahmin modelleri (bkz. zaman serisi tahmini dersi) tam olarak bu özellikler üzerine kurulur.</div></section><section class="more"><span class="eyebrow">Derinleş</span><p>Bu derste zamanı ölçmeyi, kovalara bölmeyi ve dönemleri kıyaslamayı öğrendin. Bir sonraki doğal soru "yarın kaç?" sorusudur, yani tahmin (forecasting). Tahmin modelleri, ARIMA ve üstel düzeltme <b>Zaman serisi tahmini</b> dersinin konusu; bu bölüm o derse köprü kuruyor: geçmişten özellik (feature) üretmek, bunu <b>sızıntısız</b> yapmak ve modeli dürüstçe sınamak. Veri, Pedal İzmir'in Haziran-Ağustos 2024 arasındaki 116 bin bisiklet yolculuğu.</p>
+<h2>Önce seriyi kur: günlük yolculuk sayısı</h2>
+<pre class="py">import veri
+import pandas as pd
+yol = veri.oku("pedal_izmir", "bk_trips")
+zaman = pd.to_datetime(yol["started_at"])
+gunluk = zaman.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=0)
+gunluk.name = "yolculuk"
+print(len(gunluk), gunluk.index.min().date(), gunluk.index.max().date())
+print(gunluk.head(7).tolist())
+print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..Paz</pre>
+<p><code>asfreq("D", fill_value=0)</code> hiç yolculuk olmayan günleri de 0 olarak ekler; eksik gün, gecikme (lag) hesabını sessizce kaydırır. Haftanın günü ortalamaları mevsimselliği (seasonality) gösterir: modelin bunu öğrenmesi için ona "geçen haftanın aynı günü" bilgisini vermen gerekir.</p>
+<h2>Gecikme ve pencere özellikleri</h2>
+<p>Klasik makine öğrenmesi modelleri (doğrusal regresyon, gradyan artırma) sırayı bilmez; her satırı bağımsız görür. Zaman bilgisini ona sütun olarak verirsin:</p>
+<div class="tbl-wrap"><table><tr><th>Özellik</th><th>pandas</th><th>Anlamı</th></tr>
+<tr><td>lag_1</td><td><code>s.shift(1)</code></td><td>Dünkü değer</td></tr>
+<tr><td>lag_7</td><td><code>s.shift(7)</code></td><td>Geçen haftanın aynı günü</td></tr>
+<tr><td>ort_7</td><td><code>s.shift(1).rolling(7).mean()</code></td><td>Dünden geriye son 7 günün ortalaması</td></tr>
+<tr><td>haftanin_gunu</td><td><code>s.index.dayofweek</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
+<div class="warn"><b>Sızıntının en sinsi biçimi: shift'siz rolling</b><code>s.rolling(7).mean()</code> bugünün değerini de içerir. Tahmin anında bugünün değeri henüz bilinmediği için model eğitimde "cevabı görür", testte harika, canlıda kötü sonuç verir. Kural: tahmin edilen an t ise, özellik yalnız t'den <b>önce</b> bilinen bilgiyle hesaplanmalı. Pencereyi her zaman <code>shift(1)</code>'den sonra uygula.</div>
+<pre class="py">X = pd.DataFrame({
+    "y": gunluk,
+    "lag_1": gunluk.shift(1),
+    "lag_7": gunluk.shift(7),
+    "ort_7": gunluk.shift(1).rolling(7).mean(),
+    "sizan_ort_7": gunluk.rolling(7).mean(),          # YANLIŞ: bugünü içerir
+    "haftanin_gunu": gunluk.index.dayofweek,
+}).dropna()
+print(len(X))
+print(X[["y", "ort_7", "sizan_ort_7"]].corr().round(3).loc["y"].tolist())</pre>
+<p>Sızan özelliğin hedefle korelasyonu belirgin biçimde yüksek çıkar; bu fark "çok iyi" görünen ama canlıda çöken modelin işaretidir. Çok adımlı tahminde (7 gün sonrası) kural daha da sıkıdır: ufuk h ise en yakın gecikme <code>shift(h)</code> olabilir.</p>
+<p>Dış değişkenlerde (exogenous) aynı soruyu sor: "Tahmin anında bunu gerçekten bilir miyim?" Pedal İzmir'in <code>bk_weather</code> tablosundaki gerçekleşen yağmur, yarının yolculuğunu tahmin ederken bilinmez; canlıda elinde yalnız hava <b>tahmini</b> olur. Eğitimde gerçekleşen değeri kullanmak modeli olduğundan iyi gösterir. Takvim bilgileri (tatil, okul dönemi, kampanya planı) ise önceden bilinir ve güvenle kullanılır.</p>
+<h2>Dürüst sınama: zamana göre bölme</h2>
+<p>Rastgele <code>train_test_split</code> zaman serisinde yasaktır: test günleri eğitim günlerinin arasına serpiştirilir ve model geleceği görür. Doğrusu son N günü test olarak ayırmak ya da ileri yürüyen doğrulama (walk-forward) yapmaktır: önce 1-60. günlerle eğit, 61-67'yi tahmin et; sonra 1-67 ile eğit, 68-74'ü tahmin et... scikit-learn'de bunu <code>TimeSeriesSplit</code> yapar.</p>
+<pre class="py">from sklearn.model_selection import TimeSeriesSplit
+for i, (egitim, test) in enumerate(TimeSeriesSplit(n_splits=3, test_size=7).split(X)):
+    print(i, "eğitim:", X.index[egitim[0]].date(), "→", X.index[egitim[-1]].date(),
+          "| test:", X.index[test[0]].date(), "→", X.index[test[-1]].date())</pre>
+<h2>Kıyas modelleri: önce basit olanı yen</h2>
+<p>Her tahmin modelinin geçmesi gereken iki çıta vardır: <b>naive</b> (yarın = bugün) ve <b>mevsimsel naive</b> (yarın = geçen haftanın aynı günü). Modelin ortalama mutlak hatası (MAE) bunlardan iyi değilse karmaşıklık boşunadır.</p>
+<pre class="py">test = gunluk.iloc[-14:]
+naive = gunluk.shift(1).iloc[-14:]
+mevsimsel = gunluk.shift(7).iloc[-14:]
+print("naive MAE:", round((test - naive).abs().mean(), 1))
+print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
+<p>Bu veride naive daha iyi çıkıyor; yani yolculuk sayısı haftalık örüntüden çok son günlerin düzeyine bağlı. Böyle bir bulgu, model kurmadan önce hangi özelliklerin önemli olacağını söyler. <b>Zaman serisi tahmini</b> dersinde bu kıyasları ExponentialSmoothing, SARIMA ve gecikme özellikli gradyan artırma modelleriyle aşmaya çalışacaksın.</p>
+<div class="note"><b>Gerçek işte</b>Talep tahmini (kaç bisiklet, kaç kurye, kaç kasiyer) operasyon ekiplerinin her gün kullandığı bir çıktıdır. Veri bilimi mülakatlarında "modelin testte çok iyi ama canlıda kötü, ne olabilir?" sorusunun ilk cevabı neredeyse her zaman zaman sızıntısıdır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>resample'ın ince ayarları</h3>
+<p><code>resample("W")</code> varsayılan olarak Pazar'a çapalanır ve etiketi aralığın sağ ucudur. Haftayı Pazartesi etiketiyle görmek istersen <code>resample("W-MON", label="left", closed="left")</code> kullan. Saatlik veride vardiya raporu için <code>offset="8h"</code> ile kovaları 08:00'dan başlatabilirsin.</p>
+<h3>Timestamp mi Period mu?</h3>
+<p>Timestamp bir an, Period bir aralıktır ("2024-03" ayının tamamı). Aylık raporlarda <code>to_period("M")</code> anahtarları hem okunur hem de ayın hangi günü etiketleneceği tartışmasını bitirir.</p>
+<h3>Tahmine giriş ve sızıntı</h3>
+<p>Tahmin (forecasting) için önce basit kıyas modellerini kur: "yarın = bugün" (naive) ve "gelecek salı = geçen salı" (seasonal naive). statsmodels'teki üstel düzeltme (ExponentialSmoothing) ve ARIMA bunların üstüne kurulur. Zaman serisinde rastgele train/test bölmesi yapma: modeli geçmişle eğit, gelecekle test et; aksi hâlde gelecekten bilgi sızar (leakage) ve model kâğıt üstünde parlak, gerçekte işe yaramaz çıkar.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-zaman-serisi">Alıştırmalara geç (35)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pandas-ileri/">← İleri pandas: şekil, pencere ve zincir</a><a href="../seaborn-plotly/">İleri görselleştirme: seaborn, plotly ve doğru grafik →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

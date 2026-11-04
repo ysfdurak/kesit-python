@@ -1,0 +1,255 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hugging Face ve yerel modellerle Python | Kesit Python</title><meta name="description" content="transformers pipeline ve tokenizer kavramından (oyuncak BPE ile) Ollama ve llama.cpp ile yerel LLM'e, sentence-transformers'a, boyut-lisans-Türkçe…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/yerel-modeller-hf/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Hugging Face ve yerel modellerle Python"><meta property="og:description" content="transformers pipeline ve tokenizer kavramından (oyuncak BPE ile) Ollama ve llama.cpp ile yerel LLM'e, sentence-transformers'a, boyut-lisans-Türkçe…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/yerel-modeller-hf/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Hugging Face ve yerel modellerle Python","description":"transformers pipeline ve tokenizer kavramından (oyuncak BPE ile) Ollama ve llama.cpp ile yerel LLM'e, sentence-transformers'a, boyut-lisans-Türkçe…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/yerel-modeller-hf/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Hugging Face ve yerel modellerle Python</h1><p class="st-l">transformers pipeline ve tokenizer kavramından (oyuncak BPE ile) Ollama ve llama.cpp ile yerel LLM'e, sentence-transformers'a, boyut-lisans-Türkçe ölçütleriyle model seçimine, numpy ile nicemlemeye ve LoRA ince ayarına kadar açık model dünyasını öğrenir; gerçek Lezzet Kurye yorumlarında scikit-learn temel çizgisini sahte bir yerel LLM ile ölçerek karşılaştırırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yerel-modeller-hf">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden kendi makinende model çalıştırasın?</h2>
+<p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde bulut sağlayıcılarının API'lerini kullandın ve dersin sonundaki "Derinleş" bölümünde Ollama'nın OpenAI uyumlu uç noktasını gördün. Bu derste bir adım geri çekilip açık modellerin dünyasına giriyorsun: <b>Hugging Face</b> ekosistemi, tokenizer'ın aslında ne yaptığı, bir modelin hangi donanıma sığacağı, <b>nicemleme</b> (quantization) ile modelin nasıl küçüldüğü, <b>LoRA</b> ile ince ayarın nasıl ucuzladığı ve en önemlisi: her işe LLM gerekmediği.</p>
+<p>Yerel ya da kendi sunucunda model çalıştırmanın üç tipik nedeni vardır: <b>veri</b> (müşteri yorumları, sağlık ya da İK kayıtları kurum dışına çıkmasın; KVKK), <b>maliyet</b> (milyonlarca kısa sınıflandırma çağrısında token faturası büyür) ve <b>bağımsızlık</b> (çevrim dışı çalışma, sağlayıcı değişikliğinden etkilenmeme). Bedeli ise işletmedir: GPU, bellek, güncelleme ve ölçekleme senin işin olur.</p>
+<p>Senaryo: <b>Lezzet Kurye</b> müşteri yorumlarını (gerçek <code>lk_ratings</code> tablosu) olumlu, nötr, olumsuz diye sınıflandırmak istiyor ve yorumların dışarı gönderilmesini istemiyor. Elimizde üç seçenek var: klasik makine öğrenmesi, küçük bir yerel model, bulut LLM'i.</p>
+
+<h2>1. Hugging Face ekosistemi</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Parça</th><th>Ne işe yarar?</th><th>Kurulum</th></tr>
+<tr><td>Hub (huggingface.co)</td><td>Model, veri seti ve demo deposu; her modelin bir <b>model kartı</b> (lisans, eğitim verisi, sınırlılıklar) vardır</td><td>Tarayıcı</td></tr>
+<tr><td><code>transformers</code></td><td>Modeli indirip çalıştırma: <code>pipeline</code>, <code>AutoTokenizer</code>, <code>AutoModel...</code></td><td><code>pip install transformers torch</code></td></tr>
+<tr><td><code>sentence-transformers</code></td><td>Cümle embedding'leri ve çapraz kodlayıcılar</td><td><code>pip install sentence-transformers</code></td></tr>
+<tr><td><code>datasets</code>, <code>peft</code>, <code>accelerate</code></td><td>Veri yükleme, LoRA ile ince ayar, çoklu GPU</td><td><code>pip install datasets peft accelerate</code></td></tr>
+</table></div>
+<p><code>pipeline</code> en hızlı başlangıçtır: görev adını ve model kimliğini verirsin; tokenizer, model ve son işlem hazır gelir. İlk çalıştırmada model indirilir ve önbelleğe (<code>~/.cache/huggingface</code>) alınır.</p>
+<pre class="code"># pip install transformers torch sentencepiece      (Kendi bilgisayarında dene)
+from transformers import pipeline
+
+duygu = pipeline("sentiment-analysis", model="savasy/bert-base-turkish-sentiment-cased")
+print(duygu(["Yemek sıcacık geldi, çok lezzetliydi", "Sipariş yanlış geldi"]))
+# [{'label': 'positive', 'score': 0.99...}, {'label': 'negative', 'score': 0.98...}]
+
+ner = pipeline("ner", model="savasy/bert-base-turkish-ner-cased", aggregation_strategy="simple")
+print(ner("Kadıköy'deki Köşe Dönercisi siparişimi Oğuz Güneş getirdi."))
+# [{'entity_group': 'LOC', 'word': 'Kadıköy', 'start': 0, 'end': 7, 'score': ...}, ...]
+
+ozet = pipeline("summarization", model="csebuetnlp/mT5_multilingual_XLSum")
+print(ozet(uzun_metin, max_length=60, min_length=15)[0]["summary_text"])</pre>
+<div class="warn"><b>Model kimliklerini körü körüne kopyalama</b>Hub'daki modeller silinebilir, adı değişebilir ya da lisansı güncellenebilir. Kullanmadan önce model kartını oku: hangi dillerde eğitildi, lisansı ne, hangi veriyle değerlendirildi? Kurumsal projede model kimliğini ve <code>revision</code> (commit) değerini sabitle.</div>
+
+<h2>2. Tokenizer: model metni nasıl görür?</h2>
+<p>Model harfleri ya da kelimeleri değil <b>token</b>'ları görür. Modern tokenizer'lar alt kelime (subword) birimleri kullanır: sık kelimeler tek token, nadir kelimeler birkaç parça olur. En yaygın algoritma <b>BPE</b> (Byte Pair Encoding): harflerden başla, en sık yan yana gelen ikiliyi birleştir, tekrarla. Aşağıda gerçek Lezzet Kurye yorumlarından 30 birleşimlik oyuncak bir BPE öğreniyoruz:</p>
+<pre class="py">import re
+from collections import Counter
+import veri
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+yorumlar = [r["comment"] for r in veri.kayitlar("lezzet_kurye", "lk_ratings") if r["comment"]]
+frek = Counter(k for y in yorumlar for k in re.findall(r"\w+", tr_kucuk(y)))
+sozcukler = {tuple(k) + ("_",): n for k, n in frek.items()}     # "_" = kelime sonu
+
+def cift_say(sozcukler):
+    say = Counter()
+    for semboller, n in sozcukler.items():
+        for a, b in zip(semboller, semboller[1:]):
+            say[a, b] += n
+    return say
+
+def birlestir(sozcukler, cift):
+    yeni = {}
+    for semboller, n in sozcukler.items():
+        s, i = [], 0
+        while i &lt; len(semboller):
+            if i + 1 &lt; len(semboller) and (semboller[i], semboller[i + 1]) == cift:
+                s.append(semboller[i] + semboller[i + 1]); i += 2
+            else:
+                s.append(semboller[i]); i += 1
+        yeni[tuple(s)] = n
+    return yeni
+
+birlesimler = []
+for _ in range(120):
+    say = cift_say(sozcukler)
+    cift = min(say, key=lambda c: (-say[c], c))      # en sık; eşitlikte alfabetik küçük
+    birlesimler.append(cift)
+    sozcukler = birlestir(sozcukler, cift)
+print(len(birlesimler), birlesimler[:8])
+print(sorted(sozcukler, key=sozcukler.get, reverse=True)[:4])</pre>
+<p>Öğrenilen birleşimlerle yeni kelimeleri tokenlara bölelim. Sık görülen "geldi" tek token, hiç görülmemiş "sıcacıktı" neredeyse harf harf bölünür:</p>
+<pre class="py">def tokenle(kelime, birlesimler):
+    semboller = tuple(tr_kucuk(kelime)) + ("_",)
+    for cift in birlesimler:
+        semboller = next(iter(birlestir({semboller: 1}, cift)))
+    return list(semboller)
+
+for k in ["geldi", "lezzetliydi", "sıcacıktı", "gelmedi"]:
+    print(k, tokenle(k, birlesimler))</pre>
+<p>Bunun pratik sonuçları önemlidir: Türkçe gibi eklemeli dillerde, ağırlıklı İngilizce metinle eğitilmiş tokenizer'lar aynı anlamı daha <b>çok tokenla</b> ifade eder. Bu da daha yüksek maliyet, daha çabuk dolan bağlam penceresi ve bazen daha düşük kalite demektir. Model seçerken Türkçe metninle token sayısını ölç:</p>
+<pre class="code">from transformers import AutoTokenizer          # Kendi bilgisayarında dene
+for ad in ["dbmdz/bert-base-turkish-cased", "bert-base-uncased"]:
+    tok = AutoTokenizer.from_pretrained(ad)
+    parcalar = tok.tokenize("Siparişlerinizden memnun kalmadık")
+    print(ad, len(parcalar), parcalar)
+# Türkçe için eğitilmiş tokenizer aynı cümleyi belirgin biçimde daha az parçaya böler.</pre>
+
+<h2>3. Ollama ve llama.cpp ile yerel LLM</h2>
+<p>Sohbet modelleri için en pratik yol <b>Ollama</b>'dır: modeli indirir, nicemlenmiş hâlde çalıştırır ve yerelde bir HTTP sunucusu açar. Altında <b>llama.cpp</b> vardır: modelleri tek bir <b>GGUF</b> dosyası olarak CPU ya da GPU'da çalıştıran C/C++ çıkarım motoru. OpenAI uyumlu uç noktayı <a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde gördün; burada Ollama'nın kendi API'si ve llama.cpp'nin Python bağlayıcısı:</p>
+<pre class="code"># Terminal (Kendi bilgisayarında dene):
+#   ollama pull qwen2.5:7b          # ~4.7 GB, 4 bit nicemlenmiş
+#   ollama run qwen2.5:7b "Merhaba"
+#   ollama list                     # indirilen modeller
+import requests
+
+yanit = requests.post("http://localhost:11434/api/chat", json={
+    "model": "qwen2.5:7b",
+    "messages": [{"role": "system", "content": "Yorumu olumlu, notr ya da olumsuz diye etiketle. Yalnız etiketi yaz."},
+                 {"role": "user", "content": "Biraz geç geldi ama lezzetli"}],
+    "stream": False,
+    "options": {"temperature": 0},
+}, timeout=60)
+print(yanit.json()["message"]["content"])
+
+# pip install llama-cpp-python      (GGUF dosyasını doğrudan yükler)
+from llama_cpp import Llama
+llm = Llama(model_path="modeller/qwen2.5-7b-instruct-q4_k_m.gguf", n_ctx=4096, n_gpu_layers=-1)
+print(llm.create_chat_completion(messages=[{"role": "user", "content": "Merhaba"}])["choices"][0]["message"]["content"])</pre>
+<p>Dosya adındaki <code>q4_k_m</code> nicemleme türünü söyler: yaklaşık 4 bit, gruplu ölçekler. Birazdan bunun ne demek olduğunu numpy ile göreceksin.</p>
+
+<h2>4. sentence-transformers: yerel embedding</h2>
+<p><a href="../embedding-vektor-arama/">Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</a> ve <a href="../rag-uygulamasi/">Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</a> derslerinde sahte embedding kullandın. Kendi bilgisayarında gerçeğine geçmek tek satırdır; çok dilli küçük modeller CPU'da da hızlıdır ve veri dışarı çıkmaz:</p>
+<pre class="code"># pip install sentence-transformers       (Kendi bilgisayarında dene)
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")   # 384 boyut
+v = model.encode(["Yemek soğuk geldi", "Siparişim buz gibiydi", "Kurye çok nazikti"], normalize_embeddings=True)
+print(v.shape, (v @ v.T).round(2))   # ilk ikisi birbirine üçüncüden daha yakın</pre>
+
+<h2>5. Model seçimi: boyut, lisans, Türkçe</h2>
+<p>Bir modelin belleğe sığıp sığmadığı kabaca <b>parametre sayısı × parametre başına bayt</b> ile hesaplanır. fp16'da parametre başına 2 bayt, int8'de 1, 4 bitte yarım bayt. Buna çalışma sırasındaki ek bellek (bağlam önbelleği, ara değerler) eklenir; kaba bir pay olarak %20 kullanılabilir.</p>
+<pre class="py">def agirlik_gb(param_milyar, bit):
+    return param_milyar * 1e9 * bit / 8 / 1024**3
+
+print(f"{'model':&gt;6} {'fp16':&gt;7} {'int8':&gt;7} {'4-bit':&gt;7}")
+for p in [1, 3, 8, 14, 70]:
+    print(f"{p:&gt;5}B " + " ".join(f"{agirlik_gb(p, b):&gt;6.1f}G" for b in (16, 8, 4)))</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Sor</th><th>Neden önemli?</th></tr>
+<tr><td>Boyut</td><td>Hedef donanıma (GPU belleği, dizüstü RAM) hangi nicemlemeyle sığar?</td><td>Sığmayan model ya çalışmaz ya da dayanılmaz yavaşlar</td></tr>
+<tr><td>Lisans</td><td>Apache-2.0, MIT mi; yoksa ticari kullanımı kısıtlayan (CC BY-NC) ya da özel koşullu bir topluluk lisansı mı?</td><td>Ticari üründe NC lisanslı model kullanmak hukuki risktir</td></tr>
+<tr><td>Türkçe desteği</td><td>Model kartı Türkçeyi sayıyor mu? Türkçe metinde token sayısı ve kalite nasıl?</td><td>Desteklenmeyen dilde hem kalite düşer hem maliyet artar</td></tr>
+<tr><td>Görev uyumu</td><td>Sohbet (instruct) modeli mi, temel model mi, embedding modeli mi?</td><td>Temel model talimat izlemez; embedding modeli metin üretmez</td></tr>
+<tr><td>Bağlam uzunluğu</td><td>RAG için kaç token bağlam gerekiyor?</td><td>Uzun bağlam bellek ister</td></tr>
+</table></div>
+
+<h2>6. Nicemleme (quantization) numpy ile</h2>
+<p>Nicemleme, 16 bitlik ağırlıkları 8 ya da 4 bitlik tamsayılara çevirip yanına bir <b>ölçek</b> (scale) saklamaktır: <code>q = yuvarla(w / ölçek)</code>, geri dönüşte <code>w ≈ q × ölçek</code>. Simetrik nicemlemede ölçek, en büyük mutlak değeri tamsayı aralığının ucuna eşler. Sorun <b>aykırı değerlerdir</b>: tek bir büyük ağırlık ölçeği büyütür ve küçük ağırlıkların hepsi sıfıra yuvarlanır. Çözüm, ağırlıkları küçük gruplara bölüp her gruba ayrı ölçek vermektir (GGUF'taki <code>q4_k</code> ve GPTQ/AWQ gibi yöntemlerin temel fikri):</p>
+<pre class="py">import numpy as np
+
+rng = np.random.default_rng(0)
+w = rng.normal(0, 0.02, size=4096).astype(np.float32)
+w[7] = 0.9                                     # tek bir aykırı ağırlık
+
+def nicemle(w, bit=8):
+    qmax = 2 ** (bit - 1) - 1                  # int8 için 127, 4 bit için 7
+    olcek = np.abs(w).max() / qmax
+    q = np.clip(np.round(w / olcek), -qmax, qmax).astype(np.int8)
+    return q, olcek
+
+def grup_nicemle(w, bit=4, grup=64):
+    qmax = 2 ** (bit - 1) - 1
+    g = w.reshape(-1, grup)
+    olcek = np.abs(g).max(axis=1, keepdims=True) / qmax
+    q = np.clip(np.round(g / olcek), -qmax, qmax).astype(np.int8)
+    return q, olcek
+
+for ad, (q, s) in [("int8 tek ölçek", nicemle(w, 8)), ("4 bit tek ölçek", nicemle(w, 4)),
+                   ("4 bit 64'lük grup", grup_nicemle(w, 4, 64))]:
+    geri = (q * s).reshape(-1)
+    print(f"{ad:&lt;18} ortalama hata {np.abs(w - geri).mean():.5f}  sıfıra düşen: {(q == 0).mean():.0%}")</pre>
+<p>Tek ölçekli 4 bit nicemlemede aykırı değer yüzünden ağırlıkların neredeyse tamamı sıfıra düştü; 64'lük gruplarla hata int8 düzeyine indi. Grup başına ek bir ölçek saklamanın maliyeti küçüktür (64 ağırlıkta bir sayı).</p>
+
+<h2>7. İnce ayar ve LoRA</h2>
+<p><b>İnce ayar</b> (fine-tuning), önceden eğitilmiş modeli kendi örneklerinle eğitmeye devam etmektir. Tüm ağırlıkları güncellemek büyük modelde çok pahalıdır. <b>LoRA</b> (Low-Rank Adaptation) ağırlıkları dondurur ve her katmana iki küçük matris ekler: <code>W' = W + (alfa / r) · B · A</code>. <code>r</code> (rank) 8 ya da 16 gibi küçük bir sayıdır; eğitilen parametre sayısı binde birler düzeyine iner. B sıfırla başladığı için eğitim başında model değişmez; eğitim bitince adaptör ağırlığa gömülebilir:</p>
+<pre class="py">d, r, alfa = 4096, 8, 16
+tam = d * d
+lora = r * d + d * r
+print(f"tam ince ayar: {tam:,} parametre, LoRA r={r}: {lora:,} ({lora / tam:.2%})")
+
+rng = np.random.default_rng(1)
+W = rng.normal(size=(6, 5))                    # dondurulmuş ağırlık (çıktı × girdi)
+A = rng.normal(size=(2, 5)) * 0.1              # r × girdi, eğitilir
+B = np.zeros((6, 2))                           # çıktı × r, sıfırla başlar
+x = rng.normal(size=(3, 5))
+print(np.allclose(x @ W.T + (alfa / r) * (x @ A.T) @ B.T, x @ W.T))   # başlangıçta model değişmez
+B = rng.normal(size=(6, 2)) * 0.1              # eğitimden sonra
+W_birlesik = W + (alfa / r) * B @ A            # adaptörü ağırlığa göm: çıkarımda ek maliyet yok
+print(np.allclose(x @ W_birlesik.T, x @ W.T + (alfa / r) * (x @ A.T) @ B.T))</pre>
+<pre class="code"># pip install transformers peft datasets accelerate     (Kendi bilgisayarında dene; GPU önerilir)
+from peft import LoraConfig, get_peft_model
+from transformers import AutoModelForSequenceClassification
+
+model = AutoModelForSequenceClassification.from_pretrained("dbmdz/bert-base-turkish-cased", num_labels=3)
+ayar = LoraConfig(r=8, lora_alpha=16, lora_dropout=0.1, target_modules=["query", "value"], task_type="SEQ_CLS")
+model = get_peft_model(model, ayar)
+model.print_trainable_parameters()      # eğitilebilir parametrelerin oranı yüzde birin altında
+# Sonra transformers.Trainer ile birkaç yüz-birkaç bin etiketli örnekle eğitilir.</pre>
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyaç</th><th>Önce dene</th><th>Neden?</th></tr>
+<tr><td>Model güncel şirket bilgisini bilsin</td><td>RAG (<a href="../rag-uygulamasi/">Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</a>)</td><td>Belge değişince indeksi güncellersin; kaynak gösterirsin</td></tr>
+<tr><td>Belirli biçim ve üslup</td><td>İstem + yapılandırılmış çıktı (<a href="../prompt-muhendisligi/">Prompt mühendisliği ve yapılandırılmış çıktı</a>)</td><td>Eğitim gerektirmez, hemen değiştirilir</td></tr>
+<tr><td>Dar görevde küçük, ucuz, tutarlı model</td><td>LoRA ince ayar</td><td>Küçük model büyük modelin işini yapar; gecikme ve maliyet düşer</td></tr>
+<tr><td>Etiketli binlerce örnek, sabit sınıflar</td><td>scikit-learn temel çizgisi</td><td>Milisaniyeler içinde, GPU'suz, açıklanabilir</td></tr>
+</table></div>
+
+<h2>8. Temel çizgi: scikit-learn ile Türkçe metin sınıflandırma</h2>
+<p>LLM'e geçmeden önce <b>temel çizgi</b> (baseline) kur. <a href="../nlp-metin/">Metin işleme ve NLP: Türkçe metinden modele</a> dersindeki TF-IDF + lojistik regresyon hattını gerçek Lezzet Kurye yorumlarına uygulayalım. Etiket, yemek ve kurye puanlarının ortalamasından türetiliyor (4 ve üstü olumlu, 3'ün altı olumsuz):</p>
+<pre class="py">from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score, f1_score
+
+kayit = [r for r in veri.kayitlar("lezzet_kurye", "lk_ratings") if r["comment"]]
+
+def etiket(r):
+    ort = (r["food_score"] + r["courier_score"]) / 2
+    return "olumlu" if ort &gt;= 4 else ("olumsuz" if ort &lt; 3 else "notr")
+
+X = [r["comment"] for r in kayit]
+y = [etiket(r) for r in kayit]
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
+model = make_pipeline(TfidfVectorizer(preprocessor=tr_kucuk), LogisticRegression(max_iter=1000))
+model.fit(X_tr, y_tr)
+tahmin = model.predict(X_te)
+print(len(X), Counter(y).most_common())
+print(f"çoğunluk sınıfı: {Counter(y_te).most_common(1)[0][1] / len(y_te):.3f}  "
+      f"doğruluk: {accuracy_score(y_te, tahmin):.3f}  makro F1: {f1_score(y_te, tahmin, average='macro'):.3f}")</pre>
+<p>Doğruluk 0.757, çoğunluk sınıfının (0.752) ancak üstünde; makro F1 0.384. Aynı yorum farklı puanlarla geldiği için etiket gürültülü: "Porsiyon küçüktü" diyenlerin bir kısmı 4-5 puan vermiş. Veride 275 farklı yorum var. Model hiç görmediği ifadelerle karşılaşınca ne yapıyor?</p>
+<pre class="py">yeni = ["Buz gibiydi", "Bayıldım", "Bir saat bekledim", "İdare eder"]
+print([str(t) for t in model.predict(yeni)])
+print(model.named_steps["tfidfvectorizer"].transform(yeni).nnz, "bilinen kelime")</pre>
+<p>Yeni ifadelerin yalnız bazı kelimeleri sözlükte var (toplam 8 eşleşme); model üçüne en sık sınıfı ("olumlu") veriyor. "Buz gibiydi" açıkça olumsuz, "İdare eder" nötr. İşte LLM'in (yerel ya da bulut) değeri burada: <b>dil bilgisi</b> sayesinde görmediği ifadeyi anlar. Ama her yorum için LLM çağırmak yavaş ve pahalıdır. Pratik çözüm <b>hibrit</b>: hızlı sınıflandırıcı önce çalışır, güveni düşük ya da sözlük dışı kalan yorumları LLM'e gönderir. Bunu mini projede ölçerek kuracaksın.</p>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>scikit-learn</th><th>Yerel küçük LLM</th><th>Bulut LLM</th></tr>
+<tr><td>Gecikme (yorum başına)</td><td>Milisaniyenin altı</td><td>Yüzlerce milisaniye (GPU'ya bağlı)</td><td>Yüzlerce milisaniye + ağ</td></tr>
+<tr><td>Maliyet</td><td>Yok denecek kadar az</td><td>Donanım + elektrik</td><td>Token başına</td></tr>
+<tr><td>Etiketli veri</td><td>Gerekir (yüzlerce-binlerce)</td><td>Az ya da hiç (sıfır atış)</td><td>Az ya da hiç</td></tr>
+<tr><td>Yeni ifadeler</td><td>Zayıf</td><td>İyi</td><td>Çok iyi</td></tr>
+<tr><td>Veri dışarı çıkar mı?</td><td>Hayır</td><td>Hayır</td><td>Evet (sözleşme ve KVKK)</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Müşteri yorumu, e-posta ya da talep sınıflandıran ekipler genelde şu yolu izler: önce birkaç yüz örneği LLM ile (ya da elle) etiketleyip temel çizgiyi kurar, sonra hacim büyüdükçe küçük bir modeli (TF-IDF + lojistik regresyon ya da LoRA ile ince ayarlanmış BERTurk) üretime alır ve yalnız zor örnekleri büyük modele gönderir. Kararı her zaman aynı test setinde doğruluk, gecikme ve maliyet tablosuyla verirler.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Çıkarım sunucuları</h3>
+<p>Tek kullanıcı için Ollama yeterlidir; çok kullanıcılı üretimde vLLM ya da Hugging Face TGI gibi sunucular sürekli toplu işleme (continuous batching) ve bağlam önbelleği paylaşımıyla aynı GPU'dan çok daha fazla istek çıkarır. İkisi de OpenAI uyumlu uç nokta sunar; <a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersindeki sağlayıcıdan bağımsız istemcin değişmeden çalışır.</p>
+<h3>QLoRA</h3>
+<p>Temel modeli 4 bit nicemlenmiş tutup üstüne LoRA adaptörlerini eğitmek (QLoRA), büyük modellerin tek bir tüketici GPU'sunda ince ayarını mümkün kılar.</p>
+<h3>Damıtma (distillation)</h3>
+<p>Büyük modelin etiketlerini (ya da olasılıklarını) öğretmen olarak kullanıp küçük bir modeli eğitirsin. Mini projedeki hibrit yaklaşımın doğal devamıdır: LLM'in etiketlediği zor örnekler zamanla küçük modelin eğitim setine eklenir.</p>
+<h3>Değerlendirme</h3>
+<p>Yerel modeli bulut modeliyle karşılaştırırken aynı altın seti, aynı istemi (prompt) ve aynı ölçütleri kullan; ölçüt seçimi ve LLM-hakem tuzakları <a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek</a> dersinde.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yerel-modeller-hf">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../rag-uygulamasi/">← Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</a><a href="../proje-etl/">Bitirme projesi: Anadolu Market web olayları ETL →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

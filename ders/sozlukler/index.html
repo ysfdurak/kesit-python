@@ -1,0 +1,217 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sözlükler (dict) | Kesit Python</title><meta name="description" content="Müşteri ve sipariş kayıtlarını anahtar-değer çiftleriyle tutar; get, items ve update ile güvenle okur-günceller; iç içe sözlükle JSON benzeri yapı kurar…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sozlukler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sözlükler (dict)"><meta property="og:description" content="Müşteri ve sipariş kayıtlarını anahtar-değer çiftleriyle tutar; get, items ve update ile güvenle okur-günceller; iç içe sözlükle JSON benzeri yapı kurar…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sozlukler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sözlükler (dict)","description":"Müşteri ve sipariş kayıtlarını anahtar-değer çiftleriyle tutar; get, items ve update ile güvenle okur-günceller; iç içe sözlükle JSON benzeri yapı kurar…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/sozlukler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>Sözlükler (dict)</h1><p class="st-l">Müşteri ve sipariş kayıtlarını anahtar-değer çiftleriyle tutar; get, items ve update ile güvenle okur-günceller; iç içe sözlükle JSON benzeri yapı kurar ve sayım kalıbını öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sozlukler">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>İsimle erişmek</h2>
+<p>Listeler dersinde bir siparişi <code>["AM-101", "İzmir", 1499.9]</code> diye tutmuştun. Üç ay sonra <code>siparis[2]</code> gördüğünde bunun tutar olduğunu hatırlayacak mısın? <b>Sözlük</b> (dictionary, dict) her değere bir <b>anahtar</b> (key) verir: <code>siparis["tutar"]</code>. Anadolu Market'in müşteri kaydı, Ilgaz Bank'ın hesap bilgisi, bir API'den dönen yanıt: iş dünyasındaki verinin büyük kısmı bu biçimdedir.</p>
+<pre class="py">musteri = {
+    "no": "M-101",
+    "ad": "Ayşe Yılmaz",
+    "sehir": "İzmir",
+    "bakiye": 12500.0,
+    "aktif": True,
+}
+print(musteri["ad"])
+print(musteri["bakiye"] + 500)
+print(len(musteri), "alan")
+print(type(musteri))</pre>
+<p>Süslü parantez içinde <code>anahtar: değer</code> çiftleri. Anahtar genelde metindir ama sayı ve demet de olabilir; değişmez olması yeter. Değer ise her şey olabilir: sayı, metin, liste, hatta başka bir sözlük. Python 3.7'den beri sözlük, anahtarların ekleme sırasını korur.</p>
+
+<h2>Okuma: köşeli parantez mi get mi?</h2>
+<p>Var olmayan anahtarı köşeli parantezle istersen KeyError alırsın. <code>get</code> ise bulamazsa <code>None</code> ya da senin verdiğin varsayılanı döndürür ve programı durdurmaz.</p>
+<pre class="py">musteri = {"no": "M-101", "ad": "Ayşe Yılmaz", "sehir": "İzmir"}
+print(musteri.get("sehir"))
+print(musteri.get("telefon"))              # None
+print(musteri.get("telefon", "kayıtlı değil"))
+print("telefon" in musteri)                # anahtar var mı?
+print("ad" in musteri)
+try:
+    print(musteri["telefon"])
+except KeyError as hata:
+    print("KeyError:", hata)</pre>
+<p>Kural: anahtarın kesin var olduğunu biliyorsan köşeli parantez (hata alırsan bu gerçek bir sorundur ve görmek istersin). Eksik olabilecek alanlarda <code>get</code>. <code>in</code> operatörü sözlükte <b>anahtarları</b> arar, değerleri değil.</p>
+
+<h2>Ekleme, güncelleme, silme</h2>
+<pre class="py">hesap = {"no": "TR-5501", "bakiye": 10000}
+hesap["sahip"] = "Mehmet Kaya"        # yeni anahtar ekle
+hesap["bakiye"] = hesap["bakiye"] - 750   # değeri değiştir
+hesap["bakiye"] += 2000               # kısayol
+print(hesap)
+hesap.update({"sube": "Konak", "bakiye": 11250})   # toplu güncelle
+print(hesap)
+silinen = hesap.pop("sube")           # anahtarı çıkar, değeri döndür
+print(silinen, hesap)
+del hesap["sahip"]
+print(hesap)
+print(hesap.pop("yok", "bulunamadı")) # varsayılanlı pop</pre>
+<p>Aynı anahtara ikinci kez atama yapmak üzerine yazar; sözlükte anahtar tekrarı yoktur. <code>update</code> başka bir sözlükten alanları alır: var olanları günceller, olmayanları ekler. <code>pop</code> ve <code>del</code> siler; <code>pop</code> değeri geri verdiği için daha sık kullanılır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İşlem</th><th>Yazım</th><th>Eksik anahtarda</th></tr>
+<tr><td>Oku</td><td><code>d["k"]</code></td><td>KeyError</td></tr>
+<tr><td>Güvenli oku</td><td><code>d.get("k", varsayilan)</code></td><td>varsayılan döner</td></tr>
+<tr><td>Ekle / güncelle</td><td><code>d["k"] = v</code></td><td>eklenir</td></tr>
+<tr><td>Toplu güncelle</td><td><code>d.update(baska)</code></td><td>eklenir</td></tr>
+<tr><td>Sil ve al</td><td><code>d.pop("k")</code></td><td>KeyError (varsayılan verilmezse)</td></tr>
+<tr><td>Sil</td><td><code>del d["k"]</code></td><td>KeyError</td></tr>
+<tr><td>Var mı?</td><td><code>"k" in d</code></td><td>False</td></tr>
+</table></div>
+
+<h2>keys, values, items</h2>
+<p>Sözlüğün üç görünümü vardır: anahtarlar, değerler ve çiftler. Bunlar liste gibi gezilebilir; döngüler dersinde her gün kullanacaksın. Şimdilik listeye çevirip bakalım:</p>
+<pre class="py">fiyatlar = {"kahve makinesi": 1499.9, "kalem": 2.5, "defter": 45}
+print(list(fiyatlar.keys()))
+print(list(fiyatlar.values()))
+print(list(fiyatlar.items()))
+print("Toplam:", sum(fiyatlar.values()))
+print("En pahalı:", max(fiyatlar, key=fiyatlar.get))
+urun, fiyat = list(fiyatlar.items())[0]     # demet açma!
+print(urun, fiyat)</pre>
+<p><code>items</code> her çifti bir demet olarak verir; demet açmayı öğrendiğin için <code>urun, fiyat = ...</code> yazabildin. <code>max(fiyatlar, key=fiyatlar.get)</code> kalıbı "değeri en büyük olan anahtarı bul" demektir ve raporlarda çok geçer.</p>
+
+<h2>İç içe sözlük ve JSON'a hazırlık</h2>
+<p>Bir müşterinin birden fazla siparişi, bir siparişin birden fazla ürünü var. Değer olarak liste ve sözlük kullanarak hiyerarşi kurarsın:</p>
+<pre class="py">musteri = {
+    "no": "M-101",
+    "ad": "Ayşe Yılmaz",
+    "adres": {"sehir": "İzmir", "ilce": "Konak", "posta": "35220"},
+    "siparisler": [
+        {"kod": "AM-101", "tutar": 1499.9, "teslim": True},
+        {"kod": "AM-103", "tutar": 89.5, "teslim": False},
+    ],
+}
+print(musteri["adres"]["sehir"])
+print(musteri["siparisler"][0]["kod"])
+print(musteri["siparisler"][-1]["teslim"])
+musteri["adres"]["ilce"] = "Bornova"
+musteri["siparisler"].append({"kod": "AM-110", "tutar": 250, "teslim": False})
+print(len(musteri["siparisler"]), "sipariş")
+import json
+print(json.dumps(musteri, ensure_ascii=False, indent=2)[:80])</pre>
+<p>Zincirleme köşeli parantez derinlere iner: önce adres sözlüğü, sonra içindeki şehir. Son satırlardaki <code>json</code> modülü bu yapıyı metne çevirir. <b>JSON</b>, web servislerinin ve yapılandırma dosyalarının ortak dilidir ve Python sözlüğüyle neredeyse birebir aynı görünür: süslü parantez, anahtar-değer, listeler. Sözlüğü iyi kavradıysan JSON'ı zaten biliyorsun; JSON ve CSV dersinde dosyadan okuyup yazacağız.</p>
+<div class="warn"><b>Kopyalama tuzağı burada da var</b><code>yedek = musteri</code> kopya değildir; <code>musteri.copy()</code> ise yalnızca dış sözlüğü kopyalar, içindeki adres sözlüğü ve sipariş listesi paylaşılır. İç içe yapıyı tamamen kopyalamak için <code>copy.deepcopy</code> kullan.</div>
+
+<h2>Sayım kalıbı</h2>
+<p>Analistin en sık yazdığı kod parçalarından biri: bir listedeki her değerin kaç kez geçtiğini bulmak. Şehir bazlı sipariş adedi, ürün bazlı satış, hata türü bazlı log sayısı. Sözlük bunun için biçilmiş kaftan; anahtar değer, değer ise sayaç olur. Döngüyü henüz görmediğin için önce adım adım, sonra döngülü hâlini gösteriyorum:</p>
+<pre class="py">sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "İzmir", "Ankara"]
+sayim = {}
+sayim["İzmir"] = sayim.get("İzmir", 0) + 1     # ilk kez: 0 + 1
+sayim["Ankara"] = sayim.get("Ankara", 0) + 1
+sayim["İzmir"] = sayim.get("İzmir", 0) + 1     # ikinci kez: 1 + 1
+print(sayim)
+
+sayim = {}
+for sehir in sehirler:          # döngü: her şehir için aynı satır
+    sayim[sehir] = sayim.get(sehir, 0) + 1
+print(sayim)
+print("En çok:", max(sayim, key=sayim.get))</pre>
+<p>Kalıbın kalbi tek satır: <code>sayim[x] = sayim.get(x, 0) + 1</code>. <code>get</code>'in varsayılanı 0 olduğu için ilk karşılaşmada hata çıkmaz. Döngüler dersinde <code>for</code> satırını tam olarak anlayacaksın; şimdilik "listenin her elemanı için bu satırı çalıştır" diye oku. Aynı işi hazır yapan <code>collections.Counter</code> da var; Orta seviyede göreceksin.</p>
+<div class="tip"><b>Gruplama kalıbı</b>Saymak yerine toplamak istersen aynı yapı çalışır: <code>toplam[sehir] = toplam.get(sehir, 0) + tutar</code>. Şehir bazlı ciro bu tek satırdır.</div>
+<div class="note"><b>Anahtar olarak ne kullanmalı?</b>Metin, sayı ve demet anahtar olabilir; liste olamaz (değişebilir). "Şehir ve yıl" gibi bileşik anahtar için demet kullan: <code>ciro[("İzmir", 2025)]</code>.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Sözlükleri birleştirmek</h2>
+<p>İki kaynaktan gelen ayarları ya da fiyat listelerini birleştirmek günlük iştir. Python 3.9'dan beri bunun için <code>|</code> (yeni sözlük) ve <code>|=</code> (yerinde) operatörleri var. Aynı anahtar iki tarafta da varsa <b>sağdaki kazanır</b>. Eski kodlarda aynı işi <code>{**a, **b}</code> ya da <code>a.update(b)</code> ile görürsün.</p>
+<pre class="py">varsayilan = {"para_birimi": "TL", "kdv": 0.20, "kargo": 49.9}
+kampanya = {"kargo": 0, "indirim": 0.10}
+
+ayar = varsayilan | kampanya          # yeni sözlük, sağdaki kazanır
+print(ayar)
+print(varsayilan)                     # değişmedi
+
+eski_yol = {**varsayilan, **kampanya} # aynı sonuç
+print(ayar == eski_yol)
+
+varsayilan |= {"kdv": 0.10}           # yerinde güncelleme
+print(varsayilan["kdv"])</pre>
+<p>Birleştirme <b>üzerine yazar</b>, toplamaz. İki deponun stoklarını toplamak istiyorsan döngüyle <code>get(..., 0)</code> kalıbını kullanırsın; aşağıdaki alıştırmalarda bunu yapacaksın.</p>
+
+<h2>Silmenin dört yolu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Dönen değer</th><th>Anahtar yoksa</th><th>Ne zaman?</th></tr>
+<tr><td><code>del d[k]</code></td><td>-</td><td><code>KeyError</code></td><td>Anahtarın var olduğundan eminsen</td></tr>
+<tr><td><code>d.pop(k)</code></td><td>Silinen değer</td><td><code>KeyError</code></td><td>Değeri kullanacaksan</td></tr>
+<tr><td><code>d.pop(k, varsayilan)</code></td><td>Değer ya da varsayılan</td><td>Varsayılanı döndürür</td><td>"Varsa al ve sil"</td></tr>
+<tr><td><code>d.popitem()</code></td><td>Son eklenen (anahtar, değer)</td><td>Boşsa <code>KeyError</code></td><td>Yığın gibi tüketmek</td></tr>
+<tr><td><code>d.clear()</code></td><td>None</td><td>-</td><td>Hepsini boşalt</td></tr>
+</table></div>
+<pre class="py">kuponlar = {"YAZ10": 10, "ILK50": 50}
+indirim = kuponlar.pop("YAZ10", 0)    # kullanılan kupon silinir
+print(indirim, kuponlar)
+print(kuponlar.pop("SAHTE", 0))       # yoksa 0, hata yok
+sepet = {"çay": 2, "kahve": 1}
+print(sepet.popitem())                # en son eklenen: ('kahve', 1)</pre>
+
+<h2>Gezerken değiştirme tuzağı</h2>
+<p>Bir sözlüğü <code>for</code> ile gezerken ona anahtar ekler ya da silersen Python <code>RuntimeError: dictionary changed size during iteration</code> verir. Çözüm: anahtarların bir <b>kopyası</b> üzerinde gez (<code>list(d)</code>) ya da silinecekleri önce topla, sonra sil. Var olan anahtarın <b>değerini</b> değiştirmek ise güvenlidir.</p>
+<pre class="py">stok = {"çay": 0, "kahve": 5, "şeker": 0, "su": 12}
+for urun in list(stok):               # kopya üzerinde gez
+    if stok[urun] == 0:
+        del stok[urun]
+print(stok)
+
+for urun in stok:                     # değer güncellemek serbest
+    stok[urun] += 10
+print(stok)</pre>
+
+<h2>Görünümler (views) canlıdır ve küme gibi davranır</h2>
+<p><code>keys()</code>, <code>values()</code>, <code>items()</code> kopya değil, sözlüğe açılan <b>canlı pencerelerdir</b> (view): sözlük değişince görünüm de değişir. Ayrıca <code>keys()</code> küme işlemlerini destekler; iki fiyat listesini karşılaştırırken kümeye çevirmene bile gerek kalmaz.</p>
+<pre class="py">eski = {"çay": 120, "kahve": 340, "kek": 90}
+yeni = {"çay": 125, "kahve": 340, "su": 15}
+anahtarlar = yeni.keys()
+print("Eklenen:", anahtarlar - eski.keys())
+print("Kalkan:", eski.keys() - anahtarlar)
+ortak = sorted(eski.keys() &amp; anahtarlar)
+print("Fiyatı değişen:", [u for u in ortak if eski[u] != yeni[u]])
+yeni["süt"] = 40
+print(len(anahtarlar))                 # görünüm güncellendi: 4</pre>
+<p>Son satırdaki köşeli parantezli tek satırlık döngü bir liste comprehension'dır; Comprehension dersinde ayrıntılı göreceksin. Sözlük comprehension'ı da (<code>{u: f * 1.2 for u, f in fiyat.items()}</code>) orada.</p>
+
+<h2>Değerde arama yavaştır</h2>
+<p><code>"İzmir" in musteri</code> yalnızca <b>anahtarlara</b> bakar ve karma (hash) sayesinde neredeyse anında yanıt verir. <code>"İzmir" in musteri.values()</code> ise listedeki gibi baştan sona tarar. Değere göre sık arama yapıyorsan, ters sözlüğü bir kez kurup sonra anahtarla aramak çok daha hızlıdır. Örneğin müşteri numarası → e-posta sözlüğün varsa ve sürekli "bu e-posta kimin?" diye soruyorsan, e-posta → müşteri numarası sözlüğünü bir kez üret.</p>
+<pre class="py">eposta = {"M-1": "ayse@ornek.com", "M-2": "can@ornek.com"}
+print("can@ornek.com" in eposta)            # False: anahtarlara bakar
+print("can@ornek.com" in eposta.values())   # True ama yavaş tarama
+kimin = {}
+for no, adres in eposta.items():
+    kimin[adres] = no
+print(kimin["can@ornek.com"])                 # hızlı ters arama</pre>
+<p>İç içe sözlüklerde güvenli erişimi (<code>.get</code> zinciri) ve derin kopyayı İç içe veri yapıları dersinde ayrıntılı göreceksin; buradaki kalıplar o dersin temelidir.</p>
+
+<h2>Değere göre sıralamak ve ilk N</h2>
+<p>Sözlük ekleme sırasını korur ama kendisi sıralanmaz. "En çok satan 3 ürün" için öğeleri (<code>items()</code>) değere göre sıralarsın. İki kısa yol var: anahtarları <code>key=d.get</code> ile sıralamak ya da çiftleri bir anahtar fonksiyonla sıralamak. Eşitlik kuralı gerekiyorsa demet anahtar kullan.</p>
+<pre class="py">satis = {"çay": 120, "kahve": 340, "su": 120, "kek": 210}
+print(sorted(satis, key=satis.get, reverse=True)[:3])
+
+def adet_sonra_ad(cift):
+    urun, adet = cift
+    return (-adet, urun)             # adet azalan, eşitlikte ad artan
+
+for urun, adet in sorted(satis.items(), key=adet_sonra_ad):
+    print(f"{urun:&lt;6}{adet:&gt;5}")</pre>
+
+<h2>Ters çevirme ve gruplama</h2>
+<p>Sözlüğü ters çevirmek (değer → anahtar) değerler benzersizse tek döngüdür. Değerler tekrar ediyorsa bilgi kaybolmasın diye her değere bir <b>liste</b> bağlarsın; bu da gruplama kalıbıdır. <code>setdefault(k, [])</code> anahtar yoksa boş listeyi koyup döndürür, varsa var olanı döndürür.</p>
+<pre class="py">bolge = {"İzmir": "Ege", "Manisa": "Ege", "Ankara": "İç Anadolu", "Konya": "İç Anadolu", "Bursa": "Marmara"}
+gruplar = {}
+for sehir, b in bolge.items():
+    gruplar.setdefault(b, []).append(sehir)
+print(gruplar)</pre>
+<div class="warn"><b>dict.fromkeys ile liste paylaşımı</b><code>dict.fromkeys(["İzmir", "Ankara"], [])</code> her anahtara <b>aynı</b> listeyi bağlar: birine eklediğin herkese görünür. Değişebilir varsayılan gerekiyorsa <code>setdefault</code> ya da Collections dersinde göreceğin <code>defaultdict(list)</code> kullan. Sayım için hazır araç <code>collections.Counter</code> da o derste.</div>
+<div class="tip"><b>Eşitlik sıraya bakmaz</b><code>{"a": 1, "b": 2} == {"b": 2, "a": 1}</code> True'dur. Testlerde sözlükleri doğrudan <code>==</code> ile karşılaştırabilirsin; sıralama ancak yazdırırken önemlidir.</div>
+<div class="note"><b>Gerçek işte</b>Uygulamalar ayarlarını çoğunlukla katmanlı tutar: kod içindeki varsayılanlar, üstüne yapılandırma dosyası, en üstte ortam değişkenleri. Bu katmanlar tam olarak <code>varsayilan | dosya | ortam</code> birleştirmesidir; sağdaki kazanır. Fiyat ya da stok listesi senkronizasyonunda da ilk iş iki sözlüğün anahtar farkını (eklenen/kalkan) ve ortak anahtarlarda değeri değişenleri çıkarmaktır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sözlük neden hızlı?</h3>
+<p>Sözlük, kümeyle aynı karma tablo (hash table) yapısını kullanır. Anahtarın karması hesaplanır ve değer doğrudan o adreste aranır; sözlük bir milyon kayıt da tutsa okuma süresi değişmez. Listede "no'su M-101 olan müşteri" aramak baştan sona taramadır. Bu yüzden kayıtları numarayla erişilecekse liste değil sözlükte tut: <code>musteriler["M-101"]</code>.</p>
+<h3>setdefault ve defaultdict</h3>
+<p>Sayım kalıbındaki <code>get(x, 0)</code> yerine <code>sayim.setdefault(x, 0)</code> da yazılır; anahtar yoksa ekler ve değeri döndürür. Gruplama için <code>collections.defaultdict(list)</code> daha temizdir: <code>gruplar[sehir].append(siparis)</code> tek satırda, var mı diye bakmadan. Standart kütüphane dersinde bu araçları ayrıntılı ele alacağız.</p>
+<h3>Veri modeli olarak sözlük: sınırlar</h3>
+<p>Sözlük esnektir ama "ad" yerine yanlışlıkla "adi" yazarsan Python şikâyet etmez; sessizce yeni alan ekler. Büyük projelerde bu tür yazım hatalarını yakalamak için kayıtları <code>dataclass</code> ya da <code>TypedDict</code> ile tanımlarsın. Sözlük veri taşımak için, dataclass veri tanımlamak için. Orta seviyede bu ayrımı yaşayarak öğreneceksin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sozlukler">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../demet-kume/">← Demet (tuple) ve küme (set)</a><a href="../kosullar/">Koşullar: if / elif / else →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,224 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma | Kesit Python</title><meta name="description" content="re.search/match/findall/sub ile kalıp arar, gruplarla veri çıkarır, telefon/e-posta/IBAN benzeri doğrulamalar yazar ve regex tuzaklarından kaçınırsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/regex/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma"><meta property="og:description" content="re.search/match/findall/sub ile kalıp arar, gruplarla veri çıkarır, telefon/e-posta/IBAN benzeri doğrulamalar yazar ve regex tuzaklarından kaçınırsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/regex/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma","description":"re.search/match/findall/sub ile kalıp arar, gruplarla veri çıkarır, telefon/e-posta/IBAN benzeri doğrulamalar yazar ve regex tuzaklarından kaçınırsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/regex/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma</h1><p class="st-l">re.search/match/findall/sub ile kalıp arar, gruplarla veri çıkarır, telefon/e-posta/IBAN benzeri doğrulamalar yazar ve regex tuzaklarından kaçınırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/regex">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'a gelen EFT açıklamalarından fatura numarasını çıkarmak, Anadolu Market müşteri formundaki telefonun doğru biçimde olduğunu kontrol etmek, log dosyasından hata kodlarını toplamak... Bunların ortak noktası: metin içinde <b>kalıp</b> (pattern) aramak. <code>str.find</code> ve <code>in</code> sabit metin arar; "5 ile başlayan 10 haneli sayı" gibi kalıpları ise düzenli ifadeler (regular expression, regex) bulur. Regex küçük bir dildir; doğru kullanınca 20 satırlık ayrıştırma kodu bir satıra iner, yanlış kullanınca kimsenin okuyamadığı bir satır çıkar. Bu ders ikisi arasındaki çizgiyi öğretir.</p>
+
+<h2>Temel sözlük</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Yapı</th><th>Anlam</th><th>Örnek</th></tr>
+<tr><td>\d  \w  \s</td><td>Rakam / harf-rakam-alt çizgi / boşluk</td><td>\d{3} → 3 rakam</td></tr>
+<tr><td>\D  \W  \S</td><td>Yukarıdakilerin tersi</td><td>\D+ → rakam olmayanlar</td></tr>
+<tr><td>.</td><td>Satır sonu dışında herhangi bir karakter</td><td>a.c → abc, a-c</td></tr>
+<tr><td>[abc]  [^abc]  [a-z]</td><td>Küme / küme dışı / aralık</td><td>[A-Z]{2} → iki büyük harf</td></tr>
+<tr><td>*  +  ?  {n,m}</td><td>0+ / 1+ / 0-1 / n ile m arası</td><td>\d{2,4}</td></tr>
+<tr><td>^  $  \b</td><td>Satır başı / sonu / kelime sınırı</td><td>^TR → TR ile başlar</td></tr>
+<tr><td>( )  (?P&lt;ad&gt; )  (?: )</td><td>Grup / adlandırılmış grup / yakalamayan grup</td><td>(?P&lt;yil&gt;\d{4})</td></tr>
+<tr><td>a|b</td><td>Veya</td><td>TL|USD|EUR</td></tr>
+</table></div>
+<div class="tip"><b>Her zaman ham dize kullan</b>Kalıpları <code>r"..."</code> ile yaz. Aksi halde Python <code>"\b"</code>yi geri silme (backspace) karakteri sanır, <code>"\d"</code> için uyarı verir. <code>r</code> öneki ters eğik çizgiyi olduğu gibi bırakır.</div>
+
+<h2>Dört ana fonksiyon</h2>
+<p><code>re.search</code> metnin herhangi bir yerinde ilk eşleşmeyi bulur; <code>re.match</code> yalnızca <b>baştan</b> eşleşir; <code>re.fullmatch</code> tüm metnin kalıba uymasını ister (doğrulama için en doğrusu); <code>re.findall</code> tüm eşleşmeleri liste olarak verir. <code>search/match/fullmatch</code> eşleşme yoksa <code>None</code> döndürür; bu yüzden sonucu önce <code>if</code> ile kontrol edersin.</p>
+<pre class="py">import re
+
+aciklama = "EFT - Fatura No: FT-2026-00431, tutar 1.250,00 TL"
+m = re.search(r"FT-\d{4}-\d{5}", aciklama)
+print("search :", m.group() if m else None, "| konum:", m.span())
+print("match  :", re.match(r"FT-", aciklama))          # baş 'EFT' olduğu için None
+print("match2 :", re.match(r"EFT", aciklama).group())
+print("full   :", re.fullmatch(r"\d{10}", "5321234567") is not None)
+print("full2  :", re.fullmatch(r"\d{10}", "532123456X") is not None)
+print("findall:", re.findall(r"\d+", aciklama))
+print("bos    :", re.search(r"\d+", "rakam yok"))      # None</pre>
+
+<h2>Gruplar: eşleşmenin parçalarını almak</h2>
+<p>Parantez, eşleşmenin bir bölümünü yakalar (capture). <code>group(1)</code> ilk grubu, <code>groups()</code> hepsini verir. Adlandırılmış gruplar <code>(?P&lt;ad&gt;...)</code> ile kodu okunur yapar; <code>groupdict()</code> doğrudan sözlük döndürür. Yakalamak istemediğin ama gruplaman gereken yerde <code>(?:...)</code> kullan.</p>
+<pre class="py">import re
+
+satir = "2026-03-15 14:30:07 ERROR odeme-servisi: zaman asimi (kod=504)"
+kalip = r"(?P&lt;tarih&gt;\d{4}-\d{2}-\d{2}) (?P&lt;saat&gt;[\d:]+) (?P&lt;seviye&gt;[A-Z]+) (?P&lt;servis&gt;[\w-]+): (?P&lt;mesaj&gt;.*)"
+m = re.search(kalip, satir)
+print(m.group("seviye"), "-", m.group("servis"))
+print(m.groupdict())
+print(m.group(1), m.group(3))      # sıra numarasıyla da erişilir
+
+# findall: grup varsa yalnızca grupları döndürür
+fiyatlar = "laptop 25.999 TL, mouse 349 TL, çanta 1.200 TL"
+print(re.findall(r"(\w+) ([\d.]+) TL", fiyatlar))
+# finditer: eşleşme nesneleriyle gez
+for e in re.finditer(r"(?P&lt;urun&gt;\w+) (?P&lt;fiyat&gt;[\d.]+) TL", fiyatlar):
+    print(e["urun"], "→", e["fiyat"].replace(".", ""))</pre>
+
+<h2>re.sub: bul ve değiştir</h2>
+<p><code>re.sub(kalip, yeni, metin)</code> tüm eşleşmeleri değiştirir. <code>yeni</code> içinde <code>\1</code> ya da <code>\g&lt;ad&gt;</code> ile grup kullanabilirsin; karmaşık dönüşümlerde <code>yeni</code> yerine fonksiyon verirsin. KVKK gereği kart numarası maskeleme tipik bir örnektir.</p>
+<pre class="py">import re
+
+mesaj = "Kart 5401 2345 6789 1234 ile 350 TL ödeme; TC 12345678901 doğrulandı."
+# Kartın ilk 4 ve son 4'ünü bırak, ortayı maskele
+maskeli = re.sub(r"(\d{4}) \d{4} \d{4} (\d{4})", r"\1 **** **** \2", mesaj)
+print(maskeli)
+# 11 haneli sayıyı tamamen gizle
+print(re.sub(r"\b\d{11}\b", "***********", maskeli))
+# Tarih biçimi değiştir: 2026-03-15 -&gt; 15.03.2026
+print(re.sub(r"(\d{4})-(\d{2})-(\d{2})", r"\3.\2.\1", "Rapor tarihi 2026-03-15"))
+# Fonksiyonla değiştirme: fiyatları yüzde 10 artır
+print(re.sub(r"\d+", lambda m: str(int(m.group()) * 11 // 10), "mouse 350 TL, çanta 1200 TL"))
+# Fazla boşlukları teke indir, kaç tane değişti?
+yeni, adet = re.subn(r"\s+", " ", "çok    fazla   boşluk")
+print(yeni, "|", adet)</pre>
+
+<h2>İş kalıpları: telefon, e-posta, IBAN</h2>
+<p>Kurumsal formlarda en çok karşılaşılan üç doğrulama. Amaç "biçimsel olarak makul mü?" sorusuna cevap vermektir; gerçek doğrulama (IBAN kontrol basamağı, e-posta adresinin var olması) regex'in işi değildir.</p>
+<pre class="py">import re
+
+TELEFON = re.compile(r"^(?:\+90|0)?\s?5\d{2}\s?\d{3}\s?\d{2}\s?\d{2}$")
+EPOSTA = re.compile(r"^[\w.+-]+@[\w-]+(?:\.[\w-]+)+$")
+IBAN_TR = re.compile(r"^TR\d{2}\s?(?:\d{4}\s?){5}\d{2}$")   # TR + 24 hane = 26 karakter
+
+for t in ["0532 123 45 67", "+90 532 123 45 67", "5321234567", "0212 123 45 67", "532 12 34"]:
+    print(f"{t:&gt;18} →", bool(TELEFON.match(t)))
+for e in ["ayse.yilmaz@anadolumarket.com.tr", "ali@firma", "kötü@@adres.com"]:
+    print(f"{e:&gt;34} →", bool(EPOSTA.match(e)))
+for i in ["TR33 0006 1005 1978 6457 8413 26", "TR330006100519786457841326", "TR12 3456"]:
+    print(f"{i:&gt;34} →", bool(IBAN_TR.match(i)))</pre>
+<div class="note"><b>Neden compile?</b><code>re.compile</code> kalıbı bir kez derler ve bir nesne verir; döngüde binlerce kez kullanacaksan okunurluk ve hız kazandırır. Python zaten son kalıpları önbelleğe (cache) alır, bu yüzden tek seferlik kullanımda fark yoktur; compile'ın asıl faydası kalıba <b>ad vermek</b>tir.</div>
+
+<h2>Tuzaklar</h2>
+<h3>1. Açgözlülük (greedy)</h3>
+<p><code>.*</code> olabildiğince çok karakter yutar. <code>&lt;b&gt;x&lt;/b&gt; ve &lt;b&gt;y&lt;/b&gt;</code> metninde <code>&lt;b&gt;.*&lt;/b&gt;</code> tüm satırı alır. Tembel (lazy) sürüm <code>.*?</code> en kısa eşleşmede durur.</p>
+<h3>2. Nokta ve özel karakterler</h3>
+<p><code>.</code> "her karakter" demektir; gerçek nokta için <code>\.</code> yaz. Kullanıcıdan gelen metni kalıba gömeceksen <code>re.escape()</code> ile kaçır.</p>
+<h3>3. match ile doğrulama</h3>
+<p><code>re.match(r"\d{10}", "5321234567abc")</code> eşleşir çünkü yalnızca baştan bakar. Doğrulama için <code>fullmatch</code> ya da <code>^...$</code> kullan.</p>
+<h3>4. Çok satırlı metin ve bayraklar</h3>
+<pre class="py">import re
+
+html = "&lt;b&gt;laptop&lt;/b&gt; ve &lt;b&gt;mouse&lt;/b&gt;"
+print("açgözlü:", re.findall(r"&lt;b&gt;.*&lt;/b&gt;", html))
+print("tembel :", re.findall(r"&lt;b&gt;.*?&lt;/b&gt;", html))
+
+print("nokta  :", re.findall(r"1.5", "1.5 ve 1x5 ve 125"))
+print("kaçmış :", re.findall(r"1\.5", "1.5 ve 1x5 ve 125"))
+print("escape :", re.escape("fiyat (TL)?"))
+
+log = "INFO baslat\nERROR disk dolu\nerror: yetki yok\nINFO bitti"
+print("IGNORECASE:", re.findall(r"^error.*", log, flags=re.IGNORECASE | re.MULTILINE))
+print("MULTILINE yok:", re.findall(r"^ERROR.*", log))
+
+# VERBOSE: uzun kalıbı açıklamalı yaz
+TUTAR = re.compile(r"""
+    (?P&lt;miktar&gt;\d{1,3}(?:\.\d{3})*(?:,\d{2})?)   # 1.250,00 gibi
+    \s*(?P&lt;birim&gt;TL|USD|EUR)                      # para birimi
+""", re.VERBOSE)
+print(TUTAR.search("Toplam: 1.250,00 TL ödendi").groupdict())</pre>
+
+<div class="warn"><b>Regex her şeyin cevabı değil</b>HTML/JSON/CSV gibi yapılı biçimleri regex ile ayrıştırma; her birinin kendi ayrıştırıcısı var (<code>json</code>, <code>csv</code>, <code>html.parser</code>). Basit "ile başlıyor mu", "içeriyor mu" sorularında <code>str.startswith</code> ve <code>in</code> hem hızlı hem okunurdur. Regex'i düzensiz metinden kalıp çıkarmak için sakla.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: ileri bakış, geri başvuru, bölme ve Türkçe metin</h2>
+<p>search, findall, gruplar ve sub ile çoğu işi çözersin. Ama iş hayatında şu sorular gelir: "Şifrede en az bir rakam ve bir büyük harf var mı?" (tek kalıpla), "Aynı kelime iki kez yazılmış mı?", "Adres alanı virgül, noktalı virgül ya da tireyle ayrılmış, nasıl bölerim?", "Kullanıcının yazdığı formülü parçalara nasıl ayırırım?", "Neden <code>[a-zA-Z]</code> Şükrü'yü reddediyor?". Bu bölüm bu araçları ekliyor. Metin temizleme ve kelime sayma gibi doğal dil işleme konuları "NLP ve metin" dersinde.</p>
+
+<h3>1. İleri ve geri bakış (lookaround)</h3>
+<p>Bakış (lookaround) ifadeleri bir konumda "şu gelir mi / şu var mıydı?" diye kontrol eder ama <b>karakter tüketmez</b>; eşleşmeye dahil olmazlar. Bu yüzden "kendisi değil, yanındaki önemli" durumları için idealdir: tutarın önünde TL olsun ama TL'yi alma, şifrede rakam bulunsun ama yeri önemli değil.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Adı</th><th>Anlamı</th><th>Örnek</th></tr>
+<tr><td><code>X(?=Y)</code></td><td>Olumlu ileri bakış</td><td>X'ten sonra Y gelir</td><td><code>\d+(?= TL)</code></td></tr>
+<tr><td><code>X(?!Y)</code></td><td>Olumsuz ileri bakış</td><td>X'ten sonra Y gelmez</td><td><code>\d+(?!%)</code></td></tr>
+<tr><td><code>(?&lt;=Y)X</code></td><td>Olumlu geri bakış</td><td>X'ten önce Y vardı</td><td><code>(?&lt;=#)\w+</code></td></tr>
+<tr><td><code>(?&lt;!Y)X</code></td><td>Olumsuz geri bakış</td><td>X'ten önce Y yoktu</td><td><code>(?&lt;!-)\d+</code></td></tr>
+</table></div>
+<pre class="py">import re
+
+metin = "Kulaklık 750 TL, kargo 49 TL, indirim %15, iade -120 TL"
+print(re.findall(r"\d+(?= TL)", metin))          # TL'den önceki sayılar
+print(re.findall(r"(?&lt;!-)\b\d+(?= TL)", metin))  # eksi işaretli olanlar hariç
+print(re.findall(r"(?&lt;=%)\d+", metin))           # yüzde işaretinden sonraki
+
+# Şifre kuralı: en az 8 karakter, 1 rakam, 1 büyük harf (sıra önemsiz)
+KURAL = re.compile(r"(?=.*\d)(?=.*[A-ZÇĞİÖŞÜ]).{8,}")
+for s in ["anadolu2026", "Anadolu2026", "Kısa1"]:
+    print(s, bool(KURAL.fullmatch(s)))
+
+# Binlik ayırıcı: sağdan 3'lü gruplar önüne nokta (karakter tüketmeden)
+print(re.sub(r"(?&lt;=\d)(?=(?:\d{3})+(?!\d))", ".", "Toplam 1234567 TL"))</pre>
+<div class="warn"><b>Geri bakış sabit uzunluk ister</b>Python'da <code>(?&lt;=...)</code> içindeki kalıp sabit uzunlukta olmalı: <code>(?&lt;=TL|USD)</code> hata verir çünkü 2 ve 3 karakter farklıdır. Çözüm: <code>(?:(?&lt;=TL)|(?&lt;=USD))</code> ya da grup yakalayıp grubu kullanmak.</div>
+
+<h3>2. Geri başvuru: kalıp içinde "aynısı"</h3>
+<p><code>\1</code>, <code>\2</code> ya da adlandırılmış <code>(?P=ad)</code>, kalıbın içinde "1. grubun yakaladığı metnin aynısı" demektir. Tekrarlanan kelimeleri, açılan tırnakla aynı türde kapanan tırnağı, aynı ayraçla yazılmış tarihleri yakalamak için kullanılır. Değiştirme metninde de <code>\1</code> kullanılabilir; ama değiştirme metnini de mutlaka ham dize (<code>r"..."</code>) olarak yaz.</p>
+<pre class="py">import re
+
+not_metni = "Müşteri bu bu ürünü iade etti etti ama kargo ücreti ödenmedi."
+print(re.findall(r"\b(\w+) \1\b", not_metni))
+print(re.sub(r"\b(\w+)( \1\b)+", r"\1", not_metni))
+
+# Ayraç tutarlı mı? 15.03.2026 olur, 15.03/2026 olmaz
+TARIH = re.compile(r"\d{2}(?P&lt;ayrac&gt;[./-])\d{2}(?P=ayrac)\d{4}")
+for t in ["15.03.2026", "15/03/2026", "15.03/2026"]:
+    print(t, bool(TARIH.fullmatch(t)))
+
+print(re.findall(r"""(["'])(.*?)\1""", """kod="A-1" ad='Çay' not="yarım'"""))</pre>
+
+<h3>3. re.split ve eşleşme nesnesinin ayrıntıları</h3>
+<p><code>str.split</code> tek bir ayraçla böler; <code>re.split</code> kalıpla böler: "virgül, noktalı virgül ya da tire; etrafında boşluk olabilir". Kalıpta <b>yakalayan grup</b> varsa ayraçlar da sonuç listesine girer; istemiyorsan <code>(?:...)</code> kullan. Eşleşme nesnesi (Match) ise yalnız <code>group()</code>'tan ibaret değildir: <code>span()</code>, <code>start()</code>, <code>end()</code> konum verir (metni vurgulamak, hatayı göstermek için), <code>lastgroup</code> hangi adlı grubun eşleştiğini söyler.</p>
+<pre class="py">import re
+
+adres = "Kızılay Mah. ;  Atatürk Blv, No: 12 - Çankaya/Ankara"
+print(re.split(r"\s*[;,\-]\s*", adres))
+print(re.split(r"\s*([;,\-])\s*", "a ; b,c"))     # yakalayan grup: ayraçlar da gelir
+print(re.split(r"\s+", "  çok   boşluk  ", maxsplit=1))
+
+m = re.search(r"(?P&lt;kod&gt;FT-\d{4}-\d{5})", "EFT açıklama: FT-2026-00431 ödendi")
+print(m.group("kod"), m.span(), m.start("kod"), m.end())
+satir = "TR01;12a0;havale"
+hata = re.search(r"[^\d;A-Za-z]|(?&lt;=;)\d*[a-z]\d*(?=;)", satir)
+print(satir)
+print(" " * hata.start() + "^" * (hata.end() - hata.start()), "hatalı alan")</pre>
+
+<h3>4. Mini ayrıştırıcı (tokenizer): lastgroup ile</h3>
+<p>Kullanıcının yazdığı bir indirim formülünü (<code>fiyat * 0.9 - 50</code>) ya da bir arama sorgusunu parçalara ayırmak için birden çok adlı grubu <code>|</code> ile birleştirip <code>finditer</code> ile gezersin; her eşleşmenin <code>lastgroup</code>'u parçanın türünü söyler. Hiçbir türe uymayan karakteri yakalayan bir "HATA" grubu en sona konur. Python'un kendi belgelerindeki tokenizer tarifi budur ve küçük kural motorlarının temelidir.</p>
+<pre class="py">import re
+
+PARCALAR = [
+    ("SAYI",   r"\d+(?:\.\d+)?"),
+    ("AD",     r"[^\W\d]\w*"),
+    ("OP",     r"[+\-*/()]"),
+    ("BOSLUK", r"\s+"),
+    ("HATA",   r"."),
+]
+KALIP = re.compile("|".join(f"(?P&lt;{ad}&gt;{k})" for ad, k in PARCALAR))
+
+def parcala(formul):
+    for m in KALIP.finditer(formul):
+        tur = m.lastgroup
+        if tur == "BOSLUK":
+            continue
+        if tur == "HATA":
+            raise ValueError(f"{m.start()}. konumda beklenmeyen karakter: {m.group()!r}")
+        yield tur, m.group()
+
+print(list(parcala("fiyat * 0.9 - 50")))
+try:
+    list(parcala("fiyat # 2"))
+except ValueError as e:
+    print(e)</pre>
+
+<h3>5. Türkçe karakterler ve Unicode</h3>
+<p>Python 3'te <code>str</code> kalıpları varsayılan olarak Unicode'dur: <code>\w</code> ç, ğ, ı, ö, ş, ü, İ harflerini de kapsar, <code>\d</code> başka alfabelerdeki rakamları da (ör. Arapça-Hint rakamları) eşler. Sorun genellikle elle yazılan kümelerdedir: <code>[a-zA-Z]</code> "Şükrü"yü reddeder. "Yalnız harf" demek için <code>[^\W\d_]</code> (harf-rakam-alt çizgi kümesinden rakam ve alt çizgiyi çıkar) kullan. Yalnız ASCII rakam istiyorsan <code>[0-9]</code> yaz ya da <code>re.ASCII</code> bayrağı ver. <code>re.IGNORECASE</code> Türkçe İ/ı kuralını bilmez: "İSTANBUL" ile "istanbul" eşleşir ama "ISPARTA" ile "ısparta" eşleşmez; karşılaştırmadan önce kendi Türkçe küçültme fonksiyonunla normalleştir.</p>
+<div class="tip"><b>Regex101 ile dene</b>Karmaşık bir kalıbı koda koymadan önce regex101.com'da "Python" seçeneğiyle dene: her parçanın ne yaptığını açıklar ve eşleşmeleri renklendirir. Denediğin örnekleri sonra pozitif/negatif test olarak koduna taşı.</div>
+
+<div class="note"><b>Gerçek işte</b>Bankacılıkta açıklama alanlarından fatura no, abone no, plaka çıkarmak; e-ticarette ürün başlıklarından beden/renk/kapasite ayıklamak; log izlemede hata satırlarını servis bazında saymak regex'in günlük işleridir. Bu kalıplar bir <code>kaliplar.py</code> modülünde, her biri için "eşleşmeli/eşleşmemeli" örnek listesiyle birlikte tutulur ve pytest ile parametrik test edilir. Kullanıcı girdisine uygulanan kalıplarda girdi uzunluğu sınırlanır (ReDoS) ve <code>re.escape</code> unutulmaz.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretim kodunda regex disiplini</h3>
+<p>Kurumsal projelerde kalıplar modülün başında büyük harfli sabit olarak <code>re.compile</code> ile tanımlanır ve yanına bir yorumla "ne eşleşir, ne eşleşmez" örnekleri yazılır. Her kalıbın en az bir pozitif ve bir negatif test örneği olur; çünkü regex'ler değiştirilirken en çok "önceden eşleşen artık eşleşmiyor" hatası çıkar. <code>re.VERBOSE</code> ile parçalara açıklama eklemek üç ay sonra kendine iyilik yapmaktır.</p>
+<p>Güvenlik: bazı kalıplar belirli girdilerde üstel zaman alır (ReDoS, örn. <code>(a+)+$</code> kalıbına uzun "aaaa...b" vermek). Kullanıcıdan gelen metne iç içe niceleyici içeren kalıp uygulayacaksan girdinin uzunluğunu sınırla. Python 3.11 ile gelen <code>(?&gt;...)</code> atomik gruplar ve sahiplenici niceleyiciler (<code>a++</code>) geri izlemeyi keserek bu sorunu azaltır.</p>
+<p>Unicode: Python 3'te <code>\w</code> varsayılan olarak Türkçe harfleri de kapsar (<code>re.ASCII</code> bayrağı vermediğin sürece). Büyük/küçük harf duyarsız eşleşmede "İ/i" ve "I/ı" ayrımı yanıltabilir; kritik karşılaştırmalarda metni önce normalize et. Son olarak, bir kalıbı yazdıktan sonra dört beş örnek metinle etkileşimli olarak denemek (regex101 gibi araçlar ya da küçük bir Python döngüsü) hatayı üretime gitmeden yakalar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/regex">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../tarih-saat/">← Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi</a><a href="../json-csv/">JSON ve CSV: veri alışverişinin iki ortak dili →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

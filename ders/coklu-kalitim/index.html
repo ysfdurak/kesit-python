@@ -1,0 +1,242 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Çoklu kalıtım, MRO ve mixin'ler | Kesit Python</title><meta name="description" content="Birden fazla üst sınıftan kalıtımı, elmas problemini, C3 ile MRO hesaplamayı, super() zincirini ve **kwargs ile işbirlikçi kurucuları,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/coklu-kalitim/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Çoklu kalıtım, MRO ve mixin'ler"><meta property="og:description" content="Birden fazla üst sınıftan kalıtımı, elmas problemini, C3 ile MRO hesaplamayı, super() zincirini ve **kwargs ile işbirlikçi kurucuları,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/coklu-kalitim/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Çoklu kalıtım, MRO ve mixin'ler","description":"Birden fazla üst sınıftan kalıtımı, elmas problemini, C3 ile MRO hesaplamayı, super() zincirini ve **kwargs ile işbirlikçi kurucuları,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/coklu-kalitim/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Çoklu kalıtım, MRO ve mixin'ler</h1><p class="st-l">Birden fazla üst sınıftan kalıtımı, elmas problemini, C3 ile MRO hesaplamayı, super() zincirini ve **kwargs ile işbirlikçi kurucuları, JSON/log/karşılaştırma mixin'leri tasarlamayı ve duck typing ile kompozisyonu ne zaman seçeceğini öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/coklu-kalitim">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Kalıtım ve polimorfizm dersinde tek bir üst sınıftan türetmeyi, <code>super()</code> ile kurucuyu genişletmeyi ve mixin fikrine kısa bir girişi gördün. Gerçek kod tabanlarında ise sınıfların çoğu birden fazla kaynaktan yetenek alır: Anadolu Market'in <code>Siparis</code> sınıfı hem bir <code>Kayit</code>'tır, hem JSON'a çevrilebilir, hem işlemlerini loglar, hem de tutarına göre sıralanabilir. Django'nun sınıf tabanlı görünümleri, scikit-learn'ün tahmin edicileri, <code>socketserver.ThreadingMixIn</code> hep bu kalıpla yazılmıştır.</p>
+<p>Çoklu kalıtım (multiple inheritance) güçlüdür ama bir soruyu doğurur: iki üst sınıfta aynı adlı metot varsa hangisi çalışır? Python bu soruyu <b>MRO</b> (Method Resolution Order, metot çözümleme sırası) ile kesin olarak yanıtlar. Bu dersin sonunda bir sınıfın MRO'sunu kâğıt üzerinde hesaplayabilecek, <code>super()</code>'nün aslında "üst sınıf" değil "MRO'da sıradaki sınıf" demek olduğunu bilecek ve temiz mixin'ler tasarlayabileceksin. Bunlar PCAP 4.5 konusunun tamamıdır.</p>
+
+<h2>Tekli ve çoklu kalıtım sözdizimi</h2>
+<p>Parantez içine birden fazla sınıf yazarsın. Arama soldan sağa yapılır: önce sınıfın kendisi, sonra ilk yazılan üst sınıf ve onun ataları (ortak ata hariç), sonra ikinci üst sınıf...</p>
+<pre class="py">class Kargolanabilir:
+    def teslimat(self):
+        return "Kargo ile 2 gün"
+    def etiket(self):
+        return "KARGO"
+
+class Indirilebilir:
+    def teslimat(self):
+        return "Anında indirme"
+    def boyut(self):
+        return "120 MB"
+
+class EKitapPaketi(Indirilebilir, Kargolanabilir):   # basılı kitap + PDF
+    pass
+
+p = EKitapPaketi()
+print(p.teslimat())            # soldaki kazanır
+print(p.etiket(), p.boyut())   # ikisinin yetenekleri de var
+print([k.__name__ for k in EKitapPaketi.__mro__])</pre>
+<p><code>__mro__</code> sınıfın arama sırasını demet olarak tutar; <code>EKitapPaketi.mro()</code> aynı bilgiyi liste olarak verir. Her sınıfın zinciri <code>object</code> ile biter.</p>
+
+<h2>Elmas problemi</h2>
+<p>İki üst sınıf ortak bir atadan türüyorsa kalıtım grafiği elmas biçimini alır. Eski dillerde ortak atanın metodu iki kez mi çalışacak, hangi yoldan mı gelinecek belirsizdi. Python'da ortak ata MRO'da <b>bir kez</b> ve <b>tüm alt sınıflarından sonra</b> yer alır.</p>
+<pre class="py">class Hesap:
+    def aciklama(self):
+        return "Hesap"
+
+class Vadeli(Hesap):
+    def aciklama(self):
+        return "Vadeli"
+
+class Dovizli(Hesap):
+    def aciklama(self):
+        return "Dövizli"
+
+class DovizliVadeli(Vadeli, Dovizli):
+    pass
+
+print([k.__name__ for k in DovizliVadeli.__mro__])
+print(DovizliVadeli().aciklama())
+print(Hesap in DovizliVadeli.__mro__, DovizliVadeli.__mro__.count(Hesap))</pre>
+
+<h2>C3 doğrusallaştırma: MRO nasıl hesaplanır?</h2>
+<p>Python 2.3'ten beri MRO, <b>C3 doğrusallaştırma</b> (C3 linearization) algoritmasıyla bulunur. Üç kuralı garanti eder:</p>
+<ol>
+<li><b>Çocuk önce:</b> bir sınıf her zaman üst sınıflarından önce gelir.</li>
+<li><b>Yerel sıra korunur:</b> <code>class D(B, C)</code> yazdıysan B, C'den önce gelir.</li>
+<li><b>Tutarlılık (monotonluk):</b> üst sınıfların kendi MRO'larındaki sıra bozulmaz.</li>
+</ol>
+<p>Hesap şöyle yapılır: <code>L[D] = D + birleştir(L[B], L[C], [B, C])</code>. Birleştirme adımında listelerin başlarına bakarsın; başka hiçbir listenin <b>kuyruğunda</b> (ilk eleman dışındaki kısmında) geçmeyen ilk baş adayı seçilir, tüm listelerden çıkarılır, tekrar edilir. Aday kalmazsa sıralama imkânsızdır ve Python sınıfı oluşturmayı reddeder:</p>
+<pre class="py">class A: pass
+class B(A): pass
+
+try:
+    class C(A, B):      # A, B'den önce olsun diyorsun ama B, A'nın çocuğu!
+        pass
+except TypeError as e:
+    print("TypeError:", e)
+
+class C(B, A):          # tutarlı sıra
+    pass
+print([k.__name__ for k in C.mro()])</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Tanım</th><th>MRO</th><th>Not</th></tr>
+<tr><td><code>class B(A)</code></td><td>B, A, object</td><td>Tekli kalıtım: düz zincir</td></tr>
+<tr><td><code>class D(B, C)</code>; B(A), C(A)</td><td>D, B, C, A, object</td><td>Elmas: A en sonda, bir kez</td></tr>
+<tr><td><code>class E(C, B)</code>; B(A), C(A)</td><td>E, C, B, A, object</td><td>Yerel sıra değişti, MRO da değişti</td></tr>
+<tr><td><code>class X(A, B)</code>; B(A)</td><td>TypeError</td><td>Çocuk-önce kuralıyla çelişir</td></tr>
+</table></div>
+
+<h2>super() üst sınıfı değil, MRO'da sıradakini çağırır</h2>
+<p>Bu cümle çoklu kalıtımın anahtarıdır. <code>super().metot()</code>, <b>nesnenin</b> MRO'sunda, içinde bulunduğun sınıftan sonra gelen sınıfın metodunu çağırır. Aynı <code>Vadeli</code> sınıfındaki <code>super()</code>, tek başına kullanıldığında Hesap'a, <code>DovizliVadeli</code> nesnesinde ise Dovizli'ye gider.</p>
+<pre class="py">class Hesap:
+    def kaydet(self):
+        print("Hesap: veritabanına yazıldı")
+
+class Vadeli(Hesap):
+    def kaydet(self):
+        print("Vadeli: vade tablosu güncellendi")
+        super().kaydet()
+
+class Dovizli(Hesap):
+    def kaydet(self):
+        print("Dövizli: kur kaydı eklendi")
+        super().kaydet()
+
+class DovizliVadeli(Vadeli, Dovizli):
+    def kaydet(self):
+        print("DövizliVadeli: başlıyor")
+        super().kaydet()
+
+DovizliVadeli().kaydet()
+print("---")
+Vadeli().kaydet()</pre>
+<p>Hesap'ın <code>kaydet</code>'i <b>bir kez</b> çalıştı ve her sınıf yalnız kendi işini yaptı. Bu düzene <b>işbirlikçi çoklu kalıtım</b> (cooperative multiple inheritance) denir. Şartı basittir: zincirdeki her sınıf <code>super()</code> çağırır ve kimse üst sınıfı adıyla (<code>Hesap.kaydet(self)</code>) çağırmaz. Adıyla çağırırsan zincir kopar ya da ortak ata iki kez çalışır.</p>
+
+<h3>Kurucularda **kwargs ile işbirliği</h3>
+<p>Farklı sınıfların kurucuları farklı parametreler ister. Çözüm: her sınıf kendi parametresini <b>adıyla</b> alır, kalanını <code>**kwargs</code> ile <code>super().__init__</code>'e iletir. Zincirin sonunda object'e boş kwargs ulaşmalıdır.</p>
+<pre class="py">class Kayit:
+    def __init__(self, *, kimlik, **kwargs):
+        super().__init__(**kwargs)
+        self.kimlik = kimlik
+
+class ZamanDamgasi:
+    def __init__(self, *, tarih="2026-01-15", **kwargs):
+        super().__init__(**kwargs)
+        self.tarih = tarih
+
+class Sahipli:
+    def __init__(self, *, sahip, **kwargs):
+        super().__init__(**kwargs)
+        self.sahip = sahip
+
+class Fatura(ZamanDamgasi, Sahipli, Kayit):
+    def __init__(self, *, tutar, **kwargs):
+        super().__init__(**kwargs)
+        self.tutar = tutar
+
+f = Fatura(kimlik="F-1001", sahip="Anadolu Market", tutar=1250.0)
+print(vars(f))
+print([k.__name__ for k in Fatura.__mro__])</pre>
+<div class="tip"><b>Yalnız-anahtar parametre</b>Parametre listesindeki <code>*</code>, sonrasındaki argümanların adla verilmesini zorunlu kılar. İşbirlikçi kurucularda konuma bağlı argüman sırası MRO'ya göre değişeceği için adla geçmek tek güvenli yoldur.</div>
+
+<h2>Mixin tasarımı</h2>
+<p><b>Mixin</b>, tek başına örneklenmesi amaçlanmayan, tek bir yeteneği (JSON'a çevirme, loglama, karşılaştırma) başka sınıflara "karıştırmak" için yazılmış küçük bir sınıftır. İyi bir mixin:</p>
+<ul>
+<li>Tek bir iş yapar ve adı <code>...Mixin</code> ile biter.</li>
+<li>Kendi <code>__init__</code>'ini mümkünse tanımlamaz; tanımlarsa işbirlikçi yazar.</li>
+<li>Ev sahibi sınıftan beklediğini (ör. <code>_anahtar()</code> metodu) belgelendirir.</li>
+<li>Sınıf tanımında <b>solda</b>, asıl taban sınıf en <b>sağda</b> yazılır: <code>class Siparis(JsonMixin, LogMixin, Kayit)</code>.</li>
+</ul>
+<pre class="py">import json
+from functools import total_ordering
+
+class JsonMixin:
+    def to_json(self):
+        return json.dumps(vars(self), ensure_ascii=False, sort_keys=True)
+
+class LogMixin:
+    def log(self, mesaj):
+        self.__dict__.setdefault("_kayitlar", [])
+        self._kayitlar.append(f"[{type(self).__name__}] {mesaj}")
+
+@total_ordering
+class KarsilastirmaMixin:
+    # Ev sahibi _anahtar() tanımlamalı
+    def __eq__(self, other):
+        if not isinstance(other, KarsilastirmaMixin):
+            return NotImplemented
+        return self._anahtar() == other._anahtar()
+    def __lt__(self, other):
+        if not isinstance(other, KarsilastirmaMixin):
+            return NotImplemented
+        return self._anahtar() &lt; other._anahtar()
+
+class Urun(JsonMixin, KarsilastirmaMixin):
+    def __init__(self, ad, fiyat):
+        self.ad, self.fiyat = ad, fiyat
+    def _anahtar(self):
+        return self.fiyat
+    def __repr__(self):
+        return f"Urun({self.ad!r}, {self.fiyat})"
+
+urunler = [Urun("Termos", 349.9), Urun("Kalem", 25.0), Urun("Çanta", 899.0)]
+print(sorted(urunler))
+print(urunler[0] > urunler[1], max(urunler).ad)
+print(urunler[1].to_json())</pre>
+<p><code>functools.total_ordering</code>, <code>__eq__</code> ve <code>__lt__</code>'den diğer dört karşılaştırmayı türetir. <code>to_json</code> ise <code>vars(self)</code> ile nesnenin sözlüğünü kullanır; kapsülleme dersindeki iç gözlem araçlarının pratik bir uygulaması.</p>
+
+<h2>Metot ezme, __str__ ve __repr__</h2>
+<p>Alt sınıf bir metodu yeniden tanımlayınca (ezme, overriding) MRO'da önce o bulunur. <code>__repr__</code>'ı taban sınıfta bir kez, <code>type(self).__name__</code> kullanarak yazarsan tüm alt sınıflar doğru adı kendiliğinden gösterir. <code>__str__</code> son kullanıcıya, <code>__repr__</code> geliştiriciye yöneliktir; <code>__str__</code> yoksa <code>print</code> <code>__repr__</code>'a düşer.</p>
+
+<h2>Polimorfizm ve duck typing</h2>
+<p>Polimorfizmin Python'daki en yaygın biçimi <b>duck typing</b>'dir: "Ördek gibi yürüyor ve ötüyorsa ördektir." Bir fonksiyon nesnenin türünü değil, <b>yapabildiklerini</b> önemser. Ortak üst sınıf zorunlu değildir.</p>
+<pre class="py">class KargoUcreti:
+    def __init__(self, desi): self.desi = desi
+    def ucret(self): return 30 + self.desi * 4.5
+
+class Sigorta:
+    def __init__(self, deger): self.deger = deger
+    def ucret(self): return round(self.deger * 0.01, 2)
+
+class HediyePaketi:
+    def ucret(self): return 25
+
+class Not:                      # ucret() yok
+    metin = "Kapıya bırakın"
+
+kalemler = [KargoUcreti(3), Sigorta(2000), HediyePaketi(), Not()]
+toplam = 0
+for k in kalemler:
+    try:
+        toplam += k.ucret()
+    except AttributeError:
+        print("Ücretsiz kalem atlandı:", type(k).__name__)
+print("Toplam ek ücret:", toplam)</pre>
+<p><code>try/except AttributeError</code> yaklaşımına EAFP ("izin isteme, af dile") denir ve Python'da <code>hasattr</code> ile önceden sormaktan (LBYL) genellikle daha deyimseldir.</p>
+
+<h2>Ne zaman kompozisyon?</h2>
+<p>Kalıtım "<b>bir</b> ... dır" (is-a), kompozisyon "<b>bir ... sahiptir</b>" (has-a) ilişkisidir. Çoklu kalıtım cazip gelse de şu durumlarda kompozisyonu seç:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th><th>Neden</th></tr>
+<tr><td>Küçük, durumsuz yetenek (JSON, log, karşılaştırma)</td><td>Mixin</td><td>Kod tekrarı yok, MRO basit</td></tr>
+<tr><td>Davranış çalışma anında değişecek (SMS mi e-posta mı)</td><td>Kompozisyon</td><td>Nesneyi değiştirmek sınıf değiştirmekten kolay</td></tr>
+<tr><td>Parça kendi durumunu taşıyor (adres, sepet)</td><td>Kompozisyon</td><td>Yaşam döngüleri ayrı</td></tr>
+<tr><td>Aynı yetenekten iki tane gerekiyor (iki adres)</td><td>Kompozisyon</td><td>Bir sınıftan iki kez kalıtım alınamaz</td></tr>
+<tr><td>Çerçeve (Django, unittest) sınıf bekliyor</td><td>Kalıtım + mixin</td><td>Çerçevenin sözleşmesi</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal Python projelerinde sık görülen bir kod inceleme (code review) yorumu: "Bu mixin neden kendi <code>__init__</code>'inde <code>super()</code> çağırmıyor?" İşbirliğini bozan tek bir sınıf, zincirin geri kalanını sessizce devre dışı bırakır ve hata ancak belirli bir sınıf bileşiminde ortaya çıkar. Ekipler bu yüzden mixin'leri durumsuz tutar, <code>__mro__</code>'yu testte doğrular ve kalıtım derinliğini sınırlar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>super() perde arkasında</h3>
+<p>Argümansız <code>super()</code>, derleyicinin eklediği <code>__class__</code> hücresi ve metodun ilk argümanı (<code>self</code>) ile <code>super(SuAnkiSinif, self)</code>'e dönüşür. Bu nesne <code>type(self).__mro__</code>'yu alır, <code>SuAnkiSinif</code>'ı bulur ve aramaya ondan <b>sonraki</b> sınıftan başlar. Bu yüzden aynı satır, farklı nesnelerde farklı sınıflara gidebilir. <code>super(Vadeli, self).kaydet()</code> biçimi hâlâ geçerlidir ama yalnız bir sınıfı bilerek atlamak istediğinde kullanılır.</p>
+<h3>Mixin ile ABC birlikte</h3>
+<p>Mixin'in ev sahibinden beklediği metodu belgelemek yetmezse <code>abc.abstractmethod</code> ile zorunlu kılabilirsin; ya da tip denetleyicileri için <code>typing.Protocol</code> tanımlarsın (İleri OOP dersinde). <code>isinstance(x, JsonMixin)</code> sorgusu çalışır ama duck typing ruhuna aykırıdır; yeteneği kullanmayı dene, yoksa hatayı yakala.</p>
+<h3>PCAP için hızlı kontrol listesi</h3>
+<ul>
+<li><code>issubclass(D, A)</code> dolaylı atalar için de True'dur; <code>D.__bases__</code> yalnız doğrudan üstleri gösterir.</li>
+<li>Aynı adlı nitelik hem sınıf değişkeni hem metot olarak farklı üstlerde varsa MRO'da önce gelen kazanır; türü önemli değildir.</li>
+<li>Tutarsız MRO, sınıf <b>tanımlanırken</b> TypeError verir; nesne oluşturulurken değil.</li>
+<li>Tüm sınıflar örtük olarak <code>object</code>'ten türer; <code>class A:</code> ile <code>class A(object):</code> Python 3'te aynıdır.</li>
+</ul>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/coklu-kalitim">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pytest/">← pytest ile test: fixture, parametrize ve gerçek proje düzeni</a><a href="../gui-tkinter/">Masaüstü arayüz: tkinter ve MVC →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

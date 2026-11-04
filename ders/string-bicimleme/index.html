@@ -1,0 +1,189 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metin biçimlendirme ve rapor üretme | Kesit Python</title><meta name="description" content="f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/string-bicimleme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Metin biçimlendirme ve rapor üretme"><meta property="og:description" content="f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/string-bicimleme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Metin biçimlendirme ve rapor üretme","description":"f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/string-bicimleme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Metin biçimlendirme ve rapor üretme</h1><p class="st-l">f-string ile hizalama, genişlik, binlik ayırıcı, yüzde ve ondalık biçimlerini öğrenir; format(), çok satırlı metin ve ljust/rjust ile Ilgaz Bank hesap özeti gibi düzgün tablolu raporlar üretirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/string-bicimleme">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden biçimlendirme?</h2>
+<p>Ilgaz Bank'ın müşteri hizmetleri ekibi her sabah bir hesap özeti görmek istiyor: hesap adı, bakiye, son işlem. <code>print(ad, bakiye)</code> ile çıkan "Ayşe 12500.5" satırı doğru ama okunmaz; bakiyeler alt alta hizalanmıyor, binlikler ayrılmıyor, kuruşlar bazen bir bazen iki hane. Raporun işe yaraması için metni <b>biçimlendirmen</b> (formatting) gerekir. Python'da bunun ana aracı f-string; bu derste süslü parantezin içindeki iki noktadan sonrasını, yani <b>biçim belirtecini</b> (format spec) öğreneceksin.</p>
+
+<h2>f-string hatırlatma ve biçim belirteci</h2>
+<p><code>f"..."</code> içinde <code>{ifade}</code> yazarsın; Python ifadeyi hesaplayıp metne gömer. İki nokta ile belirteç eklersin: <code>{deger:belirtec}</code>. Belirtecin genel sırası şöyledir: <b>dolgu</b> + <b>hizalama</b> + <b>genişlik</b> + <b>binlik</b> + <b>.ondalık</b> + <b>tür</b>. Her parça isteğe bağlıdır.</p>
+<pre class="py">bakiye = 12500.5
+print(f"[{bakiye}]")           # ham
+print(f"[{bakiye:.2f}]")       # 2 ondalık
+print(f"[{bakiye:,.2f}]")      # binlik ayırıcı + 2 ondalık
+print(f"[{bakiye:12,.2f}]")    # 12 karakter genişlik, sağa hizalı (sayı varsayılanı)
+print(f"[{bakiye:&lt;12,.2f}]")   # sola hizalı
+print(f"[{bakiye:^12,.2f}]")   # ortalı
+print(f"[{bakiye:*&gt;12,.2f}]")  # yıldızla doldur, sağa hizala</pre>
+<p>Sayılar varsayılan olarak <b>sağa</b>, metinler <b>sola</b> hizalanır. Bu raporlarda tam istediğin şeydir: sütun başlığı solda, tutarlar sağda alt alta.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Belirteç</th><th>Anlamı</th><th>Örnek</th><th>Sonuç</th></tr>
+<tr><td><code>:.2f</code></td><td>Sabit 2 ondalık</td><td><code>f"{3.14159:.2f}"</code></td><td>3.14</td></tr>
+<tr><td><code>:,</code></td><td>Binlik ayırıcı (virgül)</td><td><code>f"{1234567:,}"</code></td><td>1,234,567</td></tr>
+<tr><td><code>:_</code></td><td>Binlik ayırıcı (alt çizgi)</td><td><code>f"{1234567:_}"</code></td><td>1_234_567</td></tr>
+<tr><td><code>:.1%</code></td><td>Yüzde, 1 ondalık (100 ile çarpar)</td><td><code>f"{0.1575:.1%}"</code></td><td>15.8%</td></tr>
+<tr><td><code>:10</code></td><td>En az 10 karakter genişlik</td><td><code>f"{'ad':10}"</code></td><td>ad ve 8 boşluk</td></tr>
+<tr><td><code>:&gt;10</code> / <code>:&lt;10</code> / <code>:^10</code></td><td>Sağa / sola / ortaya hizala</td><td><code>f"{'ad':^6}"</code></td><td>"  ad  "</td></tr>
+<tr><td><code>:05d</code></td><td>Tam sayı, sıfırla 5 haneye doldur</td><td><code>f"{42:05d}"</code></td><td>00042</td></tr>
+<tr><td><code>:+.1f</code></td><td>İşareti her zaman göster</td><td><code>f"{250.0:+.1f}"</code></td><td>+250.0</td></tr>
+<tr><td><code>:e</code></td><td>Bilimsel gösterim</td><td><code>f"{1500000:.2e}"</code></td><td>1.50e+06</td></tr>
+</table></div>
+<pre class="py">oran = 0.1575
+siparis_no = 42
+fark = -1250.75
+print(f"Faiz oranı: {oran:.2%}")
+print(f"Sipariş no: {siparis_no:06d}")
+print(f"Değişim: {fark:+,.2f} TL")
+print(f"Başlık: {'Özet':-^30}")
+print(f"{'Hesap':&lt;12}{'Bakiye':&gt;14}")
+print(f"{'Ayşe':&lt;12}{12500.5:&gt;14,.2f}")
+print(f"{'Mehmet Can':&lt;12}{830:&gt;14,.2f}")</pre>
+<div class="tip"><b>Hata ayıklama (debugging) kısayolu</b><code>f"{bakiye=}"</code> yazımı hem adı hem değeri basar: <code>bakiye=12500.5</code>. Değişken takibi için print'e en hızlı yol.</div>
+<div class="note"><b>Türkçe binlik ve ondalık</b>Python'ın <code>,</code> ayırıcısı İngiliz biçimidir (1,234.50). Türkçe "1.234,50" için en pratik yol biçimlendirip karakterleri takas etmektir: <code>f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")</code>. <code>locale</code> modülü de var ama sistem ayarına bağlıdır, tarayıcıda ve sunucuda farklı davranabilir.</div>
+
+<h2>format() ve str.format</h2>
+<p>f-string Python 3.6'da geldi; eski kodda ve bazı özel durumlarda iki akraba görürsün. <code>format(deger, belirtec)</code> fonksiyonu tek bir değeri biçimlendirir; belirteci bir değişkende tutabildiğin için "kullanıcı hangi ondalık sayısını istediyse" gibi dinamik senaryolarda işe yarar. <code>"...{}...".format(x)</code> yöntemi ise şablonu önceden hazırlayıp sonra doldurmak için kullanılır, örneğin bir ayar dosyasından okunan mesaj kalıbında.</p>
+<pre class="py">x = 1234.5678
+print(format(x, ",.2f"))
+print(format(x, "&gt;15.1f"))
+
+ondalik = 3
+print(f"{x:.{ondalik}f}")          # f-string içinde iç içe belirteç
+
+sablon = "Sayın {ad}, {tarih} itibarıyla bakiyeniz {bakiye:,.2f} TL'dir."
+print(sablon.format(ad="Ayşe Yılmaz", tarih="28.10.2026", bakiye=12500.5))
+print("{0} - {1} - {0}".format("A", "B"))</pre>
+<p>Günlük kodda tercih sırası: önce f-string, şablon dışarıdan geliyorsa <code>str.format</code>, tek değer ve dinamik belirteç için <code>format()</code>. <code>%</code> işaretli eski biçimlendirmeyi (<code>"%s" % ad</code>) yalnızca eski kodda görürsün; yeni kodda kullanma.</p>
+
+<h2>Çok satırlı metin</h2>
+<p>Üç tırnak, satır sonlarını koruyan metin oluşturur ve f-string ile birleşebilir. Bir hesap özetinin başlığı için biçilmiş kaftan:</p>
+<pre class="py">musteri = "Ayşe Yılmaz"
+hesap_no = "TR33 0006 1005 1978 6457 8413 26"
+bakiye = 12500.5
+baslik = f"""{'ILGAZ BANK':^40}
+{'Hesap Özeti':^40}
+{'=' * 40}
+Müşteri : {musteri}
+IBAN    : {hesap_no}
+Bakiye  : {bakiye:,.2f} TL
+{'=' * 40}"""
+print(baslik)</pre>
+<p>Girintili bir fonksiyon içinde üç tırnaklı metin yazdığında satır başlarındaki boşluklar da metne girer; o durumda <code>textwrap.dedent</code> yardımcı olur. Tek satırlık uzun metinleri bölmek içinse yan yana yazılan tırnaklı parçalar otomatik birleşir: <code>("a" "b")</code> → <code>"ab"</code>.</p>
+
+<h2>Basit tablo yazdırma</h2>
+<p>Gerçek iş: hesap listesinden hizalı bir tablo üret. Kalıp hep aynıdır: başlık satırı, ayraç çizgisi, döngüde her satır aynı genişliklerle, en altta toplam. Genişlikleri bir yerde sabit tutarsan başlık ve satırlar asla kaymaz.</p>
+<pre class="py">hesaplar = [
+    ("Ayşe Yılmaz", "Vadesiz", 12500.5, 3),
+    ("Mehmet Can", "Vadeli", 830, 0),
+    ("Şirin Öztürk", "Vadesiz", 148200.75, 12),
+    ("İlker Ağaoğlu", "Kredi", -5400, 1),
+]
+G_AD, G_TUR, G_BAK, G_ISL = 16, 9, 14, 6
+print(f"{'Müşteri':&lt;{G_AD}}{'Tür':&lt;{G_TUR}}{'Bakiye (TL)':&gt;{G_BAK}}{'İşlem':&gt;{G_ISL}}")
+print("-" * (G_AD + G_TUR + G_BAK + G_ISL))
+toplam = 0
+for ad, tur, bakiye, islem in hesaplar:
+    print(f"{ad:&lt;{G_AD}}{tur:&lt;{G_TUR}}{bakiye:&gt;{G_BAK},.2f}{islem:&gt;{G_ISL}}")
+    toplam += bakiye
+print("-" * (G_AD + G_TUR + G_BAK + G_ISL))
+print(f"{'TOPLAM':&lt;{G_AD + G_TUR}}{toplam:&gt;{G_BAK},.2f}")</pre>
+<p>Genişlikleri de süslü parantezle gömebildiğine dikkat et: <code>{ad:&lt;{G_AD}}</code>. Sütun genişliğini verinin en uzun elemanından hesaplamak istersen <code>max(len(h[0]) for h in hesaplar) + 2</code> yeter.</p>
+
+<h2>Türkçe karakter ve ljust/rjust</h2>
+<p><code>str.ljust(n)</code>, <code>str.rjust(n)</code> ve <code>str.center(n)</code> f-string hizalamasının yöntem hâlidir; ikinci argümanla dolgu karakteri alırlar. Bir listeyi sütun sütun yazdırırken f-string kadar sık kullanılır.</p>
+<pre class="py">print("Şube".ljust(10, ".") + "|")
+print("İzmir".rjust(10) + "|")
+print("Çağrı".center(11, "*") + "|")
+print(len("İzmir"), len("Izmir"))
+print(len("Şirin Öztürk"), len("Sirin Ozturk"))
+for sehir in ["İstanbul", "Çorum", "Iğdır", "Muş"]:
+    print(sehir.ljust(10) + "|" + str(len(sehir)).rjust(3))</pre>
+<p>Python 3 metinleri Unicode olarak tutar; <code>len("İzmir")</code> 5'tir, hizalama Türkçe harflerle de doğru çalışır. İki yerde dikkat: <b>büyük-küçük dönüşümünde</b> <code>"ı".upper()</code> "I", ama <code>"I".lower()</code> "i" verir (Türkçe noktasız ı Unicode'un genel kuralında yoktur), bu yüzden şehir adlarını karşılaştırırken <code>casefold</code> yerine sabit bir sözlükten yararlanmak daha güvenlidir. Ve <b>terminal fontu</b> bazı karakterleri farklı genişlikte çizebilir; hizalama karakter sayısına göredir, piksele göre değil.</p>
+<div class="warn"><b>Para ile float</b>Raporda <code>:.2f</code> kuruşu düzgün gösterir ama arka planda 0.1 + 0.2 hâlâ 0.30000000000000004'tür. Gösterim için f-string, hesap için (özellikle bankacılıkta) <code>decimal.Decimal</code> kullanılır. Orta seviyede ayrıntısına gireceğiz; şimdilik biçimlendirmenin hesabı değil görünümü düzelttiğini unutma.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Belirteç dilinin tamamı</h2>
+<p>Derste belirtecin en sık kullanılan parçalarını gördün. Resmi adıyla biçim belirteci mini dili (format specification mini-language) şu sırayla okunur ve her parça isteğe bağlıdır:</p>
+<pre class="out">[[dolgu]hizalama][işaret][#][0][genişlik][gruplama][.duyarlık][tür]</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Parça</th><th>Seçenekler</th><th>Örnek</th><th>Sonuç</th></tr>
+<tr><td>Hizalama</td><td><code>&lt;</code> <code>&gt;</code> <code>^</code> <code>=</code> (işaretten sonra doldur)</td><td><code>f"{-3.14:=+9.2f}"</code></td><td><code>-    3.14</code></td></tr>
+<tr><td>İşaret</td><td><code>+</code> (her zaman), <code>-</code> (varsayılan), boşluk</td><td><code>f"{12.5:+.1f}"</code></td><td><code>+12.5</code></td></tr>
+<tr><td><code>#</code></td><td>Alternatif biçim: önek ekler</td><td><code>f"{255:#x}"</code></td><td><code>0xff</code></td></tr>
+<tr><td><code>0</code></td><td>Sayıyı sıfırla doldur</td><td><code>f"{42:06d}"</code></td><td><code>000042</code></td></tr>
+<tr><td>Gruplama</td><td><code>,</code> ya da <code>_</code></td><td><code>f"{1234567:_}"</code></td><td><code>1_234_567</code></td></tr>
+<tr><td>Tür</td><td><code>d</code> <code>f</code> <code>e</code> <code>g</code> <code>%</code> <code>b</code> <code>o</code> <code>x</code> <code>s</code></td><td><code>f"{10:08b}"</code></td><td><code>00001010</code></td></tr>
+</table></div>
+<pre class="py">degisim = [12.5, -3.25, 0.0]
+for d in degisim:
+    print(f"{d:+7.2f}%")                # işaret her zaman görünür
+
+siparis_no = 42
+print(f"AM-{siparis_no:06d}")           # sıfır dolgulu numara
+print(str(siparis_no).zfill(6))          # metin yöntemiyle aynı iş
+print(f"{255:#x} {255:#o} {10:08b}")     # onaltılık, sekizlik, ikilik
+print(f"{0.256:.1%}", f"{1234.5:g}", f"{0.00001234:g}")</pre>
+<p><code>g</code> türü "akıllı" gösterimdir: sayının büyüklüğüne göre sabit ya da bilimsel gösterimi seçer ve gereksiz sıfırları atar. Fatura, sipariş ve müşteri numaralarında ise sıfır dolgusu (<code>06d</code>) standarttır; sıralamada "AM-000042"nin "AM-000100"den önce gelmesini sağlar.</p>
+
+<h2>İç içe alanlar: dinamik genişlik</h2>
+<p>Genişlik ve ondalık sayısı da birer ifade olabilir: belirtecin içine yeni bir <code>{}</code> yazarsın. Sütun genişliğini veriden hesaplayan tablolar böyle kurulur.</p>
+<pre class="py">urunler = [("çay", 5.5), ("filtre kahve", 120), ("su", 7.25)]
+genislik = max(len(ad) for ad, _ in urunler) + 2
+ondalik = 2
+print(f"{'Ürün':&lt;{genislik}}{'Fiyat':&gt;10}")
+print("-" * (genislik + 10))
+for ad, fiyat in urunler:
+    print(f"{ad:.&lt;{genislik}}{fiyat:&gt;10.{ondalik}f}")</pre>
+
+<h2>!r, !s ve = ile hata ayıklama</h2>
+<p>Alanın sonuna <code>!r</code> eklersen değer <code>repr()</code> ile, yani "programcı gözüyle" gösterilir: metinler tırnaklı, görünmeyen boşluklar ve özel karakterler görünür hale gelir. Kullanıcıdan ya da dosyadan gelen bir değerin neden eşleşmediğini anlamanın en hızlı yolu budur. <code>=</code> eki ise ifadenin kendisini de yazar.</p>
+<pre class="py">sehir = "İzmir "                         # sonda gizli boşluk
+print(f"[{sehir}]  [{sehir!r}]")
+print(f"{sehir == 'İzmir'=}")
+print(f"{len(sehir)=}, {sehir.strip()!r}")
+satir = "Ayşe\tİzmir\n"
+print(f"{satir!r}")                       # sekme ve satır sonu görünür</pre>
+
+<h2>Eski % biçimlendirme ve logging</h2>
+<p>Yeni kodda f-string yazarsın ama <code>%</code> biçimini tanıman gerekir: eski projelerde ve özellikle <code>logging</code> modülünde hâlâ kullanılır. <code>%s</code> metin, <code>%d</code> tam sayı, <code>%.2f</code> ondalık demektir; değerler <code>%</code> işaretinden sonra demet olarak verilir. Tür uyuşmazsa (<code>%d</code>'ye metin vermek) <code>TypeError</code> alırsın.</p>
+<pre class="py">ad, tutar, adet = "Ayşe", 1250.5, 3
+print("%s: %d ürün, %.2f TL" % (ad, adet, tutar))
+print("%-8s|%8.1f|" % (ad, tutar))       # - sola hizalar
+# logging.info("Sipariş %s alındı", no)  → değer, mesaj gerçekten yazılacaksa birleştirilir</pre>
+<p>Logging'de <code>logging.info(f"... {no}")</code> yerine <code>logging.info("... %s", no)</code> yazılmasının sebebi budur: mesaj seviyesi kapalıysa birleştirme hiç yapılmaz. Ayrıntısını Loglama dersinde göreceksin.</p>
+
+<h2>Dışarıdan gelen şablonlar: string.Template</h2>
+<p>SMS ya da e-posta metnini pazarlama ekibi yazıyorsa şablon kullanıcıdan gelir. Böyle şablonlarda f-string ve <code>str.format</code> risklidir: <code>format</code> şablonu nesnelerin niteliklerine erişebilir (<code>{musteri.__class__}</code>). <code>string.Template</code> yalnızca <code>$ad</code> biçimindeki basit yer tutucuları doldurur; <code>safe_substitute</code> eksik alanları hata vermeden olduğu gibi bırakır.</p>
+<pre class="py">from string import Template
+
+sablon = Template("Sayın $ad, $tutar TL tutarlı siparişiniz $kargo ile yola çıktı.")
+print(sablon.substitute(ad="Ayşe Kaya", tutar="1.250,00", kargo="Anadolu Kargo"))
+print(sablon.safe_substitute(ad="Can"))   # eksikler aynen kalır
+try:
+    sablon.substitute(ad="Can")
+except KeyError as h:
+    print("Eksik alan:", h)</pre>
+
+<h2>Uzun metinler: textwrap</h2>
+<p>Ürün açıklaması ya da adres gibi uzun metinleri sabit genişlikte satırlara bölmek için <code>textwrap.fill</code>, tek satıra sığdırıp sonunu kısaltmak için <code>textwrap.shorten</code> kullanılır. İkisi de kelimeleri bölmez.</p>
+<pre class="py">import textwrap
+aciklama = "Paslanmaz çelik gövdeli, 1.7 litre kapasiteli, otomatik kapanma özellikli su ısıtıcısı."
+print(textwrap.fill(aciklama, width=30))
+print(textwrap.shorten(aciklama, width=40, placeholder="..."))</pre>
+<div class="note"><b>Gerçek işte</b>Raporlama işinin büyük kısmı biçimlendirmedir: muhasebe Türkçe para biçimi ister, banka ekstresi sağa yaslı ve işaretli tutar ister, fatura numaraları sıfır dolguludur, SMS 160 karakteri geçmemelidir. Ekipler bu kuralları bir kez <code>bicim.py</code> gibi küçük bir modülde fonksiyon olarak yazar (<code>tl()</code>, <code>yuzde()</code>, <code>fatura_no()</code>) ve tüm raporlar onları kullanır. Daha büyük HTML/e-posta şablonları için Jinja2'yi Şablonla rapor üretme dersinde göreceksin.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>__format__ ve özel biçimler</h3>
+<p>Belirteçler yalnızca sayı ve metin için değildir. <code>datetime</code> nesneleri kendi belirteçlerini tanır: <code>f"{tarih:%d.%m.%Y}"</code>. Kendi sınıfını yazdığında <code>__format__</code> yöntemini tanımlayarak <code>f"{hesap:kisa}"</code> gibi özel biçimler kurabilirsin. Bu, raporlama kütüphanelerinin arkasındaki mekanizmadır.</p>
+<h3>Gerçek raporlarda ne kullanılır?</h3>
+<p>Düz metin tablo, log dosyaları ve terminal araçları için hâlâ standarttır. E-posta ve web raporlarında aynı veriyi HTML tablosuna, Excel'e ya da PDF'e dökersin; pandas'ın <code>to_string</code>, <code>to_markdown</code> ve <code>to_excel</code> yöntemleri bu dersteki kalıbın endüstriyel sürümüdür. <code>tabulate</code> ve <code>rich</code> gibi üçüncü parti paketler de renkli, çerçeveli terminal tabloları üretir. Temel mantık değişmez: genişlik, hizalama, ondalık.</p>
+<h3>Biçimlendirme ve güvenlik</h3>
+<p>Kullanıcıdan gelen metni doğrudan <code>str.format</code> şablonu olarak kullanma: <code>kullanici_metni.format(...)</code> yazımı, kötü niyetli bir şablonun nesne özelliklerine erişmesine kapı açar. Şablon senin, veri kullanıcının olsun; f-string bu açıdan daha güvenlidir çünkü şablon kodun içindedir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/string-bicimleme">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kapsam-moduller/">← Kapsam ve modüller</a><a href="../dosya-islemleri/">Dosya işlemleri →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

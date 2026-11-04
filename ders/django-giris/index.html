@@ -1,0 +1,400 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Django'ya giriş: MVT, ORM, admin ve DRF | Kesit Python</title><meta name="description" content="Django projesi ve uygulaması kurar; URL, view, model, migration, admin, şablon, form ve kimlik doğrulamayı tanır; ORM sorgularını (filter, exclude,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/django-giris/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Django'ya giriş: MVT, ORM, admin ve DRF"><meta property="og:description" content="Django projesi ve uygulaması kurar; URL, view, model, migration, admin, şablon, form ve kimlik doğrulamayı tanır; ORM sorgularını (filter, exclude,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/django-giris/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Django'ya giriş: MVT, ORM, admin ve DRF","description":"Django projesi ve uygulaması kurar; URL, view, model, migration, admin, şablon, form ve kimlik doğrulamayı tanır; ORM sorgularını (filter, exclude,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/django-giris/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Django'ya giriş: MVT, ORM, admin ve DRF</h1><p class="st-l">Django projesi ve uygulaması kurar; URL, view, model, migration, admin, şablon, form ve kimlik doğrulamayı tanır; ORM sorgularını (filter, exclude, annotate, aggregate, select_related) SQL karşılıklarıyla birlikte düşünmeyi Anadolu Market örneğiyle öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/django-giris">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden Django?</h2>
+<p>Flask ve FastAPI derslerinde küçük, esnek çatıları (framework) gördün: yönlendirme verirler, gerisini sen seçersin. Django ise "pili içinde" (batteries included) yaklaşımıyla gelir: ORM, migration sistemi, admin paneli, kullanıcı ve yetki sistemi, form doğrulama, şablon motoru, önbellek (cache), e-posta ve güvenlik korumaları tek pakette ve birbiriyle uyumlu. Anadolu Market'in iç yönetim paneli, Ilgaz Bank'ın kredi başvuru takip ekranı ya da belediyenin randevu sistemi gibi <b>veritabanı ağırlıklı, formlu, yetkili kullanıcılı</b> uygulamalarda Django ile birkaç günde çalışan bir ürün çıkarabilirsin.</p>
+<div class="warn"><b>Django tarayıcıda çalışmaz</b>Bu dersteki Django kodları <code>pre</code> kutularında gösterim içindir; kendi bilgisayarında denemen gerekir. Çalıştırılabilir kutular ve alıştırmalar ise Django'nun arkasındaki mantığı (QuerySet, URL eşleme, form doğrulama, migration SQL'i) saf Python ve sqlite3 ile taklit eder. Böylece Django'yu "sihir" olarak değil, anlaşılır bir makine olarak öğrenirsin.</div>
+
+<h2>Kurulum: proje ve uygulama</h2>
+<div class="steps-list"><ol>
+<li>Proje klasörü aç ve sanal ortam (virtual environment) kur (Sanal ortam ve pip dersini hatırla).</li>
+<li>Django'yu kur, projeyi oluştur, bir uygulama (app) ekle.</li>
+<li>Veritabanı tablolarını oluştur ve geliştirme sunucusunu başlat; tarayıcıda <code>http://127.0.0.1:8000/</code> adresini aç.</li>
+</ol></div>
+<pre class="code"># Windows (PowerShell)
+python -m venv .venv
+.venv\Scripts\Activate.ps1
+# macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+
+pip install django
+django-admin startproject anadolu_market .
+python manage.py startapp magaza
+python manage.py migrate
+python manage.py runserver</pre>
+<p>Komutların sonunda şu yapı oluşur:</p>
+<pre class="code">anadolu_market/        # proje paketi: ayarlar ve kök URL'ler
+    settings.py
+    urls.py
+    wsgi.py / asgi.py  # sunucunun giriş noktaları
+magaza/                # uygulama: tek bir iş alanı
+    models.py  views.py  admin.py  apps.py  tests.py
+    migrations/
+manage.py              # yönetim komutlarının kapısı</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>Ne?</th><th>Anadolu Market örneği</th></tr>
+<tr><td>Proje (project)</td><td>Ayarlar, kök URL'ler, uygulamaların toplamı</td><td><code>anadolu_market</code></td></tr>
+<tr><td>Uygulama (app)</td><td>Tek bir iş alanının model, view ve şablonları; başka projeye taşınabilir</td><td><code>magaza</code>, <code>siparis</code>, <code>musteri</code></td></tr>
+<tr><td><code>INSTALLED_APPS</code></td><td>Projenin tanıdığı uygulamalar</td><td><code>"magaza.apps.MagazaConfig"</code> eklenmezse modeller görünmez</td></tr>
+</table></div>
+<p>Yeni uygulamayı <code>settings.py</code> içindeki <code>INSTALLED_APPS</code> listesine eklemeyi unutma. Aynı dosyada <code>DATABASES</code> (varsayılan SQLite), <code>DEBUG</code>, <code>ALLOWED_HOSTS</code>, <code>SECRET_KEY</code>, <code>TEMPLATES</code> ve <code>STATIC_URL</code> ayarları bulunur.</p>
+
+<h2>MVT: Model, View, Template</h2>
+<p>Django kendi mimarisine MVT der. Klasik MVC ile eşleşmesi biraz kafa karıştırır: Django'nun "view"u MVC'deki controller'a, "template"i MVC'deki view'a karşılık gelir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Katman</th><th>Görevi</th><th>Dosya</th></tr>
+<tr><td>Model</td><td>Veri yapısı ve iş kuralları; tabloya eşlenir</td><td><code>models.py</code></td></tr>
+<tr><td>View</td><td>İsteği alır, modelden veri çeker, yanıt döndürür</td><td><code>views.py</code></td></tr>
+<tr><td>Template</td><td>HTML üretimi; mantıktan arındırılmış sunum</td><td><code>templates/</code></td></tr>
+<tr><td>URLconf</td><td>Yolu doğru view'a yönlendirir</td><td><code>urls.py</code></td></tr>
+</table></div>
+<p>Bir isteğin yolculuğu: tarayıcı <code>/urunler/42/</code> ister → ara katmanlar (middleware: oturum, CSRF, güvenlik başlıkları) çalışır → URLconf deseni eşler ve <code>pk=42</code> yakalar → view modeli sorgular → şablon HTML üretir → yanıt yine ara katmanlardan geçip döner.</p>
+
+<h2>URL'ler ve view'lar</h2>
+<pre class="code"># magaza/urls.py
+from django.urls import path
+from . import views
+
+app_name = "magaza"
+urlpatterns = [
+    path("", views.urun_listesi, name="liste"),
+    path("urunler/yeni/", views.UrunOlustur.as_view(), name="yeni"),
+    path("urunler/&lt;int:pk&gt;/", views.UrunDetay.as_view(), name="detay"),
+    path("kategori/&lt;slug:slug&gt;/", views.kategori, name="kategori"),
+]
+# anadolu_market/urls.py içinde: path("magaza/", include("magaza.urls"))</pre>
+<p>Desenler <b>yukarıdan aşağıya</b> denenir ve ilk eşleşen kazanır. <code>&lt;int:pk&gt;</code> bir dönüştürücüdür (converter): yalnız rakamları eşler ve değeri <code>int</code> olarak view'a verir. Diğerleri: <code>str</code> (eğik çizgi hariç her şey), <code>slug</code>, <code>uuid</code>, <code>path</code>. Arka planda her desen bir düzenli ifadeye çevrilir; aşağıdaki kutu bu fikri taklit ediyor.</p>
+<pre class="py">import re
+
+DONUSTURUCU = {"int": (r"[0-9]+", int), "str": (r"[^/]+", str), "slug": (r"[-a-zA-Z0-9_]+", str)}
+
+def derle(desen):
+    cevirici = {}
+    def degistir(m):
+        tur, ad = m.group(1), m.group(2)
+        cevirici[ad] = DONUSTURUCU[tur][1]
+        return f"(?P&lt;{ad}&gt;{DONUSTURUCU[tur][0]})"
+    regex = re.sub(r"&lt;(\w+):(\w+)&gt;", degistir, desen)
+    return re.compile("^" + regex + "$"), cevirici
+
+regex, cevirici = derle("urunler/&lt;int:pk&gt;/")
+for yol in ["urunler/42/", "urunler/abc/", "urunler/7"]:
+    m = regex.match(yol)
+    if m:
+        print(yol, "-&gt;", {k: cevirici[k](v) for k, v in m.groupdict().items()})
+    else:
+        print(yol, "-&gt; 404")</pre>
+<p>View iki biçimde yazılır. Fonksiyon tabanlı view (FBV) açık ve basittir; sınıf tabanlı view (CBV) listeleme, detay, oluşturma gibi tekrarlayan kalıpları hazır verir.</p>
+<pre class="code"># magaza/views.py
+from django.shortcuts import render, get_object_or_404
+from django.views.generic import DetailView, CreateView
+from django.contrib.auth.decorators import login_required
+from .models import Urun
+
+def urun_listesi(request):
+    urunler = Urun.objects.filter(aktif=True).order_by("-eklenme")
+    return render(request, "magaza/liste.html", {"urunler": urunler})
+
+class UrunDetay(DetailView):
+    model = Urun                       # pk'yı URL'den alır, yoksa 404
+    template_name = "magaza/detay.html"
+
+class UrunOlustur(CreateView):
+    model = Urun
+    fields = ["ad", "kategori", "fiyat", "stok"]
+    success_url = "/magaza/"</pre>
+
+<h2>Modeller ve ORM</h2>
+<p>Model, bir tabloyu temsil eden Python sınıfıdır. Her alan (field) bir sütundur; <code>id</code> birincil anahtarı otomatik eklenir.</p>
+<pre class="code"># magaza/models.py
+from django.db import models
+
+class Kategori(models.Model):
+    ad = models.CharField(max_length=60, unique=True)
+
+class Urun(models.Model):
+    ad = models.CharField(max_length=120)
+    kategori = models.ForeignKey(Kategori, on_delete=models.PROTECT, related_name="urunler")
+    fiyat = models.DecimalField(max_digits=10, decimal_places=2)
+    stok = models.PositiveIntegerField(default=0)
+    aktif = models.BooleanField(default=True)
+    eklenme = models.DateTimeField(auto_now_add=True)
+
+    def __str__(self):
+        return self.ad</pre>
+<p><code>Urun.objects</code> bir yöneticidir (manager); ondan dönen <b>QuerySet</b> iki özelliğe sahiptir: <b>tembeldir</b> (lazy), yani üzerinde döngü kurana, <code>len</code>, <code>list</code> ya da dilim uygulayana kadar veritabanına gitmez; ve <b>zincirlenebilir</b>dir, her <code>filter</code> yeni bir QuerySet döndürür, eskisini değiştirmez. Alan adı ile işlem arasına çift alt çizgi koyarak sorgu yaparsın; buna lookup denir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>ORM</th><th>SQL karşılığı (yaklaşık)</th></tr>
+<tr><td><code>filter(fiyat__gt=100)</code></td><td><code>WHERE fiyat &gt; 100</code></td></tr>
+<tr><td><code>filter(ad__icontains="çay")</code></td><td><code>WHERE ad LIKE '%çay%'</code> (büyük/küçük harf duyarsız)</td></tr>
+<tr><td><code>filter(sehir__in=["İzmir", "Bursa"])</code></td><td><code>WHERE sehir IN (...)</code></td></tr>
+<tr><td><code>exclude(stok=0)</code></td><td><code>WHERE NOT (stok = 0)</code></td></tr>
+<tr><td><code>filter(kategori__ad="İçecek")</code></td><td><code>JOIN kategori ... WHERE kategori.ad = ...</code></td></tr>
+<tr><td><code>aggregate(Sum("fiyat"))</code></td><td><code>SELECT SUM(fiyat)</code> → tek sözlük</td></tr>
+<tr><td><code>values("kategori").annotate(n=Count("id"))</code></td><td><code>GROUP BY kategori</code> → satır başına değer</td></tr>
+<tr><td><code>order_by("-fiyat")[:5]</code></td><td><code>ORDER BY fiyat DESC LIMIT 5</code></td></tr>
+</table></div>
+<pre class="code">from django.db.models import Q, F, Count, Sum, Avg
+
+pahali = Urun.objects.filter(fiyat__gte=500).exclude(stok=0)
+print(pahali.query)            # üretilen SQL'i görürsün
+izmir_ya_da_buyuk = Siparis.objects.filter(Q(sehir="İzmir") | Q(tutar__gt=1000))
+Urun.objects.filter(stok__lt=F("kritik_stok"))          # iki sütunu karşılaştır
+Urun.objects.aggregate(toplam=Sum("fiyat"), ort=Avg("fiyat"))
+Kategori.objects.annotate(urun_sayisi=Count("urunler")).order_by("-urun_sayisi")
+Urun.objects.select_related("kategori")                 # tek JOIN, N+1 yok
+Kategori.objects.prefetch_related("urunler")            # 2 sorgu, ters ilişki</pre>
+<p>Aşağıdaki kutu, zincirlenebilir ve lookup destekli bir QuerySet'in özünü 20 satırda taklit ediyor. Alıştırmalarda bunu adım adım sen kuracaksın.</p>
+<pre class="py">ISLEM = {
+    "exact": lambda a, b: a == b,
+    "gt": lambda a, b: a &gt; b,
+    "lte": lambda a, b: a &lt;= b,
+    "icontains": lambda a, b: b.lower() in a.lower(),
+}
+
+class Sorgu:
+    def __init__(self, kayitlar, kosullar=()):
+        self.kayitlar, self.kosullar = kayitlar, list(kosullar)
+    def filter(self, **kw):
+        return Sorgu(self.kayitlar, self.kosullar + list(kw.items()))
+    def __iter__(self):                      # tembel: ancak gezilince çalışır
+        for k in self.kayitlar:
+            if all(ISLEM[(a.split("__") + ["exact"])[1]](k[a.split("__")[0]], v)
+                   for a, v in self.kosullar):
+                yield k
+
+urunler = [{"ad": "Rize Çayı", "fiyat": 120}, {"ad": "Türk Kahvesi", "fiyat": 350},
+           {"ad": "Yeşil Çay", "fiyat": 90}]
+qs = Sorgu(urunler).filter(ad__icontains="çay")
+ucuz = qs.filter(fiyat__lte=100)
+print([u["ad"] for u in qs])
+print([u["ad"] for u in ucuz])</pre>
+<p>ORM sonunda SQL üretir. Aynı sorgunun SQL karşılığını sqlite3 ile görmek, Django'da hangi sorgunun pahalı olduğunu sezmeni sağlar:</p>
+<pre class="py">import sqlite3
+db = sqlite3.connect(":memory:")
+db.executescript("""
+CREATE TABLE kategori (id INTEGER PRIMARY KEY, ad TEXT);
+CREATE TABLE urun (id INTEGER PRIMARY KEY, ad TEXT, fiyat REAL, kategori_id INTEGER);
+INSERT INTO kategori VALUES (1, 'İçecek'), (2, 'Mutfak');
+INSERT INTO urun VALUES (1, 'Çay', 120, 1), (2, 'Kahve', 350, 1), (3, 'Bardak', 25, 2);
+""")
+# Kategori.objects.annotate(n=Count("urunler"), ort=Avg("urunler__fiyat")).order_by("-n")
+sql = """SELECT k.ad, COUNT(u.id) AS n, AVG(u.fiyat) AS ort
+         FROM kategori k LEFT JOIN urun u ON u.kategori_id = k.id
+         GROUP BY k.id ORDER BY n DESC"""
+for satir in db.execute(sql):
+    print(satir)</pre>
+
+<h2>Migration: modelden tabloya</h2>
+<p>Modeli değiştirdiğinde veritabanı kendiliğinden değişmez. İki adım vardır: <code>makemigrations</code> modeldeki farkı bulup <code>migrations/0002_...py</code> dosyası <b>yazar</b>; <code>migrate</code> bu dosyaları veritabanına <b>uygular</b>. Migration dosyaları git'e girer; ekipteki herkes ve sunucu aynı şemaya böyle ulaşır.</p>
+<pre class="code">python manage.py makemigrations magaza
+python manage.py sqlmigrate magaza 0001     # üretilecek SQL'i göster
+python manage.py showmigrations
+python manage.py migrate</pre>
+<p>Django'nun yaptığını küçük ölçekte taklit edelim: dataclass alanlarından <code>CREATE TABLE</code> üretmek.</p>
+<pre class="py">from dataclasses import dataclass, fields
+
+TIP = {int: "INTEGER", str: "VARCHAR(120)", float: "REAL", bool: "BOOL"}
+
+@dataclass
+class Musteri:
+    ad: str
+    sehir: str
+    puan: float
+    aktif: bool
+
+def create_table(model):
+    sutunlar = ['"id" INTEGER PRIMARY KEY AUTOINCREMENT']
+    sutunlar += [f'"{f.name}" {TIP[f.type]} NOT NULL' for f in fields(model)]
+    return f'CREATE TABLE "magaza_{model.__name__.lower()}" (' + ", ".join(sutunlar) + ");"
+
+print(create_table(Musteri))</pre>
+<p>Tablo adının <code>magaza_musteri</code> olmasına dikkat: Django varsayılan olarak <code>uygulama_model</code> adını kullanır.</p>
+
+<h2>Admin paneli</h2>
+<p>Django'nun en çok sevilen özelliği: birkaç satırla, yetkili personelin veriyi listeleyip arayıp düzenleyebileceği bir yönetim paneli.</p>
+<pre class="code"># magaza/admin.py
+from django.contrib import admin
+from .models import Urun
+
+@admin.register(Urun)
+class UrunAdmin(admin.ModelAdmin):
+    list_display = ["ad", "kategori", "fiyat", "stok", "aktif"]
+    list_filter = ["kategori", "aktif"]
+    search_fields = ["ad"]
+    list_select_related = ["kategori"]
+
+# terminalde: python manage.py createsuperuser  → /admin/ adresine gir</pre>
+
+<h2>Şablonlar, formlar ve kimlik doğrulama</h2>
+<pre class="code">&lt;!-- magaza/templates/magaza/liste.html --&gt;
+{% extends "base.html" %}
+{% block icerik %}
+  {% for u in urunler %}
+    &lt;p&gt;{{ u.ad }} — {{ u.fiyat|floatformat:2 }} TL&lt;/p&gt;
+  {% empty %}
+    &lt;p&gt;Ürün yok.&lt;/p&gt;
+  {% endfor %}
+{% endblock %}</pre>
+<p><code>{{ u.ad }}</code> çıktısı otomatik kaçırılır (autoescape): ürün adına <code>&lt;script&gt;</code> yazılsa bile metin olarak görünür. Formlarda ise <code>ModelForm</code>, model alanlarından form üretir; <code>is_valid()</code> her alanı dönüştürür, <code>clean_&lt;alan&gt;</code> metotlarındaki kuralları çalıştırır, hataları <code>form.errors</code>'a, temiz veriyi <code>form.cleaned_data</code>'ya koyar.</p>
+<pre class="code">from django import forms
+
+class UrunFormu(forms.ModelForm):
+    class Meta:
+        model = Urun
+        fields = ["ad", "kategori", "fiyat", "stok"]
+
+    def clean_fiyat(self):
+        fiyat = self.cleaned_data["fiyat"]
+        if fiyat &lt;= 0:
+            raise forms.ValidationError("Fiyat pozitif olmalı.")
+        return fiyat
+
+@login_required
+def urun_ekle(request):
+    form = UrunFormu(request.POST or None)
+    if request.method == "POST" and form.is_valid():
+        form.save()
+        return redirect("magaza:liste")
+    return render(request, "magaza/form.html", {"form": form})
+# şablonda: &lt;form method="post"&gt;{% csrf_token %}{{ form.as_p }}&lt;/form&gt;</pre>
+<p>Aynı doğrulama akışının saf Python taklidi:</p>
+<pre class="py">class UrunFormu:
+    def __init__(self, veri):
+        self.veri, self.errors, self.cleaned_data = veri, {}, {}
+    def is_valid(self):
+        ad = self.veri.get("ad", "").strip()
+        if not ad:
+            self.errors["ad"] = "Bu alan zorunlu."
+        try:
+            fiyat = float(self.veri.get("fiyat", ""))
+            if fiyat &lt;= 0:
+                self.errors["fiyat"] = "Fiyat pozitif olmalı."
+        except ValueError:
+            self.errors["fiyat"] = "Geçerli bir sayı gir."
+        if not self.errors:
+            self.cleaned_data = {"ad": ad, "fiyat": fiyat}
+        return not self.errors
+
+f = UrunFormu({"ad": "  Rize Çayı ", "fiyat": "120.5"})
+print(f.is_valid(), f.cleaned_data)
+g = UrunFormu({"ad": "", "fiyat": "bedava"})
+print(g.is_valid(), g.errors)</pre>
+<p>Kimlik doğrulama hazırdır: <code>django.contrib.auth</code> kullanıcı modelini, parola özetlemeyi (PBKDF2), giriş/çıkış view'larını, gruplar ve izinleri (<code>user.has_perm("magaza.change_urun")</code>) sağlar. View'ı korumak için <code>@login_required</code> ya da CBV'de <code>LoginRequiredMixin</code> kullanırsın.</p>
+
+<h2>Django REST Framework (DRF)</h2>
+<p>Mobil uygulama ya da React ön yüz için JSON API gerekiyorsa DRF eklenir (<code>pip install djangorestframework</code>). Serializer, ModelForm'un API karşılığıdır.</p>
+<pre class="code">from rest_framework import serializers, viewsets, routers, permissions
+
+class UrunSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Urun
+        fields = ["id", "ad", "fiyat", "stok"]
+
+class UrunViewSet(viewsets.ModelViewSet):
+    queryset = Urun.objects.select_related("kategori").filter(aktif=True)
+    serializer_class = UrunSerializer
+    permission_classes = [permissions.IsAuthenticatedOrReadOnly]
+
+router = routers.DefaultRouter()
+router.register("urunler", UrunViewSet)   # GET/POST /urunler/, GET/PUT/DELETE /urunler/5/</pre>
+
+<h2>Güvenlik varsayılanları ve dağıtım</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Tehdit</th><th>Django'nun varsayılanı</th><th>Seni bozan şey</th></tr>
+<tr><td>SQL enjeksiyonu</td><td>ORM her değeri parametre olarak gönderir</td><td><code>raw()</code>/<code>extra()</code> içinde f-string</td></tr>
+<tr><td>XSS</td><td>Şablonlarda otomatik kaçış</td><td><code>|safe</code>, <code>mark_safe</code> ile kullanıcı verisi</td></tr>
+<tr><td>CSRF</td><td><code>CsrfViewMiddleware</code> + <code>{% csrf_token %}</code></td><td>Gelişigüzel <code>@csrf_exempt</code></td></tr>
+<tr><td>Clickjacking</td><td><code>X-Frame-Options: DENY</code></td><td>Middleware'i kaldırmak</td></tr>
+<tr><td>Parola</td><td>PBKDF2 ile tuzlu özet</td><td>Parolayı kendi alanında düz saklamak</td></tr>
+</table></div>
+<p>Yayına almadan önce: <code>DEBUG = False</code>, <code>SECRET_KEY</code> ortam değişkeninden, <code>ALLOWED_HOSTS</code> dolu, veritabanı PostgreSQL, statik dosyalar <code>collectstatic</code> ile toplanmış. Uygulamayı <code>runserver</code> ile değil, gunicorn (WSGI) ya da uvicorn (ASGI) ile çalıştırırsın; önüne nginx ya da bir platform (Render, Railway, Fly.io) konur. Docker ve dağıtım dersinde bu adımları konteynerle birleştireceksin.</p>
+<pre class="code">python manage.py check --deploy        # güvenlik ayarlarını denetler
+python manage.py collectstatic --noinput
+gunicorn anadolu_market.wsgi:application --bind 0.0.0.0:8000 --workers 3</pre>
+<div class="tip"><b>İlk projede sıralama</b>Model → makemigrations/migrate → admin'e kaydet → admin'den örnek veri gir → view + URL → şablon. Admin, view yazmadan verini görmeni sağlar; hata ayıklamayı (debugging) çok kısaltır.</div>
+<div class="note"><b>Gerçek işte</b>Kurumsal Django projelerinde en sık performans sorunu N+1 sorgudur: 50 siparişlik bir listede her satır için müşteri adını şablonda <code>{{ s.musteri.ad }}</code> diye yazmak 1 + 50 sorgu üretir. Kod incelemesinde (code review) liste view'larında <code>select_related</code>/<code>prefetch_related</code> aranır; geliştirme sırasında django-debug-toolbar ile sayfa başına sorgu sayısı izlenir. İkinci klasik: modeli değiştirip migration dosyasını commit etmeyi unutmak; sunucuda "no such column" hatası alınır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Django'da HTMX, form, fetch ile JSON ve SPA kararı</h2><p>Django'nun şablon sistemi, formları ve admin paneli sunucu tarafı oluşturma (SSR) için kurulmuştur. Bir noktada şu karar gelir: arayüzü ayrı bir SPA (React) ve DRF API'siyle mi kuracağız, yoksa Django şablonlarını koruyup yalnız gereken yerleri dinamik mi yapacağız? İkinci yolun en yaygın aracı HTMX'tir. Flask dersindeki ek bölümde HTMX'in temel özniteliklerini (<code>hx-get</code>, <code>hx-target</code>, <code>hx-swap</code>, <code>hx-trigger</code>) gördüysen, burada aynı fikrin Django'daki karşılığını, CSRF'yi ve JSON uç noktalarını öğreneceksin.</p><div class="tbl-wrap"><table><tr><th>Soru</th><th>Django şablonu + HTMX</th><th>DRF + SPA</th></tr><tr><td>Arama motoru (SEO) önemli mi?</td><td>Hazır HTML, doğal</td><td>Ek sunucu tarafı oluşturma gerekir</td></tr><tr><td>Mobil uygulama da aynı veriyi kullanacak mı?</td><td>Ayrı JSON uç noktaları gerekir</td><td>Aynı API</td></tr><tr><td>Ekip</td><td>Python ağırlıklı</td><td>Ayrı ön yüz uzmanlığı</td></tr><tr><td>Admin, form, yetki</td><td>Django'nun hazır araçları aynen</td><td>API ve istemcide yeniden kurulur</td></tr></table></div><h3>Parça şablonu ve HX-Request</h3><p>Django'da parça şablonu ayrı bir dosyadır ve tam sayfa şablonunda <code>{% include %}</code> ile kullanılır. Görünüm, <code>request.headers</code> ile HTMX isteğini tanır; <code>django-htmx</code> paketi bunu <code>request.htmx</code> olarak kısaltır. Sayfalamada Django'nun <code>Paginator</code> sınıfı kullanılır.</p><pre class="code"># urunler/views.py
+from django.core.paginator import Paginator
+from django.shortcuts import render
+from .models import Urun
+
+def urun_listesi(request):
+    q = request.GET.get("q", "")
+    qs = Urun.objects.filter(ad__icontains=q).order_by("id")
+    sayfa = Paginator(qs, 12).get_page(request.GET.get("sayfa"))
+    baglam = {"sayfa": sayfa, "q": q}
+    if request.headers.get("HX-Request") == "true":          # ya da request.htmx
+        return render(request, "urunler/_satirlar.html", baglam)
+    return render(request, "urunler/liste.html", baglam)</pre><pre class="code">{# urunler/_satirlar.html #}
+{% for u in sayfa %}
+  &lt;tr&gt;&lt;td&gt;{{ u.ad }}&lt;/td&gt;&lt;td&gt;{{ u.fiyat }} TL&lt;/td&gt;&lt;/tr&gt;
+{% endfor %}
+{% if sayfa.has_next %}
+  &lt;tr hx-get="?q={{ q|urlencode }}&amp;sayfa={{ sayfa.next_page_number }}"
+      hx-trigger="revealed" hx-swap="outerHTML"&gt;&lt;td&gt;Yükleniyor...&lt;/td&gt;&lt;/tr&gt;
+{% endif %}</pre><h3>CSRF: Django'nun kapısı</h3><p>Django, POST/PUT/PATCH/DELETE isteklerinde CSRF belirteci (token) ister. Klasik formda <code>{% csrf_token %}</code> gizli bir <code>csrfmiddlewaretoken</code> alanı ekler. HTMX ve <code>fetch</code> isteklerinde belirteç <b>başlıkla</b> gönderilir: <code>X-CSRFToken</code>. Belirtecin değeri <code>csrftoken</code> çerezinde de durur.</p><pre class="code">&lt;body hx-headers='{"X-CSRFToken": "{{ csrf_token }}"}'&gt;   {# tüm HTMX istekleri başlığı taşır #}
+
+&lt;script&gt;
+function cerez(ad) {
+  return document.cookie.split("; ").find(c =&gt; c.startsWith(ad + "="))?.split("=")[1];
+}
+const r = await fetch("/api/sepet/", {
+  method: "POST",
+  headers: {"Content-Type": "application/json", "X-CSRFToken": cerez("csrftoken")},
+  body: JSON.stringify({urun_id: 19, adet: 2}),
+});
+&lt;/script&gt;</pre><p>Çerezden belirteç okumak tarayıcıda çalışan kodun işidir; mantığı Python'la görelim. Gerçek Anadolu Market ürünlerini <code>veri</code> modülünden okuyup JSON'a çeviriyoruz:</p><pre class="py">import json
+from decimal import Decimal
+from http.cookies import SimpleCookie
+import veri
+
+c = SimpleCookie()
+c.load("sessionid=abc123; csrftoken=Xy9QeT2k")
+print("çerezdeki belirteç:", c["csrftoken"].value)
+
+urunler = veri.kayitlar("anadolu_market", "products")
+kitaplar = [{"id": u["product_id"], "ad": u["name"], "fiyat": Decimal(str(u["price"]))}
+            for u in urunler if u["category"] == "Kitap"][:3]
+
+def ondalik(o):                      # DjangoJSONEncoder'ın yaptığı gibi
+    if isinstance(o, Decimal):
+        return str(o)
+    raise TypeError(f"{type(o).__name__} JSON'a çevrilemez")
+
+print(json.dumps(kitaplar, default=ondalik, ensure_ascii=False))</pre><h3>JsonResponse ve fetch</h3><p>JSON uç noktası için DRF şart değildir; küçük işlerde <code>JsonResponse</code> yeter. İki ayrıntı: varsayılan <code>safe=True</code> yalnız sözlük kabul eder (liste için <code>safe=False</code>), ve <code>DecimalField</code> değerleri Django'nun kodlayıcısında metne çevrilir. Türkçe karakterlerin kaçırılmaması için <code>json_dumps_params={"ensure_ascii": False}</code> verilebilir.</p><pre class="code">import json
+from django.http import JsonResponse
+from django.views.decorators.http import require_POST
+
+@require_POST
+def sepet_api(request):
+    try:
+        govde = json.loads(request.body)
+    except json.JSONDecodeError:
+        return JsonResponse({"hata": "geçersiz JSON"}, status=400)
+    form = SepetFormu(govde)                       # Django formu JSON ile de çalışır
+    if not form.is_valid():
+        return JsonResponse({"hatalar": form.errors}, status=422)
+    return JsonResponse({"tutar": str(form.tutar())})
+
+def kategoriler(request):
+    return JsonResponse(list(Kategori.objects.values("id", "ad")), safe=False,
+                        json_dumps_params={"ensure_ascii": False})</pre><h3>Form hataları HTMX ile</h3><p>HTMX 2, varsayılan olarak 4xx/5xx yanıtları sayfaya yerleştirmez. Form hatalarını göstermek için iki yol var: hatalı formu 200 ile parça olarak döndürmek, ya da 422 dönüp <code>HX-Retarget</code> ve <code>HX-Reswap</code> yanıt başlıklarıyla hataların nereye konacağını söylemek (ve istemcide 422'yi yerleştirmeye izin veren yapılandırmayı açmak). Hangi yolu seçersen seç, kural aynıdır: doğrulama her zaman sunucuda yapılır.</p><div class="note"><b>Gerçek işte</b>Django + HTMX, özellikle iç sistemlerde (bayi portalı, İK izin ekranı, stok paneli) yaygınlaşıyor: admin paneli, kimlik doğrulama ve form doğrulaması hazır gelir; ön yüz projesi gerekmez. Mobil uygulama ya da dış ortaklar için ise aynı modeller üzerine DRF API eklenir. Mülakatta "Django ile SPA" sorulursa CSRF'nin başlıkla gönderildiğini ve CORS'un ayrı bir konu olduğunu söyleyebilmelisin.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sorgu sayısını ölç, sonra optimize et</h3>
+<p><code>from django.db import connection</code> ile <code>len(connection.queries)</code> (DEBUG açıkken) ya da testlerde <code>self.assertNumQueries(2)</code> kullan. <code>only("ad", "fiyat")</code> ve <code>defer("aciklama")</code> gereksiz sütunları çekmez; <code>values_list("ad", flat=True)</code> model nesnesi bile kurmaz. Büyük tabloda <code>iterator()</code> belleği korur; toplu yazmada <code>bulk_create</code> ve <code>update()</code> tek sorguyla çalışır.</p>
+<h3>İşlem bütünlüğü ve yarış durumları</h3>
+<p>Stok düşme gibi işlemleri <code>transaction.atomic()</code> içinde yap; iki kullanıcı aynı anda son ürünü alırken <code>select_for_update()</code> satırı kilitler. <code>Urun.objects.filter(pk=5).update(stok=F("stok") - 1)</code> ise okuma-yazma arasında kayıp güncellemeyi önler, çünkü hesap veritabanında yapılır.</p>
+<h3>Mimari alışkanlıklar</h3>
+<p>İş kuralını view'a gömme; model metotlarına ya da ayrı bir <code>services.py</code> katmanına koy. Sinyalleri (signals) ölçülü kullan; gizli yan etkiler hata ayıklamayı zorlaştırır. Ayarları <code>django-environ</code> ya da ortam değişkenleriyle yönet, <code>pytest-django</code> ile test yaz. Uzun süren işleri (e-posta, rapor) Celery gibi bir kuyruğa ver; bunun mantığını Orkestrasyon dersinde göreceksin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/django-giris">Alıştırmalara geç (30)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sqlalchemy-orm/">← SQLAlchemy 2.0: Core, ORM, ilişkiler ve transaction</a><a href="../orkestrasyon/">İş akışı orkestrasyonu: cron, DAG ve Airflow →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

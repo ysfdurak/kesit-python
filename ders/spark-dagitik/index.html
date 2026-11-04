@@ -1,0 +1,201 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PySpark ile dağıtık veri işleme: partition, shuffle ve Spark SQL | Kesit Python</title><meta name="description" content="Spark'ın sürücü, yürütücü ve partition modelini, tembel değerlendirmeyi, dar ve geniş dönüşümleri, shuffle'ın bedelini, broadcast join'i, çarpıklık ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/spark-dagitik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="PySpark ile dağıtık veri işleme: partition, shuffle ve Spark SQL"><meta property="og:description" content="Spark'ın sürücü, yürütücü ve partition modelini, tembel değerlendirmeyi, dar ve geniş dönüşümleri, shuffle'ın bedelini, broadcast join'i, çarpıklık ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/spark-dagitik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"PySpark ile dağıtık veri işleme: partition, shuffle ve Spark SQL","description":"Spark'ın sürücü, yürütücü ve partition modelini, tembel değerlendirmeyi, dar ve geniş dönüşümleri, shuffle'ın bedelini, broadcast join'i, çarpıklık ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/spark-dagitik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>PySpark ile dağıtık veri işleme: partition, shuffle ve Spark SQL</h1><p class="st-l">Spark'ın sürücü, yürütücü ve partition modelini, tembel değerlendirmeyi, dar ve geniş dönüşümleri, shuffle'ın bedelini, broadcast join'i, çarpıklık ve salting'i, Spark SQL pencere fonksiyonlarını ve bölümlü Parquet gölünü Pedal İzmir verisiyle saf Python, polars ve DuckDB üzerinde kurarak öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/spark-dagitik">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli? Veri tek makineye sığmadığında</h2>
+<p>Pedal İzmir'in bisiklet paylaşım sistemi üç yaz ayında 116.517 yolculuk üretti. Bu boyut bir dizüstü bilgisayar için çocuk oyuncağı: polars ya da DuckDB saniyeler içinde özetler (bunu <a href="../polars-duckdb/">polars, DuckDB ve Parquet: büyük veriye tek makinede</a> dersinde gördün). Şimdi aynı şirketin 30 şehre yayıldığını, her bisikletin 5 saniyede bir GPS konumu gönderdiğini düşün: günde milyarlarca satır, yılda yüzlerce terabayt. Tek makinenin belleği, diski ve işlemcisi yetmez. Çözüm işi <b>parçalara bölüp</b> çok sayıda makineye dağıtmaktır. Apache Spark bu işin endüstri standardıdır; Databricks, AWS EMR, Google Dataproc ve Azure Synapse'in kalbinde o çalışır.</p>
+<p>Spark, Java sanal makinesi (JVM) ve bir küme ister; tarayıcıda çalışmaz. Bu yüzden derste PySpark kodunu gri kutularda okuyacak, Spark'ın arka planda yaptığı işi ise saf Python, polars ve DuckDB ile <b>kendin kuracaksın</b>: bölümleme (partitioning), map-reduce, shuffle, broadcast join, salting ve pencere fonksiyonları (window function). Mülakatlarda sorulan da tam olarak bu iç işleyiştir; API'yi bir öğleden sonrada öğrenirsin, ama "bu iş neden 40 dakika sürüyor?" sorusunu iç işleyişi bilen cevaplar.</p>
+
+<h2>Dağıtık hesaplamanın parçaları: sürücü, yürütücü, partition</h2>
+<p>Bir Spark uygulamasında tek bir <b>sürücü</b> (driver) programı ve birçok <b>yürütücü</b> (executor) süreci vardır. Sürücü senin Python kodunu çalıştırır, planı çıkarır ve işi küçük <b>görevlere</b> (task) bölüp yürütücülere dağıtır. Veri, <b>partition</b> denen parçalara ayrılmıştır; her görev tek bir partition üzerinde çalışır. 200 partition ve 50 çekirdek varsa görevler dört dalgada biter.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>Ne demek?</th><th>Benzetme</th></tr>
+<tr><td>Sürücü (driver)</td><td>Planı yapar, görevleri dağıtır, sonucu toplar</td><td>Şantiye şefi</td></tr>
+<tr><td>Yürütücü (executor)</td><td>Görevleri çalıştıran JVM süreci; bellek ve çekirdek sahibi</td><td>Usta ekipleri</td></tr>
+<tr><td>Partition</td><td>Verinin bağımsız işlenebilen parçası</td><td>Bir ustaya verilen tuğla yığını</td></tr>
+<tr><td>Görev (task)</td><td>Bir partition üzerinde bir aşamanın işi</td><td>"Bu yığını duvara ör"</td></tr>
+<tr><td>Aşama (stage)</td><td>Shuffle gerektirmeden art arda yapılabilen görevler</td><td>Malzeme taşınmadan yapılan iş bloğu</td></tr>
+<tr><td>İş (job)</td><td>Bir eylemin (action) tetiklediği aşamalar bütünü</td><td>Bir katın tamamı</td></tr>
+</table></div>
+<p>Bölümlemenin en yaygın yolu <b>hash bölümleme</b>dir: anahtarın özeti (hash) partition sayısına bölünür, kalan partition numarasını verir. Aynı anahtar her zaman aynı partition'a düşer. Aşağıda Pedal İzmir yolculuklarını başlangıç istasyonuna göre 4 partition'a dağıtıyoruz (tamsayı anahtarda <code>% n</code> yeterli):</p>
+<pre class="py">import veri
+
+trips = veri.kayitlar("pedal_izmir", "bk_trips")
+print(len(trips), "yolculuk")
+
+n = 4
+bolumler = [[] for _ in range(n)]
+for t in trips:
+    bolumler[t["start_station"] % n].append(t)
+
+for i, b in enumerate(bolumler):
+    print(f"partition {i}: {len(b):&gt;6} kayıt")</pre>
+<div class="warn"><b>Metin anahtarda hash() tuzağı</b>Python'da <code>hash("Konak")</code> her süreçte farklı değer üretir (PYTHONHASHSEED rastgeledir). Spark kendi kararlı hash fonksiyonunu (Murmur3) kullanır. Kendi simülasyonunda metin anahtarı bölmek istersen <code>zlib.crc32(anahtar.encode())</code> gibi kararlı bir özet kullan.</div>
+
+<h2>SparkSession, DataFrame API ve tembel değerlendirme</h2>
+<p>PySpark'ta her şey bir <code>SparkSession</code> ile başlar. DataFrame API'si pandas'tan çok polars'ın lazy API'sine benzer: <code>filter</code>, <code>select</code>, <code>groupBy</code> gibi <b>dönüşümler</b> (transformation) hiçbir şey hesaplamaz, yalnız plan kurar. <code>count</code>, <code>show</code>, <code>collect</code>, <code>write</code> gibi <b>eylemler</b> (action) gelince Catalyst iyileştiricisi planı optimize eder ve küme çalışmaya başlar.</p>
+<pre class="code">from pyspark.sql import SparkSession, functions as F
+
+spark = SparkSession.builder.appName("pedal-izmir").getOrCreate()
+
+trips = spark.read.csv("s3://pedal/bk_trips/", header=True, inferSchema=True)
+stations = spark.read.parquet("s3://pedal/bk_stations/")
+
+gunluk = (trips
+          .filter(F.col("distance_km") &gt; 0)                 # dönüşüm: plan
+          .withColumn("gun", F.to_date("started_at"))       # dönüşüm: plan
+          .groupBy("gun")                                   # dönüşüm: plan (geniş)
+          .agg(F.count("*").alias("yolculuk"),
+               F.round(F.avg("fare"), 2).alias("ort_ucret")))
+
+gunluk.explain()          # fiziksel planı yazdırır, veri okumaz
+gunluk.show(5)            # EYLEM: iş burada başlar</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>PySpark için Java 17 gerekir. <code>pip install pyspark</code> ile kurulur; <code>spark = SparkSession.builder.master("local[*]").getOrCreate()</code> tek makinede tüm çekirdekleri yürütücü gibi kullanır. Çalışırken <code>http://localhost:4040</code> adresinde Spark UI açılır. Kurulumsuz denemek için Databricks Free Edition ya da Google Colab'da <code>!pip install pyspark</code> yeterli.</div>
+<p>Aynı tembel mantığı tarayıcıda polars ile görebilirsin: <code>.lazy()</code> (bilgisayarında doğrudan dosyadan <code>scan_csv</code>) plan kurar, <code>collect</code> çalıştırır.</p>
+<pre class="py">import polars as pl
+
+plan = (pl.read_csv(veri.yol("pedal_izmir", "bk_trips")).lazy()   # bilgisayarında: pl.scan_csv(...)
+        .filter(pl.col("distance_km") &gt; 0)
+        .with_columns(pl.col("started_at").str.slice(0, 7).alias("ay"))
+        .group_by("ay")
+        .agg(pl.len().alias("yolculuk"), pl.col("fare").mean().round(2).alias("ort_ucret"))
+        .sort("ay"))
+print(type(plan).__name__)      # henüz veri yok, yalnız plan
+print(plan.collect())           # eylem</pre>
+<h2>Dar ve geniş dönüşümler: shuffle'ın bedeli</h2>
+<p><b>Dar dönüşüm</b> (narrow) her çıktı partition'ının yalnız bir girdi partition'ına bağlı olduğu işlemdir: <code>filter</code>, <code>select</code>, <code>withColumn</code>. Ağ trafiği yoktur, her yürütücü kendi parçasını işler. <b>Geniş dönüşüm</b> (wide) ise aynı anahtara sahip kayıtların aynı yere toplanmasını gerektirir: <code>groupBy</code>, <code>join</code>, <code>distinct</code>, <code>orderBy</code>. Bu toplanmaya <b>shuffle</b> denir: veriler diske yazılır, ağdan taşınır, yeniden okunur. Spark işlerinin yavaşlığının bir numaralı sebebi shuffle'dır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Dönüşüm</th><th>Tür</th><th>Shuffle?</th><th>Not</th></tr>
+<tr><td><code>filter</code>, <code>select</code>, <code>withColumn</code></td><td>Dar</td><td>Hayır</td><td>Aynı aşamada zincirlenir</td></tr>
+<tr><td><code>groupBy().agg()</code></td><td>Geniş</td><td>Evet</td><td>Önce partition içinde kısmi toplam (combiner) yapılır</td></tr>
+<tr><td><code>join</code></td><td>Geniş</td><td>Çoğunlukla</td><td>Küçük tablo yayınlanırsa (broadcast) shuffle olmaz</td></tr>
+<tr><td><code>orderBy</code></td><td>Geniş</td><td>Evet</td><td>Aralık bölümleme için önce örnekleme yapar</td></tr>
+<tr><td><code>repartition(n)</code></td><td>Geniş</td><td>Evet</td><td>Tam karıştırma; <code>coalesce(n)</code> ise azaltırken shuffle yapmaz</td></tr>
+</table></div>
+<p>Spark'ın <code>groupBy</code>'ı akıllıdır: shuffle'dan önce her partition kendi içinde <b>kısmi toplam</b> çıkarır (map-side combine), ağdan yalnız bu özetler gider. Aşağıda dosyanın ardışık parçalara bölündüğü durumu (HDFS ya da S3 blokları gibi) taklit ediyoruz ve combiner'ın ağ trafiğini ne kadar düşürdüğünü sayıyoruz:</p>
+<pre class="py">from collections import Counter
+
+def parcala(kayitlar, n):
+    boy = -(-len(kayitlar) // n)              # yukarı yuvarlayan bölme
+    return [kayitlar[i * boy:(i + 1) * boy] for i in range(n)]
+
+parcalar = parcala(trips, 4)
+
+# MAP + COMBINE: her parça kendi içinde sayar
+kismi = [Counter(t["start_station"] for t in p) for p in parcalar]
+print("combiner olmasa ağdan giden kayıt:", sum(len(p) for p in parcalar))
+print("combiner ile ağdan giden kayıt   :", sum(len(k) for k in kismi))
+
+# SHUFFLE + REDUCE: aynı anahtarlar birleşir
+toplam = Counter()
+for k in kismi:
+    toplam.update(k)
+print("en yoğun 3 istasyon:", toplam.most_common(3))</pre>
+<p>116 binden 248'e: combiner sayesinde shuffle'a binlerce kat daha az kayıt girer. Ortalama gibi <b>birleştirilebilir olmayan</b> ölçülerde ise kısmi sonuç olarak (toplam, adet) çifti taşınır; ortalamaların ortalaması yanlış sonuç verir (alıştırmalarda bu hatayı avlayacaksın).</p>
+
+<h2>Join stratejileri, veri çarpıklığı ve salting</h2>
+<p>İki büyük tabloyu birleştirmek için Spark varsayılan olarak <b>sort-merge join</b> kullanır: iki taraf da anahtara göre shuffle edilip sıralanır, sonra fermuar gibi birleştirilir. Taraflardan biri küçükse (varsayılan eşik 10 MB, <code>spark.sql.autoBroadcastJoinThreshold</code>) <b>broadcast hash join</b> seçilir: küçük tablo her yürütücüye kopyalanır, büyük tablo yerinden kıpırdamaz. 62 satırlık istasyon tablosu bunun ders kitabı örneğidir.</p>
+<pre class="code">from pyspark.sql.functions import broadcast
+
+zengin = trips.join(broadcast(stations),
+                    trips.start_station == stations.station_id, "left")
+zengin.groupBy("district").count().orderBy(F.desc("count")).show()</pre>
+<pre class="py">stations = veri.kayitlar("pedal_izmir", "bk_stations")
+ilce = {s["station_id"]: s["district"] for s in stations}   # her yürütücüye giden küçük sözlük
+
+sayac = Counter(ilce[t["start_station"]] for t in trips)     # büyük tablo yerinde kalır
+for ad, n in sayac.most_common(3):
+    print(ad, n)</pre>
+<p><b>Veri çarpıklığı</b> (skew), bazı anahtarların diğerlerinden çok daha sık görülmesidir. Alsancak Çarşı istasyonu tek başına 4.257 yolculukla öndedir; gerçek hayatta bu oran 1'e 1000 olabilir (ör. "bilinmiyor" müşteri kimliği). Hash bölümlemede o anahtarın bütün kayıtları tek göreve düşer; 199 görev 10 saniyede biterken bir görev 40 dakika sürer. Spark UI'da bu durum "görev sürelerinin max değeri medyanın çok üstünde" diye görünür.</p>
+<p>Çözümlerden biri <b>salting</b> (tuzlama): sıcak anahtara yapay bir son ek eklenir (<code>12#0</code>, <code>12#1</code>...), böylece yük birkaç göreve yayılır. İlk aşamada tuzlu anahtarlarla kısmi toplam alınır, ikinci aşamada tuz atılıp yeniden toplanır. Spark 3'ün <b>AQE</b> (adaptive query execution) özelliği join'lerdeki çarpıklığı çoğu zaman kendisi böler (<code>spark.sql.adaptive.skewJoin.enabled</code>), ama groupBy çarpıklığında ve eski sürümlerde salting hâlâ elle yapılır.</p>
+<pre class="py">sade = Counter(t["start_station"] for t in trips)
+sicak = {k for k, _ in sade.most_common(2)}
+tuzlu = Counter((t["start_station"], t["trip_id"] % 4 if t["start_station"] in sicak else 0) for t in trips)
+print("tuzsuz en büyük grup:", max(sade.values()))
+print("tuzlu en büyük grup :", max(tuzlu.values()))</pre>
+<h2>Spark SQL ve pencere fonksiyonları</h2>
+<p>DataFrame'i geçici görünüm olarak kaydedip SQL yazabilirsin; Spark SQL ve DataFrame API aynı iyileştiriciye gider, performans farkı yoktur. Pencere fonksiyonları (<code>ROW_NUMBER</code>, <code>RANK</code>, <code>LAG</code>, kayan toplam) da aynıdır. <code>PARTITION BY</code> ifadesi Spark'ta gerçekten bir shuffle'a dönüşür: aynı ilçenin satırları aynı göreve toplanır.</p>
+<pre class="code">trips.createOrReplaceTempView("trips")
+stations.createOrReplaceTempView("stations")
+spark.sql("""
+    WITH s AS (
+        SELECT st.district, st.name, COUNT(*) AS n
+        FROM trips t JOIN stations st ON t.start_station = st.station_id
+        GROUP BY st.district, st.name)
+    SELECT * FROM (
+        SELECT *, ROW_NUMBER() OVER (PARTITION BY district ORDER BY n DESC) AS sira
+        FROM s) WHERE sira = 1
+""").show()</pre>
+<p>Aynı sorguyu DuckDB ile tarayıcıda çalıştırabilirsin; SQL neredeyse harfi harfine aynı:</p>
+<pre class="py">import duckdb
+
+t_yol = veri.yol("pedal_izmir", "bk_trips")
+s_yol = veri.yol("pedal_izmir", "bk_stations")
+sorgu = f"""
+WITH s AS (
+    SELECT st.district, st.name, COUNT(*) AS n
+    FROM read_csv('{t_yol}') t JOIN read_csv('{s_yol}') st ON t.start_station = st.station_id
+    GROUP BY st.district, st.name)
+SELECT district, name, n FROM (
+    SELECT *, ROW_NUMBER() OVER (PARTITION BY district ORDER BY n DESC, name) AS sira FROM s)
+WHERE sira = 1 ORDER BY n DESC LIMIT 3
+"""
+for satir in duckdb.sql(sorgu).fetchall():
+    print(satir)</pre>
+<h2>Parquet, partitionBy, Delta ve Iceberg</h2>
+<p>Spark'ın doğal dosya biçimi Parquet'tir: sütunsal, sıkıştırılmış ve şemalı. <code>partitionBy</code> ile yazınca veri <b>hive tarzı</b> klasörlere ayrılır (<code>ay=2024-06/</code>). Sorgu <code>WHERE ay = '2024-07'</code> içerirse Spark öteki klasörleri hiç açmaz; buna <b>bölüm budama</b> (partition pruning) denir. Bölüm sütunu, filtrede sık kullanılan ve <b>az sayıda</b> farklı değeri olan bir sütun olmalıdır: gün ya da ay iyi, müşteri kimliği felakettir (milyonlarca küçük dosya).</p>
+<pre class="code">(trips.withColumn("ay", F.substring("started_at", 1, 7))
+      .repartition("ay")                       # her ay tek görevde: az ve büyük dosya
+      .write.mode("overwrite")
+      .partitionBy("ay")
+      .parquet("s3://pedal/lake/trips/"))
+
+# Delta Lake: Parquet + işlem günlüğü (ACID, MERGE, zaman yolculuğu)
+trips.write.format("delta").mode("append").save("s3://pedal/delta/trips")
+spark.read.format("delta").option("versionAsOf", 3).load("s3://pedal/delta/trips")</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>Ne ekler?</th><th>Nerede görürsün?</th></tr>
+<tr><td>Parquet</td><td>Sütunsal depolama, sıkıştırma, istatistik</td><td>Her yerde</td></tr>
+<tr><td>Delta Lake</td><td>ACID işlem günlüğü, MERGE/UPSERT, zaman yolculuğu</td><td>Databricks</td></tr>
+<tr><td>Apache Iceberg</td><td>Tablo biçimi, gizli bölümleme, şema evrimi, motor bağımsız</td><td>Snowflake, AWS Athena, Trino</td></tr>
+<tr><td>Apache Hudi</td><td>Artımlı upsert, CDC odaklı</td><td>Uber kökenli göller</td></tr>
+</table></div>
+
+<h2>UDF'nin bedeli ve pandas UDF</h2>
+<p>Spark'ın hazır fonksiyonları (<code>F.when</code>, <code>F.regexp_extract</code>...) JVM içinde, Catalyst'in optimize ettiği kodla çalışır. Python ile yazdığın sıradan bir <b>UDF</b> ise her satırı JVM'den Python sürecine taşır, sonucu geri getirir: serileştirme maliyeti işi 10 kat yavaşlatabilir ve iyileştirici fonksiyonun içini göremez. Önce hazır fonksiyon ara; yoksa Arrow ile toplu (vektörel) çalışan <b>pandas UDF</b> kullan.</p>
+<pre class="code">from pyspark.sql.functions import pandas_udf
+import pandas as pd
+
+@F.udf("double")                       # yavaş: satır satır
+def kdv_ekle(tutar):
+    return tutar * 1.2
+
+@pandas_udf("double")                  # hızlı: Arrow ile toplu
+def kdv_ekle_vek(tutar: pd.Series) -&gt; pd.Series:
+    return tutar * 1.2
+
+trips.select(F.col("fare") * 1.2)      # en hızlı: hazır ifade, UDF yok</pre>
+<h2>Ne zaman Spark gereksizdir?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Veri boyutu</th><th>Önerilen araç</th><th>Neden?</th></tr>
+<tr><td>Belleğe rahat sığar (birkaç GB)</td><td>pandas, polars</td><td>Kurulum yok, en hızlı geliştirme</td></tr>
+<tr><td>Tek makine diskine sığar (10 GB – 1 TB)</td><td>DuckDB, polars lazy/streaming</td><td>Tek düğümde Spark'tan hızlı, küme maliyeti yok</td></tr>
+<tr><td>Çok TB, sürekli büyüyen göl, çok ekip</td><td>Spark (Databricks, EMR), Trino</td><td>Yatay ölçek, hata toleransı, yönetişim</td></tr>
+</table></div>
+<div class="tip"><b>Spark UI'yı okumak</b>Bir iş yavaşsa önce Spark UI'nın <i>Stages</i> sekmesine bak: en uzun aşamada "Shuffle Read" ve "Shuffle Write" boyutları shuffle'ın bedelini, görev sürelerinin min/medyan/max dağılımı çarpıklığı, "Spill (disk)" sütunu bellek yetmezliğini gösterir. <i>SQL</i> sekmesindeki plan grafiğinde "BroadcastHashJoin" ile "SortMergeJoin" ayrımını görürsün.</div>
+<div class="note"><b>Gerçek işte</b>Veri mühendisliği ekiplerinde Spark işinin süresini yarıya indiren değişiklikler çoğu zaman koddaki bir döngü değil, plandaki bir tercihtir: küçük boyut tablosunu broadcast etmek, filtreyi join'den önceye almak, çarpık anahtarı ayrı işlemek, gereksiz <code>orderBy</code> ve <code>collect</code>'i kaldırmak, küçük dosya sorununu <code>repartition</code> ile çözmek. Kod incelemesinde (code review) ilk sorulan soru "Bu iş kaç kez shuffle yapıyor?" olur.</div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Partition sayısını ayarlamak</h3>
+<p>Shuffle sonrası partition sayısı <code>spark.sql.shuffle.partitions</code> ile belirlenir (varsayılan 200). Kural olarak partition başına 100–200 MB hedeflenir: 1 TB'lık shuffle için 200 çok azdır (her görev 5 GB, belleğe sığmaz, diske taşar), 1 GB için fazladır (5 MB'lık 200 minik görev, zamanlama yükü). AQE açıkken Spark küçük partition'ları kendisi birleştirir (<code>coalescePartitions</code>).</p>
+<h3>cache ve persist</h3>
+<p>Aynı DataFrame'i birden çok eylemde kullanıyorsan her eylem planı baştan çalıştırır. <code>df.cache()</code> sonucu yürütücü belleğinde tutar; ama gereksiz cache belleği yer ve diske taşmaya yol açar. Yalnız gerçekten tekrar kullanılan, pahalı hesaplanan ara sonucu önbelleğe al, işin bitince <code>unpersist()</code> çağır.</p>
+<h3>collect() ve toPandas() tuzağı</h3>
+<p><code>collect</code> bütün veriyi sürücüye çeker. 50 GB'lık sonucu sürücüye çekmek OutOfMemory demektir. Sürücüye yalnız küçük özetler gelmeli; büyük sonuçlar <code>write</code> ile göle yazılmalı.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/spark-dagitik">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../akis-isleme/">← Akış işleme ve mesaj kuyrukları: Kafka kavramları</a><a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,155 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kullanıcı girdisi ve tür dönüşümü | Kesit Python</title><meta name="description" content="input() her zaman str döndürür: int/float/bool dönüşümlerinin tuzaklarını, Türkçe virgüllü ondalığı, isdigit/isnumeric/isdecimal farkını, while True +…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/girdi-donusum/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kullanıcı girdisi ve tür dönüşümü"><meta property="og:description" content="input() her zaman str döndürür: int/float/bool dönüşümlerinin tuzaklarını, Türkçe virgüllü ondalığı, isdigit/isnumeric/isdecimal farkını, while True +…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/girdi-donusum/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kullanıcı girdisi ve tür dönüşümü","description":"input() her zaman str döndürür: int/float/bool dönüşümlerinin tuzaklarını, Türkçe virgüllü ondalığı, isdigit/isnumeric/isdecimal farkını, while True +…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/girdi-donusum/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Akış kontrolü</span><h1>Kullanıcı girdisi ve tür dönüşümü</h1><p class="st-l">input() her zaman str döndürür: int/float/bool dönüşümlerinin tuzaklarını, Türkçe virgüllü ondalığı, isdigit/isnumeric/isdecimal farkını, while True + try/except doğrulama döngüsünü, split ile çoklu değer ve varsayılan değer kalıplarını öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/girdi-donusum">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Kullanıcı ne yazarsa yazar</h2>
+<p>Anadolu Market'in depo görevlisi stok sayım programına "12" yerine "on iki", "12,5" ya da yanlışlıkla boş bir satır girer. Kasa görevlisi "Onaylıyor musun?" sorusuna "Hayır" yazar ve program bunu "evet" sanar. Kullanıcı girdisi (user input) programın en kirli kapısıdır: <b>her şey metin olarak gelir, hiçbir şeyin doğru biçimde geleceği garanti değildir</b>. İlk program dersinde <code>input()</code> ile tanıştın, değişkenler dersinde <code>int()</code> ve <code>float()</code> gördün. Bu derste ikisini birleştirip sağlam bir girdi katmanı kuracaksın: dönüştür, doğrula, gerekirse tekrar sor.</p>
+
+<h2>input() her zaman str döndürür</h2>
+<p><code>input(istem)</code> ekrana istem (prompt) metnini yazar, kullanıcının Enter'a basmasını bekler ve yazılanı <b>sondaki satır sonu olmadan</b> bir <code>str</code> olarak döndürür. Kullanıcı 42 yazsa da gelen değer <code>"42"</code> metnidir.</p>
+<pre class="code">adet = input("Adet: ")          # kullanıcı 3 yazar
+fiyat = input("Fiyat: ")        # kullanıcı 20 yazar
+print(adet * 2)                 # 33   (metin tekrarı!)
+print(adet + fiyat)             # 320  (metin birleştirme!)
+print(int(adet) * int(fiyat))   # 60</pre>
+<p>Bu derste tarayıcıdaki örnekler <code>input()</code> yerine "kullanıcının yazdığı" metni doğrudan bir değişkene koyarak çalışır; alıştırmalarda ise gerçek <code>input()</code> kullanacaksın ve sistem senin yerine yazacak. Doğrulayıcı istemi ve girilen değeri çıktıya ekler: <code>Ad: Ayşe</code> gibi.</p>
+<pre class="py">girilen_adet = "3"        # input("Adet: ") sonucu gibi düşün
+girilen_fiyat = "20"
+print(type(girilen_adet).__name__)
+print(girilen_adet * 2, girilen_adet + girilen_fiyat)
+print(int(girilen_adet) * int(girilen_fiyat))</pre>
+
+<h2>Dönüşüm fonksiyonları ve tuzakları</h2>
+<p><code>int()</code>, <code>float()</code>, <code>bool()</code> ve <code>str()</code> yeni bir değer üretir; orijinal metin değişmez. Hangi metinleri kabul ettiklerini bilmek, ValueError'ı önceden kestirmeni sağlar.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Sonuç</th><th>Not</th></tr>
+<tr><td><code>int("42")</code>, <code>int(" 42 ")</code></td><td>42</td><td>Baştaki/sondaki boşluk sorun değil</td></tr>
+<tr><td><code>int("1_000")</code></td><td>1000</td><td>Alt çizgi basamak ayırıcısı kabul edilir</td></tr>
+<tr><td><code>int("4.5")</code></td><td>ValueError</td><td>Ondalık metni doğrudan int olmaz: <code>int(float("4.5"))</code></td></tr>
+<tr><td><code>int(4.9)</code>, <code>int(-4.9)</code></td><td>4, -4</td><td>Yuvarlamaz, sıfıra doğru keser</td></tr>
+<tr><td><code>int("ff", 16)</code></td><td>255</td><td>İkinci parametre taban</td></tr>
+<tr><td><code>float("12.5")</code>, <code>float("1e3")</code></td><td>12.5, 1000.0</td><td>Bilimsel gösterim kabul</td></tr>
+<tr><td><code>float("12,5")</code></td><td>ValueError</td><td>Python ondalık ayırıcı olarak yalnız nokta bilir</td></tr>
+<tr><td><code>float("nan")</code>, <code>float("inf")</code></td><td>nan, inf</td><td>Sürpriz: bunlar da geçerli float!</td></tr>
+<tr><td><code>bool("False")</code>, <code>bool("0")</code></td><td>True, True</td><td>Boş olmayan her metin True</td></tr>
+<tr><td><code>bool("")</code></td><td>False</td><td>Yalnız boş metin False</td></tr>
+<tr><td><code>str(3.0)</code></td><td>"3.0"</td><td>Sayıdan metne her zaman çalışır</td></tr>
+</table></div>
+<pre class="py">for metin in ["42", " 42 ", "1_000", "4.5", "on iki", ""]:
+    try:
+        print(repr(metin), "-&gt;", int(metin))
+    except ValueError as e:
+        print(repr(metin), "-&gt; ValueError:", e)
+
+print(bool("False"), bool("0"), bool(""), bool(" "))
+print(int(float("4.5")), round(float("4.5")), round(float("5.5")))</pre>
+<div class="warn"><b>bool("False") True'dur</b><code>bool()</code> metnin <b>içeriğine</b> bakmaz, yalnızca boş olup olmadığına bakar. Kullanıcıdan evet/hayır almak için metni kendin yorumlamalısın: <code>cevap.strip().lower() in ("e", "evet")</code>. Aynı tuzak ortam değişkenlerinde ve CSV'deki "True"/"False" sütunlarında da karşına çıkar.</div>
+<p>Son satırdaki <code>round(4.5)</code> sonucunun 4 çıkması hata değil: Python "bankacı yuvarlaması" yapar (yarımları çift sayıya). Sayılar dersinde bunu ayrıntılı gördün.</p>
+
+<h2>Virgüllü ondalık: "12,5" → 12.5</h2>
+<p>Türkiye'de ondalık ayırıcı virgül, binlik ayırıcı noktadır: <code>1.234,56</code>. Python ise tam tersini bekler. Kullanıcı ve Excel verisinde bu biçim çok sık gelir. Güvenli dönüşüm sırası: önce binlik noktalarını sil, sonra virgülü noktaya çevir.</p>
+<pre class="py">def tr_float(metin):
+    temiz = metin.strip().replace(" ", "")
+    if "," in temiz:                       # Türkçe biçim: 1.234,56
+        temiz = temiz.replace(".", "").replace(",", ".")
+    return float(temiz)
+
+for m in ["12,5", "1.234,56", " 99 ", "3.75", "1 250,00"]:
+    print(repr(m), "-&gt;", tr_float(m))</pre>
+<div class="note"><b>Belirsiz durum</b><code>"1.234"</code> bin iki yüz otuz dört mü, bir virgül iki yüz otuz dört mü? Metinden anlaşılamaz. Bu yüzden kurumsal sistemlerde girdi biçimi açıkça belirlenir ("ondalık için virgül kullanın") ya da her iki ayırıcıyı içeren metin reddedilip kullanıcıya tekrar sorulur. Para için float yerine <code>Decimal</code> kullanmayı da unutma.</div>
+
+<h2>isdigit, isnumeric, isdecimal farkı</h2>
+<p>Bir metnin sayı olup olmadığını dönüştürmeden önce sormak için üç metot vardır. Hepsi boş metinde, eksi işaretinde, noktada ve boşlukta <b>False</b> döner. Farkları Unicode'daki özel rakamlardadır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Metin</th><th>isdecimal()</th><th>isdigit()</th><th>isnumeric()</th><th>int() çalışır mı?</th></tr>
+<tr><td><code>"123"</code></td><td>True</td><td>True</td><td>True</td><td>Evet</td></tr>
+<tr><td><code>"٣"</code> (Arapça 3)</td><td>True</td><td>True</td><td>True</td><td>Evet → 3</td></tr>
+<tr><td><code>"²"</code> (üst simge)</td><td>False</td><td>True</td><td>True</td><td>Hayır!</td></tr>
+<tr><td><code>"½"</code>, <code>"Ⅻ"</code></td><td>False</td><td>False</td><td>True</td><td>Hayır</td></tr>
+<tr><td><code>"-5"</code>, <code>"3.5"</code>, <code>" 7"</code>, <code>""</code></td><td>False</td><td>False</td><td>False</td><td>-5 ve " 7" evet!</td></tr>
+</table></div>
+<p>Kural: <code>int()</code> öncesi ön kontrol için en güvenlisi <code>isdecimal()</code>'dır. Ama tablo son satırı gösteriyor ki hiçbiri negatif sayıyı ve boşluklu girdiyi tanımaz. Bu yüzden profesyonel kod "önce sor" yerine "<b>dene ve yakala</b>" (EAFP: easier to ask forgiveness than permission) yaklaşımını tercih eder: <code>try: int(metin) except ValueError: ...</code>.</p>
+<pre class="py">for m in ["123", "²", "½", "-5", " 7"]:
+    try:
+        sonuc = int(m)
+    except ValueError:
+        sonuc = "dönüştürülemez"
+    print(f"{m!r:6} isdecimal={m.isdecimal()!s:5} isdigit={m.isdigit()!s:5} int: {sonuc}")</pre>
+
+<h2>Doğrulama döngüsü: doğru girene kadar sor</h2>
+<p>Kullanıcıya bir kez sorup hatalı girdide programı çökertmek kabul edilemez. Standart kalıp: <code>while True</code> ile sonsuz döngü kur, <code>try</code> içinde dönüştür, aralık gibi iş kurallarını kontrol et, her şey yolundaysa <code>break</code> ile çık. Hata mesajı neyin yanlış olduğunu ve ne beklendiğini söylemeli.</p>
+<pre class="code">while True:
+    metin = input("Adet (1-99): ")
+    try:
+        adet = int(metin)
+    except ValueError:
+        print("Lütfen tam sayı gir.")
+        continue
+    if 1 &lt;= adet &lt;= 99:
+        break
+    print("1 ile 99 arasında olmalı.")
+print("Sepete", adet, "adet eklendi.")</pre>
+<p>Tarayıcıda aynı mantığı, kullanıcının sırayla yazdığı değerleri bir listeden alarak çalıştırabilirsin:</p>
+<pre class="py">girdiler = iter(["on iki", "0", "150", "12"])   # kullanıcının sırayla yazdıkları
+
+def sor(istem):
+    deger = next(girdiler)
+    print(istem + deger)
+    return deger
+
+while True:
+    metin = sor("Adet (1-99): ")
+    try:
+        adet = int(metin)
+    except ValueError:
+        print("Lütfen tam sayı gir.")
+        continue
+    if 1 &lt;= adet &lt;= 99:
+        break
+    print("1 ile 99 arasında olmalı.")
+print("Sepete", adet, "adet eklendi.")</pre>
+<div class="tip"><b>Deneme hakkı sınırı koy</b>Otomatik testlerde ya da boru hattında (stdin bir dosyadan gelirken) sonsuz döngü programı kilitleyebilir. <code>for deneme in range(3):</code> ile hak sınırı koyup döngü sonunda <code>else:</code> bloğunda "çok fazla hatalı deneme" diyerek çıkmak daha sağlamdır. Girdi bittiğinde <code>input()</code> EOFError fırlatır; onu da yakalayabilirsin.</div>
+
+<h2>Bir satırda birden fazla değer</h2>
+<p>Kullanıcı "1,75 70" ya da "120 85 140" gibi birden fazla değeri tek satıra yazabilir. <code>split()</code> argümansız çağrılınca her türlü boşlukta böler ve fazla boşlukları yok sayar; ardından her parçayı dönüştürürsün.</p>
+<pre class="py">satir = "  120   85 140 "               # input("Satışlar: ") sonucu gibi
+sayilar = [int(p) for p in satir.split()]
+print(sayilar, sum(sayilar))
+
+en, boy = map(int, "40x60".split("x"))   # tam iki parça bekler
+print(en * boy, "cm²")
+
+try:
+    a, b = "1 2 3".split()
+except ValueError as e:
+    print("Beklenenden fazla değer:", e)</pre>
+<p>Açma (unpacking) ile <code>a, b = ...</code> yazdığında parça sayısı tutmazsa ValueError alırsın; bu da bir doğrulama fırsatıdır.</p>
+
+<h2>Varsayılan değer: Enter'a basılırsa</h2>
+<p>Komut satırı araçlarında yaygın bir kibarlık: köşeli parantezde varsayılanı gösterip boş bırakılırsa onu kullanmak. <code>or</code> operatörü boş metni yanlış saydığı için tek satırda çözülür.</p>
+<pre class="py">girilen_sehir = ""          # kullanıcı yalnız Enter'a bastı
+girilen_gun = " 30 "
+sehir = girilen_sehir.strip() or "İstanbul"
+gun = int(girilen_gun.strip() or "7")
+print(f"Rapor: {sehir}, {gun} gün")</pre>
+
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank şubelerinde kullanılan eski bir terminal uygulaması, gişe görevlisinin girdiği tutarı <code>float(input())</code> ile okuyordu. "1.500" yazan görevli 1,5 TL'lik işlem yaptı; "1500,00" yazan ise ValueError ile ekranı kilitledi. Yeni sürümde girdi katmanı üç kurala bağlandı: Türkçe biçim ayrıştırıcı (binlik nokta, ondalık virgül), aralık kontrolü (0 &lt; tutar ≤ günlük limit) ve büyük tutarlarda "1.500,00 TL onaylıyor musunuz? (e/h)" teyidi. Aynı ilkeler web formlarında da geçerlidir: istemci tarafı kontrol yetmez, sunucu girdiyi her zaman yeniden doğrular.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Asla eval(input()) yazma</h3>
+<p>Eski öğreticilerde "sayı ya da liste girsin diye" <code>eval(input())</code> görürsün. <code>eval</code> metni Python kodu olarak çalıştırır; kullanıcı <code>__import__("os").remove("veri.db")</code> yazarsa onu da çalıştırır. Bir metni Python değerine (sayı, liste, sözlük) güvenle çevirmek için <code>ast.literal_eval</code> kullan; yalnız sabit değerleri kabul eder. JSON biçimindeki girdiler için <code>json.loads</code> daha da uygundur.</p>
+<h3>Girdi katmanını ayır</h3>
+<p>İş mantığını <code>input()</code> çağrılarıyla karıştırma. "Metni al → dönüştür → doğrula" işini saf fonksiyonlara (<code>tr_float</code>, <code>evet_mi</code>, <code>adet_dogrula</code>) koy; <code>input()</code> yalnızca en dış katmanda kalsın. Böylece aynı fonksiyonları komut satırında, web formunda ve CSV içe aktarmada yeniden kullanır, input olmadan test edersin.</p>
+<h3>Etkileşimsiz girdi: stdin</h3>
+<p>Sunucuda çalışan betiklerin karşısında insan yoktur; girdi bir dosyadan ya da başka programdan boru ile gelir (<code>python sayim.py &lt; sayim.txt</code>). Bu durumda <code>input()</code> her satırı okur ve dosya bitince EOFError fırlatır. Satır satır işlemek için <code>for satir in sys.stdin:</code> kalıbı daha uygundur. Terminal dersinde stdin'i ve yönlendirmeyi görmüştün.</p>
+<h3>Parola girişi</h3>
+<p>Parola gibi gizli bilgiler <code>input()</code> ile alınmaz; ekranda görünür. Standart kütüphanedeki <code>getpass.getpass("Parola: ")</code> yazılanı göstermez (kendi terminalinde dene).</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/girdi-donusum">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../vscode/">← VS Code ile Python</a><a href="../operatorler/">Operatörler derinlemesine →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

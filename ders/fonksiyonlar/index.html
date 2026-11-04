@@ -1,0 +1,214 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fonksiyonlar | Kesit Python</title><meta name="description" content="def ile kendi fonksiyonunu yazar; parametre, varsayılan değer, anahtar sözcüklü argüman, *args/**kwargs ve çoklu return ile Anadolu Market KDV ve indirim…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/fonksiyonlar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Fonksiyonlar"><meta property="og:description" content="def ile kendi fonksiyonunu yazar; parametre, varsayılan değer, anahtar sözcüklü argüman, *args/**kwargs ve çoklu return ile Anadolu Market KDV ve indirim…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/fonksiyonlar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Fonksiyonlar","description":"def ile kendi fonksiyonunu yazar; parametre, varsayılan değer, anahtar sözcüklü argüman, *args/**kwargs ve çoklu return ile Anadolu Market KDV ve indirim…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/fonksiyonlar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Fonksiyonlar</h1><p class="st-l">def ile kendi fonksiyonunu yazar; parametre, varsayılan değer, anahtar sözcüklü argüman, *args/**kwargs ve çoklu return ile Anadolu Market KDV ve indirim hesaplarını tek yerden yönetirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonlar">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden fonksiyon?</h2>
+<p>Anadolu Market'in fiyat ekibinde çalıştığını düşün. Ürün listesi, sepet özeti, fatura, iade ekranı: hepsinde KDV hesaplanıyor. Bu hesabı her ekranda ayrı ayrı yazarsan bir gün KDV oranı değiştiğinde dört yeri de bulup düzeltmen gerekir; birini unutursan fatura yanlış kesilir. Fonksiyon (function), "bu hesabı bir kere yaz, her yerden çağır" demenin yoludur. Şimdiye kadar <code>print</code>, <code>len</code>, <code>round</code> gibi hazır fonksiyonları kullandın; bu derste kendi fonksiyonlarını yazacaksın.</p>
+<p>Fonksiyonun üç kazancı var: <b>tekrarı önler</b> (aynı kodu bir kere yazarsın), <b>ad verir</b> (<code>kdv_hesapla(fiyat)</code> yazısı, formülün kendisinden daha anlaşılırdır) ve <b>test edilebilir</b> küçük parçalar üretir.</p>
+
+<h2>def, parametre ve return</h2>
+<p>Bir fonksiyon <code>def</code> anahtar sözcüğü, bir ad, parantez içinde parametreler (parameter) ve iki nokta ile tanımlanır. Gövde girintilidir. <code>return</code>, fonksiyonun ürettiği değeri çağıran yere geri gönderir.</p>
+<pre class="py">def kdv_hesapla(fiyat, oran=0.20):
+    """Fiyata KDV ekler ve KDV dahil tutarı döndürür."""
+    return round(fiyat * (1 + oran), 2)
+
+print(kdv_hesapla(100))        # varsayılan oran %20
+print(kdv_hesapla(100, 0.10))  # gıda ürünü, %10
+print(kdv_hesapla(fiyat=250, oran=0.01))</pre>
+<p>Burada <code>fiyat</code> ve <code>oran</code> <b>parametre</b>, çağrıda verdiğin <code>100</code> ve <code>0.10</code> ise <b>argüman</b> (argument). Parametre tanımdaki isimdir, argüman o isme gerçekten gönderilen değer. Üçlü tırnak içindeki ilk metin <b>docstring</b>: fonksiyonun ne yaptığını anlatır, <code>help(kdv_hesapla)</code> yazınca görünür. İşyerinde her fonksiyona bir satırlık docstring yazma alışkanlığı, kodunu okuyan ekip arkadaşlarına bırakacağın en kıymetli nottur.</p>
+<div class="note"><b>return olmayan fonksiyon</b>Bir fonksiyonda <code>return</code> yoksa ya da yalnızca <code>return</code> yazılmışsa fonksiyon <code>None</code> döndürür. <code>sonuc = print("x")</code> yazarsan <code>sonuc</code> None olur; print ekrana yazar ama değer döndürmez.</div>
+
+<h2>Varsayılan değer ve anahtar sözcüklü argüman</h2>
+<p><code>oran=0.20</code> yazımı <b>varsayılan değer</b> (default value) verir: çağıran oran belirtmezse 0.20 kullanılır. Varsayılan değerli parametreler, değersiz olanlardan <b>sonra</b> gelmek zorundadır; <code>def f(oran=0.2, fiyat)</code> SyntaxError verir.</p>
+<p>Çağrıda <code>fiyat=250</code> gibi ad belirtmeye <b>anahtar sözcüklü argüman</b> (keyword argument) denir. Konumsal (positional) argümanlar sırayla eşleşir; anahtar sözcüklüler ise adla eşleşir, bu yüzden sırası önemsizdir. İkisini karıştırabilirsin ama konumsallar her zaman önce gelir.</p>
+<pre class="py">def indirim_uygula(fiyat, yuzde=0, kupon=0, uye=False):
+    tutar = fiyat * (1 - yuzde / 100)
+    tutar -= kupon
+    if uye:
+        tutar *= 0.95          # üyelere ek %5
+    return round(max(tutar, 0), 2)
+
+print(indirim_uygula(1000))
+print(indirim_uygula(1000, 10))
+print(indirim_uygula(1000, kupon=50))
+print(indirim_uygula(1000, 10, uye=True))
+print(indirim_uygula(fiyat=40, kupon=100))   # eksiye düşmez</pre>
+<p>Dört parametreli bir fonksiyonda <code>indirim_uygula(1000, 0, 0, True)</code> yazmak okunmaz; <code>indirim_uygula(1000, uye=True)</code> ise kendini anlatır. Çok parametreli fonksiyonlarda anahtar sözcük kullanmak, PEP 8 kadar önemli bir ekip kuralıdır.</p>
+
+<h2>Çoklu dönüş: demet açma</h2>
+<p>Python'da bir fonksiyon birden fazla değer "döndürüyor" gibi görünür; aslında tek bir demet (tuple) döndürür ve sen onu açarsın (unpacking). Fatura hesabında ara toplam, KDV ve genel toplamı birlikte döndürmek doğal bir örnektir:</p>
+<pre class="py">def fatura_hesapla(sepet, kdv_orani=0.20):
+    """sepet: (urun, adet, birim_fiyat) demetlerinin listesi"""
+    ara_toplam = 0
+    for urun, adet, fiyat in sepet:
+        ara_toplam += adet * fiyat
+    kdv = round(ara_toplam * kdv_orani, 2)
+    return ara_toplam, kdv, round(ara_toplam + kdv, 2)
+
+sepet = [("Kahve Makinesi", 1, 1500), ("Filtre", 3, 45.5), ("Fincan", 6, 30)]
+ara, kdv, toplam = fatura_hesapla(sepet)
+print("Ara toplam:", ara)
+print("KDV:", kdv)
+print("Genel toplam:", toplam)
+print(type(fatura_hesapla(sepet)))</pre>
+<p>Son satır <code>&lt;class 'tuple'&gt;</code> basar: döndürülen şey gerçekten bir demettir. Üç değişkene açmak için sol tarafa üç ad yazarsın; sayı tutmazsa <code>ValueError</code> alırsın.</p>
+
+<h2>*args ve **kwargs</h2>
+<p>Kaç argüman geleceğini önceden bilmediğin durumlar olur. Sepete 2 ürün de eklenebilir 20 ürün de. <code>*args</code> fazladan gelen <b>konumsal</b> argümanları bir demette, <code>**kwargs</code> fazladan gelen <b>anahtar sözcüklü</b> argümanları bir sözlükte toplar. <code>args</code> ve <code>kwargs</code> adları gelenektir; yıldızlar asıl işi yapar.</p>
+<pre class="py">def sepet_toplami(*fiyatlar, **secenekler):
+    toplam = sum(fiyatlar)
+    print("gelen fiyatlar:", fiyatlar)
+    print("gelen seçenekler:", secenekler)
+    if secenekler.get("kargo_bedava", False) is False and toplam &lt; 500:
+        toplam += secenekler.get("kargo", 49.9)
+    return round(toplam, 2)
+
+print(sepet_toplami(120, 85.5, 60))
+print(sepet_toplami(120, 85.5, 60, kargo=29.9))
+print(sepet_toplami(900, 250, kargo_bedava=True))</pre>
+<p>Yıldızın tersi de çalışır: elindeki listeyi <code>sepet_toplami(*liste)</code>, sözlüğü <code>f(**sozluk)</code> diyerek açıp argüman olarak gönderebilirsin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Ne alır</th><th>Fonksiyon içinde türü</th><th>Örnek çağrı</th></tr>
+<tr><td><code>def f(a, b)</code></td><td>Tam iki konumsal argüman</td><td>tekil değerler</td><td><code>f(1, 2)</code></td></tr>
+<tr><td><code>def f(a, b=5)</code></td><td>Bir zorunlu, bir isteğe bağlı</td><td>tekil değerler</td><td><code>f(1)</code>, <code>f(1, b=9)</code></td></tr>
+<tr><td><code>def f(*args)</code></td><td>Sıfır veya daha çok konumsal</td><td>tuple</td><td><code>f()</code>, <code>f(1, 2, 3)</code></td></tr>
+<tr><td><code>def f(**kwargs)</code></td><td>Sıfır veya daha çok anahtar sözcüklü</td><td>dict</td><td><code>f(x=1, y=2)</code></td></tr>
+<tr><td><code>def f(a, *args, k=0, **kwargs)</code></td><td>Hepsi birden, bu sırayla</td><td>karışık</td><td><code>f(1, 2, 3, k=4, z=5)</code></td></tr>
+</table></div>
+
+<h2>Saf fonksiyon</h2>
+<p>Aynı girdiye her zaman aynı çıktıyı veren ve dış dünyayı değiştirmeyen fonksiyona <b>saf fonksiyon</b> (pure function) denir. <code>kdv_hesapla(100)</code> her çağrıda 120.0 verir; ekrana yazmaz, dosyaya dokunmaz, global değişken bozmaz. Saf fonksiyonlar test etmesi en kolay, hata ayıklaması (debugging) en rahat parçalardır. Hesabı yapan fonksiyonla sonucu yazdıran kodu ayır: hesap saf kalsın, print dışarıda olsun. Ders boyunca bu kalıbı göreceksin: <code>fatura_hesapla</code> hesaplar, çağıran yer yazdırır.</p>
+
+<h2>Değişebilir varsayılan tuzağı</h2>
+<p>Python'da en meşhur tuzaklardan biri: varsayılan değer, fonksiyon <b>tanımlandığında bir kez</b> oluşturulur, her çağrıda yeniden değil. Varsayılan bir liste ya da sözlükse, tüm çağrılar aynı nesneyi paylaşır.</p>
+<pre class="py">def sepete_ekle(urun, sepet=[]):      # TUZAK
+    sepet.append(urun)
+    return sepet
+
+print(sepete_ekle("Kahve"))
+print(sepete_ekle("Çay"))              # Kahve hâlâ içeride!
+
+def sepete_ekle_dogru(urun, sepet=None):
+    if sepet is None:
+        sepet = []
+    sepet.append(urun)
+    return sepet
+
+print(sepete_ekle_dogru("Kahve"))
+print(sepete_ekle_dogru("Çay"))</pre>
+<div class="warn"><b>Kural</b>Varsayılan değer olarak asla <code>[]</code>, <code>{}</code> ya da <code>set()</code> yazma. <code>None</code> ver, gövdede <code>if sepet is None: sepet = []</code> ile oluştur. Sayı, metin, demet ve <code>None</code> gibi değişmez (immutable) varsayılanlar güvenlidir.</div>
+<div class="tip"><b>İyi fonksiyon nasıl olur?</b>Tek bir iş yapar, adı fiille başlar (<code>hesapla</code>, <code>bul</code>, <code>filtrele</code>), 3-5 parametreyi geçmez, docstring taşır ve mümkünse saftır. 40 satırı geçen bir fonksiyon genelde ikiye bölünmek ister.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Docstring: fonksiyonun kullanım kılavuzu</h2>
+<p>Fonksiyon gövdesinin ilk satırına yazılan üç tırnaklı metne belge dizgisi (docstring) denir. Yorumdan farkı, çalışma anında erişilebilir olmasıdır: <code>help(fonksiyon)</code> ve <code>fonksiyon.__doc__</code> onu gösterir, VS Code fareyle üzerine gelince açar. Ekip kodunda herkese açık her fonksiyonun bir docstring'i olur: ne yaptığı, parametreleri, dönüş değeri ve hangi durumda hata verdiği.</p>
+<pre class="py">def taksit(tutar: float, ay: int, faiz: float = 0.0) -&gt; float:
+    """Aylık taksit tutarını hesaplar.
+
+    Args:
+        tutar: Kredi anaparası (TL).
+        ay: Taksit sayısı, 1 veya daha büyük.
+        faiz: Aylık faiz oranı (0.02 = %2).
+
+    Returns:
+        2 ondalığa yuvarlanmış aylık taksit.
+
+    Raises:
+        ValueError: ay 1'den küçükse.
+    """
+    if ay &lt; 1:
+        raise ValueError("ay en az 1 olmalı")
+    if faiz == 0:
+        return round(tutar / ay, 2)
+    return round(tutar * faiz / (1 - (1 + faiz) ** -ay), 2)
+
+print(taksit(12000, 12), taksit(12000, 12, 0.02))
+print(taksit.__doc__.splitlines()[0])
+print(taksit.__annotations__)</pre>
+<p>Tip ipuçları (<code>tutar: float</code>, <code>-&gt; float</code>) da <code>__annotations__</code> içinde saklanır ama Python çalışma anında onları <b>denetlemez</b>; <code>taksit("abc", 3)</code> yine çağrılır ve içeride hata verir. Denetimi mypy gibi araçlar ve editörün yapar. "Değer ya da None" dönen fonksiyonlar için <code>-&gt; float | None</code>, liste için <code>list[float]</code>, sözlük için <code>dict[str, int]</code> yazılır.</p>
+
+<h2>Parametrelerin tam sırası</h2>
+<p>Bir fonksiyon tanımında parametre türlerinin sırası sabittir. Hepsini bir arada pek görmezsin ama kütüphane belgelerini okurken bu kalıbı tanıman gerekir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Sıra</th><th>Tür</th><th>Yazım</th><th>Nasıl çağrılır?</th></tr>
+<tr><td>1</td><td>Yalnız konumsal</td><td><code>a, /</code></td><td>Yalnızca sırayla: <code>f(1)</code></td></tr>
+<tr><td>2</td><td>Normal</td><td><code>b</code>, <code>c=2</code></td><td>Sırayla ya da adla</td></tr>
+<tr><td>3</td><td>Değişken konumsal</td><td><code>*args</code></td><td>Fazla konumsal argümanlar demet olur</td></tr>
+<tr><td>4</td><td>Yalnız anahtar sözcüklü</td><td><code>*</code> ya da <code>*args</code> sonrası: <code>d</code></td><td>Yalnızca adla: <code>d=4</code></td></tr>
+<tr><td>5</td><td>Değişken anahtar sözcüklü</td><td><code>**kwargs</code></td><td>Fazla adlı argümanlar sözlük olur</td></tr>
+</table></div>
+<pre class="py">def ornek(a, /, b, c=2, *args, d, **kwargs):
+    print(a, b, c, args, d, kwargs)
+
+ornek(1, 2, d=4)
+ornek(1, 2, 3, 9, 9, d=4, rapor=True)
+try:
+    ornek(a=1, b=2, d=4)
+except TypeError as h:
+    print("Hata:", h)</pre>
+<p>Son çağrının hata mesajı ilginçtir: <code>a</code> yalnız konumsal olduğu için <code>a=1</code> onun yerine geçmez, <code>**kwargs</code> sözlüğüne düşer; Python da "a eksik" der. Yalnız konumsal parametreler bu yüzden kullanılır: parametre adını ileride değiştirmek, çağıranların kodunu bozmaz. <code>len(obj)</code> gibi yerleşik fonksiyonlar da böyle tanımlıdır.</p>
+
+<h2>Çağrı tarafında açma: * ve **</h2>
+<p><code>*args</code> ve <code>**kwargs</code>'ın tersi de var: çağrı sırasında bir listeyi <code>*</code> ile konumsal argümanlara, bir sözlüğü <code>**</code> ile adlı argümanlara dağıtabilirsin. Ayarları bir yapılandırma sözlüğünde tutup fonksiyona tek hamlede vermek böyle yapılır.</p>
+<pre class="py">def fiyat(tutar, kdv=0.20, indirim=0):
+    return round(tutar * (1 + kdv) - indirim, 2)
+
+kampanya = {"kdv": 0.10, "indirim": 5}
+print(fiyat(100, **kampanya))          # fiyat(100, kdv=0.10, indirim=5)
+arg = [250, 0.01]
+print(fiyat(*arg))                     # fiyat(250, 0.01)
+try:
+    fiyat(100, **{"kdv": 0.1, "kargo": 30})
+except TypeError as h:
+    print("Bilinmeyen ayar:", h)</pre>
+<p>Sözlükte fonksiyonun tanımadığı bir anahtar varsa <code>TypeError</code> alırsın; bu iyi bir şeydir, yazım hatalı ayar adlarını hemen yakalar.</p>
+
+<h2>Argüman nasıl aktarılır: kopya mı, referans mı?</h2>
+<p>Python argümanı ne kopyalar ne de "değişkenin kendisini" verir: parametre, çağıranın nesnesine bağlanan <b>yeni bir addır</b> (nesne referansıyla aktarım). Sonuç iki kurala iner: parametre üzerinden nesneyi <b>değiştirirsen</b> (append, sözlüğe atama) çağıran da görür; parametreye <b>yeni bir değer atarsan</b> yalnız yerel ad değişir, çağıran etkilenmez.</p>
+<pre class="py">def ekle(sepet, urun):
+    sepet.append(urun)        # nesneyi değiştirir: çağıran görür
+
+def sifirla(sepet):
+    sepet = []                # yalnız yerel adı yeniden bağlar
+
+def bosalt(sepet):
+    sepet.clear()             # nesneyi değiştirir
+
+s = ["çay"]
+ekle(s, "kahve"); print(s)
+sifirla(s); print(s)          # değişmedi!
+bosalt(s); print(s)</pre>
+<div class="warn"><b>Gizli yan etki</b>Bir fonksiyonun aldığı listeyi ya da sözlüğü sessizce değiştirmesi en zor bulunan hatalardandır. Kural: ya girdiyi değiştirme ve yeni nesne döndür (saf fonksiyon), ya da değiştiriyorsan adında ve docstring'inde belirt ve <code>None</code> döndür (<code>list.sort()</code> gibi).</div>
+
+<h2>Fonksiyon alan fonksiyonlar</h2>
+<p>Fonksiyonlar değer olduğu için başka bir fonksiyona argüman olarak verilebilir. <code>sorted(..., key=...)</code> bunun en bilinen örneği. Kendi fonksiyonların da "nasıl" kısmını dışarıdan alabilir; böylece aynı döngüyü farklı kurallarla yeniden kullanırsın. Bu tür fonksiyonlara üst düzey fonksiyon (higher-order function) denir.</p>
+<pre class="py">def uygula(degerler, islem):
+    sonuc = []
+    for d in degerler:
+        sonuc.append(islem(d))
+    return sonuc
+
+def kdv_ekle(f):
+    return round(f * 1.2, 2)
+
+print(uygula([100, 49.9], kdv_ekle))
+print(uygula(["  izmir ", "ANKARA"], str.strip))
+print(uygula([-3, 4], abs))</pre>
+<p>Tek satırlık küçük fonksiyonları yerinde tanımlamak için <code>lambda</code>, hazır <code>map</code>/<code>filter</code> ve fonksiyon döndüren fonksiyonlar (kapanış, closure) Fonksiyonel programlama ve Kapanışlar derslerinde; kendini çağıran fonksiyonlar ise Özyineleme (recursion) dersinde.</p>
+<div class="note"><b>Gerçek işte</b>Kod incelemelerinde (code review) fonksiyonlara bakılan ilk şeyler: tek bir iş yapıyor mu, adı fiil mi (<code>hesapla_</code>, <code>getir_</code>, <code>kaydet_</code>), girdisini gizlice değiştiriyor mu, docstring'i ve tip ipuçları var mı, hata durumunda ne yapıyor? Küçük, saf ve belgelenmiş fonksiyonlar birim testle kolayca sınanır; Test yazma dersinde göreceğin <code>assert</code> tabanlı testler tam olarak bu fonksiyonlar üzerine kurulur.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Yalnızca anahtar sözcüklü ve yalnızca konumsal parametreler</h3>
+<p>Python 3'te parametre listesine tek başına <code>*</code> koyarsan sonrasındaki parametreler yalnızca adla verilebilir: <code>def indirim(fiyat, *, yuzde=0, kupon=0)</code>. Artık <code>indirim(1000, 10)</code> hata verir; <code>indirim(1000, yuzde=10)</code> yazmak zorunludur. Bu, yanlışlıkla yüzde yerine kupon göndermeyi imkânsız kılar. Tersi için <code>/</code> kullanılır: <code>def f(a, b, /)</code> yazımında a ve b yalnızca konumsaldır; <code>len</code> gibi yerleşik fonksiyonlar böyledir.</p>
+<h3>Tip ipuçları</h3>
+<p>Kurumsal kodda fonksiyon imzasına tip ipucu (type hint) eklenir: <code>def kdv_hesapla(fiyat: float, oran: float = 0.20) -&gt; float:</code>. Python bunları zorlamaz ama editör ve <code>mypy</code> gibi araçlar hataları daha yazarken yakalar. Dataclass ve typing dersinde ayrıntıya gireceğiz; şimdilik imzaya tip yazmayı deneyebilirsin, zararı yoktur.</p>
+<h3>Fonksiyon bir değerdir</h3>
+<p>Python'da fonksiyon da bir nesnedir: değişkene atanır, listeye konur, başka fonksiyona argüman olarak verilir. <code>hesaplar = {"kdv": kdv_hesapla, "indirim": indirim_uygula}</code> gibi bir sözlükle "işlem adı → fonksiyon" tablosu kurabilirsin. Orta seviyedeki fonksiyonel programlama ve dekoratör (decorator) dersleri tamamen bu fikrin üstüne kurulur.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonlar">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../donguler/">← Döngüler: for ve while</a><a href="../kapsam-moduller/">Kapsam ve modüller →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

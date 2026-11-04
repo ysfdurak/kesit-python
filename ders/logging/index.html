@@ -1,0 +1,235 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>logging: profesyonel kayıt tutma | Kesit Python</title><meta name="description" content="Seviyeleri, logger hiyerarşisini ve yayılımı, handler/formatter/filter boru hattını, dosyaya dönen log, dictConfig, JSON log, exception() ile traceback,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/logging/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="logging: profesyonel kayıt tutma"><meta property="og:description" content="Seviyeleri, logger hiyerarşisini ve yayılımı, handler/formatter/filter boru hattını, dosyaya dönen log, dictConfig, JSON log, exception() ile traceback,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/logging/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"logging: profesyonel kayıt tutma","description":"Seviyeleri, logger hiyerarşisini ve yayılımı, handler/formatter/filter boru hattını, dosyaya dönen log, dictConfig, JSON log, exception() ile traceback,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/logging/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>logging: profesyonel kayıt tutma</h1><p class="st-l">Seviyeleri, logger hiyerarşisini ve yayılımı, handler/formatter/filter boru hattını, dosyaya dönen log, dictConfig, JSON log, exception() ile traceback, kütüphanede NullHandler ve KVKK uyumlu TC/kart maskelemeyi öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/logging">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Gece 03.00'te Anadolu Market'in ödeme servisi bazı siparişleri reddetmeye başlıyor. Nöbetçi geliştiricinin elinde yalnız loglar var. Kod <code>print("hata oldu")</code> yazıyorsa elinde ne zaman, hangi modülde, hangi siparişte, hangi önem derecesinde olduğu bilinmeyen bir satır vardır. <code>logging</code> ile yazılmışsa her satırda zaman, seviye, modül adı ve sipariş numarası durur; hata satırının altında tam traceback vardır; hassas veriler maskelenmiştir ve loglar hem ekrana hem dönen (rotating) dosyalara akar.</p>
+<p>Hata tasarımı dersinde <code>basicConfig</code>, <code>getLogger(__name__)</code> ve <code>exception()</code> ile tanıştın. Bu derste logging'in mimarisini öğreneceksin: <b>logger → filter → handler → formatter</b> boru hattı (pipeline), hiyerarşi ve yayılım (propagation), <code>dictConfig</code>, JSON log, kütüphane kodunun kuralları ve KVKK uyumlu maskeleme.</p>
+
+<h2>print yerine logging: ne kazanırsın?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyaç</th><th>print</th><th>logging</th></tr>
+<tr><td>Önem derecesi</td><td>Yok</td><td>DEBUG, INFO, WARNING, ERROR, CRITICAL</td></tr>
+<tr><td>Kapatıp açmak</td><td>Kodu değiştirmek gerekir</td><td>Seviyeyi yapılandırmadan değiştir</td></tr>
+<tr><td>Hedef</td><td>Yalnız stdout</td><td>Konsol, dosya, syslog, e-posta, HTTP... aynı anda</td></tr>
+<tr><td>Bağlam</td><td>Elle yazarsın</td><td>Zaman, modül, satır, süreç, iş parçacığı otomatik</td></tr>
+<tr><td>Traceback</td><td>Elle</td><td><code>logger.exception()</code></td></tr>
+<tr><td>Kütüphane kodu</td><td>Kullanıcının ekranını kirletir</td><td>Uygulama isterse görünür</td></tr>
+</table></div>
+
+<h2>Seviyeler</h2>
+<p>Her seviye bir sayıdır. Logger ve handler bir eşik taşır; eşiğin altındaki kayıtlar atılır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Seviye</th><th>Sayı</th><th>Ne zaman?</th><th>Anadolu Market örneği</th></tr>
+<tr><td>DEBUG</td><td>10</td><td>Geliştirici ayrıntısı</td><td>Sepet hesabının ara değerleri</td></tr>
+<tr><td>INFO</td><td>20</td><td>Olağan, önemli olay</td><td>Sipariş AM-101 oluşturuldu</td></tr>
+<tr><td>WARNING</td><td>30</td><td>Beklenmedik ama sürüyor</td><td>Stok 5'in altına düştü</td></tr>
+<tr><td>ERROR</td><td>40</td><td>İşlem başarısız</td><td>Ödeme sağlayıcısı yanıt vermedi</td></tr>
+<tr><td>CRITICAL</td><td>50</td><td>Sistem çalışamıyor</td><td>Veritabanı bağlantısı yok</td></tr>
+</table></div>
+<p>Kök logger'ın (root) varsayılan seviyesi <b>WARNING</b>'dir. Bu yüzden hiç yapılandırmadan yazılan <code>logging.info(...)</code> görünmez; yeni başlayanların en sık şaşırdığı durum budur.</p>
+
+<h2>Boru hattı: logger, handler, formatter, filter</h2>
+<ol>
+<li><b>Logger</b>: koddan çağırdığın nesne (<code>log.info(...)</code>). Seviyesine bakar, bir <code>LogRecord</code> oluşturur, kendi filtrelerini uygular.</li>
+<li><b>Handler</b>: kaydı bir hedefe gönderir (StreamHandler: akış, FileHandler: dosya, RotatingFileHandler: boyutla dönen dosya). Kendi seviyesi ve filtreleri vardır.</li>
+<li><b>Formatter</b>: kaydı metne çevirir: <code>"%(asctime)s %(levelname)s %(name)s: %(message)s"</code>.</li>
+<li><b>Filter</b>: kaydı geçirir ya da düşürür; kaydı <b>değiştirebilir</b> de (maskeleme).</li>
+</ol>
+<p>Bu derste ekran çıktısının her çalıştırmada aynı olması için handler'ları <code>sys.stdout</code>'a bağlayacak ve formata zaman koymayacağız. Tarayıcıdaki Python oturumu çalıştırmalar arasında yaşadığı için, her örnekte logger'ın handler'larını temizleyip <code>propagate = False</code> yapacağız; yoksa aynı mesaj iki, üç kez basılır.</p>
+<pre class="py">import logging, sys
+
+log = logging.getLogger("anadolu.siparis")
+log.handlers.clear()                 # önceki çalıştırmadan kalanları sil
+log.propagate = False                # kök logger'a iletme
+log.setLevel(logging.DEBUG)          # logger eşiği
+
+ekran = logging.StreamHandler(sys.stdout)
+ekran.setLevel(logging.INFO)         # handler eşiği: DEBUG bu kapıdan geçmez
+ekran.setFormatter(logging.Formatter("%(levelname)-8s %(name)s | %(message)s"))
+log.addHandler(ekran)
+
+log.debug("Sepet ara toplamı: %s", 1249.9)     # görünmez
+log.info("Sipariş %s oluşturuldu", "AM-101")
+log.warning("Stok azaldı: %s (kalan %d)", "Termos", 3)
+log.error("Ödeme reddedildi: %s", "AM-102")
+print(log.getEffectiveLevel(), ekran.level)</pre>
+<div class="tip"><b>%s ile tembel biçimlendirme</b>Mesajı <code>log.info("Sipariş %s", no)</code> biçiminde ver. Metin yalnız kayıt gerçekten yazılacaksa oluşturulur ve (aşağıda göreceğin gibi) filtreler argümanlara ayrı ayrı erişebilir. f-string de çalışır ama hata tasarımı dersinde gördüğün nedenlerle ikinci tercihtir.</div>
+
+<h2>Logger hiyerarşisi ve yayılım</h2>
+<p>Logger adları noktayla ayrılmış bir ağaç kurar: <code>anadolu</code> → <code>anadolu.odeme</code> → <code>anadolu.odeme.kart</code>. Her modülün başında <code>log = logging.getLogger(__name__)</code> yazarsan ağaç, paket yapını kendiliğinden yansıtır. İki kural:</p>
+<ul>
+<li><b>Etkin seviye</b>: seviyesi ayarlanmamış (NOTSET) logger, ilk ayarlı atasının seviyesini kullanır.</li>
+<li><b>Yayılım</b>: <code>propagate</code> True ise (varsayılan) kayıt, atalarının <b>handler'larına</b> da gönderilir. Atanın logger seviyesine bakılmaz, yalnız handler seviyelerine bakılır.</li>
+</ul>
+<pre class="py">import logging, sys
+
+def ekran(etiket):
+    h = logging.StreamHandler(sys.stdout)
+    h.setFormatter(logging.Formatter(etiket + " %(name)s: %(message)s"))
+    return h
+
+ana = logging.getLogger("anadolu")
+ana.handlers.clear(); ana.propagate = False
+ana.setLevel(logging.INFO)
+ana.addHandler(ekran("[ANA]"))
+
+odeme = logging.getLogger("anadolu.odeme")
+odeme.handlers.clear(); odeme.propagate = True; odeme.setLevel(logging.NOTSET)
+odeme.info("Kart doğrulandı")                 # kendi handler'ı yok: ata yazar
+odeme.addHandler(ekran("[ODEME]"))
+odeme.info("Tahsilat tamam")                  # İKİ kez: kendi + ata
+odeme.propagate = False
+odeme.info("Yalnız bir kez")
+print(odeme.parent.name, logging.getLevelName(odeme.getEffectiveLevel()))</pre>
+<p>Tekrarlanan log satırlarının bir numaralı nedeni budur: hem alt logger'a hem köke handler eklemek. Yaygın düzen: handler'ları <b>yalnız</b> en üstte (kök ya da uygulama logger'ı) tanımla, alt logger'lara hiç handler ekleme, yalnız <code>getLogger(__name__)</code> ile kullan.</p>
+
+<h2>Filter: kaydı süz ya da değiştir</h2>
+<p><code>logging.Filter</code>'dan türeyen bir sınıfın <code>filter(self, kayit)</code> metodu True dönerse kayıt geçer. Kaydın alanlarını değiştirmek de serbesttir. Bu, KVKK ve PCI-DSS gereği TC kimlik ve kart numaralarını logdan silmenin en sağlam yoludur: geliştirici unutsa bile filtre yakalar.</p>
+<pre class="py">import logging, sys, re
+
+KART = re.compile(r"\b(?:\d[ -]?){12}(\d{4})\b")
+TC = re.compile(r"\b[1-9]\d{8}(\d{2})\b")
+
+def maskele(metin):
+    metin = KART.sub(lambda m: "**** **** **** " + m.group(1), metin)
+    return TC.sub(lambda m: "*" * 9 + m.group(1), metin)
+
+class MaskeFiltresi(logging.Filter):
+    def filter(self, kayit):
+        kayit.msg = maskele(kayit.getMessage())
+        kayit.args = ()
+        return True
+
+log = logging.getLogger("anadolu.kvkk")
+log.handlers.clear(); log.propagate = False; log.setLevel(logging.INFO)
+h = logging.StreamHandler(sys.stdout)
+h.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+h.addFilter(MaskeFiltresi())
+log.addHandler(h)
+
+log.info("Ödeme alındı kart=%s tutar=%.2f", "4543 1234 5678 9012", 1499.9)
+log.warning("Müşteri %s için adres eksik", "12345678946")</pre>
+<p>Filtreyi handler'a eklemek, o handler'a giden her kaydı (alt logger'lardan yayılanlar dahil) kapsar. Logger'a eklenen filtre ise yalnız o logger'da doğrudan oluşturulan kayıtlara uygulanır.</p>
+
+<h2>exception(): traceback'i kaybetme</h2>
+<p><code>log.exception("mesaj")</code> yalnız <code>except</code> bloğunda çağrılır, ERROR seviyesinde yazar ve formatter traceback'i mesajın altına ekler. Başka bir seviyede traceback istersen <code>exc_info=True</code> ver.</p>
+<pre class="py">import logging, sys
+
+log = logging.getLogger("anadolu.kur")
+log.handlers.clear(); log.propagate = False; log.setLevel(logging.INFO)
+h = logging.StreamHandler(sys.stdout)
+h.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+log.addHandler(h)
+
+def birim_fiyat(toplam, adet):
+    try:
+        return round(toplam / adet, 2)
+    except ZeroDivisionError:
+        log.exception("Birim fiyat hesaplanamadı: toplam=%s adet=%s", toplam, adet)
+        return None
+
+print(birim_fiyat(100, 0))
+try:
+    int("on iki")
+except ValueError:
+    log.warning("Adet sayıya çevrilemedi", exc_info=True)</pre>
+
+<h2>Yapılandırılmış (JSON) log</h2>
+<p>Üretimde loglar Elasticsearch, Loki, Datadog gibi sistemlerde aranır. Her satırın bir JSON nesnesi olması, "tutarı 10.000 TL üstü ve seviyesi ERROR olan kayıtlar" gibi sorguları mümkün kılar. Kendi Formatter'ını yazmak kolaydır; ek alanlar <code>extra=</code> ile kayda eklenir.</p>
+<pre class="py">import logging, sys, json
+
+class JsonFormatter(logging.Formatter):
+    def format(self, kayit):
+        veri = {"seviye": kayit.levelname, "logger": kayit.name, "mesaj": kayit.getMessage()}
+        for alan in ("siparis_id", "tutar"):
+            if hasattr(kayit, alan):
+                veri[alan] = getattr(kayit, alan)
+        if kayit.exc_info:
+            veri["hata"] = self.formatException(kayit.exc_info).splitlines()[-1]
+        return json.dumps(veri, ensure_ascii=False)
+
+log = logging.getLogger("anadolu.json")
+log.handlers.clear(); log.propagate = False; log.setLevel(logging.INFO)
+h = logging.StreamHandler(sys.stdout)
+h.setFormatter(JsonFormatter())
+log.addHandler(h)
+
+log.info("Sipariş onaylandı", extra={"siparis_id": "AM-101", "tutar": 1499.9})
+try:
+    {}["kargo"]
+except KeyError:
+    log.exception("Kargo bilgisi yok", extra={"siparis_id": "AM-102"})</pre>
+
+<h2>Dosyaya log ve RotatingFileHandler</h2>
+<p><code>FileHandler</code> tek dosyaya yazar ve dosya sonsuza dek büyür. <code>RotatingFileHandler</code> dosya <code>maxBytes</code>'a ulaşınca onu <code>.1</code> olarak yeniden adlandırır, eskileri kaydırır ve en fazla <code>backupCount</code> yedek tutar. Zamana göre döndürmek için <code>TimedRotatingFileHandler</code> (ör. her gece) vardır.</p>
+<pre class="py">import logging, os
+from logging.handlers import RotatingFileHandler
+
+for f in os.listdir("."):
+    if f.startswith("stok.log"):
+        os.remove(f)
+
+log = logging.getLogger("anadolu.stok")
+log.handlers.clear(); log.propagate = False; log.setLevel(logging.INFO)
+dosya = RotatingFileHandler("stok.log", maxBytes=120, backupCount=2, encoding="utf-8")
+dosya.setFormatter(logging.Formatter("%(levelname)s %(message)s"))
+log.addHandler(dosya)
+
+for i in range(1, 13):
+    log.info("Ürün U%02d sayıldı", i)
+dosya.close()
+log.removeHandler(dosya)
+
+print(sorted(f for f in os.listdir(".") if f.startswith("stok.log")))
+with open("stok.log", encoding="utf-8") as f:
+    print(f.read().strip())</pre>
+<div class="warn"><b>Handler'ı kapat</b>Dosya handler'ları açık dosya tutar. Uzun yaşayan uygulamada sorun olmaz ama testlerde ve betik sonunda <code>close()</code> ya da <code>logging.shutdown()</code> çağırmazsan son satırlar diske yazılmayabilir ve Windows'ta dosya silinemez.</div>
+
+<h2>dictConfig: yapılandırmayı koddan ayır</h2>
+<p>Gerçek uygulamada yapılandırma tek yerde, çoğu zaman bir YAML/JSON dosyasında durur ve <code>logging.config.dictConfig</code> ile yüklenir. Ortama (geliştirme/üretim) göre seviyeyi değiştirmek kod değişikliği gerektirmez.</p>
+<pre class="py">import logging, logging.config
+
+AYAR = {
+    "version": 1,
+    "disable_existing_loggers": False,
+    "formatters": {"sade": {"format": "%(levelname)s:%(name)s:%(message)s"}},
+    "handlers": {
+        "ekran": {"class": "logging.StreamHandler", "stream": "ext://sys.stdout",
+                  "formatter": "sade", "level": "INFO"},
+    },
+    "loggers": {
+        "anadolu": {"handlers": ["ekran"], "level": "DEBUG", "propagate": False},
+    },
+}
+logging.config.dictConfig(AYAR)
+logging.getLogger("anadolu.iade").info("İade talebi alındı")
+logging.getLogger("anadolu.iade").debug("ekran handler'ı INFO, bu görünmez")</pre>
+<p><code>"ext://sys.stdout"</code> yapılandırma anında <code>sys.stdout</code> nesnesine çözülür. <code>disable_existing_loggers: False</code> unutulursa, dictConfig'ten önce oluşturulmuş tüm logger'lar sessizce kapanır: klasik bir üretim sürprizi.</p>
+
+<h2>Kütüphane kodunda NullHandler</h2>
+<p>Bir paket (ör. <code>anadolu_odeme</code>) yazıyorsan logging'i <b>yapılandırma</b>: <code>basicConfig</code> çağırma, handler ekleme, seviye ayarlama. Bu kararlar uygulamanındır. Paketin <code>__init__.py</code>'sine yalnız şunu yaz:</p>
+<pre class="code">import logging
+logging.getLogger(__name__).addHandler(logging.NullHandler())</pre>
+<p><code>NullHandler</code> hiçbir şey yapmaz; yalnız "handler bulunamadı" durumunda Python'un son çare (last resort) olarak stderr'e WARNING basmasını önler. Uygulama kendi handler'larını köke eklediğinde paketin logları yayılım sayesinde oraya akar.</p>
+
+<div class="note"><b>Gerçek işte</b>Bankacılık ve e-ticarette loglar çoğunlukla merkezi bir sisteme gider ve denetimde incelenir. KVKK ve kart verisi güvenliği standartları (PCI-DSS) tam kart numarasının ve kimlik numarasının loglarda açık metin olarak durmasına izin vermez; denetimlerde ilk bakılan yerlerden biri log dosyalarıdır. Bu yüzden ekipler maskeleme filtresini handler düzeyinde zorunlu kılar, JSON log kullanır ve her isteğe bir <code>istek_id</code> ekleyerek tek bir müşterinin yolculuğunu servisler arasında izler.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>LoggerAdapter ve bağlam</h3>
+<p>Her satıra aynı <code>extra</code>'yı yazmak yerine <code>logging.LoggerAdapter(log, {"istek_id": "R-42"})</code> kullanabilirsin. Daha modern yaklaşım <code>contextvars</code> ile istek kimliğini bir değişkende tutup bir Filter içinde kayda eklemektir; async kodda da doğru çalışır.</p>
+<h3>Performans</h3>
+<p>Pahalı bir hesaplamayı yalnız log yazılacaksa yap: <code>if log.isEnabledFor(logging.DEBUG): log.debug("Ayrıntı: %s", pahali())</code>. Yüksek trafikli servislerde <code>QueueHandler</code> ve <code>QueueListener</code> ile yazma işini ayrı bir iş parçacığına alırsın; istek yolu diske beklemez.</p>
+<h3>structlog ve loguru</h3>
+<p><code>structlog</code> anahtar-değer tabanlı yapılandırılmış logu birinci sınıf vatandaş yapar; <code>loguru</code> tek satırda renkli, dönen dosyalı log verir. İkisi de standart <code>logging</code> ile birlikte çalışabilir. Önce standart modülü iyi öğren: kütüphanelerin neredeyse hepsi onu kullanır ve onların loglarını yönetmek senin işin olacak.</p>
+<h3>Testte log doğrulamak</h3>
+<p><code>unittest</code>'te <code>self.assertLogs("anadolu.odeme", level="WARNING")</code>, pytest'te <code>caplog</code> fikstürü logları yakalar. Bu derste alıştırmalarda kendi handler'ını yazarak aynı şeyi yapacaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/logging">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kapsulleme-ozellik/">← Kapsülleme ve iç gözlem: property, __dict__ ve getattr</a><a href="../algoritmalar/">Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

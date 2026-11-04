@@ -1,0 +1,54 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Kanat Havayolları gecikme analizi | Kesit Python</title><meta name="description" content="Gerçek uçuş verisini okur, sorunlarını denetler, temizler, zaman dilimi ve neden bazında analiz eder, grafiğini çizer, tampon senaryosunu hesaplar ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-analist/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Kanat Havayolları gecikme analizi"><meta property="og:description" content="Gerçek uçuş verisini okur, sorunlarını denetler, temizler, zaman dilimi ve neden bazında analiz eder, grafiğini çizer, tampon senaryosunu hesaplar ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-analist/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Kanat Havayolları gecikme analizi","description":"Gerçek uçuş verisini okur, sorunlarını denetler, temizler, zaman dilimi ve neden bazında analiz eder, grafiğini çizer, tampon senaryosunu hesaplar ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/proje-analist/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Bitirme projesi: Kanat Havayolları gecikme analizi</h1><p class="st-l">Gerçek uçuş verisini okur, sorunlarını denetler, temizler, zaman dilimi ve neden bazında analiz eder, grafiğini çizer, tampon senaryosunu hesaplar ve operasyon müdürüne gerekçeli bir iş kararı yazarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-analist">Uygulamada aç, 13 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: kış tarifesinde tampon nereye?</h2>
+<p>Kanat Havayolları operasyon müdürü soruyor: "Eylülden beri geç kalkışlar artıyor. Kış tarifesinde bazı seferlerin planına 15 dakika tampon koyabilirim ama hepsine koyamam, uçağı boşa bekletmek pahalı. Nereye koyalım?" Bu proje bir analistin gerçek işini baştan sona yaptırır: veriyi oku, sorunlarını anla, temizle, analiz et, grafiği çiz, kararı yaz.</p>
+<div class="tbl-wrap"><table><tr><th>Adım</th><th>Soru</th><th>Çıktı</th></tr><tr><td>1. Oku ve denetle</td><td>Elimde ne var?</td><td><code>denetle</code></td></tr><tr><td>2. Temizle</td><td>Hangi satırlar ve tanımlar?</td><td><code>temizle</code></td></tr><tr><td>3. Analiz</td><td>Sorun nerede yoğun?</td><td><code>grup_ozeti</code>, <code>neden_ozeti</code></td></tr><tr><td>4. Grafik</td><td>Nasıl gösteririm?</td><td><code>grafik</code></td></tr><tr><td>5. Senaryo</td><td>Tampon ne kazandırır?</td><td><code>tampon_etkisi</code></td></tr><tr><td>6. Karar</td><td>Ne öneririm?</td><td><code>karar</code>, <code>rapor</code></td></tr></table></div>
+<h2>Önce veriyi tanı</h2>
+<p>Her analiz aynı soruyla başlar: bu tablo ne anlatıyor, nerede eksik? Burada boş değerlerin bir anlamı var: iptal seferde gerçek zaman olmaz, yön değiştiren seferde varış zamanı boştur.</p>
+<pre class="py">import pandas as pd
+import veri
+
+TARIHLER = ["sched_dep", "sched_arr", "actual_dep", "actual_arr"]
+
+def oku():
+    ucus = veri.oku("kanat_havayollari", "hv_flights", parse_dates=TARIHLER)
+    rotar = veri.oku("kanat_havayollari", "hv_delays")
+    rota = veri.oku("kanat_havayollari", "hv_routes")
+    return ucus, rotar, rota
+
+ucus, rotar, rota = oku()
+print(len(ucus), "sefer", ucus["status"].value_counts().to_dict())
+print(ucus[["actual_dep", "actual_arr"]].isna().sum().to_dict())
+print(len(rotar), "rötar satırı,", rotar["flight_id"].nunique(), "sefer")</pre>
+<p>Son satır bir tuzağı gösteriyor: 1.350 rötar satırı 1.228 seferi anlatıyor, çünkü bir seferin birden çok nedeni olabilir.</p>
+<h2>Tanımları yaz</h2>
+<p>Analizde en çok tartışma tanımlardan çıkar. Bu projenin tanımları: geç kalkış, planlanandan 15 dakikayı aşan kalkıştır; iptaller gecikme hesabına girmez, ayrı sayılır; dilimler sabah (12'den önce), öğle (12-18), akşam (18 ve sonrası). Tanımı değiştirirsen sonuç değişir, bu yüzden raporda da yazılır.</p>
+<h2>Sonuç nereye işaret ediyor?</h2>
+<p>İptaller çıkınca 3.111 sefer kalıyor ve %37,9 geç kalkış var. Dilimlere ayırınca fark görünür:</p>
+<div class="tbl-wrap"><table><tr><th>Dilim</th><th>Sefer</th><th>Geç oranı</th><th>Medyan gecikme</th></tr><tr><td>akşam</td><td>1.096</td><td>%47,4</td><td>14,0 dk</td></tr><tr><td>sabah</td><td>1.260</td><td>%33,0</td><td>5,0 dk</td></tr><tr><td>öğle</td><td>755</td><td>%32,2</td><td>5,0 dk</td></tr></table></div>
+<p>Aylara bakınca oran Eylül'de %29,8 iken Aralık'ta %51,0. Neden tarafında en çok dakikayı <b>hava</b> kaybettiriyor (%32,6). Bu önemli bir uyarıdır: tampon hava koşulunu çözmez, yalnız yolcunun gördüğü gecikmeyi azaltır. Rapora bunu yazmak senin işin.</p>
+<div class="note"><b>Veri notu</b>Bu veri kurgusaldır ve bilinen sınırları Veri setleri sayfasında yazar; örneğin geç gelen uçak nedeninin nedensellik gücü zayıftır. Yöntemi öğren, sonucu gerçek bir havayoluna genelleme.</div>
+<h2>Grafik karar için çizilir</h2>
+<pre class="py">import matplotlib.pyplot as plt
+import pandas as pd
+ozet = pd.DataFrame({'dilim': ['akşam', 'sabah', 'öğle'], 'gec_orani': [47.4, 33.0, 32.2]})
+fig, ax = plt.subplots(figsize=(6, 3.5))
+ax.bar(ozet["dilim"], ozet["gec_orani"], color="#3b6ea8")
+ax.set_title("Zaman dilimine göre geç kalkış oranı")
+ax.set_ylabel("Geç kalkış oranı (%)")
+ax.set_ylim(0, None)
+plt.show()</pre>
+<p>Başlık ne gösterdiğini söyler, eksen birimini yazar, sütun ekseni sıfırdan başlar. Tek bir renk yeter; karar sütunların yüksekliğindedir.</p>
+<h2>Kararı yaz</h2>
+<p>Hesabın sonunda elinde bir öneri olmalı. Akşam dilimine 15 dakika tampon, tüm seferlerde geç kalkış oranını %37,9 seviyesinden %27,9 seviyesine indirirdi; 310 sefer geç sayılmaktan çıkardı. Bu varsayımlı bir hesaptır, ölçüm değildir: rötarın kendisi değişmez varsayıldı. İyi bir karar notu bunu saklamaz, küçük bir deneme önerir.</p>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Projeyi portföye taşı</h3><p>Aynı akışı kendi bilgisayarında bir defterde yap ve sonucu tek sayfalık nota dök. Rotaları ekle (en az 50 sefer eşiğiyle), <code>hv_bookings</code> ile geciken yolcu sayısını bağla, tamponun maliyetine bir varsayım koy. Görüşmede en çok şunu sorarlar: "Bu sonuca neden güveniyorsun, ne yanlış olabilir?" Cevabın burada: tanımlar, çıkarılan satırlar, bire çok tuzağı, senaryo varsayımı.</p></section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-analist">Alıştırmalara geç (13)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sablon-rapor/">← Şablonla rapor üretme: string.Template ve Jinja2</a><a href="../proje-mutabakat/">Bitirme projesi: Lezzet Kurye kupon mutabakatı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

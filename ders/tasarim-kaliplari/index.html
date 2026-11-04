@@ -1,0 +1,333 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tasarım kalıpları Python'da | Kesit Python</title><meta name="description" content="Strateji, fabrika, gözlemci, tekil, adaptör ve komut kalıplarını Python'a özgü biçimde uygula; fonksiyonların birinci sınıf olduğu yerde kalıbın…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/tasarim-kaliplari/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Tasarım kalıpları Python'da"><meta property="og:description" content="Strateji, fabrika, gözlemci, tekil, adaptör ve komut kalıplarını Python'a özgü biçimde uygula; fonksiyonların birinci sınıf olduğu yerde kalıbın…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/tasarim-kaliplari/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Tasarım kalıpları Python'da","description":"Strateji, fabrika, gözlemci, tekil, adaptör ve komut kalıplarını Python'a özgü biçimde uygula; fonksiyonların birinci sınıf olduğu yerde kalıbın…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/tasarim-kaliplari/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>Tasarım kalıpları Python'da</h1><p class="st-l">Strateji, fabrika, gözlemci, tekil, adaptör ve komut kalıplarını Python'a özgü biçimde uygula; fonksiyonların birinci sınıf olduğu yerde kalıbın gereksizleştiğini gör.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tasarim-kaliplari">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Tasarım kalıpları (design patterns), tekrar eden tasarım sorunlarına verilmiş isimli çözümlerdir. Kod incelemesinde (code review) "burada strateji kalıbı daha uygun" cümlesi, dakikalarca anlatımın yerini tutar. Ama kalıpların çoğu Java/C++ dünyasında, fonksiyonların nesne olmadığı bir ortamda doğdu. Python'da fonksiyonlar birinci sınıf (first-class) değerdir, sınıflar çalışma zamanında oluşturulabilir, modüller zaten tekil nesnedir. Bu yüzden bu derste her kalıbı iki kez göreceksin: klasik biçimi ve Python'da sade biçimi. Hedef, kalıbı ezberlemek değil; <b>ne zaman gerektiğini ve ne zaman gerekmediğini</b> ayırt etmektir.</p>
+
+<h2>Strateji: değiştirilebilir davranış</h2>
+<p>Anadolu Market'te kargo ücreti şehre, ağırlığa ve kampanyaya göre farklı kurallarla hesaplanıyor. Klasik çözüm bir <code>KargoStratejisi</code> soyut sınıfı ve alt sınıflarıdır. Python'da aynı iş, aynı imzaya sahip fonksiyonlar ve bir sözlükle çözülür.</p>
+<pre class="py">from typing import Callable
+
+Strateji = Callable[[float, str], float]   # (agirlik_kg, sehir) -&gt; ücret
+
+def sabit(agirlik, sehir):
+    return 49.90
+
+def agirlik_bazli(agirlik, sehir):
+    return 20 + 8 * agirlik
+
+def bolgesel(agirlik, sehir):
+    uzak = {'Hakkari', 'Kars', 'Van'}
+    return agirlik_bazli(agirlik, sehir) * (1.5 if sehir in uzak else 1.0)
+
+STRATEJILER: dict[str, Strateji] = {
+    'sabit': sabit, 'agirlik': agirlik_bazli, 'bolgesel': bolgesel,
+}
+
+def kargo_ucreti(agirlik, sehir, strateji: str = 'agirlik'):
+    hesapla = STRATEJILER[strateji]
+    return round(hesapla(agirlik, sehir), 2)
+
+for s in STRATEJILER:
+    print(f'{s:&lt;9}', kargo_ucreti(3.5, 'Van', s))
+</pre>
+<div class="tip"><b>Kalıp gerekmeyen durum</b>Strateji, "davranışı parametre olarak geçir" demektir. Python'da bu zaten <code>sorted(key=...)</code>, <code>map</code>, dekoratör ile her gün yaptığın şeydir. Stratejinin durumu (state) ve birden fazla metodu varsa o zaman sınıf (ya da Protocol) düşün.</div>
+
+<h2>Fabrika ve kayıt (registry)</h2>
+<p>Fabrika (factory), "hangi sınıfın üretileceğini" çağıran koddan gizler. Ilgaz Bank'ta rapor türüne göre farklı dışa aktarıcı üretmek gibi. Python'da en temiz biçim: bir sözlükte sınıfları tut, <code>__init_subclass__</code> ya da dekoratörle otomatik kaydet. Sınıflar zaten çağrılabilir olduğu için ayrı bir "Creator" hiyerarşisine gerek kalmaz.</p>
+<pre class="py">import json, csv, io
+
+KAYIT: dict[str, type] = {}
+
+def disa_aktarici(format_adi):
+    def kaydet(cls):
+        KAYIT[format_adi] = cls
+        return cls
+    return kaydet
+
+@disa_aktarici('json')
+class JsonAktar:
+    def yaz(self, satirlar):
+        return json.dumps(satirlar, ensure_ascii=False)
+
+@disa_aktarici('csv')
+class CsvAktar:
+    def yaz(self, satirlar):
+        buf = io.StringIO()
+        w = csv.DictWriter(buf, fieldnames=list(satirlar[0]))
+        w.writeheader(); w.writerows(satirlar)
+        return buf.getvalue().strip()
+
+def aktarici_uret(format_adi: str):
+    try:
+        return KAYIT[format_adi]()
+    except KeyError:
+        raise ValueError(f'desteklenmeyen format: {format_adi!r}; seçenekler: {sorted(KAYIT)}')
+
+veri = [{'hesap': 'TR01', 'bakiye': 1500.0}, {'hesap': 'TR02', 'bakiye': -20.5}]
+for f in ('json', 'csv'):
+    print(aktarici_uret(f).yaz(veri))
+try:
+    aktarici_uret('xml')
+except ValueError as e:
+    print(e)
+</pre>
+
+<h2>Gözlemci: olaylara abone olmak</h2>
+<p>Gözlemci (observer), bir olay olduğunda ilgilenen herkese haber verir; yayıncı aboneleri tanımaz. Sipariş onaylanınca stok düşsün, e-posta gitsin, muhasebe kaydı açılsın. Python'da abone bir fonksiyon, abone listesi de bir listedir.</p>
+<pre class="py">from collections import defaultdict
+
+class OlayYayini:
+    def __init__(self):
+        self._aboneler = defaultdict(list)
+
+    def abone_ol(self, olay, fn=None):
+        if fn is None:                 # @bus.abone_ol('olay') biçimi: dekoratör döndür
+            return lambda f: self.abone_ol(olay, f)
+        self._aboneler[olay].append(fn)
+        return fn
+
+    def yayinla(self, olay, **veri):
+        for fn in self._aboneler[olay]:
+            fn(**veri)
+
+bus = OlayYayini()
+stok = {'kahve': 10}
+
+@bus.abone_ol('siparis_onay')
+def stok_dus(urun, adet, **_):
+    stok[urun] -= adet
+    print(f'stok güncellendi: {urun}={stok[urun]}')
+
+@bus.abone_ol('siparis_onay')
+def eposta(musteri, **_):
+    print(f'e-posta: {musteri} siparişiniz onaylandı')
+
+bus.yayinla('siparis_onay', urun='kahve', adet=3, musteri='ayse@x.com')
+bus.yayinla('iade', urun='kahve')     # abone yok, sessizce geçer
+</pre>
+<div class="warn"><b>Abone hataları</b>Bir abonenin fırlattığı istisna diğer abonelere ulaşmayı engeller. Üretim kodunda her aboneyi <code>try/except</code> ile sarıp loglamak, ya da hataları toplayıp sonunda raporlamak gerekir. Ayrıca abonelerin çağrı sırasına güvenme; sıraya bağımlılık varsa gözlemci yanlış kalıptır.</div>
+
+<h2>Tekil (singleton) ve neden modül daha iyi</h2>
+<p>Tekil, bir sınıftan yalnızca tek örnek olmasını garanti eder: yapılandırma, bağlantı havuzu, logger. Klasik gerçekleştirme <code>__new__</code> üzerinden yapılır. Ancak Python'da her modül yalnızca bir kez yüklenir ve zaten tekildir: <code>config.py</code> içinde <code>AYARLAR = {...}</code> yazmak, aynı garantiyi sıfır kodla verir ve test ederken yerine sahte nesne koymak (monkeypatch) çok daha kolaydır.</p>
+<pre class="py">class Ayarlar:
+    _ornek = None
+    def __new__(cls):
+        if cls._ornek is None:
+            cls._ornek = super().__new__(cls)
+            cls._ornek.degerler = {'para_birimi': 'TRY'}
+        return cls._ornek
+
+a, b = Ayarlar(), Ayarlar()
+print(a is b, a.degerler)
+
+# Pythonic eşdeğer: modül düzeyinde tek nesne
+import types
+config = types.SimpleNamespace(para_birimi='TRY', kdv=0.20)
+print(config.para_birimi, config.kdv)
+</pre>
+<div class="tbl-wrap"><table><tr><th>Kalıp</th><th>Çözdüğü sorun</th><th>Klasik biçim</th><th>Python'da sade biçim</th></tr><tr><td>Strateji</td><td>Değiştirilebilir algoritma</td><td>Soyut sınıf + alt sınıflar</td><td>Fonksiyon sözlüğü, key=</td></tr><tr><td>Fabrika</td><td>Üretimi gizlemek</td><td>Creator hiyerarşisi</td><td>Kayıt sözlüğü + sınıf çağrısı</td></tr><tr><td>Gözlemci</td><td>Gevşek bağlı bildirim</td><td>Subject/Observer arayüzü</td><td>Fonksiyon listesi</td></tr><tr><td>Tekil</td><td>Tek örnek</td><td>__new__ ile kontrol</td><td>Modül düzeyi nesne</td></tr><tr><td>Adaptör</td><td>Uyumsuz arayüz</td><td>Sarmalayıcı sınıf</td><td>Sarmalayıcı sınıf ya da fonksiyon</td></tr><tr><td>Komut</td><td>İşlemi nesne yapmak, geri alma</td><td>execute/undo arayüzü</td><td>dataclass + Protocol</td></tr></table></div>
+
+<h2>Adaptör: uyumsuz arayüzleri bağlamak</h2>
+<p>Eski bir ödeme kütüphanesi <code>charge(amount_cents)</code> bekliyor, yeni kodun ise <code>tahsil_et(tutar_tl)</code> çağırıyor. Hiçbirini değiştirmeden ikisini bir adaptörle bağlarsın. Adaptör ince olmalı: dönüştür, yönlendir, bitir.</p>
+<pre class="py">class EskiOdemeKutuphanesi:          # değiştiremediğin dış kod
+    def charge(self, amount_cents: int) -&gt; dict:
+        return {'ok': amount_cents &gt; 0, 'cents': amount_cents}
+
+class OdemeAdaptoru:
+    def __init__(self, eski):
+        self._eski = eski
+    def tahsil_et(self, tutar_tl: float) -&gt; bool:
+        return self._eski.charge(round(tutar_tl * 100))['ok']
+
+def siparisi_tamamla(saglayici, tutar):
+    return 'tamam' if saglayici.tahsil_et(tutar) else 'reddedildi'
+
+print(siparisi_tamamla(OdemeAdaptoru(EskiOdemeKutuphanesi()), 149.90))
+print(siparisi_tamamla(OdemeAdaptoru(EskiOdemeKutuphanesi()), 0))
+</pre>
+
+<h2>Komut: işlemi nesne yapmak</h2>
+<p>Komut (command) kalıbında her işlem; çalıştırılabilen ve geri alınabilen bir nesnedir. Geri al/yinele, işlem kuyruğu, denetim kaydı (audit log) için kullanılır. Ilgaz Bank'ta hesap hareketlerini komut olarak modellemek, hatalı bir toplu işlemi tersine çevirmeyi mümkün kılar.</p>
+<pre class="py">from dataclasses import dataclass, field
+
+@dataclass
+class YatirKomutu:
+    hesaplar: dict
+    hesap: str
+    tutar: float
+    def uygula(self):
+        self.hesaplar[self.hesap] += self.tutar
+    def geri_al(self):
+        self.hesaplar[self.hesap] -= self.tutar
+
+@dataclass
+class TransferKomutu:
+    hesaplar: dict
+    kaynak: str
+    hedef: str
+    tutar: float
+    def uygula(self):
+        if self.hesaplar[self.kaynak] &lt; self.tutar:
+            raise ValueError('yetersiz bakiye')
+        self.hesaplar[self.kaynak] -= self.tutar
+        self.hesaplar[self.hedef] += self.tutar
+    def geri_al(self):
+        self.hesaplar[self.hedef] -= self.tutar
+        self.hesaplar[self.kaynak] += self.tutar
+
+@dataclass
+class Islemci:
+    gecmis: list = field(default_factory=list)
+    def calistir(self, komut):
+        komut.uygula()
+        self.gecmis.append(komut)
+    def geri_al(self):
+        if self.gecmis:
+            self.gecmis.pop().geri_al()
+
+h = {'TR01': 100.0, 'TR02': 0.0}
+p = Islemci()
+p.calistir(YatirKomutu(h, 'TR01', 50))
+p.calistir(TransferKomutu(h, 'TR01', 'TR02', 120))
+print(h)
+p.geri_al(); print('transfer geri alındı:', h)
+p.geri_al(); print('yatırma geri alındı:', h)
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Derste olmayan altı kalıp, Python'ca</h2>
+<p>Strateji, fabrika, gözlemci, adaptör ve komutu gördün. Kurumsal Python kodunda en az onlar kadar sık karşına çıkan altı kalıp daha var. Hepsinin ortak noktası, "değişecek olanı değişmeyenden ayırmak"tır. Python'da çoğu, sınıf hiyerarşisi yerine birkaç fonksiyonla ya da küçük bir sözlükle kurulur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kalıp</th><th>Çözdüğü sorun</th><th>Python'daki kısa yolu</th><th>Nerede görürsün?</th></tr>
+<tr><td>Durum (State)</td><td>Nesnenin davranışı durumuna göre değişir, if/elif patlar</td><td>Geçiş tablosu sözlüğü ya da Enum</td><td>Sipariş, kredi başvurusu akışı</td></tr>
+<tr><td>Sorumluluk zinciri (Chain of responsibility)</td><td>İstek birkaç adımdan sırayla geçmeli</td><td>Fonksiyon listesi, ara katman (middleware)</td><td>Web çatıları, doğrulama hattı</td></tr>
+<tr><td>Şablon metot (Template method)</td><td>Algoritmanın iskeleti sabit, adımları değişir</td><td>Taban sınıfta somut metot + soyut adımlar</td><td>Rapor üretimi, ETL işleri</td></tr>
+<tr><td>Kurucu (Builder)</td><td>Çok parçalı nesneyi adım adım kurmak</td><td><code>self</code> döndüren akıcı (fluent) metotlar</td><td>SQL sorgu kurucular, HTTP istemcileri</td></tr>
+<tr><td>Depo (Repository) + bağımlılık enjeksiyonu</td><td>İş kuralı veritabanına yapışık, test edilemez</td><td>Depoyu kurucuya parametre olarak ver</td><td>Servis katmanı, birim testler</td></tr>
+<tr><td>Süsleyici (Decorator) nesne</td><td>Nesneye çalışma anında yetenek eklemek</td><td>Aynı arayüzü uygulayan sarmalayıcı sınıf</td><td>Loglama, önbellek (cache), yeniden deneme</td></tr>
+</table></div>
+
+<h2>Durum makinesi: geçişleri veri olarak yaz</h2>
+<p>Anadolu Market siparişi <i>yeni → ödendi → kargoda → teslim</i> akışında ilerler; iptal yalnızca kargoya verilmeden önce mümkündür. Bu kuralları if/elif ile her metoda dağıtırsan yeni bir durum eklemek tüm metotları değiştirmeyi gerektirir. Geçiş tablosu kuralları tek yere toplar, tablo aynı zamanda belge görevi görür.</p>
+<pre class="py">GECISLER = {
+    "yeni":   {"ode": "odendi", "iptal": "iptal"},
+    "odendi": {"kargola": "kargoda", "iptal": "iptal"},
+    "kargoda": {"teslim": "teslim"},
+}
+
+class Siparis:
+    def __init__(self, no):
+        self.no, self.durum, self.gecmis = no, "yeni", ["yeni"]
+
+    def olay(self, ad):
+        hedef = GECISLER.get(self.durum, {}).get(ad)
+        if hedef is None:
+            raise ValueError(f"{self.durum!r} durumunda {ad!r} yapılamaz")
+        self.durum = hedef
+        self.gecmis.append(hedef)
+
+s = Siparis(1042)
+for ad in ["ode", "kargola", "iptal"]:
+    try:
+        s.olay(ad)
+    except ValueError as h:
+        print("Reddedildi:", h)
+print(s.durum, s.gecmis)
+</pre>
+
+<h2>Sorumluluk zinciri: ara katmanlar</h2>
+<p>Bir API isteği önce kimlik doğrulamadan, sonra hız sınırından, sonra loglamadan geçip asıl işleyiciye ulaşır. Her katman ya isteği reddeder ya da <b>bir sonrakine</b> devreder. Flask, Django ve FastAPI'deki middleware'ler bu kalıptır. Python'da her katman <code>(istek, sonraki)</code> alan bir fonksiyon olabilir.</p>
+<pre class="py">def kimlik(istek, sonraki):
+    if not istek.get("token"):
+        return {"durum": 401}
+    return sonraki(istek)
+
+def log(istek, sonraki):
+    yanit = sonraki(istek)
+    print(f"{istek['yol']} -&gt; {yanit['durum']}")
+    return yanit
+
+def isleyici(istek):
+    return {"durum": 200, "veri": "bakiye: 1500"}
+
+def zincir(katmanlar, son):
+    for katman in reversed(katmanlar):
+        son = (lambda k, s: lambda istek: k(istek, s))(katman, son)
+    return son
+
+uygulama = zincir([log, kimlik], isleyici)
+uygulama({"yol": "/hesap", "token": "abc"})
+uygulama({"yol": "/hesap"})
+</pre>
+
+<h2>Şablon metot ve kurucu</h2>
+<p><b>Şablon metot</b>ta taban sınıf algoritmanın sırasını sabitler (<code>uret()</code>: veriyi getir, süz, biçimle), alt sınıflar yalnızca değişen adımları doldurur. Strateji kalıbıyla farkı: strateji davranışı dışarıdan <b>verilen</b> bir nesneyle değiştirir (bileşim), şablon metot ise <b>kalıtımla (inheritance)</b> değiştirir. <b>Kurucu</b> (builder) ise çok seçenekli bir nesneyi zincirleme çağrılarla kurar; her metot <code>self</code> döndürür, en sonda <code>sql()</code>, <code>build()</code> gibi bir metot sonucu üretir. SQLAlchemy'nin <code>select(...).where(...).order_by(...)</code> yazımı buna örnektir.</p>
+<pre class="py">from abc import ABC, abstractmethod
+
+class Rapor(ABC):
+    def uret(self):                         # şablon: sıra sabit
+        satirlar = [s for s in self.veri() if self.dahil_mi(s)]
+        return self.bicimle(satirlar)
+
+    @abstractmethod
+    def veri(self): ...
+
+    def dahil_mi(self, satir):              # isteğe bağlı kanca (hook)
+        return True
+
+    @abstractmethod
+    def bicimle(self, satirlar): ...
+
+class BuyukSiparisCSV(Rapor):
+    def veri(self):
+        return [("İzmir", 1200), ("Bursa", 300), ("Ankara", 5400)]
+    def dahil_mi(self, s):
+        return s[1] &gt;= 1000
+    def bicimle(self, satirlar):
+        return "\n".join(f"{a};{t}" for a, t in satirlar)
+
+print(BuyukSiparisCSV().uret())
+</pre>
+
+<h2>Depo kalıbı ve bağımlılık enjeksiyonu</h2>
+<p>İş kuralı içinde <code>sqlite3.connect("prod.db")</code> yazarsan o kuralı veritabanı olmadan test edemezsin. Çözüm: veri erişimini bir <b>depo</b> (repository) arayüzünün arkasına koy ve servisi kurarken depoyu <b>parametre olarak ver</b> (dependency injection). Üretimde SQL deposu, testte bellek içi sözlük deposu verilir; servis kodu değişmez. Python'da bunun için çatıya gerek yoktur: kurucu parametresi yeter. Arayüzü <code>Protocol</code> ile tanımlamak (ileri OOP dersi) tip denetleyicisine de sözleşmeyi bildirir.</p>
+<pre class="py">from typing import Protocol
+
+class HesapDeposu(Protocol):
+    def bakiye(self, no: str) -&gt; int: ...
+    def guncelle(self, no: str, yeni: int) -&gt; None: ...
+
+class BellekDepo:
+    def __init__(self, veri): self.veri = dict(veri)
+    def bakiye(self, no): return self.veri[no]
+    def guncelle(self, no, yeni): self.veri[no] = yeni
+
+class HavaleServisi:
+    def __init__(self, depo: HesapDeposu):
+        self.depo = depo                     # enjekte edilen bağımlılık
+    def havale(self, kimden, kime, tutar):
+        if self.depo.bakiye(kimden) &lt; tutar:
+            raise ValueError("Yetersiz bakiye")
+        self.depo.guncelle(kimden, self.depo.bakiye(kimden) - tutar)
+        self.depo.guncelle(kime, self.depo.bakiye(kime) + tutar)
+
+depo = BellekDepo({"TR1": 1000, "TR2": 0})
+HavaleServisi(depo).havale("TR1", "TR2", 250)
+print(depo.veri)
+</pre>
+<div class="warn"><b>Kalıp için kalıp yazma</b>Üç satırlık bir if bloğunu durum makinesine, tek kullanımlık bir nesneyi kurucuya çevirmek kodu zorlaştırır. Kalıbı, aynı değişikliği ikinci ya da üçüncü kez yaparken hissettiğin acıya cevap olarak getir.</div>
+<div class="note"><b>Gerçek işte</b>Mülakatlarda "hangi tasarım kalıplarını biliyorsun?" sorusunun iyi cevabı bir liste değil, bir hikâyedir: "Sipariş durumları her sprintte değişiyordu, geçiş tablosuna taşıdık; artık yeni durum bir satırlık değişiklik ve tablo ürün ekibiyle paylaştığımız belge oldu." Kalıbın adını, çözdüğü sorunu ve bedelini birlikte anlat.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kalıp seçiminde kurumsal refleksler</h3>
+<p>Kod incelemelerinde en sık görülen kalıp hatası "fazla mimari"dir: üç satırlık bir koşul için strateji hiyerarşisi, iki format için fabrika sınıfı. Kuralı şöyle koy: kalıbı, aynı sorunu <b>ikinci kez</b> çözerken tanıt, birincide değil. Birinci sınıf fonksiyonlar, <code>functools.partial</code>, dataclass ve Protocol, klasik kalıpların büyük kısmını iki üç satıra indirir.</p>
+<p>Buna karşılık bazı kalıplar Python'da bile sınıf ister: komut (durum + geri alma), gözlemci (abone yönetimi, hata izolasyonu), adaptör (dış sistem sınırı). Bunların ortak noktası, kodun bir sınırda durmasıdır: dış kütüphane, ağ, veritabanı, kullanıcı etkileşimi. Sınırlarda açık arayüz (Protocol) tanımla; içeride sade fonksiyonlarla kal.</p>
+<p>Testte kalıpların karşılığı: strateji sözlüğünü testte sahte fonksiyonla değiştir; gözlemcide aboneleri listeye toplayıp yayın sonrası kontrol et; komutlarda <code>uygula</code> + <code>geri_al</code> sonrası durumun başlangıca döndüğünü doğrula (round-trip testi). Tekil yerine modül düzeyi nesne kullanmanın en büyük getirisi de burada: <code>monkeypatch.setattr(config, 'kdv', 0)</code> ile tek satırda izole test.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tasarim-kaliplari">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ileri-oop/">← İleri OOP: dunder metotlar, ABC, Protocol ve descriptor</a><a href="../tip-sistemi-ileri/">İleri tip sistemi: Generic, Protocol, TypedDict ve mypy →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

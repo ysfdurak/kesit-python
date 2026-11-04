@@ -1,0 +1,315 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>API tasarımına giriş: HTTP, doğrulama ve ilk servis | Kesit Python</title><meta name="description" content="HTTP'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/api-web/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="API tasarımına giriş: HTTP, doğrulama ve ilk servis"><meta property="og:description" content="HTTP'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/api-web/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"API tasarımına giriş: HTTP, doğrulama ve ilk servis","description":"HTTP'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/api-web/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>API tasarımına giriş: HTTP, doğrulama ve ilk servis</h1><p class="st-l">HTTP'nin temelleri, requests/httpx kullanım kalıpları, FastAPI ile uç nokta yazma, JSON doğrulama, hata kodları, yeniden deneme ve zaman aşımı; tarayıcıda sahte istemci ve fonksiyon tabanlı yönlendiriciyle çalıştır.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/api-web">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Kurumsal Python kodunun büyük bölümü bir ağ sınırında durur: Anadolu Market'in sipariş servisi kargo firmasının API'sine istek atar, Ilgaz Bank'ın kredi modülü skor servisinden yanıt bekler. Bu sınırda her şey ters gidebilir: zaman aşımı, 503, bozuk JSON, beklenmeyen alan. Bu derste HTTP'yi, istemci kütüphanelerini ve bir API yazmanın iskeletini öğreneceksin. Tarayıcıda ağ erişimi olmadığı için örnekler <b>sahte istemci</b> (fake client) ile çalışır; gerçek <code>requests</code>/<code>httpx</code>/FastAPI kodu gösterim olarak verilir. Sahte istemci yaklaşımı aynı zamanda ekiplerin birim testte kullandığı yöntemdir, boşa gitmez.</p>
+
+<h2>HTTP temelleri</h2>
+<p>Bir HTTP isteği: yöntem (GET, POST, PUT, PATCH, DELETE), yol (<code>/siparisler/42</code>), başlıklar (<code>Authorization</code>, <code>Content-Type</code>) ve gövde (genelde JSON). Yanıt: durum kodu, başlıklar, gövde. GET ve DELETE idempotent (tekrarlanınca aynı sonuç), POST değildir; bu yüzden POST'u körlemesine yeniden denemek çift sipariş yaratabilir.</p>
+<div class="tbl-wrap"><table><tr><th>Kod</th><th>Anlamı</th><th>İstemci ne yapmalı</th></tr><tr><td>200 / 201</td><td>Başarılı / oluşturuldu</td><td>Gövdeyi işle</td></tr><tr><td>204</td><td>Başarılı, gövde yok</td><td>JSON parse etmeye çalışma</td></tr><tr><td>400 / 422</td><td>Hatalı istek / doğrulama hatası</td><td>Yeniden deneme; girdiyi düzelt</td></tr><tr><td>401 / 403</td><td>Kimlik yok / yetki yok</td><td>Token yenile ya da dur</td></tr><tr><td>404</td><td>Kaynak yok</td><td>İş kuralına göre karar</td></tr><tr><td>429</td><td>Çok fazla istek</td><td>Retry-After kadar bekle</td></tr><tr><td>500 / 502 / 503</td><td>Sunucu hatası</td><td>Üstel geri çekilmeyle yeniden dene</td></tr></table></div>
+
+<h2>requests ve httpx kalıpları</h2>
+<p>İki kütüphane de benzer arayüz sunar; <code>httpx</code> async ve HTTP/2 destekler. Üç kural: her isteğe <b>zaman aşımı</b> ver (varsayılan sonsuzdur), <b>oturum</b> (Session/Client) kullan (bağlantı tekrar kullanımı, ortak başlık), <code>raise_for_status()</code> ile 4xx/5xx'i istisnaya çevir.</p>
+<pre class="py"># Gösterim: gerçek projede böyle yazılır (burada çalışmaz)
+GOSTERIM = '''
+import httpx
+
+with httpx.Client(base_url="https://api.anadolu.example",
+                  headers={"Authorization": "Bearer TOKEN"},
+                  timeout=httpx.Timeout(5.0, connect=2.0)) as client:
+    r = client.get("/siparisler", params={"durum": "bekliyor", "limit": 50})
+    r.raise_for_status()
+    siparisler = r.json()
+    r2 = client.post("/siparisler", json={"musteri": 10, "tutar": 99.9})
+    print(r2.status_code, r2.json()["id"])
+'''
+print(GOSTERIM.strip().splitlines()[0])
+print('Satır sayısı:', len(GOSTERIM.strip().splitlines()))
+</pre>
+<p>Şimdi aynı sözleşmeye uyan, elimizdeki yanıtları döndüren küçük bir sahte istemci yazalım. Gerçek kodda bu sınıfın yerine <code>httpx.Client</code> geçer; iş mantığı değişmez.</p>
+<pre class="py">import json
+
+class SahteYanit:
+    def __init__(self, status_code, govde='', headers=None):
+        self.status_code = status_code
+        self.text = govde
+        self.headers = headers or {}
+    def json(self):
+        return json.loads(self.text)
+    def raise_for_status(self):
+        if self.status_code &gt;= 400:
+            raise RuntimeError(f'HTTP {self.status_code}')
+
+class SahteIstemci:
+    """Yol -&gt; yanıt tablosu; gerçek httpx.Client ile aynı yüzey."""
+    def __init__(self, tablo):
+        self.tablo = tablo
+        self.istekler = []
+    def get(self, yol, params=None, timeout=5.0):
+        self.istekler.append(('GET', yol, params))
+        return self.tablo.get(yol, SahteYanit(404, '{"detail":"yok"}'))
+    def post(self, yol, json=None, timeout=5.0):
+        self.istekler.append(('POST', yol, json))
+        return self.tablo.get(yol, SahteYanit(404, '{"detail":"yok"}'))
+
+client = SahteIstemci({
+    '/siparisler/42': SahteYanit(200, '{"id": 42, "tutar": 149.9, "durum": "kargoda"}'),
+    '/siparisler/99': SahteYanit(404, '{"detail": "sipariş yok"}'),
+})
+
+def siparis_getir(client, no):
+    r = client.get(f'/siparisler/{no}', timeout=5.0)
+    if r.status_code == 404:
+        return None
+    r.raise_for_status()
+    return r.json()
+
+print(siparis_getir(client, 42))
+print(siparis_getir(client, 99))
+print(client.istekler)
+</pre>
+<div class="warn"><b>Zaman aşımı yoksa üretimde askıda kalırsın</b><code>requests.get(url)</code> varsayılan olarak sonsuza kadar bekler. Bir bağlantı zaman aşımı (connect) ve bir okuma zaman aşımı (read) belirle; httpx'te <code>Timeout(5.0, connect=2.0)</code>, requests'te <code>timeout=(2, 5)</code>.</div>
+
+<h2>FastAPI ile uç nokta</h2>
+<p>FastAPI, fonksiyon imzasındaki tip ipuçlarından (type hint) hem doğrulamayı hem belgeyi üretir. Gövde modeli pydantic <code>BaseModel</code>'dir: alan tipleri uymazsa otomatik 422 döner.</p>
+<pre class="py">GOSTERIM = '''
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+app = FastAPI()
+
+class SiparisIstek(BaseModel):
+    musteri_id: int
+    tutar: float = Field(gt=0)
+    sehir: str
+
+DB: dict[int, dict] = {}
+
+@app.post("/siparisler", status_code=201)
+def siparis_olustur(s: SiparisIstek):
+    no = len(DB) + 1
+    DB[no] = s.model_dump() | {"id": no, "durum": "bekliyor"}
+    return DB[no]
+
+@app.get("/siparisler/{no}")
+def siparis_getir(no: int):
+    if no not in DB:
+        raise HTTPException(status_code=404, detail="sipariş yok")
+    return DB[no]
+'''
+print('FastAPI uç noktaları:', [s.strip() for s in GOSTERIM.splitlines() if s.startswith('@app')])
+</pre>
+<p>Pyodide'de FastAPI yok; ama mantığı <b>fonksiyon tabanlı yönlendirici</b> (router) ile birebir kurabiliriz: yol deseni + yöntem bir fonksiyona eşlenir, gövde bir doğrulayıcıdan geçer, hata durumunda kod ve detay döner.</p>
+<pre class="py">import json, re
+from dataclasses import dataclass, asdict
+
+class HTTPHata(Exception):
+    def __init__(self, kod, detay):
+        self.kod, self.detay = kod, detay
+
+@dataclass
+class SiparisIstek:          # pydantic mantığı, elle
+    musteri_id: int
+    tutar: float
+    sehir: str
+    @classmethod
+    def dogrula(cls, ham: dict):
+        hatalar = []
+        if not isinstance(ham.get('musteri_id'), int): hatalar.append('musteri_id int olmalı')
+        t = ham.get('tutar')
+        if not isinstance(t, (int, float)) or t &lt;= 0: hatalar.append('tutar &gt; 0 olmalı')
+        if not isinstance(ham.get('sehir'), str) or not ham['sehir']: hatalar.append('sehir boş olamaz')
+        if hatalar:
+            raise HTTPHata(422, hatalar)
+        return cls(ham['musteri_id'], float(t), ham['sehir'])
+
+class Uygulama:
+    def __init__(self):
+        self.rotalar = []          # (yöntem, regex, fonksiyon)
+    def rota(self, yontem, desen):
+        rx = re.compile('^' + re.sub(r'\{(\w+)\}', r'(?P&lt;\1&gt;[^/]+)', desen) + '$')
+        def kaydet(fn):
+            self.rotalar.append((yontem, rx, fn)); return fn
+        return kaydet
+    def istek(self, yontem, yol, govde=None):
+        for y, rx, fn in self.rotalar:
+            m = rx.match(yol)
+            if m and y == yontem:
+                try:
+                    return 200, fn(**m.groupdict(), govde=govde)
+                except HTTPHata as e:
+                    return e.kod, {'detail': e.detay}
+        return 404, {'detail': 'rota yok'}
+
+app = Uygulama()
+DB = {}
+
+@app.rota('POST', '/siparisler')
+def olustur(govde):
+    s = SiparisIstek.dogrula(govde)
+    no = len(DB) + 1
+    DB[no] = asdict(s) | {'id': no, 'durum': 'bekliyor'}
+    return DB[no]
+
+@app.rota('GET', '/siparisler/{no}')
+def getir(no, govde=None):
+    no = int(no)
+    if no not in DB:
+        raise HTTPHata(404, 'sipariş yok')
+    return DB[no]
+
+print(app.istek('POST', '/siparisler', {'musteri_id': 7, 'tutar': 99.9, 'sehir': 'Bursa'}))
+print(app.istek('POST', '/siparisler', {'musteri_id': '7', 'tutar': -1}))
+print(app.istek('GET', '/siparisler/1'))
+print(app.istek('GET', '/siparisler/5'))
+</pre>
+<div class="tip"><b>Doğrulama sınırda, güven içeride</b>Gövdeyi uç noktada bir kez doğrula; iç fonksiyonlara doğrulanmış dataclass/pydantic nesnesi ver. Hata yanıtı tutarlı bir şekil taşısın: <code>{"detail": ...}</code>. Günlük kaydına istek kimliğini (request id) ekle; destek ekibi hatayı bununla bulur.</div>
+
+<h2>Yeniden deneme ve zaman aşımı</h2>
+<p>Geçici hatalar (429, 502, 503, bağlantı kopması) için <b>üstel geri çekilme</b> (exponential backoff) kullan: 1 s, 2 s, 4 s... ve küçük rastgele sapma (jitter) ekle ki yüzlerce istemci aynı anda tekrar vurmasın. 4xx hatalarında (429 hariç) yeniden deneme yapma; istek zaten yanlış. POST'ta yeniden deneme yapacaksan <code>Idempotency-Key</code> başlığı gönder.</p>
+<pre class="py">import random
+
+def geri_cekilme_sureleri(deneme, taban=1.0, tavan=30.0, jitter=0.2):
+    """deneme 0,1,2... için bekleme süreleri (saniye)."""
+    sure = min(tavan, taban * 2 ** deneme)
+    return round(sure * (1 + random.uniform(-jitter, jitter)), 2)
+
+def yeniden_dene(fn, deneme_sayisi=4, uyku=lambda s: None):
+    son_hata = None
+    for i in range(deneme_sayisi):
+        try:
+            r = fn()
+            if r.status_code in (429, 502, 503):
+                raise RuntimeError(f'geçici: {r.status_code}')
+            return r
+        except RuntimeError as e:
+            son_hata = e
+            if i &lt; deneme_sayisi - 1:
+                uyku(geri_cekilme_sureleri(i))
+    raise RuntimeError(f'{deneme_sayisi} denemede başarısız: {son_hata}')
+
+random.seed(1)
+yanitlar = iter([SahteYanit(503), SahteYanit(503), SahteYanit(200, '{"ok": true}')])
+bekleme = []
+r = yeniden_dene(lambda: next(yanitlar), uyku=bekleme.append)
+print(r.status_code, r.json(), 'beklemeler:', bekleme)
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>İstemciden sunucuya: API'yi tasarlayan tarafta olmak</h2>
+<p>İstemci tarafını (istek atmak, yeniden denemek, sayfaları dolaşmak) <i>http-api</i> dersinde, çatıları <i>flask</i> ve <i>fastapi</i> derslerinde ayrıntılı göreceksin. Bu bölüm hangi çatıyı seçersen seç geçerli kalan <b>sunucu tarafı sözleşmeleri</b> ele alıyor: kaynakları adlandırmak, doğru durum kodunu seçmek, hata gövdesini standartlaştırmak, tekrarlanan isteğe dayanmak (idempotency), webhook imzası doğrulamak ve iyimser eşzamanlılık (ETag). Bunlar mülakatlarda en çok sorulan, çatı belgelerinde en az anlatılan konulardır.</p>
+
+<h3>REST kaynak tasarımı ve durum kodu seçimi</h3>
+<div class="tbl-wrap"><table>
+<tr><th>İstek</th><th>Anlamı</th><th>Başarılı yanıt</th><th>Sık hata yanıtları</th></tr>
+<tr><td><code>GET /siparisler?sehir=İzmir&amp;limit=50</code></td><td>Listele, süz</td><td>200 + liste ve sonraki sayfa imleci</td><td>400 geçersiz parametre</td></tr>
+<tr><td><code>GET /siparisler/1042</code></td><td>Tek kaynak</td><td>200 (+ <code>ETag</code>)</td><td>404 yok, 304 değişmedi</td></tr>
+<tr><td><code>POST /siparisler</code></td><td>Yeni kaynak oluştur</td><td>201 + <code>Location: /siparisler/1043</code></td><td>422 doğrulama, 409 çakışma</td></tr>
+<tr><td><code>PUT /siparisler/1042</code></td><td>Tamamını değiştir (idempotent)</td><td>200 ya da 204</td><td>412 ETag uyuşmadı</td></tr>
+<tr><td><code>PATCH /siparisler/1042</code></td><td>Kısmi güncelle</td><td>200</td><td>422, 409</td></tr>
+<tr><td><code>DELETE /siparisler/1042</code></td><td>Sil (idempotent)</td><td>204</td><td>404 (ya da yine 204)</td></tr>
+<tr><td><code>POST /siparisler/1042/iptal</code></td><td>Kaynağa uymayan eylem</td><td>200/202</td><td>409 durum uygun değil</td></tr>
+</table></div>
+<p>Kurallar: kaynak adları çoğul isim (<code>/siparisler</code>), fiil URL'de değil yöntemde; 401 "kim olduğunu bilmiyorum", 403 "biliyorum ama yetkin yok"; 422 gövde biçimce doğru ama kurala aykırı, 400 gövde hiç okunamıyor. Uzun süren iş için 202 Accepted + durum sorgulanacak bir adres döndür.</p>
+
+<h3>Tek tip hata gövdesi: problem+json</h3>
+<p>Her uç noktanın hatayı başka biçimde dönmesi istemci yazanların kâbusudur. RFC 9457 (eski adıyla RFC 7807) <code>application/problem+json</code> türünde ortak bir biçim önerir: <code>type</code>, <code>title</code>, <code>status</code>, <code>detail</code>, <code>instance</code> alanları ve gerekirse ek alanlar (ör. alan bazlı <code>errors</code>). Tek bir yardımcı fonksiyon yazıp tüm hataları ondan geçirirsen istemciler tek bir ayrıştırıcıyla yetinir.</p>
+
+<h2>Çatısız bir API: WSGI sözleşmesi</h2>
+<p>Flask ve Django'nun altında <b>WSGI</b> (Web Server Gateway Interface) vardır: sunucu (gunicorn, uWSGI) her istek için uygulamanı <code>uygulama(environ, start_response)</code> diye çağırır. <code>environ</code> isteği anlatan bir sözlüktür (yöntem, yol, başlıklar, gövde akışı); uygulama <code>start_response(durum, basliklar)</code> çağırıp gövdeyi bayt parçaları olarak döndürür. FastAPI'nin altındaki <b>ASGI</b> aynı fikrin async sürümüdür. Sözleşme yalnızca bir fonksiyon olduğu için uygulamayı ağ olmadan, doğrudan çağırarak test edebilirsin; aşağıdaki örnek tarayıcıda çalışır.</p>
+<pre class="py">import io, json
+from wsgiref.util import setup_testing_defaults
+
+SIPARISLER = {1042: {"no": 1042, "sehir": "İzmir", "tutar": 1250}}
+
+def json_yanit(start_response, durum, veri, ek=()):
+    govde = json.dumps(veri, ensure_ascii=False).encode("utf-8")
+    start_response(durum, [("Content-Type", "application/json; charset=utf-8"),
+                           ("Content-Length", str(len(govde))), *ek])
+    return [govde]
+
+def uygulama(environ, start_response):
+    yontem, yol = environ["REQUEST_METHOD"], environ["PATH_INFO"]
+    if yontem == "GET" and yol.startswith("/siparisler/"):
+        s = SIPARISLER.get(int(yol.rsplit("/", 1)[1]))
+        if s is None:
+            return json_yanit(start_response, "404 Not Found",
+                              {"title": "Sipariş bulunamadı", "status": 404})
+        return json_yanit(start_response, "200 OK", s)
+    if yontem == "POST" and yol == "/siparisler":
+        boy = int(environ.get("CONTENT_LENGTH") or 0)
+        veri = json.loads(environ["wsgi.input"].read(boy))
+        no = max(SIPARISLER) + 1
+        SIPARISLER[no] = {"no": no, **veri}
+        return json_yanit(start_response, "201 Created", SIPARISLER[no],
+                          [("Location", f"/siparisler/{no}")])
+    return json_yanit(start_response, "405 Method Not Allowed", {"status": 405})
+
+def istek_at(yontem, yol, govde=None):          # test istemcisi: ağ yok
+    environ = {}
+    setup_testing_defaults(environ)
+    ham = json.dumps(govde).encode() if govde else b""
+    environ.update(REQUEST_METHOD=yontem, PATH_INFO=yol,
+                   CONTENT_LENGTH=str(len(ham)), **{"wsgi.input": io.BytesIO(ham)})
+    yakalanan = {}
+    def start_response(durum, basliklar):
+        yakalanan["durum"], yakalanan["basliklar"] = durum, dict(basliklar)
+    govde = b"".join(uygulama(environ, start_response))
+    return yakalanan["durum"], yakalanan["basliklar"].get("Location"), json.loads(govde)
+
+print(istek_at("GET", "/siparisler/1042"))
+print(istek_at("POST", "/siparisler", {"sehir": "Bursa", "tutar": 300}))
+print(istek_at("GET", "/siparisler/9"))
+</pre>
+
+<h2>Idempotency anahtarı: çift ödemeyi önlemek</h2>
+<p>Mobil uygulama "Öde" isteğini gönderdi, ağ koptu, yanıt gelmedi. Uygulama tekrar denerse müşteriden iki kez para çekilebilir; denemezse ödeme belirsiz kalır. Çözüm: istemci her işlem için benzersiz bir <code>Idempotency-Key</code> başlığı üretir (genelde UUID). Sunucu ilk isteğin <b>yanıtını</b> bu anahtarla saklar; aynı anahtarla gelen sonraki istekleri yeniden işlemez, kayıtlı yanıtı döndürür. Aynı anahtar <b>farklı bir gövdeyle</b> gelirse bu istemci hatasıdır (422 ya da 409). Stripe ve birçok banka API'si böyle çalışır.</p>
+
+<h2>Webhook imzası: gelen isteğe güvenmek</h2>
+<p>Ödeme sağlayıcısı "ödeme tamamlandı" bilgisini senin <code>/webhook</code> adresine POST eder. Adres herkese açık olduğu için herkes sahte istek gönderebilir. Sağlayıcı gövdeyi ortak bir gizli anahtarla <b>HMAC-SHA256</b> ile imzalar ve imzayı başlıkta gönderir; sen aynı hesabı yapıp karşılaştırırsın. Tekrar saldırısına (replay) karşı imzaya zaman damgası da katılır ve eski istekler reddedilir.</p>
+<pre class="py">import hashlib, hmac, json
+
+GIZLI = b"whsec_anadolu_test"
+
+def imzala(zaman: int, govde: bytes) -&gt; str:
+    mesaj = str(zaman).encode() + b"." + govde
+    return hmac.new(GIZLI, mesaj, hashlib.sha256).hexdigest()
+
+def dogrula(zaman: int, govde: bytes, imza: str, simdi: int, tolerans=300) -&gt; bool:
+    if abs(simdi - zaman) &gt; tolerans:
+        return False                                   # eski istek: tekrar saldırısı
+    return hmac.compare_digest(imzala(zaman, govde), imza)
+
+govde = json.dumps({"olay": "odeme.tamamlandi", "tutar": 1250}).encode()
+imza = imzala(1_700_000_000, govde)
+print(dogrula(1_700_000_000, govde, imza, simdi=1_700_000_060))
+print(dogrula(1_700_000_000, govde.replace(b"1250", b"9999"), imza, simdi=1_700_000_060))
+print(dogrula(1_700_000_000, govde, imza, simdi=1_700_009_999))
+</pre>
+<div class="warn"><b>İmzayı ham baytlar üzerinde hesapla</b>Gövdeyi önce <code>json.loads</code> ile ayrıştırıp sonra <code>json.dumps</code> ile yeniden üretirsen boşluklar, anahtar sırası ve Unicode kaçışları değişir; imza tutmaz. Çatından <b>ham gövdeyi</b> al (Flask'ta <code>request.get_data()</code>, FastAPI'de <code>await request.body()</code>). Karşılaştırmayı da <code>==</code> ile değil <code>hmac.compare_digest</code> ile yap; <code>==</code> ilk farklı karakterde durduğu için süre ölçümüyle imza tahmin edilebilir (timing attack).</div>
+
+<h2>ETag ile iyimser eşzamanlılık</h2>
+<p>İki operatör aynı siparişi aynı anda açıp düzenlerse sonra kaydeden, öncekinin değişikliğini sessizce ezer (lost update). Sunucu her GET yanıtında kaynağın sürümünü <code>ETag</code> başlığında verir; istemci PUT/PATCH gönderirken bu değeri <code>If-Match</code> başlığına koyar. Sunucu mevcut sürüm farklıysa <b>412 Precondition Failed</b> döner; istemci kaynağı yeniden okuyup kullanıcıya çakışmayı gösterir. ETag'in ikinci kullanımı önbellektir (cache): <code>If-None-Match</code> eşleşirse 304 Not Modified ve boş gövde döner (istemci tarafını http-api dersinde gördün).</p>
+
+<h2>Sürümleme, hız sınırı ve belgeler</h2>
+<ul>
+<li><b>Sürümleme:</b> Kırıcı değişiklik (alan silmek, tipini değiştirmek) yeni sürüm ister: <code>/v2/siparisler</code> en yaygın ve en görünür yoldur. Alan <b>eklemek</b> kırıcı değildir; istemcileri bilmedikleri alanları yok saymaya alıştır.</li>
+<li><b>Hız sınırı (rate limit):</b> Sunucu tarafında genelde jeton kovası (token bucket) kullanılır: kova saniyede r jetonla dolar, en fazla b jeton tutar, her istek bir jeton harcar. Aşımda 429 ve <code>Retry-After</code> başlığı dön.</li>
+<li><b>Sayfalama:</b> <code>offset</code> basittir ama araya kayıt eklenince satır atlar/tekrarlar ve büyük offset'lerde veritabanı yavaşlar. <b>İmleç (cursor)</b> sayfalamada "son görülen id"yi opak bir değer olarak (ör. base64) verirsin; sorgu <code>WHERE id &gt; ?</code> olur.</li>
+<li><b>Belge:</b> OpenAPI şeması API'nin sözleşmesidir; FastAPI tiplerden otomatik üretir, Flask'ta apispec gibi eklentiler gerekir. Şemadan istemci kodu ve sözleşme testleri üretilebilir.</li>
+</ul>
+<div class="tip"><b>Kendi bilgisayarında dene</b>Örnekteki WSGI uygulamasını gerçek bir sunucuyla çalıştırmak için dosyaya kaydedip <code>python -m wsgiref.simple_server</code> yerine üretim sunucusu kullan: <code>pip install gunicorn</code> ve <code>gunicorn modul:uygulama --bind 0.0.0.0:8000</code> (Windows'ta gunicorn çalışmaz; <code>pip install waitress</code> ve <code>waitress-serve --port=8000 modul:uygulama</code>). Sık hata: <code>ModuleNotFoundError</code> alırsan komutu dosyanın bulunduğu klasörden çalıştır ya da <code>--chdir</code> ver.</div>
+<div class="note"><b>Gerçek işte</b>Ödeme, sipariş ve havale gibi para hareketi yaratan her POST uç noktasında ilk soru "bu istek iki kez gelirse ne olur?" olmalıdır. Kod incelemesinde (code review) idempotency anahtarı, webhook imza doğrulaması ve tek tip hata gövdesi yoksa bunlar genellikle güvenlik ya da muhasebe bulgusu olarak geri döner. API'yi yazan ekip, istemcinin yeniden deneme yapacağını varsaymak zorundadır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretim API istemcisi kontrol listesi</h3>
+<p>Kurumsal bir istemci modülü şu parçaları taşır: tek bir <code>Client</code> nesnesi (oturum), merkezi zaman aşımı, 5xx/429 için geri çekilmeli yeniden deneme, 4xx için anlamlı iş istisnaları (<code>SiparisBulunamadi</code> gibi), yanıt şemasının doğrulanması (TypedDict/pydantic), istek kimliği ve süresinin loglanması. Sahte istemciyi <code>Protocol</code> ile tanımlarsan hem gerçek hem test istemcisi aynı imzaya uyar; iş mantığı ağ olmadan test edilir.</p>
+<p>Sunucu tarafında FastAPI'nin bağımlılık enjeksiyonu (<code>Depends</code>) veritabanı oturumu ve kimlik doğrulamayı uç noktadan ayırır. Asenkron uç noktalar (<code>async def</code>) yalnızca I/O beklerken kazanç sağlar; CPU ağırlıklı işi <code>run_in_executor</code> ya da ayrı işçiye ver. Sürümleme (<code>/v1/</code>), sayfalama (<code>limit/offset</code> ya da imleç), oran sınırlama (rate limit) ve OpenAPI belgesi, bir API'nin "üretime hazır" sayılması için beklenen asgari özelliklerdir.</p>
+<p>Devre kesici (circuit breaker) kalıbını da bil: dış servis art arda başarısız olunca bir süre hiç istek atmadan hızlı hata dön; böylece hem kendi hizmetin yavaşlamaz hem de karşı tarafa yük bindirmezsin.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/api-web">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../tip-sistemi-ileri/">← İleri tip sistemi: Generic, Protocol, TypedDict ve mypy</a><a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

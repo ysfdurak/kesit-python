@@ -1,0 +1,345 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Orta bitirme projesi: Ilgaz Bank işlem analizi | Kesit Python</title><meta name="description" content="Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-orta/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Orta bitirme projesi: Ilgaz Bank işlem analizi"><meta property="og:description" content="Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-orta/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Orta bitirme projesi: Ilgaz Bank işlem analizi","description":"Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/proje-orta/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Orta bitirme projesi: Ilgaz Bank işlem analizi</h1><p class="st-l">Orta seviyede öğrendiğin her şeyi tek projede birleştirirsin: dataclass ile işlem modeli, CSV ayrıştırma, kategori toplamları, çok koşullu şüpheli işlem kuralı, JSON rapor ve unittest ile doğrulama.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje tanımı</h2>
+<p>Ilgaz Bank'ın kart operasyon ekibi senden küçük ama gerçekçi bir araç istiyor: günlük kart işlemlerini okuyacak, kategori bazında harcamayı özetleyecek, şüpheli görünen işlemleri işaretleyecek ve sonucu JSON raporu olarak verecek. Ekip, kuralların test edilmiş olmasını şart koşuyor; çünkü yanlış pozitif bir müşterinin kartını gereksiz yere bloke eder, yanlış negatif ise dolandırıcılığı kaçırır.</p>
+<p>Bu ders diğerlerinden farklı: yeni kavram öğretmez, öğrendiklerini birleştirir. Alıştırmalar birbirini tamamlayan altı parçadır; her parçada bir önceki parçanın fonksiyonu hazır gelir. Aşağıda her parçanın kuramı ve örnek çıktısı var; alıştırmalarda kendi sürümünü yazacaksın.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Parça</th><th>Ne yapar</th><th>Kullandığın dersler</th></tr>
+<tr><td>1. Model</td><td>Transaction dataclass'ı ve CSV'den okuma</td><td>dataclass-typing, json-csv, tarih-saat, decimal</td></tr>
+<tr><td>2. Özet</td><td>Kategoriye göre toplam</td><td>collections, kapsamli-ifadeler</td></tr>
+<tr><td>3. Kural A-B</td><td>Gece saati ve yüksek tutar</td><td>tarih-saat, fonksiyonel</td></tr>
+<tr><td>4. Kural C</td><td>Aynı kartta 10 dakikada 3 işlem</td><td>iteratorler, tarih-saat, sıralama</td></tr>
+<tr><td>5. Rapor</td><td>JSON çıktı, tip dönüşümü</td><td>json-csv, decimal</td></tr>
+<tr><td>6. Test</td><td>unittest ile kural testleri</td><td>test-yazma</td></tr>
+</table></div>
+
+<h2>Parça 1: Veri modeli ve CSV okuma</h2>
+<p>Her işlem beş alan taşır: işlem kimliği, kart numarası (maskeli), zaman, tutar, kategori. Tutar para olduğu için <code>Decimal</code>, zaman <code>datetime</code>. <code>frozen=True</code> ile işlem nesnesi değiştirilemez olur: analiz sırasında kimse bir tutarı yanlışlıkla güncelleyemez. CSV metni <code>csv.DictReader</code> ile okunur, her satır <code>Transaction</code>'a dönüştürülür.</p>
+<pre class="py">import csv
+import io
+from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
+
+@dataclass(frozen=True)
+class Transaction:
+    id: str
+    kart: str
+    zaman: datetime
+    tutar: Decimal
+    kategori: str
+
+VERI = """id,kart,zaman,tutar,kategori
+T1,****1111,2024-03-15 09:12:00,245.90,market
+T2,****1111,2024-03-15 13:40:00,1200.00,elektronik
+T3,****2222,2024-03-15 02:15:00,8500.00,kuyumcu
+T4,****3333,2024-03-15 23:50:00,60.00,yakit
+T5,****3333,2024-03-15 23:54:00,75.50,yakit
+T6,****3333,2024-03-15 23:58:00,90.00,market
+T7,****2222,2024-03-15 18:00:00,430.00,market
+"""
+
+def csv_oku(metin: str) -&gt; list[Transaction]:
+    islemler = []
+    for satir in csv.DictReader(io.StringIO(metin)):
+        islemler.append(Transaction(
+            id=satir["id"],
+            kart=satir["kart"],
+            zaman=datetime.strptime(satir["zaman"], "%Y-%m-%d %H:%M:%S"),
+            tutar=Decimal(satir["tutar"]),
+            kategori=satir["kategori"],
+        ))
+    return islemler
+
+islemler = csv_oku(VERI)
+print(len(islemler), "işlem okundu")
+print(islemler[2])
+print("tutar türü:", type(islemler[0].tutar).__name__, "| saat:", islemler[2].zaman.hour)</pre>
+<div class="tip"><b>Dönüşüm tek yerde</b>Metinden tipe dönüşüm yalnızca csv_oku içinde yapılır. Sonraki hiçbir parça "acaba tutar string mi" diye düşünmez; bu, katmanlı tasarımın en sade halidir.</div>
+
+<h2>Parça 2: Kategoriye göre toplam</h2>
+<p>Klasik gruplama: sözlükte biriktir. <code>defaultdict(Decimal)</code> başlangıç değeri olarak <code>Decimal(0)</code> verir, böylece <code>+=</code> doğrudan çalışır. Çıktıyı toplam tutara göre azalan sıralamak raporun okunurluğunu artırır.</p>
+<pre class="py">from collections import defaultdict
+from decimal import Decimal
+
+# Parça 1'deki islemler listesini yeniden kuralım (kısa sürüm)
+from dataclasses import dataclass
+from datetime import datetime
+
+@dataclass(frozen=True)
+class Transaction:
+    id: str
+    kart: str
+    zaman: datetime
+    tutar: Decimal
+    kategori: str
+
+islemler = [
+    Transaction("T1", "****1111", datetime(2024, 3, 15, 9, 12), Decimal("245.90"), "market"),
+    Transaction("T2", "****1111", datetime(2024, 3, 15, 13, 40), Decimal("1200.00"), "elektronik"),
+    Transaction("T3", "****2222", datetime(2024, 3, 15, 2, 15), Decimal("8500.00"), "kuyumcu"),
+    Transaction("T7", "****2222", datetime(2024, 3, 15, 18, 0), Decimal("430.00"), "market"),
+]
+
+def kategori_toplam(islemler: list[Transaction]) -&gt; dict[str, Decimal]:
+    toplam: dict[str, Decimal] = defaultdict(Decimal)
+    for t in islemler:
+        toplam[t.kategori] += t.tutar
+    return dict(sorted(toplam.items(), key=lambda kv: kv[1], reverse=True))
+
+for kategori, tutar in kategori_toplam(islemler).items():
+    print(f"{kategori:12} {tutar:&gt;10}")</pre>
+
+<h2>Parça 3 ve 4: Şüpheli işlem kuralları</h2>
+<p>Operasyon ekibinin üç kuralı var; bir işlem bunlardan <b>en az birine</b> uyarsa şüpheli sayılır ve hangi kurallara takıldığı raporda görünür:</p>
+<ul>
+<li><b>gece:</b> işlem saati 23:00 ve sonrası ya da 06:00'dan önce.</li>
+<li><b>yuksek_tutar:</b> tutar 5000 TL ve üzeri.</li>
+<li><b>sik_islem:</b> aynı kartta, herhangi bir 10 dakikalık pencerede 3 ya da daha fazla işlem; pencereye giren her işlem işaretlenir.</li>
+</ul>
+<p>İlk iki kural tek işleme bakar; birer satırlık saf fonksiyonlardır. Üçüncü kural işlemler arası ilişkiye bakar: karta göre grupla, zamana göre sırala, her işlem için "bu işlemle başlayan 10 dakikalık pencerede kaç işlem var?" diye say; 3 ve üstüyse penceredeki tüm işlemleri işaretle.</p>
+<pre class="py">from collections import defaultdict
+from dataclasses import dataclass
+from datetime import datetime, timedelta
+from decimal import Decimal
+
+@dataclass(frozen=True)
+class Transaction:
+    id: str
+    kart: str
+    zaman: datetime
+    tutar: Decimal
+    kategori: str
+
+islemler = [
+    Transaction("T3", "****2222", datetime(2024, 3, 15, 2, 15), Decimal("8500.00"), "kuyumcu"),
+    Transaction("T4", "****3333", datetime(2024, 3, 15, 23, 50), Decimal("60.00"), "yakit"),
+    Transaction("T5", "****3333", datetime(2024, 3, 15, 23, 54), Decimal("75.50"), "yakit"),
+    Transaction("T6", "****3333", datetime(2024, 3, 15, 23, 58), Decimal("90.00"), "market"),
+    Transaction("T7", "****2222", datetime(2024, 3, 15, 18, 0), Decimal("430.00"), "market"),
+]
+
+def gece_mi(t: Transaction) -&gt; bool:
+    return t.zaman.hour &gt;= 23 or t.zaman.hour &lt; 6
+
+def yuksek_mi(t: Transaction, esik: Decimal = Decimal("5000")) -&gt; bool:
+    return t.tutar &gt;= esik
+
+def sik_islem_idleri(islemler: list[Transaction], pencere_dk: int = 10, esik: int = 3) -&gt; set[str]:
+    karta_gore: dict[str, list[Transaction]] = defaultdict(list)
+    for t in islemler:
+        karta_gore[t.kart].append(t)
+    supheli: set[str] = set()
+    pencere = timedelta(minutes=pencere_dk)
+    for grup in karta_gore.values():
+        grup.sort(key=lambda t: t.zaman)
+        for i, baslangic in enumerate(grup):
+            icindekiler = [t for t in grup[i:] if t.zaman - baslangic.zaman &lt;= pencere]
+            if len(icindekiler) &gt;= esik:
+                supheli.update(t.id for t in icindekiler)
+    return supheli
+
+def supheli_isaretle(islemler: list[Transaction]) -&gt; dict[str, list[str]]:
+    sik = sik_islem_idleri(islemler)
+    sonuc = {}
+    for t in islemler:
+        nedenler = []
+        if gece_mi(t): nedenler.append("gece")
+        if yuksek_mi(t): nedenler.append("yuksek_tutar")
+        if t.id in sik: nedenler.append("sik_islem")
+        if nedenler:
+            sonuc[t.id] = nedenler
+    return sonuc
+
+for tid, nedenler in supheli_isaretle(islemler).items():
+    print(tid, "-&gt;", ", ".join(nedenler))</pre>
+<p>T3 iki kurala birden takıldı (gece ve yüksek tutar); T4-T5-T6 ise hem gece hem sık işlem. T7 temiz. Pencere mantığında <code>grup[i:]</code> dilimi yalnızca ileriye bakar; sıralı liste sayesinde geçmişe bakmaya gerek yoktur.</p>
+<div class="warn"><b>Sınır değerleri test et</b>23:00 tam saati gece mi? 5000.00 tam tutar yüksek mi? 10 dakika 0 saniye pencerede mi? Kuralları yazarken <code>&gt;=</code> ile <code>&gt;</code> arasındaki farkı iş birimine sor ve testte sabitle. Bu projede üç sınır da dahil (&gt;=) kabul edildi.</div>
+
+<h2>Parça 5: JSON rapor</h2>
+<p>Rapor üç bölüm taşır: genel özet (işlem sayısı, toplam tutar), kategori toplamları ve şüpheli işlemler. <code>json.dumps</code> Decimal ve datetime'ı tanımaz; ya rapor sözlüğünü kurarken metne çevirirsin ya da <code>default=</code> parametresine bir dönüştürücü verirsin. Para alanlarını <b>metin</b> olarak yazmak ("8500.00") float'a çevirmekten güvenlidir: alıcı sistem tekrar Decimal'e dönebilir.</p>
+<pre class="py">import json
+from datetime import datetime
+from decimal import Decimal
+
+def json_uyumlu(nesne):
+    if isinstance(nesne, Decimal):
+        return str(nesne)
+    if isinstance(nesne, datetime):
+        return nesne.isoformat()
+    raise TypeError(f"JSON'a çevrilemez: {type(nesne).__name__}")
+
+rapor = {
+    "tarih": datetime(2024, 3, 15).date().isoformat(),
+    "islem_sayisi": 7,
+    "toplam_tutar": Decimal("10601.40"),
+    "kategori_toplam": {"kuyumcu": Decimal("8500.00"), "elektronik": Decimal("1200.00")},
+    "supheli": [
+        {"id": "T3", "kart": "****2222", "zaman": datetime(2024, 3, 15, 2, 15), "tutar": Decimal("8500.00"), "nedenler": ["gece", "yuksek_tutar"]},
+    ],
+}
+metin = json.dumps(rapor, default=json_uyumlu, ensure_ascii=False, indent=2)
+print(metin)
+geri = json.loads(metin)
+print("geri okunan toplam:", Decimal(geri["toplam_tutar"]) + Decimal("0.60"))</pre>
+
+<h2>Parça 6: Testler</h2>
+<p>Kurallar test edilmeden teslim edilmez. Her kural için en az bir pozitif, bir negatif ve bir sınır testi yazarsın. Test verisi küçük ve elle hesaplanabilir olmalı; büyük CSV'yi teste sokma. Aşağıdaki örnek yalnızca gece kuralını test eder; alıştırmada üç kuralı birden yazacaksın.</p>
+<pre class="py">import io
+import unittest
+from dataclasses import dataclass
+from datetime import datetime
+from decimal import Decimal
+
+@dataclass(frozen=True)
+class Transaction:
+    id: str
+    kart: str
+    zaman: datetime
+    tutar: Decimal
+    kategori: str
+
+def gece_mi(t):
+    return t.zaman.hour &gt;= 23 or t.zaman.hour &lt; 6
+
+def islem(saat, dakika=0, tutar="100"):
+    return Transaction("X", "****0000", datetime(2024, 3, 15, saat, dakika), Decimal(tutar), "market")
+
+class GeceKuraliTest(unittest.TestCase):
+    def test_gece_yarisi_sonrasi(self):
+        self.assertTrue(gece_mi(islem(2, 15)))
+    def test_sinir_23_dahil(self):
+        self.assertTrue(gece_mi(islem(23, 0)))
+    def test_sinir_6_haric(self):
+        self.assertFalse(gece_mi(islem(6, 0)))
+    def test_ogle_degil(self):
+        self.assertFalse(gece_mi(islem(13, 40)))
+
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(GeceKuraliTest)
+adlar = [t.id().split(".")[-1] for t in suite]
+sonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+print(len(adlar), "test:", adlar)
+print("başarılı:", sonuc.wasSuccessful())</pre>
+<p><code>islem(...)</code> yardımcı fonksiyonu test verisini tek satırda kurar; test gövdeleri yalnızca kuralı konuşur. Bu küçük "fabrika" kalıbı, test dosyalarını okunur tutmanın en ucuz yoludur.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Projeyi üretim kalitesine taşımak</h2>
+<p>Altı parçayla çalışan bir analiz aracın var. Kart operasyon ekibi aracı her gün kullanmaya başlayınca yeni istekler gelir: "Bozuk satır yüzünden tüm rapor çöktü", "Eşiği 5000'den 7500'e çekmek için yazılımcı mı bekleyeceğiz?", "Dünün sonuçlarını nerede saklıyoruz?", "Bunu her sabah komut satırından çalıştırmak istiyoruz". Bu bölüm, orta seviyede öğrendiğin her şeyi (doğrulama, yapılandırma, SQLite, argparse, logging, test, Git) aynı projede bir araya getirir. Alıştırmalar da bu ihtiyaçları birer birer kapatır.</p>
+<h3>1. Girdiyi doğrula, hatayı topla</h3>
+<p>Gerçek dosyada bazı satırlar bozuktur: tarih yanlış biçimde, tutar boş, kategori eksik. İki strateji vardır: <b>hızlı başarısız ol</b> (fail fast: ilk hatada dur) ve <b>hataları topla</b> (geçerli satırları işle, bozukları satır numarasıyla raporla). Günlük operasyon raporlarında ikincisi tercih edilir; ama bozuk satır oranı bir eşiği aşarsa (ör. %5) dosyanın tamamı reddedilir, çünkü o noktada sorun tek tük satırda değil, kaynaktadır.</p>
+<pre class="py">import csv, io
+from datetime import datetime
+from decimal import Decimal, InvalidOperation
+
+VERI = """id,kart,zaman,tutar,kategori
+T1,****1111,2024-03-15 09:12:00,245.90,market
+T2,****1111,15.03.2024 13:40,1200.00,elektronik
+T3,****2222,2024-03-15 02:15:00,,kuyumcu
+T4,****3333,2024-03-15 23:50:00,-60.00,yakit
+T5,****3333,2024-03-15 23:54:00,75.50,
+"""
+
+gecerli, hatalar = [], []
+for no, s in enumerate(csv.DictReader(io.StringIO(VERI)), start=2):   # 1. satır başlık
+    try:
+        zaman = datetime.strptime(s["zaman"], "%Y-%m-%d %H:%M:%S")
+        tutar = Decimal(s["tutar"])
+        if tutar &lt;= 0:
+            raise ValueError("tutar pozitif olmalı")
+        if not s["kategori"].strip():
+            raise ValueError("kategori boş")
+    except InvalidOperation:
+        hatalar.append((no, s["id"], "tutar sayı değil"))
+        continue
+    except ValueError as e:
+        hatalar.append((no, s["id"], str(e)[:30]))
+        continue
+    gecerli.append((s["id"], zaman.hour, tutar))
+
+print("geçerli:", gecerli)
+for h in hatalar:
+    print("satır", *h)
+oran = len(hatalar) / (len(hatalar) + len(gecerli))
+print(f"hata oranı %{oran * 100:.0f} -&gt;", "DOSYAYI REDDET" if oran &gt; 0.05 else "devam")</pre>
+<div class="warn"><b>InvalidOperation bir ValueError değildir</b><code>Decimal("")</code> ve <code>Decimal("abc")</code> <code>decimal.InvalidOperation</code> fırlatır; bu sınıf <code>ArithmeticError</code>'dan türer. Yalnızca <code>except ValueError</code> yazarsan boş tutarlı satır tüm programı düşürür.</div>
+<h3>2. Kurallar veri olsun: kayıt defteri ve ayar dosyası</h3>
+<p>Kural eklemek için <code>kurallari_uygula</code> fonksiyonunu her seferinde değiştirmek yerine kuralları bir <b>kayıt defterine</b> (registry) koy: ad → fonksiyon. Eşikler ise koddan çıkıp bir ayar sözlüğüne (gerçekte JSON/TOML dosyası) taşınır. Ayardan gelen değerler metin ya da float olabileceği için okurken <b>tek noktada</b> doğru tipe çevrilir.</p>
+<pre class="py">import json
+from datetime import datetime
+from decimal import Decimal
+
+AYAR_JSON = '{"yuksek_esik": "5000.00", "gece_bas": 23, "gece_bit": 6, "riskli_kategoriler": ["kuyumcu", "kripto"]}'
+ham = json.loads(AYAR_JSON)
+ayar = {**ham, "yuksek_esik": Decimal(ham["yuksek_esik"]), "riskli_kategoriler": set(ham["riskli_kategoriler"])}
+
+KURALLAR = {}
+def kural(ad):
+    def kaydet(f):
+        KURALLAR[ad] = f
+        return f
+    return kaydet
+
+@kural("gece")
+def _gece(t, a):
+    return t["zaman"].hour &gt;= a["gece_bas"] or t["zaman"].hour &lt; a["gece_bit"]
+
+@kural("yuksek")
+def _yuksek(t, a):
+    return t["tutar"] &gt;= a["yuksek_esik"]
+
+@kural("riskli_kategori")
+def _kategori(t, a):
+    return t["kategori"] in a["riskli_kategoriler"]
+
+islem = {"id": "T3", "zaman": datetime(2024, 3, 15, 2, 15), "tutar": Decimal("8500.00"), "kategori": "kuyumcu"}
+print(sorted(KURALLAR))
+print([ad for ad, f in KURALLAR.items() if f(islem, ayar)])</pre>
+<h3>3. Sakla: SQLite'ta kuruş olarak</h3>
+<p>Sonuçları her gün bir SQLite dosyasına yazarsan "geçen hafta kaç şüpheli işlem vardı" sorusu tek sorgu olur. Para için SQLite'ın REAL tipi float'tır; tutarı <b>tam sayı kuruş</b> olarak saklamak hem toplamları kesin yapar hem de Decimal'e geri dönüşü kolaylaştırır. Zamanı ISO 8601 metni olarak yaz.</p>
+<pre class="py">import sqlite3
+from decimal import Decimal
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE islem (id TEXT PRIMARY KEY, zaman TEXT, tutar_kurus INTEGER, kategori TEXT)")
+veriler = [("T1", "2024-03-15T09:12:00", Decimal("0.10"), "market"),
+           ("T2", "2024-03-15T13:40:00", Decimal("0.20"), "market")]
+con.executemany("INSERT INTO islem VALUES (?, ?, ?, ?)",
+                [(i, z, int(t * 100), k) for i, z, t, k in veriler])
+kurus = con.execute("SELECT SUM(tutar_kurus) FROM islem WHERE kategori = 'market'").fetchone()[0]
+print(Decimal(kurus) / 100, "| float olsaydı:", 0.10 + 0.20)</pre>
+<h3>4. Komut satırı aracı ve proje ağacı</h3>
+<p>Son adım aracı paketlemek. Proje <i>git-proje-yapisi</i> dersindeki src yerleşimine oturur; giriş noktası argparse ile parametre alır, sonucu stdout'a ya da dosyaya yazar, hata durumunda sıfır dışı çıkış kodu döner ki zamanlayıcı (cron, Windows Görev Zamanlayıcı) sorunu fark etsin.</p>
+<pre class="code">kart-analiz/
+├── pyproject.toml            # [project.scripts] kart-analiz = "kart_analiz.cli:main"
+├── README.md   .gitignore   .env.example
+├── ayar.json                 # eşikler: kod değişmeden ayarlanır
+├── src/kart_analiz/
+│   ├── model.py              # Transaction, csv_oku, doğrulama
+│   ├── kurallar.py           # kayıt defteri + kurallar
+│   ├── rapor.py              # JSON / CSV çıktı
+│   ├── depo.py               # SQLite
+│   └── cli.py                # argparse + logging
+└── tests/  test_model.py  test_kurallar.py  test_rapor.py
+
+# Kendi bilgisayarında:
+python -m venv .venv &amp;&amp; source .venv/bin/activate     # Windows: .venv\Scripts\Activate.ps1
+python -m pip install -e .
+kart-analiz islemler.csv --ayar ayar.json --cikti rapor.json --veritabani gecmis.db -v
+python -m unittest discover -s tests</pre>
+<div class="tbl-wrap"><table><tr><th>Üretim kontrol listesi</th><th>Bu projede karşılığı</th><th>İlgili ders</th></tr><tr><td>Bozuk veri programı düşürmüyor</td><td>Satır bazında doğrulama, hata raporu, eşik</td><td>hatalar, json-csv</td></tr><tr><td>Eşikler koddan ayrı</td><td>ayar.json + tek noktada tip dönüşümü</td><td>yapilandirma</td></tr><tr><td>Para kesin</td><td>Decimal; SQLite'ta kuruş, JSON'da metin</td><td>standart-kutuphane</td></tr><tr><td>Ne olduğu izlenebilir</td><td>logging: kaç satır okundu, kaç hata, kaç işaret</td><td>logging</td></tr><tr><td>Kurallar güvenilir</td><td>Sınır değer testleri, mock'suz saf fonksiyonlar</td><td>test-yazma</td></tr><tr><td>Kurulum tekrarlanabilir</td><td>pyproject + kilit dosyası</td><td>sanal-ortam-pip</td></tr><tr><td>Değişiklikler izlenebilir</td><td>Git, PR, Conventional Commits</td><td>git-proje-yapisi</td></tr></table></div>
+<div class="tip"><b>Portföy için</b>Bu projeyi GitHub'a koyarken README'ye bir örnek CSV, tek satırlık çalıştırma komutu, örnek çıktı ve "tasarım kararları" bölümü (neden Decimal, neden kayıt defteri, neden kuruş) ekle. Mülakatta en çok bu kararlar sorulur.</div>
+<div class="note"><b>Gerçek işte</b>Bankalarda bu tür kural motorları genellikle önce basit eşiklerle başlar; kurallar ayar dosyasında risk ekibinin sorumluluğundadır, kod ise yazılım ekibinde. Her kuralın kaç işlemi işaretlediği günlük izlenir: bir kural birden bire çok fazla işaretliyorsa ya veri kaynağı bozulmuştur ya da eşik yanlış girilmiştir. İşaretlenen işlemler analistin önüne puan sırasıyla gelir; zamanla bu kuralların yanına makine öğrenmesi modelleri eklenir (ileri seviye ml dersleri), ama açıklanabilir kurallar denetim için her zaman kalır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Bu projeyi üretime taşısaydın</h3>
+<p>Gerçek bir kart izleme sistemi aynı iskeleti büyütür. Kurallar bir listede tutulur: her kural <code>(ad, fonksiyon)</code> çifti olur ve <code>supheli_isaretle</code> listeyi dolaşır; yeni kural eklemek if satırı eklemek değil, listeye eleman eklemek haline gelir. Eşikler (5000 TL, 10 dakika, 3 işlem) koda değil yapılandırmaya yazılır; operasyon ekibi kodu değiştirmeden ayarı değiştirir. Sık işlem kuralı milyonlarca işlemde O(n²)'ye yaklaşır; sıralı listede iki işaretçiyle (sliding window) tek geçişe iner, İleri seviyedeki performans dersinin konusu.</p>
+<p>Veri CSV'den değil veritabanından gelir: sqlite3 dersindeki iş bölümü burada da geçerli; kart ve tarih aralığı filtresini SQL yapar, kuralları Python uygular. Rapor JSON olarak bir kuyruk ya da API'ye gider, operasyon ekibi panelde görür. Testler CI'da her commit'te koşar; bir kuralın eşiği değişince önce test güncellenir. Bu dersteki altı parça, o sistemin küçültülmüş ama eksiksiz bir modelidir: model, hesap, kural, rapor, test. Bir mülakatta "orta seviye Python projesi anlat" dendiğinde anlatacağın şey tam olarak bu.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../git-proje-yapisi/">← Git ve proje yapısı</a><a href="../numpy/">numpy: sayısal diziler ve vektörleştirme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

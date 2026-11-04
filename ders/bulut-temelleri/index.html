@@ -1,0 +1,247 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bulut temelleri: nesne depolama, IAM, serverless ve maliyet | Kesit Python</title><meta name="description" content="IaaS/PaaS/SaaS, bölge ve AZ kavramlarını, S3 nesne depolamayı ve boto3'ü, data lake katmanlarını ve tarih bölümlemeyi, IAM politikaları ve en az yetkiyi,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/bulut-temelleri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bulut temelleri: nesne depolama, IAM, serverless ve maliyet"><meta property="og:description" content="IaaS/PaaS/SaaS, bölge ve AZ kavramlarını, S3 nesne depolamayı ve boto3'ü, data lake katmanlarını ve tarih bölümlemeyi, IAM politikaları ve en az yetkiyi,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/bulut-temelleri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bulut temelleri: nesne depolama, IAM, serverless ve maliyet","description":"IaaS/PaaS/SaaS, bölge ve AZ kavramlarını, S3 nesne depolamayı ve boto3'ü, data lake katmanlarını ve tarih bölümlemeyi, IAM politikaları ve en az yetkiyi,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/bulut-temelleri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Bulut temelleri: nesne depolama, IAM, serverless ve maliyet</h1><p class="st-l">IaaS/PaaS/SaaS, bölge ve AZ kavramlarını, S3 nesne depolamayı ve boto3'ü, data lake katmanlarını ve tarih bölümlemeyi, IAM politikaları ve en az yetkiyi, imzalı URL'yi, serverless fonksiyonları, yönetilen veritabanlarını, maliyet tuzaklarını ve sahte bulutla test yazmayı öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/bulut-temelleri">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden bulut?</h2>
+<p>Kanat Havayolları'nın veri ekibi her gece uçuş, rezervasyon ve gecikme dosyalarını işliyor. İlk yıl tek bir sunucu yetti. Sonra veri büyüdü, sunucunun diski doldu, bir gece disk bozuldu ve iki günlük veri kayboldu; yeni sunucu almak haftalar sürdü. Bulut (cloud) bu sorunları kiralık, ölçeklenebilir ve yönetilen hizmetlerle çözer: depolamayı terabayt terabayt değil gigabayt-ay olarak ödersin, sunucuyu dakikalar içinde açıp kapatırsın, yedekleme ve donanım arızası sağlayıcının sorunudur.</p>
+<p>Bu derste bir veri ya da backend mühendisinin bulutta ilk gün ihtiyaç duyduğu temelleri öğreneceksin: hizmet modelleri, bölgeler, <b>nesne depolama</b> (S3) ve <b>boto3</b>, data lake klasör düzeni, <b>IAM</b> ve en az yetki ilkesi, imzalı URL, serverless fonksiyonlar, yönetilen veritabanları ve <b>maliyet</b>. Uygulamayı Docker ile paketlemeyi <i>docker-deploy</i> dersinde gördün; bu ders o paketin nereye ve nasıl gideceğini anlatır.</p>
+<div class="note"><b>Kendi bilgisayarında dene</b>boto3 gerçek bir AWS hesabı ve ağ erişimi ister; bu sayfadaki motorda çalışmaz. Gri kutulardaki kodları kendi bilgisayarında dene: <code>pip install boto3 moto</code>. Gerçek hesapta denerken ücretsiz katman (free tier) sınırlarını ve bütçe alarmını ayarlamayı unutma. Yeşil kutular ve alıştırmalar boto3'ün arayüzünü taklit eden bellek içi bir <b>SahteS3</b> sınıfı ve saf Python ile çalışır.</div>
+
+<h2>Hizmet modelleri, bölgeler ve sağlayıcılar</h2>
+<ul>
+<li><b>IaaS</b> (altyapı hizmeti): sanal makine, disk, ağ kiralarsın; işletim sistemi ve yazılım senin sorumluluğundur. Örnek: EC2.</li>
+<li><b>PaaS</b> (platform hizmeti): kodunu ya da konteynerini verirsin, sunucuyu sağlayıcı yönetir. Örnek: Cloud Run, App Service, yönetilen veritabanı.</li>
+<li><b>SaaS</b> (yazılım hizmeti): hazır uygulamayı kullanırsın. Örnek: Gmail, Salesforce.</li>
+</ul>
+<p><b>Bölge</b> (region) coğrafi bir veri merkezi grubudur (ör. Frankfurt); <b>kullanılabilirlik alanı</b> (availability zone, AZ) bölge içindeki birbirinden bağımsız elektrik ve ağa sahip veri merkezidir. Kritik sistemler en az iki AZ'ye yayılır; bir AZ çökerse diğeri çalışmaya devam eder. Bölge seçimi gecikme (kullanıcıya yakınlık), fiyat ve <b>yasal veri yerleşimi</b> kurallarına göre yapılır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Hizmet</th><th>AWS</th><th>Google Cloud</th><th>Azure</th></tr>
+<tr><td>Nesne depolama</td><td>S3</td><td>Cloud Storage (GCS)</td><td>Blob Storage</td></tr>
+<tr><td>Sanal makine</td><td>EC2</td><td>Compute Engine</td><td>Virtual Machines</td></tr>
+<tr><td>Serverless fonksiyon</td><td>Lambda</td><td>Cloud Run functions</td><td>Azure Functions</td></tr>
+<tr><td>Konteyner çalıştırma</td><td>ECS / Fargate</td><td>Cloud Run</td><td>Container Apps</td></tr>
+<tr><td>Yönetilen PostgreSQL</td><td>RDS / Aurora</td><td>Cloud SQL</td><td>Azure Database for PostgreSQL</td></tr>
+<tr><td>Veri ambarı</td><td>Redshift</td><td>BigQuery</td><td>Synapse / Fabric</td></tr>
+<tr><td>Kimlik ve yetki</td><td>IAM</td><td>Cloud IAM</td><td>Entra ID + RBAC</td></tr>
+</table></div>
+
+<h2>Nesne depolama: bucket, key, prefix</h2>
+<p>S3 bir dosya sistemi değildir; <b>anahtar-değer deposudur</b>. <b>Bucket</b> (kova) küresel olarak benzersiz adlı bir kaptır; içindeki her <b>nesne</b> (object) bir <b>anahtar</b> (key) ile saklanır: <code>ham/kanat/ucuslar/yil=2024/ay=09/gun=01/part-000.csv</code>. Konsolda "klasör" gibi görünen şey anahtarın <code>/</code>'a kadarki <b>önekidir</b> (prefix); gerçek klasör yoktur. Nesneler değiştirilmez, üstüne yazılır; "dosyanın sonuna ekle" yoktur.</p>
+<pre class="code">import boto3
+
+s3 = boto3.client("s3", region_name="eu-central-1")      # kimlik bilgisi ortamdan/rolden gelir
+s3.upload_file("ucuslar.csv", "kanat-veri", "ham/kanat/ucuslar/yil=2024/ay=09/gun=01/part-000.csv")
+
+nesne = s3.get_object(Bucket="kanat-veri", Key="ham/kanat/ucuslar/yil=2024/ay=09/gun=01/part-000.csv")
+metin = nesne["Body"].read().decode("utf-8")
+
+# Listeleme en fazla 1000 anahtar döndürür: sayfalayıcı (paginator) kullan
+sayfalayici = s3.get_paginator("list_objects_v2")
+for sayfa in sayfalayici.paginate(Bucket="kanat-veri", Prefix="ham/kanat/ucuslar/yil=2024/ay=09/"):
+    for nesne in sayfa.get("Contents", []):
+        print(nesne["Key"], nesne["Size"])</pre>
+<p>Aynı arayüzü bellek içinde taklit eden bir sınıfla tarayıcıda deneyelim. Alıştırmalarda bu <code>SahteS3</code> sınıfını kullanacaksın; metot ve parametre adları boto3 ile aynıdır, böylece kodun gerçek istemciye neredeyse değişmeden taşınır.</p>
+<pre class="py">class NoSuchKey(KeyError):
+    pass
+
+
+class SahteS3:
+    """boto3 S3 istemcisinin bellek içi, sadeleştirilmiş taklidi."""
+
+    def __init__(self):
+        self.kovalar = {}
+
+    def create_bucket(self, Bucket):
+        self.kovalar.setdefault(Bucket, {})
+
+    def put_object(self, Bucket, Key, Body):
+        if isinstance(Body, str):
+            Body = Body.encode("utf-8")
+        self.kovalar[Bucket][Key] = Body
+        return {"ETag": str(hash(Body))}
+
+    def get_object(self, Bucket, Key):
+        try:
+            return {"Body": self.kovalar[Bucket][Key], "ContentLength": len(self.kovalar[Bucket][Key])}
+        except KeyError:
+            raise NoSuchKey(Key) from None
+
+    def delete_object(self, Bucket, Key):
+        self.kovalar[Bucket].pop(Key, None)
+
+    def list_objects_v2(self, Bucket, Prefix="", MaxKeys=1000, ContinuationToken=None):
+        anahtarlar = sorted(k for k in self.kovalar[Bucket] if k.startswith(Prefix))
+        if ContinuationToken:
+            anahtarlar = [k for k in anahtarlar if k &gt; ContinuationToken]
+        sayfa = anahtarlar[:MaxKeys]
+        yanit = {"KeyCount": len(sayfa), "IsTruncated": len(anahtarlar) &gt; MaxKeys}
+        if sayfa:                                   # gerçek S3 gibi: boş sonuçta Contents yok
+            yanit["Contents"] = [{"Key": k, "Size": len(self.kovalar[Bucket][k])} for k in sayfa]
+        if yanit["IsTruncated"]:
+            yanit["NextContinuationToken"] = sayfa[-1]
+        return yanit
+
+
+s3 = SahteS3()
+s3.create_bucket(Bucket="kanat-veri")
+for gun in ["01", "02", "03"]:
+    s3.put_object(Bucket="kanat-veri", Key=f"ham/kanat/ucuslar/yil=2024/ay=09/gun={gun}/part-000.csv",
+                  Body="flight_id,status\n1,landed\n")
+s3.put_object(Bucket="kanat-veri", Key="ham/kanat/gecikmeler/yil=2024/ay=09/gun=01/part-000.csv", Body="x")
+
+yanit = s3.list_objects_v2(Bucket="kanat-veri", Prefix="ham/kanat/ucuslar/", MaxKeys=2)
+print([n["Key"].split("/")[-2] for n in yanit["Contents"]], yanit["IsTruncated"])
+print(s3.get_object(Bucket="kanat-veri", Key="ham/kanat/ucuslar/yil=2024/ay=09/gun=01/part-000.csv")["Body"].decode())</pre>
+
+<h2>Data lake yerleşimi ve bölümleme</h2>
+<p>Data lake (veri gölü), farklı kaynaklardan gelen ham ve işlenmiş verinin nesne depolamada düzenli bir yol şemasıyla tutulmasıdır. Yaygın katman düzeni (madalyon mimarisi olarak da bilinir):</p>
+<div class="tbl-wrap"><table>
+<tr><th>Katman</th><th>İçerik</th><th>Kural</th></tr>
+<tr><td><code>ham/</code> (bronze)</td><td>Kaynaktan geldiği gibi</td><td>Asla değiştirilmez; yeniden işleme kaynağı</td></tr>
+<tr><td><code>temiz/</code> (silver)</td><td>Tür dönüşümü, tekilleştirme, şema doğrulama</td><td>Genellikle Parquet</td></tr>
+<tr><td><code>mart/</code> (gold)</td><td>İş için özetlenmiş tablolar</td><td>Panolar ve analistler okur</td></tr>
+</table></div>
+<p>Her katmanda veri <b>tarihe göre bölümlenir</b> (partitioning). Hive biçimi (<code>yil=2024/ay=09/gun=01</code>) sorgu motorlarının (Athena, BigQuery, Spark, DuckDB) yalnızca ilgili klasörleri okumasını sağlar (partition pruning): "Eylül verisi" sorgusu diğer ayları hiç açmaz. Ay ve gün <b>iki haneli</b> yazılmalıdır, yoksa metin sıralaması bozulur (<code>ay=10</code> &lt; <code>ay=9</code>).</p>
+<pre class="py">from datetime import date
+
+def lake_yolu(katman, kaynak, tablo, gun, parca=0):
+    if katman not in {"ham", "temiz", "mart"}:
+        raise ValueError(f"bilinmeyen katman: {katman}")
+    return f"{katman}/{kaynak}/{tablo}/yil={gun.year}/ay={gun.month:02d}/gun={gun.day:02d}/part-{parca:03d}.csv"
+
+print(lake_yolu("ham", "kanat", "ucuslar", date(2024, 9, 1)))
+print(sorted(["ay=9", "ay=10", "ay=11"]), sorted(["ay=09", "ay=10", "ay=11"]))</pre>
+
+<h2>IAM ve en az yetki</h2>
+<p>IAM (Identity and Access Management) "kim, hangi kaynakta, hangi işlemi yapabilir?" sorusunu yönetir. Yetki JSON <b>politikalarıyla</b> verilir. Değerlendirme kuralı basittir: varsayılan olarak her şey yasaktır; bir <code>Allow</code> izin verir; açık bir <code>Deny</code> her zaman kazanır.</p>
+<pre class="code">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "HamKatmaniOku",
+      "Effect": "Allow",
+      "Action": ["s3:GetObject"],
+      "Resource": "arn:aws:s3:::kanat-veri/ham/kanat/*"
+    },
+    {
+      "Sid": "MartKatmaninaYaz",
+      "Effect": "Allow",
+      "Action": ["s3:PutObject"],
+      "Resource": "arn:aws:s3:::kanat-veri/mart/*"
+    }
+  ]
+}</pre>
+<p><b>En az yetki ilkesi</b> (least privilege): her kimlik yalnızca işini yapmak için gereken eylemlere, yalnızca gereken kaynaklarda sahip olmalı. <code>"Action": "s3:*"</code> ve <code>"Resource": "*"</code> görmek kod incelemesinde (code review) kırmızı bayraktır.</p>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Erişim anahtarı (access key)</th><th>Rol (role)</th></tr>
+<tr><td>Nedir?</td><td>Kalıcı kullanıcı adı/parola çifti</td><td>Geçici kimlik bilgisi veren kimlik</td></tr>
+<tr><td>Süre</td><td>Silinene kadar geçerli</td><td>Dakikalar/saatler sonra kendiliğinden düşer</td></tr>
+<tr><td>Risk</td><td>Koda, git'e, loga sızabilir</td><td>Sızsa bile kısa ömürlü</td></tr>
+<tr><td>Kullanım</td><td>Mümkünse hiç; zorunluysa kasada (secrets manager)</td><td>EC2, Lambda, konteyner, CI (OIDC) için standart</td></tr>
+</table></div>
+<p>boto3 kimlik bilgisini sırayla ortam değişkenlerinden, <code>~/.aws</code> profilinden ve çalıştığı makinenin rolünden arar. Koda asla anahtar yazma; yazdıysan anahtarı hemen iptal et (git geçmişinden silmek yetmez).</p>
+
+<h3>İmzalı URL (presigned URL)</h3>
+<p>Bir müşteriye özel bir faturayı indirtmek için kovayı herkese açmak yerine <b>süreli, imzalı bir bağlantı</b> üretirsin: <code>s3.generate_presigned_url("get_object", Params={...}, ExpiresIn=900)</code>. URL; nesne anahtarı, son kullanma zamanı ve gizli anahtarla üretilmiş bir HMAC imzası içerir. Sunucu imzayı yeniden hesaplar, eşleşmiyorsa ya da süre geçtiyse reddeder. Mantığı standart kütüphaneyle:</p>
+<pre class="py">import hashlib
+import hmac
+
+GIZLI = b"sunucuda-saklanan-gizli-anahtar"
+
+def imzala(anahtar, bitis):
+    mesaj = f"{anahtar}|{bitis}".encode()
+    return hmac.new(GIZLI, mesaj, hashlib.sha256).hexdigest()[:16]
+
+bitis = 1_735_700_000 + 900          # simdi + 15 dakika (epoch saniye)
+imza = imzala("fatura/2024/12/F-1001.pdf", bitis)
+print(f"https://kanat-veri.s3.amazonaws.com/fatura/2024/12/F-1001.pdf?expires={bitis}&amp;sig={imza}")
+print(hmac.compare_digest(imza, imzala("fatura/2024/12/F-1001.pdf", bitis)),
+      hmac.compare_digest(imza, imzala("fatura/2024/12/F-1002.pdf", bitis)))</pre>
+
+<h2>Serverless fonksiyon ve olay tetikleyici</h2>
+<p><b>Serverless</b> (sunucusuz) fonksiyonda yalnız bir fonksiyon yazarsın; sağlayıcı onu bir olay geldiğinde çalıştırır, milisaniye başına ücret alır, boşta maliyet sıfırdır. Tipik veri kullanımı: <code>ham/</code>'a yeni dosya düşünce S3 bir olay üretir, Lambda dosyayı okuyup doğrular ve <code>temiz/</code>'e yazar. Sınırları: çalışma süresi sınırı (AWS Lambda'da 15 dakika), soğuk başlangıç (cold start) gecikmesi, sınırlı bellek/disk. Uzun işler için konteyner (Fargate, Cloud Run) ya da toplu iş (batch) hizmetleri seçilir.</p>
+<pre class="code">import json, urllib.parse, boto3
+
+s3 = boto3.client("s3")
+
+def handler(event, context):
+    for kayit in event["Records"]:
+        kova = kayit["s3"]["bucket"]["name"]
+        anahtar = urllib.parse.unquote_plus(kayit["s3"]["object"]["key"])   # olaydaki anahtar URL kodludur!
+        govde = s3.get_object(Bucket=kova, Key=anahtar)["Body"].read()
+        # ... doğrula, dönüştür ...
+        s3.put_object(Bucket=kova, Key=anahtar.replace("ham/", "temiz/", 1), Body=govde)
+    return {"statusCode": 200, "body": json.dumps({"islenen": len(event["Records"])})}</pre>
+
+<h2>Yönetilen veritabanı ve ambar</h2>
+<p>Kendi sunucunda PostgreSQL kurmak yerine <b>yönetilen</b> hizmet (RDS, Cloud SQL) yedekleme, yama, çoğaltma ve AZ'ler arası yedekliliği üstlenir; sen şema ve sorguyla ilgilenirsin (<i>postgresql-python</i> dersi). Analitik için <b>BigQuery</b> (sunucusuz, taranan bayt başına ücret), <b>Snowflake</b> (depolama ve hesaplama ayrı ölçeklenir) ve <b>Redshift</b> gibi ambarlar kullanılır; dbt modelleri (<i>dbt-elt</i>) bu ambarlarda çalışır. Ortak tasarım ilkesi: <b>depolama ve hesaplamanın ayrılması</b>. Veri ucuz nesne depolamada durur, sorgu anında hesaplama kiralanır.</p>
+
+<h2>Maliyet tuzakları</h2>
+<p>Bulut faturası birkaç kalemden oluşur: depolama (GB-ay), istek sayısı (her PUT/GET/LIST), <b>dışarı çıkan trafik</b> (egress: buluttan internete ya da başka bölgeye veri aktarımı) ve hesaplama süresi. En sık sürprizler:</p>
+<ul>
+<li><b>Çıkış trafiği</b>: veriyi buluta yüklemek genellikle ücretsiz, dışarı çekmek ücretlidir. Analizi verinin bulunduğu bölgede yap.</li>
+<li><b>Küçük dosyalar</b>: saatte binlerce 5 KB'lık dosya hem istek ücretini patlatır hem de sorgu motorlarını yavaşlatır. Dosyaları yüzlerce MB'lık parçalarda birleştir (compaction).</li>
+<li><b>Unutulan kaynaklar</b>: test için açılıp kapatılmayan makineler, ekli kalmış diskler, eski anlık görüntüler. Etiketleme (tag) ve bütçe alarmı şart.</li>
+<li><b>Yaşam döngüsü yok</b>: 3 yıllık ham log'u en pahalı depolama sınıfında tutmak. Eski veriyi soğuk sınıfa taşıyan ya da silen yaşam döngüsü (lifecycle) kuralı yaz.</li>
+</ul>
+<pre class="py"># Temsili birim fiyatlar (gerçek fiyatlar bölgeye ve zamana göre değişir; sağlayıcının fiyat sayfasına bak)
+FIYAT = {"depolama_gb_ay": 0.023, "put_1000": 0.005, "get_1000": 0.0004, "cikis_gb": 0.09}
+
+def aylik(gb, put, get, cikis_gb):
+    return round(gb * FIYAT["depolama_gb_ay"] + put / 1000 * FIYAT["put_1000"]
+                 + get / 1000 * FIYAT["get_1000"] + cikis_gb * FIYAT["cikis_gb"], 2)
+
+# Aynı 500 GB veri: saatte 3600 küçük dosya mı, saatte 1 büyük dosya mı?
+print("küçük dosyalar:", aylik(500, 3600 * 24 * 30, 3600 * 24 * 30 * 5, 50), "$")
+print("birleştirilmiş:", aylik(500, 24 * 30, 24 * 30 * 5, 50), "$")</pre>
+
+<h2>Altyapıyı kod olarak yönetmek</h2>
+<p>Konsolda tıklayarak kurulan altyapı tekrarlanamaz ve denetlenemez. <b>IaC</b> (Infrastructure as Code) araçlarında (Terraform, Pulumi, AWS CDK) kovalar, roller ve politikalar dosyada tanımlanır, kod incelemesinden geçer ve <code>plan</code> ile değişiklik önceden görülür.</p>
+<pre class="code"># main.tf
+resource "aws_s3_bucket" "veri" {
+  bucket = "kanat-veri"
+  tags   = { ekip = "veri", ortam = "prod" }
+}
+resource "aws_s3_bucket_lifecycle_configuration" "ham" {
+  bucket = aws_s3_bucket.veri.id
+  rule {
+    id     = "ham-soguk"
+    status = "Enabled"
+    filter { prefix = "ham/" }
+    transition { days = 90  storage_class = "GLACIER" }
+  }
+}</pre>
+
+<h2>Test: sahte bulut</h2>
+<p>Birim testlerinde gerçek buluta gitmek yavaş, pahalı ve kırılgandır. <b>moto</b> kütüphanesi boto3 çağrılarını bellek içinde karşılar; alıştırmalardaki <code>SahteS3</code> ile aynı fikir. Entegrasyon testleri için LocalStack gibi yerel emülatörler de vardır.</p>
+<pre class="code">import boto3
+from moto import mock_aws
+
+@mock_aws
+def test_rapor_mart_katmanina_yazilir():
+    s3 = boto3.client("s3", region_name="eu-central-1")
+    s3.create_bucket(Bucket="kanat-veri", CreateBucketConfiguration={"LocationConstraint": "eu-central-1"})
+    rapor_uret(s3, "kanat-veri", "2024-09-01")              # test edilen fonksiyon
+    anahtarlar = [o["Key"] for o in s3.list_objects_v2(Bucket="kanat-veri", Prefix="mart/")["Contents"]]
+    assert anahtarlar == ["mart/kanat/gunluk/yil=2024/ay=09/gun=01/rapor.json"]</pre>
+<div class="warn"><b>KVKK ve veri yerleşimi</b>Kişisel veriyi yurt dışındaki bir bölgeye aktarmak KVKK kapsamında ek şartlara bağlıdır. Bölge seçimi teknik değil hukuki bir karardır: hangi verinin (kimlik, sağlık, finans) hangi bölgede tutulabileceğini hukuk ve bilgi güvenliği ekipleriyle birlikte belirle, kişisel veriyi mümkünse maskele ya da takma adlandır (pseudonymization) ve şifreleme anahtarlarının yönetimini planla.</div>
+<div class="note"><b>Gerçek işte</b>Bulut olaylarının çoğu karmaşık saldırılar değil, basit yapılandırma hatalarıdır: herkese açık bırakılmış bir kova, git'e itilmiş bir erişim anahtarı, <code>s3:*</code> yetkili bir uygulama rolü. Kıdemli ekipler üç kuralı otomatikleştirir: hesap düzeyinde "herkese açık erişimi engelle" ayarı, uzun ömürlü anahtar yerine rol ve OIDC, ve her kaynağa sahibini ve maliyet merkezini gösteren etiket. Faturayı her ay ekip bazında incelemek de mühendisliğin parçasıdır (FinOps).</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tablo biçimleri</h3>
+<p>Data lake'te düz Parquet dosyalarının üstüne <b>Apache Iceberg</b>, <b>Delta Lake</b> ve <b>Hudi</b> gibi açık tablo biçimleri ACID işlem, şema evrimi, zamanda yolculuk (eski sürümü sorgulama) ve satır düzeyinde güncelleme ekler. "Lakehouse" mimarisi bunların üstüne kurulur.</p>
+<h3>Tutarlılık ve idempotent yazma</h3>
+<p>S3 bugün yazdığını hemen okuyabildiğin güçlü tutarlılık sunar; ama olay tetikleyicileri en az bir kez (at-least-once) teslim edilir. Aynı olay iki kez gelebilir; Lambda'n aynı girdiyle iki kez çalışınca aynı sonucu üretmeli (deterministik çıktı anahtarı, üstüne yazma).</p>
+<h3>Ağ ve şifreleme</h3>
+<p>VPC (sanal özel ağ), alt ağlar ve güvenlik grupları veritabanını internetten ayırır; VPC endpoint ile S3 trafiği internete çıkmadan gider (hem güvenlik hem çıkış maliyeti). Kovalarda varsayılan şifreleme açık olmalı; hassas veride anahtarı kendin yönettiğin KMS anahtarı kullan.</p>
+<h3>Gözlemlenebilirlik</h3>
+<p>CloudWatch, Cloud Logging gibi hizmetler logları ve metrikleri toplar; S3 erişim logları ve CloudTrail "kim, ne zaman, neyi okudu?" sorusunu yanıtlar. Denetim izi KVKK açısından da gereklidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/bulut-temelleri">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../zaman-serisi-tahmin/">← Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye</a><a href="../dbt-elt/">ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

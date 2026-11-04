@@ -1,0 +1,311 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi | Kesit Python</title><meta name="description" content="Test piramidini kurar, unittest.mock'u side_effect, spec ve doğru patch hedefiyle ustalıkla kullanır, bağımlılık enjeksiyonuyla zamanı, rastgeleliği ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/test-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi"><meta property="og:description" content="Test piramidini kurar, unittest.mock'u side_effect, spec ve doğru patch hedefiyle ustalıkla kullanır, bağımlılık enjeksiyonuyla zamanı, rastgeleliği ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/test-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi","description":"Test piramidini kurar, unittest.mock'u side_effect, spec ve doğru patch hedefiyle ustalıkla kullanır, bağımlılık enjeksiyonuyla zamanı, rastgeleliği ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/test-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi</h1><p class="st-l">Test piramidini kurar, unittest.mock'u side_effect, spec ve doğru patch hedefiyle ustalıkla kullanır, bağımlılık enjeksiyonuyla zamanı, rastgeleliği ve ağı izole eder; fabrikalar, özellik tabanlı ve mutasyon testiyle testlerinin gerçekten hata yakaladığını kanıtlarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/test-ileri">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden ileri test teknikleri?</h2>
+<p>Test yazma dersinde <code>unittest</code>, düz <code>assert</code>, <code>patch.object</code> ve TDD döngüsünü gördün. Gerçek projede ise testlerin kendisi bir kod tabanına dönüşür: yüzlerce test, dış servislere bağlı kod, saatle değişen kurallar, rastgele üretilen kimlikler. Kötü tasarlanmış bir test paketi ya yavaştır, ya rastgele kırılır (flaky), ya da daha kötüsü <b>her şey yeşilken hatayı kaçırır</b>. Bu derste Ilgaz Bank ve Anadolu Market örnekleriyle testlerini hızlı, güvenilir ve gerçekten hata yakalayan hâle getirmeyi öğreneceksin.</p>
+
+<h2>Test piramidi</h2>
+<p>Test piramidi (test pyramid), farklı düzeydeki testlerden ne kadar yazman gerektiğini anlatan bir kılavuzdur: tabanda çok sayıda hızlı <b>birim testi</b> (unit test), ortada daha az <b>entegrasyon testi</b> (integration test), tepede birkaç <b>uçtan uca test</b> (end-to-end, E2E).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Düzey</th><th>Neyi sınar?</th><th>Hız</th><th>Örnek (Anadolu Market)</th></tr>
+<tr><td>Birim</td><td>Tek fonksiyon/sınıf, dış bağımlılık yok</td><td>Milisaniye</td><td><code>indirim_hesapla(sepet)</code></td></tr>
+<tr><td>Entegrasyon</td><td>Bileşenlerin birlikte çalışması (gerçek SQLite, gerçek ORM)</td><td>Saniye altı</td><td>Sipariş deposu + veritabanı</td></tr>
+<tr><td>Uçtan uca</td><td>Kullanıcının gördüğü akış, tüm sistem ayakta</td><td>Saniyeler-dakikalar</td><td>Sepete ekle → öde → e-posta gelsin</td></tr>
+</table></div>
+<p>Piramit ters dönerse (çok E2E, az birim testi) CI yavaşlar, hatanın yeri bulunamaz ve testler küçük arayüz değişikliklerinde topluca kırılır.</p>
+
+<h2>Test ikizleri: dummy, stub, fake, mock, spy</h2>
+<p>Gerçek bir bağımlılığın yerine geçen nesneye genel olarak <b>test ikizi</b> (test double) denir. Türleri karıştırılır ama farkları önemlidir:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Tür</th><th>Ne yapar?</th><th>Ne zaman?</th></tr>
+<tr><td>Dummy</td><td>Yalnızca parametre doldurur, kullanılmaz</td><td>İmza gerektiriyor ama test ilgilenmiyor</td></tr>
+<tr><td>Saplama (stub)</td><td>Sabit cevap döndürür</td><td>"Kur servisi 40.0 desin"</td></tr>
+<tr><td>Sahte (fake)</td><td>Çalışan ama basit bir gerçekleme</td><td>Bellek içi depo, sözlükle çalışan önbellek (cache)</td></tr>
+<tr><td>Taklit (mock)</td><td>Çağrıları kaydeder, beklentiyi doğrular</td><td>"SMS tam bir kez bu numaraya gitti mi?"</td></tr>
+<tr><td>Casus (spy)</td><td>Gerçeği çağırır, çağrıları da kaydeder</td><td><code>Mock(wraps=gercek)</code></td></tr>
+</table></div>
+<p>Kural: <b>durumu</b> (sonuç ne oldu?) doğrulamak için stub ve fake, <b>etkileşimi</b> (kim, kime, neyle çağrıldı?) doğrulamak için mock kullan. Her şeyi mock'larsan testler gerçekleştirmenin ayrıntısına kilitlenir ve her yeniden düzenlemede kırılır.</p>
+<pre class="py">class SahteMusteriDepo:
+    """Gerçek SQL deposuyla aynı arayüz, bellekte çalışır (fake)."""
+    def __init__(self):
+        self._kayitlar = {}
+    def ekle(self, musteri):
+        self._kayitlar[musteri["id"]] = dict(musteri)
+    def getir(self, mid):
+        return self._kayitlar.get(mid)
+
+def sadakat_puani_ekle(depo, mid, tutar):
+    m = depo.getir(mid)
+    m["puan"] = m.get("puan", 0) + int(tutar // 10)
+    depo.ekle(m)
+    return m["puan"]
+
+depo = SahteMusteriDepo()
+depo.ekle({"id": 7, "ad": "Ayşe"})
+print(sadakat_puani_ekle(depo, 7, 255))
+print(depo.getir(7))     # durumu doğruluyoruz, etkileşimi değil</pre>
+
+<h2>unittest.mock derinlemesine</h2>
+<p><code>Mock</code> ve <code>MagicMock</code> erişilen her özniteliği anında yaratır ve her çağrıyı kaydeder. En sık kullanacağın ayarlar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Görevi</th></tr>
+<tr><td><code>return_value</code></td><td>Çağrı hep bu değeri döndürür</td></tr>
+<tr><td><code>side_effect = İstisna</code></td><td>Çağrı istisna fırlatır (ağ hatası taklidi)</td></tr>
+<tr><td><code>side_effect = [a, b, c]</code></td><td>Her çağrıda sıradaki değer (listede istisna varsa fırlatılır)</td></tr>
+<tr><td><code>side_effect = fonksiyon</code></td><td>Argümanlara göre hesaplanan cevap</td></tr>
+<tr><td><code>assert_called_once_with(...)</code></td><td>Tam bir kez, bu argümanlarla çağrıldı mı?</td></tr>
+<tr><td><code>call_args</code>, <code>call_args_list</code>, <code>call_count</code></td><td>Kayıtlı çağrıları incelemek için</td></tr>
+<tr><td><code>Mock(spec=Sinif)</code>, <code>create_autospec</code></td><td>Yalnızca gerçek sınıfta olan özniteliklere izin verir; autospec imzayı da denetler</td></tr>
+</table></div>
+<pre class="py">from unittest.mock import Mock, MagicMock, call
+
+kur = Mock(side_effect=[38.5, ConnectionError("TCMB yanıt vermiyor"), 38.7])
+print(kur("USD"))
+try:
+    kur("USD")
+except ConnectionError as e:
+    print("yakalandı:", e)
+print(kur("USD"), "| çağrı sayısı:", kur.call_count)
+
+sms = Mock()
+sms.gonder("05321112233", "Siparişin yola çıktı")
+sms.gonder.assert_called_once_with("05321112233", "Siparişin yola çıktı")
+print(sms.gonder.call_args_list == [call("05321112233", "Siparişin yola çıktı")])
+
+sepet = MagicMock()          # sihirli metotları da destekler
+sepet.__len__.return_value = 3
+print(len(sepet), "ürün")</pre>
+<div class="warn"><b>spec kullanmayan mock yalan söyleyebilir</b>Gerçek sınıfta metot <code>kaydet</code> ama kodun <code>depo.kayit_et()</code> çağırıyorsa, düz <code>Mock()</code> bunu sessizce kabul eder ve test yeşil kalır; üretimde ise AttributeError alırsın. <code>Mock(spec=Depo)</code> ya da <code>create_autospec(Depo)</code> bu yalanı engeller. Ayrıca <code>m.assert_called_once_wiht(...)</code> gibi yazım hatalarını Python 3.12 AttributeError ile yakalar.</div>
+<pre class="py">from unittest.mock import Mock, create_autospec
+
+class Depo:
+    def kaydet(self, siparis): ...
+
+serbest = Mock()
+serbest.kayit_et({"id": 1})               # hata yok: yalan söyleyen test
+print("düz Mock sorunu fark etmedi")
+
+kati = create_autospec(Depo, instance=True)
+try:
+    kati.kayit_et({"id": 1})
+except AttributeError as e:
+    print("autospec yakaladı:", type(e).__name__)
+try:
+    kati.kaydet()                          # eksik argüman
+except TypeError as e:
+    print("imza da denetlendi:", type(e).__name__)</pre>
+
+<h2>patch hedefi: nerede kullanılıyorsa orası</h2>
+<p><code>patch("a.b.c")</code> bir modüldeki <b>adı</b> geçici olarak değiştirir. <code>rapor.py</code> içinde <code>from kur import kur_getir</code> yazılmışsa, <code>rapor</code> modülü kendi <code>kur_getir</code> adına sahiptir; <code>patch("kur.kur_getir")</code> bunu etkilemez. Doğru hedef <code>patch("rapor.kur_getir")</code>'dir. Aşağıda iki modülü bellekte oluşturup farkı görüyoruz:</p>
+<pre class="py">import sys, types
+from unittest.mock import patch
+
+kur = types.ModuleType("kur")
+def kur_getir(doviz):
+    raise ConnectionError("ağ yok")
+kur.kur_getir = kur_getir
+sys.modules["kur"] = kur
+
+rapor = types.ModuleType("rapor")
+exec("from kur import kur_getir\ndef tl(tutar): return round(tutar * kur_getir('USD'), 2)", rapor.__dict__)
+sys.modules["rapor"] = rapor
+
+with patch("kur.kur_getir", return_value=40.0):
+    try:
+        rapor.tl(100)
+    except ConnectionError:
+        print("Yanlış hedef: rapor hâlâ gerçek fonksiyonu çağırdı")
+
+with patch("rapor.kur_getir", return_value=40.0) as sahte:
+    print("Doğru hedef:", rapor.tl(100))
+    sahte.assert_called_once_with("USD")</pre>
+
+<h2>Bağımlılık enjeksiyonu: test edilebilir tasarım</h2>
+<p>Patch'e çok ihtiyaç duyuyorsan bu genellikle tasarımın bağımlılıkları içeride sakladığını gösterir. <b>Bağımlılık enjeksiyonu</b> (dependency injection) ile saat, rastgele sayı üreteci (generator), HTTP istemcisi ve depo dışarıdan verilir; testte yerine sabit/sahte olanı koyarsın. Zaman (<code>datetime.now</code>), rastgelelik (<code>random</code>) ve ağ, testleri "bazen kırmızı" yapan üç büyük kaynaktır.</p>
+<pre class="py">import random
+from datetime import datetime
+
+class KuponUretici:
+    def __init__(self, saat=datetime.now, rng=None):
+        self.saat = saat
+        self.rng = rng or random.Random()
+
+    def uret(self, musteri_id):
+        gun = self.saat().strftime("%y%m%d")
+        return f"AM{gun}-{musteri_id}-{self.rng.randint(100, 999)}"
+
+sabit_saat = lambda: datetime(2026, 3, 13, 9, 30)
+u1 = KuponUretici(saat=sabit_saat, rng=random.Random(42))
+u2 = KuponUretici(saat=sabit_saat, rng=random.Random(42))
+print(u1.uret(15), u2.uret(15))      # aynı tohum, aynı sonuç: deterministik test</pre>
+
+<h2>Parametrize ve test verisi fabrikaları</h2>
+<p>Aynı mantığı onlarca girdiyle denemek için testi kopyalamazsın; <b>tablo güdümlü</b> (table-driven) yazarsın. pytest'te bu <code>@pytest.mark.parametrize</code>, unittest'te <code>subTest</code>'tir:</p>
+<pre class="code">import pytest
+
+@pytest.mark.parametrize("tutar, beklenen", [(100, 120.0), (0, 0.0), (19.99, 23.99)])
+def test_kdv(tutar, beklenen):
+    assert kdv_ekle(tutar) == pytest.approx(beklenen)</pre>
+<p>Testlerde sık ihtiyaç duyulan nesneleri (müşteri, sipariş) her seferinde elle yazmak hem uzun hem kırılgandır. <b>Fabrika</b> (factory) fonksiyonu makul varsayılanlar üretir; test yalnızca kendisini ilgilendiren alanı değiştirir. Python'da <code>factory_boy</code> kütüphanesi bunu büyük ölçekte yapar.</p>
+<pre class="py">import copy, itertools
+
+_sayac = itertools.count(1)
+VARSAYILAN = {"musteri": "Ayşe", "sehir": "İzmir", "kalemler": [{"urun": "Çay", "adet": 1, "fiyat": 50.0}]}
+
+def siparis(**ozel):
+    s = copy.deepcopy(VARSAYILAN)
+    s["id"] = next(_sayac)
+    s.update(ozel)
+    return s
+
+print(siparis())
+print(siparis(sehir="Van", musteri="Mehmet"))</pre>
+
+<h2>Özellik tabanlı test</h2>
+<p>Örnek tabanlı testte girdiyi sen seçersin; <b>özellik tabanlı testte</b> (property-based testing) her girdi için doğru olması gereken bir <b>özellik</b> yazarsın ve araç yüzlerce rastgele girdi üretir. Python'da standart araç <b>hypothesis</b>'tir; bulduğu hatalı girdiyi en küçük hâline <b>küçültür</b> (shrinking).</p>
+<pre class="code">from hypothesis import given, strategies as st
+
+@given(st.floats(min_value=0, max_value=1e6), st.integers(min_value=0, max_value=100))
+def test_indirim_fiyati_asmaz(fiyat, oran):
+    sonuc = indirimli(fiyat, oran)
+    assert 0 &lt;= sonuc &lt;= fiyat</pre>
+<p>Kendi bilgisayarında dene: <code>pip install hypothesis pytest</code>. Tarayıcıda hypothesis yok; ama fikri <code>random.Random(tohum)</code> ile kendimiz kurabiliriz. Aşağıdaki indirim fonksiyonundaki hatayı elle yazdığın üç örnek muhtemelen yakalamazdı:</p>
+<pre class="py">import random
+
+def indirimli(fiyat, oran):
+    return round(fiyat - fiyat * oran / 10, 2)     # hata: /100 olmalıydı
+
+def ozellik(fiyat, oran):
+    s = indirimli(fiyat, oran)
+    return 0 &lt;= s &lt;= fiyat
+
+rng = random.Random(0)
+for deneme in range(1, 501):
+    fiyat, oran = round(rng.uniform(0, 1000), 2), rng.randint(0, 100)
+    if not ozellik(fiyat, oran):
+        print(f"{deneme}. denemede karşı örnek: fiyat={fiyat}, oran={oran} -&gt; {indirimli(fiyat, oran)}")
+        break
+else:
+    print("500 denemede özellik bozulmadı")</pre>
+<p>İyi özellik kalıpları: <b>gidiş-dönüş</b> (<code>json.loads(json.dumps(x)) == x</code>), <b>değişmezler</b> (sıralama eleman sayısını korur), <b>eşgüç</b> (idempotence: <code>temizle(temizle(x)) == temizle(x)</code>) ve <b>referansla karşılaştırma</b> (hızlı algoritma = yavaş ama kesin olan).</p>
+
+<h2>Kapsam, dal kapsamı ve mutasyon testi</h2>
+<p><b>Satır kapsamı</b> (line coverage) hangi satırların çalıştığını ölçer; <b>dal kapsamı</b> (branch coverage) her <code>if</code>'in hem doğru hem yanlış yolunun denendiğini. <code>if vip: oran += 5</code> satırı yalnızca VIP müşteriyle test edilirse satır kapsamı %100 olur ama "VIP değil" yolu hiç denenmemiştir. Komut: <code>coverage run --branch -m pytest</code> ve <code>coverage report -m</code> (Kalite ve CI dersinde kapsam eşiğini gördün).</p>
+<p>Kapsam bir testin kodu <b>çalıştırdığını</b> söyler, <b>doğruladığını</b> söylemez. <b>Mutasyon testi</b> (mutation testing) bunu ölçer: araç koda küçük hatalar (mutant) sokar, ör. <code>&lt;</code> yerine <code>&lt;=</code>, ve testleri koşturur. Testler kırmızıya dönerse mutant <b>öldürülmüştür</b>; yeşil kalırsa <b>hayatta kalmıştır</b> ve testlerinde bir boşluk var demektir. Python'da <code>mutmut</code> ve <code>cosmic-ray</code> bu işi yapar.</p>
+<pre class="py">import ast
+
+kaynak = "def ucretsiz_kargo(tutar):\n    return tutar &gt;= 500\n"
+
+class BuyukEsitToBuyuk(ast.NodeTransformer):
+    def visit_Compare(self, dugum):
+        dugum.ops = [ast.Gt() if isinstance(o, ast.GtE) else o for o in dugum.ops]
+        return dugum
+
+mutant = ast.unparse(BuyukEsitToBuyuk().visit(ast.parse(kaynak)))
+print("Mutant:", mutant.splitlines()[1].strip())
+
+def testler(f):
+    assert f(1000) is True
+    assert f(100) is False
+
+for ad, kod in [("orijinal", kaynak), ("mutant", mutant)]:
+    ns = {}
+    exec(kod, ns)
+    testler(ns["ucretsiz_kargo"])
+    print(ad, "testleri geçti")
+print("Mutant hayatta kaldı: sınır değeri 500 hiç test edilmemiş!")</pre>
+
+<h2>TDD ve güvenli yeniden düzenleme</h2>
+<p>Kırmızı-yeşil-düzenle döngüsünü biliyorsun. İleri seviyede asıl kazanç "düzenle" adımındadır: davranışı kilitleyen testler varken kodu gönül rahatlığıyla yeniden yapılandırırsın (refactor). Eski, testsiz bir koda dokunmadan önce <b>karakterizasyon testi</b> (characterization test) yaz: kodun bugün ne yaptığını (doğru ya da yanlış) kaydeden testler. Sonra küçük adımlarla değiştir, her adımda testleri çalıştır.</p>
+<div class="tip"><b>İyi testin özellikleri: FIRST</b><b>F</b>ast (hızlı), <b>I</b>solated (birbirinden bağımsız, sıra önemsiz), <b>R</b>epeatable (her makinede aynı sonuç: sabit saat, sabit tohum), <b>S</b>elf-validating (assert ile kendi karar verir, çıktıya bakmayı gerektirmez), <b>T</b>imely (kodla birlikte yazılır).</div>
+<div class="note"><b>Gerçek işte</b>Bankacılık ve e-ticaret ekiplerinde birleştirme isteği (pull request) incelemesinde ilk bakılan şeylerden biri yeni kodun testidir: "Hata yolu test edilmiş mi? Saat sabitlenmiş mi? Mock'lar spec'li mi?" Rastgele kırılan (flaky) bir test bulunduğunda genellikle karantinaya alınır ve kök nedeni (çoğu zaman paylaşılan durum, gerçek saat ya da test sırası) düzeltilene kadar bir iş kaydı açık kalır. Kritik modüllerde (ödeme, faiz hesabı) mutasyon testi gece çalışan ayrı bir CI işinde koşturulabilir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Mock ve fake'ler hızlıdır ama bir noktada gerçek parçalarla da sınaman gerekir: SQL sorgun PostgreSQL'de gerçekten çalışıyor mu, API'n yayımladığı sözleşmeye uyuyor mu, sistem yük altında ne kadar dayanıyor? Bu bölüm test piramidinin üst katlarını uygulamalı olarak açıyor: gerçek veritabanıyla entegrasyon testi, sözleşme testi ve yük testi.</p>
+<h2>Gerçek veritabanı, temiz durum: transaction rollback fixture</h2>
+<p>Entegrasyon testlerinin en büyük sorunu durumdur: bir testin eklediği satır diğerini bozar. Her testte veritabanını sıfırdan kurmak yavaştır. Yaygın çözüm, her testi <b>geri alınacak bir transaction</b> içinde çalıştırmaktır: test başında <code>BEGIN</code>, sonunda <code>ROLLBACK</code>. Test istediği kadar yazar, iz bırakmaz. Test edilen kod kendi içinde <code>commit()</code> çağırıyorsa, dış transaction'ı korumak için iç işlemleri bir <b>savepoint</b>'e (iç içe transaction) bağlarsın.</p>
+<pre class="code"># conftest.py (SQLAlchemy 2.0 + pytest)
+import pytest
+from sqlalchemy import create_engine
+from sqlalchemy.orm import Session
+
+@pytest.fixture(scope="session")
+def engine():
+    from testcontainers.postgres import PostgresContainer    # pip install testcontainers
+    with PostgresContainer("postgres:16") as pg:             # gerçek PostgreSQL, geçici konteyner
+        eng = create_engine(pg.get_connection_url())
+        Base.metadata.create_all(eng)                        # ya da: alembic upgrade head
+        yield eng
+
+@pytest.fixture
+def db(engine):
+    with engine.connect() as conn:
+        dis = conn.begin()                                   # dış transaction
+        oturum = Session(bind=conn, join_transaction_mode="create_savepoint")
+        yield oturum                                         # kodun commit'i yalnız savepoint'i kapatır
+        oturum.close()
+        dis.rollback()                                       # her şey geri alınır</pre>
+<p><b>testcontainers</b>, test oturumu başında Docker'da gerçek bir PostgreSQL (ya da Redis, Kafka) başlatır ve sonunda siler. SQLite ile test edip PostgreSQL'de çalıştırmak, <code>ILIKE</code>, JSONB, eşzamanlı kilitler ve tarih fonksiyonlarındaki farkları kaçırır. CI'da Docker varsa bu yaklaşım pratik ve güvenilirdir. Aynı fikrin sqlite3 ile çalışan küçük hâli:</p>
+<pre class="py">import sqlite3
+from contextlib import contextmanager
+
+conn = sqlite3.connect(":memory:", isolation_level=None)    # transaction'ları elle yönet
+conn.execute("CREATE TABLE siparis (id INTEGER PRIMARY KEY, tutar REAL)")
+conn.execute("INSERT INTO siparis (tutar) VALUES (100)")
+
+@contextmanager
+def test_islemi(c):
+    c.execute("BEGIN")
+    try:
+        yield c
+    finally:
+        c.execute("ROLLBACK")
+
+def siparis_ekle(c, tutar):            # test edilen kod: kendi savepoint'ini açar ve kapatır
+    c.execute("SAVEPOINT ekle")
+    c.execute("INSERT INTO siparis (tutar) VALUES (?)", (tutar,))
+    c.execute("RELEASE ekle")
+
+with test_islemi(conn) as c:
+    siparis_ekle(c, 250)
+    print("test içinde:", c.execute("SELECT COUNT(*) FROM siparis").fetchone()[0])
+print("test sonrası:", conn.execute("SELECT COUNT(*) FROM siparis").fetchone()[0])</pre>
+<h2>Sözleşme testi: API'n söz verdiği gibi mi?</h2>
+<p>Bir API'nin sözleşmesi OpenAPI belgesidir: hangi uç nokta, hangi alanlar, hangi türler, hangileri zorunlu. FastAPI bu belgeyi koddan üretir; ama istemciler (mobil uygulama, başka ekip) belgeye güvenir. İki tür sözleşme testi vardır:</p>
+<div class="tbl-wrap"><table><tr><th>Yaklaşım</th><th>Nasıl?</th><th>Araç</th></tr>
+<tr><td>Şemaya karşı test</td><td>Gerçek yanıtları OpenAPI şemasıyla doğrula; şemadan rastgele istekler üretip sunucuyu zorla</td><td>schemathesis, openapi-core</td></tr>
+<tr><td>Tüketici güdümlü (consumer-driven)</td><td>Her istemci beklediği alanları bir sözleşme dosyasına yazar; sağlayıcı CI'da bu dosyalara karşı test edilir</td><td>Pact</td></tr>
+<tr><td>Kırıcı değişiklik denetimi</td><td>Yeni şemayı eskisiyle karşılaştır; alan silme, tür değiştirme, yeni zorunlu alan = kırıcı</td><td>oasdiff, openapi-diff</td></tr></table></div>
+<pre class="code">schemathesis run http://localhost:8000/openapi.json --checks all   # şemadan yüzlerce istek üretir</pre>
+<h2>Yük testi: ne kadar dayanır?</h2>
+<p>Yük testi (load test), gerçekçi eşzamanlı kullanıcı trafiği altında yanıt sürelerini ve hata oranını ölçer. Python dünyasında en yaygın araç <b>locust</b>'tır: kullanıcı davranışını Python sınıfı olarak yazarsın.</p>
+<pre class="code"># locustfile.py   →   locust -f locustfile.py --host http://localhost:8000 -u 200 -r 20 -t 5m --headless
+from locust import HttpUser, task, between
+
+class Musteri(HttpUser):
+    wait_time = between(1, 3)            # kullanıcılar arası düşünme süresi
+
+    @task(5)                             # ağırlık: listeleme 5 kat sık
+    def urunler(self):
+        self.client.get("/urunler?sayfa=1")
+
+    @task(1)
+    def siparis(self):
+        self.client.post("/siparisler", json={"urun_id": 7, "adet": 1})</pre>
+<p>Ortalamaya değil <b>yüzdeliklere</b> bak: p95 = 480 ms, isteklerin %95'inin 480 ms'den kısa sürdüğünü söyler. Ortalama, birkaç çok yavaş isteği gizler; o yavaş istekler genellikle en çok sipariş veren müşterilerinkidir. Hedefleri SLO (hizmet düzeyi hedefi) olarak yaz: "p95 &lt; 500 ms, hata oranı &lt; %1, 200 eşzamanlı kullanıcıda". Yük testini prod'a değil, prod benzeri staging ortamına uygula.</p>
+<div class="note"><b>Gerçek işte</b>Backend ekiplerinde tipik test dağılımı: çok sayıda hızlı birim testi, her depo ve sorgu için rollback fixture'lı entegrasyon testleri, CI'da sözleşme ve kırıcı değişiklik denetimi, büyük sürümlerden önce staging'de yük testi. Mülakatta "Entegrasyon testlerinde veritabanını nasıl izole ediyorsun?" sorusuna transaction rollback cevabı beklenir.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sözleşme testleri ve sahtenin doğruluğu</h3>
+<p>Fake kullanmanın riski, sahtenin gerçekten farklı davranmasıdır. Çözüm: aynı test paketini hem fake hem gerçek depo üzerinde çalıştırmak (<b>sözleşme testi</b>, contract test). pytest'te bunu parametrize edilmiş bir fixture ile yaparsın; gerçek PostgreSQL için <code>testcontainers</code> testte geçici bir konteyner açar.</p>
+<h3>Flaky testlerin anatomisi</h3>
+<p>Rastgele kırılan testlerin çoğu şu kaynaklardan gelir: gerçek saat (gece yarısı geçişi, saat dilimi), sabitlenmemiş rastgelelik, testler arasında paylaşılan modül düzeyi durum, sıraya bağımlılık (<code>pytest-randomly</code> sırayı karıştırarak bunu ortaya çıkarır), ağ ve <code>time.sleep</code> ile beklenen eşzamanlılık (concurrency). Her birinin ilacı aynıdır: bağımlılığı dışarıdan ver ve testte kontrol et.</p>
+<h3>Ne kadar mock?</h3>
+<p>"Sahip olmadığın şeyi mock'lama" sık duyulan bir ilkedir: üçüncü taraf bir kütüphaneyi doğrudan mock'lamak yerine onu kendi küçük adaptör sınıfının arkasına koy, testte adaptörü değiştir. Böylece kütüphane değiştiğinde yalnızca adaptör ve onun entegrasyon testi etkilenir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/test-ileri">Alıştırmalara geç (29)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-api/">← Bitirme projesi: Anadolu Market Sipariş API'si</a><a href="../eda-kesifsel/">Keşifsel veri analizi (EDA): sorudan bulguya →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

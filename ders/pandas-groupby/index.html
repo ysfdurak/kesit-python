@@ -1,0 +1,279 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>groupby, pivot ve merge | Kesit Python</title><meta name="description" content="groupby/agg/transform ile özet, pivot_table ile çapraz tablo, merge/concat ile tablo birleştirme, resample ile zaman serisi ve apply tuzağı; Anadolu…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pandas-groupby/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="groupby, pivot ve merge"><meta property="og:description" content="groupby/agg/transform ile özet, pivot_table ile çapraz tablo, merge/concat ile tablo birleştirme, resample ile zaman serisi ve apply tuzağı; Anadolu…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pandas-groupby/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"groupby, pivot ve merge","description":"groupby/agg/transform ile özet, pivot_table ile çapraz tablo, merge/concat ile tablo birleştirme, resample ile zaman serisi ve apply tuzağı; Anadolu…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/pandas-groupby/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>groupby, pivot ve merge</h1><p class="st-l">groupby/agg/transform ile özet, pivot_table ile çapraz tablo, merge/concat ile tablo birleştirme, resample ile zaman serisi ve apply tuzağı; Anadolu Market satış analizi.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-groupby">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Soru: "Hangi şehir, hangi kategoride ne kadar satıyor?"</h2>
+<p>Anadolu Market yönetimi her ay aynı soruları sorar: şehir bazında ciro, kategori bazında ortalama sepet, müşteri başına sipariş sayısı, haftalık trend. Bu soruların hepsi "böl → hesapla → birleştir" (split-apply-combine) kalıbıdır ve pandas'ta <b>groupby</b> ile yazılır. Derste tek bir sipariş tablosu üzerinden tüm araçları sırayla göreceğiz.</p>
+
+<h2>groupby ve agg</h2>
+<p><code>df.groupby("sehir")</code> tabloyu şehir gruplarına böler; ardından <code>["tutar"].sum()</code> gibi bir özet uygulanır. Birden çok özet için <code>agg</code>: sözlükle sütun başına fonksiyon, ya da <b>adlandırılmış agg</b> ile çıktı sütun adlarını kendin ver.</p>
+<pre class="py">import pandas as pd, io
+
+CSV = """siparis_id,musteri,sehir,kategori,adet,fiyat,tarih
+1001,Ayşe,İstanbul,Gıda,3,45.5,2024-03-01
+1002,Mehmet,Ankara,Elektronik,1,899.0,2024-03-01
+1003,Ayşe,İstanbul,Gıda,10,12.75,2024-03-04
+1004,Zeynep,İzmir,Kozmetik,2,129.9,2024-03-05
+1005,Ali,Ankara,Gıda,6,45.5,2024-03-09
+1006,Zeynep,İzmir,Elektronik,1,1250.0,2024-03-12
+1007,Mehmet,Ankara,Gıda,4,12.75,2024-03-15
+1008,Ayşe,İstanbul,Kozmetik,1,129.9,2024-03-20
+"""
+df = pd.read_csv(io.StringIO(CSV), parse_dates=["tarih"])
+df["tutar"] = df["adet"] * df["fiyat"]
+
+print(df.groupby("sehir")["tutar"].sum())
+print(df.groupby("sehir").agg(
+    ciro=("tutar", "sum"),
+    siparis=("siparis_id", "count"),
+    ort_sepet=("tutar", "mean"),
+).round(1))
+print(df.groupby(["sehir", "kategori"])["tutar"].sum().reset_index().head(4))
+</pre>
+<div class="tip"><b>reset_index</b>groupby sonucu grup anahtarlarını index yapar. Raporda düz tablo istiyorsan <code>reset_index()</code> ya da baştan <code>groupby(..., as_index=False)</code>.</div>
+
+<h2>transform: grubun özetini satıra geri yaz</h2>
+<p><code>agg</code> grup başına bir satır verir; <code>transform</code> ise her satıra kendi grubunun değerini yazar, uzunluk değişmez. "Her siparişin, şehrinin toplam cirosundaki payı" sorusu bunu ister.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["Ankara", "Ankara", "İzmir", "İzmir", "İzmir"],
+    "tutar": [899.0, 273.0, 259.8, 1250.0, 51.0],
+})
+df["sehir_toplam"] = df.groupby("sehir")["tutar"].transform("sum")
+df["pay"] = (df["tutar"] / df["sehir_toplam"] * 100).round(1)
+df["sehir_sira"] = df.groupby("sehir")["tutar"].rank(ascending=False).astype(int)
+print(df)
+print(df[df["sehir_sira"] == 1])      # her şehrin en büyük siparişi
+</pre>
+
+<h2>pivot_table: çapraz tablo</h2>
+<p>Satırlarda şehir, sütunlarda kategori, hücrede ciro: Excel'in pivotu. <code>fill_value</code> boş kombinasyonu doldurur, <code>margins=True</code> toplam satır/sütun ekler.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["İstanbul", "Ankara", "İstanbul", "İzmir", "Ankara", "İzmir"],
+    "kategori": ["Gıda", "Elektronik", "Gıda", "Kozmetik", "Gıda", "Elektronik"],
+    "tutar": [136.5, 899.0, 127.5, 259.8, 273.0, 1250.0],
+})
+pv = pd.pivot_table(df, index="sehir", columns="kategori", values="tutar",
+                    aggfunc="sum", fill_value=0, margins=True, margins_name="Toplam")
+print(pv)
+print(pd.crosstab(df["sehir"], df["kategori"]))   # yalnızca sayım
+</pre>
+
+<h2>merge, join, concat</h2>
+<p>Siparişler bir tabloda, müşteri bilgileri (segment, kayıt tarihi) başka tabloda. SQL JOIN'in karşılığı <code>pd.merge</code>. <code>how</code> parametresi hangi satırların kalacağını belirler:</p>
+<div class="tbl-wrap"><table><tr><th>how</th><th>Sonuç</th><th>Tipik kullanım</th></tr>
+<tr><td><code>inner</code></td><td>İki tarafta da eşleşenler</td><td>Yalnızca bilinen müşterilerin siparişleri</td></tr>
+<tr><td><code>left</code></td><td>Sol tablonun tümü, sağdan eşleşen</td><td>Siparişleri koru, müşteri bilgisi yoksa NaN</td></tr>
+<tr><td><code>outer</code></td><td>Her iki tablonun tümü</td><td>Uyuşmazlık denetimi</td></tr>
+<tr><td><code>concat</code></td><td>Alt alta (ya da yan yana) ekleme</td><td>Aylık dosyaları birleştirme</td></tr>
+</table></div>
+<pre class="py">import pandas as pd
+
+siparis = pd.DataFrame({"siparis_id": [1, 2, 3, 4], "musteri_id": [10, 20, 10, 99], "tutar": [136.5, 899.0, 127.5, 50.0]})
+musteri = pd.DataFrame({"musteri_id": [10, 20, 30], "ad": ["Ayşe", "Mehmet", "Zeynep"], "segment": ["Altın", "Gümüş", "Gümüş"]})
+
+print(pd.merge(siparis, musteri, on="musteri_id", how="inner"))
+sol = pd.merge(siparis, musteri, on="musteri_id", how="left", indicator=True)
+print(sol[["siparis_id", "ad", "_merge"]])
+print(sol[sol["ad"].isna()]["siparis_id"].tolist(), "-&gt; müşterisi bilinmeyen sipariş")
+
+mart = pd.DataFrame({"ay": ["Mart"], "ciro": [1213.0]})
+nisan = pd.DataFrame({"ay": ["Nisan"], "ciro": [1480.5]})
+print(pd.concat([mart, nisan], ignore_index=True))
+</pre>
+<div class="warn"><b>Satır patlaması</b>Sağ tabloda anahtar tekrar ediyorsa (bir müşteri iki satır) merge sonrası sol tablo satırları çoğalır ve ciro iki kat çıkar. Birleştirmeden önce <code>musteri["musteri_id"].is_unique</code> kontrol et ya da <code>validate="many_to_one"</code> ver; pandas tekrar varsa hata fırlatır.</div>
+
+<h2>Zaman serisi: resample</h2>
+<p>Tarih sütununu index yapınca (<code>set_index("tarih")</code>) pandas zamanı anlar: <code>resample("W")</code> haftalık, <code>"ME"</code> ay sonu, <code>"D"</code> günlük kovalara böler ve groupby gibi özetler. <code>.dt</code> erişimcisi ile ay, hafta günü gibi parçalar sütun olarak çıkarılır.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "tarih": pd.to_datetime(["2024-03-01", "2024-03-01", "2024-03-04", "2024-03-05",
+                             "2024-03-09", "2024-03-12", "2024-03-15", "2024-03-20"]),
+    "tutar": [136.5, 899.0, 127.5, 259.8, 273.0, 1250.0, 51.0, 129.9],
+})
+haftalik = df.set_index("tarih")["tutar"].resample("W").sum()
+print(haftalik)
+df["gun_adi"] = df["tarih"].dt.day_name()
+df["hafta"] = df["tarih"].dt.isocalendar().week
+print(df.groupby("hafta", observed=True)["tutar"].agg(["sum", "count"]))
+print(haftalik.rolling(2).mean().round(1).dropna())    # hareketli ortalama
+</pre>
+
+<h2>apply tuzağı</h2>
+<p><code>df.apply(func, axis=1)</code> her satır için Python fonksiyonu çağırır: esnek ama yavaştır, çünkü vektörleştirme (vectorization) kaybolur. Çoğu "satır bazlı" iş aslında sütun aritmetiği, <code>np.where</code>, <code>np.select</code> ya da <code>map</code> ile yazılabilir. <code>apply</code>'ı son çare olarak, küçük veride ya da gerçekten karmaşık mantıkta kullan.</p>
+<pre class="py">import pandas as pd, numpy as np
+
+df = pd.DataFrame({"tutar": [136.5, 899.0, 127.5, 1250.0, 51.0], "segment": ["Altın", "Gümüş", "Altın", "Gümüş", "Bronz"]})
+
+# yavaş yol
+df["indirim_a"] = df.apply(lambda r: 0.10 if r["segment"] == "Altın" else 0.0, axis=1)
+# hızlı yol: map ve np.select
+df["indirim_b"] = df["segment"].map({"Altın": 0.10, "Gümüş": 0.05}).fillna(0.0)
+df["kademe"] = np.select([df["tutar"] &gt;= 1000, df["tutar"] &gt;= 500], ["büyük", "orta"], default="küçük")
+print(df)
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: groupby'ın ince ayarları ve güvenli birleştirme</h2><p>groupby, pivot ve merge ile raporun iskeletini kurabiliyorsun. Bu bölüm, raporda rakamları <b>sessizce</b> yanlış çıkaran ayrıntılara odaklanıyor: eksik anahtarlı satırların kaybolması, <code>count</code> ile <code>size</code> farkı, çoklu özetten gelen iki katlı sütun adları, ağırlıklı ortalama ve farklı adlı anahtarlarla birleştirme. Pencere fonksiyonları (window function), MultiIndex ve geniş-uzun dönüşüm "İleri pandas" dersinde, zaman kovaları "Zaman serisi" dersinde ayrıntılı ele alınıyor.</p><h3>Grubun içine bakmak: size, count, nunique, first</h3><p>groupby nesnesi bir döngüde gezilebilir: her adımda grup anahtarı ve o gruba ait alt tablo gelir. Hata ayıklarken ya da her grup için ayrı dosya üretirken işe yarar. Özetlerde ise dört sayım birbirine karıştırılır:</p><div class="tbl-wrap"><table><tr><th>Yöntem</th><th>Ne sayar</th><th>Eksik değer</th></tr><tr><td><code>size()</code></td><td>Gruptaki satır sayısı</td><td>Satır sayılır</td></tr><tr><td><code>count()</code></td><td>Sütunda dolu hücre sayısı</td><td>NaN sayılmaz</td></tr><tr><td><code>nunique()</code></td><td>Farklı değer sayısı (tekil müşteri)</td><td>NaN sayılmaz</td></tr><tr><td><code>first()</code> / <code>last()</code></td><td>Gruptaki ilk / son dolu değer</td><td>NaN atlanır</td></tr></table></div><pre class="py">import io
+import pandas as pd
+
+CSV = """siparis_id,musteri,sehir,kategori,adet,fiyat
+1,Ayşe,İstanbul,Gıda,3,45.5
+2,Mehmet,Ankara,Elektronik,1,899.0
+3,Ayşe,İstanbul,Gıda,10,12.75
+4,Zeynep,,Kozmetik,2,129.9
+5,Ali,Ankara,Gıda,6,45.5
+6,Zeynep,İzmir,Elektronik,1,1250.0
+7,Ayşe,İstanbul,Kozmetik,1,
+"""
+df = pd.read_csv(io.StringIO(CSV))
+df["tutar"] = df["adet"] * df["fiyat"]
+
+for sehir, grup in df.groupby("sehir"):
+    print(sehir, len(grup), grup["siparis_id"].tolist())
+
+g = df.groupby("sehir")
+print(g.size().to_dict())                 # satır sayısı
+print(g["fiyat"].count().to_dict())       # dolu fiyat sayısı
+print(g["musteri"].nunique().to_dict())   # tekil müşteri
+print(g.get_group("Ankara")["tutar"].sum())
+</pre><p>Çıktıya dikkat: 4 numaralı siparişin şehri boş ve hiçbir grupta görünmüyor. İstanbul'da 3 satır var ama 2 dolu fiyat var.</p><h3>Eksik anahtar: dropna=False</h3><p>groupby varsayılan olarak anahtarı eksik (NaN) olan satırları <b>atar</b>. Şehri girilmemiş siparişlerin cirosu raporda yok olur ve toplamlar tutmaz. Ya anahtarı önce doldur (<code>fillna("Bilinmiyor")</code>) ya da <code>dropna=False</code> ver. Raporun en altına "gruplar toplamı = genel toplam" kontrolü koymak bu hatayı hemen yakalar.</p><pre class="py">import io
+import pandas as pd
+
+CSV = """siparis_id,musteri,sehir,kategori,adet,fiyat
+1,Ayşe,İstanbul,Gıda,3,45.5
+2,Mehmet,Ankara,Elektronik,1,899.0
+3,Ayşe,İstanbul,Gıda,10,12.75
+4,Zeynep,,Kozmetik,2,129.9
+5,Ali,Ankara,Gıda,6,45.5
+6,Zeynep,İzmir,Elektronik,1,1250.0
+7,Ayşe,İstanbul,Kozmetik,1,
+"""
+df = pd.read_csv(io.StringIO(CSV))
+df["tutar"] = df["adet"] * df["fiyat"]
+
+print(df.groupby("sehir")["tutar"].sum().sum(), "≠", df["tutar"].sum())
+print(df.groupby("sehir", dropna=False)["tutar"].sum())
+rapor = df.assign(sehir=df["sehir"].fillna("Bilinmiyor")).groupby("sehir")["tutar"].sum()
+assert abs(rapor.sum() - df["tutar"].sum()) &lt; 1e-9, "toplam tutmuyor"
+print(rapor.round(2).to_dict())
+</pre><h3>filter: koşulu sağlayan grupları tut</h3><p><code>filter(fonksiyon)</code> her grubu fonksiyona verir; True dönen grupların <b>satırlarını</b> (özet değil) olduğu gibi döndürür. "En az 2 sipariş vermiş müşterilerin siparişleri" ya da "cirosu 500 TL üstü şehirlerin satırları" böyle yazılır. Aynı sonucu transform ile maske kurarak da alabilirsin; büyük veride transform genellikle daha hızlıdır.</p><pre class="py">import io
+import pandas as pd
+
+CSV = """siparis_id,musteri,sehir,kategori,adet,fiyat
+1,Ayşe,İstanbul,Gıda,3,45.5
+2,Mehmet,Ankara,Elektronik,1,899.0
+3,Ayşe,İstanbul,Gıda,10,12.75
+4,Zeynep,,Kozmetik,2,129.9
+5,Ali,Ankara,Gıda,6,45.5
+6,Zeynep,İzmir,Elektronik,1,1250.0
+7,Ayşe,İstanbul,Kozmetik,1,
+"""
+df = pd.read_csv(io.StringIO(CSV))
+df["tutar"] = df["adet"] * df["fiyat"]
+
+sadik = df.groupby("musteri").filter(lambda g: len(g) &gt;= 2)
+print(sadik["musteri"].unique().tolist())
+
+maske = df.groupby("musteri")["siparis_id"].transform("size") &gt;= 2
+print(df[maske]["siparis_id"].tolist())
+</pre><h3>Çoklu özet, düz sütun adları ve ağırlıklı ortalama</h3><p><code>agg(["sum", "mean"])</code> iki katlı (MultiIndex) sütun adı üretir: <code>("tutar", "sum")</code>. Excel'e yazmadan önce bunları <code>"tutar_sum"</code> gibi düzleştirmek gerekir. Adlandırılmış agg (<code>ciro=("tutar", "sum")</code>) baştan düz ad verdiği için çoğu zaman daha iyidir. Hazır fonksiyon yetmediğinde agg'a kendi fonksiyonunu verebilirsin; ama <b>ağırlıklı ortalama</b> gibi iki sütun gerektiren özetleri ayrı toplamlarla hesaplamak hem hızlı hem doğrudur: ortalama birim fiyat = toplam tutar / toplam adet.</p><pre class="py">import io
+import pandas as pd
+
+CSV = """siparis_id,musteri,sehir,kategori,adet,fiyat
+1,Ayşe,İstanbul,Gıda,3,45.5
+2,Mehmet,Ankara,Elektronik,1,899.0
+3,Ayşe,İstanbul,Gıda,10,12.75
+4,Zeynep,,Kozmetik,2,129.9
+5,Ali,Ankara,Gıda,6,45.5
+6,Zeynep,İzmir,Elektronik,1,1250.0
+7,Ayşe,İstanbul,Kozmetik,1,
+"""
+df = pd.read_csv(io.StringIO(CSV))
+df["tutar"] = df["adet"] * df["fiyat"]
+
+coklu = df.groupby("kategori")["tutar"].agg(["sum", "mean", "max"])
+print(coklu.columns.tolist())
+iki = df.groupby("kategori").agg({"tutar": ["sum", "max"], "adet": ["sum"]})
+iki.columns = ["_".join(c) for c in iki.columns]
+print(iki.reset_index())
+
+# Ağırlıklı ortalama fiyat: düz ortalama yanıltır
+toplam = df.dropna(subset=["fiyat"]).groupby("kategori")[["tutar", "adet"]].sum()
+print((toplam["tutar"] / toplam["adet"]).round(2).to_dict())
+print(df.groupby("kategori")["fiyat"].mean().round(2).to_dict())   # düz ortalama
+print(df.groupby("kategori")["fiyat"].agg(lambda s: s.max() - s.min()).to_dict())   # özel fonksiyon
+</pre><h3>Oranlar: satır yüzdeleri</h3><p>"Her şehirde cironun yüzde kaçı hangi kategoriden?" sorusu bir pivotun her satırını kendi toplamına bölmektir: <code>pv.div(pv.sum(axis=1), axis=0)</code>. Sayımlar için <code>pd.crosstab(..., normalize="index")</code> aynı işi tek adımda yapar.</p><h3>merge ayrıntıları</h3><div class="tbl-wrap"><table><tr><th>Durum</th><th>Çözüm</th></tr><tr><td>Anahtar sütunların adı farklı (<code>musteri_id</code> ve <code>id</code>)</td><td><code>left_on="musteri_id", right_on="id"</code>, sonra <code>drop(columns="id")</code></td></tr><tr><td>İki tabloda aynı adlı başka sütun var</td><td>Otomatik <code>_x</code>/<code>_y</code> eki; anlamlı ad için <code>suffixes=("_siparis", "_hedef")</code></td></tr><tr><td>Anahtar iki sütundan oluşuyor</td><td><code>on=["sehir", "ay"]</code></td></tr><tr><td>Sağ tablonun anahtarı index'te</td><td><code>df.join(diger, on="musteri_id")</code> ya da <code>right_index=True</code></td></tr><tr><td>Aylık dosyaları birleştirip kaynağı korumak</td><td><code>pd.concat([mart, nisan], keys=["Mart", "Nisan"])</code></td></tr></table></div><pre class="py">import pandas as pd
+
+hedef = pd.DataFrame({"sehir": ["Ankara", "İzmir"], "ay": [3, 3], "tutar": [1000.0, 1500.0]})
+gercek = pd.DataFrame({"sehir": ["Ankara", "İzmir", "Ankara"], "ay": [3, 3, 4], "tutar": [1172.0, 1250.0, 900.0]})
+k = gercek.merge(hedef, on=["sehir", "ay"], how="left", suffixes=("_gercek", "_hedef"))
+k["gerceklesme"] = (k["tutar_gercek"] / k["tutar_hedef"] * 100).round(1)
+print(k)
+
+pv = pd.DataFrame({"Gıda": [300.0, 50.0], "Elektronik": [700.0, 150.0]}, index=["Ankara", "İzmir"])
+print(pv.div(pv.sum(axis=1), axis=0).mul(100).round(1))
+</pre><div class="tip"><b>Rapor sonu kontrolleri</b>Her özet tablonun altına iki satırlık kontrol koy: grupların toplamı genel toplama eşit mi, merge öncesi ve sonrası satır sayısı beklendiği gibi mi? <code>assert len(sonra) == len(once)</code> left merge'de satır patlamasını, toplam kontrolü kaybolan NaN anahtarlarını yakalar.</div><div class="note"><b>Gerçek işte</b>Yönetime giden rakamların en sık yanlış çıkma sebebi hatalı formül değil, sessiz veri kaybıdır: eksik şehirli siparişlerin groupby'da düşmesi, müşteri tablosundaki tekrarlı kayıt yüzünden cironun iki kat sayılması, fiyatın düz ortalamasının ağırlıklı ortalama sanılması. Deneyimli analistler her raporun sonunda "mutabakat" (reconciliation) satırı tutar: kaynak toplam, rapor toplamı, fark.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek sipariş satırlarıyla groupby</h2><p>Derste groupby, merge ve pivot'u küçük tablolarla öğrendin. Gerçek e-ticaret verisinde işi zorlaştıran şey fonksiyonlar değil, <b>tablonun tanecik düzeyi</b> (grain): her satır neyi temsil ediyor? Anadolu Market'te <code>orders</code> tablosunda her satır bir sipariştir (910 satır), <code>order_items</code> tablosunda ise her satır bir sipariş <i>kalemidir</i> (1.620 satır). Bir siparişte 1 ile 4 arasında kalem olabilir. Tanecik düzeyini karıştırmak, analistlerin en sık yaptığı ve en zor fark edilen hatadır.</p><div class="tbl-wrap"><table><tr><th>Tablo</th><th>Bir satır =</th><th>Anahtar</th><th>Ciro hesabı</th></tr><tr><td><code>orders</code></td><td>bir sipariş</td><td><code>order_id</code></td><td>yok (tutar sütunu yok)</td></tr><tr><td><code>order_items</code></td><td>bir sipariş kalemi</td><td><code>item_id</code></td><td><code>quantity * unit_price * (1 - discount)</code></td></tr><tr><td><code>products</code></td><td>bir ürün</td><td><code>product_id</code></td><td>güncel <code>price</code> (satış anındaki fiyat değil!)</td></tr><tr><td><code>customers</code></td><td>bir müşteri</td><td><code>customer_id</code></td><td>yok</td></tr></table></div><h3>Güvenli birleştirme: validate ile tanecik kontrolü</h3><p>Kalemleri siparişlerle birleştirince satır sayısı 1.620 kalmalı: her kalemin tam bir siparişi vardır. Bunu umut etmek yerine <code>validate="many_to_one"</code> ile garanti altına al: sağ tabloda anahtar tekrar ederse pandas hata verir. <code>indicator=True</code> ise hangi satırın iki tarafta da bulunduğunu gösterir.</p><pre class="py">import veri
+
+o = veri.oku("anadolu_market", "orders")
+oi = veri.oku("anadolu_market", "order_items")
+oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+
+d = oi.merge(o, on="order_id", how="left", validate="many_to_one", indicator=True)
+print(len(oi), len(d))                       # 1620 1620
+print(d["_merge"].value_counts().to_dict())  # hepsi both
+</pre><h3>İki adımlı toplama: önce siparişe, sonra segmente</h3><p>"Ortalama sepet tutarı" (AOV, average order value) sipariş başına cirodur. Kalem tablosunda doğrudan <code>ciro.mean()</code> alırsan <b>kalem başına</b> ortalamayı bulursun; bu rakam AOV'nin yaklaşık yarısıdır. Doğru yol iki adımlıdır: önce <code>order_id</code> düzeyine topla, sonra ortala.</p><pre class="py">import veri
+
+o = veri.oku("anadolu_market", "orders")
+oi = veri.oku("anadolu_market", "order_items")
+oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+d = oi.merge(o, on="order_id")
+d = d[d["status"] == "delivered"]
+
+yanlis = d["ciro"].mean()                              # kalem ortalaması
+sepet = d.groupby("order_id")["ciro"].sum()            # 1. adım: sipariş düzeyi
+print("kalem başına:", round(yanlis, 2))
+print("sipariş başına (AOV):", round(sepet.mean(), 2))
+print("sipariş sayısı:", d["order_id"].nunique(), "| kalem sayısı:", len(d))
+</pre><div class="warn"><b>size() mi nunique() mi?</b>Birleştirilmiş kalem tablosunda <code>groupby("segment").size()</code> sipariş değil <b>kalem</b> sayar. Sipariş sayısı için <code>groupby("segment")["order_id"].nunique()</code> kullan. Raporda "sipariş" yazan her sütunun hangi tanecikte sayıldığını kontrol et.</div><h3>Gerçek pivot ve grup içi pay</h3><p>Kategori × kanal çapraz tablosu, yönetimin en sık istediği görünümdür. <code>transform("sum")</code> ise her satıra kendi grubunun toplamını yazar; böylece "ürünün kategori içindeki payı" tek satırda hesaplanır.</p><pre class="py">import veri
+
+o = veri.oku("anadolu_market", "orders")
+oi = veri.oku("anadolu_market", "order_items")
+p = veri.oku("anadolu_market", "products")
+oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+d = oi.merge(o, on="order_id").merge(p, on="product_id")
+d = d[d["status"] == "delivered"]
+
+pv = d.pivot_table(index="category", columns="channel", values="ciro",
+                   aggfunc="sum", fill_value=0, margins=True, margins_name="Toplam")
+print(pv.round(0))
+
+urun = d.groupby(["category", "name"], as_index=False)["ciro"].sum()
+urun["pay"] = urun["ciro"] / urun.groupby("category")["ciro"].transform("sum")
+print(urun.sort_values("pay", ascending=False).head(3))
+</pre><h3>Hiç sipariş vermeyen müşteriler: left merge ve indicator</h3><p>"Kaç müşterimiz hiç sipariş vermedi?" sorusu, birleştirmenin yönüyle ilgilidir. Müşteri tablosunu sola koyup <code>how="left"</code> ve <code>indicator=True</code> ile birleştirirsen, sağda karşılığı olmayan satırlar <code>left_only</code> olarak işaretlenir. Sayımı önce müşteri düzeyine indirmeyi unutma: bir müşteri birden çok siparişle eşleşir.</p><pre class="py">import veri
+
+c = veri.oku("anadolu_market", "customers")
+o = veri.oku("anadolu_market", "orders")
+d = c.merge(o[["order_id", "customer_id"]], on="customer_id", how="left", indicator=True)
+print(len(c), len(d))
+siparissiz = d.loc[d["_merge"] == "left_only", "customer_id"].nunique()
+print("hiç sipariş vermeyen:", siparissiz)
+print("müşteri başına sipariş:", round(len(o) / c["customer_id"].nunique(), 2))
+</pre><div class="note"><b>Gerçek işte</b>Bir panoda "Ortalama sepet 841 TL" ile "Ortalama sepet 1.489 TL" yan yana durabilir; ikisi de aynı veriden, farklı taneciklerden hesaplanmıştır. Kıdemli analistler her metriğin yanına tanımını yazar: "AOV = teslim edilmiş siparişlerde, sipariş başına indirimli ciro". Kesit SQL'de aynı soruyu <code>GROUP BY order_id</code> alt sorgusuyla çözmüştün; Kesit Power BI'da ise <code>AVERAGEX(VALUES(Satislar[SiparisNo]), ...)</code> aynı iki adımlı mantıktır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Anadolu Market aylık rapor kalıbı</h3>
+<p>Üretimde rapor üç fonksiyona ayrılır: <code>yukle()</code> ham veriyi getirir ve temizler; <code>zenginlestir()</code> müşteri ve ürün tablolarıyla merge eder, türetilmiş sütunları ekler; <code>ozetle()</code> groupby/pivot ile çıktı tablolarını üretir. Her birinin girdi-çıktı sözleşmesi (sütun adları ve türleri) testle korunur. Böylece "geçen ay raporu neden farklı?" sorusunun cevabı dakikada bulunur.</p>
+<h3>category ve observed</h3>
+<p>Şehir gibi sütunları <code>category</code> yaptıysan <code>groupby(..., observed=True)</code> yaz; aksi hâlde veride olmayan kategoriler sıfır satırı olarak gelir ve pandas 2.x uyarı verir (3.x'te varsayılan True oldu). Kod iki sürümde de aynı davransın diye parametreyi her zaman açıkça ver.</p>
+<h3>Pencere fonksiyonları</h3>
+<p><code>rolling</code> (hareketli), <code>expanding</code> (kümülatif), <code>shift</code> (önceki dönem) ve <code>pct_change</code> ile "geçen haftaya göre değişim" hesaplanır. Grup içinde pencere için <code>groupby("sehir")["tutar"].shift(1)</code> deseni SQL'deki LAG ile aynıdır.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-groupby">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pandas-temizlik/">← Veri temizleme: eksik, tür, metin, yinelenen</a><a href="../gorsellestirme/">matplotlib ile görselleştirme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

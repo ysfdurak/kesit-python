@@ -1,0 +1,249 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>pytest ile test: fixture, parametrize ve gerçek proje düzeni | Kesit Python</title><meta name="description" content="pytest'in test keşfini, düz assert ve assert yeniden yazımını, pytest.raises ve pytest.approx'u, fixture (scope, yield ile temizlik), parametrize,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pytest/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="pytest ile test: fixture, parametrize ve gerçek proje düzeni"><meta property="og:description" content="pytest'in test keşfini, düz assert ve assert yeniden yazımını, pytest.raises ve pytest.approx'u, fixture (scope, yield ile temizlik), parametrize,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pytest/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"pytest ile test: fixture, parametrize ve gerçek proje düzeni","description":"pytest'in test keşfini, düz assert ve assert yeniden yazımını, pytest.raises ve pytest.approx'u, fixture (scope, yield ile temizlik), parametrize,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/pytest/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Test</span><h1>pytest ile test: fixture, parametrize ve gerçek proje düzeni</h1><p class="st-l">pytest'in test keşfini, düz assert ve assert yeniden yazımını, pytest.raises ve pytest.approx'u, fixture (scope, yield ile temizlik), parametrize, conftest.py, skip/xfail işaretlerini, tmp_path, monkeypatch ve capsys'i, coverage ölçümünü ve komut satırı seçeneklerini öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pytest">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden pytest?</h2>
+<p>Test yazma dersinde unittest ile test sınıfı kurdun, pytest tarzına da kısaca göz attın. Bugün Python ekosisteminde yeni projelerin büyük çoğunluğu <b>pytest</b> kullanır: test bir sınıf değil sıradan bir fonksiyondur, karşılaştırma için <code>self.assertEqual</code> yerine düz <code>assert</code> yazılır ve fixture sistemi test verisini hazırlamayı çok kolaylaştırır. Ilgaz Bank'ta faiz hesabını değiştiren bir geliştirici, 800 testlik paketi bir komutla çalıştırır; kırmızı çıkan test ona hangi hesaplamayı bozduğunu dakikalar içinde söyler.</p>
+<p>Ama asıl ders şudur: <b>iyi test, bozuk kodda başarısız olan testtir.</b> Her zaman yeşil yanan bir test güven vermez, sadece süs olur. Bu dersin alıştırmalarında yazdığın testler önce doğru koda, sonra kasıtlı bozulmuş sürümlere karşı çalıştırılacak; bozuk sürümleri yakalayamayan test "geçmiş" sayılmayacak.</p>
+<div class="note"><b>Tarayıcıda pytest</b>pytest bir komut satırı aracıdır: dosyaları tarar, testleri toplar ve raporlar. Tarayıcıda dosya taraması yerine test fonksiyonlarını doğrudan çağıracağız; <code>pytest.raises</code>, <code>pytest.approx</code>, <code>pytest.fixture</code> ve <code>pytest.mark</code> ise gerçek pytest modülünden gelir. Komut satırı örnekleri kendi bilgisayarında çalıştırman içindir.</div>
+
+<h2>Kurulum ve test keşfi</h2>
+<pre class="code"># Kendi bilgisayarında (sanal ortam etkinken)
+pip install pytest pytest-cov
+pytest                 # bulunduğun klasörden itibaren tüm testleri bul ve çalıştır</pre>
+<p>pytest şu kurallarla test toplar (test discovery):</p>
+<div class="tbl-wrap"><table>
+<tr><th>Öğe</th><th>Kural</th><th>Örnek</th></tr>
+<tr><td>Dosya</td><td><code>test_*.py</code> ya da <code>*_test.py</code></td><td><code>test_fiyat.py</code></td></tr>
+<tr><td>Fonksiyon</td><td><code>test</code> ile başlayan</td><td><code>def test_kdv_ekle():</code></td></tr>
+<tr><td>Sınıf</td><td><code>Test</code> ile başlayan, <code>__init__</code> içermeyen</td><td><code>class TestSepet:</code></td></tr>
+<tr><td>Metot</td><td>Test sınıfında <code>test</code> ile başlayan</td><td><code>def test_toplam(self):</code></td></tr>
+</table></div>
+<p>Tipik proje düzeni:</p>
+<pre class="out">anadolu_market/
+    src/anadolu/fiyat.py
+    tests/
+        conftest.py          # ortak fixture'lar
+        test_fiyat.py
+        test_sepet.py
+    pyproject.toml           # [tool.pytest.ini_options]</pre>
+
+<h2>Düz assert ve assert yeniden yazımı</h2>
+<p>pytest, test dosyalarını import ederken içlerindeki <code>assert</code> ifadelerini yeniden yazar (assertion rewriting). Bu sayede başarısız bir <code>assert toplam == 120</code> satırı yalnızca "AssertionError" demez; sol ve sağ tarafın değerlerini, listelerde farklı elemanı, sözlüklerde eksik anahtarı gösterir.</p>
+<pre class="code"># tests/test_fiyat.py
+from anadolu.fiyat import kdv_ekle
+
+def test_kdv_ekle():
+    assert kdv_ekle(100) == 120.0
+    assert kdv_ekle(9.99) == 11.99          # yuvarlama da test edilir
+    assert kdv_ekle(100, oran=0.10) == 110.0</pre>
+<pre class="out">    def test_kdv_ekle():
+&gt;       assert kdv_ekle(9.99) == 11.99
+E       assert 11.988 == 11.99
+E        +  where 11.988 = kdv_ekle(9.99)
+FAILED tests/test_fiyat.py::test_kdv_ekle - assert 11.988 == 11.99</pre>
+<p>Tarayıcıda aynı test fonksiyonunu doğrudan çağırabiliriz. Doğru kodda sessizce geçer; bozuk kodda AssertionError fırlatır:</p>
+<pre class="py">def kdv_ekle(tutar, oran=0.20):
+    return round(tutar * (1 + oran), 2)
+
+def test_kdv_ekle():
+    assert kdv_ekle(100) == 120.0
+    assert kdv_ekle(9.99) == 11.99
+    assert kdv_ekle(100, oran=0.10) == 110.0
+
+test_kdv_ekle()
+print("doğru sürüm: geçti")
+
+def kdv_ekle(tutar, oran=0.20):          # yuvarlamayı unutan sürüm
+    return tutar * (1 + oran)
+try:
+    test_kdv_ekle()
+except AssertionError:
+    print("bozuk sürüm: test yakaladı")</pre>
+<div class="warn"><b>assert'e virgülle beklenen değer yazma</b><code>assert indirim(1000, 0.25), 750</code> "sonuç 750 mi?" diye sormaz; "sonuç doğru mu (sıfır değil mi)?" diye sorar, 750 ise hata mesajıdır. Bu test, sonuç sıfır olmadığı sürece hep geçer. Doğrusu <code>assert indirim(1000, 0.25) == 750</code>.</div>
+
+<h2>pytest.raises ve pytest.approx</h2>
+<pre class="py">import pytest
+
+class YetersizBakiye(Exception):
+    pass
+
+def para_cek(bakiye, tutar):
+    if tutar &lt;= 0:
+        raise ValueError("tutar negatif ya da sıfır olamaz")
+    if tutar &gt; bakiye:
+        raise YetersizBakiye(f"bakiye {bakiye} TL, istenen {tutar} TL")
+    return bakiye - tutar
+
+with pytest.raises(ValueError, match="negatif"):
+    para_cek(100, -5)
+with pytest.raises(YetersizBakiye) as bilgi:
+    para_cek(100, 250)
+print("yakalanan:", bilgi.type.__name__, "|", bilgi.value)
+
+print(0.1 + 0.2 == 0.3)                        # False: kayan nokta
+print(0.1 + 0.2 == pytest.approx(0.3))         # True
+print(1000 * 1.1 ** 2, 1000 * 1.1 ** 2 == pytest.approx(1210))
+print([0.1 + 0.2, 1.0] == pytest.approx([0.3, 1.0]))
+print(101 == pytest.approx(100, rel=0.02))     # yüzde 2 tolerans</pre>
+<p><code>match</code> bir düzenli ifadedir ve hata mesajında <code>re.search</code> ile aranır. <code>with</code> bloğunda hata fırlatan satırdan <b>sonra</b> yazılan kod asla çalışmaz; bloğa yalnızca hatayı beklediğin tek çağrıyı koy. Hata hiç fırlatılmazsa <code>pytest.raises</code> testi <code>Failed: DID NOT RAISE</code> ile düşürür.</p>
+
+<h2>Fixture: test verisini hazırlayan fonksiyon</h2>
+<p>Birçok testin aynı hazırlığa ihtiyacı varsa (dolu bir sepet, örnek müşteri listesi, veritabanı bağlantısı) bunu <b>fixture</b> olarak yazarsın. Test fonksiyonu fixture'ın adını parametre olarak ister; pytest fixture'ı çalıştırıp sonucunu verir. Buna bağımlılık enjeksiyonu (dependency injection) denir.</p>
+<pre class="code">import pytest
+from anadolu.sepet import Sepet
+
+@pytest.fixture
+def dolu_sepet():
+    s = Sepet()
+    s.ekle("Çay", 50, adet=2)
+    s.ekle("Şeker", 35.5)
+    return s
+
+def test_toplam(dolu_sepet):          # pytest dolu_sepet() sonucunu verir
+    assert dolu_sepet.toplam() == 135.5
+
+def test_gecersiz_adet(dolu_sepet):   # her test TAZE bir sepet alır
+    with pytest.raises(ValueError):
+        dolu_sepet.ekle("Kahve", 120, adet=0)</pre>
+<p><b>yield ile temizlik:</b> fixture <code>return</code> yerine <code>yield</code> kullanırsa, <code>yield</code> sonrası kod test bittikten sonra (test başarısız olsa bile) çalışır. Geçici veritabanını kapatmak, dosya silmek için idealdir. <b>scope</b> fixture'ın ne sıklıkla yeniden oluşturulacağını belirler:</p>
+<div class="tbl-wrap"><table>
+<tr><th>scope</th><th>Ne zaman oluşturulur?</th><th>Örnek kullanım</th></tr>
+<tr><td><code>"function"</code> (varsayılan)</td><td>Her test için yeniden</td><td>Değiştirilebilir sepet, sözlük</td></tr>
+<tr><td><code>"class"</code></td><td>Test sınıfı başına bir kez</td><td>Sınıftaki testlerin ortak verisi</td></tr>
+<tr><td><code>"module"</code></td><td>Test dosyası başına bir kez</td><td>Pahalı ama salt okunur veri</td></tr>
+<tr><td><code>"session"</code></td><td>Tüm çalıştırmada bir kez</td><td>Test veritabanı, Docker konteyneri</td></tr>
+</table></div>
+<p>Bir fixture'ın yaşam döngüsünü tarayıcıda üreteçle (generator) taklit edebiliriz; pytest de yield fixture'ı tam olarak böyle çalıştırır:</p>
+<pre class="py">def baglanti():                      # @pytest.fixture olsaydı
+    print("kur: test veritabanı açıldı")
+    db = {"musteriler": ["Ayşe", "Can"]}
+    yield db
+    db.clear()
+    print("temizle: veritabanı kapatıldı")
+
+def test_musteri_sayisi(db):
+    assert len(db["musteriler"]) == 2
+    print("test çalıştı")
+
+uretec = baglanti()
+db = next(uretec)                    # yield'e kadar: hazırlık
+try:
+    test_musteri_sayisi(db)
+finally:
+    next(uretec, None)               # yield sonrası: temizlik</pre>
+<p><b>conftest.py:</b> Birden çok test dosyasının kullandığı fixture'lar <code>tests/conftest.py</code> dosyasına yazılır. pytest bu dosyayı otomatik yükler; import etmene gerek yoktur. Alt klasörlerde ayrı conftest.py dosyaları olabilir, en yakındaki öncelik kazanır.</p>
+
+<h2>parametrize: tek test, çok durum</h2>
+<pre class="py">import pytest
+
+def kargo_ucreti(tutar):
+    if tutar &lt; 0:
+        raise ValueError("tutar negatif olamaz")
+    return 0.0 if tutar &gt;= 500 else 49.9
+
+@pytest.mark.parametrize("tutar, beklenen", [
+    (0, 49.9),
+    (499.99, 49.9),      # sınırın hemen altı
+    (500, 0.0),          # tam sınır
+    (1250, 0.0),
+])
+def test_kargo(tutar, beklenen):
+    assert kargo_ucreti(tutar) == beklenen
+
+# pytest her satırı ayrı test sayar: test_kargo[0-49.9], test_kargo[499.99-49.9] ...
+isaret = test_kargo.pytestmark[0]
+print(isaret.name, isaret.args[0])
+for durum in isaret.args[1]:
+    test_kargo(*durum)
+print(len(isaret.args[1]), "durum geçti")</pre>
+<div class="tip"><b>Sınır değerlerini test et</b>Hataların çoğu sınırlardadır: <code>&gt;=</code> yerine <code>&gt;</code>, boş liste, sıfır, negatif sayı, tam eşik. Parametre listesine her zaman "sınırın kendisi" ve "hemen altı/üstü" durumlarını koy.</div>
+
+<h2>İşaretler: skip, skipif, xfail</h2>
+<pre class="code">import sys, pytest
+
+@pytest.mark.skip(reason="Kur servisi bakımda")
+def test_canli_kur(): ...
+
+@pytest.mark.skipif(sys.platform == "win32", reason="Yalnızca Linux sunucuda")
+def test_dosya_izinleri(): ...
+
+@pytest.mark.xfail(reason="Hata #142: yuvarlama düzeltilecek")
+def test_kusurat_yuvarlama(): ...
+
+@pytest.mark.yavas              # kendi işaretin: pyproject'te tanımla
+def test_buyuk_rapor(): ...</pre>
+<p><code>xfail</code> "bu testin şu an başarısız olmasını bekliyorum" demektir; geçerse <b>XPASS</b> olarak raporlanır, böylece hata düzeldiğinde haberin olur. Kendi işaretlerini <code>pytest -m "not yavas"</code> ile süzersin.</p>
+
+<h2>Yerleşik fixture'lar: tmp_path, monkeypatch, capsys</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Fixture</th><th>Ne verir?</th><th>Ne zaman?</th></tr>
+<tr><td><code>tmp_path</code></td><td>Her teste özel, boş bir <code>pathlib.Path</code> klasörü</td><td>Dosya yazan/okuyan kod</td></tr>
+<tr><td><code>monkeypatch</code></td><td><code>setattr</code>, <code>setenv</code>, <code>delenv</code>, <code>setitem</code>; test bitince her şeyi geri alır</td><td>Dış servis, saat, ortam değişkeni</td></tr>
+<tr><td><code>capsys</code></td><td><code>readouterr()</code> ile o ana kadarki stdout/stderr</td><td>print eden kod</td></tr>
+<tr><td><code>caplog</code></td><td>logging kayıtları</td><td>Log mesajı denetimi</td></tr>
+</table></div>
+<pre class="py">import os, pytest
+
+class KurServisi:
+    @staticmethod
+    def usd_kuru():
+        raise ConnectionError("testte gerçek servise bağlanma")
+
+def tl_karsiligi(usd):
+    kur = KurServisi.usd_kuru()
+    komisyon = float(os.environ.get("AM_KOMISYON", "0"))
+    return round(usd * kur * (1 + komisyon), 2)
+
+def test_tl_karsiligi(monkeypatch):
+    monkeypatch.setattr(KurServisi, "usd_kuru", lambda: 32.5)
+    monkeypatch.setenv("AM_KOMISYON", "0.01")
+    assert tl_karsiligi(10) == 328.25
+
+mp = pytest.MonkeyPatch()           # pytest bunu fixture olarak verir
+try:
+    test_tl_karsiligi(mp)
+    print("test geçti")
+finally:
+    mp.undo()                       # test sonrası otomatik geri alma
+print("AM_KOMISYON" in os.environ)  # False: ortam eski hâline döndü
+try:
+    KurServisi.usd_kuru()
+except ConnectionError:
+    print("asıl servis geri geldi")</pre>
+
+<h2>Coverage ve komut satırı</h2>
+<p><b>Kapsam</b> (coverage), testler çalışırken kodun hangi satırlarının çalıştığını ölçer: <code>pytest --cov=anadolu --cov-report=term-missing</code> her dosya için yüzde ve çalışmayan satır numaralarını gösterir. Yüzde 100 kapsam hatasız kod demek değildir (satır çalışmış ama sonucu kontrol edilmemiş olabilir); ama yüzde 40 kapsam, kodun yarısından fazlasının hiç denenmediğini kesin olarak söyler.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar?</th></tr>
+<tr><td><code>pytest -v</code></td><td>Her testi adıyla ve sonucuyla listeler</td></tr>
+<tr><td><code>pytest -q</code></td><td>Kısa çıktı</td></tr>
+<tr><td><code>pytest -x</code></td><td>İlk başarısızlıkta durur</td></tr>
+<tr><td><code>pytest -k "kdv and not yavas"</code></td><td>Adı ifadeye uyan testleri seçer</td></tr>
+<tr><td><code>pytest --lf</code> / <code>--ff</code></td><td>Yalnızca son başarısızları / önce başarısızları çalıştırır</td></tr>
+<tr><td><code>pytest tests/test_fiyat.py::test_kdv_ekle</code></td><td>Tek bir testi çalıştırır</td></tr>
+<tr><td><code>pytest -m yavas</code></td><td>İşarete göre seçer</td></tr>
+<tr><td><code>pytest -s</code></td><td>print çıktısını yakalamadan gösterir</td></tr>
+<tr><td><code>pytest --pdb</code></td><td>Başarısızlıkta hata ayıklayıcıyı açar</td></tr>
+<tr><td><code>pytest --cov=paket</code></td><td>Kapsam ölçer (pytest-cov)</td></tr>
+<tr><td><code>pytest -n auto</code></td><td>Testleri paralel çalıştırır (pytest-xdist)</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal projelerde testler her pull request'te CI (GitHub Actions, GitLab CI) tarafından çalıştırılır; kırmızı test birleştirmeyi engeller. Kod incelemesinde (code review) "bu değişikliğin testi nerede?" sorusu standarttır. Hata bildirimi geldiğinde iyi ekipler önce hatayı yeniden üreten başarısız bir test yazar, sonra kodu düzeltir; böylece aynı hata bir daha geri gelmez (regresyon testi). Dış servisler (ödeme, kur, SMS) testte asla gerçek çağrılmaz; monkeypatch ya da mock ile taklit edilir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Mutasyon testi: testlerini test et</h3>
+<p>Kapsam yüzdesi "satır çalıştı mı" sorusunu yanıtlar, "test bir hatayı yakalar mıydı" sorusunu yanıtlamaz. Mutasyon testi araçları (<code>mutmut</code>, <code>cosmic-ray</code>) kodda küçük değişiklikler (mutant) yapar: <code>&gt;=</code> yerine <code>&gt;</code>, <code>+</code> yerine <code>-</code>, <code>return</code> değerini değiştirme. Testlerin bu mutantı "öldürmesi", yani başarısız olması gerekir. Bu dersin alıştırmaları tam olarak bu fikirle denetleniyor.</p>
+<h3>İyi testin özellikleri</h3>
+<ul><li><b>Bağımsız:</b> Sırası değişince sonucu değişmez; global durum paylaşmaz.</li><li><b>Hızlı:</b> Ağ, disk ve uyku yok; binlerce test saniyeler içinde biter.</li><li><b>Belirleyici:</b> Rastgelelik ve saat sabitlenir; bazen geçip bazen düşen (flaky) test güveni yok eder.</li><li><b>Okunur:</b> Hazırla, çalıştır, doğrula (Arrange, Act, Assert) düzeni; adı neyi test ettiğini söyler: <code>test_uye_olmayan_1000_tl_ustu_50_indirim_alir</code>.</li></ul>
+<h3>Özellik tabanlı test</h3>
+<p><code>hypothesis</code> kütüphanesi senin yerine yüzlerce rastgele girdi üretip "her tutar için indirimli fiyat tutardan büyük olamaz" gibi genel özellikleri dener ve hatayı bulunca en küçük örneğe indirger. Parametrize ile seçtiğin durumların kaçırdığı köşeleri bulmakta çok güçlüdür.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pytest">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../moduller-paketler/">← Modüller ve paketler: import sisteminin içi</a><a href="../coklu-kalitim/">Çoklu kalıtım, MRO ve mixin'ler →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

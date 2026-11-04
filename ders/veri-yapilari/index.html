@@ -1,0 +1,228 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf | Kesit Python</title><meta name="description" content="Yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash tablosu, ikili arama ağacı ve grafı hem Python'ın hazır araçlarıyla hem de sıfırdan sınıf yazarak…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/veri-yapilari/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf"><meta property="og:description" content="Yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash tablosu, ikili arama ağacı ve grafı hem Python'ın hazır araçlarıyla hem de sıfırdan sınıf yazarak…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/veri-yapilari/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf","description":"Yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash tablosu, ikili arama ağacı ve grafı hem Python'ın hazır araçlarıyla hem de sıfırdan sınıf yazarak…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/veri-yapilari/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri yapıları ve algoritmalar</span><h1>Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf</h1><p class="st-l">Yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash tablosu, ikili arama ağacı ve grafı hem Python'ın hazır araçlarıyla hem de sıfırdan sınıf yazarak öğrenir; her problem için doğru yapıyı karmaşıklık tablosuna bakarak seçersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-yapilari">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in çağrı merkezinde arayanlar sıraya girer; ilk arayan ilk konuşur. Şehir hastanesinin acil servisinde ise sıra geliş saatine göre değil, aciliyete göre belirlenir. Kampanya editöründe "geri al" tuşu en son yapılan işlemi geri çevirir. Lojistik ekibi depolar arasındaki yolları bir ağ olarak düşünür. Bu dört iş dört farklı <b>veri yapısı</b> (data structure) ister: kuyruk, öncelik kuyruğu, yığın ve graf.</p>
+<p>Yanlış yapı seçmek kodu yanlış yapmaz ama yavaşlatır: 1 milyon elemanlı listede <code>pop(0)</code> her seferinde tüm elemanları kaydırır. Doğru yapı ise aynı işi sabit sürede yapar. Bu derste her yapının <b>ne işe yaradığını</b>, Python'daki <b>hazır karşılığını</b> ve mantığını kavramak için <b>sıfırdan nasıl yazıldığını</b> göreceksin. <code>deque</code>, <code>Counter</code> gibi araçlarla <b>collections ve itertools</b> dersinde, kümelerle <b>Demetler ve kümeler</b> dersinde tanışmıştın; burada onları veri yapısı gözüyle yeniden ele alıyoruz.</p>
+
+<h2>Yığın (stack): son giren ilk çıkar</h2>
+<p>Yığın, üst üste konmuş tabaklar gibidir: en son koyduğunu ilk alırsın (LIFO, last in first out). Python'da sıradan bir <code>list</code> mükemmel bir yığındır: <code>append</code> üste koyar, <code>pop()</code> üstten alır, <code>[-1]</code> üsttekine bakar; üçü de O(1).</p>
+<pre class="py">def dengeli_mi(ifade):
+    eslesme = {")": "(", "]": "[", "}": "{"}
+    yigin = []
+    for ch in ifade:
+        if ch in "([{":
+            yigin.append(ch)                       # açılanı üste koy
+        elif ch in eslesme:
+            if not yigin or yigin.pop() != eslesme[ch]:
+                return False                       # kapanış, üstteki açılışla eşleşmeli
+    return not yigin                               # açık kalan olmamalı
+
+for f in ["(fiyat * [1 + kdv])", "{indirim: (10]", "((tutar)", ""]:
+    print(repr(f), dengeli_mi(f))</pre>
+<p>Derleyiciler, JSON ayrıştırıcıları ve hesap makineleri iç içe yapıları böyle kontrol eder. Yığının bir başka klasik kullanımı <b>geri al</b> (undo) özelliğidir: her işlem yığına konur, geri al en üsttekini çıkarır. Fonksiyon çağrıları da bir yığında tutulur; özyinelemede gördüğün <code>RecursionError</code> bu çağrı yığınının (call stack) taşmasıdır.</p>
+
+<h2>Kuyruk (queue): ilk giren ilk çıkar</h2>
+<p>Kuyruk, banka gişesindeki sıradır (FIFO, first in first out). Liste ile kuyruk yapmak tuzaktır: <code>liste.pop(0)</code> baştaki elemanı çıkarınca geri kalan tüm elemanları bir sola kaydırır, yani O(n)'dir. <code>collections.deque</code> (double-ended queue, iki uçlu kuyruk) iki uçta da O(1) ekler ve çıkarır.</p>
+<pre class="py">from collections import deque
+cagri = deque()
+for musteri in ["Ayşe (sipariş)", "Mehmet (iade)", "Zeynep (kargo)"]:
+    cagri.append(musteri)                 # sıranın sonuna
+cagri.appendleft("Can (VIP)")             # VIP öne geçer
+while cagri:
+    print("Görüşülüyor:", cagri.popleft(), "| bekleyen:", len(cagri))
+
+son_islemler = deque(maxlen=3)            # sabit boyutlu pencere
+for no in range(101, 106):
+    son_islemler.append(no)
+print(son_islemler)</pre>
+<p><code>maxlen</code> verilen bir deque dolunca yeni eleman eklendikçe öbür uçtaki en eski eleman düşer: "son 100 işlem", "son 5 dakikanın logları" için idealdir. İş parçacıkları (thread) arasında güvenli kuyruk gerekiyorsa <code>queue.Queue</code> kullanılır; onu <b>Eşzamanlılık (concurrency)</b> dersinde göreceksin.</p>
+
+<h2>Öncelik kuyruğu: heapq</h2>
+<p>Acil serviste sıra aciliyete göredir: kırmızı alan hastası, sarı alandakinden önce muayene edilir. <b>Öncelik kuyruğu</b> (priority queue) her zaman en öncelikli elemanı verir. Python'da <code>heapq</code> modülü, sıradan bir listeyi <b>ikili yığın</b> (binary heap) olarak düzenler: en küçük eleman hep <code>h[0]</code>'dadır; ekleme ve çıkarma O(log n)'dir.</p>
+<pre class="py">import heapq
+from itertools import count
+
+sira = count()                       # eşit öncelikte geliş sırası
+bekleyenler = []
+for ad, oncelik in [("Ali", 3), ("Elif", 1), ("Burak", 2), ("Seda", 1)]:
+    heapq.heappush(bekleyenler, (oncelik, next(sira), ad))   # 1 = en acil
+
+while bekleyenler:
+    oncelik, _, ad = heapq.heappop(bekleyenler)
+    print(f"{ad} (öncelik {oncelik})")
+
+tutarlar = [250, 1999, 75, 4300, 860, 120]
+print(heapq.nlargest(3, tutarlar), heapq.nsmallest(2, tutarlar))</pre>
+<p>Demetler (tuple) sırayla karşılaştırılır: önce öncelik, eşitse ikinci eleman. Araya bir <b>sıra numarası</b> koymak iki işe yarar: eşit öncelikte ilk gelen önce çıkar (kararlılık) ve Python hiçbir zaman üçüncü elemanı (karşılaştırılamayan bir sözlük ya da nesne olabilir) karşılaştırmak zorunda kalmaz. <code>heapq</code> yalnızca en küçüğü verir; en büyüğü istiyorsan önceliği eksiyle sakla: <code>(-tutar, ...)</code>.</p>
+<div class="warn"><b>Yığın sıralı liste değildir</b><code>print(bekleyenler)</code> yazdığında listenin sıralı olmadığını görürsün; yalnızca <code>h[0]</code>'ın en küçük olduğu garanti edilir. Tüm sırayı görmek için <code>sorted(h)</code> kullan; ama bunu her adımda yaparsan yığının avantajını kaybedersin.</div>
+
+<h2>Bağlı liste: düğümler zinciri</h2>
+<p><b>Bağlı liste</b> (linked list), her biri bir değer ve bir sonraki düğüme bağlantı taşıyan düğümlerden (node) oluşur. Başa ekleme O(1)'dir ve hiçbir eleman kaydırılmaz; buna karşılık i'inci elemana erişmek için baştan yürümek gerekir, O(n). Python'da günlük işte bağlı liste yazmazsın (deque zaten içeride bağlı bloklar kullanır), ama mülakatlarda ve "referans" kavramını oturtmakta çok değerlidir.</p>
+<pre class="py">class Dugum:
+    def __init__(self, deger, sonraki=None):
+        self.deger = deger
+        self.sonraki = sonraki
+
+class BagliListe:
+    def __init__(self):
+        self.bas = None
+        self.uzunluk = 0
+    def basa_ekle(self, deger):
+        self.bas = Dugum(deger, self.bas)   # yeni düğüm eski başı gösterir
+        self.uzunluk += 1
+    def __iter__(self):
+        dugum = self.bas
+        while dugum:
+            yield dugum.deger
+            dugum = dugum.sonraki
+    def ters_cevir(self):
+        onceki, dugum = None, self.bas
+        while dugum:
+            dugum.sonraki, onceki, dugum = onceki, dugum, dugum.sonraki
+        self.bas = onceki
+
+rota = BagliListe()
+for durak in ["Bursa", "Ankara", "İstanbul"]:
+    rota.basa_ekle(durak)
+print(list(rota), rota.uzunluk)
+rota.ters_cevir()
+print(" -&gt; ".join(rota))</pre>
+<p><code>__iter__</code>'ı üreteçle (generator) yazınca sınıf <code>list()</code>, <code>for</code> ve <code>join</code> ile doğal çalışır. Ters çevirme, üç işaretçiyle (önceki, şimdiki, sonraki) yerinde yapılır; klasik bir mülakat sorusudur.</p>
+
+<h2>Hash tablosu: dict ve set nasıl bu kadar hızlı?</h2>
+<p>Sözlükte <code>d["AM-1042"]</code> araması, sözlükte 10 ya da 10 milyon eleman olsa da ortalama aynı sürede biter. Sırrı <b>hash tablosu</b>dur: anahtar <code>hash()</code> fonksiyonuyla bir tam sayıya çevrilir, bu sayıdan bir <b>kova</b> (bucket) indeksi hesaplanır (<code>hash(anahtar) % kova_sayisi</code>) ve değer doğrudan o kovaya gider. Aramada aynı hesap tekrar yapılır; tarama yoktur.</p>
+<p>İki farklı anahtar aynı kovaya düşebilir: buna <b>çakışma</b> (collision) denir. Çözümlerden biri her kovada küçük bir liste tutmaktır (zincirleme, chaining); CPython ise boş kova arayarak ilerleyen açık adresleme (open addressing) kullanır. Tablo dolmaya başlayınca (doluluk oranı, load factor) kova sayısı büyütülür ve her şey yeniden yerleştirilir; bu yüzden ekleme "amortize" O(1)'dir.</p>
+<pre class="py">class MiniSozluk:
+    def __init__(self, kova_sayisi=4):
+        self.kovalar = [[] for _ in range(kova_sayisi)]
+    def _kova(self, anahtar):
+        return self.kovalar[hash(anahtar) % len(self.kovalar)]
+    def koy(self, anahtar, deger):
+        kova = self._kova(anahtar)
+        for i, (a, _) in enumerate(kova):
+            if a == anahtar:                 # aynı anahtar: güncelle
+                kova[i] = (anahtar, deger)
+                return
+        kova.append((anahtar, deger))        # çakışma olsa da aynı kovaya eklenir
+    def al(self, anahtar):
+        for a, d in self._kova(anahtar):
+            if a == anahtar:
+                return d
+        raise KeyError(anahtar)
+
+s = MiniSozluk()
+for kod, stok in [("SUT", 40), ("EKMEK", 120), ("PEYNIR", 15), ("YAG", 8), ("CAY", 60)]:
+    s.koy(kod, stok)
+s.koy("SUT", 35)
+print(s.al("SUT"), s.al("CAY"))
+print([len(k) for k in s.kovalar], "eleman/kova")
+print(hash(1) == hash(1.0), {1: "a", 1.0: "b"})</pre>
+<p>Son satır önemli bir kuralı gösterir: eşit olan nesnelerin hash'i de eşit olmalıdır. <code>1 == 1.0</code> olduğu için sözlük onları aynı anahtar sayar. Bu kuralın sonucu: <b>değişebilir</b> nesneler (list, dict, set) anahtar olamaz, çünkü içerikleri değişince hash'leri de değişir ve kayıt yanlış kovada kalır. Anahtar olabilen nesnelere <b>hashable</b> denir: int, str, tuple (içi de hashable ise), frozenset. Kendi sınıfında <code>__eq__</code> yazarsan <code>__hash__</code>'i de tutarlı yazmalısın; <code>@dataclass(frozen=True)</code> bunu senin için yapar.</p>
+
+<h2>Küme işlemleri</h2>
+<p><code>set</code> değeri olmayan bir hash tablosudur: üyelik testi O(1), tekrarları otomatik atar. Kampanya hedeflemede kümeler doğal dildir:</p>
+<pre class="py">sut_alan = {"m1", "m2", "m3", "m5"}
+kahve_alan = {"m2", "m3", "m4"}
+sadik = {"m3", "m5", "m9"}
+print(sorted(sut_alan &amp; kahve_alan))          # kesişim: ikisini de alan
+print(sorted(sut_alan | kahve_alan))          # birleşim
+print(sorted(sut_alan - kahve_alan))          # fark: süt alıp kahve almayan
+print(sorted(sut_alan ^ kahve_alan))          # yalnız birini alan
+print((sut_alan &amp; kahve_alan) &lt;= (sut_alan | sadik))   # alt küme mi?
+segmentler = {frozenset({"süt", "kahve"}): 2}  # frozenset sözlük anahtarı olabilir
+print(segmentler[frozenset({"kahve", "süt"})])</pre>
+
+<h2>İkili arama ağacı (BST)</h2>
+<p><b>Ağaç</b> (tree), kökten dallanan düğümlerden oluşur. <b>İkili arama ağacında</b> (binary search tree) her düğümün solundaki tüm değerler ondan küçük, sağındakiler büyüktür. Bu kural sayesinde arama her adımda yarı yarıya daralır; ağaç dengeliyse ekleme ve arama O(log n)'dir. Ağacı <b>sıralı gezmek</b> (in-order: sol, kök, sağ) değerleri küçükten büyüğe verir.</p>
+<pre class="py">class Dugum:
+    def __init__(self, deger):
+        self.deger, self.sol, self.sag = deger, None, None
+
+def ekle(kok, deger):
+    if kok is None:
+        return Dugum(deger)
+    if deger &lt; kok.deger:
+        kok.sol = ekle(kok.sol, deger)
+    elif deger &gt; kok.deger:
+        kok.sag = ekle(kok.sag, deger)
+    return kok                                  # eşitse eklenmez
+
+def ara(kok, deger):
+    while kok and kok.deger != deger:
+        kok = kok.sol if deger &lt; kok.deger else kok.sag
+    return kok is not None
+
+def sirali(kok):
+    return sirali(kok.sol) + [kok.deger] + sirali(kok.sag) if kok else []
+
+def yukseklik(kok):
+    return 1 + max(yukseklik(kok.sol), yukseklik(kok.sag)) if kok else 0
+
+kok = None
+for fiyat in [50, 30, 70, 20, 40, 60, 80]:
+    kok = ekle(kok, fiyat)
+print(sirali(kok), ara(kok, 60), ara(kok, 65), yukseklik(kok))
+sirali_giris = None
+for fiyat in range(1, 8):
+    sirali_giris = ekle(sirali_giris, fiyat)
+print("sıralı eklenince yükseklik:", yukseklik(sirali_giris))</pre>
+<p>Son satır BST'nin zayıf noktasıdır: veriyi sıralı eklersen ağaç bir zincire (bağlı listeye) dönüşür ve işlemler O(n) olur. Gerçek sistemler bunu önlemek için kendini dengeleyen ağaçlar (AVL, kırmızı-siyah) ya da veritabanlarında B-ağaçları kullanır. Veritabanı indeksleri (index) tam olarak budur.</p>
+
+<h2>Graf: komşuluk listesi</h2>
+<p><b>Graf</b> (graph), düğümler (vertex) ve onları bağlayan kenarlardan (edge) oluşur: depolar ve yollar, kullanıcılar ve takip ilişkileri, banka hesapları ve para transferleri. Python'da en pratik temsil <b>komşuluk listesi</b>dir (adjacency list): her düğüm için komşularının listesi ya da kümesi.</p>
+<pre class="py">from collections import defaultdict
+yollar = [("Gebze", "İstanbul"), ("Gebze", "Bursa"), ("Bursa", "İzmir"), ("Ankara", "Bursa")]
+graf = defaultdict(set)
+for a, b in yollar:            # yönsüz: iki yöne de ekle
+    graf[a].add(b)
+    graf[b].add(a)
+for depo in sorted(graf):
+    print(depo, "-&gt;", sorted(graf[depo]))
+en_bagli = max(sorted(graf), key=lambda d: len(graf[d]))
+print("En çok bağlantı:", en_bagli, len(graf[en_bagli]))
+print("Bursa-İzmir yolu var mı?", "İzmir" in graf["Bursa"])</pre>
+<p>Kenar sayısı az olan (seyrek) graflarda komşuluk listesi bellek dostudur. Alternatif olan <b>komşuluk matrisi</b> (n×n tablo) "iki düğüm bağlı mı" sorusunu O(1) yanıtlar ama n² bellek ister. Graf üzerinde gezinme (BFS, DFS) ve en kısa yol <b>Algoritmalar</b> dersinin konusu.</p>
+
+<h2>Karmaşıklık tablosu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>İşlem</th><th>list</th><th>deque</th><th>dict</th><th>set</th><th>heapq</th></tr>
+<tr><td>Sona ekle / çıkar</td><td>O(1)</td><td>O(1)</td><td>-</td><td>-</td><td>push/pop O(log n)</td></tr>
+<tr><td>Başa ekle / çıkar</td><td>O(n)</td><td>O(1)</td><td>-</td><td>-</td><td>-</td></tr>
+<tr><td>İndeksle erişim</td><td>O(1)</td><td>O(n) (uçlarda O(1))</td><td>-</td><td>-</td><td>en küçük h[0] O(1)</td></tr>
+<tr><td>Var mı? (<code>in</code>)</td><td>O(n)</td><td>O(n)</td><td>O(1) ort.</td><td>O(1) ort.</td><td>O(n)</td></tr>
+<tr><td>Anahtarla ekle/sil</td><td>-</td><td>-</td><td>O(1) ort.</td><td>O(1) ort.</td><td>-</td></tr>
+<tr><td>Ortadan silme</td><td>O(n)</td><td>O(n)</td><td>O(1)</td><td>O(1)</td><td>O(n)</td></tr>
+</table></div>
+<div class="tbl-wrap"><table>
+<tr><th>Problem</th><th>Yapı</th><th>Neden?</th></tr>
+<tr><td>Geri al, parantez dengesi, DFS</td><td>Yığın (list)</td><td>En son eklenen ilk lazım</td></tr>
+<tr><td>Çağrı merkezi, iş kuyruğu, BFS</td><td>Kuyruk (deque)</td><td>Geliş sırası korunur, iki uç O(1)</td></tr>
+<tr><td>Acil servis, zamanlayıcı, en büyük k</td><td>Öncelik kuyruğu (heapq)</td><td>En öncelikli her an O(log n)</td></tr>
+<tr><td>Müşteri no ile kayıt, sayım, önbellek</td><td>dict</td><td>Anahtarla O(1) erişim</td></tr>
+<tr><td>Kara liste, tekrar ayıklama, segment</td><td>set</td><td>Üyelik O(1), küme cebiri</td></tr>
+<tr><td>Sıralı veride aralık sorgusu</td><td>Sıralı liste + bisect / ağaç</td><td>O(log n) arama</td></tr>
+<tr><td>Rota, ağ, ilişki</td><td>Graf (dict of set)</td><td>Bağlantıları doğal temsil eder</td></tr>
+</table></div>
+<div class="tip"><b>Seçim için üç soru</b>Hangi işlemi en sık yapacağım (ekleme mi, arama mı, en küçüğü almak mı)? Sıra önemli mi? Veri ne kadar büyük olacak? Bu üç sorunun cevabı yapıyı neredeyse her zaman belirler.</div>
+<div class="note"><b>Gerçek işte</b>Üretimde gördüğün yavaşlıkların büyük kısmı yanlış veri yapısından gelir: döngü içinde listeye <code>in</code> ile bakmak (set olmalıydı), kuyruğu <code>pop(0)</code> ile işlemek (deque olmalıydı), en büyük 10 kaydı bulmak için milyon satırı sıralamak (<code>heapq.nlargest</code> yeterdi). Kod incelemesinde (code review) "bu döngünün içinde ne arıyoruz ve hangi yapıda?" sorusu, profil almadan önce bile birçok sorunu yakalar. Celery, RQ gibi iş kuyrukları, işletim sistemi zamanlayıcıları ve Redis'in sorted set'leri bu dersteki yapıların endüstriyel sürümleridir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>LRU önbellek = sözlük + sıra</h3>
+<p>En az kullanılanı atan önbellek (LRU cache), O(1) erişim için hash tablosu, O(1) "en eskiyi at" için çift yönlü bağlı liste birleştirir. Python'da <code>OrderedDict</code> ile <code>move_to_end</code> ve <code>popitem(last=False)</code> bunu birkaç satırda verir; <code>functools.lru_cache</code> da içeride aynı fikri kullanır.</p>
+<h3>Trie, union-find ve diğerleri</h3>
+<p>Ön ek araması (otomatik tamamlama) için <b>trie</b> (önek ağacı), "bu iki hesap aynı gruba mı ait" sorusu için <b>union-find</b> (ayrık kümeler), aralık toplamları için <b>segment ağacı</b> kullanılır. Hepsinin ortak noktası: belirli bir soruyu ucuzlatmak için veriyi önceden düzenlemek.</p>
+<h3>Hazır kütüphaneler</h3>
+<p>Sıralı kalan bir koleksiyon için <code>sortedcontainers.SortedList</code>, graflar için <code>networkx</code>, büyük sayısal diziler için <code>numpy</code> kullanılır. Sıfırdan yazmayı bilmek, bu kütüphanelerin hangi işlemde hızlı hangisinde yavaş olduğunu sezmeni sağlar.</p>
+<h3>Amortize maliyet</h3>
+<p><code>list.append</code> bazen tüm diziyi daha büyük bir alana kopyalar (O(n)), ama bu seyrek olur ve kapasite her seferinde katlanarak büyüdüğü için ortalama maliyet O(1) kalır. Buna amortize (amortized) karmaşıklık denir; dict büyümesi de aynı mantıkla çalışır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-yapilari">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../dosya-ileri/">← İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma</a><a href="../yapilandirma/">Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

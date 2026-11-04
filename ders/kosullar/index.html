@@ -1,0 +1,207 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Koşullar: if / elif / else | Kesit Python</title><meta name="description" content="Programın hangi yoldan gideceğine karar ver: karşılaştırma ve mantık operatörleri, truthiness, iç içe koşullar ve erken dönüş."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kosullar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Koşullar: if / elif / else"><meta property="og:description" content="Programın hangi yoldan gideceğine karar ver: karşılaştırma ve mantık operatörleri, truthiness, iç içe koşullar ve erken dönüş."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kosullar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Koşullar: if / elif / else","description":"Programın hangi yoldan gideceğine karar ver: karşılaştırma ve mantık operatörleri, truthiness, iç içe koşullar ve erken dönüş.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/kosullar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Akış kontrolü</span><h1>Koşullar: if / elif / else</h1><p class="st-l">Programın hangi yoldan gideceğine karar ver: karşılaştırma ve mantık operatörleri, truthiness, iç içe koşullar ve erken dönüş.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kosullar">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Şimdiye kadar yazdığın programlar yukarıdan aşağıya, hiç sapmadan çalıştı. Oysa gerçek iş kuralları hep "eğer ... ise" diye başlar: <i>Eğer sepet tutarı 500 TL'yi geçerse kargo bedava. Eğer başvuranın yaşı 18'in altındaysa krediyi reddet. Eğer stok sıfırsa "tükendi" yaz.</i> Ilgaz Bank'ta bir kredi uzmanının her gün uyguladığı kuralı Python'a öğretmek için koşul (condition) yapısına ihtiyacın var.</p>
+
+<h2>if, elif, else</h2>
+<p>Python'da bir blok yalnızca koşul <code>True</code> olduğunda çalışır. Blok girintiyle (4 boşluk) belirlenir; süslü parantez yok.</p>
+<pre class="py">sepet_tutari = 640
+
+if sepet_tutari &gt;= 500:
+    kargo = 0
+elif sepet_tutari &gt;= 200:
+    kargo = 29.90
+else:
+    kargo = 49.90
+
+print("Kargo ücreti:", kargo)</pre>
+<p>Üç kuralı aklında tut:</p>
+<ul>
+  <li><b>if</b> zorunlu, <b>elif</b> (else if) istediğin kadar, <b>else</b> en fazla bir tane ve en sonda.</li>
+  <li>Dallar yukarıdan aşağıya denenir; <b>ilk doğru olan</b> çalışır, gerisi atlanır. Bu yüzden sıralama önemlidir: önce <code>&gt;= 200</code> yazsaydın 640 de o dala girerdi.</li>
+  <li>Her koşul satırı iki nokta <code>:</code> ile biter.</li>
+</ul>
+
+<h2>Karşılaştırma operatörleri</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Operatör</th><th>Anlamı</th><th>Örnek</th><th>Sonuç</th></tr>
+<tr><td><code>==</code></td><td>eşit mi</td><td><code>5 == 5.0</code></td><td>True</td></tr>
+<tr><td><code>!=</code></td><td>eşit değil mi</td><td><code>"a" != "A"</code></td><td>True</td></tr>
+<tr><td><code>&lt;</code> <code>&lt;=</code></td><td>küçük / küçük eşit</td><td><code>3 &lt;= 3</code></td><td>True</td></tr>
+<tr><td><code>&gt;</code> <code>&gt;=</code></td><td>büyük / büyük eşit</td><td><code>"b" &gt; "a"</code></td><td>True (alfabetik)</td></tr>
+<tr><td><code>in</code></td><td>içinde mi</td><td><code>"İzmir" in ["Ankara", "İzmir"]</code></td><td>True</td></tr>
+<tr><td><code>is</code></td><td>aynı nesne mi</td><td><code>x is None</code></td><td>None kontrolü için</td></tr>
+</table></div>
+<div class="warn"><b>== ile = karıştırma</b>Tek eşittir atama, çift eşittir karşılaştırmadır. <code>if yas = 18:</code> yazarsan Python sözdizimi hatası verir; bu iyi bir şey, çünkü hatayı anında görürsün.</div>
+<p>Python'da karşılaştırmaları zincirleyebilirsin; bu matematikteki gibi okunur:</p>
+<pre class="py">kredi_notu = 720
+if 650 &lt;= kredi_notu &lt; 750:
+    print("Orta risk grubu")
+print(18 &lt;= 25 &lt; 65)   # True</pre>
+
+<h2>Mantık operatörleri: and, or, not</h2>
+<p>Birden fazla koşulu birleştirmek için <code>and</code> (ve), <code>or</code> (veya), <code>not</code> (değil) kullanılır. Öncelik sırası: <code>not</code> &gt; <code>and</code> &gt; <code>or</code>. Emin değilsen parantez koy; parantez hem güvenli hem okunaklıdır.</p>
+<pre class="py">yas = 34
+aylik_gelir = 42000
+kara_listede = False
+mevcut_kredi = 1
+
+uygun = yas &gt;= 18 and aylik_gelir &gt;= 25000 and not kara_listede
+print("Temel şartlar:", uygun)
+
+# Parantezin farkı
+print(True or False and False)     # and önce: True or False -> True
+print((True or False) and False)   # parantez önce: True and False -> False</pre>
+<div class="tip"><b>Kısa devre (short-circuit)</b><code>a and b</code> ifadesinde <code>a</code> yanlışsa Python <code>b</code>'ye hiç bakmaz. Bu, <code>liste and liste[0] == 5</code> gibi "önce boş mu diye bak, sonra elemana eriş" kalıplarını güvenli kılar.</div>
+
+<h2>Truthiness: her şey bir koşul olabilir</h2>
+<p><code>if</code> yalnızca <code>True</code>/<code>False</code> beklemez; herhangi bir değer koyabilirsin. Python değeri "doğru gibi" ya da "yanlış gibi" sayar:</p>
+<ul>
+  <li><b>Yanlış sayılanlar (falsy):</b> <code>False</code>, <code>None</code>, <code>0</code>, <code>0.0</code>, boş metin <code>""</code>, boş liste <code>[]</code>, boş sözlük <code>{}</code>, boş demet <code>()</code>.</li>
+  <li><b>Doğru sayılanlar (truthy):</b> geri kalan her şey; <code>-1</code>, <code>" "</code> (boşluk karakteri), <code>[0]</code> bile.</li>
+</ul>
+<pre class="py">sepet = []
+if sepet:
+    print("Sepette ürün var")
+else:
+    print("Sepet boş")
+
+ad = ""
+print("Ad girildi" if ad else "Ad boş")
+print(bool(0), bool("0"), bool([]), bool([0]))</pre>
+<p>Son satırdaki <code>x if kosul else y</code> yapısına <b>koşullu ifade</b> (conditional expression, "ternary") denir; tek satırda iki değerden birini seçer.</p>
+
+<h2>İç içe koşul ve erken dönüş</h2>
+<p>Koşul içine koşul yazabilirsin ama girinti derinleştikçe kod zorlaşır. Fonksiyon içindeysen (bir sonraki modülde ayrıntısıyla göreceksin) olumsuz durumları başta eleyip <code>return</code> ile çıkmak, kodu düz ve okunur tutar. Buna <b>erken dönüş</b> (early return) ya da "guard clause" denir.</p>
+<pre class="py">def kredi_karari(yas, gelir, kredi_notu, kara_listede):
+    """Ilgaz Bank bireysel kredi ön değerlendirme kuralı."""
+    if kara_listede:
+        return "RED: kara liste"
+    if yas &lt; 18:
+        return "RED: yaş"
+    if gelir &lt; 25000:
+        return "RED: gelir yetersiz"
+    if kredi_notu &gt;= 700:
+        return "ONAY: standart faiz"
+    if kredi_notu &gt;= 600:
+        return "ONAY: yüksek faiz"
+    return "RED: kredi notu düşük"
+
+print(kredi_karari(34, 42000, 720, False))
+print(kredi_karari(34, 42000, 640, False))
+print(kredi_karari(17, 42000, 720, False))
+print(kredi_karari(40, 90000, 800, True))</pre>
+<p>Aynı kuralı iç içe <code>if</code> ile yazsaydın dört seviye girinti olurdu. Erken dönüşte her satır tek bir kuralı anlatır; kredi uzmanı bile okuyup "evet, kuralımız bu" diyebilir.</p>
+<div class="note"><b>pass ve boş blok</b>Python'da boş blok olamaz. Henüz ne yazacağını bilmiyorsan <code>pass</code> yaz; hiçbir şey yapmaz ama sözdizimini tamamlar.</div>
+
+<h2>match ile çoklu dallanma (Python 3.10+)</h2>
+<p>Bir değeri birçok sabitle karşılaştırıyorsan <code>match</code> daha temiz olabilir:</p>
+<pre class="py">durum = "kargoda"
+match durum:
+    case "hazirlaniyor":
+        print("Depoda paketleniyor")
+    case "kargoda" | "dagitimda":
+        print("Yolda")
+    case "teslim":
+        print("Teslim edildi")
+    case _:
+        print("Bilinmeyen durum")</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>and ve or aslında ne döndürür?</h2>
+<p>Ders boyunca <code>and</code> ve <code>or</code>'u True/False üreten operatörler gibi kullandın. Gerçekte ikisi de <b>işlenenlerden birini</b> döndürür: <code>a or b</code>, a doğru (truthy) ise a'yı, değilse b'yi; <code>a and b</code>, a yanlış (falsy) ise a'yı, değilse b'yi verir. Kısa devre de buradan gelir: sonucu belli olan ifadede ikinci tarafa hiç bakılmaz.</p>
+<pre class="py">print("" or "Misafir")        # boş metin falsy → "Misafir"
+print("Ayşe" or "Misafir")    # "Ayşe"
+print(5 and 0)                # 5 truthy → ikinci taraf: 0
+print(None and 1 / 0)         # None falsy → bölmeye hiç bakılmaz
+
+ad = ""
+gorunen = ad or "Misafir"     # varsayılan değer kalıbı
+print(gorunen)
+
+kupon = 0                     # "indirim yok" anlamında bilinçli 0
+indirim = kupon or 10         # TUZAK: 0 falsy, 10 seçilir
+print(indirim)
+indirim = 10 if kupon is None else kupon
+print(indirim)</pre>
+<div class="warn"><b>"or ile varsayılan" tuzağı</b><code>x or varsayilan</code> yalnızca x'in hiçbir falsy değerinin anlamlı olmadığı durumlarda güvenlidir (ör. boş ad). 0, 0.0, boş liste gibi değerler geçerli bir girdi olabiliyorsa "verilmedi" bilgisini <code>None</code> ile taşı ve <code>is None</code> ile kontrol et.</div>
+
+<h2>Öncelik sırası ve De Morgan</h2>
+<p>Karmaşık koşullarda hangi işlemin önce yapıldığını bilmek zorundasın. Karşılaştırmalar mantık operatörlerinden önce, <code>not</code> <code>and</code>'den önce, <code>and</code> de <code>or</code>'dan önce değerlendirilir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Öncelik (yüksekten düşüğe)</th><th>Operatör</th><th>Örnek</th><th>Nasıl okunur</th></tr>
+<tr><td>1</td><td>Aritmetik</td><td><code>a + b &gt; 100</code></td><td><code>(a + b) &gt; 100</code></td></tr>
+<tr><td>2</td><td>Karşılaştırma, <code>in</code>, <code>is</code></td><td><code>x in s and y</code></td><td><code>(x in s) and y</code></td></tr>
+<tr><td>3</td><td><code>not</code></td><td><code>not a and b</code></td><td><code>(not a) and b</code></td></tr>
+<tr><td>4</td><td><code>and</code></td><td><code>a or b and c</code></td><td><code>a or (b and c)</code></td></tr>
+<tr><td>5</td><td><code>or</code></td><td><code>a and b or c</code></td><td><code>(a and b) or c</code></td></tr>
+</table></div>
+<p>Şüphedeysen parantez kullan; okuyan kişiye de yardım eder. Bir koşulun tersini yazarken <b>De Morgan kuralı</b> işini görür: <code>not (a and b)</code> ile <code>not a or not b</code> aynıdır; <code>not (a or b)</code> ile <code>not a and not b</code> aynıdır. "Kart aktif VE bakiye yeterli değilse" demek, "kart pasif YA DA bakiye yetersiz" demektir.</p>
+<pre class="py">kart_aktif, bakiye, tutar = True, 300, 500
+print(not (kart_aktif and bakiye &gt;= tutar))
+print(not kart_aktif or bakiye &lt; tutar)       # aynı sonuç
+
+premium, kampanya, tutar = False, True, 150
+print(premium or kampanya and tutar &gt; 200)    # and önce: False or (True and False)
+print((premium or kampanya) and tutar &gt; 200)  # farklı anlam, aynı sonuç burada
+print((premium or kampanya) and tutar &gt; 100)  # True</pre>
+
+<h2>Çoklu <code>or</code> yerine <code>in</code>; <code>any</code> ve <code>all</code></h2>
+<p><code>sehir == "İzmir" or sehir == "Manisa" or sehir == "Aydın"</code> yerine <code>sehir in {"İzmir", "Manisa", "Aydın"}</code> yaz: daha kısa, daha hızlı ve kural kümesi bir değişkene taşınabilir. Bir listedeki elemanlardan <b>en az biri</b> koşulu sağlıyor mu sorusu için <code>any</code>, <b>hepsi</b> sağlıyor mu için <code>all</code> var.</p>
+<pre class="py">ege = {"İzmir", "Manisa", "Aydın"}
+print("Manisa" in ege, "Bursa" in ege)
+
+tutarlar = [120, 4800, 75, 9200]
+print(any(t &gt; 5000 for t in tutarlar))     # en az biri 5000'i geçiyor mu?
+print(all(t &gt; 0 for t in tutarlar))        # hepsi pozitif mi?
+print(all([]), any([]))                     # boş listede: True False</pre>
+<p>Parantez içindeki <code>t &gt; 5000 for t in tutarlar</code> yapısı bir üreteç ifadesidir (generator expression); her eleman için koşulu sırayla üretir. Comprehension dersinde ayrıntısını göreceksin; şimdilik "her t için şu koşul" diye oku. <code>any</code> ilk True'da, <code>all</code> ilk False'ta durur.</p>
+<div class="warn"><b>Boş listede all True'dur</b><code>all([])</code> True döner ("hepsi sağlıyor" iddiasını çürüten eleman yok). "Tüm taksitler ödendi mi?" sorusunda taksit listesi boşsa bunu ayrıca kontrol etmezsen, hiç taksidi olmayan hesap "kapandı" görünür.</div>
+
+<h2>Kayan nokta ve metin karşılaştırma</h2>
+<p>Ondalıklı sayılar ikili tabanda tam temsil edilemez; <code>0.1 + 0.2 == 0.3</code> False'tur. Para ya da ölçüm karşılaştırırken <code>math.isclose</code> ya da bir tolerans kullan. Metinlerde ise karşılaştırma harf kodlarına göredir: büyük harfler küçüklerden, rakam içeren metinler de sayısal değil harf harf karşılaştırılır.</p>
+<pre class="py">import math
+print(0.1 + 0.2 == 0.3)
+print(math.isclose(0.1 + 0.2, 0.3))
+print(abs(1000.10 - 1000.1000001) &lt; 0.005)  # kuruş toleransı
+
+print("10" &lt; "9")             # metin: "1" &lt; "9" → True
+print(int("10") &lt; int("9"))   # sayı: False
+print("Zeytin" &lt; "ayva")       # büyük harf önce gelir: True
+print("EVET".lower() == "evet")</pre>
+<p>Kullanıcı girdisini karşılaştırmadan önce <code>strip()</code> ile boşlukları, <code>lower()</code> ya da <code>casefold()</code> ile büyük/küçük harf farkını temizle. Türkçe "İ/ı" harflerinin küçültmede sürprizleri var; Unicode ve metin dersinde ayrıntılı gördün.</p>
+
+<h2>Uzun elif zinciri yerine tablo</h2>
+<p>Eşik tabanlı kurallar (kargo, indirim, vergi dilimi) değiştikçe elif zincirini düzenlemek hataya açıktır. Kuralları bir veri yapısına, karar mantığını tek bir döngüye koyarsan kural değişikliği yalnız veriyi değiştirir. Walrus operatörü (<code>:=</code>) ise bir değeri hem hesaplayıp hem koşulda kullanmanı sağlar.</p>
+<pre class="py">KARGO = [(500, 0.0), (200, 29.9), (0, 49.9)]   # büyükten küçüğe
+
+def kargo(tutar):
+    for esik, ucret in KARGO:
+        if tutar &gt;= esik:
+            return ucret
+    return None                                  # negatif tutar
+
+print(kargo(750), kargo(250), kargo(50), kargo(-5))
+
+sepet = ["çay", "kahve", "şeker", "su"]
+if (n := len(sepet)) &gt; 3:
+    print(f"{n} ürün: toplu indirim uygulanır")</pre>
+<div class="note"><b>Gerçek işte</b>Bankalarda ve e-ticarette iş kuralları sık değişir: kampanya eşikleri, kredi skor sınırları, kargo bölgeleri. Ekipler bu kuralları çoğunlukla koddan ayırıp yapılandırma dosyasına ya da veritabanı tablosuna koyar; kod yalnızca "kuralları sırayla dene, ilk uyanı uygula" der. Böylece iş birimi bir eşiği değiştirmek için yazılımcı beklemez, test edilen kod da değişmez. Kod incelemesinde (code review) en çok yakalanan koşul hataları ise sınır değerlerdir: <code>&gt;</code> mi <code>&gt;=</code> mi, 500 TL tam sınırda kargo ücretli mi?</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İş kuralını koddan ayır</h3>
+<p>Gerçek sistemlerde "kredi için en az 25.000 TL gelir" gibi eşikler kodun içine gömülmez; sabit (constant) olarak en üste ya da bir ayar dosyasına yazılır: <code>MIN_GELIR = 25000</code>. Kural değiştiğinde tek satırı değiştirirsin ve kodun geri kalanını test etmen gerekmez.</p>
+<h3>Karmaşık koşulu adlandır</h3>
+<p><code>if yas &gt;= 18 and gelir &gt;= MIN_GELIR and not kara_listede and kredi_notu &gt;= 600:</code> satırı doğrudur ama okunmaz. Önce <code>temel_sartlar = yas &gt;= 18 and gelir &gt;= MIN_GELIR</code> gibi anlamlı ara değişkenler üret, sonra <code>if temel_sartlar and risk_uygun:</code> yaz. Bir koşulu okurken üç kere nefes almak gerekiyorsa bölünmelidir.</p>
+<h3>None ile is kullan</h3>
+<p>"Değer gelmedi" durumunu <code>None</code> ile temsil ederiz ve <code>if x is None</code> yazarız, <code>== None</code> değil. <code>is</code> aynı nesne olup olmadığına bakar; <code>None</code> tek bir nesne olduğu için en güvenli yoldur. Aynı mantıkla <code>if not x</code> ile <code>if x is None</code> farklıdır: ilki 0 ve boş listeyi de yakalar, ikincisi yalnızca None'ı.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kosullar">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sozlukler/">← Sözlükler (dict)</a><a href="../donguler/">Döngüler: for ve while →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

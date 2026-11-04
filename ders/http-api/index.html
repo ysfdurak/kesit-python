@@ -1,0 +1,198 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler | Kesit Python</title><meta name="description" content="HTTP isteğinin anatomisini, metotları ve durum kodlarını öğrenir; requests/httpx ile kimlik doğrulamalı, zaman aşımlı, sayfalı ve hız sınırına saygılı API…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/http-api/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler"><meta property="og:description" content="HTTP isteğinin anatomisini, metotları ve durum kodlarını öğrenir; requests/httpx ile kimlik doğrulamalı, zaman aşımlı, sayfalı ve hız sınırına saygılı API…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/http-api/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler","description":"HTTP isteğinin anatomisini, metotları ve durum kodlarını öğrenir; requests/httpx ile kimlik doğrulamalı, zaman aşımlı, sayfalı ve hız sınırına saygılı API…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/http-api/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</h1><p class="st-l">HTTP isteğinin anatomisini, metotları ve durum kodlarını öğrenir; requests/httpx ile kimlik doğrulamalı, zaman aşımlı, sayfalı ve hız sınırına saygılı API istemcisi yazar, sahte taşıyıcıyla test edersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/http-api">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in sipariş sistemi kargo firmasının API'sinden teslimat durumlarını, Ilgaz Bank'ın ödeme API'sinden tahsilat sonuçlarını, merkez bankasının servisinden döviz kurlarını çeker. Modern yazılımda sistemler birbirleriyle çoğunlukla <b>HTTP</b> üzerinden konuşan <b>API</b>'lerle (Application Programming Interface) haberleşir. Bir API istemcisi yazmak kolaydır; <b>dayanıklı</b> bir istemci yazmak ise ayrı bir beceridir: ağ kopar, sunucu yavaşlar, hız sınırına takılırsın, beklenmedik JSON gelir. Bu derste ikisini de öğreneceksin.</p>
+<p>Önceki derste HTML kazımayı gördün; API ise verinin makine için hazırlanmış, kurallı halidir. API varsa kazımaya gerek yoktur. Sunucu tarafını (FastAPI ile uç nokta yazmayı) ileri seviyedeki "API ve web" dersinde göreceksin; burada istemci tarafındayız.</p>
+
+<h2>HTTP isteğinin anatomisi</h2>
+<pre class="code">POST /v1/siparisler?kaynak=mobil HTTP/1.1          ← metot, yol, sorgu parametresi
+Host: api.anadolumarket.example
+Authorization: Bearer eyJhbGciOi...                 ← kimlik doğrulama başlığı
+Content-Type: application/json                      ← gövdenin biçimi
+Accept: application/json                            ← beklediğin yanıt biçimi
+
+{"musteri_id": 1042, "urunler": [{"sku": "AM-101", "adet": 2}]}   ← gövde (body)</pre>
+<p>Yanıt da benzer yapıdadır: bir <b>durum kodu</b> (status code), başlıklar ve gövde. REST tarzı API'lerde adres bir <b>kaynağı</b> (resource: siparişler, müşteriler), metot ise o kaynağa ne yapılacağını anlatır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Metot</th><th>Amaç</th><th>Gövde</th><th>Güvenli</th><th>Idempotent</th></tr>
+<tr><td>GET</td><td>Kaynağı oku</td><td>Yok</td><td>Evet</td><td>Evet</td></tr>
+<tr><td>POST</td><td>Yeni kaynak oluştur / işlem başlat</td><td>Var</td><td>Hayır</td><td>Hayır</td></tr>
+<tr><td>PUT</td><td>Kaynağı tamamen değiştir</td><td>Var</td><td>Hayır</td><td>Evet</td></tr>
+<tr><td>PATCH</td><td>Kaynağın bir kısmını güncelle</td><td>Var</td><td>Hayır</td><td>Genelde hayır</td></tr>
+<tr><td>DELETE</td><td>Kaynağı sil</td><td>Genelde yok</td><td>Hayır</td><td>Evet</td></tr>
+</table></div>
+<p><b>Güvenli</b> (safe) metot sunucuda bir şey değiştirmez. <b>Idempotent</b> metodu aynı istekle bir kez de on kez de çağırsan sonuç aynıdır. Bu ayrım yeniden denemede hayati önem taşır: GET'i tekrar denemek zararsızdır, ama zaman aşımına uğrayan bir ödeme POST'unu körlemesine tekrarlarsan müşteriden iki kez para çekebilirsin.</p>
+
+<h2>Durum kodları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Kod</th><th>Anlamı</th><th>İstemci ne yapmalı?</th></tr>
+<tr><td>200 OK</td><td>Başarılı, gövdede veri var</td><td>JSON'u oku</td></tr>
+<tr><td>201 Created</td><td>Kaynak oluşturuldu</td><td>Yeni kaynağın kimliğini ya da <code>Location</code> başlığını al</td></tr>
+<tr><td>204 No Content</td><td>Başarılı, gövde yok</td><td><code>.json()</code> çağırma</td></tr>
+<tr><td>301 / 302 / 304</td><td>Taşındı / geçici yönlendirme / değişmedi</td><td>Kütüphane yönlendirmeyi izler; 304'te önbelleği (cache) kullan</td></tr>
+<tr><td>400 Bad Request</td><td>İstek hatalı (eksik alan, yanlış biçim)</td><td>Tekrar deneme; isteği düzelt</td></tr>
+<tr><td>401 Unauthorized</td><td>Kimlik doğrulanamadı (anahtar yok/yanlış/süresi dolmuş)</td><td>Token'ı yenile ya da yapılandırmayı düzelt</td></tr>
+<tr><td>403 Forbidden</td><td>Kim olduğun belli ama yetkin yok</td><td>Tekrar deneme; yetki iste</td></tr>
+<tr><td>404 Not Found</td><td>Kaynak yok</td><td>Çoğu zaman "yok" olarak işle (None)</td></tr>
+<tr><td>409 / 422</td><td>Çakışma / doğrulama hatası</td><td>Gövdedeki hata ayrıntısını kullanıcıya göster</td></tr>
+<tr><td>429 Too Many Requests</td><td>Hız sınırı aşıldı</td><td><code>Retry-After</code> kadar bekle, sonra tekrar dene</td></tr>
+<tr><td>500 / 502 / 503 / 504</td><td>Sunucu ya da ağ geçidi sorunu</td><td>Geri çekilerek sınırlı sayıda tekrar dene</td></tr>
+</table></div>
+
+<h2>requests ile istek atmak</h2>
+<p><code>requests</code> Python'un en yaygın HTTP kütüphanesidir. Tarayıcı motorunda ağ olmadığı için bu kodu kendi bilgisayarında dene.</p>
+<pre class="code">import os
+import requests
+
+TABAN = "https://api.anadolumarket.example/v1"
+token = os.environ["ANADOLU_API_TOKEN"]          # anahtar kodda değil, ortamda
+
+with requests.Session() as oturum:                # bağlantıyı yeniden kullanır, ortak başlık
+    oturum.headers.update({"Authorization": f"Bearer {token}", "Accept": "application/json"})
+
+    y = oturum.get(f"{TABAN}/siparisler", params={"sehir": "İzmir", "sayfa": 1}, timeout=10)
+    y.raise_for_status()                          # 4xx/5xx → requests.HTTPError
+    for s in y.json()["veri"]:
+        print(s["id"], s["tutar"])
+
+    yeni = oturum.post(f"{TABAN}/siparisler", json={"musteri_id": 1042, "tutar": 349.9}, timeout=(3, 10))
+    print(yeni.status_code, yeni.headers.get("Location"))</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install requests httpx</code>. Gerçek bir API ile denemek için herkese açık test servisleri (ör. httpbin) kullanabilirsin. httpx tarayıcı motorunda da yüklü; ağ isteği atamaz ama birazdan göreceğin sahte taşıyıcıyla tam çalışır.</div>
+<ul>
+<li><code>params=</code> sorgu parametrelerini doğru kodlar (Türkçe karakter, boşluk, <code>&amp;</code>). Adresi f-string ile elle kurma.</li>
+<li><code>json=</code> gövdeyi JSON'a çevirir ve <code>Content-Type</code> başlığını ekler; <code>data=</code> form gönderir.</li>
+<li><code>timeout=</code> <b>her zaman</b> ver. Vermezsen istek sonsuza kadar bekleyebilir. <code>(3, 10)</code>: 3 sn bağlantı, 10 sn okuma.</li>
+<li><code>Session</code> TCP bağlantısını yeniden kullanır; aynı sunucuya çok istek atıyorsan belirgin hızlanır.</li>
+</ul>
+
+<h2>httpx ve sahte taşıyıcıyla test</h2>
+<p><code>httpx</code>, requests'e çok benzeyen modern bir kütüphanedir; ek olarak async desteği ve HTTP/2 sunar. En büyük test kolaylığı <code>MockTransport</code>'tur: istemci gerçek ağ yerine senin yazdığın bir fonksiyona istek gönderir. Böylece istemci kodun hiç değişmeden test edilir. Bu derste alıştırmaların çoğu bu yöntemi kullanıyor.</p>
+<pre class="py">import httpx
+
+def sahte_sunucu(istek: httpx.Request) -&gt; httpx.Response:
+    if istek.headers.get("Authorization") != "Bearer gizli-123":
+        return httpx.Response(401, json={"hata": "yetkisiz"})
+    if istek.url.path == "/v1/siparisler/AM-7":
+        return httpx.Response(200, json={"id": "AM-7", "durum": "kargoda"})
+    return httpx.Response(404, json={"hata": "bulunamadı"})
+
+istemci = httpx.Client(
+    transport=httpx.MockTransport(sahte_sunucu),
+    base_url="https://api.anadolumarket.example/v1",
+    headers={"Authorization": "Bearer gizli-123"},
+    timeout=5.0,
+)
+y = istemci.get("/siparisler/AM-7")
+print(y.status_code, y.json())
+y = istemci.get("/siparisler/AM-999")
+print(y.status_code, y.is_success)
+try:
+    y.raise_for_status()
+except httpx.HTTPStatusError as e:
+    print("Hata:", e.response.status_code, e.request.url)</pre>
+
+<h2>Sorgu parametreleri ve kimlik doğrulama</h2>
+<p>Sorgu parametreleri adresin <code>?</code> sonrasındaki <code>anahtar=değer</code> çiftleridir. Özel karakterler yüzde kodlamasıyla (percent-encoding) yazılır; <code>urlencode</code> bunu senin yerine yapar.</p>
+<pre class="py">from urllib.parse import urlencode
+import base64
+
+params = {"sehir": "İzmir", "q": "çay &amp; şeker", "sayfa": 2, "kategori": None}
+temiz = {k: v for k, v in params.items() if v is not None}
+print(urlencode(temiz))
+
+kullanici, parola = "rapor_bot", "s3cr3t"
+kod = base64.b64encode(f"{kullanici}:{parola}".encode()).decode()
+print("Authorization: Basic", kod)</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Nasıl gönderilir?</th><th>Not</th></tr>
+<tr><td>API anahtarı</td><td><code>X-API-Key: abc123</code> başlığı (bazen <code>?api_key=</code>)</td><td>Başlık tercih edilir; adres günlüklere düşer</td></tr>
+<tr><td>Bearer token</td><td><code>Authorization: Bearer &lt;token&gt;</code></td><td>OAuth2/JWT; süresi dolar, yenilenir</td></tr>
+<tr><td>Basic</td><td><code>Authorization: Basic base64(kullanıcı:parola)</code></td><td>Base64 şifreleme değildir; yalnız HTTPS ile</td></tr>
+<tr><td>OAuth2 client credentials</td><td>Önce token uç noktasından token alınır</td><td>Kurumsal servisler arası yaygın yöntem</td></tr>
+</table></div>
+
+<h2>Gizli anahtarlar: kodda değil, ortamda</h2>
+<p>API anahtarını koda yazıp Git'e göndermek en sık ve en pahalı hatalardan biridir: depo bir kez paylaşıldığında anahtar sızmış sayılır ve iptal edilmesi gerekir. Anahtarlar <b>ortam değişkeninde</b> (environment variable) ya da bir gizli anahtar yöneticisinde (secret manager) tutulur. Yerelde <code>.env</code> dosyası kullanıyorsan onu <code>.gitignore</code>'a ekle.</p>
+<pre class="py">import os
+
+def token_al(ortam=os.environ):
+    token = ortam.get("ANADOLU_API_TOKEN")
+    if not token:
+        raise RuntimeError("ANADOLU_API_TOKEN tanımlı değil; .env dosyanı ya da ortamını kontrol et")
+    return token
+
+def maskele(deger):
+    return "****" + deger[-4:] if len(deger) &gt; 4 else "****"
+
+try:
+    token_al({})
+except RuntimeError as e:
+    print("Hata:", e)
+t = token_al({"ANADOLU_API_TOKEN": "tok_live_8f3a91c2"})
+print("Kullanılan token:", maskele(t))</pre>
+<div class="warn"><b>Günlükte sır olmaz</b>İstek başlıklarını hata ayıklamak için yazdırırken <code>Authorization</code>, <code>X-API-Key</code>, <code>Cookie</code> değerlerini maskele. Günlük sistemleri çoğu zaman uygulamadan çok daha fazla kişinin erişimine açıktır.</div>
+
+<h2>Sayfalama</h2>
+<p>API'ler büyük listeleri parça parça verir. Üç yaygın biçim vardır ve istemcinin döngüsü buna göre kurulur:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>İstek</th><th>Durma koşulu</th></tr>
+<tr><td>Sayfa numarası</td><td><code>?sayfa=3&amp;boyut=100</code></td><td>Boş liste ya da <code>sayfa == toplam_sayfa</code></td></tr>
+<tr><td>Offset/limit</td><td><code>?offset=200&amp;limit=100</code></td><td>Dönen kayıt sayısı &lt; limit</td></tr>
+<tr><td>İmleç (cursor)</td><td><code>?imlec=eyJpZCI6...</code></td><td>Yanıttaki <code>sonraki_imlec</code> boş</td></tr>
+<tr><td>Link başlığı</td><td>Yanıtta <code>Link: &lt;...&gt;; rel="next"</code></td><td><code>rel="next"</code> yok</td></tr>
+</table></div>
+<p>İmleç tabanlı sayfalama, veri arada değişse bile kayıt atlamaz ya da tekrarlamaz; büyük ve canlı veri için en sağlam yöntemdir. Her durumda bir <b>en fazla sayfa</b> sınırı koymak, hatalı bir API'nin istemcini sonsuz döngüye sokmasını önler.</p>
+
+<h2>Hız sınırı ve üstel geri çekilme</h2>
+<p>Çoğu API dakikada belli sayıda isteğe izin verir; aşarsan <b>429</b> döner ve çoğu zaman <code>Retry-After</code> başlığıyla kaç saniye beklemen gerektiğini söyler. Geçici sunucu hatalarında (502, 503, 504) ise <b>üstel geri çekilme</b> (exponential backoff) uygulanır: 1 sn, 2 sn, 4 sn, 8 sn… Çok sayıda istemci aynı anda tekrar denemesin diye bekleme süresine küçük bir rastgelelik (jitter) eklenir.</p>
+<pre class="py">import random
+
+def bekleme(deneme, retry_after=None, taban=1.0, tavan=30.0, rng=random.Random(0)):
+    if retry_after is not None and str(retry_after).isdigit():
+        return float(retry_after)
+    ust = min(tavan, taban * 2 ** deneme)
+    return round(rng.uniform(0, ust), 2)        # "full jitter"
+
+for i in range(6):
+    print(i, bekleme(i))
+print("Retry-After ile:", bekleme(0, retry_after="7"))</pre>
+<div class="steps-list"><ol>
+<li>Yalnızca <b>geçici</b> hataları tekrar dene: zaman aşımı, bağlantı hatası, 408, 429, 502, 503, 504.</li>
+<li>400, 401, 403, 404, 422 gibi istemci hatalarını tekrar deneme; aynı istek aynı sonucu verir.</li>
+<li>Deneme sayısını sınırla (genelde 3–5) ve son denemeden sonra hatayı yukarı fırlat; sessizce <code>None</code> döndürme.</li>
+<li>Idempotent olmayan istekleri (POST) yalnızca sunucu destekliyorsa bir <code>Idempotency-Key</code> başlığıyla tekrar dene.</li>
+<li>Her denemeyi günlüğe yaz: hangi adres, hangi kod, ne kadar beklendi.</li>
+</ol></div>
+
+<h2>Hata yönetimi ve yanıt doğrulama</h2>
+<div class="tbl-wrap"><table>
+<tr><th>requests</th><th>httpx</th><th>Ne zaman?</th></tr>
+<tr><td><code>requests.Timeout</code></td><td><code>httpx.TimeoutException</code></td><td>Süre doldu</td></tr>
+<tr><td><code>requests.ConnectionError</code></td><td><code>httpx.ConnectError</code> (<code>TransportError</code>)</td><td>DNS, bağlantı reddi, ağ kopması</td></tr>
+<tr><td><code>requests.HTTPError</code></td><td><code>httpx.HTTPStatusError</code></td><td><code>raise_for_status()</code> 4xx/5xx gördü</td></tr>
+<tr><td><code>requests.RequestException</code></td><td><code>httpx.HTTPError</code></td><td>Hepsinin atası</td></tr>
+</table></div>
+<p>2xx almak verinin doğru olduğu anlamına gelmez. Dış sistemden gelen her yanıtı sınırda <b>doğrula</b>: beklenen alanlar var mı, tipleri doğru mu, değerler mantıklı mı? Küçük işlerde elle kontrol, büyük işlerde <code>pydantic</code> modelleri kullanılır. Doğrulanmamış veri sistemin içine sızarsa hata çok daha uzakta ve pahalı bir yerde ortaya çıkar.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir sağlık randevu sisteminde hastane bilgi sisteminin API'si yoğun saatlerde 503 döner. İyi bir entegrasyon her isteğe zaman aşımı koyar, 503 ve 429'da geri çekilerek en fazla 4 kez dener, randevu oluşturma POST'unu her randevu için üretilen sabit bir <code>Idempotency-Key</code> ile gönderir (tekrar denemede çift randevu oluşmaz), tüm token'ları günlükte maskeler ve sağlayıcı tamamen çöktüğünde kullanıcıya "kaydınız sıraya alındı" deyip işi kuyruğa bırakır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İstemciyi sınıfa sar</h3>
+<p>Uygulamanın her yerinde <code>httpx.get</code> çağırmak yerine tek bir <code>KargoAPI</code> sınıfı yaz: taban adres, kimlik, zaman aşımı, yeniden deneme ve doğrulama bu sınıfta olsun; dışarıya <code>gonderi_durumu(takip_no)</code> gibi iş diliyle konuşan metotlar açsın. Testlerde sınıfa <code>MockTransport</code>'lu bir <code>httpx.Client</code> enjekte edersin.</p>
+<h3>Devre kesici (circuit breaker)</h3>
+<p>Karşı servis tamamen çöktüyse her isteği 4 kez denemek hem seni yavaşlatır hem onu daha çok yorar. Devre kesici, art arda belli sayıda hata görünce bir süre hiç istek atmadan hemen hata döner, sonra tek bir deneme isteğiyle servisin düzelip düzelmediğine bakar.</p>
+<h3>Önbellek ve koşullu istek</h3>
+<p>Sık değişmeyen veride (ürün kataloğu, il listesi) yanıtın <code>ETag</code> başlığını sakla, sonraki istekte <code>If-None-Match</code> gönder; değişmediyse sunucu gövdesiz 304 döner. Hem hız sınırını korursun hem bant genişliğini.</p>
+<h3>Async istemci</h3>
+<p>Yüzlerce bağımsız isteği sırayla atmak yavaştır. <code>httpx.AsyncClient</code> ve <code>asyncio.gather</code> ile eşzamanlı istek atabilirsin; ama eşzamanlılığı (concurrency) bir semafor ile sınırla ki hız sınırına çarpmayasın. Ayrıntıları ileri seviyedeki async dersinde göreceksin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/http-api">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../excel-otomasyon/">← Excel otomasyonu: openpyxl, pandas ve rapor üretimi</a><a href="../web-scraping/">Web kazıma: HTML, BeautifulSoup ve etik →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

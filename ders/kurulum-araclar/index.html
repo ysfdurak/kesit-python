@@ -1,0 +1,120 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kuruluma genel bakış: sürüm seçimi ve araçlar | Kesit Python</title><meta name="description" content="Python'ı ve VS Code'u kurar, terminalden sürümü kontrol eder, REPL ile betik çalıştırmayı ayırt eder ve sanal ortam kavramına ilk bakışı atarsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kurulum-araclar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kuruluma genel bakış: sürüm seçimi ve araçlar"><meta property="og:description" content="Python'ı ve VS Code'u kurar, terminalden sürümü kontrol eder, REPL ile betik çalıştırmayı ayırt eder ve sanal ortam kavramına ilk bakışı atarsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kurulum-araclar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kuruluma genel bakış: sürüm seçimi ve araçlar","description":"Python'ı ve VS Code'u kurar, terminalden sürümü kontrol eder, REPL ile betik çalıştırmayı ayırt eder ve sanal ortam kavramına ilk bakışı atarsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/kurulum-araclar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Bilgisayarına geç</span><h1>Kuruluma genel bakış: sürüm seçimi ve araçlar</h1><p class="st-l">Python'ı ve VS Code'u kurar, terminalden sürümü kontrol eder, REPL ile betik çalıştırmayı ayırt eder ve sanal ortam kavramına ilk bakışı atarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kurulum-araclar">Uygulamada aç, 11 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden kurulumu önemsiyoruz?</h2>
+<p>Bu uygulamada kodu tarayıcıda çalıştırıyorsun ve bu, öğrenmek için yeterli. Ama iş hayatında Python, senin bilgisayarında ya da bir sunucuda bir betik (script) olarak çalışır: Ilgaz Bank'ın gece raporu bir sunucuda, Anadolu Market analistinin günlük özeti onun dizüstünde koşar. Bu derste o ortamı kuruyoruz. Kurulumu bir kez düzgün yaparsan sonraki aylarda saatlerce "neden çalışmıyor" sorusuyla uğraşmazsın.</p>
+
+<h2>1. Python'ı kurmak</h2>
+<p>Resmî kaynak <b>python.org</b>. Kasım 2026'da kararlı sürümler 3.15 (Ekim 2026'da çıktı) ve 3.14; yeni başlayan için öneri <b>3.14</b>, çünkü paketlerin hazır derlemeleri yeni sürümlere biraz geç gelir. Bu uygulamadaki tarayıcı motoru Python 3.12'dir; temel dil aynıdır, bilgisayarına 3.14 kurman sorun çıkarmaz. Windows'ta python.org artık "Python install manager" adlı yükleme yöneticisini öne çıkarıyor, klasik yükleyici de hâlâ sunuluyor.</p>
+<div class="steps-list"><ol>
+<li><b>Windows:</b> Kurulum sihirbazının ilk ekranında "Add python.exe to PATH" kutusunu mutlaka işaretle. Bu kutu, terminalde <code>python</code> yazınca bilgisayarın Python'ı bulmasını sağlar.</li>
+<li><b>macOS:</b> python.org paketini kur. Sistemle gelen eski Python'a dokunma; sen hep <code>python3</code> komutunu kullan.</li>
+<li><b>Linux:</b> Çoğu dağıtımda Python zaten vardır. Yoksa paket yöneticisinden (apt, dnf) <code>python3</code> kur.</li>
+</ol></div>
+<p>Kurulum bittikten sonra bir terminal (Windows'ta PowerShell ya da Komut İstemi, macOS ve Linux'ta Terminal) aç ve şunu yaz:</p>
+<pre class="out">python --version
+Python 3.14.x</pre>
+<p>Windows'ta <code>python</code>, macOS ve Linux'ta genelde <code>python3</code> çalışır. "Python 3." ile başlayan bir satır görüyorsan kurulum tamam. "command not found" ya da "tanınmıyor" diyorsa büyük ihtimalle PATH adımı atlanmıştır; kurulumu "Modify" ile tekrar aç ve kutuyu işaretle.</p>
+
+<h2>2. Editör: VS Code</h2>
+<p>Kodu Not Defteri'nde de yazabilirsin ama bir kod editörü (code editor) sana renklendirme, otomatik tamamlama ve hata altı çizme verir. En yaygın tercih ücretsiz <b>Visual Studio Code</b>. Kurduktan sonra sol taraftaki Extensions panelinden Microsoft'un <b>Python</b> eklentisini yükle. Bu eklenti, dosyanın sağ üstündeki "Run" düğmesini ve hata uyarılarını getirir.</p>
+<div class="tip"><b>Klasör aç, dosya değil</b>VS Code'da "File &gt; Open Folder" ile projenin klasörünü aç. Editör, terminali o klasörde başlatır ve dosyalarını yan yana görürsün. Tek dosya açmak işleri karıştırır.</div>
+
+<h2>3. İki çalışma biçimi: REPL ve betik</h2>
+<p>Python'la iki şekilde konuşursun. Terminale sadece <code>python</code> yazıp Enter'a basarsan <b>REPL</b> açılır: Read-Eval-Print Loop, yani oku-hesapla-yazdır döngüsü. Başında <code>&gt;&gt;&gt;</code> olan satıra bir ifade yazarsın, Python hemen sonucunu gösterir. Deneme için mükemmel. Çıkmak için <code>exit()</code> yazarsın.</p>
+<pre class="out">&gt;&gt;&gt; 3 * 250
+750
+&gt;&gt;&gt; "Anadolu" + " Market"
+'Anadolu Market'</pre>
+<p>Kalıcı bir iş için ise kodu bir dosyaya yazarsın: uzantısı <code>.py</code> olan düz bir metin dosyası. Örneğin <code>rapor.py</code> adıyla şu içeriği kaydet ve terminalde <code>python rapor.py</code> ile çalıştır. Aynı kodu burada da çalıştırabilirsin:</p>
+<pre class="py">siparis_adedi = 3
+birim_fiyat = 250
+print("Haftalık özet")
+print("Sipariş:", siparis_adedi)
+print("Ciro:", siparis_adedi * birim_fiyat)</pre>
+<p>Aradaki fark önemli: REPL'de her ifadenin değeri otomatik gösterilir, betikte ise sadece <code>print</code> ettiğin şey ekrana çıkar. Betikte <code>3 * 250</code> yazıp bırakırsan hiçbir şey görmezsin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar</th></tr>
+<tr><td><code>python --version</code></td><td>Kurulu sürümü gösterir</td></tr>
+<tr><td><code>python</code></td><td>REPL'i açar (çıkış: <code>exit()</code>)</td></tr>
+<tr><td><code>python rapor.py</code></td><td>rapor.py betiğini baştan sona çalıştırır</td></tr>
+<tr><td><code>python -m venv .venv</code></td><td>Projeye özel sanal ortam oluşturur</td></tr>
+<tr><td><code>pip install pandas</code></td><td>Bir paket kurar (sanal ortam etkinken)</td></tr>
+</table></div>
+
+<h2>4. Python'ın kendisine soru sormak</h2>
+<p>Hangi sürümde çalıştığını kodla da öğrenebilirsin. <code>sys</code> modülü (module), yorumlayıcı hakkında bilgi taşır; <code>import</code> ile içe alırsın:</p>
+<pre class="py">import sys
+print(sys.version)
+print("Ana sürüm:", sys.version_info.major)
+print("Alt sürüm:", sys.version_info.minor)</pre>
+<p>Modül kavramını ileride ayrıntılı göreceksin; şimdilik "başkasının hazırladığı araç kutusu" diye düşün. Üçüncü örnek, hazır gelen <code>platform</code> modülüyle sistem bilgisini çeker:</p>
+<pre class="py">import platform
+print("Python:", platform.python_version())
+print("Uygulama:", platform.python_implementation())</pre>
+
+<h2>İlk betiği adım adım çalıştırmak</h2>
+<div class="steps-list"><ol>
+<li>VS Code'da bir klasör aç (örneğin <code>python-proje</code>).</li>
+<li>Yeni dosya oluştur, adını <code>merhaba.py</code> koy ve içine <code>print("Merhaba")</code> yaz, kaydet.</li>
+<li>Üst menüden Terminal &gt; New Terminal ile editörün içinde bir terminal aç; terminal zaten klasörün içinde başlar.</li>
+<li><code>python merhaba.py</code> (ya da <code>python3 merhaba.py</code>) yaz ve Enter'a bas.</li>
+<li>Çıktıyı gör. Bir hata varsa son satırı oku; büyük ihtimalle dosya adı ya da yazım hatasıdır.</li>
+</ol></div>
+<p>Bu beş adım, önümüzdeki aylarda yüzlerce kez tekrarlayacağın döngüdür: yaz, kaydet, çalıştır, oku, düzelt. Editördeki Run düğmesi aynı komutu senin yerine yazar; ama terminal komutunu bilmek, düğmenin olmadığı sunucularda hayat kurtarır.</p>
+
+<h2>5. Jupyter'a kısa bakış</h2>
+<p>Veri analistleri genelde <b>Jupyter Notebook</b> kullanır: kod hücreleri, çıktılar ve açıklama metinleri tek bir belgede durur, her hücre tek tek çalıştırılır. Bir satır veri okuyup sonucunu hemen görmek için idealdir; VS Code da <code>.ipynb</code> dosyalarını açar. Betik yazmayı öğrendikten sonra Jupyter'a geçmek kolaydır; tersi daha zordur. Bu yüzden önce betik mantığını oturtuyoruz.</p>
+
+<h2>6. Sanal ortam kavramına ön bakış</h2>
+<p>Her proje farklı paketler ister: Anadolu Market raporu pandas'ın bir sürümünü, başka bir proje başka sürümünü. Hepsini aynı yere kurarsan birbirini bozar. <b>Sanal ortam</b> (virtual environment), projeye özel, izole bir Python kopyasıdır. <code>python -m venv .venv</code> ile oluşturur, etkinleştirir, paketleri oraya kurarsın. Orta seviyede bunu adım adım yapacağız; şimdilik "her projenin kendi çantası olur" fikri yeter.</p>
+<div class="warn"><b>Paket kurmak için acele etme</b>İlk haftalarda hiçbir paket kurmana gerek yok. Standart kütüphane bu seviyedeki her şeyi karşılar. İnternette gördüğün her "pip install" komutunu hemen çalıştırma; önce ne kurduğunu anla.</div>
+<div class="note"><b>Dosya adlarında Türkçe karakter</b>Betik dosyasına <code>rapor.py</code> gibi küçük harfli, boşluksuz, ASCII bir ad ver. <code>Haftalık Rapor.py</code> çalışır ama terminalde yazması ve paylaşması zahmetlidir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Bu bölümde kurulumun büyük resmini görürsün. Adım adım kurulum için <b>Windows</b> ve <b>macOS / Linux</b> derslerine, editör için <b>VS Code</b>, defter ortamı için <b>Jupyter ve Colab</b> derslerine bak. Burada hangi işletim sisteminde olursan ol geçerli kararları ve araçları ele alıyoruz: hangi sürüm, hangi Python, REPL'den nasıl daha çok verim alınır, <code>python -m</code> neden bu kadar önemli ve pip ile ilk paket nasıl kurulur.</p><h2>Sürüm seçimi ve Python'ın sürüm döngüsü</h2><p>Python sürümleri <code>3.12.4</code> gibi üç parçalıdır: <b>3</b> ana sürüm (major), <b>12</b> özellik sürümü (minor), <b>4</b> düzeltme sürümü (micro / patch). Önemli olan ortadaki sayıdır; yeni söz dizimi ve modüller orada gelir. Sondaki sayı yalnızca hata ve güvenlik düzeltmesi içerir, bu yüzden 3.12.3'ten 3.12.4'e geçmek her zaman güvenlidir.</p><p>PEP 602 ile Python yıllık bir takvime geçti: her yıl Ekim ayında yeni bir 3.x çıkar (3.12 → 2023, 3.13 → 2024, 3.14 → 2025). Her sürüm yaklaşık 2 yıl tam destek (hata düzeltmeleri) alır, ardından yalnızca güvenlik düzeltmeleriyle toplam 5 yıl yaşar. Örneğin 3.9 Ekim 2025'te, 3.10 Ekim 2026'da destek dışı kaldı. Destek dışı bir sürüm çalışmaya devam eder ama artık güvenlik açıkları kapatılmaz; kurum sunucularında bu kabul edilmez.</p><div class="tbl-wrap"><table><tr><th>Aşama</th><th>Süre</th><th>Ne gelir?</th><th>Ne zaman kullanılır?</th></tr><tr><td>alpha / beta / rc</td><td>Yayın öncesi ~1 yıl</td><td>Deneme sürümleri, özellikler değişebilir</td><td>Yalnız kütüphane yazarları test için</td></tr><tr><td>Tam destek (bugfix)</td><td>İlk ~2 yıl</td><td>Hata ve güvenlik düzeltmeleri, düzenli 3.x.y sürümleri</td><td>Yeni projeler için ideal</td></tr><tr><td>Güvenlik desteği</td><td>Sonraki ~3 yıl</td><td>Yalnız güvenlik yamaları, çoğunlukla kaynak kodu olarak</td><td>Mevcut projeler; göç planı yap</td></tr><tr><td>Destek dışı (EOL)</td><td>5 yıldan sonra</td><td>Hiçbir şey</td><td>Kullanma; acilen yükselt</td></tr></table></div><div class="tip"><b>Hangi sürümü kurmalıyım?</b>Pratik kural: <b>en yeni sürümün bir öncesi</b>. Yeni çıkmış bir sürümde pandas, numpy gibi paketlerin hazır derlenmiş dosyaları (wheel) birkaç ay gecikebilir. Ekibin bir sürüm kullanıyorsa onunla aynısını kur; bu uygulama tarayıcıda Python 3.12 kullanır ve öğrendiğin her şey 3.10 ve üstünde çalışır.</div><h2>CPython, PyPy ve diğerleri</h2><p>"Python" aslında bir dil tanımıdır; onu çalıştıran programa uygulama (implementation) denir. python.org'dan indirdiğin sürüm <b>CPython</b>'dır: C ile yazılmış, referans kabul edilen uygulama. Bu uygulamadaki tarayıcı motoru Pyodide da WebAssembly'ye derlenmiş CPython'dır. Kendin kontrol et:</p><pre class="py">import sys
+import platform
+print("Uygulama:", platform.python_implementation())
+print("İç adı:", sys.implementation.name)
+print("Sürüm:", platform.python_version())
+print("Sürüm demeti:", sys.version_info[:3])
+print("En az 3.10 mu?", sys.version_info &gt;= (3, 10))</pre><div class="tbl-wrap"><table><tr><th>Uygulama</th><th>Nedir?</th><th>Ne zaman?</th></tr><tr><td>CPython</td><td>Referans uygulama, C ile yazılmış</td><td>Varsayılan; hemen her iş</td></tr><tr><td>PyPy</td><td>JIT derleyicili uygulama</td><td>Uzun çalışan saf Python döngüleri; C eklentili paketlerde uyumluluk sınırlı olabilir</td></tr><tr><td>MicroPython</td><td>Mikrodenetleyiciler için küçük Python</td><td>Sensör, ESP32, Raspberry Pi Pico</td></tr><tr><td>Pyodide</td><td>Tarayıcıda çalışan CPython</td><td>Bu uygulama, JupyterLite</td></tr></table></div><p>CPython'ın son sürümlerinde iki yenilik var: GIL'siz (free-threaded) derleme (3.13'te deneysel, 3.14'te resmî destekli, ama ayrı bir derleme ve varsayılan değil) ve hâlâ deneysel olan JIT derleyici. İkisi de varsayılan olarak kapalıdır; Eşzamanlılık (concurrency) ve Performans derslerinde konuşacağız.</p><h2>REPL'i iyi kullanmak</h2><p>Terminalde <code>python</code> (macOS/Linux'ta <code>python3</code>, Windows'ta <code>py</code> da olur) yazınca açılan REPL, en hızlı deneme alanındır. Birkaç numara verimini katlar:</p><pre class="code">&gt;&gt;&gt; 1499.9 * 3
+4499.700000000001
+&gt;&gt;&gt; round(_, 2)          # _ son sonucu tutar (yalnız REPL'de)
+4499.7
+&gt;&gt;&gt; help(round)          # belgeyi gösterir; q ile çık
+&gt;&gt;&gt; dir("metin")         # bir nesnenin metotlarını listeler
+&gt;&gt;&gt; import math; math.sqrt(144)
+12.0
+&gt;&gt;&gt; exit()</pre><ul><li><b><code>_</code> değişkeni:</b> REPL'de son ifadenin sonucunu tutar. Betikte bu özellik yoktur.</li><li><b><code>help()</code> ve <code>dir()</code>:</b> İnternete çıkmadan belge okumanın yolu. <code>help(str.split)</code> bir metodun ne yaptığını anlatır.</li><li><b>Yukarı ok:</b> Önceki satırları geri getirir. Python 3.13 ile gelen yeni REPL renkli istem (prompt), çok satırlı düzenleme, F1 (yardım), F2 (geçmiş) ve F3 (yapıştırma kipi) sunar; <code>exit</code> parantezsiz de çalışır.</li><li><b><code>python -i rapor.py</code>:</b> Betiği çalıştırır ve bittiğinde REPL'e düşer; betikteki değişkenleri inceleyebilirsin. Hata ayıklamanın (debugging) en basit biçimidir.</li></ul><p><code>help</code> ve <code>dir</code> burada da çalışır; çıktıyı kısaltmak için yalnız ilk elemanları alıyoruz:</p><pre class="py">yontemler = dir("Anadolu")
+print(len(yontemler) &gt; 30)
+print([y for y in yontemler if y.startswith("s")])
+help(len)</pre><h2><code>python -m</code>: modülü program gibi çalıştırmak</h2><p><code>-m</code> bayrağı "şu modülü, <b>bu</b> Python'la çalıştır" demektir. Makinede birden fazla Python olduğunda doğru olanı kullandığından emin olmanın en güvenli yolu budur.</p><div class="tbl-wrap"><table><tr><th>Komut</th><th>Ne yapar?</th></tr><tr><td><code>python -V</code> / <code>-VV</code></td><td>Sürümü gösterir (-VV derleme ayrıntısıyla)</td></tr><tr><td><code>python -c "print(2**10)"</code></td><td>Tek satırlık kodu dosya yazmadan çalıştırır</td></tr><tr><td><code>python -m pip install pandas</code></td><td>Bu Python'ın pip'iyle paket kurar</td></tr><tr><td><code>python -m venv .venv</code></td><td>Projeye özel sanal ortam oluşturur</td></tr><tr><td><code>python -m http.server 8000</code></td><td>Klasörü yerel bir web sunucusuyla paylaşır</td></tr><tr><td><code>python -m json.tool veri.json</code></td><td>JSON dosyasını okunur biçimde yazdırır ve doğrular</td></tr><tr><td><code>python -m timeit "sum(range(1000))"</code></td><td>Küçük bir ifadenin süresini ölçer</td></tr><tr><td><code>python -m site</code></td><td>Paketlerin hangi klasörlere kurulduğunu gösterir</td></tr></table></div><p>Kendi betiğin de bir modüldür. Doğrudan çalıştırıldığında özel değişken <code>__name__</code>, <code>"__main__"</code> değerini alır; içe aktarıldığında ise modülün adını. İleride <code>if __name__ == "__main__":</code> kalıbını bu yüzden göreceksin.</p><pre class="py">print("Bu kod şu adla çalışıyor:", __name__)
+import json
+print("json modülünün adı:", json.__name__)</pre><h2>pip ile ilk adımlar</h2><p>pip, PyPI'daki paketleri kuran resmî araçtır. Komutları her zaman <code>python -m pip</code> biçiminde yaz ve mümkünse bir sanal ortamın içinde çalıştır (Orta seviyedeki Sanal ortam ve pip dersi bunu derinleştirir).</p><pre class="code">python -m pip --version                 # hangi Python'a bağlı? yol yazar
+python -m pip install requests          # en yeni sürüm
+python -m pip install "pandas==2.2.3"   # tam sürüm (tırnak kabuk için)
+python -m pip install --upgrade pip     # pip'in kendisini güncelle
+python -m pip list                      # kurulu paketler
+python -m pip show pandas               # sürüm, bağımlılıklar, konum
+python -m pip freeze &gt; requirements.txt # ortamı dosyaya dök
+python -m pip install -r requirements.txt
+python -m pip uninstall requests</pre><div class="tbl-wrap"><table><tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr><tr><td><code>pip: command not found</code> / tanınmıyor</td><td>Scripts klasörü PATH'te değil</td><td><code>python -m pip</code> kullan</td></tr><tr><td>Kurdum ama <code>ModuleNotFoundError</code></td><td>Paket başka bir Python'a kuruldu</td><td><code>python -m pip --version</code> ile yolu karşılaştır; editörde aynı yorumlayıcıyı seç</td></tr><tr><td><code>externally-managed-environment</code></td><td>Sistem Python'ı korunuyor (PEP 668)</td><td>Sanal ortam oluştur; sistem Python'ına kurma</td></tr><tr><td><code>Permission denied</code></td><td>Yönetici klasörüne yazmaya çalışıyor</td><td>sudo kullanma; sanal ortam ya da <code>--user</code></td></tr><tr><td>SSL / proxy hatası</td><td>Kurum ağı trafiği denetliyor</td><td>BT'den proxy ve sertifika ayarını iste</td></tr><tr><td>REPL'de <code>pip install</code> SyntaxError</td><td>Terminal komutu Python'a yazıldı</td><td><code>exit()</code> ile çık, terminalde çalıştır</td></tr></table></div><div class="warn"><b>Paket adı ile içe aktarma adı farklı olabilir</b><code>pip install beautifulsoup4</code> kurar, kodda <code>import bs4</code> yazarsın; <code>scikit-learn</code> kurulur, <code>sklearn</code> içe aktarılır. Ayrıca PyPI'da tanınmış paketlere benzeyen sahte adlar (typosquatting) bulunur; adı kopyala-yapıştır yapmadan önce paket sayfasını kontrol et.</div><h2>uv'ye kısa bakış</h2><p>uv, Rust ile yazılmış, pip ve venv'in işini çok daha hızlı yapan yeni nesil bir araçtır; Python sürümlerini de kendisi indirebilir. Tek başına bir kurulum yolu olarak macOS / Linux dersinde ayrıntılı anlatılıyor. Bilmen gereken dört komut:</p><pre class="code">uv python install 3.12        # Python'ın kendisini indir
+uv init rapor &amp;&amp; cd rapor     # pyproject.toml ile proje başlat
+uv add pandas                 # paketi ekle (ortamı kendisi kurar)
+uv run main.py                # projenin ortamında çalıştır</pre><p>Ekibin pip kullanıyorsa pip, uv kullanıyorsa uv; ikisinin de mantığı aynı: projeye özel ortam ve kayıtlı bağımlılık listesi.</p><h2>Kurulum doğrulama kontrol listesi</h2><p>Yeni bir bilgisayarda ya da sunucuda işe başlamadan önce bu listeyi sırayla geç. Her satır bir öncekinin varsayımını doğrular:</p><div class="steps-list"><ol><li><code>python --version</code> (ya da <code>python3</code>, <code>py</code>): beklenen sürüm mü?</li><li><code>where python</code> (Windows) / <code>which -a python3</code> (macOS/Linux): kaç Python var, ilki hangisi?</li><li><code>python -c "import sys; print(sys.executable)"</code>: çalışan yorumlayıcının tam yolu.</li><li><code>python -m pip --version</code>: pip aynı yolu mu gösteriyor?</li><li><code>python -c "import ssl, sqlite3, venv; print('tamam')"</code>: ağ, veritabanı ve sanal ortam modülleri sağlam mı?</li><li><code>python -m venv deneme</code>, etkinleştir, <code>python -m pip install requests</code>: tüm zincir çalışıyor mu? Sonra klasörü sil.</li><li>Editörde (VS Code) seçili yorumlayıcı 3. adımdaki yolla aynı mı?</li></ol></div><div class="note"><b>Gerçek işte</b>Kurumlarda "bende çalışıyor, sunucuda çalışmıyor" sorunlarının çoğu bu listedeki bir adımın atlanmasından çıkar: sunucuda farklı bir minor sürüm, paketin yanlış Python'a kurulması ya da proxy yüzünden yarım kalmış bir kurulum. Projenin README dosyasına "Python 3.12, <code>python -m pip install -r requirements.txt</code>" gibi iki satır eklemek, ekibe katılan her yeni kişiye saatler kazandırır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kurumsal bilgisayarda kurulum</h3>
+<p>Şirket dizüstünde yönetici yetkisi olmayabilir. python.org kurulumu "Install for me only" seçeneğiyle yönetici istemeden kurulur. Bazı kurumlar Python'ı yazılım merkezinden dağıtır; önce oraya bak. Vekil sunucu (proxy) arkasındaysan pip paket indiremeyebilir; bu durumda BT ekibinden proxy ayarını iste, kendi başına çözüm aramaya çalışma.</p>
+<h3>Birden fazla Python sürümü</h3>
+<p>Bir süre sonra makinede birkaç Python olur: sistemle gelen, python.org'dan kurulan, belki bir de Anaconda. Hangisinin çalıştığını <code>python --version</code> ve Windows'ta <code>where python</code>, macOS ve Linux'ta <code>which python3</code> söyler. Karışıklığı önlemenin yolu yine sanal ortamdır: ortam etkinken <code>python</code> hep o projenin Python'ıdır.</p>
+<h3>Editör alternatifleri</h3>
+<p>PyCharm, Python'a özel güçlü bir editördür ve büyük projelerde tercih edilir. Jupyter Lab veri keşfi için, Thonny ise tamamen yeni başlayanlar için sadeleştirilmiştir. Hangisini seçersen seç, temel beceriler aynıdır: dosya oluştur, kaydet, terminalden çalıştır, hata mesajını oku.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kurulum-araclar">Alıştırmalara geç (11)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../python-nedir/">← Python nedir, nerede kullanılır?</a><a href="../ilk-program/">İlk program: print, yorum, input →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

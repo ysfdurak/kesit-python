@@ -1,0 +1,342 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Git ve proje yapısı | Kesit Python</title><meta name="description" content="Temel Git akışını (init, add, commit, branch, merge, pull request) kavrar, .gitignore kurallarını fnmatch ile çözümler, src yerleşimli proje ağacı kurar,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/git-proje-yapisi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Git ve proje yapısı"><meta property="og:description" content="Temel Git akışını (init, add, commit, branch, merge, pull request) kavrar, .gitignore kurallarını fnmatch ile çözümler, src yerleşimli proje ağacı kurar,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/git-proje-yapisi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Git ve proje yapısı","description":"Temel Git akışını (init, add, commit, branch, merge, pull request) kavrar, .gitignore kurallarını fnmatch ile çözümler, src yerleşimli proje ağacı kurar,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/git-proje-yapisi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Git ve proje yapısı</h1><p class="st-l">Temel Git akışını (init, add, commit, branch, merge, pull request) kavrar, .gitignore kurallarını fnmatch ile çözümler, src yerleşimli proje ağacı kurar, README yazar, config ve .env ile gizli bilgiyi koddan ayırır ve kod inceleme kültürünü tanırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/git-proje-yapisi">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden Git?</h2>
+<p>Ilgaz Bank'ın risk ekibinde üç analist aynı rapor betiğini geliştiriyor. "rapor_v2_son_FINAL.py" dosyaları e-postayla dolaşıyor, kimin hangi satırı değiştirdiği belli değil, dün çalışan sürüm kayboldu. Git, sürüm kontrol sistemi (version control system) olarak bu kaosu bitirir: her değişiklik kim, ne zaman, neden bilgisiyle kaydedilir; herkes aynı anda ayrı dallarda çalışır; istenirse herhangi bir güne geri dönülür. Git öğrenmek Python'dan bağımsız bir beceri ama Python geliştiricisi için şart: işe alım testlerinde ilk sorulan şey GitHub profilindir.</p>
+<div class="note"><b>Bu derste Git komutları gösterilir</b>Tarayıcıda Git çalıştıramayız; komutları kendi bilgisayarında dene. Kod alıştırmaları Git ve proje yapısının Python tarafını işler: .gitignore kurallarını eşleştirmek, proje ağacını doğrulamak, ortam değişkeni okumak.</div>
+
+<h2>Temel akış: init, add, commit</h2>
+<p>Git üç bölgeyle çalışır: çalışma dizini (dosyaların), hazırlık alanı (staging, "sonraki kayda girecekler") ve depo (repository, kalıcı geçmiş). Günlük döngü şudur:</p>
+<div class="steps-list"><ol>
+<li><code>git init</code> — klasörü depo yapar (bir kez).</li>
+<li>Dosyaları düzenle; <code>git status</code> ile neyin değiştiğini gör.</li>
+<li><code>git add src/rapor.py</code> — değişikliği hazırlık alanına koy (<code>git add .</code> hepsini).</li>
+<li><code>git commit -m "Şehir raporuna KDV sütunu eklendi"</code> — anlamlı bir mesajla kaydet.</li>
+<li><code>git log --oneline</code> — geçmişi gör.</li>
+</ol></div>
+<p>İyi commit mesajı emir kipinde, kısa ve "ne, neden" sorusuna yanıt verir: "KDV hesabını Decimal'e taşı (float yuvarlama hatası)". "düzeltmeler", "wip", "asdf" gibi mesajlar üç ay sonra hiçbir şey anlatmaz.</p>
+
+<h2>Dal, birleştirme ve pull request</h2>
+<p>Dal (branch), ana koda dokunmadan deneme yapmanı sağlar. <code>git switch -c sehir-raporu</code> yeni dal açar; orada commit'lersin; iş bitince <code>git switch main</code> ve <code>git merge sehir-raporu</code> ile birleştirirsin. Ekip çalışmasında birleştirme doğrudan değil, <b>pull request</b> (PR; GitLab'da merge request) üzerinden yapılır: dalını sunucuya <code>git push</code> ile gönderirsin, PR açarsın, ekip arkadaşın inceler, onaylar, sonra main'e birleşir. Aynı satırı iki kişi farklı değiştirdiyse çakışma (conflict) çıkar; Git dosyaya <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt;</code> ve <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> işaretleri koyar, sen doğru halini seçip yeniden commit'lersin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar</th></tr>
+<tr><td>git clone URL</td><td>Uzak depoyu indirir</td></tr>
+<tr><td>git switch -c dal-adi</td><td>Yeni dal açıp ona geçer</td></tr>
+<tr><td>git pull</td><td>Uzaktaki değişiklikleri alır</td></tr>
+<tr><td>git push -u origin dal-adi</td><td>Dalı uzak depoya gönderir</td></tr>
+<tr><td>git merge dal-adi</td><td>Dalı bulunduğun dala birleştirir</td></tr>
+<tr><td>git diff</td><td>Kaydedilmemiş değişiklikleri gösterir</td></tr>
+<tr><td>git restore dosya</td><td>Dosyadaki kaydedilmemiş değişikliği geri alır</td></tr>
+<tr><td>git stash</td><td>Yarım işi geçici rafa kaldırır</td></tr>
+</table></div>
+
+<h2>.gitignore: neyi depoya koymazsın?</h2>
+<p>Sanal ortam (virtual environment), önbellek, gizli anahtar ve büyük veri dosyaları depoya girmez. <code>.gitignore</code> dosyası satır satır desen (pattern) içerir; Git o desenlere uyan dosyaları görmezden gelir. Desenler kabuk joker karakterleriyle yazılır: <code>*</code> herhangi karakter dizisi, <code>?</code> tek karakter, sonda <code>/</code> klasör, başta <code>!</code> istisna. Python tarafında aynı jokerleri <code>fnmatch</code> modülü çözer; CI betiklerinde "bu dosya ignore'da mı" kontrolü böyle yazılır.</p>
+<pre class="py">from fnmatch import fnmatch
+
+gitignore = """
+# Python
+__pycache__/
+*.pyc
+.venv/
+# Gizli bilgi
+.env
+# Veri ve çıktı
+data/*.csv
+*.log
+!onemli.log
+"""
+
+def kurallar(metin: str) -&gt; list[str]:
+    return [s.strip() for s in metin.splitlines() if s.strip() and not s.strip().startswith("#")]
+
+def yok_sayilir_mi(yol: str, kurallar: list[str]) -&gt; bool:
+    sonuc = False
+    for k in kurallar:
+        istisna = k.startswith("!")
+        desen = k[1:] if istisna else k
+        if desen.endswith("/"):
+            uydu = yol.startswith(desen) or ("/" + desen) in ("/" + yol)
+        else:
+            uydu = fnmatch(yol, desen) or fnmatch(yol.rsplit("/", 1)[-1], desen)
+        if uydu:
+            sonuc = not istisna
+    return sonuc
+
+k = kurallar(gitignore)
+for yol in ["src/rapor.py", "src/__pycache__/rapor.cpython-312.pyc", ".env", "data/satis.csv", "data/README.md", "hata.log", "onemli.log", ".venv/bin/python"]:
+    print(f"{yol:40} {'YOK SAY' if yok_sayilir_mi(yol, k) else 'izle'}")</pre>
+<p>Kurallar sırayla uygulanır ve son eşleşen kazanır; bu yüzden <code>!onemli.log</code> satırı <code>*.log</code>'dan sonra gelince istisna olur. Gerçek Git'in eşleştirme kuralları biraz daha zengindir (<code>**</code>, kök bağıl yollar) ama bu basit model günlük ihtiyacın yüzde doksanını karşılar.</p>
+<div class="warn"><b>Bir kez push edilen gizli bilgi geri alınamaz</b>.env dosyasını yanlışlıkla commit'leyip push ettiysen silmek yetmez: geçmişte kalır. Anahtarı derhal iptal edip yenisini üret. .env satırını .gitignore'a <b>ilk commit'ten önce</b> yaz.</div>
+
+<h2>Proje yapısı: src yerleşimi</h2>
+<p>Küçük bir betik tek dosya olabilir; ama test, bağımlılık ve ekip devreye girince standart bir ağaç gerekir. Python topluluğunun önerdiği <b>src yerleşimi</b> (src layout), paketi <code>src/</code> altına koyar; böylece testler yanlışlıkla kurulmamış yerel kodu değil, kurulmuş paketi test eder.</p>
+<pre class="py">import tempfile
+from pathlib import Path
+
+AGAC = {
+    "README.md": "# Anadolu Rapor\n\nŞehir bazlı satış raporu aracı.\n\n## Kurulum\n\n    pip install -e .\n",
+    ".gitignore": ".venv/\n__pycache__/\n.env\n",
+    "pyproject.toml": '[project]\nname = "anadolu-rapor"\nversion = "0.1.0"\n',
+    ".env.example": "DB_URL=sqlite:///market.db\nAPI_KEY=buraya-anahtar\n",
+    "src/anadolu_rapor/__init__.py": "",
+    "src/anadolu_rapor/rapor.py": "def sehir_ozeti(satirlar):\n    return {}\n",
+    "tests/test_rapor.py": "import unittest\n",
+}
+
+with tempfile.TemporaryDirectory() as d:
+    kok = Path(d) / "anadolu-rapor"
+    for yol, icerik in AGAC.items():
+        hedef = kok / yol
+        hedef.parent.mkdir(parents=True, exist_ok=True)
+        hedef.write_text(icerik, encoding="utf-8")
+    for p in sorted(kok.rglob("*")):
+        derinlik = len(p.relative_to(kok).parts) - 1
+        print("  " * derinlik + ("+ " if p.is_dir() else "- ") + p.name)
+    print("README ilk satır:", (kok / "README.md").read_text(encoding="utf-8").splitlines()[0])</pre>
+<p>README (benioku) dosyası projenin kapısıdır: ne yapar, nasıl kurulur, nasıl çalıştırılır, nasıl test edilir. Dört başlık yeterlidir. <code>.env.example</code> ise gerçek değerler olmadan hangi ortam değişkenlerinin gerektiğini gösterir; depoya girer, <code>.env</code> girmez.</p>
+
+<h2>Config ve .env: gizli bilgi koddan ayrı</h2>
+<p>Veritabanı parolası, API anahtarı, e-posta şifresi kodda yazmaz. Bunlar ortam değişkeni (environment variable) olarak işletim sisteminden okunur: <code>os.environ</code> bir sözlük gibi davranır. Geliştirme makinesinde değişkenleri <code>.env</code> dosyasından yüklersin (python-dotenv paketi ya da birkaç satırlık kendi okuyucun); sunucuda ise dağıtım sistemi onları doğrudan tanımlar. Kod iki ortamda da aynıdır.</p>
+<pre class="py">import os
+
+ENV_ORNEK = """
+# Anadolu Market yerel ayarlar
+DB_URL=sqlite:///market.db
+API_KEY="abc-123"
+DEBUG=true
+"""
+
+def env_yukle(metin: str) -&gt; dict[str, str]:
+    degerler = {}
+    for satir in metin.splitlines():
+        satir = satir.strip()
+        if not satir or satir.startswith("#") or "=" not in satir:
+            continue
+        ad, deger = satir.split("=", 1)
+        degerler[ad.strip()] = deger.strip().strip('"').strip("'")
+    return degerler
+
+for ad, deger in env_yukle(ENV_ORNEK).items():
+    os.environ.setdefault(ad, deger)   # gerçek ortamda zaten varsa ezme
+
+def ayar(ad: str, varsayilan: str | None = None) -&gt; str:
+    deger = os.environ.get(ad, varsayilan)
+    if deger is None:
+        raise RuntimeError(f"Eksik ortam değişkeni: {ad} (.env dosyasını kontrol et)")
+    return deger
+
+print("DB_URL :", ayar("DB_URL"))
+print("API_KEY:", ayar("API_KEY")[:3] + "***")
+print("DEBUG  :", ayar("DEBUG").lower() == "true")
+print("PORT   :", ayar("PORT", "8000"))
+try:
+    ayar("SMTP_SIFRE")
+except RuntimeError as e:
+    print("hata:", e)</pre>
+<p><code>setdefault</code> önemli: sunucuda tanımlı gerçek değer varsa .env'deki değeri yazmaz. Eksik değişkende programın ilk saniyede anlaşılır bir mesajla durması, iki saat sonra "None" hatasıyla çökmesinden iyidir.</p>
+<div class="tip"><b>Anahtarı loglama</b>Hata ayıklarken <code>print(os.environ)</code> yazmak tüm gizli bilgileri log dosyasına döker. Değeri göstermen gerekiyorsa ilk üç karakter artı yıldız yeter.</div>
+
+<h2>Kod inceleme kültürü</h2>
+<p>Pull request'in asıl değeri kodun ikinci bir göz tarafından okunmasıdır. İnceleyen (reviewer) şunlara bakar: iş kuralı doğru mu, test var mı, isimler anlaşılır mı, gizli bilgi sızmış mı, aynı şey daha basit yazılabilir mi? Yorum yazarken kişiyi değil kodu konuş: "Bu döngü O(n²), sözlükle tek geçişte olur" iyi; "Bunu nasıl böyle yazarsın" kötü. Yazar olarak ise PR'ı küçük tut (bir PR bir iş), açıklamaya "neden"i yaz ve yorumları savunma değil öğrenme fırsatı olarak gör. İncelemeyi bekletmemek de nezakettir: küçük PR aynı gün incelenir.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Git'i gerçekten kullanmak</h2>
+<p>Temel akışı (add, commit, dal, PR) ve proje ağacını gördün. İşte ilk haftanda ise şu sorular gelir: "Git'i nasıl kurarım, kimliğimi nasıl tanıtırım?", "Yanlış commit'i nasıl geri alırım?", "Birleştirmede çakışma çıktı, bu &lt;&lt;&lt;&lt;&lt;&lt;&lt; işaretleri ne?", "Windows'ta çalışan arkadaşımın dosyalarında neden her satır değişmiş görünüyor?", "Hangi commit hatayı getirdi?". Bu bölüm bunları yanıtlar ve Git çıktılarını Python'la işleyen küçük araçlar yazdırır. Otomatik kalite kontrolleri (pre-commit, GitHub Actions) <i>kalite-ci</i>, paket sürümleme ve yayımlama <i>paketleme-dagitim</i> dersinde.</p>
+<h3>Kurulum ve ilk ayarlar</h3>
+<pre class="code"># Windows:  winget install --id Git.Git -e   (ya da git-scm.com; Git Bash da gelir)
+# macOS:    xcode-select --install   ya da   brew install git
+# Ubuntu:   sudo apt install git     | Fedora: sudo dnf install git
+git --version
+
+git config --global user.name "Ayşe Yılmaz"
+git config --global user.email "ayse@ilgazbank.example"
+git config --global init.defaultBranch main
+git config --global pull.rebase true          # pull sırasında gereksiz merge commit'i olmasın
+git config --global core.autocrlf true        # yalnız Windows: depoda LF, diskte CRLF
+git config --global core.autocrlf input       # macOS/Linux
+git config --list --show-origin               # hangi ayar nereden geliyor
+
+# GitHub/GitLab için SSH anahtarı (parola yerine)
+ssh-keygen -t ed25519 -C "ayse@ilgazbank.example"
+cat ~/.ssh/id_ed25519.pub        # bu satırı GitHub &gt; Settings &gt; SSH keys'e yapıştır
+ssh -T git@github.com            # "Hi ayse! You've successfully authenticated"</pre>
+<p>Satır sonu farkı (Windows CRLF <code>\r\n</code>, Linux/macOS LF <code>\n</code>) karışık ekiplerde "her satır değişti" görünen diff'lerin bir numaralı nedenidir. Ekip genelinde kalıcı çözüm depo köküne bir <code>.gitattributes</code> koymaktır: <code>* text=auto eol=lf</code> ve <code>*.bat text eol=crlf</code>.</p>
+<pre class="py">dosyalar = {
+    "src/rapor.py": b"import csv\nprint('ok')\n",
+    "src/kargo.py": b"UCRET = 45\r\nKDV = 0.2\r\n",
+    "scripts/kur.bat": b"@echo off\r\npy -m venv .venv\r\n",
+    "README.md": b"# Rapor\r\nKurulum\n",
+}
+for yol, icerik in dosyalar.items():
+    crlf = icerik.count(b"\r\n")
+    lf = icerik.count(b"\n") - crlf
+    tur = "KARIŞIK" if crlf and lf else "CRLF" if crlf else "LF"
+    uyari = "" if tur == "LF" or yol.endswith(".bat") else "  &lt;- .gitattributes ile LF'e çevrilmeli"
+    print(f"{yol:18} {tur}{uyari}")</pre>
+<h3>Geri alma: hangi komut ne zaman?</h3>
+<div class="tbl-wrap"><table><tr><th>Durum</th><th>Komut</th><th>Paylaşılmış geçmişte güvenli mi?</th></tr><tr><td>Dosyadaki kaydedilmemiş değişikliği at</td><td><code>git restore dosya</code></td><td>Evet (yerel)</td></tr><tr><td>Yanlışlıkla <code>add</code> ettin</td><td><code>git restore --staged dosya</code></td><td>Evet (yerel)</td></tr><tr><td>Son commit mesajı yanlış / dosya unutuldu</td><td><code>git commit --amend</code></td><td>Yalnız push etmediysen</td></tr><tr><td>Son commit'i geri al, değişiklikler kalsın</td><td><code>git reset --soft HEAD~1</code></td><td>Yalnız push etmediysen</td></tr><tr><td>Push edilmiş commit'i geri al</td><td><code>git revert &lt;hash&gt;</code></td><td>Evet: ters commit üretir</td></tr><tr><td>"Kaybettim" sandığın commit'i bul</td><td><code>git reflog</code></td><td>Evet (yerel kayıt)</td></tr><tr><td>Yarım işi rafa kaldır / geri al</td><td><code>git stash</code> / <code>git stash pop</code></td><td>Evet</td></tr></table></div>
+<div class="warn"><b>reset --hard ve push --force</b><code>git reset --hard</code> kaydedilmemiş işi geri dönüşsüz siler. Paylaşılan dalda geçmişi yeniden yazıp <code>push --force</code> yapmak ekip arkadaşlarının işini bozar; zorunluysan <code>--force-with-lease</code> kullan ve önce haber ver. Ana dalda geri almanın yolu her zaman <code>revert</code>'tür.</div>
+<h3>Birleştirme çakışması (merge conflict)</h3>
+<p>İki dal aynı satırı farklı değiştirdiyse Git karar veremez ve dosyaya işaretler koyar. <code>&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD</code> ile <code>=======</code> arası senin dalın, <code>=======</code> ile <code>&gt;&gt;&gt;&gt;&gt;&gt;&gt;</code> arası gelen dal. Doğru sonucu elle yazar, işaretleri silersin, sonra <code>git add dosya</code> ve <code>git commit</code> (rebase sırasındaysan <code>git rebase --continue</code>). Vazgeçmek için <code>git merge --abort</code>. İşaretlerin yanlışlıkla commit'lenmemesi için CI'da basit bir kontrol çok işe yarar:</p>
+<pre class="py">dosya = """VERGI_ORANI = 0.20
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; HEAD
+KARGO_UCRETI = 45
+=======
+KARGO_UCRETI = 49.90
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; kargo-zammi
+PARA_BIRIMI = "TL"
+"""
+
+def cakismalar(metin):
+    bloklar, durum, bizim, onlarin = [], None, [], []
+    for satir in metin.splitlines():
+        if satir.startswith("&lt;&lt;&lt;&lt;&lt;&lt;&lt;"):
+            durum, bizim, onlarin = "bizim", [], []
+        elif satir.startswith("=======") and durum == "bizim":
+            durum = "onlarin"
+        elif satir.startswith("&gt;&gt;&gt;&gt;&gt;&gt;&gt;") and durum == "onlarin":
+            bloklar.append({"bizim": bizim, "onlarin": onlarin, "dal": satir[8:].strip()})
+            durum = None
+        elif durum == "bizim":
+            bizim.append(satir)
+        elif durum == "onlarin":
+            onlarin.append(satir)
+    return bloklar
+
+for b in cakismalar(dosya):
+    print(f"main: {b['bizim']}  |  {b['dal']}: {b['onlarin']}")</pre>
+<h3>Rebase, etiket ve geçmişte arama</h3>
+<p><code>git rebase main</code> dalındaki commit'leri main'in en güncel hâlinin üstüne taşır; geçmiş düz kalır. Kural: yalnızca <b>kendi, paylaşılmamış</b> dalını rebase et. Sürüm yayımlarken <code>git tag -a v1.4.0 -m "Kasım sürümü"</code> ve <code>git push origin v1.4.0</code>. Hatanın hangi commit'le geldiğini bulmak için <code>git bisect</code> ikili arama yapar: iyi ve kötü commit'i söylersin, Git ortadakini açar, sen test edersin; birkaç adımda suçlu bulunur. <code>git blame dosya</code> her satırı son değiştireni, <code>git log -S "KARGO_UCRETI" --oneline</code> o metni ekleyen/silen commit'leri gösterir.</p>
+<pre class="code">git log --oneline --graph --all -20       # dalları görsel izle
+git log --since="2 weeks" --author="Ayşe" -- src/
+git show v1.4.0 --stat
+git bisect start; git bisect bad; git bisect good v1.3.0
+git bisect run python -m pytest tests/test_kargo.py   # otomatik ikili arama
+git bisect reset</pre>
+<p>Git'in "makine dostu" çıktılarını betiklerle işlemek CI ve sürüm otomasyonunun temelidir. <code>git status --porcelain</code> her satırda iki harfli durum kodu verir (<code>M</code> değişti, <code>A</code> eklendi, <code>??</code> izlenmiyor); Conventional Commits (<code>feat:</code>, <code>fix:</code>, <code>feat!:</code>) mesajlarından ise sürüm numarası ve değişiklik günlüğü (CHANGELOG) otomatik üretilir:</p>
+<pre class="py">import re
+
+log = """a1b2c3d feat(rapor): şehir kırılımı eklendi
+9f8e7d6 fix: KDV yuvarlaması Decimal'e taşındı
+5c4b3a2 docs: README kurulum adımları
+1a2b3c4 feat!: CSV ayırıcısı ; oldu"""
+
+gruplar = {"Yeni özellikler": [], "Hata düzeltmeleri": [], "Kırıcı değişiklikler": []}
+for satir in log.splitlines():
+    h, mesaj = satir.split(" ", 1)
+    m = re.match(r"(\w+)(\([\w-]+\))?(!)?: (.+)", mesaj)
+    if not m:
+        continue
+    tur, _, kirici, ozet = m.groups()
+    if kirici:
+        gruplar["Kırıcı değişiklikler"].append(f"{ozet} ({h})")
+    elif tur == "feat":
+        gruplar["Yeni özellikler"].append(f"{ozet} ({h})")
+    elif tur == "fix":
+        gruplar["Hata düzeltmeleri"].append(f"{ozet} ({h})")
+for baslik, maddeler in gruplar.items():
+    if maddeler:
+        print("##", baslik)
+        print("\n".join("- " + x for x in maddeler))</pre>
+<div class="tip"><b>README, LICENSE, CHANGELOG</b>İyi bir depoda kökte en az şunlar bulunur: ne işe yaradığını ve nasıl kurulup çalıştırılacağını anlatan <code>README.md</code>, kullanım hakkını belirten <code>LICENSE</code> (şirket içi kodda genellikle "tescilli"), sürüm farklarını anlatan <code>CHANGELOG.md</code>, örnek ayar <code>.env.example</code> ve satır sonu kuralı için <code>.gitattributes</code>.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ta ana dal korumalıdır: doğrudan push yasaktır, her değişiklik PR ile gelir, en az bir onay ve yeşil CI gerekir, birleştirme "squash" ile tek commit'e indirilir. Canlıda hata çıkınca önce <code>git revert</code> ile hızla geri dönülür, sonra kök neden ayrı bir dalda düzeltilir. Sürüm etiketleri ve CHANGELOG, Conventional Commits mesajlarından otomatik üretilir; bu yüzden commit mesajı kuralı PR kontrolünde denetlenir.</div>
+</section><section class="more"><span class="eyebrow">Derinleş</span><h2>Ortak çalışma: issue, inceleme, birleştirme kararı</h2>
+<p>Git komutları işin yarısıdır; diğer yarısı insanlarla anlaşmaktır. Depo paylaşılınca değişiklik bir sohbetle başlar, bir kararla biter.</p>
+<div class="tbl-wrap"><table><tr><th>Aşama</th><th>İyi uygulama</th></tr>
+<tr><td>Issue (kayıt)</td><td>Ne bekleniyor, ne oluyor, nasıl tekrar edilir, hangi sürüm. Karar ve gerekçe de buraya yazılır.</td></tr>
+<tr><td>Dal ve commit</td><td>Tek amaçlı dal, anlaşılır mesaj: <code>Kupon tutarını Decimal'e taşı</code>. Issue numarasını mesaja ekle.</td></tr>
+<tr><td>Pull request</td><td>Neyi, neden değiştirdiğin ve nasıl denediğin. Küçük tutulan değişiklik daha iyi incelenir.</td></tr>
+<tr><td>Kod inceleme (code review)</td><td>Kişiye değil koda, somut ve gerekçeli yorum: "Boş liste gelirse burada sıfıra bölünür, bir test ekleyelim mi?"</td></tr>
+<tr><td>Yoruma cevap</td><td>Kabul ettiysen düzelt, etmediysen nedenini yaz. Sessizce kapatma; karar kayıtta kalsın.</td></tr>
+<tr><td>CI (sürekli entegrasyon)</td><td>Her değişiklikte aynı testler aynı ortamda çalışır. "Bende çalışıyor" tartışmasını bitirir.</td></tr>
+<tr><td>Birleştirme kararı</td><td>Testler geçti, inceleme onaylandı, açık yorum kalmadı. Biri eksikse birleştirme.</td></tr></table></div>
+<p>Çakışma (merge conflict) en çok iki kişi aynı satırı değiştirince çıkar. Sık <code>git pull</code>, küçük değişiklik ve işi önceden konuşmak çakışmayı azaltır. Çıktığında iki tarafın niyetini oku, gerekiyorsa arkadaşına sor, sonra testleri yeniden çalıştır.</p></section><section class="more"><span class="eyebrow">Derinleş</span><p>Bir işe alımcı portföy deponu ortalama bir-iki dakika inceler ve çoğu zaman yalnız README'yi okur. Bu bölüm, bir analiz ya da yazılım projesini GitHub'da "okunur" bir portföy parçasına çevirmeyi anlatıyor: README şablonu, bulgu özeti, ekran görüntüleri ve depoyu yayına alma adımları.</p>
+<h2>Portföy deposunun yapısı</h2>
+<pre class="out">anadolu-market-analizi/
+├── README.md              ← vitrin: 1 dakikada okunur
+├── notebooks/             ← keşif (çıktıları temizlenmiş, nbstripout)
+├── src/analiz/            ← tekrar kullanılan kod
+├── raporlar/rapor.html    ← nbconvert/Quarto çıktısı
+├── gorseller/             ← README'de kullanılan PNG'ler (küçük, sıkıştırılmış)
+├── data/README.md         ← veri nereden, nasıl indirilir (ham veri depoda değil)
+├── tests/
+├── pyproject.toml / requirements.txt
+└── LICENSE</pre>
+<h2>README şablonu</h2>
+<p>İyi bir portföy README'si bir hikâye anlatır: sorun neydi, ne yaptın, ne buldun, nasıl tekrar üretilir. Aşağıdaki başlıklar hem analiz hem yazılım projelerinde işe yarar:</p>
+<pre class="code"># Anadolu Market: Şehir bazlı satış ve iade analizi
+
+&gt; 910 siparişlik e-ticaret verisinde ciro ve iadeyi şehir, kanal ve zamana göre inceledim.
+&gt; En önemli bulgu: ... (tek cümle, rakamla)
+
+![Şehir bazlı ciro](gorseller/sehir_ciro.png)
+
+## Sorun
+Yönetim hangi şehirlerde büyümeye yatırım yapılacağını soruyor.
+
+## Veri
+- Kaynak: Kesit Python "anadolu_market" kurgusal veri seti (10 tablo, 6.236 satır)
+- Dönem: 2022-06 – 2024-12
+
+## Yöntem
+SQL (sqlite3) ile birleştirme → pandas ile temizlik → kohort ve RFM → görselleştirme
+
+## Bulgular
+| Şehir | Teslim edilen sipariş | Ciro (TL) |
+|---|---|---|
+| İstanbul | 162 | 199.387,25 |
+| ...
+
+1. ...
+2. ...
+
+## Öneriler ve sınırlamalar
+
+## Nasıl çalıştırılır
+    git clone https://github.com/kullanici/anadolu-market-analizi
+    cd anadolu-market-analizi &amp;&amp; pip install -r requirements.txt
+    python -m analiz.rapor        # raporlar/rapor.html üretir
+
+## Teknolojiler
+Python 3.12 · pandas · SQLite · matplotlib · pytest</pre>
+<div class="tip"><b>Bulgu özeti nasıl yazılır?</b>Her bulgu bir cümle, bir rakam ve bir "neden önemli" içersin: "İzmir, İstanbul'un yarısı kadar siparişle onun cirosunun üçte ikisini üretiyor; sipariş başı ciro İstanbul'dan %26 yüksek." Yöntemi bulgunun önüne koyma; okuyucu önce sonucu görmek ister. Sınırlamaları dürüstçe yaz (kurgusal veri, kısa dönem, örneklem küçük): bu bir zayıflık değil, olgunluk işaretidir.</div>
+<p>Bulgu tablosunu elle yazmak yerine koddan üret; README sayıları ile rapor sayıları hiç ayrışmaz:</p>
+<pre class="py">import veri
+conn = veri.baglan("anadolu_market", tablolar=["orders", "order_items", "customers"])
+satirlar = conn.execute("""
+    SELECT c.city, COUNT(DISTINCT o.order_id),
+           ROUND(SUM(oi.quantity * oi.unit_price * (1 - oi.discount)), 2) AS ciro
+    FROM orders o JOIN customers c USING (customer_id) JOIN order_items oi USING (order_id)
+    WHERE o.status = 'delivered' AND c.city IS NOT NULL
+    GROUP BY c.city ORDER BY ciro DESC LIMIT 3""").fetchall()
+
+tl = lambda x: f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+print("| Şehir | Teslim edilen sipariş | Ciro (TL) |")
+print("|---|---|---|")
+for sehir, n, ciro in satirlar:
+    print(f"| {sehir} | {n} | {tl(ciro)} |")</pre>
+<h2>Ekran görüntüleri ve görseller</h2>
+<p>README'nin en üstündeki tek bir grafik ya da uygulama ekran görüntüsü, okuyucunun kalmasını sağlar. Görselleri <code>gorseller/</code> klasörüne koy, göreli yolla bağla (<code>![açıklama](gorseller/x.png)</code>), alternatif metni anlamlı yaz, boyutu küçük tut (genişlik 1200 px civarı, birkaç yüz KB). Etkileşimli bir uygulama ise kısa bir GIF ya da canlı demo bağlantısı (Streamlit Community Cloud, Render, GitHub Pages) çok etkilidir.</p>
+<h2>GitHub'da yayın</h2>
+<div class="steps-list"><ol>
+<li>Gizli bilgi taraması: <code>.env</code>, parola, kişisel veri depoda olmamalı (<code>git log -p | grep -i parola</code>; GitHub secret scanning da uyarır).</li>
+<li>Büyük dosya: GitHub 100 MB üstü dosyayı reddeder, 50 MB'ta uyarır. Veriyi depoya koyma; nasıl indirileceğini <code>data/README.md</code>'de anlat ya da Git LFS kullan.</li>
+<li>Notebook çıktılarını temizle (<code>nbstripout</code>) ama rapor HTML'ini <code>raporlar/</code>'a koy.</li>
+<li><code>gh repo create anadolu-market-analizi --public --source=. --push</code> ya da web arayüzünden depo oluşturup <code>git remote add origin ...</code> + <code>git push -u origin main</code>.</li>
+<li>Depo sayfasında "About" kısmına tek cümlelik açıklama ve konular (topics: <code>python</code>, <code>pandas</code>, <code>data-analysis</code>) ekle; profilinde en iyi 4-6 depoyu sabitle (pin).</li>
+<li>Rapor HTML'ini GitHub Pages ile yayınla (Settings → Pages → <code>main</code>/<code>docs</code>); README'den bağlantı ver.</li>
+</ol></div>
+<div class="note"><b>Gerçek işte</b>İşe alımcılar çok sayıda "Titanic" ve "Iris" deposu görür. Seni ayıran; gerçekçi bir iş sorusu, koddan üretilen ve tekrar edilebilen sonuçlar, temiz klasör yapısı, testler ve tek komutla çalışan kurulumdur. Kesit Python, Kesit SQL ve Kesit Power BI'daki aynı veri setleriyle yaptığın SQL, Python ve Power BI analizlerini tek bir portföy hikâyesinde birleştirebilirsin.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Dal stratejisi ve otomasyon</h3>
+<p>Ekipler büyüdükçe dal düzeni kural haline gelir. En yaygın model "GitHub flow": <code>main</code> her zaman çalışır durumdadır; her iş kısa ömürlü bir dalda yapılır (<code>feature/sehir-raporu</code>, <code>fix/kdv-yuvarlama</code>); PR ile birleşir; birleşince dal silinir. Daha katı kurumlarda (bankacılık gibi) <code>develop</code> ve <code>release</code> dalları da olur. Hangi modeli kullanırsan kullan, kural aynı: main'e doğrudan push yok, her değişiklik incelenir.</p>
+<p>Otomasyon bunu destekler. Pre-commit kancaları (hook) commit'ten önce biçimlendiriciyi (ruff, black) ve basit kontrolleri çalıştırır; böylece inceleme, girinti ve boşluk tartışmasına harcanmaz. CI (GitHub Actions, GitLab CI) her PR'da testleri koşar ve kırmızıysa birleştirmeyi engeller. Commit mesajlarında "Conventional Commits" düzeni (<code>feat:</code>, <code>fix:</code>, <code>docs:</code>) değişiklik günlüğünü otomatik üretmeyi sağlar. İleri seviyedeki "Kalite ve CI" dersinde bu zinciri uçtan uca kuracaksın; bugün için hedefin küçük: anlamlı commit, temiz .gitignore, gizli bilgi .env'de.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/git-proje-yapisi">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sanal-ortam-pip/">← Sanal ortam ve paket yönetimi</a><a href="../proje-orta/">Orta bitirme projesi: Ilgaz Bank işlem analizi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

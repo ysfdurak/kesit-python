@@ -1,0 +1,211 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Demet (tuple) ve küme (set) | Kesit Python</title><meta name="description" content="Değişmez kayıtlar için demeti, benzersiz değerler ve küme işlemleri için kümeyi öğrenir; liste, demet ve küme arasında ne zaman hangisini seçeceğini…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/demet-kume/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Demet (tuple) ve küme (set)"><meta property="og:description" content="Değişmez kayıtlar için demeti, benzersiz değerler ve küme işlemleri için kümeyi öğrenir; liste, demet ve küme arasında ne zaman hangisini seçeceğini…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/demet-kume/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Demet (tuple) ve küme (set)","description":"Değişmez kayıtlar için demeti, benzersiz değerler ve küme işlemleri için kümeyi öğrenir; liste, demet ve küme arasında ne zaman hangisini seçeceğini…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/demet-kume/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>Demet (tuple) ve küme (set)</h1><p class="st-l">Değişmez kayıtlar için demeti, benzersiz değerler ve küme işlemleri için kümeyi öğrenir; liste, demet ve küme arasında ne zaman hangisini seçeceğini kavrarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/demet-kume">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>İki yeni kap</h2>
+<p>Liste çoğu işi görür ama iki durumda eksik kalır. Birincisi: bazı veriler asla değişmemeli; bir şubenin koordinatı, bir siparişin (kod, tarih) kimliği. İkincisi: bazen sırayla değil "hangileri var" ile ilgilenirsin; Anadolu Market'ten alışveriş yapmış benzersiz şehirler, hem kredi kartı hem mevduat müşterisi olanlar. İlk iş için <b>demet</b> (tuple), ikincisi için <b>küme</b> (set) var.</p>
+
+<h2>Demet: değişmez liste</h2>
+<p>Demet, parantezle yazılan ve oluşturulduktan sonra <b>değiştirilemeyen</b> sıralı bir koleksiyondur. İndeks, dilim, <code>len</code>, <code>in</code> hepsi listeyle aynı çalışır; sadece ekleme, silme ve atama yoktur.</p>
+<pre class="py">sube = ("Ilgaz Bank Konak", 38.4189, 27.1287)
+print(sube[0])
+print(sube[1:])
+print(len(sube), "Konak" in sube[0])
+tek = (42,)             # tek elemanlı demet: virgül şart
+degil = (42)            # bu sadece 42 sayısı
+print(type(tek), type(degil))
+parantezsiz = 1, 2, 3   # parantez bile gerekmez
+print(parantezsiz)</pre>
+<p>Tek elemanlı demette virgül şarttır; <code>(42)</code> yalnızca bir sayıdır. Aslında demeti yapan şey parantez değil virgüldür: <code>1, 2, 3</code> tek başına bir demettir. Sayılar dersinde <code>1499,90</code> yazınca demet oluşmasının sebebi buydu.</p>
+<pre class="py">sube = ("Konak", 38.4189, 27.1287)
+try:
+    sube[0] = "Alsancak"
+except TypeError as hata:
+    print("Değiştirilemez:", hata)
+yeni_sube = ("Alsancak",) + sube[1:]
+print(yeni_sube)</pre>
+<p>Değiştirmek istersen metinlerde olduğu gibi yeni bir demet kurarsın. Buradaki <code>try/except</code> yapısını Hatalar dersinde öğreneceksin; şimdilik "hata verir ama program durmasın" diye oku.</p>
+
+<h2>Açma (unpacking)</h2>
+<p>Demetin en güçlü yanı: elemanlarını tek satırda ayrı değişkenlere dağıtabilirsin. Buna açma (unpacking) denir ve fonksiyonlar birden fazla değer döndürürken sürekli karşına çıkar.</p>
+<pre class="py">sube = ("Konak", 38.4189, 27.1287)
+ad, enlem, boylam = sube
+print(ad, enlem, boylam)
+a, b = 10, 20
+a, b = b, a                    # takas, geçici değişkensiz
+print(a, b)
+bolum, kalan = divmod(10000, 3)
+print(bolum, kalan)
+ilk, *orta, son = [1, 2, 3, 4, 5]
+print(ilk, orta, son)</pre>
+<p>Sol taraftaki değişken sayısı eleman sayısıyla eşleşmeli, yoksa ValueError alırsın. Yıldızlı ad (<code>*orta</code>) "geri kalan hepsi" demektir ve liste olarak gelir. Açma yalnızca demet için değil liste ve her yinelenebilir için çalışır.</p>
+<div class="tip"><b>Demet ne zaman?</b>Elemanların sayısı ve anlamı sabitse demet kullan: (enlem, boylam), (ad, soyad), (yıl, ay, gün). Elemanlar aynı türden ve sayısı değişkense liste: sipariş tutarları, şehir adları. Demet ayrıca sözlük anahtarı olabilir; liste olamaz.</div>
+
+<h2>Küme: benzersiz elemanlar</h2>
+<p>Küme süslü parantezle yazılır, sırasızdır ve her elemanı yalnızca bir kez tutar. Bir listeyi <code>set()</code>'e vermek tekrarları anında kaldırır.</p>
+<pre class="py">sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "İzmir", "Ankara"]
+benzersiz = set(sehirler)
+print(benzersiz)
+print(len(benzersiz), "farklı şehir")
+benzersiz.add("İstanbul")
+benzersiz.add("Ankara")            # zaten var, bir şey olmaz
+benzersiz.discard("Bursa")         # yoksa da hata vermez
+print(sorted(benzersiz))           # sıralı görmek için listeye çevir
+print("İzmir" in benzersiz)
+bos = set()                        # {} boş sözlük olur, dikkat</pre>
+<p>Küme sırasız olduğundan indeksle erişemezsin (<code>benzersiz[0]</code> hata verir) ve yazdırınca sıra her çalıştırmada farklı olabilir. Sıralı görmek için <code>sorted</code> kullan. Kümenin asıl gücü hızdır: <code>in</code> sorgusu listede baştan sona tarama yaparken kümede eleman sayısından bağımsız, neredeyse anında yanıtlanır. Yüz binlerce müşteri numarası içinde arama yapacaksan küme kullan.</p>
+<div class="warn"><b>Küme elemanları değişmez olmalı</b>Kümeye sayı, metin ve demet koyabilirsin ama liste ya da sözlük koyamazsın; <code>{[1, 2]}</code> TypeError verir. Sebep: küme elemanları için karma (hash) hesaplar ve değişebilen nesnelerin karması tutarlı olmaz.</div>
+
+<h2>Demeti listeye, listeyi demete</h2>
+<p>İki yapı arasında geçiş ucuzdur: <code>list()</code> ve <code>tuple()</code> dönüşüm yapar. Bir kaydı değiştirmen gerektiğinde listeye çevirir, düzeltir, sonra tekrar demete dönersin.</p>
+<pre class="py">kayit = ("AM-101", "İzmir", 1499.9)
+gecici = list(kayit)
+gecici[2] = 1399.9
+kayit = tuple(gecici)
+print(kayit, type(kayit))
+print(kayit.count("İzmir"), kayit.index(1399.9))
+print(tuple("abc"))</pre>
+<p>Demetin yalnızca iki metodu vardır: <code>count</code> ve <code>index</code>. Daha fazlasına ihtiyaç duyuyorsan muhtemelen liste istiyorsundur; bu da demetin sana verdiği bir sinyal.</p>
+
+<h2>Küme işlemleri</h2>
+<p>Ilgaz Bank'ta iki müşteri grubu var: kredi kartı olanlar ve mevduat hesabı olanlar. Pazarlama ekibi şunu soruyor: hangileri ikisine de sahip, hangileri yalnızca kredi kartına sahip, toplam kaç farklı müşteri var?</p>
+<pre class="py">kredi_karti = {"M-101", "M-102", "M-103", "M-104"}
+mevduat = {"M-103", "M-104", "M-105"}
+print("Her ikisi:", kredi_karti &amp; mevduat)       # kesişim
+print("Toplam farklı:", kredi_karti | mevduat)    # birleşim
+print("Sadece kart:", kredi_karti - mevduat)      # fark
+print("Yalnız birinde:", kredi_karti ^ mevduat)   # simetrik fark
+print(kredi_karti.intersection(mevduat))         # aynı şey, metot hâli
+print({"M-103"} &lt;= mevduat)                       # alt küme mi?</pre>
+<div class="tbl-wrap"><table>
+<tr><th>İşlem</th><th>Operatör</th><th>Metot</th><th>Anlamı</th></tr>
+<tr><td>Birleşim</td><td><code>a | b</code></td><td><code>a.union(b)</code></td><td>Herhangi birinde olanlar</td></tr>
+<tr><td>Kesişim</td><td><code>a &amp; b</code></td><td><code>a.intersection(b)</code></td><td>İkisinde de olanlar</td></tr>
+<tr><td>Fark</td><td><code>a - b</code></td><td><code>a.difference(b)</code></td><td>a'da olup b'de olmayanlar</td></tr>
+<tr><td>Simetrik fark</td><td><code>a ^ b</code></td><td><code>a.symmetric_difference(b)</code></td><td>Yalnızca birinde olanlar</td></tr>
+<tr><td>Alt küme</td><td><code>a &lt;= b</code></td><td><code>a.issubset(b)</code></td><td>a'nın tamamı b'de mi</td></tr>
+</table></div>
+<p>Bu dört işlem, SQL'deki JOIN ve EXCEPT sorgularının Python karşılığıdır. "Geçen ay alışveriş yapıp bu ay yapmayan müşteriler" sorusu tek bir fark işlemidir: <code>gecen_ay - bu_ay</code>.</p>
+
+<h2>Hangisini ne zaman?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Liste</th><th>Demet</th><th>Küme</th></tr>
+<tr><td>Yazım</td><td><code>[1, 2]</code></td><td><code>(1, 2)</code></td><td><code>{1, 2}</code></td></tr>
+<tr><td>Sıralı</td><td>Evet</td><td>Evet</td><td>Hayır</td></tr>
+<tr><td>Değiştirilebilir</td><td>Evet</td><td>Hayır</td><td>Evet (elemanlar değişmez)</td></tr>
+<tr><td>Tekrar</td><td>Olabilir</td><td>Olabilir</td><td>Olamaz</td></tr>
+<tr><td>İndeks</td><td>Var</td><td>Var</td><td>Yok</td></tr>
+<tr><td>Tipik iş</td><td>Sıralı kayıtlar</td><td>Sabit yapılı kayıt, çoklu dönüş</td><td>Benzersizlik, üyelik, karşılaştırma</td></tr>
+</table></div>
+<div class="note"><b>frozenset</b>Değişmez küme istersen <code>frozenset</code> var; kümelerin kümesini yaparken ya da sözlük anahtarı olarak küme kullanırken gerekir. Nadir ama var olduğunu bil.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Demetleri karşılaştırmak ve sıralamak</h2>
+<p>İki demet karşılaştırılırken Python <b>soldan sağa</b> eleman eleman bakar: ilk elemanlar farklıysa sonuç oradan belli olur, eşitse ikinci elemana geçer. Buna sözlük sırası (lexicographic order) denir. Bu kural sayesinde demet listesini <code>sorted</code> ile sıraladığında önce ilk alana, eşitlikte ikinci alana göre sıralama kendiliğinden olur.</p>
+<pre class="py">print((2025, 3) &lt; (2025, 11))      # ilk eşit, 3 &lt; 11
+print(("Bursa", 900) &lt; ("Ankara", 50))   # "B" &gt; "A", gerisine bakılmaz
+
+siparisler = [("AM-104", "İzmir", 450.0), ("AM-101", "Ankara", 1200.0),
+              ("AM-103", "İzmir", 1890.5), ("AM-102", "Ankara", 75.0)]
+
+def sehir_sonra_tutar(s):
+    # şehir artan, eşit şehirde tutar AZALAN: sayıyı eksiyle çevir
+    return (s[1], -s[2])
+
+for kod, sehir, tutar in sorted(siparisler, key=sehir_sonra_tutar):
+    print(kod, sehir, tutar)</pre>
+<p><code>key</code> parametresine verdiğin fonksiyon her eleman için bir "sıralama anahtarı" üretir; anahtar demet olunca çok kriterli sıralama tek satıra iner. Azalan sıra gereken sayısal alanı eksiyle çevirmek yaygın bir hiledir. Fonksiyonu tek satırda <code>lambda</code> ile yazmayı Fonksiyonel programlama dersinde göreceksin.</p>
+<div class="note"><b>Türkçe harfler</b>Metin karşılaştırması harflerin Unicode numarasına göre yapılır; "İ", "Ç", "Ş" gibi harfler Z'den sonra gelir. Bu yüzden <code>"İzmir"</code>, <code>"Zonguldak"</code>'tan büyük sayılır. Doğru Türkçe alfabetik sıra için Unicode ve metin dersindeki teknikleri kullanırsın.</div>
+
+<h2>İç içe açma ve yıldızlı açma</h2>
+<p>Açma (unpacking) yalnızca düz demetlerde değil, iç içe yapılarda da çalışır. Sol tarafı verinin <b>şekline</b> benzetmen yeterli. Döngü başlığında yapıldığında kayıtları okumak çok kolaylaşır.</p>
+<pre class="py">kayitlar = [("AM-1", ("İzmir", 120)), ("AM-2", ("Bursa", 80))]
+for kod, (sehir, tutar) in kayitlar:
+    print(f"{kod}: {sehir} / {tutar} TL")
+
+ilk, *_, son = (5, 8, 13, 21, 34)   # _ : "umursamıyorum" adı
+print(ilk, son)
+
+basla, bitir = ("09:00", "18:00")
+mesai = (basla, "12:30", bitir)
+print(*mesai)                      # yıldız, demeti argümanlara dağıtır
+print(*mesai, sep=" | ")</pre>
+<p>Alt çizgi (<code>_</code>) Python için sıradan bir değişken adıdır ama ekip içinde "bu değeri kullanmayacağım" anlamına gelen ortak bir işarettir. Çağrıdaki <code>*mesai</code> ise demeti açıp her elemanı ayrı argüman olarak verir; Fonksiyonlar dersinde <code>*args</code> ile bunun tersini göreceksin.</p>
+
+<h2>Değişmezlik yüzeyseldir</h2>
+<p>Demet, içinde tuttuğu <b>referansları</b> değiştirmene izin vermez; ama referansın gösterdiği nesne değişebilir türdeyse (liste, sözlük) o nesne değişebilir. Bu yüzden içinde liste olan bir demet "değişmez" görünse de içeriği değişir ve karması (hash) hesaplanamaz.</p>
+<pre class="py">kayit = ("AM-7", ["kalem"])
+kayit[1].append("defter")       # demeti değil, içindeki listeyi değiştiriyoruz
+print(kayit)
+try:
+    hash(kayit)
+except TypeError as h:
+    print("Anahtar/küme elemanı olamaz:", h)
+sabit = ("AM-7", ("kalem", "defter"))  # iç kısım da demet: tamamen değişmez
+print(hash(sabit) == hash(("AM-7", ("kalem", "defter"))))</pre>
+<div class="warn"><b>Tek elemanlı demet ekleme tuzağı</b><code>kayit[:2] + (yeni,)</code> doğru, <code>kayit[:2] + (yeni)</code> yanlış: virgülsüz parantez yalnızca gruplar ve "demete sayı eklenemez" anlamında <code>TypeError</code> alırsın.</div>
+
+<h2>Kümeyi yerinde güncellemek</h2>
+<p>İlk bölümde <code>|</code>, <code>&amp;</code>, <code>-</code>, <code>^</code> ile <b>yeni</b> küme üretmeyi gördün. Büyük bir kümeyi adım adım daraltırken her seferinde yenisini kurmak yerine kümeyi <b>yerinde</b> (in-place) güncelleyebilirsin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Ne yapar?</th><th>Dönen değer</th><th>Eleman yoksa</th></tr>
+<tr><td><code>k.add(x)</code></td><td>Tek eleman ekler</td><td>None</td><td>-</td></tr>
+<tr><td><code>k.update(liste)</code> / <code>k |= b</code></td><td>Birçok eleman ekler</td><td>None</td><td>-</td></tr>
+<tr><td><code>k.remove(x)</code></td><td>Siler</td><td>None</td><td><code>KeyError</code></td></tr>
+<tr><td><code>k.discard(x)</code></td><td>Siler</td><td>None</td><td>Sessiz geçer</td></tr>
+<tr><td><code>k.pop()</code></td><td>Rastgele bir eleman çıkarır</td><td>Çıkan eleman</td><td>Boşsa <code>KeyError</code></td></tr>
+<tr><td><code>k -= b</code> / <code>k.difference_update(b)</code></td><td>b'dekileri çıkarır</td><td>None</td><td>-</td></tr>
+<tr><td><code>k &amp;= b</code> / <code>k.intersection_update(b)</code></td><td>Yalnız ortakları tutar</td><td>None</td><td>-</td></tr>
+<tr><td><code>a.isdisjoint(b)</code></td><td>Ortak eleman yok mu?</td><td>bool</td><td>-</td></tr>
+<tr><td><code>a.issuperset(b)</code> / <code>a &gt;= b</code></td><td>b'nin tamamı a'da mı?</td><td>bool</td><td>-</td></tr>
+</table></div>
+<pre class="py">hedef = set(range(1001, 1011))          # 10 müşteri
+kara_liste = [1003, 1007, 1099]
+izin_yok = {1001, 1007}
+hedef -= set(kara_liste)                 # 1099 hiç yoktu, sorun değil
+hedef.difference_update(izin_yok)
+print(len(hedef), sorted(hedef))
+print(hedef.isdisjoint(izin_yok))        # artık ortak yok: True
+sonuc = hedef.update({2001})             # update None döndürür!
+print(sonuc)</pre>
+<p>Metot adının sonunda <code>_update</code> görüyorsan ya da <code>add</code>, <code>remove</code>, <code>discard</code> gibi bir fiilse işlem yerinde yapılır ve <code>None</code> döner. <code>hedef = hedef.update(...)</code> yazmak kümeni kaybettirir.</p>
+
+<h2>Sırayı koruyarak tekrar kaldırmak</h2>
+<p><code>set(liste)</code> tekrarları siler ama sırayı bozar. Raporda ilk görülme sırası önemliyse "görülenler kümesi" kalıbını kullan: kümeyi hızlı üyelik testi için, listeyi sıra için tutarsın.</p>
+<pre class="py">sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "Ankara", "Adana"]
+gorulen = set()
+sirali = []
+for s in sehirler:
+    if s not in gorulen:
+        gorulen.add(s)
+        sirali.append(s)
+print(sirali)
+print(list(dict.fromkeys(sehirler)))   # aynı sonuç, tek satır</pre>
+<p>İkinci satırdaki <code>dict.fromkeys</code> hilesini Sözlükler dersinden sonra daha iyi anlayacaksın: sözlükler ekleme sırasını korur ve anahtarları benzersizdir. Küme kurmanın tek satırlık yolu olan küme comprehension'ı (<code>{s.strip() for s in sehirler}</code>) ise Comprehension dersinde göreceksin.</p>
+
+<h2>Kayıt tekilleştirme ve frozenset</h2>
+<p>Demetler değişmez olduğu için kümeye girebilir; bu, aynı (müşteri, ürün) kaydının iki kez yüklenmesi gibi hataları yakalamanın en kısa yoludur. Sıranın önemsiz olduğu ikililerde (ör. "birlikte alınan iki ürün") ise <code>frozenset</code> kullanırsın: <code>frozenset({"çay", "şeker"})</code> ile <code>frozenset({"şeker", "çay"})</code> eşittir.</p>
+<pre class="py">yuklenen = [("M-1", "çay"), ("M-2", "kahve"), ("M-1", "çay"), ("M-3", "çay")]
+print(len(yuklenen), "satır,", len(set(yuklenen)), "benzersiz kayıt")
+
+ikili_1 = frozenset({"çay", "şeker"})
+ikili_2 = frozenset({"şeker", "çay"})
+print(ikili_1 == ikili_2, len({ikili_1, ikili_2}))
+print(("çay", "şeker") == ("şeker", "çay"))   # demette sıra önemli</pre>
+<div class="note"><b>Gerçek işte</b>Veri ekiplerinin en sık yaptığı işlerden biri <i>mutabakattır</i> (reconciliation): CRM'deki müşteri numaralarıyla muhasebe sistemindekiler tutuyor mu, depodaki SKU listesi ile e-ticaret sitesindeki aynı mı? Bu soruların ilk cevabı neredeyse her zaman iki kümenin farkıdır. Excel'de DÜŞEYARA ile saatler süren karşılaştırma, kümeye çevrilmiş iki listeyle saniyeler sürer; çıkan "eksik" ve "fazla" listeleri ilgili ekibe gönderilir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Demet neden sözlük anahtarı olabilir?</h3>
+<p>Sözlükler ve kümeler elemanı bulmak için karma (hash) değeri kullanır. Karma, nesnenin içeriğinden hesaplanır; içerik değişirse karma da değişir ve nesne kaybolur. Demet değişmez olduğundan karması sabittir, bu yüzden <code>{("İzmir", 2025): 1500}</code> gibi bileşik anahtarlar kurabilirsin. Şehir-yıl bazlı özetlerde çok işe yarar.</p>
+<h3>namedtuple ve dataclass'a doğru</h3>
+<p><code>sube[1]</code> okunur değildir; enlem mi boylam mı? <code>collections.namedtuple</code> demete alan adı verir: <code>sube.enlem</code>. Python 3.7'den beri <code>dataclass</code> aynı işi daha güçlü yapar. Orta seviyede ikisini de göreceksin; şimdilik demet, "küçük ve sabit kayıt" için yeterli.</p>
+<h3>Büyük veri setlerinde küme</h3>
+<p>İki büyük listeyi "hangi elemanlar ortak" diye iç içe döngüyle karşılaştırmak eleman sayısının karesiyle büyür: on bin eleman için yüz milyon karşılaştırma. Kümeye çevirip kesişim almak doğrusal zamanda biter. Analist olarak öğreneceğin ilk performans kuralı budur: üyelik ve karşılaştırma işlerinde listeyi kümeye çevir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/demet-kume">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../listeler/">← Listeler</a><a href="../sozlukler/">Sözlükler (dict) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

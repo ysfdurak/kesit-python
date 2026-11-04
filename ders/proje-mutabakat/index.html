@@ -1,0 +1,46 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Lezzet Kurye kupon mutabakatı | Kesit Python</title><meta name="description" content="BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-mutabakat/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Lezzet Kurye kupon mutabakatı"><meta property="og:description" content="BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-mutabakat/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Lezzet Kurye kupon mutabakatı","description":"BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/proje-mutabakat/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Bitirme projesi: Lezzet Kurye kupon mutabakatı</h1><p class="st-l">BT iş analisti için kabul testi: geç teslim kuralını koda çevirir, servisin dökümüyle satır satır karşılaştırır, API cevabını sözleşmeye göre denetler, fark raporunu Excel olarak yazar ve kabul ya da ret notu üretirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat">Uygulamada aç, 13 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: kupon mutabakatı</h2>
+<p>Kesit SQL'deki BT İş Analisti yolunda Lezzet Kurye için geç teslim kuponu talebini analiz ettin: 45 dakikayı aşan teslime 30 TL, 60 dakikayı aşana 60 TL. Geliştirme bitti, kabul testi sana geldi. Elinde sipariş verisi ve kupon servisinin dökümü var. Soru basit: <b>kural doğru uygulanmış mı?</b> Bu dersteki küçük betik bu soruyu her seferinde aynı biçimde, elle Excel karşılaştırması yapmadan cevaplar.</p>
+<p>Bu proje yazılımcı olmayı hedeflemez; yolda gördüğün dosya, CSV, JSON, pandas ve Excel işlerini gerçek bir kabul testinde birleştirir.</p>
+<div class="tbl-wrap"><table><tr><th>Adım</th><th>Soru</th><th>Çıktı</th></tr><tr><td>1. Kural</td><td>Kaç kupon oluşmalıydı?</td><td><code>beklenen_kuponlar</code></td></tr><tr><td>2. Dosya</td><td>Döküm okunabilir mi?</td><td><code>dosya_oku</code></td></tr><tr><td>3. Mutabakat</td><td>Nerede fark var?</td><td><code>mutabakat</code>, <code>ozet_cikar</code></td></tr><tr><td>4. API</td><td>Cevaplar sözleşmeye uyuyor mu?</td><td><code>cevap_denetle</code></td></tr><tr><td>5. Rapor</td><td>Kabul mü, ret mi?</td><td><code>rapor_sayfalari</code>, <code>karar_notu</code></td></tr></table></div>
+<h2>Önce beklenen sonuç</h2>
+<p>Kabul testinin ilk kuralı: dosyaya bakmadan önce beklenen sonucu kendin hesapla. Dosyadan başlarsan farkında olmadan ona uyum sağlarsın. Hesabın SQL yolundaki sonuçla aynı olmalı: <b>1.508 kupon, 51.900 TL</b> (222 tanesi 60 TL).</p>
+<pre class="py">import csv, io, json
+import pandas as pd
+import veri
+
+def siparisleri_oku():
+    return veri.oku("lezzet_kurye", "lk_orders", parse_dates=["placed_at", "delivered_at"])
+
+s = siparisleri_oku()
+print(s["status"].value_counts().to_dict())
+d = s[s["status"] == "teslim"]
+sure = (d["delivered_at"] - d["placed_at"]).dt.total_seconds()
+print("en kısa", sure.min(), "en uzun", sure.max(), "saniye")</pre>
+<h2>İkinci dosya nereden geliyor?</h2>
+<p>Veri setlerinde gerçek bir kupon servisi dökümü yok, bu yüzden <code>kupon_dosyasi</code> onu hazır kuraldan üretir ve numaraya bağlı, açık hatalar ekler: bazı kuponlar oluşmamış, bazıları çift, bazılarında 30 ile 60 karışmış, bazıları zamanında teslime verilmiş. Hatalar derse aittir ve koda bakınca görünür; sonuçlar her çalıştırmada aynıdır.</p>
+<h2>Toplam tutarsa neden yetmez?</h2>
+<p>Dosyanın toplamını beklenenle karşılaştırmak en hızlı yoldur ve en yanıltıcısıdır. Bu örnekte beklenen 51.900 TL, dosyada 53.160 TL; net fark yalnız 1260 TL. Oysa 77 siparişte sorun var. Eksik kupon ile çift kupon birbirini götürür. Karşılaştırma bu yüzden sipariş numarası üzerinden, dış birleştirmeyle yapılır.</p>
+<pre class="py">import pandas as pd
+b = pd.DataFrame({"no": [1, 2, 3], "tutar": [30, 30, 60]})
+d = pd.DataFrame({"no": [2, 3, 4], "tutar": [30, 30, 30]})
+m = b.merge(d, on="no", how="outer", suffixes=("_b", "_d"), indicator=True)
+print(m)</pre>
+<p><code>indicator=True</code> her satırın nereden geldiğini söyler: <code>left_only</code> eksik, <code>right_only</code> fazla, <code>both</code> ise tutar karşılaştırılacak satır.</p>
+<h2>API cevabı da bir sözleşmedir</h2>
+<p>İş analisti API yazmaz ama cevabın sözleşmeye uyup uymadığını denetleyebilir. <a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</a> dersindeki JSON okuma burada işe yarar; gerçek servise bağlanman gerekmez, örnek cevaplar dosyadan okunur.</p>
+<h2>Bitince göreceğin sonuç</h2>
+<p>Tarayıcıda openpyxl çalışmadığı için rapor sayfalarını burada Python listesi olarak kurarsın; gerçek Excel dosyasını son adımda kendi bilgisayarında aynı kodla yazarsın.</p>
+<div class="tbl-wrap"><table><tr><th>Durum</th><th>Sipariş</th></tr><tr><td>Tamam</td><td>1.459</td></tr><tr><td>Eksik</td><td>15</td></tr><tr><td>Çift</td><td>18</td></tr><tr><td>Tutar farkı</td><td>16</td></tr><tr><td>Fazla</td><td>28</td></tr></table></div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bunu işe taşı</h3><p>Aynı kalıp her kabul testinde çalışır: kuralı ayrı hesapla, anahtarla karşılaştır, farkı sınıflandır, dosya olarak paylaş. Kural Kesit SQL'deki karar tablosundan geliyor; tablo değişirse betikte tek yer değişir. Bir sonraki adım olarak bu betiği bir sonraki sürümde yeniden çalıştırıp farkın kapandığını göster: buna regresyon denetimi denir.</p></section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-mutabakat">Alıştırmalara geç (13)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-analist/">← Bitirme projesi: Kanat Havayolları gecikme analizi</a><a href="../istatistik/">İstatistik ve hipotez testi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

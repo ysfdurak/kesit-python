@@ -1,0 +1,282 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri tip sistemi: Generic, Protocol, TypedDict ve mypy | Kesit Python</title><meta name="description" content="Generic/TypeVar, Protocol, Literal, TypedDict, overload, NewType, Callable ve ParamSpec ile kodun sözleşmesini yaz; mypy/pyright'ın nasıl çalıştığını ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/tip-sistemi-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri tip sistemi: Generic, Protocol, TypedDict ve mypy"><meta property="og:description" content="Generic/TypeVar, Protocol, Literal, TypedDict, overload, NewType, Callable ve ParamSpec ile kodun sözleşmesini yaz; mypy/pyright'ın nasıl çalıştığını ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/tip-sistemi-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri tip sistemi: Generic, Protocol, TypedDict ve mypy","description":"Generic/TypeVar, Protocol, Literal, TypedDict, overload, NewType, Callable ve ParamSpec ile kodun sözleşmesini yaz; mypy/pyright'ın nasıl çalıştığını ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/tip-sistemi-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>İleri tip sistemi: Generic, Protocol, TypedDict ve mypy</h1><p class="st-l">Generic/TypeVar, Protocol, Literal, TypedDict, overload, NewType, Callable ve ParamSpec ile kodun sözleşmesini yaz; mypy/pyright'ın nasıl çalıştığını ve strict modu öğren.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tip-sistemi-ileri">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Orta seviyede tip ipuçlarını (type hints) belgeleme aracı olarak kullandın. Kurumsal projelerde ipuçları bundan fazlasıdır: CI'da çalışan <code>mypy</code> ya da <code>pyright</code>, kod çalışmadan önce "bu fonksiyona None gelebilir" ya da "bu sözlükte böyle bir anahtar yok" der. Ilgaz Bank'ta bir müşteri numarasıyla hesap numarasını karıştıran kod, test edilmediyse üretimde patlar; <code>NewType</code> ile bu karışıklık derleme-benzeri aşamada yakalanır. Bu ders, tip sistemini bir sözleşme dili olarak kullanmayı öğretir. Unutma: Python çalışma zamanında ipuçlarını <b>denetlemez</b>; bu yüzden alıştırmalarda ipuçlarını <code>typing.get_type_hints</code> ve <code>inspect.signature</code> ile okuyarak kendimiz kontrol edeceğiz.</p>
+
+<h2>TypeVar ve Generic</h2>
+<p>Bir fonksiyon "ne verirsen onu döndürür" diyorsa <code>Any</code> yazmak bilgiyi kaybettirir. <code>TypeVar</code>, "burada bir tür var, adı T, giriş ve çıkışta aynı" der. Sınıfları da generic yapabilirsin: <code>Stack[int]</code>. Python 3.12 ile <code>def ilk[T](...)</code> ve <code>class Stack[T]:</code> kısa sözdizimi geldi; eski sözdizimini de tanıman gerekir çünkü kurumsal kodun çoğu onunla yazıldı.</p>
+<pre class="py">from typing import TypeVar, Generic, get_type_hints
+
+T = TypeVar('T')
+
+def ilk(dizi: list[T], varsayilan: T) -&gt; T:
+    return dizi[0] if dizi else varsayilan
+
+class Stack(Generic[T]):
+    def __init__(self) -&gt; None:
+        self._v: list[T] = []
+    def push(self, x: T) -&gt; None:
+        self._v.append(x)
+    def pop(self) -&gt; T:
+        return self._v.pop()
+    def __len__(self) -&gt; int:
+        return len(self._v)
+
+# Python 3.12 kısa sözdizimi
+def son[U](dizi: list[U]) -&gt; U:
+    return dizi[-1]
+
+s: Stack[str] = Stack()
+s.push('TR01'); s.push('TR02')
+print(s.pop(), len(s))
+print(ilk([], 0), ilk([3.5], 0.0), son(['a', 'b']))
+print(get_type_hints(ilk))          # çalışma zamanında ipuçlarını oku
+</pre>
+<div class="note"><b>Sınırlı TypeVar</b><code>TypeVar('N', int, float)</code> yalnızca bu türlere izin verir; <code>TypeVar('C', bound=Comparable)</code> ise "bu Protocol'ü sağlayan her tür" der. <code>sorted</code> benzeri fonksiyonlar bound ile yazılır.</div>
+
+<h2>Literal, TypedDict, NewType</h2>
+<p><code>Literal['TRY', 'USD']</code> bir parametrenin yalnızca belirli değerleri alabileceğini söyler; enum kadar ağır değildir. <code>TypedDict</code> JSON'dan gelen sözlüklerin anahtarlarını ve tiplerini tanımlar; mypy yanlış anahtarı yakalar, çalışma zamanında ise sıradan <code>dict</code>'tir. <code>NewType</code> aynı temel türden ayrı kimlikler üretir: <code>MusteriNo</code> ve <code>HesapNo</code> ikisi de <code>int</code> olsa bile birbirinin yerine geçemez.</p>
+<pre class="py">from typing import Literal, TypedDict, NewType, NotRequired
+
+ParaBirimi = Literal['TRY', 'USD', 'EUR']
+MusteriNo = NewType('MusteriNo', int)
+HesapNo = NewType('HesapNo', int)
+
+class Islem(TypedDict):
+    hesap: HesapNo
+    tutar: float
+    birim: ParaBirimi
+    aciklama: NotRequired[str]        # isteğe bağlı anahtar
+
+def bakiye_etkisi(i: Islem) -&gt; float:
+    kur = {'TRY': 1.0, 'USD': 1.0, 'EUR': 1.0}   # örnek
+    return i['tutar'] * kur[i['birim']]
+
+i: Islem = {'hesap': HesapNo(1001), 'tutar': 250.0, 'birim': 'TRY'}
+print(bakiye_etkisi(i), type(i).__name__)
+print(Islem.__required_keys__, Islem.__optional_keys__)
+m = MusteriNo(1001)
+print(m == 1001, type(m))             # çalışma zamanında sıradan int
+</pre>
+<div class="warn"><b>Çalışma zamanı denetlemez</b><code>{'hesap': 1, 'tutar': 'yüz', 'birim': 'XXX'}</code> yazsan Python ses çıkarmaz; yalnızca mypy uyarır. Dış veriyi (API, dosya) gerçekten doğrulamak için pydantic ya da elle kontrol gerekir; TypedDict bir niyet beyanıdır.</div>
+
+<h2>overload: girdiye göre dönüş tipi</h2>
+<p>Bir fonksiyon <code>str</code> alınca <code>str</code>, <code>list[str]</code> alınca <code>list[str]</code> döndürüyorsa tek imza bunu anlatamaz. <code>@overload</code> ile "görünür imzaları" sıralar, en sonda gerçek gerçekleştirmeyi yazarsın. Overload gövdeleri <code>...</code> olur; çalışma zamanında yalnızca son tanım kalır.</p>
+<pre class="py">from typing import overload
+
+@overload
+def normalize(x: str) -&gt; str: ...
+@overload
+def normalize(x: list[str]) -&gt; list[str]: ...
+def normalize(x):
+    if isinstance(x, str):
+        return x.strip().lower()
+    return [s.strip().lower() for s in x]
+
+print(normalize('  AYŞE '), normalize([' A', 'b ']))
+</pre>
+
+<h2>Callable ve ParamSpec</h2>
+<p><code>Callable[[int, str], bool]</code> "int ve str alıp bool döndüren" fonksiyon tipidir. Dekoratör (decorator) yazarken sorun şudur: <code>Callable[..., T]</code> dönüş tipini korur ama parametre bilgisini yutar; editör artık yanlış argümanı göremez. <code>ParamSpec</code> parametre listesini bir değişken gibi taşır ve dekoratör imzayı olduğu gibi aktarır.</p>
+<pre class="py">from typing import Callable, ParamSpec, TypeVar
+from functools import wraps
+import inspect
+
+P = ParamSpec('P')
+R = TypeVar('R')
+
+def logla(fn: Callable[P, R]) -&gt; Callable[P, R]:
+    @wraps(fn)
+    def sarmal(*args: P.args, **kwargs: P.kwargs) -&gt; R:
+        print(f'-&gt; {fn.__name__}{args}{kwargs or ""}')
+        return fn(*args, **kwargs)
+    return sarmal
+
+@logla
+def faiz(anapara: float, oran: float, ay: int = 12) -&gt; float:
+    return round(anapara * oran * ay / 12, 2)
+
+print(faiz(10_000, 0.3, ay=6))
+print(inspect.signature(faiz))       # wraps sayesinde imza korunur
+</pre>
+
+<h2>mypy ve pyright nasıl çalışır?</h2>
+<p>Her iki araç da kodu çalıştırmaz; kaynak dosyayı ayrıştırır, her ifadenin tipini <b>çıkarım</b> (inference) ile bulur ve ipuçlarıyla tutarsızlıkları raporlar. İpucu olmayan fonksiyon mypy için varsayılan olarak denetlenmez; <code>--strict</code> bunu değiştirir. Sık karşılaşılan bayraklar:</p>
+<div class="tbl-wrap"><table><tr><th>Bayrak / ayar</th><th>Ne denetler</th><th>Tipik hata</th></tr><tr><td>disallow_untyped_defs</td><td>Her fonksiyon ipuçlu olmalı</td><td>Function is missing a type annotation</td></tr><tr><td>no_implicit_optional</td><td>Varsayılan None ise tip Optional olmalı</td><td>Incompatible default for argument</td></tr><tr><td>warn_return_any</td><td>Any döndüren fonksiyon uyarır</td><td>Returning Any from function</td></tr><tr><td>strict_equality</td><td>Asla eşit olamayacak türleri karşılaştırma</td><td>Non-overlapping equality check</td></tr><tr><td>warn_unused_ignores</td><td>Gereksiz # type: ignore</td><td>Unused "type: ignore" comment</td></tr></table></div>
+<p><code>pyproject.toml</code> içinde <code>[tool.mypy] strict = true</code> ile hepsi açılır. Pyright (VS Code'daki Pylance) daha katı çıkarım yapar ve daha hızlıdır; ekipler genelde birini CI'da zorunlu kılar. Dar daraltma (narrowing) kavramını öğren: <code>if x is None: return</code> satırından sonra denetleyici <code>x</code>'in artık None olmadığını bilir; <code>isinstance</code>, <code>in</code>, <code>assert</code> ve <code>match</code> de daraltır.</p>
+<pre class="py">from typing import TypeGuard, assert_never, Literal
+
+Durum = Literal['acik', 'kapali', 'askida']
+
+def pozitif_floatlar(v: list[object]) -&gt; TypeGuard[list[float]]:
+    return all(isinstance(x, (int, float)) and x &gt; 0 for x in v)
+
+def etiket(d: Durum) -&gt; str:
+    match d:
+        case 'acik': return 'Aktif'
+        case 'kapali': return 'Kapalı'
+        case 'askida': return 'Askıda'
+        case _: assert_never(d)      # yeni değer eklenirse mypy uyarır
+
+veri: list[object] = [1.5, 2, 3.0]
+if pozitif_floatlar(veri):
+    print(sum(veri))                 # artık list[float]
+print(etiket('askida'))
+</pre>
+<div class="tip"><b>Aşamalı sıkılaştırma</b>Büyük eski kod tabanında strict'i bir anda açma. Önce <code>check_untyped_defs</code>, sonra modül modül <code>disallow_untyped_defs</code>; her adımda hata sayısını CI'da ölç. Şu an geçmeyen dosyaları <code>[[tool.mypy.overrides]]</code> ile geçici muaf tut.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Python 3.12 tip sözdizimi</h2>
+<p>Derste <code>TypeVar</code> ve <code>Generic</code> ile generic yazdın. Python 3.12 (PEP 695) aynı şeyi çok daha kısa yazmanı sağlar: tip parametresi köşeli parantezle fonksiyonun ya da sınıfın adının yanına yazılır, tip takma adı (type alias) için <code>type</code> deyimi gelir. Eski yazım çalışmaya devam eder; yeni projede yeni yazımı, 3.11 ve öncesini destekleyen kütüphanede eskisini kullan.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Amaç</th><th>Eski yazım (3.8+)</th><th>3.12 yazımı</th></tr>
+<tr><td>Generic fonksiyon</td><td><code>T = TypeVar("T")</code><br><code>def ilk(x: list[T]) -&gt; T</code></td><td><code>def ilk[T](x: list[T]) -&gt; T</code></td></tr>
+<tr><td>Generic sınıf</td><td><code>class Kutu(Generic[T])</code></td><td><code>class Kutu[T]:</code></td></tr>
+<tr><td>Üst sınır (bound)</td><td><code>TypeVar("N", bound=Sayi)</code></td><td><code>def f[N: Sayi](x: N)</code></td></tr>
+<tr><td>Kısıtlı seçenek</td><td><code>TypeVar("S", int, float)</code></td><td><code>def f[S: (int, float)](x: S)</code></td></tr>
+<tr><td>Tip takma adı</td><td><code>Tutar: TypeAlias = int | float</code></td><td><code>type Tutar = int | float</code></td></tr>
+</table></div>
+<pre class="py">from collections.abc import Iterable, Callable
+
+type Tutar = int | float
+type Kural[T] = Callable[[T], bool]
+
+def ilk_uygun[T](ogeler: Iterable[T], kural: Kural[T]) -&gt; T | None:
+    for x in ogeler:
+        if kural(x):
+            return x
+    return None
+
+class Kutu[T]:
+    def __init__(self, icerik: T) -&gt; None:
+        self.icerik = icerik
+
+print(ilk_uygun([120, 900, 4500], lambda t: t &gt; 500))
+print(Tutar.__value__, Kutu.__type_params__, ilk_uygun.__type_params__)
+</pre>
+
+<h2>Varyans: list[int] neden list[float] değildir?</h2>
+<p><code>int</code>, <code>float</code> beklenen yere verilebilir. Ama <code>list[int]</code>, <code>list[float]</code> beklenen yere verilemez: fonksiyon listeye <code>3.5</code> eklerse senin "tamsayı listen" bozulur. Değiştirilebilir kaplar bu yüzden <b>değişmez (invariant)</b>dir. Yalnız okunan kaplar (<code>Sequence</code>, <code>Mapping</code>, <code>Iterable</code>) <b>eşdeğişkendir (covariant)</b>: <code>Sequence[int]</code>, <code>Sequence[float]</code> yerine geçer. Kural: fonksiyon parametresinde ihtiyacın olan <b>en dar yeteneği</b> iste; yalnız okuyorsan <code>list</code> değil <code>Sequence</code>/<code>Iterable</code> yaz, böylece çağıran demet, liste ya da üreteç (generator) verebilir.</p>
+<pre class="code">def ortalama(tutarlar: list[float]) -&gt; float: ...
+def ortalama2(tutarlar: Sequence[float]) -&gt; float: ...
+
+adetler: list[int] = [3, 5, 8]
+ortalama(adetler)    # mypy: Argument 1 has incompatible type "list[int]"; expected "list[float]"
+ortalama2(adetler)   # geçerli: Sequence eşdeğişkendir
+</pre>
+
+<h2>Küçük ama değerli araçlar</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne söyler?</th><th>Çalışma anında etkisi</th></tr>
+<tr><td><code>Final</code></td><td>Bu ad yeniden atanmamalı (sabit)</td><td>Yok; yalnız denetleyici uyarır</td></tr>
+<tr><td><code>ClassVar[int]</code></td><td>Sınıf düzeyi alan, örnek alanı değil</td><td>dataclass bu alanı alan saymaz</td></tr>
+<tr><td><code>Self</code></td><td>Metot kendi sınıfının (alt sınıf dahil) örneğini döndürür</td><td>Yok</td></tr>
+<tr><td><code>Annotated[int, ...]</code></td><td>Tipe ek bilgi (metadata) iliştirir</td><td><code>get_type_hints(..., include_extras=True)</code> ile okunur; pydantic ve FastAPI kullanır</td></tr>
+<tr><td><code>TypeGuard[X]</code> / <code>TypeIs[X]</code></td><td>bool dönen fonksiyon, True ise argüman X'tir</td><td>Yok; <code>TypeIs</code> 3.13+ (öncesinde <code>typing_extensions</code>)</td></tr>
+<tr><td><code>assert_never(x)</code></td><td>Bu satıra hiçbir tip ulaşamamalı</td><td>Ulaşılırsa <code>AssertionError</code></td></tr>
+<tr><td><code>NotRequired[...]</code></td><td>TypedDict'te isteğe bağlı anahtar</td><td><code>__optional_keys__</code>'ta görünür</td></tr>
+</table></div>
+<pre class="py">from typing import Annotated, Literal, assert_never, get_type_hints
+from dataclasses import dataclass
+
+@dataclass(frozen=True)
+class Aralik:
+    alt: float
+    ust: float
+
+def faiz(oran: Annotated[float, Aralik(0, 0.6)], ay: int) -&gt; float:
+    return round(oran / 12 * ay, 4)
+
+ipucu = get_type_hints(faiz, include_extras=True)["oran"]
+print(ipucu.__origin__, ipucu.__metadata__)
+
+type Kanal = Literal["sube", "mobil", "atm"]
+
+def komisyon(kanal: Kanal) -&gt; float:
+    match kanal:
+        case "sube":
+            return 5.0
+        case "mobil":
+            return 0.0
+        case "atm":
+            return 2.5
+        case _:
+            assert_never(kanal)   # yeni kanal eklenip burası unutulursa mypy hata verir
+
+print(komisyon("atm"))
+try:
+    komisyon("faks")              # tip denetleyici bunu zaten reddeder
+except AssertionError as h:
+    print("AssertionError:", str(h)[:30])
+</pre>
+
+<h3>Self ve ClassVar: akıcı sınıflarda doğru dönüş tipi</h3>
+<p>Bir metot <code>return self</code> yapıyorsa dönüş tipini sınıf adıyla yazmak alt sınıflarda yanlış olur: <code>OzelSorgu().filtre(...)</code> tip denetleyiciye göre <code>Sorgu</code> döner ve alt sınıfın metotları "yok" görünür. <code>Self</code> "hangi sınıftan çağrıldıysa o" demektir. <code>ClassVar</code> ise alanın sınıfa ait olduğunu söyler; dataclass onu kurucu parametresi yapmaz.</p>
+<pre class="py">from dataclasses import dataclass, field, fields
+from typing import ClassVar, Self
+
+@dataclass
+class Sorgu:
+    tablo: str
+    kosullar: list[str] = field(default_factory=list)
+    olusturulan: ClassVar[int] = 0          # alan değil, sınıf sayacı
+
+    def __post_init__(self) -&gt; None:
+        Sorgu.olusturulan += 1
+
+    def filtre(self, kosul: str) -&gt; Self:
+        self.kosullar.append(kosul)
+        return self
+
+class SiparisSorgusu(Sorgu):
+    def buyukler(self) -&gt; Self:
+        return self.filtre("tutar &gt; 1000")
+
+s = SiparisSorgusu("siparis").filtre("sehir = 'İzmir'").buyukler()
+print(type(s).__name__, s.kosullar, Sorgu.olusturulan)
+print("kurucu alanları:", [f.name for f in fields(Sorgu)])   # ClassVar yok
+</pre>
+
+<h2>mypy'ı projeye kurmak</h2>
+<p>Tip ipuçları ancak bir denetleyici çalıştırıldığında işe yarar. Aşağıdaki adımları kendi bilgisayarında, projenin sanal ortamında (virtual environment) uygula (tarayıcıda çalışmaz).</p>
+<pre class="code">pip install mypy                 # ya da: pip install pyright
+mypy src/                        # klasörü denetle
+mypy --strict src/               # en sıkı mod: tipsiz fonksiyon, Any sızıntısı yasak
+
+# pyproject.toml
+[tool.mypy]
+python_version = "3.12"
+strict = true
+warn_unused_ignores = true
+[[tool.mypy.overrides]]
+module = ["eski_modul.*"]
+ignore_errors = true             # eski kodu kademeli tiplemek için
+
+# kodun içinde
+reveal_type(sonuc)               # mypy çıktısında çıkarılan tipi gösterir
+x = eski_fn()  # type: ignore[no-untyped-call]   # her zaman hata koduyla sustur
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>mypy mesajı</th><th>Anlamı</th><th>Çözüm</th></tr>
+<tr><td><code>Library stubs not installed for "requests"</code></td><td>Paketin tip bilgisi ayrı dağıtılıyor</td><td><code>pip install types-requests</code> ya da <code>mypy --install-types</code></td></tr>
+<tr><td><code>Item "None" of "X | None" has no attribute ...</code></td><td>Değer None olabilir, kontrol yok</td><td><code>if x is None: ...</code> ile daralt ya da erken dön</td></tr>
+<tr><td><code>Incompatible types in assignment</code></td><td>Değişkenin ilk tipi başka</td><td>Değişkeni baştan geniş tiple bildir ya da yeni ad kullan</td></tr>
+<tr><td><code>Function is missing a type annotation</code></td><td><code>--strict</code> tipsiz fonksiyona izin vermez</td><td>Parametre ve dönüş tiplerini ekle</td></tr>
+<tr><td><code>Returning Any from function declared to return "int"</code></td><td><code>json.loads</code> gibi Any dönen değer sızıyor</td><td>Sınırda doğrula (TypedDict/pydantic) ya da <code>cast</code></td></tr>
+</table></div>
+<div class="tip"><b>Kademeli geçiş</b>Büyük bir kod tabanına bir günde <code>--strict</code> uygulanmaz. Önce varsayılan modla CI'a ekle, yeni dosyaları strict tut (<code>overrides</code>), her sprintte bir modülü tiple. <code>warn_unused_ignores</code> artık gereksiz olan susturmaları gösterir.</div>
+<div class="note"><b>Gerçek işte</b>Tip ipucunun en büyük faydası, kodu değiştirirken gelir: bir fonksiyonun dönüş tipini <code>float</code>'tan <code>Decimal</code>'e çevirdiğinde mypy etkilenen her çağrıyı saniyeler içinde listeler. Pull request'te CI'ın mypy adımı kırmızıysa, bu çoğu zaman üretimde patlayacak bir <code>None</code> hatasının erken uyarısıdır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tipleri sözleşme olarak kullanmak</h3>
+<p>Olgun ekiplerde tip ipuçları belgelemeden çok tasarım aracıdır. Bir fonksiyon <code>dict[str, Any]</code> alıyorsa bu genelde "şeklini bilmiyorum" itirafıdır; TypedDict ya da dataclass'a çevirmek sorunun yarısını çözer. <code>Optional</code> parametre çokluğu fonksiyonun iki iş yaptığına işarettir. <code>NewType</code> ile kimlikleri ayırmak, Ilgaz Bank örneğindeki gibi "müşteri no yerine hesap no gönderme" hatasını tamamen ortadan kaldırır.</p>
+<p>Variance (değişinti) konusunu bil: <code>list[int]</code>, <code>list[float]</code>'ın alt türü <b>değildir</b> (liste değişebilir, invariant); ama <code>Sequence[int]</code>, <code>Sequence[float]</code> yerine geçer (salt okunur, covariant). Parametre tiplerinde olabildiğince genel soyut tip (<code>Sequence</code>, <code>Mapping</code>, <code>Iterable</code>), dönüşte somut tip (<code>list</code>, <code>dict</code>) kullanmak bu sorunların çoğunu önler.</p>
+<p>Çalışma zamanı doğrulaması gerekiyorsa pydantic, TypedDict'in doğal devamıdır: aynı alan tanımı hem denetleyiciye hem çalışma zamanına hizmet eder. Ancak iç fonksiyonlarda doğrulama tekrarı maliyetlidir; doğrulamayı sınırda (API girişi, dosya okuma) yap, içeride tiplere güven.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tip-sistemi-ileri">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../tasarim-kaliplari/">← Tasarım kalıpları Python'da</a><a href="../api-web/">API tasarımına giriş: HTTP, doğrulama ve ilk servis →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

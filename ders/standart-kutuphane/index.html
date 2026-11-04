@@ -1,0 +1,249 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Standart kütüphane turu | Kesit Python</title><meta name="description" content="pathlib, shutil, argparse, decimal, statistics, hashlib ve secrets gibi &quot;pilleri dahil&quot; modüllerle dosya, komut satırı, para hesabı ve güvenlik işlerini…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/standart-kutuphane/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Standart kütüphane turu"><meta property="og:description" content="pathlib, shutil, argparse, decimal, statistics, hashlib ve secrets gibi &quot;pilleri dahil&quot; modüllerle dosya, komut satırı, para hesabı ve güvenlik işlerini…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/standart-kutuphane/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Standart kütüphane turu","description":"pathlib, shutil, argparse, decimal, statistics, hashlib ve secrets gibi \"pilleri dahil\" modüllerle dosya, komut satırı, para hesabı ve güvenlik işlerini…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/standart-kutuphane/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Standart kütüphane turu</h1><p class="st-l">pathlib, shutil, argparse, decimal, statistics, hashlib ve secrets gibi "pilleri dahil" modüllerle dosya, komut satırı, para hesabı ve güvenlik işlerini tek satır import ile çözersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/standart-kutuphane">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden "piller dahil"?</h2>
+<p>Python'ın sloganlarından biri "batteries included" (piller dahil): kurulumla birlikte gelen standart kütüphane (standard library) yüzlerce modül içerir. Anadolu Market'te bir analist olarak her gün şunlarla karşılaşırsın: rapor klasörünü taramak, betiğe komut satırından parametre vermek, kuruşu kuruşuna tutar hesaplamak, satış rakamlarının ortalamasını ve sapmasını almak, bir parolayı güvenli saklamak. Bunların hiçbiri için pip ile paket kurman gerekmez. Bu ders, en sık kullanacağın modülleri tek turda gezer; her birini derinlemesine değil, "ne zaman hangisine uzanırım" düzeyinde öğrenirsin.</p>
+
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyaç</th><th>Modül</th><th>Anahtar fonksiyon / sınıf</th></tr>
+<tr><td>Dosya yolu, klasör, okuma-yazma</td><td>pathlib, os, shutil, tempfile</td><td>Path, mkdir, glob, copy, rmtree</td></tr>
+<tr><td>Komut satırı argümanı</td><td>argparse, sys</td><td>ArgumentParser, parse_args, sys.argv</td></tr>
+<tr><td>Zaman ölçme, bekleme</td><td>time</td><td>perf_counter, sleep</td></tr>
+<tr><td>Rastgelelik</td><td>random, secrets</td><td>seed, choice, sample / token_hex</td></tr>
+<tr><td>İstatistik ve matematik</td><td>statistics, math</td><td>mean, median, stdev / ceil, floor, sqrt</td></tr>
+<tr><td>Metin sarma</td><td>textwrap</td><td>fill, shorten, dedent</td></tr>
+<tr><td>Sabit küme</td><td>enum</td><td>Enum, auto</td></tr>
+<tr><td>Kesin ondalık, kesir</td><td>decimal, fractions</td><td>Decimal, quantize / Fraction</td></tr>
+<tr><td>Özet (hash)</td><td>hashlib</td><td>sha256, hexdigest</td></tr>
+</table></div>
+
+<h2>Dosya sistemi: pathlib, shutil, tempfile</h2>
+<p><code>pathlib.Path</code>, dosya yolunu bir nesne olarak temsil eder; <code>/</code> işleciyle parça ekler, <code>.name</code>, <code>.suffix</code>, <code>.parent</code> ile parçalara ayırırsın. <code>os</code> modülü daha eski ve düşük seviyelidir; <code>os.environ</code> ve <code>os.getcwd()</code> gibi birkaç şey için hâlâ gerekir. <code>shutil</code> ise "kabuk yardımcıları": kopyalama, taşıma, klasörü komple silme. Aşağıdaki örnek, geçici bir klasörde (tempfile) küçük bir rapor arşivi kurar; bu klasör bellekte oluşur ve <code>with</code> bloğu bitince otomatik silinir.</p>
+<pre class="py">import shutil
+import tempfile
+from pathlib import Path
+
+with tempfile.TemporaryDirectory() as gecici:
+    kok = Path(gecici) / "raporlar"
+    kok.mkdir()
+    for ay in ("ocak", "subat", "mart"):
+        (kok / f"satis_{ay}.csv").write_text(f"sehir,tutar\nAnkara,{len(ay) * 100}\n", encoding="utf-8")
+    (kok / "notlar.txt").write_text("Mart raporu eksik kontrol edilecek", encoding="utf-8")
+
+    csvler = sorted(p.name for p in kok.glob("*.csv"))
+    print("CSV dosyaları:", csvler)
+    print("İlk dosyanın gövdesi:", (kok / "satis_ocak.csv").stem, "| uzantı:", (kok / "satis_ocak.csv").suffix)
+
+    yedek = Path(gecici) / "yedek"
+    shutil.copytree(kok, yedek)
+    print("Yedekteki dosya sayısı:", len(list(yedek.iterdir())))
+
+    shutil.rmtree(yedek)
+    print("Yedek silindi mi?", not yedek.exists())
+print("Geçici klasör de silindi mi?", not Path(gecici).exists())</pre>
+<p><code>glob("*.csv")</code> deseni yalnızca o klasöre bakar; alt klasörler dahil aramak için <code>rglob</code> kullan. <code>write_text</code> / <code>read_text</code> dosyayı açıp kapatma işini senin yerine yapar.</p>
+<div class="tip"><b>Yol birleştirmede string toplama yapma</b><code>klasor + "/" + ad</code> yerine <code>Path(klasor) / ad</code> yaz. Windows'ta ters eğik çizgi, Linux'ta düz çizgi sorununu pathlib kendisi çözer.</div>
+
+<h2>Komut satırı: sys.argv ve argparse</h2>
+<p>Betiği terminalden <code>python rapor.py --sehir Ankara --limit 5</code> diye çalıştırdığında argümanlar <code>sys.argv</code> listesine düşer. Bunları elle ayrıştırmak yerine <code>argparse</code> kullanırsın: tür dönüşümü, varsayılan değer, zorunluluk kontrolü ve <code>--help</code> çıktısı hazır gelir. Testte ya da burada tarayıcıda gerçek terminal olmadığı için <code>parse_args</code>'a listeyi elinle verirsin; bu, argparse'ı test etmenin de standart yoludur.</p>
+<pre class="py">import argparse
+
+def parser_kur() -&gt; argparse.ArgumentParser:
+    p = argparse.ArgumentParser(prog="rapor", description="Anadolu Market şehir raporu")
+    p.add_argument("--sehir", required=True, help="Raporlanacak şehir")
+    p.add_argument("--limit", type=int, default=10, help="Kaç satır gösterilsin")
+    p.add_argument("--ozet", action="store_true", help="Yalnızca toplamları yaz")
+    return p
+
+p = parser_kur()
+a = p.parse_args(["--sehir", "Ankara", "--limit", "5"])
+print(a.sehir, a.limit, a.ozet)
+b = p.parse_args(["--sehir", "İzmir", "--ozet"])
+print(b.sehir, b.limit, b.ozet)
+print(type(b.limit).__name__)</pre>
+<p><code>action="store_true"</code> bayrak (flag) tanımlar: yazılırsa True, yazılmazsa False. <code>type=int</code> sayesinde "5" metni tam sayıya çevrilir; geçersiz bir değer gelirse argparse anlaşılır bir hata basıp çıkar.</p>
+<div class="note"><b>sys ne işe yarar?</b><code>sys.argv</code> dışında <code>sys.exit(1)</code> ile betiği hata koduyla bitirir, <code>sys.version</code> ile sürümü okur, <code>sys.path</code> ile modül arama yollarını görürsün. Betiğin "başarısız" bittiğini zamanlayıcıya bildirmenin yolu sıfır dışı bir çıkış kodudur.</div>
+
+<h2>Para hesabı: neden float değil, Decimal?</h2>
+<p>Ilgaz Bank'ta 0.1 + 0.2 liranın 0.3 çıkmaması kabul edilemez. Float ikili tabanda saklandığı için bazı ondalıkları tam temsil edemez. <code>decimal.Decimal</code> ise onluk tabanda, senin belirlediğin hassasiyette çalışır. İki kural: Decimal'i <b>string</b>'den kur (float'tan kurarsan hata taşınır) ve sonucu <code>quantize</code> ile kuruşa yuvarla.</p>
+<pre class="py">from decimal import Decimal, ROUND_HALF_UP
+from fractions import Fraction
+
+print("float:  ", 0.1 + 0.2)
+print("Decimal:", Decimal("0.1") + Decimal("0.2"))
+
+tutar = Decimal("1234.567")
+kdv = tutar * Decimal("0.20")
+print("KDV ham:", kdv)
+print("KDV kuruş:", kdv.quantize(Decimal("0.01"), rounding=ROUND_HALF_UP))
+
+# Yanlış kullanım: float'tan Decimal
+print("float'tan:", Decimal(0.1))
+
+# Kesir: 3 ortağın payı tam olarak 1/3
+pay = Fraction(1, 3)
+print("3 pay toplamı:", pay * 3, "| ondalık:", float(pay))</pre>
+<p><code>ROUND_HALF_UP</code> ticari yuvarlamadır (0.005 yukarı). Varsayılan <code>ROUND_HALF_EVEN</code> bankacı yuvarlaması olarak bilinir; muhasebe kuralına göre hangisini kullanacağını iş birimine sor. <code>Fraction</code> ise oran ve pay hesaplarında kayıpsız sonuç verir.</p>
+<div class="warn"><b>Decimal ile float'ı karıştırma</b><code>Decimal("10") * 0.2</code> yazarsan TypeError alırsın. Çarpanı da Decimal yap: <code>Decimal("10") * Decimal("0.2")</code>. Tam sayıyla çarpmak serbesttir.</div>
+
+<h2>Sayılar ve rastgelelik: statistics, math, random, time</h2>
+<p>Küçük bir satış listesinin özetini çıkarmak için pandas'a gerek yok. <code>statistics</code> ortalama, medyan ve standart sapmayı verir; <code>math</code> yuvarlama ve kök işlemlerini; <code>random</code> örneklem seçmeyi; <code>time.perf_counter</code> ise bir işin kaç saniye sürdüğünü ölçmeyi sağlar.</p>
+<pre class="py">import math
+import random
+import statistics
+import time
+
+satislar = [1250, 980, 1430, 1120, 2990, 1010, 1180]
+print("ortalama:", round(statistics.mean(satislar), 2))
+print("medyan:  ", statistics.median(satislar))
+print("sapma:   ", round(statistics.stdev(satislar), 2))
+print("en büyük tam sayı sayfa:", math.ceil(len(satislar) / 3), "| kök:", math.sqrt(144))
+
+random.seed(42)
+print("denetim için seçilen 3 satış:", random.sample(satislar, 3))
+
+t0 = time.perf_counter()
+toplam = sum(i * i for i in range(100_000))
+print("süre (sn) sıfırdan büyük mü?", time.perf_counter() - t0 &gt; 0)</pre>
+<p><code>random.seed(42)</code> deterministik sonuç verir: aynı tohumla aynı örneklem çıkar. Test yazarken ve raporu tekrarlanabilir kılarken bu şarttır. Medyanın ortalamadan küçük olması, 2990 gibi bir uç değerin ortalamayı yukarı çektiğini anlatır.</p>
+
+<h2>Metin, sabit küme, özet: textwrap, enum, hashlib, secrets</h2>
+<p>Son grup birbirinden bağımsız ama hepsi günlük işte çıkar. <code>textwrap.fill</code> uzun açıklamayı satırlara böler, <code>shorten</code> listede sığmayan başlığı kısaltır. <code>enum.Enum</code>, "ONAYLI / BEKLEMEDE / RED" gibi sabit kümeleri yazım hatasına kapalı hale getirir. <code>hashlib</code> bir metnin parmak izini (hash) üretir; parola doğrulamada parolayı değil, tuzla (salt) birleştirilmiş özetini saklarsın. Tuz üretmek için <code>random</code> değil, kriptografik <code>secrets</code> modülü kullanılır.</p>
+<pre class="py">import hashlib
+import secrets
+import textwrap
+from enum import Enum, auto
+
+aciklama = "Anadolu Market, müşterinin iade talebini 14 gün içinde değerlendirir ve sonucu e-posta ile bildirir."
+print(textwrap.fill(aciklama, width=40))
+print(textwrap.shorten(aciklama, width=30, placeholder="..."))
+
+class Durum(Enum):
+    BEKLEMEDE = auto()
+    ONAYLI = auto()
+    RED = auto()
+
+basvuru = Durum.ONAYLI
+print(basvuru, "|", basvuru.name, "|", basvuru.value, "|", basvuru is Durum["ONAYLI"])
+
+tuz = secrets.token_hex(8)
+parola = "Gizli123"
+ozet = hashlib.sha256((tuz + parola).encode("utf-8")).hexdigest()
+print("tuz uzunluğu:", len(tuz), "| özet uzunluğu:", len(ozet))
+print("aynı parola aynı özeti verir mi?", ozet == hashlib.sha256((tuz + parola).encode("utf-8")).hexdigest())
+print("parola değişince özet değişir mi?", ozet != hashlib.sha256((tuz + "gizli123").encode("utf-8")).hexdigest())</pre>
+<p>Özet tek yönlüdür: özetten parolaya dönülemez. Tuz, iki müşteri aynı parolayı seçse bile saklanan özetlerin farklı olmasını sağlar. Gerçek sistemlerde sha256 yerine yavaş ve tuzlu parola algoritmaları (bcrypt, argon2) tercih edilir; sha256'yı dosya bütünlüğü ve veri parmak izi için kullan.</p>
+<div class="tip"><b>random mı, secrets mi?</b>Örneklem, simülasyon ve test verisi için <code>random</code>; token, tuz, geçici şifre, sıfırlama bağlantısı için <code>secrets</code>. random'ın çıktısı tahmin edilebilir, secrets'ınki işletim sisteminin kriptografik kaynağından gelir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Standart kütüphanenin "gizli kahramanları"</h2>
+<p>İlk turda dosya sistemi, argparse, Decimal ve hashlib gibi büyük modülleri gördün. Ama iş yerinde en çok zaman kazandıran modüller çoğu zaman daha küçükler: sıralama anahtarını tek satırda veren <code>operator</code>, pahalı hesabı önbelleğe alan <code>functools.lru_cache</code>, eşik tablosunda arama yapan <code>bisect</code>, kopyalama tuzağını çözen <code>copy</code>, yazım hatasını düzelten <code>difflib</code>. PCAP sınavında ve mülakatlarda da sıkça çıkarlar. (collections ve itertools için ayrı bir ders var; tarih için <i>tarih-saat</i>, regex için <i>regex</i> dersine bak.)</p>
+<div class="tbl-wrap"><table><tr><th>İhtiyaç</th><th>Modül</th><th>Anahtar araç</th></tr><tr><td>Sözlük/nesne listesini alana göre sırala</td><td>operator</td><td>itemgetter, attrgetter</td></tr><tr><td>Aynı girdiyle tekrar tekrar çağrılan pahalı hesap</td><td>functools</td><td>lru_cache, cache, cached_property</td></tr><tr><td>Eşik/kademe tablosu (kargo, vergi dilimi)</td><td>bisect</td><td>bisect_right, bisect_left, insort</td></tr><tr><td>İç içe veriyi bağımsız kopyala</td><td>copy</td><td>copy, deepcopy</td></tr><tr><td>Benzer metni bul, iki metni karşılaştır</td><td>difflib</td><td>get_close_matches, unified_diff</td></tr><tr><td>Basit ve güvenli metin şablonu</td><td>string</td><td>Template, safe_substitute</td></tr><tr><td>Benzersiz kimlik, ikili veriyi metne çevirme, sıkıştırma</td><td>uuid, base64, zlib, gzip</td><td>uuid4, b64encode, compress</td></tr><tr><td>Okunur döküm, hatayı bilinçli yutma</td><td>pprint, contextlib</td><td>pprint, suppress</td></tr><tr><td>Dış komut çalıştırma</td><td>subprocess, shlex</td><td>run, split, quote</td></tr></table></div>
+<h3>operator ve functools: kısa ve hızlı fonksiyonlar</h3>
+<p><code>itemgetter("sehir", "tutar")</code>, <code>lambda s: (s["sehir"], s["tutar"])</code> ile aynı işi yapar ama daha okunur ve biraz daha hızlıdır. <code>lru_cache</code> ise bir fonksiyonun sonuçlarını argümanlara göre saklar; aynı argümanla ikinci çağrı hesap yapmadan döner. Yalnızca <b>saf</b> (pure) fonksiyonlarda kullan: sonucu saate, veritabanına ya da dış duruma bağlı fonksiyonu önbelleğe almak bayat veri döndürür. Argümanlar hashlenebilir olmalıdır (liste değil, demet).</p>
+<pre class="py">from operator import itemgetter, attrgetter
+from functools import lru_cache
+from dataclasses import dataclass
+
+siparisler = [
+    {"no": "S-3", "sehir": "İzmir", "tutar": 80},
+    {"no": "S-1", "sehir": "Ankara", "tutar": 120},
+    {"no": "S-2", "sehir": "Ankara", "tutar": 45},
+]
+for s in sorted(siparisler, key=itemgetter("sehir", "tutar")):
+    print(s["no"], s["sehir"], s["tutar"])
+
+@dataclass
+class Musteri:
+    ad: str
+    puan: int
+print([m.ad for m in sorted([Musteri("Can", 3), Musteri("Ayşe", 9)], key=attrgetter("puan"), reverse=True)])
+
+@lru_cache(maxsize=128)
+def taksit_tablosu(tutar_kurus: int, ay: int) -&gt; tuple:
+    print("  hesaplanıyor:", tutar_kurus, ay)
+    taksit = tutar_kurus // ay
+    return tuple([taksit] * (ay - 1) + [tutar_kurus - taksit * (ay - 1)])
+
+taksit_tablosu(100000, 3)
+print(taksit_tablosu(100000, 3))      # ikinci çağrı önbellekten
+print(taksit_tablosu.cache_info())</pre>
+<div class="tip"><b>cache ve cached_property</b>Python 3.9+ <code>@functools.cache</code> sınırsız <code>lru_cache</code>'tir. Sınıflarda bir kez hesaplanıp saklanacak özellik için <code>@functools.cached_property</code> kullan (ör. raporun toplamı). Önbelleği boşaltmak için <code>fonk.cache_clear()</code>.</div>
+<h3>bisect: kademeli tablolarda arama</h3>
+<p>Kargo ücreti desiye, indirim sepet tutarına, vergi dilimi gelire göre değişir. Uzun bir if/elif zinciri yerine sıralı sınır listesi ve <code>bisect</code> kullanırsın: O(log n) arama yapar ve tablo değişince yalnızca listeyi güncellersin. <code>bisect_right</code> eşit değeri sağdaki dilime, <code>bisect_left</code> soldakine koyar; "1000 TL <b>ve üzeri</b>" gibi kurallarda fark burada çıkar.</p>
+<pre class="py">from bisect import bisect_right, bisect_left, insort
+
+sinirlar = [500, 1000, 2500]          # TL
+oranlar = [0, 5, 10, 15]              # yüzde
+for sepet in (499, 500, 999, 1000, 3000):
+    print(sepet, "TL -&gt; %", oranlar[bisect_right(sinirlar, sepet)])
+
+print("bisect_left(1000):", bisect_left(sinirlar, 1000), "| bisect_right(1000):", bisect_right(sinirlar, 1000))
+
+kuyruk = [10, 30, 50]
+insort(kuyruk, 35)                    # sıralı listeye sırayı bozmadan ekle
+print(kuyruk)</pre>
+<h3>copy: yüzeysel ve derin kopya</h3>
+<p><code>copy.copy</code> (ya da <code>list.copy()</code>, <code>dict.copy()</code>) yalnızca dış kabı kopyalar; içteki liste ve sözlükler <b>paylaşılır</b>. Şablon bir sepetten yeni sepet üretirken bu, bir müşterinin ürününün diğerinin sepetine düşmesi demektir. <code>copy.deepcopy</code> her seviyeyi kopyalar.</p>
+<pre class="py">import copy
+
+sablon = {"musteri": None, "kalemler": [], "kargo": {"firma": "Anadolu Kargo"}}
+s1 = copy.copy(sablon)
+s1["kalemler"].append("laptop")
+print("yüzeysel kopya sonrası şablon:", sablon["kalemler"])
+
+sablon["kalemler"].clear()
+s2 = copy.deepcopy(sablon)
+s2["kalemler"].append("mouse")
+s2["kargo"]["firma"] = "Hızlı Kargo"
+print("derin kopya sonrası şablon:", sablon)</pre>
+<h3>difflib, string.Template, uuid, base64, zlib</h3>
+<p>Müşteri formuna "Ankra" yazdı; <code>difflib.get_close_matches</code> en yakın şehri önerir. <code>string.Template</code> kullanıcıların düzenleyebileceği e-posta şablonları için f-string'ten güvenlidir: şablon metni kod çalıştıramaz, yalnızca <code>$ad</code> gibi yer tutucuları doldurur. <code>uuid4</code> tahmin edilemeyen benzersiz kimlik üretir; <code>zlib</code> + <code>base64</code> ise ikili veriyi sıkıştırıp JSON'a ya da URL'ye konabilecek metne çevirir.</p>
+<pre class="py">import difflib, uuid, base64, zlib
+from string import Template
+
+sehirler = ["Ankara", "Antalya", "Adana", "İzmir", "İstanbul"]
+print(difflib.get_close_matches("Ankra", sehirler, n=1))
+print(difflib.get_close_matches("Istanbul", sehirler, n=1, cutoff=0.6))
+
+t = Template("Sayın $ad, $no numaralı siparişiniz $gun gün içinde teslim edilecek.")
+print(t.substitute(ad="Ayşe Yılmaz", no="S-1001", gun=3))
+print(t.safe_substitute(ad="Can"))     # eksik alanı olduğu gibi bırakır
+
+kimlik = uuid.uuid4()
+print("uuid uzunluğu:", len(str(kimlik)), "| sürüm:", kimlik.version)
+
+rapor = ("Ankara;120\n" * 200).encode("utf-8")
+paket = base64.b64encode(zlib.compress(rapor)).decode("ascii")
+print(len(rapor), "bayt -&gt;", len(paket), "karakter")
+print(zlib.decompress(base64.b64decode(paket)) == rapor)
+
+eski = ["Ankara;120", "İzmir;80"]
+yeni = ["Ankara;125", "İzmir;80"]
+print("\n".join(difflib.unified_diff(eski, yeni, "dun.csv", "bugun.csv", lineterm="")))</pre>
+<div class="warn"><b>base64 şifreleme değildir</b>base64 yalnızca bir kodlamadır; herkes geri çözer. Gizli veriyi korumak için şifreleme (ör. <code>cryptography</code> paketi) gerekir. Benzer şekilde <code>uuid1</code> makinenin MAC adresini ve zamanı içerir; dışarıya açık kimliklerde <code>uuid4</code> kullan.</div>
+<h3>subprocess ve shlex: dış komut çalıştırmak</h3>
+<p>Betikten <code>git</code>, <code>pg_dump</code> ya da başka bir program çalıştırman gerekir. <code>subprocess.run</code> doğru araçtır; tarayıcıda alt süreç açılamadığı için aşağıdaki kodu kendi bilgisayarında dene. Komutu her zaman <b>liste</b> olarak ver; <code>shell=True</code> ile kullanıcı girdisi birleştirmek komut enjeksiyonuna kapı açar.</p>
+<pre class="code">import subprocess, shlex
+
+sonuc = subprocess.run(["git", "log", "-1", "--format=%h %s"],
+                       capture_output=True, text=True, check=True, timeout=10)
+print(sonuc.stdout.strip())
+
+print(shlex.split('rapor.py --sehir "Kahramanmaraş Merkez" --limit 5'))
+print(shlex.quote("dosya adı; rm -rf /"))   # kabuğa güvenli metin</pre>
+<p>Kendi bilgisayarında dene: <code>check=True</code> sıfır dışı çıkış kodunda <code>CalledProcessError</code> fırlatır, <code>timeout</code> asılı kalan komutu keser. Komut bulunamazsa <code>FileNotFoundError</code> alırsın; çoğu zaman program PATH'te değildir.</p>
+<div class="note"><b>Gerçek işte</b>Anadolu Market'in gece çalışan rapor betiği tamamen standart kütüphaneyle yazılmıştır: <code>argparse</code> ile tarih alır, <code>subprocess</code> ile veritabanı yedeği tetikler, <code>bisect</code> ile kargo kademesini hesaplar, <code>lru_cache</code> ile döviz kurunu tek sefer çeker, sonucu <code>gzip</code> ile sıkıştırıp <code>uuid4</code> adlı dosyaya yazar. Sunucuya hiç paket kurmadan çalıştığı için güvenlik ekibinin onayı da çabuk alınmıştır. İlk soru hep şudur: "Bu iş için standart kütüphanede bir şey var mı?"</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Standart kütüphane ne zaman yetmez?</h3>
+<p>Tur bitti; şimdi sınırlar. Bir işi standart kütüphaneyle çözebiliyorsan dış paket ekleme: bağımlılık, güvenlik ve sürüm yükü taşırsın. Ama şu durumlarda dış pakete geçmek doğru karardır: argparse ile 20'den fazla alt komut yönetiyorsan <code>typer</code> ya da <code>click</code>; binlerce satırlık istatistikte <code>statistics</code> yerine numpy ve pandas; parola saklamada hashlib yerine <code>argon2-cffi</code> veya <code>bcrypt</code>; karmaşık tarih işlerinde <code>dateutil</code>. Karar ölçütün şu: "Standart kütüphane bu işi yapabiliyor mu ve kod hâlâ okunur mu?"</p>
+<p>Bir de kurumsal kodda sık görülen üç küçük kalıbı aklında tut. Birincisi, betiğin her zaman <code>main(argv=None)</code> fonksiyonuyla başlaması: <code>argv</code> None ise <code>sys.argv[1:]</code> kullanır, değilse verileni; böylece aynı fonksiyon hem terminalden hem testten çağrılır. İkincisi, para alanlarını veritabanından okuduğun anda <code>Decimal</code>'e çevirip raporun sonuna kadar Decimal tutmak; float'a yalnızca grafik çizerken dönmek. Üçüncüsü, <code>Enum</code> üyelerini veritabanında <code>.name</code> olarak saklamak; sayısal <code>.value</code> saklarsan üye sırası değişince veri bozulur.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/standart-kutuphane">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../json-csv/">← JSON ve CSV: veri alışverişinin iki ortak dili</a><a href="../sqlite-python/">sqlite3 ile Python →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,294 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz | Kesit Python</title><meta name="description" content="Liste, sözlük ve küme comprehension ile üreteç ifadesini öğrenir; koşullu ve iç içe biçimlerini kullanır; ne zaman klasik döngüye dönmen gerektiğini…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kapsamli-ifadeler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz"><meta property="og:description" content="Liste, sözlük ve küme comprehension ile üreteç ifadesini öğrenir; koşullu ve iç içe biçimlerini kullanır; ne zaman klasik döngüye dönmen gerektiğini…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kapsamli-ifadeler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz","description":"Liste, sözlük ve küme comprehension ile üreteç ifadesini öğrenir; koşullu ve iç içe biçimlerini kullanır; ne zaman klasik döngüye dönmen gerektiğini…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/kapsamli-ifadeler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz</h1><p class="st-l">Liste, sözlük ve küme comprehension ile üreteç ifadesini öğrenir; koşullu ve iç içe biçimlerini kullanır; ne zaman klasik döngüye dönmen gerektiğini anlarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsamli-ifadeler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in sipariş listesinde her gün binlerce kayıt var. Analist olarak en sık yaptığın iş üç adımdır: bir listeyi <b>dönüştür</b> (her siparişin tutarını KDV'li yap), <b>süz</b> (yalnız İstanbul siparişlerini al) ve <b>yeniden grupla</b> (ürün koduna göre sözlük kur). Temel seviyede bunu <code>for</code> döngüsü ve boş listeye <code>append</code> ile yaptın. Çalışır, ama dört satır tutar ve niyetin satırlar arasında kaybolur. Comprehension (kapsamlı ifade), aynı işi tek ve okunur bir satırda yazmanı sağlar. Python topluluğunun "Pythonic" dediği kodun ilk işareti budur.</p>
+
+<h2>Liste comprehension</h2>
+<p>Kalıp şudur: <code>[ifade for öğe in kaynak]</code>. Köşeli parantez "sonuç bir liste" der; <code>for</code> kısmı kaynağı gezer; baştaki ifade her öğeden ne üretileceğini söyler.</p>
+<pre class="py">tutarlar = [1200, 350, 4800, 90]
+
+# Klasik yol
+kdvli = []
+for t in tutarlar:
+    kdvli.append(round(t * 1.20, 2))
+print(kdvli)
+
+# Comprehension
+kdvli2 = [round(t * 1.20, 2) for t in tutarlar]
+print(kdvli2)
+print(kdvli == kdvli2)</pre>
+<p>İkisi aynı listeyi üretir. Farkı okuyuş biçiminde: ilkinde "boş liste aç, döngü kur, ekle" adımlarını izlersin; ikincisinde "tutarların KDV'li hali" diye tek nefeste okursun. Comprehension'ı sağdan sola değil, <b>baştan</b> oku: "şunu al, her öğe için, kaynaktan".</p>
+
+<h3>Süzme: sondaki if</h3>
+<p>Kaynaktaki her öğeyi değil, yalnız koşulu sağlayanları istiyorsan <code>for</code>'dan sonra bir <code>if</code> eklersin. Bu <code>if</code> bir eleme filtresidir; <code>else</code>'i yoktur.</p>
+<pre class="py">siparisler = [
+    {"no": 101, "sehir": "İstanbul", "tutar": 1200, "durum": "teslim"},
+    {"no": 102, "sehir": "Ankara", "tutar": 350, "durum": "iptal"},
+    {"no": 103, "sehir": "İstanbul", "tutar": 4800, "durum": "kargoda"},
+    {"no": 104, "sehir": "İzmir", "tutar": 90, "durum": "teslim"},
+    {"no": 105, "sehir": "İstanbul", "tutar": 760, "durum": "iptal"},
+]
+
+ist = [s["no"] for s in siparisler if s["sehir"] == "İstanbul"]
+print("İstanbul siparişleri:", ist)
+
+gecerli_tutar = [s["tutar"] for s in siparisler if s["durum"] != "iptal"]
+print("İptal olmayan tutarlar:", gecerli_tutar)
+print("Ciro:", sum(gecerli_tutar))
+
+# Birden fazla koşul: and ile
+buyuk_ist = [s["no"] for s in siparisler
+             if s["sehir"] == "İstanbul" and s["tutar"] &gt; 1000]
+print("İstanbul ve 1000 üstü:", buyuk_ist)</pre>
+
+<h3>Koşullu değer: baştaki if-else</h3>
+<p>Her öğeyi tutmak ama bazısına farklı değer vermek istiyorsan <code>if-else</code> <b>ifadenin başına</b> gelir. Bu bir filtre değil, "şu durumda A, aksi halde B" seçimidir.</p>
+<pre class="py">tutarlar = [1200, 350, 4800, 90]
+etiket = ["büyük" if t &gt;= 1000 else "küçük" for t in tutarlar]
+print(etiket)
+
+# İkisi birlikte: önce süz (sondaki if), sonra seç (baştaki if-else)
+pozitif_etiket = ["büyük" if t &gt;= 1000 else "küçük"
+                  for t in tutarlar if t &gt; 100]
+print(pozitif_etiket)</pre>
+<div class="warn"><b>En sık karışan nokta</b>Sondaki <code>if</code> öğe eler, <code>else</code> alamaz. Baştaki <code>if ... else ...</code> öğe elemez, her öğeye bir değer verir ve <code>else</code> zorunludur. <code>[x for x in liste if x &gt; 0 else 0]</code> yazarsan SyntaxError alırsın.</div>
+
+<h2>Sözlük ve küme comprehension</h2>
+<p>Süslü parantez ve <code>anahtar: değer</code> yazarsan sözlük, yalnız tek değer yazarsan küme üretilir. Sözlük comprehension, listeyi "anahtara göre erişilebilir" hale getirmenin en kısa yoludur.</p>
+<pre class="py">siparisler = [
+    {"no": 101, "sehir": "İstanbul", "tutar": 1200},
+    {"no": 102, "sehir": "Ankara", "tutar": 350},
+    {"no": 103, "sehir": "İstanbul", "tutar": 4800},
+    {"no": 104, "sehir": "İzmir", "tutar": 90},
+]
+
+# Sipariş no -> tutar sözlüğü
+tutar_by_no = {s["no"]: s["tutar"] for s in siparisler}
+print(tutar_by_no[103])
+
+# Fiyat listesini yüzde 10 zamla yeniden kur
+fiyat = {"kahve": 120, "çay": 80, "şeker": 45}
+zamli = {urun: round(f * 1.10) for urun, f in fiyat.items()}
+print(zamli)
+
+# Küme: tekrarsız şehirler
+sehirler = {s["sehir"] for s in siparisler}
+print(sehirler, len(sehirler))</pre>
+<p>Sözlük comprehension'da aynı anahtar iki kez üretilirse sonuncusu kazanır; bu bazen istediğin şeydir (son fiyatı tut), bazen sessiz bir veri kaybı. Emin değilsen önce anahtarların tekrarsız olduğunu kontrol et.</p>
+
+<h2>İç içe comprehension</h2>
+<p>İki <code>for</code> yan yana yazılabilir; sıraları, klasik iç içe döngüdeki sırayla aynıdır: dıştaki önce. Tipik kullanım, liste listesini düzleştirmek (flatten) ya da iki listenin çiftlerini üretmektir.</p>
+<pre class="py">kargolar = [
+    ["K-1", "K-2"],
+    ["K-3"],
+    ["K-4", "K-5", "K-6"],
+]
+duz = [k for paket in kargolar for k in paket]
+print(duz)
+
+# Aynı şeyin klasik hali; for sırası birebir aynı
+duz2 = []
+for paket in kargolar:
+    for k in paket:
+        duz2.append(k)
+print(duz == duz2)
+
+# Ürün x şehir çiftleri
+urunler = ["kahve", "çay"]
+sehirler = ["Ankara", "İzmir"]
+print([(u, s) for u in urunler for s in sehirler])</pre>
+<p>İç içe iki <code>for</code> ile bir <code>if</code> hâlâ okunur. Üçüncü <code>for</code> ya da iç içe bir comprehension (comprehension içinde comprehension) başladığında dur ve klasik döngü yaz; aşağıda nedenini göreceksin.</p>
+
+<h2>Üreteç ifadesi: parantezsiz tembel liste</h2>
+<p>Köşeli parantez yerine yuvarlak parantez kullanırsan ortaya bir liste değil, bir üreteç (generator) çıkar. Üreteç, öğeleri istendikçe tek tek üretir; tamamını bellekte tutmaz. Toplama, en büyük bulma gibi tek geçişlik işlerde bu, hem bellek hem zaman kazandırır.</p>
+<pre class="py">siparisler = [
+    {"no": 101, "tutar": 1200, "durum": "teslim"},
+    {"no": 102, "tutar": 350, "durum": "iptal"},
+    {"no": 103, "tutar": 4800, "durum": "kargoda"},
+]
+
+# Liste: önce tüm tutarlar bellekte kurulur, sonra toplanır
+print(sum([s["tutar"] for s in siparisler if s["durum"] != "iptal"]))
+
+# Üreteç: öğeler sum'a aktıkça üretilir
+print(sum(s["tutar"] for s in siparisler if s["durum"] != "iptal"))
+
+# any / all ile doğal eşleşir
+print(any(s["durum"] == "iptal" for s in siparisler))
+print(all(s["tutar"] &gt; 0 for s in siparisler))
+
+g = (s["no"] for s in siparisler)
+print(type(g).__name__)
+print(list(g))
+print(list(g))   # ikinci kez boş: üreteç tükendi</pre>
+<p>Son iki satır önemli: üreteç bir kere gezilir. Sonucu iki kez kullanacaksan listeye çevir ya da üreteci yeniden kur. Fonksiyona tek argüman olarak veriyorsan dıştaki parantez yeterlidir: <code>sum(x for x in ...)</code>.</p>
+
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>Sözdizimi</th><th>Sonuç</th><th>Tipik iş</th></tr>
+<tr><td>Liste</td><td><code>[f(x) for x in k]</code></td><td>list, hemen kurulur</td><td>Dönüştürülmüş liste gerekince</td></tr>
+<tr><td>Sözlük</td><td><code>{a: b for x in k}</code></td><td>dict</td><td>Listeyi anahtarla erişilir yapmak</td></tr>
+<tr><td>Küme</td><td><code>{f(x) for x in k}</code></td><td>set, tekrarsız</td><td>Benzersiz değerler</td></tr>
+<tr><td>Üreteç ifadesi</td><td><code>(f(x) for x in k)</code></td><td>generator, tembel</td><td>sum/max/any/all, büyük veri</td></tr>
+</table></div>
+
+<h2>Ne zaman kullanılmamalı?</h2>
+<p>Comprehension bir okunurluk aracıdır; okunurluğu bozuyorsa amacından sapmış demektir. Şu işaretlerde klasik döngüye dön:</p>
+<ul>
+<li><b>Yan etki:</b> <code>[print(x) for x in liste]</code> gibi sonucu kullanılmayan comprehension yazma. Hem gereksiz bir liste kurar hem niyeti gizler. <code>for</code> yaz.</li>
+<li><b>Üçten fazla parça:</b> İki <code>for</code> + bir <code>if</code> sınırdır. Daha fazlası tek satıra sığsa bile kimse okuyamaz.</li>
+<li><b>Karmaşık ifade:</b> Baştaki ifade uzun bir <code>if-else</code> zinciri ya da birden çok fonksiyon çağrısıysa önce yardımcı fonksiyon yaz, comprehension'da onu çağır.</li>
+<li><b>Hata yakalama gerekiyorsa:</b> Comprehension içinde <code>try</code> yazılamaz. Öğe bazında hata olasılığı varsa döngü ya da yardımcı fonksiyon.</li>
+<li><b>Döngü içinde durma gerekiyorsa:</b> <code>break</code> comprehension'da yoktur. Belirli bir koşulda durman gerekiyorsa döngü ya da <code>itertools.takewhile</code>.</li>
+</ul>
+<pre class="py">siparisler = [
+    {"no": 101, "sehir": "istanbul ", "tutar": "1200"},
+    {"no": 102, "sehir": "ANKARA", "tutar": "350"},
+    {"no": 103, "sehir": " İzmir", "tutar": "4800"},
+]
+
+# Okunmaz: her şey tek satırda
+kotu = {s["no"]: (s["sehir"].strip().title(), int(s["tutar"]) * 1.2) for s in siparisler if s["tutar"].isdigit() and len(s["sehir"].strip()) &gt; 2}
+
+# Okunur: yardımcı fonksiyon + kısa comprehension
+def temizle(s):
+    return (s["sehir"].strip().title(), round(int(s["tutar"]) * 1.2, 2))
+
+def gecerli(s):
+    return s["tutar"].isdigit() and len(s["sehir"].strip()) &gt; 2
+
+iyi = {s["no"]: temizle(s) for s in siparisler if gecerli(s)}
+print(iyi)
+print(kotu == iyi)</pre>
+<div class="tip"><b>Kural: niyet tek nefeste okunmalı</b>Comprehension'ı yazdıktan sonra yüksek sesle oku. "Geçerli siparişlerin temizlenmiş halinden no-değer sözlüğü" diyebiliyorsan iyidir. Nefesin yetmiyorsa parçala.</div>
+<div class="note"><b>Değişken sızması yok</b>Python 3'te comprehension'ın döngü değişkeni (<code>s</code>, <code>x</code>) kendi kapsamında kalır; dışarıdaki aynı adlı değişkeni ezmez. Python 2'de ezerdi; eski kaynaklardaki uyarılar bu yüzdendir.</div>
+
+<h2>Anadolu Market: sipariş süzme boru hattı</h2>
+<p>Şimdi parçaları birleştir. Ham sipariş listesinden şu rapor istensin: iptal olmayan, tutarı 500 üstü siparişlerin şehir bazında toplam cirosu.</p>
+<pre class="py">siparisler = [
+    {"no": 101, "sehir": "İstanbul", "tutar": 1200, "durum": "teslim"},
+    {"no": 102, "sehir": "Ankara", "tutar": 350, "durum": "iptal"},
+    {"no": 103, "sehir": "İstanbul", "tutar": 4800, "durum": "kargoda"},
+    {"no": 104, "sehir": "İzmir", "tutar": 90, "durum": "teslim"},
+    {"no": 105, "sehir": "İstanbul", "tutar": 760, "durum": "iptal"},
+    {"no": 106, "sehir": "Ankara", "tutar": 2100, "durum": "teslim"},
+]
+
+gecerli = [s for s in siparisler if s["durum"] != "iptal" and s["tutar"] &gt; 500]
+sehirler = {s["sehir"] for s in gecerli}
+rapor = {sehir: sum(s["tutar"] for s in gecerli if s["sehir"] == sehir)
+         for sehir in sorted(sehirler)}
+print(rapor)</pre>
+<p>Üç comprehension, üç net adım: süz, benzersiz şehirleri bul, her şehir için topla. Her satır tek bir şey yapıyor; bu yüzden bir ay sonra da anlaşılır.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: comprehension'ın ince ayarları</h2>
+<p>Liste, sözlük ve küme comprehension'larını, iç içe yapıları ve üreteç ifadelerini gördün. Bu bölüm, iş kodunda ve PCAP sınavında karşına çıkan ince noktaları topluyor: aynı hesabı iki kez yapmamak için walrus işleci (<code>:=</code>), döngü değişkeninin kapsamı, iki boyutlu listelerde paylaşılan satır tuzağı, sözlükleri dönüştürürken anahtar çakışması ve <code>enumerate</code>/<code>zip</code> ile birlikte kullanım.</p>
+
+<h3>Walrus (:=): hesapla, süz ve kullan</h3>
+<p>Bir değeri hem süzme koşulunda hem sonuçta kullanacaksan, comprehension'da onu iki kez hesaplamak zorunda kalırsın. Python 3.8 ile gelen atama ifadesi (assignment expression), halk arasındaki adıyla walrus <code>:=</code>, değeri koşulun içinde bir ada bağlar; aynı ad ifadenin başında kullanılabilir.</p>
+<pre class="py">urunler = [("Kulaklık", 899.90), ("Kablo", 79.90), ("Monitör", 4599.0), ("Mouse", 349.50)]
+
+def kdvli(fiyat):
+    return round(fiyat * 1.20, 2)
+
+# İki kez hesaplar: kdvli() hem koşulda hem sonuçta
+pahali_1 = [(ad, kdvli(f)) for ad, f in urunler if kdvli(f) &gt; 1000]
+
+# Bir kez hesaplar
+pahali_2 = [(ad, k) for ad, f in urunler if (k := kdvli(f)) &gt; 1000]
+
+print(pahali_1)
+print(pahali_2 == pahali_1)
+</pre>
+<div class="tip"><b>Parantez şart</b><code>if k := kdvli(f) &gt; 1000</code> yazarsan önce karşılaştırma yapılır ve k'ye <code>True/False</code> atanır. Her zaman <code>(k := ifade) &gt; 1000</code> biçiminde parantezle. Walrus'un bağladığı ad, comprehension bittikten sonra dışarıda da görünür; bu bilinçli bir tasarım kararıdır.</div>
+
+<h3>Kapsam: döngü değişkeni dışarı sızmaz</h3>
+<p>Python 3'te her comprehension kendi küçük kapsamında (scope) çalışır. <code>[x for x in ...]</code> içindeki <code>x</code>, dışarıdaki aynı adlı değişkene dokunmaz. Normal <code>for</code> döngüsünde ise döngü değişkeni döngüden sonra son değerini korur. İkisini karıştırmak eski Python 2 kodlarını taşırken sık görülen bir hatadır.</p>
+<pre class="py">i = "dokunulmadı"
+kareler = [i * i for i in range(4)]
+print(kareler, "| dışarıdaki i:", i)
+
+for j in range(4):
+    pass
+print("for sonrası j:", j)            # for döngüsü sızdırır
+
+toplam = [(n := n_ + 1) for n_ in range(3)]
+print("walrus sızar, n =", n)
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Yapı</th><th>Sonuç</th><th>Döngü değişkeni dışarıda?</th><th>Tipik kullanım</th></tr>
+<tr><td><code>[ifade for x in it]</code></td><td>list</td><td>Hayır</td><td>Dönüştürülmüş yeni liste</td></tr>
+<tr><td><code>{k: v for x in it}</code></td><td>dict</td><td>Hayır</td><td>Arama tablosu, indeks</td></tr>
+<tr><td><code>{ifade for x in it}</code></td><td>set</td><td>Hayır</td><td>Tekilleştirme</td></tr>
+<tr><td><code>(ifade for x in it)</code></td><td>generator</td><td>Hayır</td><td>sum/max/any'ye akış</td></tr>
+<tr><td><code>for x in it:</code></td><td>(yan etki)</td><td>Evet, son değer kalır</td><td>Birden çok iş, try/except, break</td></tr>
+</table></div>
+
+<h3>İki boyutlu listeler: paylaşılan satır tuzağı</h3>
+<p>Depo raf düzeni, koltuk planı, haftalık vardiya tablosu gibi ızgaraları (grid) liste listesiyle tutarsın. <code>[[0] * 3] * 2</code> yazmak masum görünür ama dış çarpım <b>aynı iç listeyi</b> iki kez koyar; bir hücreyi değiştirince tüm satırlarda değişir. Doğrusu her satırı comprehension ile ayrı oluşturmaktır.</p>
+<pre class="py">yanlis = [[0] * 3] * 2
+yanlis[0][0] = 9
+print("Yanlış:", yanlis)               # iki satır da değişti!
+
+dogru = [[0] * 3 for _ in range(2)]
+dogru[0][0] = 9
+print("Doğru :", dogru)
+
+# Devrik (transpose): satırlar sütun olur
+satis = [[10, 20, 30],      # Ankara: Oca, Şub, Mar
+         [5, 15, 25]]       # İzmir
+aylik = [[satir[ay] for satir in satis] for ay in range(3)]
+print("Aya göre:", aylik)
+print("zip ile  :", [list(s) for s in zip(*satis)])
+</pre>
+<p>Dikkat: <code>[[satir[ay] for satir in satis] for ay in range(3)]</code> içiçe <b>iki ayrı</b> comprehension'dır ve 2 boyutlu sonuç üretir; <code>[x for satir in m for x in satir]</code> ise <b>tek</b> comprehension'da iki for'dur ve düzleştirir. Köşeli parantezlerin yeri her şeyi değiştirir.</p>
+
+<h3>Sözlükleri dönüştürmek</h3>
+<p>Sözlük comprehension'ı <code>.items()</code> ile birlikte en çok üç iş için kullanılır: değerleri dönüştürmek, öğeleri süzmek ve anahtar-değeri ters çevirmek. Ters çevirirken iki anahtarın değeri aynıysa <b>son gelen kazanır</b>; veri sessizce kaybolur. Çakışma olabilecekse grupla.</p>
+<pre class="py">fiyat = {"KLV": 1249.0, "MOU": 349.5, "KUL": 899.9, "KBL": 79.9}
+
+zamli = {k: round(v * 1.1, 2) for k, v in fiyat.items()}
+ucuz = {k: v for k, v in fiyat.items() if v &lt; 500}
+print(zamli)
+print(ucuz)
+
+kategori = {"KLV": "çevre", "MOU": "çevre", "KUL": "ses", "KBL": "kablo"}
+ters = {v: k for k, v in kategori.items()}
+print("Ters (kayıp var):", ters)
+
+gruplu = {kat: sorted(k for k, v in kategori.items() if v == kat)
+          for kat in set(kategori.values())}
+print("Gruplu:", dict(sorted(gruplu.items())))
+</pre>
+<div class="warn"><b>Gruplu sürümün maliyeti</b>Son örnek her kategori için tüm sözlüğü yeniden tarar (n × k işlem). Küçük veride sorun değil; büyük veride tek geçişli <code>for</code> + <code>defaultdict(list)</code> kullan (collections dersi). Comprehension kısa yazmak içindir, her zaman en hızlı yol değildir.</div>
+
+<h3>enumerate, zip ve birden çok koşul</h3>
+<p>Sıra numarası lazımsa <code>enumerate</code>, iki listeyi eşleştireceksen <code>zip</code> comprehension'ın içinde de çalışır. Arka arkaya birden çok <code>if</code> yazmak <code>and</code> ile aynıdır; okunabilirlik için uzun koşulu bir yardımcı fonksiyona taşı.</p>
+<pre class="py">musteriler = ["Ayşe", "Mehmet", "Elif", "Can"]
+puanlar = [92, 61, 78, 45]
+
+liste = [f"{no}. {ad} ({p})" for no, (ad, p) in enumerate(zip(musteriler, puanlar), 1) if p &gt;= 60 if p &lt; 90]
+print(liste)
+
+def vip_mi(ad, puan):
+    return puan &gt;= 90 or ad.startswith("A")
+
+print([ad for ad, p in zip(musteriler, puanlar) if vip_mi(ad, p)])
+</pre>
+
+<div class="note"><b>Gerçek işte</b>Kod incelemelerinde (code review) comprehension'lar için yaygın kural şudur: tek satıra sığmıyorsa, iki <code>for</code>'dan fazlası varsa ya da içinde yan etki (print, append, dosyaya yazma) varsa normal döngüye dön. Takım arkadaşın onu üç saniyede okuyabilmeli. API'den gelen JSON listesini <code>{k["id"]: k for k in kayitlar}</code> ile id → kayıt arama tablosuna çevirmek ise en çok kullanılan ve herkesin hemen tanıdığı kalıptır; bir listede tekrar tekrar arama yapmaktan çok daha hızlıdır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Comprehension ve performans</h3>
+<p>Liste comprehension, eşdeğer <code>for</code>+<code>append</code> döngüsünden genellikle biraz daha hızlıdır; çünkü <code>append</code> metodunu her turda aramak yerine yorumlayıcı özel bir "listeye ekle" komutu kullanır. Ama bu fark küçüktür ve seçim nedenin hız değil okunurluk olmalıdır. Asıl büyük fark, liste ile üreteç ifadesi arasındadır: milyon satırlık bir kaynakta <code>sum([...])</code> önce milyon öğelik liste kurar, <code>sum(...)</code> ise tek tek üretip toplar. Büyük veride üreteç ifadesini varsayılan yap; listeye yalnız sonucu birden çok kez kullanacaksan çevir.</p>
+<h3>İş hayatında nasıl görünür?</h3>
+<p>Kod incelemelerinde (code review) comprehension'ın en sık iki eleştirisi vardır: "bu satır çok uzun, böl" ve "burada liste yerine üreteç yeterdi". Bir de ters yönde: "burada comprehension yazılabilirdi" diye işaretlenen üç satırlık <code>append</code> döngüleri. Her ikisini de otomatik tarayan ruff ve pylint gibi araçlar vardır; ekipler çoğu zaman satır uzunluğunu 88 ya da 100 karakterle sınırlar. İleride pandas öğrendiğinde comprehension'ların yerini büyük ölçüde sütun işlemleri alacak; ama JSON yanıtlarını, API verisini ve konfigürasyon listelerini şekillendirirken comprehension hep elinin altında olacak.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsamli-ifadeler">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-temel/">← Bitirme projesi: Anadolu Market sipariş raporu</a><a href="../iteratorler-uretecler/">Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

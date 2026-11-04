@@ -1,0 +1,287 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri görselleştirme: seaborn, plotly ve doğru grafik | Kesit Python</title><meta name="description" content="seaborn ile istatistiksel grafikler (histplot, boxplot, violinplot, heatmap, pairplot, FacetGrid), plotly express ile etkileşim, altair, grafik seçimi…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/seaborn-plotly/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri görselleştirme: seaborn, plotly ve doğru grafik"><meta property="og:description" content="seaborn ile istatistiksel grafikler (histplot, boxplot, violinplot, heatmap, pairplot, FacetGrid), plotly express ile etkileşim, altair, grafik seçimi…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/seaborn-plotly/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri görselleştirme: seaborn, plotly ve doğru grafik","description":"seaborn ile istatistiksel grafikler (histplot, boxplot, violinplot, heatmap, pairplot, FacetGrid), plotly express ile etkileşim, altair, grafik seçimi…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/seaborn-plotly/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İleri görselleştirme: seaborn, plotly ve doğru grafik</h1><p class="st-l">seaborn ile istatistiksel grafikler (histplot, boxplot, violinplot, heatmap, pairplot, FacetGrid), plotly express ile etkileşim, altair, grafik seçimi rehberi, renk ve erişilebilirlik, yanıltıcı grafikler; alıştırmalar matplotlib ile.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/seaborn-plotly">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Doğru soruya doğru grafik</h2>
+<p><b>matplotlib ile görselleştirme</b> dersinde Figure/Axes yapısını, çizgi, çubuk ve histogramı kurdun. Gerçek işte bunun bir üst katı gelir: "Sepet tutarı şehirlere göre nasıl dağılıyor?" sorusu için kutu grafiği, "Hangi değişkenler birlikte hareket ediyor?" için korelasyon ısı haritası, "Her şehirde trend aynı mı?" için küçük çoklu grafikler (small multiples), yöneticinin fareyle üzerine gelip değer okuyacağı etkileşimli bir grafik. Bu işler için Python dünyasında iki yıldız vardır: <b>seaborn</b> (istatistiksel grafik, matplotlib üstüne kurulu) ve <b>plotly</b> (etkileşimli, tarayıcıda çalışan grafik).</p>
+<p>Ama araçtan önemlisi karardır: hangi soru, hangi grafik, hangi renk ve hangi eksen. Kötü seçilmiş bir grafik, doğru veriyle yanlış karar aldırır. Bu ders hem araçları hem de bu karar rehberini verir.</p>
+<div class="note"><b>Bu ortamda</b>seaborn ve plotly tarayıcıdaki Python'da (Pyodide) çalışmaz. Bu yüzden kodlarını çalıştır düğmesi olmayan kutularda gösteriyoruz; kendi bilgisayarında denemen için kurulum komutunu altına yazdık. Çalıştırılabilir örnekler ve alıştırmalar aynı grafikleri <b>matplotlib</b> ile kurar ve grafiğin yapısını (başlık, çubuk sayısı, eksen etiketi) test eder. seaborn zaten matplotlib üstünde çalıştığı için burada öğrendiğin her yapı birebir geçerlidir.</div>
+
+<h2>seaborn: tidy veri ile tek satırlık grafikler</h2>
+<p>seaborn'un sihri şudur: veriyi <b>uzun (tidy)</b> biçimde verirsin, sütun adlarını eksenlere ve renk (<code>hue</code>), panel (<code>col</code>, <code>row</code>) gibi görsel kanallara bağlarsın; gruplama, renk paleti ve gösterge (legend) kendiliğinden gelir.</p>
+<pre class="code">import seaborn as sns
+import matplotlib.pyplot as plt
+
+sns.set_theme(style="whitegrid")              # tutarlı tema
+# df: siparis_id, sehir, kategori, adet, tutar, segment
+
+sns.histplot(data=df, x="tutar", bins=20, kde=True)               # dağılım
+sns.boxplot(data=df, x="sehir", y="tutar")                        # gruplara göre dağılım
+sns.violinplot(data=df, x="sehir", y="tutar", inner="quartile")   # dağılımın şekli
+sns.scatterplot(data=df, x="adet", y="tutar", hue="segment")      # ilişki + renkle grup
+sns.pairplot(df[["adet", "tutar", "indirim"]])                    # tüm ikili ilişkiler
+
+kor = df[["adet", "tutar", "indirim"]].corr()
+sns.heatmap(kor, annot=True, fmt=".2f", cmap="vlag", vmin=-1, vmax=1)
+
+g = sns.FacetGrid(aylik, col="sehir", col_wrap=3, sharey=True)    # küçük çoklu grafikler
+g.map_dataframe(sns.lineplot, x="ay", y="ciro")
+plt.show()</pre>
+<div class="tip"><b>Kendi bilgisayarında dene</b><code>pip install seaborn</code> komutuyla kurulur (matplotlib ve pandas'ı da getirir). Jupyter'de grafik hücrenin altında görünür; betikte <code>plt.show()</code> pencere açar, <code>plt.savefig("grafik.png", dpi=150)</code> dosyaya yazar.</div>
+<p>seaborn fonksiyonları iki türdür. <b>Eksen düzeyi</b> (axes-level: <code>histplot</code>, <code>boxplot</code>, <code>scatterplot</code>, <code>heatmap</code>) tek bir Axes'e çizer ve <code>ax=</code> parametresi alır; matplotlib'in alt grafiklerine yerleştirebilirsin. <b>Figür düzeyi</b> (figure-level: <code>relplot</code>, <code>displot</code>, <code>catplot</code>, <code>pairplot</code>, <code>FacetGrid</code>) kendi figürünü kurar ve <code>col=</code>/<code>row=</code> ile panellere böler.</p>
+
+<h2>Aynı grafikleri matplotlib ile kurmak</h2>
+<p>seaborn'un yaptığı işin altında matplotlib nesneleri vardır. Gruplara göre kutu ve keman grafiği (violin plot) için veriyi önce gruplara bölmek yeterlidir.</p>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["Ankara"] * 6 + ["İzmir"] * 6 + ["Bursa"] * 6,
+    "tutar": [120, 340, 95, 410, 260, 1500, 80, 150, 210, 175, 140, 190, 300, 320, 280, 350, 310, 900],
+})
+sehirler = sorted(df["sehir"].unique())
+gruplar = [df.loc[df["sehir"] == s, "tutar"].to_numpy() for s in sehirler]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(10, 4), sharey=True)
+ax1.boxplot(gruplar)
+ax1.set_xticks(range(1, len(sehirler) + 1), sehirler)
+ax1.set_title("Kutu grafiği")
+ax1.set_ylabel("Sepet tutarı (TL)")
+ax2.violinplot(gruplar, showmedians=True)
+ax2.set_xticks(range(1, len(sehirler) + 1), sehirler)
+ax2.set_title("Keman grafiği")
+fig.savefig("dagilim.png", dpi=100, bbox_inches="tight")
+plt.close(fig)
+
+print("eksen etiketleri:", [t.get_text() for t in ax1.get_xticklabels()])
+print(df.groupby("sehir")["tutar"].describe()[["min", "25%", "50%", "75%", "max"]])</pre>
+<p>Kutu grafiği beş sayıyı (min, Q1, medyan, Q3, maks) ve aykırı değerleri gösterir: Ankara'daki 1500 TL'lik sipariş ayrı bir nokta olarak görünür. Keman grafiği ise dağılımın şeklini (iki tepeli mi, çarpık mı) da gösterir.</p>
+<p>Korelasyon ısı haritası (heatmap) da bir <code>imshow</code> ve her hücreye bir <code>text</code>'tir. Dikkat: <code>imshow</code>'da x ekseni <b>sütun</b>, y ekseni <b>satır</b> indeksidir; hücre yazısı <code>ax.text(j, i, ...)</code> ile yazılır.</p>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.DataFrame({
+    "adet": [1, 3, 2, 5, 4, 6, 2, 8],
+    "tutar": [120, 310, 260, 480, 450, 640, 190, 820],
+    "indirim": [0, 5, 0, 10, 10, 15, 0, 20],
+    "teslim_gun": [3, 2, 4, 1, 2, 1, 5, 1],
+})
+kor = df.corr().round(2)
+fig, ax = plt.subplots(figsize=(5, 4))
+im = ax.imshow(kor.to_numpy(), cmap="RdBu_r", vmin=-1, vmax=1)
+ax.set_xticks(range(len(kor.columns)), kor.columns, rotation=45)
+ax.set_yticks(range(len(kor.index)), kor.index)
+for i in range(len(kor.index)):
+    for j in range(len(kor.columns)):
+        ax.text(j, i, f"{kor.iloc[i, j]:.2f}", ha="center", va="center")
+fig.colorbar(im, ax=ax)
+ax.set_title("Korelasyon matrisi")
+plt.close(fig)
+print(kor)
+print("hücre yazısı:", len(ax.texts), "| renk skalası:", im.get_clim())</pre>
+<div class="warn"><b>Diverging skala ve sabit sınır</b>Korelasyon -1 ile 1 arasındadır ve 0 anlamlı bir orta noktadır. Bu yüzden iki uçlu (diverging) bir palet (RdBu, vlag) ve <code>vmin=-1, vmax=1</code> kullan. Sınırı vermezsen renkler verideki en küçük ve en büyük değere göre gerilir; 0.3'lük zayıf bir korelasyon koyu kırmızı görünebilir.</div>
+
+<h2>Grafik için veri hazırlamak</h2>
+<p>Görselleştirme işinin yarısı pandas'tır. seaborn ve plotly uzun biçim ister; ayların takvim sırasında çizilmesi için sıralı kategori gerekir; şehirleri ciroya göre sıralamak okunurluğu artırır. (melt'i <b>ileri pandas</b> dersinde gördün.)</p>
+<pre class="py">import pandas as pd
+
+genis = pd.DataFrame({
+    "sehir": ["Ankara", "İzmir", "Bursa"],
+    "Oca": [1200, 800, 600], "Şub": [1500, 950, 720], "Mar": [1400, 1010, 690],
+})
+aylar = ["Oca", "Şub", "Mar"]
+uzun = genis.melt(id_vars="sehir", var_name="ay", value_name="ciro")
+uzun["ay"] = pd.Categorical(uzun["ay"], categories=aylar, ordered=True)
+print(uzun.sort_values(["sehir", "ay"]).head(4))
+
+# Çubuk grafik için: büyükten küçüğe sırala, payı hesapla
+toplam = uzun.groupby("sehir")["ciro"].sum().sort_values(ascending=False)
+pay = (toplam / toplam.sum() * 100).round(1)
+print(pd.DataFrame({"ciro": toplam, "pay_%": pay}))</pre>
+
+<h2>plotly express: etkileşimli grafik</h2>
+<p>plotly grafiği bir HTML/JavaScript nesnesidir: fareyle üzerine gelince değer görünür (hover), yakınlaştırılır, seriler göstergeden açılıp kapanır. Panolar (dashboard), Jupyter keşfi ve e-postayla gönderilecek tek dosyalık raporlar için idealdir. <code>plotly.express</code> (px) seaborn'a çok benzer bir arayüz sunar.</p>
+<pre class="code">import plotly.express as px
+
+fig = px.line(aylik, x="ay", y="ciro", color="sehir", markers=True,
+              title="Anadolu Market aylık ciro")
+fig.show()                                      # tarayıcıda / Jupyter'de etkileşimli
+
+fig = px.scatter(df, x="adet", y="tutar", color="segment",
+                 hover_data=["siparis_id", "sehir"], facet_col="kategori")
+fig.write_html("siparisler.html")               # tek dosya, her tarayıcıda açılır
+
+fig = px.bar(toplam_df, x="sehir", y="ciro", text_auto=".2s")
+fig.update_layout(yaxis_title="Ciro (TL)")</pre>
+<div class="tip"><b>Kendi bilgisayarında dene</b><code>pip install plotly</code>. Jupyter'de <code>fig.show()</code> hücrede etkileşimli grafik açar; PNG olarak kaydetmek için ayrıca <code>pip install kaleido</code> gerekir. Web panosu kurmak istersen plotly'nin Dash kütüphanesine ya da Streamlit'e bak.</div>
+<p><b>altair</b> ise "grafiğin dilbilgisi" (grammar of graphics) yaklaşımını Python'a getirir: veriyi, işareti (mark) ve kodlamayı (encode) bildirirsin.</p>
+<pre class="code">import altair as alt   # pip install altair
+
+alt.Chart(df).mark_point().encode(
+    x="adet", y="tutar", color="segment", tooltip=["siparis_id", "sehir"]
+).interactive()</pre>
+
+<h2>Grafik seçimi rehberi</h2>
+<p>Grafiği seçerken "hangi veriye sahibim?" diye değil "hangi soruya cevap arıyorum?" diye başla.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Grafik</th><th>seaborn / plotly</th></tr>
+<tr><td>Zamanla nasıl değişti?</td><td>Çizgi</td><td><code>lineplot</code> / <code>px.line</code></td></tr>
+<tr><td>Hangi grup daha büyük?</td><td>Sıralı çubuk (yatay, uzun etiketlerde)</td><td><code>barplot</code> / <code>px.bar</code></td></tr>
+<tr><td>Değerler nasıl dağılıyor?</td><td>Histogram, yoğunluk</td><td><code>histplot</code>, <code>kdeplot</code> / <code>px.histogram</code></td></tr>
+<tr><td>Gruplar arasında dağılım farkı?</td><td>Kutu, keman</td><td><code>boxplot</code>, <code>violinplot</code> / <code>px.box</code></td></tr>
+<tr><td>İki sayısal değişken ilişkili mi?</td><td>Saçılım (dağılım) grafiği</td><td><code>scatterplot</code> / <code>px.scatter</code></td></tr>
+<tr><td>Birçok değişkenin ilişkisi?</td><td>Korelasyon ısı haritası, pairplot</td><td><code>heatmap</code>, <code>pairplot</code> / <code>px.imshow</code></td></tr>
+<tr><td>Parçanın bütüne oranı?</td><td>Yığılmış çubuk; en fazla 3-4 dilimse pasta</td><td><code>histplot(multiple="stack")</code> / <code>px.bar</code></td></tr>
+<tr><td>Her grupta desen aynı mı?</td><td>Küçük çoklu grafikler</td><td><code>FacetGrid</code>, <code>relplot(col=)</code> / <code>facet_col</code></td></tr>
+</table></div>
+
+<h2>Renk ve erişilebilirlik</h2>
+<p>Rengin üç işi vardır ve her biri farklı palet ister: <b>kategorik</b> (şehirler: birbirinden ayrışan renkler), <b>sıralı</b> (sequential: az → çok, tek renk tonu, örn. viridis), <b>iki uçlu</b> (diverging: negatif ↔ pozitif, ortası nötr). Erkeklerin yaklaşık %8'inde bir tür renk görme farklılığı vardır; en yaygını kırmızı-yeşil ayrımıdır. "Kırmızı kötü, yeşil iyi" grafiği bu izleyiciler için tek renktir.</p>
+<ul>
+<li>Renk körü dostu paletler kullan: viridis, cividis, seaborn'da <code>palette="colorblind"</code>.</li>
+<li>Rengi tek bilgi taşıyıcısı yapma: işaret şekli, çizgi stili ya da doğrudan etiket ekle.</li>
+<li>Metin ile arka plan arasında yeterli kontrast bırak (WCAG: normal metin için en az 4.5:1).</li>
+<li>Kategori sayısı 6-7'yi geçiyorsa renk ayrımı zorlaşır; grupları birleştir ya da küçük çoklu grafiğe geç.</li>
+</ul>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+aylar = ["Oca", "Şub", "Mar", "Nis"]
+seriler = {"Ankara": [12, 15, 14, 18], "İzmir": [8, 9, 10, 11], "Bursa": [6, 7, 7, 9]}
+renkler = ["#0072B2", "#E69F00", "#009E73"]          # Okabe-Ito: renk körü dostu
+isaretler = ["o", "s", "^"]
+cizgiler = ["-", "--", ":"]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+for (sehir, y), r, m, c in zip(seriler.items(), renkler, isaretler, cizgiler):
+    ax.plot(aylar, y, color=r, marker=m, linestyle=c, label=sehir)
+    ax.annotate(sehir, (len(aylar) - 1, y[-1]), xytext=(5, 0), textcoords="offset points")
+ax.set_title("Aylık ciro (bin TL)")
+ax.legend()
+plt.close(fig)
+print([(l.get_label(), l.get_marker(), l.get_linestyle()) for l in ax.lines])</pre>
+
+<h2>Yanıltıcı grafikler</h2>
+<p>Çoğu yanıltıcı grafik kötü niyetle değil, varsayılan ayarla üretilir. En sık beş tuzak:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Tuzak</th><th>Etkisi</th><th>Doğrusu</th></tr>
+<tr><td>Çubuk grafikte y ekseni 0'dan başlamıyor</td><td>%2'lik fark 5 kat görünür</td><td>Çubukta eksen 0'dan başlar; küçük farkı göstermek için çizgi ya da fark grafiği</td></tr>
+<tr><td>Çift y ekseni</td><td>Ölçek seçimiyle her iki seri "birlikte" gösterilebilir</td><td>İki ayrı panel ya da endekslenmiş (başlangıç=100) seri</td></tr>
+<tr><td>Seçilmiş zaman aralığı</td><td>Düşüşün ortasından başlayan grafik "toparlanma" anlatır</td><td>Tam dönem ya da yıllık kıyas</td></tr>
+<tr><td>3B ve çok dilimli pasta</td><td>Açı ve hacim yanlış algılanır</td><td>Sıralı yatay çubuk</td></tr>
+<tr><td>Farklı genişlikte histogram kutuları</td><td>Dağılımın şekli değişir</td><td>Eşit kutu, birkaç kutu sayısını dene</td></tr>
+</table></div>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+sube = ["Kadıköy", "Çankaya"]
+ciro = [1000, 1020]                     # yalnızca %2 fark
+fig, (a, b) = plt.subplots(1, 2, figsize=(8, 3))
+a.bar(sube, ciro); a.set_ylim(990, 1025); a.set_title("Yanıltıcı")
+b.bar(sube, ciro); b.set_ylim(0, 1100); b.set_title("Dürüst")
+plt.close(fig)
+
+def gorunen_oran(ax):
+    alt = ax.get_ylim()[0]
+    return round((ciro[1] - alt) / (ciro[0] - alt), 2)
+
+print("gerçek oran:", round(ciro[1] / ciro[0], 2))
+print("yanıltıcı grafikte görünen:", gorunen_oran(a))
+print("dürüst grafikte görünen:", gorunen_oran(b))</pre>
+
+<div class="note"><b>Gerçek işte</b>Analist raporlarının büyük kısmı yönetici sunumuna ya da bir panoya gider. İyi ekiplerin ortak alışkanlıkları: her grafiğin başlığı bir bulgu cümlesidir ("İzmir'de sepet tutarı Mart'ta %12 arttı"), eksenlerde birim yazar, renkler kurum paletinden ve renk körü dostudur, aynı rapordaki grafikler aynı temayı (<code>sns.set_theme</code> ya da matplotlib <code>rcParams</code>) kullanır. Keşif aşamasında seaborn ve pairplot, sunumda sade matplotlib/seaborn PNG'leri, paylaşılan panoda plotly tercih edilir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: grafikten panoya ve rapora</h2><p>Tek grafik bir soruyu cevaplar; <b>pano</b> (dashboard) ise bir ekibin her sabah baktığı soruları tek ekranda toplar. Bu bölümde Python'la pano kurmanın iki popüler yolunu (Streamlit ve Dash), iyi pano tasarımının ilkelerini, veri hikâyesinin akışını ve e-postayla gönderilebilen <b>tek dosyalık HTML rapor</b> üretmeyi göreceksin. Rakamlar Kesit Power BI'ın <code>kesit_bi.Satislar</code> tablosundan (1620 satış satırı) geliyor; aynı panoyu orada Power BI ile kuruyorsun.</p><h3>Önce rakamlar: KPI hesabı</h3><pre class="py">import veri
+import pandas as pd
+
+s = veri.oku("kesit_bi", "Satislar")
+s = s[s["Durum"] != "İptal"].copy()
+s["YilAy"] = s["Tarih"].str[:7]
+
+def kpi(df):
+    ciro = df["Tutar"].sum()
+    siparis = df["SiparisNo"].nunique()
+    return {"ciro": round(ciro), "siparis": siparis, "sepet": round(ciro / siparis),
+            "marj": round(1 - df["Maliyet"].sum() / ciro, 3)}
+
+bu = kpi(s[s["YilAy"] == "2024-12"])
+onceki = kpi(s[s["YilAy"] == "2024-11"])
+for ad in bu:
+    degisim = (bu[ad] - onceki[ad]) / onceki[ad]
+    print(f"{ad:&lt;8} {bu[ad]:&gt;10,}  ({degisim:+.1%} geçen aya göre)")</pre><h3>Streamlit: betikten uygulamaya</h3><p>Streamlit'te uygulama yukarıdan aşağı çalışan bir betiktir; kullanıcı bir filtreyi her değiştirdiğinde betik baştan çalışır. Bu yüzden veriyi okuyan fonksiyon <code>@st.cache_data</code> ile önbelleğe alınır. <code>pip install streamlit</code> ve <code>streamlit run pano.py</code> ile kendi bilgisayarında dene:</p><pre class="code"># pano.py
+import pandas as pd
+import plotly.express as px
+import streamlit as st
+
+st.set_page_config(page_title="Kesit Satış Panosu", layout="wide")
+
+@st.cache_data
+def yukle():
+    s = pd.read_csv("Satislar.csv")
+    return s[s["Durum"] != "İptal"].assign(YilAy=lambda d: d["Tarih"].str[:7])
+
+s = yukle()
+kanallar = st.sidebar.multiselect("Kanal", sorted(s["Kanal"].unique()), default=sorted(s["Kanal"].unique()))
+ay = st.sidebar.selectbox("Ay", sorted(s["YilAy"].unique(), reverse=True))
+f = s[s["Kanal"].isin(kanallar)]
+
+k1, k2, k3 = st.columns(3)
+bu, onceki = f[f["YilAy"] == ay], f[f["YilAy"] &lt; ay]
+k1.metric("Ciro", f"{bu['Tutar'].sum():,.0f} TL")
+k2.metric("Sipariş", bu["SiparisNo"].nunique())
+k3.metric("Ortalama sepet", f"{bu['Tutar'].sum() / max(bu['SiparisNo'].nunique(), 1):,.0f} TL")
+
+aylik = f.groupby("YilAy", as_index=False)["Tutar"].sum()
+st.plotly_chart(px.line(aylik, x="YilAy", y="Tutar", title="Aylık ciro"), use_container_width=True)
+st.dataframe(bu.groupby("Kanal")["Tutar"].sum().sort_values(ascending=False))</pre><h3>Dash: bileşen ve geri çağırma</h3><p>Dash (Plotly'nin çatısı) farklı bir model kullanır: sayfa düzeni bileşen ağacıdır, etkileşim ise girdi ve çıktıları açıkça bağlayan <b>geri çağırma</b> (callback) fonksiyonlarıyla kurulur. Yalnız etkilenen bileşen yeniden hesaplanır; daha çok kod ister ama büyük, çok sayfalı panolarda daha kontrollüdür (<code>pip install dash</code>).</p><pre class="code">from dash import Dash, Input, Output, dcc, html
+import plotly.express as px
+
+app = Dash(__name__)
+app.layout = html.Div([
+    dcc.Dropdown(sorted(s["Kanal"].unique()), "Mobil", id="kanal"),
+    dcc.Graph(id="grafik"),
+])
+
+@app.callback(Output("grafik", "figure"), Input("kanal", "value"))
+def guncelle(kanal):
+    aylik = s[s["Kanal"] == kanal].groupby("YilAy", as_index=False)["Tutar"].sum()
+    return px.bar(aylik, x="YilAy", y="Tutar")
+
+app.run(debug=True)</pre><div class="tbl-wrap"><table><tr><th></th><th>Streamlit</th><th>Dash</th><th>Power BI</th></tr><tr><td>Öğrenme</td><td>En kolay</td><td>Orta (callback)</td><td>Tıkla-sürükle + DAX</td></tr><tr><td>Ne zaman?</td><td>Hızlı prototip, ML demosu, iç araç</td><td>Özelleştirilmiş, büyük web panosu</td><td>Kurumsal raporlama, yetki, paylaşım</td></tr><tr><td>Yayın</td><td>Streamlit Community Cloud, sunucu</td><td>Herhangi bir Python web sunucusu</td><td>Power BI Hizmeti</td></tr></table></div><h3>Pano tasarım ilkeleri</h3><ul><li><b>Üstte KPI kartları:</b> 3–5 ana sayı, her birinin yanında karşılaştırma (geçen ay, hedef) ve yönü. Karşılaştırmasız sayı anlam taşımaz.</li><li><b>Soldan sağa, yukarıdan aşağı ayrıntıya:</b> özet → eğilim (zaman çizgisi) → kırılım (kanal, kategori) → ayrıntı tablosu.</li><li><b>Filtreler tek yerde</b> (kenar çubuğu ya da üst şerit) ve hepsini etkiler; etkin filtre ekranda görünsün.</li><li><b>Ayrıntıya inme</b> (drill-down): bölge → şehir → müşteri gibi hiyerarşide tıklayarak inmek; her seviyede toplamlar tutarlı olmalı.</li><li><b>Az renk:</b> gri temel, vurgu yalnız dikkat çekilecek yerde; kırmızı/yeşil yerine erişilebilir palet (bu dersteki renk bölümü).</li></ul><p><b>Veri hikâyesi</b> akışı panodan farklıdır; tek bir mesajı iletir: <b>bağlam</b> ("Aralık'ta ciro geçen yıla göre arttı"), <b>gerilim</b> ("ama iade oranı Mağaza kanalında iki katına çıktı"), <b>çözüm</b> ("Mağaza iade sürecinin incelenmesini öneriyoruz"). Her grafiğin başlığı bir bulgu cümlesi olsun: "Aylık ciro" değil, "Ciro Aralık'ta yılın zirvesine çıktı".</p><h3>Tek dosyalık HTML rapor</h3><p>Herkesin tarayıcısı vardır; sunucu kurmadan paylaşılabilecek en pratik çıktı tek bir HTML dosyasıdır. Grafikleri <b>base64</b> ile gömersen dosya dışa bağımlılık olmadan açılır. plotly ile etkileşimli rapor için <code>fig.to_html(full_html=False, include_plotlyjs="cdn")</code> parçalarını birleştirirsin (ya da çevrimdışı için <code>include_plotlyjs=True</code>).</p><pre class="py">import base64, html, io
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+aylik = s[s["YilAy"].str.startswith("2024")].groupby("YilAy")["Tutar"].sum()
+fig, ax = plt.subplots(figsize=(6, 2.5))
+ax.plot(aylik.index.str[5:], aylik.values, color="#2a6f97")
+ax.set_title("2024'te ciro yıl sonuna doğru yükseldi")
+tampon = io.BytesIO()
+fig.savefig(tampon, format="png", dpi=100, bbox_inches="tight")
+plt.close(fig)
+png = base64.b64encode(tampon.getvalue()).decode()
+
+rapor = f"""&lt;!doctype html&gt;&lt;html lang="tr"&gt;&lt;meta charset="utf-8"&gt;
+&lt;title&gt;{html.escape("Satış Raporu — Aralık 2024")}&lt;/title&gt;
+&lt;h1&gt;Aralık 2024&lt;/h1&gt;&lt;p&gt;Ciro: {bu['ciro']:,} TL&lt;/p&gt;
+&lt;img alt="Aylık ciro" src="data:image/png;base64,{png}"&gt;&lt;/html&gt;"""
+print(len(rapor), "karakter; görsel gömülü:", "data:image/png;base64," in rapor)</pre><div class="note"><b>Gerçek işte</b>Analistler genellikle iki çıktı üretir: kurumsal pano (Power BI, Tableau, Looker) ve haftalık/aylık yorumlu rapor (HTML, PDF, e-posta). Streamlit ise veri bilimi ekiplerinin model sonuçlarını paydaşa göstermesinin en hızlı yoludur. Hangi aracı seçersen seç, mülakatlarda değerlendirilen şey aynıdır: doğru KPI, karşılaştırma, temiz hiyerarşi ve tek cümlelik bulgu.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Grafiğin dilbilgisi</h3>
+<p>seaborn, plotly express ve altair aynı fikre dayanır: veri + görsel kanal eşlemesi (x, y, renk, boyut, şekil, panel) + işaret (nokta, çizgi, çubuk). Bu dili öğrenince araç değiştirmek kolaylaşır; R'daki ggplot2, Power BI ve Tableau da aynı mantıkla çalışır. Kanalların algı gücü sıralıdır: ortak eksende konum en doğru okunur, sonra uzunluk, açı, alan ve en son renk tonu. Önemli karşılaştırmayı konuma, ikincil bilgiyi renge ver.</p>
+<h3>Spagetti yerine küçük çoklu grafikler</h3>
+<p>On şehrin trendini tek grafikte on çizgiyle göstermek okunmaz. Ortak y ekseniyle (<code>sharey=True</code>) on küçük panel, hem her şehrin desenini hem de şehirler arası düzeyi gösterir. Gerekirse her panelde diğer şehirleri soluk gri arka plan olarak çiz.</p>
+<h3>Çıktı kalitesi</h3>
+<p>Sunum için <code>dpi=200</code> PNG ya da ölçeklenebilir SVG/PDF kaydet; <code>bbox_inches="tight"</code> etiketlerin kesilmesini önler. Rapor üretimini fonksiyonlaştır: veri hazırlama, çizim ve kaydetme ayrı fonksiyonlarda olsun ki aynı grafiği her ay tek komutla yeniden üretebilesin ve testleyebilesin.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/seaborn-plotly">Alıştırmalara geç (27)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pandas-zaman-serisi/">← Zaman serisi analizi</a><a href="../ml-giris/">Makine öğrenmesine giriş →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

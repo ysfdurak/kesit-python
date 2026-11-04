@@ -1,0 +1,92 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python nedir, nerede kullanılır? | Kesit Python</title><meta name="description" content="Python'ın ne olduğunu, iş dünyasında nerelerde kullanıldığını öğrenir ve ilk print komutlarını çalıştırırsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/python-nedir/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Python nedir, nerede kullanılır?"><meta property="og:description" content="Python'ın ne olduğunu, iş dünyasında nerelerde kullanıldığını öğrenir ve ilk print komutlarını çalıştırırsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/python-nedir/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Python nedir, nerede kullanılır?","description":"Python'ın ne olduğunu, iş dünyasında nerelerde kullanıldığını öğrenir ve ilk print komutlarını çalıştırırsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/python-nedir/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Başlangıç</span><h1>Python nedir, nerede kullanılır?</h1><p class="st-l">Python'ın ne olduğunu, iş dünyasında nerelerde kullanıldığını öğrenir ve ilk print komutlarını çalıştırırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/python-nedir">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Python nedir?</h2>
+<p>Python, 1991'de Guido van Rossum'un yayımladığı, okunabilirliği her şeyin önüne koyan genel amaçlı bir programlama dili (programming language). Adını yılandan değil, Monty Python komedi grubundan alır. Bugün kullanılan sürüm ailesi Python 3; bu uygulamada Python 3.12 ile çalışacaksın. Yazdığın kod, tarayıcının içinde gerçek bir Python yorumlayıcısında (interpreter) koşar. Temel dil birebir aynıdır: burada öğrendiğin dil kuralları bilgisayarına kuracağın Python'da da aynı çalışır.</p>
+<p>Python'ı bu kadar sevdiren üç özellik var:</p>
+<ul>
+<li><b>Okunur sözdizimi:</b> Süslü parantez yerine girinti, noktalı virgül yerine satır sonu. Kod, kısa İngilizce cümlelere benzer; başkasının kodunu okumak kolaydır.</li>
+<li><b>Dev kütüphane ekosistemi:</b> Veri analizi için pandas, yapay zekâ için PyTorch, web için Django ve FastAPI, otomasyon için yüzlerce paket. Çoğu iş için hazır bir araç vardır.</li>
+<li><b>Hemen sonuç:</b> Ayrı bir derleme adımı yoktur. Yaz, çalıştır, sonucu gör, düzelt.</li>
+</ul>
+
+<h2>Nerede kullanılır?</h2>
+<p>Python'ı tek bir alana sıkıştırmak zor. Aşağıdaki tablo, iş dünyasında en sık karşılaşacağın kullanım alanlarını özetliyor:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Alan</th><th>Tipik iş</th><th>Öne çıkan araçlar</th></tr>
+<tr><td>Veri analizi ve raporlama</td><td>Satış verisini temizleyip özet tablo ve grafik üretmek</td><td>pandas, matplotlib, Jupyter</td></tr>
+<tr><td>Otomasyon</td><td>Her sabah 20 Excel dosyasını birleştirip e-posta göndermek</td><td>standart kütüphane, openpyxl</td></tr>
+<tr><td>Web ve API</td><td>Sipariş sistemine servis yazmak, web sitesi kurmak</td><td>Django, FastAPI, Flask</td></tr>
+<tr><td>Yapay zekâ ve makine öğrenmesi</td><td>Müşteri kaybı tahmini, öneri sistemi, dil modelleri</td><td>scikit-learn, PyTorch, TensorFlow</td></tr>
+<tr><td>Veri mühendisliği</td><td>Veritabanından veri çekip dönüştürüp başka sisteme aktarmak</td><td>SQLAlchemy, Airflow</td></tr>
+<tr><td>Test ve DevOps</td><td>Sunucu betikleri, test otomasyonu, dağıtım</td><td>pytest, Ansible</td></tr>
+</table></div>
+<p>Bu listedeki alanların ortak noktası şu: hepsinde Python, "işi bir kere yaz, her gün otomatik koşsun" mantığıyla kullanılır. Bir analist için bu, Excel'de elle yaptığı her tekrarlı işi birkaç satır koda dönüştürmek demektir.</p>
+
+<h2>Anadolu Market'te bir analist Python'la ne yapar?</h2>
+<p>Diyelim ki Anadolu Market'in e-ticaret ekibinde veri analistisin. Pazartesi sabahı gelen kutunda şu istek var: "Geçen haftanın şehir bazlı satış özetini çıkarır mısın?" Python bilen bir analist şu akışı izler:</p>
+<div class="steps-list"><ol>
+<li>Sipariş verisini kaynağından okur (CSV dosyası, veritabanı ya da API).</li>
+<li>Veriyi temizler: boş şehir adlarını doldurur, "istanbul" ile "İstanbul"u aynı şehir sayar.</li>
+<li>Şehre göre gruplar, sipariş adedini ve toplam tutarı hesaplar.</li>
+<li>Sonucu bir tabloya ve grafiğe döker, yöneticinin anlayacağı dilde özetler.</li>
+<li>Betiği zamanlayıcıya bağlar; artık her pazartesi rapor kendiliğinden gelir.</li>
+</ol></div>
+<p>Bu kursun sonunda bu akışın tamamını tek başına yazabileceksin. Ama her yolculuk küçük bir adımla başlar: ekrana bir şey yazdırmak.</p>
+
+<h2>İlk print örnekleri</h2>
+<p><code>print</code>, Python'ın ekrana yazdırma fonksiyonudur (function). Parantez içine ne verirsen onu gösterir. Aşağıdaki kutuda Çalıştır'a bas:</p>
+<pre class="py">print("Merhaba, Anadolu Market!")
+print("Bugün 3 yeni sipariş geldi.")</pre>
+<p>Tırnak içine yazdığın şeye metin (string) denir. Birden fazla değeri virgülle ayırarak aynı satıra yazdırabilirsin; Python aralarına otomatik boşluk koyar:</p>
+<pre class="py">print("Sipariş adedi:", 3)
+print("Toplam tutar:", 3 * 250)
+print("Ilgaz", "Bank", sep=" - ")</pre>
+<p>Üçüncü satırdaki <code>sep</code>, değerler arasına ne konulacağını belirler. Şimdi en önemli ayrımı gör: tırnak içindeki her şey metindir, tırnak dışındaki sayılarla hesap yapılır.</p>
+<pre class="py">print(3 * 250)
+print("3 * 250")
+print(5 + 3)
+print("5" + "3")</pre>
+<p>İlk satırda çarpma gerçekten yapılır ve 750 çıkar. İkinci satır ise sadece bir metindir; Python onu olduğu gibi basar. Son iki satır da aynı mantığın devamı: sayılar toplanır, metinler ise uç uca eklenir.</p>
+<div class="tip"><b>Tırnak seçimi</b>Çift tırnak ("...") ve tek tırnak ('...') Python'da aynı işi görür. Metnin içinde kesme işareti varsa çift tırnak kullanmak rahat eder: <code>print("Anadolu Market'te indirim var")</code>.</div>
+<div class="warn"><b>Büyük-küçük harf önemli</b><code>Print("x")</code> yazarsan Python "NameError: name 'Print' is not defined" der. Python'da <code>print</code> ile <code>Print</code> farklı iki addır. Her zaman küçük harfle yaz.</div>
+<div class="note"><b>Python 2 ile karıştırma</b>İnternette <code>print "Merhaba"</code> gibi parantezsiz örnekler görebilirsin. Bu, 2020'de desteği biten Python 2 yazımıdır. Sen her zaman parantez kullan.</div>
+
+<h2>Python ile ilk hesaplar</h2>
+<p>print yalnızca metin basmaz; parantez içindeki her ifadeyi hesaplayıp sonucu gösterir. Anadolu Market'in bir günlük küçük özetini sadece print ile çıkarabilirsin. Değişken kavramını henüz görmedin, bu yüzden değerleri doğrudan yazıyoruz; birkaç ders sonra aynı hesabı adlandırılmış değerlerle, çok daha okunur biçimde yapacaksın.</p>
+<pre class="py">print("Sabah siparişi:", 12)
+print("Öğleden sonra:", 19)
+print("Günlük toplam:", 12 + 19)
+print("Ortalama sepet (TL):", (1499 + 250 + 89) / 3)
+print("Kalan stok:", 250 - 31)</pre>
+<p>Dördüncü satırdaki bölme işlemi ondalıklı sonuç verir; bunun neden hep böyle olduğunu Sayılar dersinde öğreneceksin. Şimdilik şunu gör: Python bir hesap makinesi gibi parantez önceliğine uyar ve sonucu hemen basar.</p>
+
+<h2>Yorumlanan dil ne demek?</h2>
+<p>Python yorumlanan (interpreted) bir dildir: kodunu önce makine diline çeviren ayrı bir program çalıştırmazsın; yorumlayıcı satırları sırayla okur ve uygular. Bunun iki sonucu var. Birincisi, deneme yapmak hızlıdır: bir satır yazar, hemen sonucu görürsün. İkincisi, çoğu hata (yazım hatası hariç) ancak o satıra sıra geldiğinde ortaya çıkar; Python önce dosyanın tamamını okur, sözdizimi hatası varsa hiçbir satırı çalıştırmaz. Dolayısıyla kodu küçük parçalar hâlinde sık sık çalıştırmak iyi bir alışkanlıktır. Şimdilik her şey tarayıcıda çalışıyor; hazır olduğunda "Bilgisayarına geç" bölümünde Python'ı kendi bilgisayarına kurar, bu yorumlayıcıyı terminalden çalıştırırsın.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Python bir programı nasıl çalıştırır?</h2><p>"Yorumlanan dil" ifadesi doğru ama eksik. Sen <code>python rapor.py</code> yazdığında perde arkasında üç adım olur:</p><div class="steps-list"><ol><li><b>Ayrıştırma (parsing):</b> Yorumlayıcı dosyanın tamamını okur ve sözdizimini denetler. Kapanmamış bir parantez varsa program <i>hiç başlamaz</i>; SyntaxError bu yüzden ilk satır bile çalışmadan gelir.</li><li><b>Bayt koduna derleme (bytecode):</b> Kod, Python sanal makinesinin anlayacağı ara bir dile çevrilir. Bir modülü içe aktardığında oluşan <code>__pycache__</code> klasöründeki <code>.pyc</code> dosyaları bu bayt kodudur; bir dahaki sefere derleme adımı atlanır.</li><li><b>Yürütme:</b> Python sanal makinesi (PVM) bayt kodunu satır satır çalıştırır. NameError, TypeError gibi hatalar bu aşamada, o satıra sıra geldiğinde çıkar.</li></ol></div><p>Bayt kodunu merak ediyorsan standart kütüphanedeki <code>dis</code> modülü onu gösterir. Çıktının ayrıntısı sürümden sürüme değişir; amaç ezberlemek değil, "kod önce çevriliyor, sonra çalışıyor" fikrini görmek:</p><pre class="py">import dis
+dis.dis("toplam = 3 * 250")
+print("Bayt kodu yukarıda; sonuç hesaplanınca:", 3 * 250)</pre><p>İlk satırda bir şey dikkatini çekebilir: Python <code>3 * 250</code> çarpımını derleme sırasında önceden yapıp 750 sabitini koyabilir. Buna sabit katlama (constant folding) denir ve yorumlayıcının küçük bir hız optimizasyonudur.</p><h2>Python'ın kimlik kartı</h2><p>İş görüşmelerinde ve PCEP gibi sertifika sınavlarında Python'ı birkaç teknik sıfatla tarif etmen beklenir. Hepsinin ne anlama geldiğini bir tabloda topladık:</p><div class="tbl-wrap"><table><tr><th>Özellik</th><th>Anlamı</th><th>Python'da örnek</th></tr><tr><td>Yorumlanan (interpreted)</td><td>Ayrı bir derleme adımı yok, yorumlayıcı çalıştırır</td><td><code>python rapor.py</code></td></tr><tr><td>Dinamik tipli (dynamically typed)</td><td>Tür değişkene değil değere aittir, çalışırken belirlenir</td><td><code>x = 5</code> sonra <code>x = "beş"</code></td></tr><tr><td>Güçlü tipli (strongly typed)</td><td>Uyumsuz türleri sessizce birbirine çevirmez</td><td><code>"5" + 3</code> TypeError verir</td></tr><tr><td>Çok paradigmalı</td><td>Yordamsal, nesne yönelimli ve fonksiyonel stil bir arada</td><td>fonksiyon, sınıf, <code>map</code></td></tr><tr><td>Çöp toplayıcılı (garbage collected)</td><td>Belleği sen boşaltmazsın, Python boşaltır</td><td>Kullanılmayan liste kendiliğinden silinir</td></tr><tr><td>Girintiyle bloklanan</td><td>Bloklar süslü parantezle değil girintiyle belirlenir</td><td><code>if</code> altındaki 4 boşluk</td></tr></table></div><p>En çok karıştırılan ikili "dinamik" ve "güçlü" tiplemedir. Dinamik, bir değişkenin türünü önceden söylemediğin anlamına gelir. Güçlü ise Python'ın türleri tahmin edip senin yerine dönüştürmediği anlamına gelir. JavaScript'te <code>"5" + 3</code> sonucu <code>"53"</code> olur; Python ise hata verir ve seni açık olmaya zorlar:</p><pre class="py">print("5" + "3")        # metin + metin: birleştirme
+print(5 + 3)            # sayı + sayı: toplama
+print(int("5") + 3)     # açıkça çevirirsen çalışır
+print("5" * 3)          # metni tekrar etmek serbest</pre><div class="warn"><b>Güçlü tipli ama her şeye izin vermez değil</b><code>"5" * 3</code> hata vermez, <code>"555"</code> üretir; çünkü metni tekrar etmek tanımlı bir işlemdir. Python'ın reddettiği şey, anlamı belirsiz işlemlerdir: metne sayı eklemek gibi.</div><h2>Python'ın felsefesi: The Zen of Python</h2><p>Python'ın tasarım ilkeleri, Tim Peters'ın yazdığı 19 maddelik bir metinde toplanır ve dilin içine gömülüdür. Aşağıdaki kutuyu çalıştır:</p><pre class="py">import this</pre><p>Bu maddeler kod incelemelerinde (code review) gerçekten alıntılanır. Özellikle şu üçünü aklında tut:</p><ul><li><b>Beautiful is better than ugly / Readability counts:</b> Kod bir kere yazılır, yüzlerce kez okunur. Okunurluk hızdan önce gelir.</li><li><b>Explicit is better than implicit:</b> Ne yaptığını açıkça yaz. <code>int("5") + 3</code> tam olarak bu ilkenin sonucudur.</li><li><b>Errors should never pass silently:</b> Hata görmezden gelinmez; Python bu yüzden şüpheli bir işlemde durup sana söyler.</li></ul><p>Bu ilkelerin somut kurallara dönüşmüş hâli PEP 8 stil rehberidir. PEP (Python Enhancement Proposal), dile yapılacak her değişikliğin yazılı önerisidir; f-string'ler PEP 498, <code>match</code> ifadesi PEP 634 ile geldi. Bir özelliğin neden öyle tasarlandığını merak ettiğinde ilgili PEP'i okumak en güvenilir kaynaktır.</p><h2>Anahtar sözcükler ve hazır fonksiyonlar</h2><p>Python'ın kendine ayırdığı birkaç düzine sözcük vardır: <code>if</code>, <code>for</code>, <code>def</code>, <code>class</code>, <code>True</code>, <code>None</code> gibi. Bunlara anahtar sözcük (keyword) denir ve değişken adı olarak kullanılamaz. <code>print</code>, <code>len</code>, <code>sum</code> ise anahtar sözcük değil hazır fonksiyondur (built-in function); teknik olarak üzerine yazabilirsin ama yazmamalısın.</p><pre class="py">import keyword
+print(keyword.iskeyword("for"))      # True: ayrılmış sözcük
+print(keyword.iskeyword("print"))    # False: hazır fonksiyon
+print(keyword.iskeyword("siparis"))  # False: serbest ad
+print(keyword.kwlist[:6])            # listenin ilk birkaç elemanı</pre><div class="tip"><b>Her şey bir nesnedir</b>Python'da sayılar, metinler, hatta <code>print</code> fonksiyonunun kendisi bile nesnedir (object). <code>print(type(print))</code> yazarsan <code>&lt;class 'builtin_function_or_method'&gt;</code> görürsün. Bu fikir, ileride fonksiyonları başka fonksiyonlara parametre olarak verirken çok işine yarayacak.</div><h2>Ekosistem: PyPI ve "piller dahil"</h2><p>Python'ın sloganlarından biri "batteries included": standart kütüphane (standard library) kurulumla birlikte gelir ve tarih hesabından JSON okumaya, e-posta göndermekten SQLite veritabanına kadar yüzlerce modül içerir. Standart kütüphanede olmayan her şey için PyPI (Python Package Index) adlı resmî paket deposu vardır; pandas, requests, Django gibi paketler oradan <code>pip</code> ile kurulur. Kurulum dersinde pip'in ilk adımlarını göreceksin.</p><p>Python'ın birden fazla uygulaması (implementation) da vardır. python.org'dan indirdiğin ve bu uygulamada tarayıcıda çalışan sürüm C ile yazılmış CPython'dır; "Python" denince neredeyse her zaman o kastedilir. PyPy gibi alternatifler belirli işlerde daha hızlıdır. Ayrıntısını Kurulum ve araçlar dersinde göreceksin.</p><div class="note"><b>Gerçek işte</b>Yeni bir ekibe katıldığında ilk hafta şu soruları sor: Hangi Python sürümünü kullanıyoruz? Paketler hangi dosyada listeleniyor (requirements.txt, pyproject.toml)? Kod stili otomatik denetleniyor mu (Ruff, Black)? Bu üç cevap, "benim makinemde çalışıyordu" türü sorunların çoğunu daha başlamadan önler. Kod incelemesinde "bu satır okunmuyor" eleştirisi aldığında kişisel algılama; Zen'in "Readability counts" maddesi ekibin ortak dilidir.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Excel'den Python'a geçiş neden kârlı?</h3>
+<p>Çoğu analist Python'a Excel'in sınırına çarpınca gelir: dosya yüz binlerce satıra ulaşınca yavaşlar, aynı raporu her hafta elle yenilemek hata üretir, iki kaynağı birleştirmek saatler alır. Python'da aynı iş bir betiktir: veriyi okur, dönüştürür, raporu yazar. Betik bir kez doğru çalışıyorsa her hafta aynı kalitede çalışır. Excel'in yerini almaz; Excel'in yapamadığı tekrarlı ve büyük işleri üstlenir.</p>
+<h3>Python her şeyin çözümü değil</h3>
+<p>Dürüst olmak gerekirse Python'ın zayıf olduğu yerler de var. Mobil uygulama arayüzleri için Swift ve Kotlin, tarayıcıda çalışan arayüzler için JavaScript, çok yüksek performans gerektiren oyun motoru ya da işletim sistemi çekirdeği için C, C++ ve Rust tercih edilir. Python'ın gücü, bu dillerle yazılmış hızlı kütüphaneleri kolayca kullanabilmesinde yatar: pandas ve numpy'nin altında C kodu çalışır, sen ise Python'ın rahatlığıyla yazarsın.</p>
+<h3>İş ilanlarında ne beklenir?</h3>
+<p>Veri analisti ilanlarında genellikle "Python (pandas), SQL ve bir görselleştirme aracı" üçlüsü geçer. Otomasyon ve yazılım rollerinde buna standart kütüphane, test yazma ve Git eklenir. Bu kursun Temel seviyesi dilin kendisini, Orta seviyesi Pythonic kod ve standart kütüphaneyi, İleri seviyesi ise pandas, eşzamanlılık (concurrency) ve dağıtımı kapsıyor; yani ilanlardaki beklentiyle aynı sırayı izliyorsun.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/python-nedir">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><span></span><a href="../kurulum-araclar/">Kuruluma genel bakış: sürüm seçimi ve araçlar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

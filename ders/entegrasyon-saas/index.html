@@ -1,0 +1,229 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook | Kesit Python</title><meta name="description" content="Polling ile webhook'u karşılaştırır; gspread ile idempotent Sheets güncellemesini, imaplib ve email modülüyle e-posta ve ek okumayı, Microsoft Graph,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/entegrasyon-saas/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook"><meta property="og:description" content="Polling ile webhook'u karşılaştırır; gspread ile idempotent Sheets güncellemesini, imaplib ve email modülüyle e-posta ve ek okumayı, Microsoft Graph,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/entegrasyon-saas/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook","description":"Polling ile webhook'u karşılaştırır; gspread ile idempotent Sheets güncellemesini, imaplib ve email modülüyle e-posta ve ek okumayı, Microsoft Graph,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/entegrasyon-saas/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook</h1><p class="st-l">Polling ile webhook'u karşılaştırır; gspread ile idempotent Sheets güncellemesini, imaplib ve email modülüyle e-posta ve ek okumayı, Microsoft Graph, Teams ve Slack webhook yüklerini, HMAC ile webhook imza doğrulamayı, sırların yönetimini ve n8n/Make ile iş bölümünü sahte istemciler ve gerçek veri setleriyle uygularsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/entegrasyon-saas">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli? Verinin yaşadığı yerler</h2>
+<p>Şirketlerde verinin önemli bir kısmı veritabanında değil, iş uygulamalarında yaşar: satış ekibinin hedef tablosu Google Sheets'te, bayilerin günlük raporu e-posta ekinde, alarmlar Teams ya da Slack kanalında, ödeme sağlayıcısının bildirimi bir webhook isteğinde. Otomasyon uzmanının işi bu adaları birbirine bağlamaktır: e-postadaki eki okuyup tabloya yazmak, tabloda bir değer değişince kanala haber vermek, dış sistemden gelen bildirime güvenip güvenmeyeceğine karar vermek.</p>
+<p><a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</a> dersinde REST istemcisi yazmayı, <a href="../yapilandirma/">Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri</a> dersinde sırları ortam değişkeninde tutmayı, webhook imzasını da <a href="../api-web/">API tasarımına giriş: HTTP, doğrulama ve ilk servis</a> dersinde ayrıntılı göreceksin. Burada bunları gerçek iş uygulamalarına uyguluyoruz. Tarayıcıda ağ olmadığı için gspread, imaplib ve Microsoft Graph kodlarını gri kutularda göreceksin; alıştırmalarda ise <b>sahte istemcilerle</b> (fake client) çalışacaksın. E-posta ayrıştırma (<code>email</code> modülü) ve imza doğrulama (<code>hmac</code>) ise standart kütüphanede olduğu için tarayıcıda gerçekten çalışır.</p>
+
+<h2>Entegrasyon kalıpları: çekme mi, itme mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Çekme (polling)</th><th>İtme (webhook)</th></tr>
+<tr><td>Nasıl çalışır?</td><td>Sen belirli aralıkla "yeni bir şey var mı?" diye sorarsın</td><td>Karşı sistem olay olunca senin adresine HTTP isteği gönderir</td></tr>
+<tr><td>Gecikme</td><td>Aralık kadar (ör. 5 dakika)</td><td>Saniyeler</td></tr>
+<tr><td>Altyapı</td><td>Zamanlanmış betik yeter, dışarıya açık adres gerekmez</td><td>İnternetten erişilebilen HTTPS uç noktası gerekir</td></tr>
+<tr><td>Maliyet</td><td>Boş sorgular API kotası yer</td><td>Yalnız olay olunca istek gelir</td></tr>
+<tr><td>Riskler</td><td>İmleç (cursor) hatası: kaçırma ya da tekrar</td><td>Sahte istek, tekrar gönderim, kaçan bildirim</td></tr>
+<tr><td>Ne zaman?</td><td>Webhook sunmayan sistemler, ofis betikleri</td><td>Ödeme, form, depo ve CRM olayları</td></tr>
+</table></div>
+<p>Polling'in kalbi <b>imleç</b>tir: "en son nereye kadar okudum?" bilgisini (son <code>updated_at</code> ya da son kimlik) saklar ve bir sonraki sorguda yalnız ondan sonrasını istersin. Aşağıda Anadolu Market'in fiyat değişikliği tablosunu (<code>price_updates</code>) sayfa sayfa dönen sahte bir API'den çekiyoruz:</p>
+<pre class="py">import veri
+
+guncellemeler = sorted(veri.kayitlar("anadolu_market", "price_updates"), key=lambda r: r["updated_at"])
+
+
+def sahte_api(since, limit=5):
+    """GET /price-updates?since=...&amp;limit=... taklidi"""
+    return [r for r in guncellemeler if r["updated_at"] &gt; since][:limit]
+
+
+imlec = "2024-11-01 00:00:00"          # bir önceki çalıştırmadan kalan
+yeni = []
+while sayfa := sahte_api(imlec):
+    yeni.extend(sayfa)
+    imlec = sayfa[-1]["updated_at"]    # imleci ilerlet
+print(len(yeni), "yeni güncelleme, yeni imleç:", imlec)</pre>
+<h2>Google Sheets: gspread ve servis hesabı</h2>
+<p>Sheets'e betikten erişmenin en temiz yolu bir <b>servis hesabı</b>dır (service account): Google Cloud'da bir "robot kullanıcı" açarsın, JSON anahtarını indirirsin ve tabloyu robotun e-posta adresiyle paylaşırsın. Kişisel hesabınla OAuth yapmaktan farkı, betiğin senin oturumuna bağlı olmamasıdır.</p>
+<pre class="code"># pip install gspread
+import gspread
+
+gc = gspread.service_account(filename="/etc/gizli/sheets-robot.json")   # repoya KOYMA
+ws = gc.open_by_key("1AbC...xyz").worksheet("Bayi Satış")
+
+satirlar = ws.get_all_values()              # her hücre METİN döner
+ws.update("B5:D5", [["İzmir", "2024-01-07", 0]])
+ws.append_row(["Yeni Bayi", "Bursa", "2024-01-08", 2040])
+ws.batch_update([{"range": "D2:D4", "values": [[1250.5], [980], [0]]}])   # tek çağrıda çok aralık</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install gspread</code>; Google Cloud Console'da proje aç, "Google Sheets API"yi etkinleştir, servis hesabı oluşturup JSON anahtar indir, tabloyu servis hesabının e-postasıyla "Düzenleyici" olarak paylaş. Anahtar dosyasının yolunu ortam değişkeninden oku (<code>os.environ["SHEETS_ANAHTAR"]</code>) ve <code>.gitignore</code>'a ekle.</div>
+<p>Sheets'e yazan betik <b>idempotent</b> olmalıdır: iki kez çalışınca satırlar ikiye katlanmamalı. Bunun yolu "varsa güncelle, yoksa ekle" (upsert) mantığıdır. Sheets API'nin dakikalık kota sınırı olduğu için satır satır okumak yerine tabloyu <b>bir kez</b> okuyup bellekte anahtar → satır numarası haritası kurarsın:</p>
+<pre class="py">class SahteSheet:
+    """gspread Worksheet'in küçük bir taklidi: hücre değerleri her zaman METİN döner."""
+    def __init__(self, satirlar):
+        self._v = [[str(h) for h in s] for s in satirlar]
+        self.cagri = 0                      # API çağrısı sayacı (kota!)
+
+    def get_all_values(self):
+        self.cagri += 1
+        return [list(s) for s in self._v]
+
+    def update_row(self, satir_no, degerler):          # 1 tabanlı satır no
+        self.cagri += 1
+        self._v[satir_no - 1] = [str(d) for d in degerler]
+
+    def append_row(self, degerler):
+        self.cagri += 1
+        self._v.append([str(d) for d in degerler])
+
+
+ws = SahteSheet([["Bayi", "Şehir", "Tutar"], ["Merkez Bayi", "İstanbul", 1250.5], ["Kızılay Bayi", "Ankara", 980]])
+
+
+def upsert(ws, satir):
+    tum = ws.get_all_values()
+    konum = {s[0]: i + 1 for i, s in enumerate(tum)}     # anahtar -&gt; 1 tabanlı satır no
+    if satir[0] in konum:
+        if tum[konum[satir[0]] - 1] != [str(d) for d in satir]:
+            ws.update_row(konum[satir[0]], satir)
+    else:
+        ws.append_row(satir)
+
+
+for _ in range(2):                                        # iki kez çalıştır
+    upsert(ws, ["Kızılay Bayi", "Ankara", 2410])
+    upsert(ws, ["Nilüfer Bayi", "Bursa", 2040])
+print(ws.get_all_values())
+print("API çağrısı:", ws.cagri)</pre>
+<div class="warn"><b>Sheets her şeyi metin döndürür</b><code>get_all_values()</code> sayıları da <code>"980"</code> olarak verir. Anahtarı sayı olan bir tabloda <code>satir[0] == 101</code> karşılaştırması hiç tutmaz ve betik her çalıştırmada aynı satırı yeniden ekler. Karşılaştırmadan önce iki tarafı da aynı türe çevir.</div>
+
+<h2>E-posta okuma: imaplib ve email modülü</h2>
+<p>Bayiler, bankalar ve tedarikçiler raporlarını hâlâ çoğunlukla e-posta ekiyle gönderir. <b>IMAP</b> ile posta kutusuna bağlanır, ölçüte göre arar (<code>UNSEEN FROM "..." SINCE 01-Oct-2024</code>), iletiyi ham bayt olarak indirirsin. Gerisini, yani başlıkları, gövdeyi ve ekleri ayrıştırmayı standart kütüphanenin <code>email</code> modülü yapar.</p>
+<pre class="code">import imaplib, os
+from email import message_from_bytes, policy
+
+with imaplib.IMAP4_SSL("imap.gmail.com") as imap:
+    imap.login(os.environ["MAIL_KULLANICI"], os.environ["MAIL_UYGULAMA_SIFRESI"])
+    imap.select("INBOX")
+    durum, veri = imap.search(None, '(UNSEEN FROM "kadikoy@ilgazbank.example" SINCE 01-Oct-2024)')
+    for num in veri[0].split():
+        durum, parca = imap.fetch(num, "(RFC822)")
+        ileti = message_from_bytes(parca[0][1], policy=policy.default)
+        for ek in ileti.iter_attachments():
+            if ek.get_filename().endswith(".csv"):
+                isle(ek.get_content())                     # metin ya da bayt
+        imap.store(num, "+FLAGS", "\\Seen")               # işlendi olarak işaretle</pre>
+<p>Aşağıdaki kod Ilgaz Bank'ın 15 Mart 2024 işlemlerinden ekli bir CSV içeren gerçek bir e-posta üretiyor, bayta çeviriyor (IMAP'ten böyle gelir) ve geri ayrıştırıyor:</p>
+<pre class="py">import csv
+import io
+import veri
+from email.message import EmailMessage
+from email import message_from_bytes, policy
+
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
+
+
+def rapor_epostasi(gun):
+    tampon = io.StringIO()
+    yazici = csv.writer(tampon)
+    yazici.writerow(["txn_id", "amount", "channel"])
+    for t in txns:
+        if t["txn_time"].startswith(gun):
+            yazici.writerow([t["txn_id"], t["amount"], t["channel"]])
+    m = EmailMessage()
+    m["From"] = "Kadıköy Şubesi &lt;kadikoy@ilgazbank.example&gt;"
+    m["To"] = "operasyon@ilgazbank.example"
+    m["Subject"] = f"Günlük işlem raporu {gun}"
+    m.set_content("Merhaba,\nGünlük işlem dökümü ektedir.")
+    m.add_attachment(tampon.getvalue().encode("utf-8"), maintype="text", subtype="csv",
+                     filename=f"islemler_{gun}.csv")
+    return m.as_bytes()
+
+
+ham = rapor_epostasi("2024-03-15")
+ileti = message_from_bytes(ham, policy=policy.default)
+print("Konu  :", ileti["subject"])
+print("Kimden:", ileti["from"].addresses[0].display_name)
+print("Gövde :", ileti.get_body(("plain",)).get_content().splitlines()[1])
+for ek in ileti.iter_attachments():
+    satirlar = list(csv.DictReader(io.StringIO(ek.get_content())))
+    print("Ek    :", ek.get_filename(), len(satirlar), "satır")</pre>
+<div class="tip"><b>policy.default kullan</b><code>message_from_bytes(ham)</code> eski (compat32) politikayla çalışır: Türkçe konu <code>=?utf-8?b?...?=</code> biçiminde kodlu kalır ve <code>get_body</code>, <code>iter_attachments</code> gibi modern metotlar yoktur. <code>policy=policy.default</code> başlıkları çözer ve ekleri kolayca gezmeni sağlar.</div>
+
+<h2>Microsoft Graph, Teams ve Slack</h2>
+<p>Microsoft 365 kullanan şirketlerde Outlook postası, Teams ve OneDrive'a <b>Microsoft Graph</b> API'siyle erişilir. Kimlik doğrulama Azure'da kayıtlı bir uygulama ve <b>MSAL</b> kütüphanesiyle yapılır. Yalnız bir kanala mesaj atmak istiyorsan daha basit yol <b>gelen webhook</b>'tur (Teams'te Workflows/Power Automate ile, Slack'te "Incoming Webhook" uygulamasıyla oluşturulur): sana gizli bir URL verilir, o adrese JSON göndermek yeter.</p>
+<pre class="code"># pip install msal requests
+import msal, requests, os
+app = msal.ConfidentialClientApplication(os.environ["AZ_CLIENT_ID"],
+        authority=f"https://login.microsoftonline.com/{os.environ['AZ_TENANT']}",
+        client_credential=os.environ["AZ_SECRET"])
+token = app.acquire_token_for_client(scopes=["https://graph.microsoft.com/.default"])["access_token"]
+r = requests.get("https://graph.microsoft.com/v1.0/users/rapor@lezzetkurye.example/messages"
+                 "?$filter=hasAttachments eq true&amp;$top=10",
+                 headers={"Authorization": f"Bearer {token}"}, timeout=10)
+
+# Slack ve Teams gelen webhook: URL bir sırdır, ortam değişkeninde dursun
+requests.post(os.environ["SLACK_WEBHOOK_URL"], json=yuk, timeout=10).raise_for_status()
+requests.post(os.environ["TEAMS_WEBHOOK_URL"], json=kart, timeout=10).raise_for_status()</pre>
+<p>Webhook'un istediği tek şey doğru biçimde bir JSON yüküdür (payload). Slack'te <b>Block Kit</b>, Teams'te <b>Adaptive Card</b> kullanılır. Yükü bir fonksiyonla üretmek onu test edilebilir yapar. Lezzet Kurye'nin 31 Aralık 2024 sipariş özetini Slack bloğuna çeviriyoruz:</p>
+<pre class="py">import json
+from collections import Counter
+import veri
+
+siparisler = veri.kayitlar("lezzet_kurye", "lk_orders")
+gun = [s for s in siparisler if s["placed_at"].startswith("2024-12-31")]
+durum = Counter(s["status"] for s in gun)
+
+yuk = {
+    "text": f"31.12.2024 özeti: {len(gun)} sipariş",          # bildirim önizlemesi
+    "blocks": [
+        {"type": "header", "text": {"type": "plain_text", "text": "Lezzet Kurye günlük özet"}},
+        {"type": "section", "fields": [
+            {"type": "mrkdwn", "text": f"*Teslim*\n{durum['teslim']}"},
+            {"type": "mrkdwn", "text": f"*İptal*\n{durum['iptal']}"},
+            {"type": "mrkdwn", "text": f"*İade*\n{durum['iade']}"},
+        ]},
+    ],
+}
+print(json.dumps(yuk, ensure_ascii=False, indent=1)[:260])</pre>
+<h2>Gelen webhook'u doğrulamak: HMAC imzası</h2>
+<p>Webhook adresin internete açıktır; herkes oraya "ödeme alındı" diye istek atabilir. Bu yüzden sağlayıcılar (Stripe, GitHub, Slack, iyzico) isteği ortak bir gizli anahtarla <b>HMAC-SHA256</b> ile imzalar ve imzayı bir başlıkta gönderir. Alıcı aynı imzayı <b>ham gövde baytları</b> üzerinden yeniden hesaplar ve <code>hmac.compare_digest</code> ile karşılaştırır. Slack ve Stripe imzaya zaman damgasını da katar; 5 dakikadan eski istekler reddedilerek <b>tekrar saldırısı</b> (replay) önlenir.</p>
+<pre class="py">import hashlib
+import hmac
+import json
+
+GIZLI = b"whsec_lezzet_test"              # gerçekte ortam değişkeninden
+govde = b'{"event_id": "ev_101", "type": "siparis.teslim", "order_id": 2}'
+imza = "sha256=" + hmac.new(GIZLI, govde, hashlib.sha256).hexdigest()
+
+
+def dogrula(govde, imza_basligi, gizli):
+    beklenen = "sha256=" + hmac.new(gizli, govde, hashlib.sha256).hexdigest()
+    return hmac.compare_digest(beklenen, imza_basligi)
+
+
+print(dogrula(govde, imza, GIZLI))
+print(dogrula(govde.replace(b"2}", b"9}"), imza, GIZLI))        # gövde değiştirildi
+print(dogrula(json.dumps(json.loads(govde)).encode(), imza, GIZLI))</pre>
+<p>Üçüncü satır neden <code>False</code>? Gövdeyi JSON olarak ayrıştırıp yeniden yazmak boşlukları ve anahtar sırasını değiştirebilir; imza <b>bayt bayt</b> aynı metin üzerinden hesaplanmalıdır. FastAPI'de ham gövdeyi <code>await request.body()</code> ile alırsın:</p>
+<pre class="code">from fastapi import FastAPI, Request, Header, HTTPException
+app = FastAPI()
+
+@app.post("/webhook/odeme")
+async def odeme(request: Request, x_imza: str = Header(...)):
+    govde = await request.body()                      # ham bayt, json() DEĞİL
+    if not dogrula(govde, x_imza, GIZLI):
+        raise HTTPException(401, "imza geçersiz")
+    olay = json.loads(govde)
+    if zaten_islendi(olay["event_id"]):               # sağlayıcı tekrar gönderebilir
+        return {"durum": "tekrar"}
+    kuyruga_ekle(olay)                                # ağır işi arka plana ver
+    return {"durum": "alındı"}                        # hızlı 2xx dön, yoksa yeniden dener</pre>
+<h2>Sırlar, n8n ve Make</h2>
+<p>Servis hesabı JSON'u, IMAP uygulama şifresi, webhook URL'leri ve imza anahtarları <b>sır</b>dır: koda, Git'e ve log'a girmez; ortam değişkeni ya da kasa (Azure Key Vault, AWS Secrets Manager) ile verilir, düzenli döndürülür (rotate) ve her entegrasyon için ayrı, en az yetkili anahtar kullanılır. OAuth'ta erişim belirteci (access token) kısa ömürlüdür; yenileme belirteci (refresh token) ise şifre kadar değerlidir.</p>
+<p><b>n8n</b> ve <b>Make</b> gibi düşük kodlu araçlar tetikleyici, bağlayıcı ve zamanlama işini hazır sunar: "Gmail'e ek gelince Sheets'e yaz" akışı dakikalar içinde kurulur. Python'un rolü, bu akışın ortasındaki <b>zor adım</b>dır: karmaşık ayrıştırma, doğrulama, hesaplama, model çağrısı. n8n'de "Code" düğümü ya da senin yazdığın küçük bir HTTP servisi (webhook alıcısı) bu adımı üstlenir. İş bölümü kuralı: bağlantı ve tetikleme platformda, iş kuralı ve test edilebilir mantık Python'da.</p>
+<div class="note"><b>Gerçek işte</b>Operasyon ekiplerinin en sık istediği entegrasyonlar şunlardır: bayi ya da şube raporu e-postalarındaki ekleri her sabah tabloya işlemek, stok veya fiyat değişince satış kanalına Teams/Slack bildirimi atmak, form ve ödeme webhook'larını CRM'e yazmak, haftalık özeti Sheets'ten alıp yönetime e-postalamak. Bu işlerde hata çoğu zaman koddan değil, tekrar eden çalıştırmadan (çift satır), kaçan imleçten ve sızan sırdan gelir.</div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Webhook alıcısının üç kuralı</h3>
+<p>1) İmzayı ham gövdeyle ve sabit zamanlı karşılaştırmayla doğrula. 2) Olay kimliğiyle tekilleştir; sağlayıcılar zaman aşımında aynı olayı yeniden gönderir. 3) İsteğe hızlıca 2xx dön, ağır işi kuyruğa bırak; aksi hâlde sağlayıcı zaman aşımına düşüp yeniden dener ve yük katlanır.</p>
+<h3>Polling'de imleç tuzakları</h3>
+<p>Aynı zaman damgasına sahip iki kayıt sayfa sınırına denk gelirse <code>&gt;</code> ile ikincisini kaçırırsın, <code>&gt;=</code> ile ilkini tekrar alırsın. Sağlam çözüm bileşik imleçtir: <code>(updated_at, id)</code> çifti ve ona göre sıralama; tekrar gelenleri de idempotent yazma karşılar.</p>
+<h3>Kota ve toplu yazma</h3>
+<p>Sheets, Graph ve Slack hız sınırı uygular; 429 yanıtında <code>Retry-After</code> başlığına uy. Satır satır güncellemek yerine değişiklikleri biriktirip <code>batch_update</code> ile tek çağrıda yaz.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/entegrasyon-saas">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../mulakat-kaliplari-2/">← Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP</a><a href="../pdf-word-otomasyon/">PDF ve Word belgeleriyle otomasyon →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

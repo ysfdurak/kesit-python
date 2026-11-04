@@ -1,0 +1,303 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti | Kesit Python</title><meta name="description" content="Etiketsiz veride k-means ile müşteri segmentleri kurar, k'yi dirsek ve silhouette ile seçer, PCA ile boyut indirger, IsolationForest ve z-skoru ile…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ml-kumeleme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti"><meta property="og:description" content="Etiketsiz veride k-means ile müşteri segmentleri kurar, k'yi dirsek ve silhouette ile seçer, PCA ile boyut indirger, IsolationForest ve z-skoru ile…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ml-kumeleme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti","description":"Etiketsiz veride k-means ile müşteri segmentleri kurar, k'yi dirsek ve silhouette ile seçer, PCA ile boyut indirger, IsolationForest ve z-skoru ile…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/ml-kumeleme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti</h1><p class="st-l">Etiketsiz veride k-means ile müşteri segmentleri kurar, k'yi dirsek ve silhouette ile seçer, PCA ile boyut indirger, IsolationForest ve z-skoru ile şüpheli işlemleri bulursun.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-kumeleme">Uygulamada aç, 39 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Etiket yokken veriden anlam çıkarmak</h2>
+<p>Anadolu Market'in pazarlama ekibi 40 bin müşteriye aynı e-postayı gönderiyor ve dönüş oranı düşük. Elinde "bu müşteri sadık, bu müşteri kaçmak üzere" diye bir etiket yok; yalnızca her müşterinin ne zaman, ne sıklıkla ve ne kadar alışveriş yaptığı var. <a href="../ml-giris/">Makine öğrenmesine giriş</a> ve <a href="../ml-regresyon-siniflandirma/">Regresyon ve sınıflandırma modelleri</a> derslerinde gördüğün denetimli öğrenmede (supervised learning) modele doğru cevabı (y) verirdin. Bu derste doğru cevap yok: algoritma benzer satırları kendisi gruplayacak. Buna <b>denetimsiz öğrenme</b> (unsupervised learning) denir.</p>
+<p>Denetimsiz öğrenmenin üç ana işi bu derste:</p>
+<ul>
+<li><b>Kümeleme</b> (clustering): benzer müşterileri, ürünleri, şubeleri gruplara ayırmak.</li>
+<li><b>Boyut indirgeme</b> (dimensionality reduction): 20 sütunu bilginin çoğunu koruyarak 2-3 sütuna sıkıştırmak (PCA).</li>
+<li><b>Anomali tespiti</b> (anomaly detection): Ilgaz Bank'ta "bu işlem diğerlerine hiç benzemiyor" diyebilmek.</li>
+</ul>
+
+<h2>k-means nasıl çalışır?</h2>
+<p>k-means en çok kullanılan kümeleme algoritmasıdır. Sen küme sayısını (k) verirsin; algoritma her kümenin bir merkezini (centroid) bulur ve her noktayı en yakın merkeze bağlar.</p>
+<div class="steps-list"><ol>
+<li>k tane başlangıç merkezi seç (scikit-learn akıllı bir yöntem kullanır: k-means++).</li>
+<li>Her noktayı Öklid uzaklığına göre en yakın merkeze ata.</li>
+<li>Her kümenin merkezini, o kümedeki noktaların ortalamasına taşı.</li>
+<li>Atamalar değişmeyene kadar 2. ve 3. adımı tekrarla.</li>
+</ol></div>
+<p>Alıştırma için gerçek müşteri verisi yerine <code>make_blobs</code> ile sentetik veri üreteceğiz. <code>random_state</code> verdiğin sürece her çalıştırmada aynı veri gelir.</p>
+<pre class="py">import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+
+X, _ = make_blobs(n_samples=300, centers=3, cluster_std=0.8, random_state=42)
+print("veri:", X.shape)
+
+km = KMeans(n_clusters=3, n_init=10, random_state=0)
+etiketler = km.fit_predict(X)
+
+print("küme boyutları:", sorted(np.bincount(etiketler).tolist()))
+print("merkezler:")
+print(np.round(km.cluster_centers_, 2))
+print("inertia:", round(km.inertia_, 1))</pre>
+<p><code>make_blobs</code> ikinci değer olarak "gerçek" küme numaralarını da döndürür; gerçek hayatta bu bilgi olmadığı için <code>_</code> ile yok sayıyoruz. <code>n_init=10</code>, algoritmayı 10 farklı başlangıçla çalıştırıp en iyisini seçer; kütüphane sürümleri arasında varsayılan değişebildiği için açıkça yazmak iyi alışkanlıktır.</p>
+<p><b>Inertia</b>, her noktanın kendi merkezine uzaklığının karelerinin toplamıdır (within-cluster sum of squares). Küçük olması kümelerin sıkı olduğunu gösterir.</p>
+<div class="warn"><b>Küme numarası bir isim değildir</b>k-means'in "0" dediği küme bir sonraki çalıştırmada "2" olabilir. Raporlarda küme numarasına değil, kümenin profiline (ortalama harcama, sıklık) bakarak isim ver.</div>
+
+<h2>Ölçekleme neden şart?</h2>
+<p>k-means uzaklık ile çalışır. Bir sütun yaş (20-70), diğeri aylık gelir (20.000-30.000 TL) ise gelirdeki 1.000 TL'lik fark, yaştaki 40 yıllık farkı ezer. Algoritma aslında anlamsız olan gelir gürültüsüne göre küme kurar. Çözüm, <a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a> dersinde gördüğün <code>StandardScaler</code>: her sütunu ortalaması 0, standart sapması 1 olacak şekilde dönüştürür.</p>
+<pre class="py">import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# yaş iki net grup (25 ve 60 civarı), gelir ise yapısız gürültü
+yas = np.array([25, 25, 26, 25, 24, 26, 27, 26, 24, 23, 59, 60, 57, 60, 58, 59, 59, 60, 61, 62])
+gelir = np.array([20283, 21243, 26706, 26472, 26154, 23837, 29972, 29808, 26855, 26505,
+                  26884, 23889, 21351, 27215, 25254, 23102, 24858, 28895, 29340, 23578])
+X = np.column_stack([yas, gelir])
+
+ham = KMeans(n_clusters=2, n_init=10, random_state=0).fit_predict(X)
+olcekli = KMeans(n_clusters=2, n_init=10, random_state=0).fit_predict(StandardScaler().fit_transform(X))
+
+def gencler_ayni_kumede_mi(etiket):
+    return len(set(etiket[:10])) == 1 and etiket[0] != etiket[10]
+
+print("ölçeksiz yaşa göre ayırdı mı?", gencler_ayni_kumede_mi(ham))
+print("ölçekli yaşa göre ayırdı mı?", gencler_ayni_kumede_mi(olcekli))</pre>
+<div class="tip"><b>Pipeline ile unutma</b><code>make_pipeline(StandardScaler(), KMeans(...))</code> yazarsan ölçekleme her zaman kümelemeden önce ve aynı ayarlarla yapılır. Yeni müşteriyi kümeye atarken (<code>predict</code>) de aynı ölçekleyici kullanılır.</div>
+
+<h2>Kaç küme? Dirsek yöntemi ve silhouette</h2>
+<p>k-means k'yi senden ister; ama doğru k'yi bilmiyorsun. İki yaygın araç var:</p>
+<ul>
+<li><b>Dirsek yöntemi</b> (elbow method): k'yi 1'den 8'e kadar dene, inertia'yı çiz. Inertia k arttıkça hep azalır (k = nokta sayısı olursa 0 olur), bu yüzden en küçüğü seçilmez. Eğrinin keskin düşüşten yataya döndüğü "dirsek" noktası aranır.</li>
+<li><b>Silhouette skoru</b>: her nokta için "kendi kümeme ne kadar yakınım, en yakın komşu kümeye ne kadar uzağım" ölçüsü. -1 ile 1 arasıdır; 1'e yakın iyi ayrılmış kümeler demektir. En yüksek ortalama skoru veren k iyi bir adaydır.</li>
+</ul>
+<pre class="py">from sklearn.datasets import make_blobs
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+X, _ = make_blobs(n_samples=400, centers=4, cluster_std=0.9, random_state=7)
+
+print(" k   inertia  silhouette")
+for k in range(2, 8):
+    km = KMeans(n_clusters=k, n_init=10, random_state=0).fit(X)
+    s = silhouette_score(X, km.labels_)
+    print(f"{k:&gt;2} {km.inertia_:&gt;9.1f}  {s:.3f}")</pre>
+<p>Çıktıda inertia'nın k=4'e kadar hızla düşüp sonra yavaşladığını, silhouette'in de k=4'te zirve yaptığını görürsün. Gerçek veride bu kadar net olmaz; o zaman iş tarafının kullanabileceği küme sayısı da (pazarlama 3-6 segmenti yönetebilir, 15'i yönetemez) karara girer.</p>
+
+<h2>Başka kümeleme algoritmaları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Algoritma</th><th>k ister mi?</th><th>Küme şekli</th><th>Gürültü/aykırı</th><th>Ne zaman?</th></tr>
+<tr><td>KMeans</td><td>Evet</td><td>Yuvarlak, benzer boyutlu</td><td>Her noktayı bir kümeye atar</td><td>Büyük veri, hızlı segmentasyon</td></tr>
+<tr><td>AgglomerativeClustering (hiyerarşik)</td><td>Evet ya da mesafe eşiği</td><td>Bağlantı türüne göre esnek</td><td>Atar</td><td>Küçük-orta veri, ağaç (dendrogram) yorumu</td></tr>
+<tr><td>DBSCAN</td><td>Hayır (eps, min_samples)</td><td>Her şekil, yoğunluk temelli</td><td>Gürültüyü <code>-1</code> etiketiyle ayırır</td><td>Coğrafi noktalar, düzensiz şekiller</td></tr>
+<tr><td>GaussianMixture</td><td>Evet</td><td>Elips, olasılıklı üyelik</td><td>Atar (olasılıkla)</td><td>"Bu müşteri %70 A, %30 B" demek gerektiğinde</td></tr>
+</table></div>
+<p><b>Hiyerarşik kümeleme</b> (hierarchical clustering) her noktayı ayrı küme sayarak başlar ve en yakın iki kümeyi adım adım birleştirir; ortaya bir soy ağacı çıkar. <b>DBSCAN</b> ise "etrafında <code>eps</code> yarıçapında en az <code>min_samples</code> komşusu olan nokta yoğun bölgededir" der; yoğun bölgeleri büyütür, hiçbir yoğun bölgeye girmeyen noktaları gürültü sayar.</p>
+<pre class="py">import numpy as np
+from sklearn.cluster import AgglomerativeClustering, DBSCAN
+
+# Anadolu Lojistik: teslimat noktalarının (x, y) km koordinatları
+noktalar = np.array([[1, 1], [1.2, 0.8], [0.9, 1.1], [5, 5], [5.1, 4.8], [4.9, 5.2], [12, 1]])
+
+hiy = AgglomerativeClustering(n_clusters=2).fit_predict(noktalar)
+print("hiyerarşik:", hiy.tolist())
+
+db = DBSCAN(eps=0.6, min_samples=2).fit_predict(noktalar)
+print("DBSCAN   :", db.tolist())
+print("gürültü sayısı:", int((db == -1).sum()))</pre>
+<p>Hiyerarşik yöntem 7. noktayı da bir kümeye zorla koydu; DBSCAN ise onu <code>-1</code> (gürültü) olarak işaretledi. Uzak bir teslimat adresi ayrı planlanmalıdır; bu bilgi DBSCAN'de bedavaya gelir.</p>
+
+<h2>PCA: boyut indirgeme</h2>
+<p>Bir müşteri için 10-20 özellik olabilir ve bunların çoğu birbiriyle ilişkilidir (sipariş sayısı ile toplam harcama birlikte artar). <b>Temel bileşen analizi</b> (Principal Component Analysis, PCA) veriyi, en çok değişkenliği (varyansı) taşıyan yeni eksenlere döndürür. İlk bileşen en fazla varyansı, ikincisi kalanın en fazlasını taşır.</p>
+<pre class="py">import numpy as np
+from sklearn.datasets import make_blobs
+from sklearn.decomposition import PCA
+from sklearn.preprocessing import StandardScaler
+
+X, _ = make_blobs(n_samples=200, n_features=6, centers=3, random_state=1)
+X = StandardScaler().fit_transform(X)
+
+pca = PCA().fit(X)
+oran = pca.explained_variance_ratio_
+print("bileşen başına açıklanan varyans:", np.round(oran, 3))
+print("kümülatif:", np.round(np.cumsum(oran), 3))
+
+X2 = PCA(n_components=2).fit_transform(X)
+print("6 sütun -&gt; 2 sütun:", X.shape, "-&gt;", X2.shape)</pre>
+<p><code>explained_variance_ratio_</code> her bileşenin toplam varyansın ne kadarını taşıdığını söyler. Kümülatif toplam %90'ı geçtiği yerde durmak yaygın bir kuraldır. Kümeleri görmek için ise 2 bileşen alıp <a href="../gorsellestirme/">matplotlib ile görselleştirme</a> dersindeki gibi <code>plt.scatter(X2[:, 0], X2[:, 1], c=etiketler)</code> ile çizersin. PCA'dan önce ölçekleme yine şarttır; yoksa büyük birimli sütun ilk bileşeni tek başına ele geçirir.</p>
+<div class="note"><b>PCA bileşeni bir iş kavramı değildir</b>"1. bileşen" gelir ya da yaş değil, tüm sütunların ağırlıklı bir karışımıdır. <code>pca.components_</code> içindeki ağırlıklara bakarak "bu bileşen çoğunlukla sıklık ve harcamadan oluşuyor" gibi yorum yapabilirsin, ama raporda asıl sütun adlarıyla konuş.</div>
+
+<h2>Müşteri segmentasyonu: RFM + k-means</h2>
+<p><a href="../proje-ileri/">Bitirme projesi: Anadolu Market müşteri analitiği paketi</a> projesinde RFM'yi çeyreklik skorlarla kurmuştun. Burada aynı üç ölçütü k-means'e veriyoruz: <b>Recency</b> (son alışverişten bu yana gün), <b>Frequency</b> (sipariş sayısı), <b>Monetary</b> (toplam harcama). Harcama çok çarpık dağılır (birkaç müşteri çok harcar); <code>np.log1p</code> ile sıkıştırıp sonra ölçeklemek kümeleri dengeler.</p>
+<pre class="py">import numpy as np
+from sklearn.cluster import KMeans
+from sklearn.preprocessing import StandardScaler
+
+# her satır bir müşteri: recency (gün), frequency (sipariş), monetary (TL)
+rfm = np.array([
+    [5, 24, 18500], [8, 30, 22000], [3, 18, 15400],      # sık ve çok harcayan
+    [40, 6, 2100], [35, 5, 1800], [50, 7, 2600],          # orta
+    [180, 1, 250], [210, 2, 400], [160, 1, 180],          # uzun süredir yok
+])
+X = rfm.astype(float)
+X[:, 2] = np.log1p(X[:, 2])
+X = StandardScaler().fit_transform(X)
+
+km = KMeans(n_clusters=3, n_init=10, random_state=0).fit(X)
+for k in range(3):
+    grup = rfm[km.labels_ == k]
+    r, f, m = grup.mean(axis=0)
+    print(f"{len(grup)} müşteri | recency {r:.0f} gün | {f:.1f} sipariş | {m:,.0f} TL")</pre>
+
+<h2>Kümeleri iş diline çevirmek</h2>
+<p>Model "küme 0, küme 1, küme 2" der; yönetici "kime ne kampanyası yapalım" diye sorar. Köprüyü sen kurarsın:</p>
+<div class="steps-list"><ol>
+<li><b>Profil çıkar:</b> her küme için özelliklerin ortalamasını (ya da medyanını) ve küme büyüklüğünü hesapla; genel ortalamayla karşılaştır.</li>
+<li><b>İsim ver:</b> "Şampiyonlar" (düşük recency, yüksek sıklık ve harcama), "Kaybedilmek üzere" (yüksek recency), "Gelişmekte olanlar" gibi.</li>
+<li><b>Aksiyon bağla:</b> şampiyonlara sadakat programı, kaybedilmek üzere olanlara geri kazanma indirimi.</li>
+<li><b>Ölç:</b> kampanya sonrası segment bazında dönüş oranını takip et; segmentler zamanla değişir, model düzenli yeniden kurulur.</li>
+</ol></div>
+<div class="tbl-wrap"><table>
+<tr><th>Küme profili</th><th>İş adı</th><th>Önerilen aksiyon</th></tr>
+<tr><td>Recency düşük, frequency ve monetary yüksek</td><td>Şampiyonlar</td><td>Erken erişim, sadakat puanı; indirimle marjı yakma</td></tr>
+<tr><td>Recency orta, frequency orta</td><td>Potansiyel sadıklar</td><td>Çapraz satış önerileri</td></tr>
+<tr><td>Recency yüksek, geçmişte iyi harcamış</td><td>Kaybedilmek üzere</td><td>Kişisel geri kazanma kuponu</td></tr>
+<tr><td>Recency yüksek, frequency 1</td><td>Tek seferlikler</td><td>Düşük maliyetli hatırlatma</td></tr>
+</table></div>
+
+<h2>Anomali tespiti: z-skoru ve IsolationForest</h2>
+<p>Ilgaz Bank'ta bir müşterinin işlemleri genelde 200-800 TL arasındayken birden 45.000 TL'lik bir işlem görünürse incelenmelidir. En basit yöntem <b>z-skoru</b>: değerin ortalamadan kaç standart sapma uzakta olduğu, <code>z = (x - ortalama) / std</code>. |z| > 3 genelde aykırı sayılır. Tek değişkende hızlıdır ama aykırı değer ortalamayı ve std'yi kendisi de büyüttüğü için küçük örneklerde eşiği düşürmen gerekebilir.</p>
+<p>Birden çok özellik birlikte önemliyse (tutar, saat, işlem sıklığı) <b>IsolationForest</b> kullanılır: rastgele bölmelerle her noktayı yalnız bırakmaya çalışır; aykırı noktalar çok az bölmeyle yalnız kalır. <code>predict</code> normal için <code>1</code>, anomali için <code>-1</code> döndürür.</p>
+<pre class="py">import numpy as np
+from sklearn.ensemble import IsolationForest
+
+tutarlar = np.array([320, 450, 280, 610, 390, 505, 45000, 350, 470, 300, 520, 12500])
+
+z = (tutarlar - tutarlar.mean()) / tutarlar.std()
+print("z-skoru &gt; 2 olanlar:", tutarlar[np.abs(z) &gt; 2].tolist())
+
+# saat bilgisini de ekleyelim: gece 3'teki işlem de şüpheli
+saat = np.array([10, 14, 12, 18, 11, 16, 3, 13, 15, 9, 17, 2])
+X = np.column_stack([np.log1p(tutarlar), saat])
+iso = IsolationForest(contamination=0.15, random_state=0).fit(X)
+tahmin = iso.predict(X)
+print("IsolationForest anomaliler:", tutarlar[tahmin == -1].tolist())</pre>
+<div class="warn"><b>Anomali = suç değil</b>Anomali modeli "bu farklı" der, "bu dolandırıcılık" demez. Maaş ikramiyesi de farklıdır. Çıktı her zaman bir inceleme kuyruğuna gider; otomatik hesap kapatma gibi kararlar insan onayı ve itiraz yolu olmadan verilmez.</div>
+
+<div class="note"><b>Gerçek işte</b>Bir e-ticaret şirketinde segmentasyon projesi genelde şöyle akar: veri ekibi RFM ve birkaç davranış özelliği (kategori çeşitliliği, iade oranı) çıkarır, k-means ile 4-6 küme dener, silhouette ve iş ekibinin yorumuyla k'yi seçer, kümelere isim verip CRM sistemine her gece "segment" sütunu yazar. Asıl başarı ölçütü silhouette değil, kampanyanın segment bazında getirdiği ek satıştır (A/B testi ile ölçülür). Bankalarda anomali skorları ise kural motorlarıyla (ör. "yeni cihaz + yurt dışı + yüksek tutar") birlikte kullanılır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek müşterilerle RFM kümeleme</h2><p>Dersteki RFM ve k-means örnekleri birkaç elle yazılmış işlemle çalışıyordu. Şimdi aynı akışı Anadolu Market'in gerçek verisiyle kuracağız: <code>anadolu_market</code> setindeki <code>customers</code> (150 müşteri), <code>orders</code> (910 sipariş) ve tutarı hesaplamak için <code>order_items</code>. Gerçek veride üç yeni sorunla karşılaşacaksın: hiç teslim edilmiş siparişi olmayan müşteriler, çok çarpık harcama dağılımı ve kümeleri iş ekibinin zaten kullandığı segmentlerle (Bireysel, Kurumsal, Premium) karşılaştırma ihtiyacı.</p><h3>1. RFM tablosu: müşteri başına bir satır</h3><p>Yalnızca teslim edilmiş (<code>delivered</code>) siparişleri say; iptal ve iadeler müşterinin değerini şişirmesin. Sipariş tutarı kalemlerden gelir, bu yüzden önce kalemleri sipariş düzeyine toplayıp siparişlere bağlarız. Referans tarihi (bugün) veri bitişinden sonraki gün seçilir: 1 Ocak 2025.</p><pre class="py">import veri
+import pandas as pd
+
+def rfm_tablosu(bugun="2025-01-01"):
+    o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+    oi = veri.oku("anadolu_market", "order_items")
+    oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+    tutar = oi.groupby("order_id")["ciro"].sum()
+    o = o[o["status"] == "delivered"].join(tutar, on="order_id")
+    r = o.groupby("customer_id").agg(son=("order_date", "max"), frequency=("order_id", "size"),
+                                     monetary=("ciro", "sum"))
+    r["recency"] = (pd.Timestamp(bugun) - r["son"]).dt.days
+    return r[["recency", "frequency", "monetary"]]
+
+r = rfm_tablosu()
+print(len(r), "müşteri")
+print(r.describe().loc[["mean", "50%", "max"]].round(1))
+</pre><p>150 müşteriden 135'inin teslim edilmiş siparişi var. Kalan 15 müşteri kümelemeye girmez; onlar ayrı bir "henüz alışveriş yapmamış" grubudur ve pazarlama ekibine ayrıca raporlanır. Harcamada ortalama (7.854 TL) medyanın (5.620 TL) belirgin üstünde: birkaç çok değerli müşteri dağılımı sağa çekiyor.</p><h3>2. Ölçekleme ve k seçimi</h3><p>monetary binlerle, frequency birlerle ölçülür. Ölçeklemeden k-means'e verirsen uzaklığı neredeyse yalnızca harcama belirler. <code>StandardScaler</code> sonrası farklı k değerleri için inertia ve silhouette skoruna bakalım:</p><pre class="py">import veri
+import pandas as pd
+
+def rfm_tablosu(bugun="2025-01-01"):
+    o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+    oi = veri.oku("anadolu_market", "order_items")
+    oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+    tutar = oi.groupby("order_id")["ciro"].sum()
+    o = o[o["status"] == "delivered"].join(tutar, on="order_id")
+    r = o.groupby("customer_id").agg(son=("order_date", "max"), frequency=("order_id", "size"),
+                                     monetary=("ciro", "sum"))
+    r["recency"] = (pd.Timestamp(bugun) - r["son"]).dt.days
+    return r[["recency", "frequency", "monetary"]]
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+from sklearn.metrics import silhouette_score
+
+r = rfm_tablosu()
+X = StandardScaler().fit_transform(r)
+for k in range(2, 7):
+    km = KMeans(n_clusters=k, n_init=10, random_state=0).fit(X)
+    print(k, round(km.inertia_, 1), round(silhouette_score(X, km.labels_), 3))
+</pre><p>Silhouette en yüksek değerine k = 3'te ulaşıyor (yaklaşık 0,53) ve inertia eğrisi de k = 3–4 civarında bükülüyor. Matematik k = 3 diyor; son karar yine iş ekibinin kaç farklı kampanyayı yönetebileceğine bağlıdır.</p><h3>3. Kümeleri iş diline çevirmek ve mevcut segmentlerle kıyaslamak</h3><pre class="py">import veri
+import pandas as pd
+
+def rfm_tablosu(bugun="2025-01-01"):
+    o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+    oi = veri.oku("anadolu_market", "order_items")
+    oi["ciro"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+    tutar = oi.groupby("order_id")["ciro"].sum()
+    o = o[o["status"] == "delivered"].join(tutar, on="order_id")
+    r = o.groupby("customer_id").agg(son=("order_date", "max"), frequency=("order_id", "size"),
+                                     monetary=("ciro", "sum"))
+    r["recency"] = (pd.Timestamp(bugun) - r["son"]).dt.days
+    return r[["recency", "frequency", "monetary"]]
+from sklearn.preprocessing import StandardScaler
+from sklearn.cluster import KMeans
+
+r = rfm_tablosu()
+X = StandardScaler().fit_transform(r)
+r["kume"] = KMeans(n_clusters=3, n_init=10, random_state=0).fit_predict(X)
+profil = r.groupby("kume").agg(musteri=("recency", "size"), recency=("recency", "mean"),
+                               frequency=("frequency", "mean"), monetary=("monetary", "mean"))
+print(profil.round(0).sort_values("monetary"))
+
+seg = veri.oku("anadolu_market", "customers").set_index("customer_id")["segment"]
+print(pd.crosstab(r["kume"], r.join(seg)["segment"]))
+</pre><div class="tbl-wrap"><table><tr><th>Küme profili</th><th>Ortalama</th><th>İş adı</th><th>Eylem</th></tr><tr><td>~32 müşteri</td><td>son alışveriş ~53 gün, ~11 sipariş, ~18.000 TL</td><td>Şampiyonlar</td><td>Sadakat programı, erken erişim</td></tr><tr><td>~84 müşteri</td><td>~77 gün, ~3 sipariş, ~4.500 TL</td><td>Potansiyel sadıklar</td><td>Çapraz satış, ikinci kategori önerisi</td></tr><tr><td>~19 müşteri</td><td>~460 gün, ~4 sipariş, ~5.600 TL</td><td>Kayıp riski</td><td>Geri kazanım kampanyası</td></tr></table></div><p>Çapraz tablo ilginç bir şey söylüyor: CRM'deki "Premium" etiketli müşterilerin bir kısmı davranış olarak "Kayıp riski" kümesinde. Etiket kayıt anındaki sözleşmeyi, küme ise <b>bugünkü davranışı</b> anlatır. Bu farkı bulmak, kümelemenin iş değerinin ta kendisidir.</p><div class="warn"><b>Küme numarası bir ad değildir</b>k-means'in verdiği 0, 1, 2 numaraları sürümden sürüme ya da veri değiştikçe yer değiştirebilir. Raporda numaraya değil, profile göre ad ver (ör. "monetary ortalaması en yüksek küme = Şampiyonlar") ve bunu kodla yap.</div><div class="note"><b>Gerçek işte</b>Segmentasyon modeli genellikle ayda bir yeniden çalıştırılır ve her müşterinin kümesi CRM'e bir alan olarak yazılır. Ölçekleyici ve model aynı tarihte birlikte kaydedilir; aksi hâlde yeni ay verisini eski ölçeğe göre dönüştürüp yanlış kümeye atarsın. Kesit Power BI'daki <code>kesit_bi.RFMSegmentleri</code> tablosu, kural tabanlı RFM'in Power BI tarafındaki karşılığıdır; bitirme projesinde (proje-ileri) ikisini karşılaştıracaksın.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: market sepeti analizi ve basit öneri</h2><p>Kümeleme müşterileri gruplar; sepet analizi (market basket analysis) ise <b>ürünleri</b> birlikte satın alınma davranışına göre ilişkilendirir. "Kitap alan kupa da alıyor mu?", "Güneş kremi sepetine şampuan önerelim mi?" gibi soruların cevabı buradadır. Bu da etiketsiz (denetimsiz) bir öğrenme problemidir: hedef sütun yok, yalnızca birlikte görülme sayıları var. Bu bölümde Anadolu Market'in gerçek <code>order_items</code> tablosunu (910 sipariş, 1620 satır) kullanacaksın.</p><h3>Üç ölçü: destek, güven, lift</h3><p>N sipariş içinde A ürününü içeren sepet sayısı n(A), hem A hem B içeren sepet sayısı n(A, B) olsun. "A alan B de alır" kuralı (A → B) için:</p><div class="tbl-wrap"><table><tr><th>Ölçü</th><th>Formül</th><th>Ne söyler?</th></tr><tr><td>Destek (support)</td><td>n(A, B) / N</td><td>Bu ikili ne kadar yaygın? Küçükse kural az müşteriyi etkiler.</td></tr><tr><td>Güven (confidence)</td><td>n(A, B) / n(A)</td><td>A alanların yüzde kaçı B de alıyor? Yöne bağlıdır: A → B ile B → A farklıdır.</td></tr><tr><td>Lift</td><td>güven(A → B) / destek(B)</td><td>Birliktelik tesadüften kaç kat fazla? 1 bağımsızlık, 1'in üstü çekim, altı itme demektir. Simetriktir.</td></tr></table></div><p>Güven tek başına yanıltır: B zaten çok popülerse (her sepette su varsa) "A alan su da alır" kuralının güveni yüksek çıkar ama hiçbir şey öğretmez. Lift, B'nin kendi yaygınlığına bölerek bu etkiyi ayıklar.</p><pre class="py">import veri
+import pandas as pd
+
+kalemler = veri.oku("anadolu_market", "order_items")
+urunler = veri.oku("anadolu_market", "products").set_index("product_id")
+
+# sipariş × ürün ikili matris: hücre "bu sepette bu ürün var mı?"
+sepet = pd.crosstab(kalemler["order_id"], kalemler["product_id"]) &gt; 0
+print(sepet.shape)                       # (sipariş sayısı, ürün sayısı)
+
+def kural(m, a, b):
+    destek = (m[a] &amp; m[b]).mean()        # bool ortalaması = oran
+    guven = destek / m[a].mean()
+    lift = guven / m[b].mean()
+    return round(destek, 4), round(guven, 4), round(lift, 2)
+
+a, b = 10, 13
+print(urunler.loc[a, "name"], "-&gt;", urunler.loc[b, "name"])
+print(kural(sepet, a, b))</pre><p>Kürk Mantolu Madonna alanların yaklaşık %10'u Saatleri Ayarlama Enstitüsü'nü de almış; bu, ikinci kitabın genel yaygınlığının neredeyse iki katı (lift ≈ 1.87). Ama destek yalnızca 7 sepet! Küçük sayılarla kurulan kurallar gürültüye çok açıktır; bu yüzden her kural listesine önce bir <b>en az destek</b> (min support) eşiği uygulanır.</p><h3>Sık ikilileri saymak: Apriori fikri</h3><p>40 ürünle 780 olası ikili, 9880 olası üçlü var; binlerce ürünle bu sayı patlar. Apriori algoritmasının gözlemi basittir: <b>bir küme sık değilse, onu içeren hiçbir büyük küme sık olamaz</b> (anti-monotonluk). O hâlde önce sık tekil ürünleri bul, yalnız onlardan ikili aday üret, sık ikililerden üçlü aday üret ve her adımda budayarak ilerle. Küçük veride <code>itertools.combinations</code> ile doğrudan saymak yeterlidir:</p><pre class="py">from collections import Counter
+from itertools import combinations
+
+ciftler = Counter()
+for _, g in kalemler.groupby("order_id"):
+    for x, y in combinations(sorted(set(g["product_id"])), 2):
+        ciftler[(x, y)] += 1
+
+print("farklı ikili:", len(ciftler))
+print("en az 5 sepette görülen:", sum(1 for v in ciftler.values() if v &gt;= 5))
+for (x, y), n in ciftler.most_common(3):
+    print(n, urunler.loc[x, "name"], "+", urunler.loc[y, "name"])</pre><div class="note"><b>Gerçek işte</b>Perakende ekipleri kuralları genellikle kategori ya da marka düzeyinde de hesaplar, çünkü ürün düzeyinde sayılar seyrektir. Anadolu Market verisinde kategori düzeyinde lift değerlerinin hepsi 1'in altında çıkar: müşteriler bir siparişte çoğunlukla aynı kategoriden (iki kitap gibi) alıyor, farklı kategorileri birlikte almıyor. Bu da kendi başına bir içgörüdür: çapraz kategori önerisi için kampanya gerekir, kendiliğinden olmuyor. Üretimde <code>mlxtend</code> (<code>apriori</code>, <code>association_rules</code>) ya da FP-Growth kullanılır; mantık aynıdır.</div><h3>Öğe-öğe benzerliğiyle öneri</h3><p>Sepet matrisinin her sütunu bir ürünün "hangi sepetlerde göründüğü" vektörüdür. İki sütun arasındaki kosinüs benzerliği (cosine similarity), ikili vektörlerde n(A, B) / √(n(A)·n(B)) olur. "Bu ürünü alanlar şunları da aldı" kutusu tam olarak budur: ürünün sütununa en benzer k sütun.</p><pre class="py">import numpy as np
+
+A = sepet.to_numpy().astype(float)
+ortak = A.T @ A                          # ürün × ürün birlikte görülme sayıları
+norm = np.sqrt(np.diag(ortak))
+benzerlik = pd.DataFrame(ortak / np.outer(norm, norm),
+                         index=sepet.columns, columns=sepet.columns)
+
+hedef = 15                               # İstatistiğe Giriş
+enler = benzerlik[hedef].drop(hedef).sort_values(ascending=False).head(3)
+for pid, s in enler.items():
+    print(f"{urunler.loc[pid, 'name']:&lt;24} {s:.3f}")</pre><p>Matris çarpımı <code>A.T @ A</code> köşegeninde her ürünün kaç sepette geçtiğini, köşegen dışında ise ikililerin ortak sayısını verir; tek satırda tüm ikili sayımı yapmış olursun. Lift de bu matristen hesaplanabilir: <code>ortak * N / np.outer(n, n)</code>.</p><div class="warn"><b>Popülerlik yanlılığı ve soğuk başlangıç</b>Benzerlik ve güven, çok satan ürünleri her listeye taşır; az satan ürün hiç önerilmez. Ölçüyü lift ya da kosinüsle normalleştir, en az ortak sepet eşiği koy ve önerileri A/B testiyle ölç (istatistik dersi). Hiç satışı olmayan yeni ürün için sepet verisi yoktur; ilk aşamada kategori ve içerik benzerliğine dayanmak gerekir.</div><p>Özetle iş akışı şudur: sepet matrisini kur → en az destek eşiğiyle sık öğe kümelerini bul → güven ve lift ile kuralları sırala → kuralları iş diline çevir ("Kitap alanlara kupa seti kampanyası") → etkisini deneyle ölç.</p></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>k-means'in varsayımları</h3>
+<p>k-means kümeleri yuvarlak ve benzer büyüklükte varsayar; hilal ya da halka şeklindeki kümeleri bölemez, çok farklı yoğunluklarda da büyük kümeyi ikiye bölüp küçükleri birleştirebilir. Bu durumda DBSCAN, HDBSCAN (scikit-learn 1.3+) ya da GaussianMixture dene. Kategorik sütunlar (şehir, kanal) için Öklid uzaklığı anlamsızdır; one-hot kodlama ile eklenebilir ama k-prototypes gibi karma uzaklık kullanan yöntemler daha uygundur.</p>
+<h3>Büyük veri ve kararlılık</h3>
+<p>Milyonlarca satırda <code>MiniBatchKMeans</code> veriyi parça parça işler. Kümelerin güvenilir olup olmadığını görmek için farklı <code>random_state</code> ya da veri alt örnekleriyle kümelemeyi tekrarla; segmentler her seferinde başka çıkıyorsa veride gerçek bir yapı zayıftır. Yüksek boyutta (50+ sütun) uzaklıklar birbirine benzer hâle gelir ("boyut laneti"); kümelemeden önce PCA ile 10-20 bileşene inmek hem hızlandırır hem gürültüyü azaltır.</p>
+<h3>Değerlendirme</h3>
+<p>Silhouette dışında <code>davies_bouldin_score</code> (küçük iyi) ve <code>calinski_harabasz_score</code> (büyük iyi) de var. Ama hiçbir iç ölçüt "bu segmentler işe yarar mı" sorusunu cevaplamaz; onu kampanya deneyi cevaplar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-kumeleme">Alıştırmalara geç (39)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../llm-api/">← LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a><a href="../nlp-metin/">Metin işleme ve NLP: Türkçe metinden modele →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

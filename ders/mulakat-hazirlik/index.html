@@ -1,0 +1,343 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama | Kesit Python</title><meta name="description" content="Teknik mülakatlarda sık sorulan Python kavram sorularını, klasik algoritma görevlerini ve canlı kodlama tekniklerini çalışırsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/mulakat-hazirlik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama"><meta property="og:description" content="Teknik mülakatlarda sık sorulan Python kavram sorularını, klasik algoritma görevlerini ve canlı kodlama tekniklerini çalışırsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/mulakat-hazirlik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama","description":"Teknik mülakatlarda sık sorulan Python kavram sorularını, klasik algoritma görevlerini ve canlı kodlama tekniklerini çalışırsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/mulakat-hazirlik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mülakat</span><h1>Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama</h1><p class="st-l">Teknik mülakatlarda sık sorulan Python kavram sorularını, klasik algoritma görevlerini ve canlı kodlama tekniklerini çalışırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mulakat-hazirlik">Uygulamada aç, 37 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Mülakat neyi ölçer?</h2>
+<p>Anadolu Market'in veri ekibine Python geliştirici alınıyor. İlk tur kavram soruları: "GIL nedir, pandas'ı neden etkilemez?" İkinci tur canlı kodlama: "Şu sipariş listesinde toplamı X eden iki ürünü bul." Üçüncü tur sistem tasarımı: "Günde milyonlarca siparişi işleyen bir boru hattını (pipeline) nasıl kurarsın?" Üç tur üç farklı şeyi ölçer: dili gerçekten anlıyor musun, problemi yapılandırılmış biçimde çözebiliyor musun, büyük resmi görüyor musun. Bu ders üçünü de çalıştırır; ağırlık ikinci turda, çünkü en çok orada elenilir.</p>
+
+<h2>Sık sorulan Python kavram soruları</h2>
+<p>Aşağıdaki tablo, mülakatlarda en sık çıkan kavram sorularını ve bir cümlelik çekirdek cevaplarını listeler. Cevabı ezberleme; her birini küçük bir örnekle gösterebilecek kadar anla.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Çekirdek cevap</th><th>Takip sorusu</th></tr>
+<tr><td>GIL nedir?</td><td>CPython'da aynı anda yalnızca bir iş parçacığının Python bytecode çalıştırmasına izin veren kilit</td><td>Neden threading I/O için işe yarar ama CPU için yaramaz? (I/O beklerken kilit bırakılır; numpy/pandas C kodu da bırakır)</td></tr>
+<tr><td>Mutable default argüman</td><td>Varsayılan değer tanım anında bir kez oluşur; liste/sözlük çağrılar arasında paylaşılır</td><td>Çözüm? (None + içeride oluştur)</td></tr>
+<tr><td>is ile == farkı</td><td>is kimlik (aynı nesne mi), == eşitlik (__eq__)</td><td>Neden <code>x is None</code> doğru, <code>x == None</code> yanlış stil? (None tekildir; __eq__ ezilebilir)</td></tr>
+<tr><td>Shallow / deep copy</td><td>Shallow dış kabı kopyalar, iç nesneler paylaşılır; deep özyinelemeli kopyalar</td><td>list(x), x[:], x.copy() hangisi? (hepsi shallow)</td></tr>
+<tr><td>Generator vs list</td><td>Generator tembel, tek geçişlik, O(1) bellek; liste tüm veriyi tutar, tekrar gezilir</td><td>sum(x*x for x in r) neden sum([x*x for x in r])'den iyi?</td></tr>
+<tr><td>Decorator</td><td>Fonksiyon alıp fonksiyon döndüren fonksiyon; @ sözdizimi şekerdir</td><td>functools.wraps neden? (ad ve docstring korunur)</td></tr>
+<tr><td>__slots__</td><td>Örnek başına __dict__ yerine sabit alanlar; bellek ve erişim hızı kazancı</td><td>Dezavantaj? (dinamik nitelik eklenemez, çoklu kalıtımda (inheritance) dikkat)</td></tr>
+</table></div>
+<p>Üçünü kodla doğrula; mülakatta "göstereyim" diyebilmek güven verir:</p>
+<pre class="py">import copy
+
+# is vs ==
+a = [1, 2]
+b = [1, 2]
+print(a == b, a is b)          # True False
+
+# shallow vs deep
+siparis = {"id": 1, "urunler": ["kalem"]}
+s1 = siparis.copy()
+s2 = copy.deepcopy(siparis)
+siparis["urunler"].append("defter")
+print(s1["urunler"], s2["urunler"])   # paylaşılan liste / bağımsız liste
+
+# mutable default
+def ekle(x, kutu=[]):
+    kutu.append(x)
+    return kutu
+print(ekle(1), ekle(2))        # aynı liste iki kez
+
+# __slots__
+class Nokta:
+    __slots__ = ("x", "y")
+    def __init__(self, x, y):
+        self.x, self.y = x, y
+n = Nokta(1, 2)
+print(hasattr(n, "__dict__"))  # False</pre>
+
+<h2>Algoritma soruları: kalıpları tanı</h2>
+<p>Mülakat sorularının büyük kısmı beş altı kalıba iner. Soruyu duyunca kalıbı tanırsan çözümün yarısı bitmiştir.</p>
+<h3>1. Sözlükle sayım ve arama: iki toplam</h3>
+<p>"Listede toplamı hedef eden iki elemanın indekslerini bul." Kaba yol çift döngü, O(n²). Akıllı yol: gördüğün her sayıyı sözlüğe koy, sıradaki sayının tamamlayıcısı (hedef - sayı) sözlükte mi diye bak. Tek geçiş, O(n).</p>
+<pre class="py">def iki_toplam(sayilar, hedef):
+    gorulen = {}                       # değer -&gt; indeks
+    for i, s in enumerate(sayilar):
+        kalan = hedef - s
+        if kalan in gorulen:
+            return [gorulen[kalan], i]
+        gorulen[s] = i
+    return []
+
+fiyatlar = [250, 90, 410, 160, 300]
+print(iki_toplam(fiyatlar, 500))   # 250 + 250 yok; 90 + 410 -&gt; [1, 2]
+print(iki_toplam(fiyatlar, 1000))  # []</pre>
+<p>Aynı kalıp "anagram grupları"nda anahtarı sıralanmış harfler yaparak, "en çok tekrar eden ürün"de <code>Counter</code> ile görünür. Soru "bul, say, grupla" diyorsa sözlük düşün.</p>
+
+<h3>2. Küme ile O(n): en uzun ardışık dizi</h3>
+<p>"Sırasız sayılarda en uzun ardışık sayı dizisinin uzunluğu?" Sıralamak O(n log n). Küme ile O(n): her sayı için, bir eksiği kümede yoksa bu bir dizinin başıdır; ileri say.</p>
+<pre class="py">def en_uzun_ardisik(sayilar):
+    kume = set(sayilar)
+    en_iyi = 0
+    for s in kume:
+        if s - 1 not in kume:          # yalnızca dizi başlarından say
+            n = 1
+            while s + n in kume:
+                n += 1
+            en_iyi = max(en_iyi, n)
+    return en_iyi
+
+print(en_uzun_ardisik([100, 4, 200, 1, 3, 2]))   # 1,2,3,4 -&gt; 4</pre>
+<p>Neden O(n)? Her sayı yalnızca ait olduğu dizinin başından itibaren bir kez sayılır. Mülakatçı "neden while içinde while var ama O(n)?" diye sorar; cevap bu.</p>
+
+<h3>3. Kayan pencere (sliding window)</h3>
+<p>"Art arda k günün en yüksek toplam cirosu" ya da "tekrarsız en uzun alt dize." Sabit ya da esneyen bir pencereyi sağa kaydırırsın; giren elemanı ekler, çıkanı çıkarırsın. Her adımda yeniden toplamak O(n·k); pencereyle O(n).</p>
+<pre class="py">def en_iyi_pencere(ciro, k):
+    toplam = sum(ciro[:k])
+    en_iyi, bas = toplam, 0
+    for i in range(k, len(ciro)):
+        toplam += ciro[i] - ciro[i - k]
+        if toplam &gt; en_iyi:
+            en_iyi, bas = toplam, i - k + 1
+    return bas, en_iyi
+
+gunluk = [120, 300, 80, 450, 200, 90, 310]
+print(en_iyi_pencere(gunluk, 3))   # (1, 830): 300+80+450</pre>
+
+<h3>4. İki pointer ve ikili arama</h3>
+<p>Sıralı veride iki uçtan ortaya yürümek (iki pointer) ya da ortadan ikiye bölmek (ikili arama, O(log n)) klasik kalıplardır. <code>bisect</code> modülü ikili aramayı hazır verir ama mülakatta elle yazmanı isterler: <code>lo, hi</code> sınırları ve <code>mid</code> hesabı; döngü <code>lo &lt;= hi</code> sürdükçe.</p>
+<pre class="py">def ikili_ara(sirali, hedef):
+    lo, hi = 0, len(sirali) - 1
+    while lo &lt;= hi:
+        mid = (lo + hi) // 2
+        if sirali[mid] == hedef:
+            return mid
+        if sirali[mid] &lt; hedef:
+            lo = mid + 1
+        else:
+            hi = mid - 1
+    return -1
+
+print(ikili_ara([3, 8, 15, 21, 42, 57], 21))   # 3
+print(ikili_ara([3, 8, 15, 21, 42, 57], 22))   # -1</pre>
+
+<h3>5. BFS: en kısa yol</h3>
+<p>Grafta "A'dan B'ye en az kaç adım?" sorusunda genişlik öncelikli arama (BFS) kullanılır: kuyruk (<code>collections.deque</code>) ve ziyaret edilenler kümesi. Depo ağı, sosyal bağlantı, kelime merdiveni; hepsi aynı kalıp.</p>
+<pre class="py">from collections import deque
+
+depolar = {
+    "İstanbul": ["Bursa", "Kocaeli"],
+    "Bursa": ["İstanbul", "Eskişehir"],
+    "Kocaeli": ["İstanbul", "Ankara"],
+    "Eskişehir": ["Bursa", "Ankara"],
+    "Ankara": ["Kocaeli", "Eskişehir"],
+}
+
+def en_kisa_adim(graf, bas, hedef):
+    kuyruk = deque([(bas, 0)])
+    ziyaret = {bas}
+    while kuyruk:
+        dugum, adim = kuyruk.popleft()
+        if dugum == hedef:
+            return adim
+        for komsu in graf.get(dugum, []):
+            if komsu not in ziyaret:
+                ziyaret.add(komsu)
+                kuyruk.append((komsu, adim + 1))
+    return -1
+
+print(en_kisa_adim(depolar, "İstanbul", "Ankara"))   # 2</pre>
+<div class="warn"><b>Ziyareti kuyruğa eklerken işaretle</b>Kuyruktan çıkarırken işaretlersen aynı düğüm kuyruğa birden çok kez girer; büyük grafta süre patlar. Kümeye ekleme anı, kuyruğa ekleme anıyla aynı olmalı.</div>
+
+<h2>Karmaşıklık: Big-O konuşabilmek</h2>
+<p>Her çözümden sonra mülakatçı "karmaşıklığı ne?" diye sorar. Kısa sözlük: sözlük/küme erişimi O(1) ortalama; listede arama O(n); sıralama O(n log n); çift döngü O(n²); ikili arama O(log n); BFS O(V + E). Bellek için de aynı soru gelir: ek sözlük tutuyorsan O(n) bellek. "Daha iyisi var mı?" sorusuna, mümkünse "hayır, çünkü her elemana en az bir kez bakmak gerekir" gibi bir alt sınır argümanı ver.</p>
+<div class="tip"><b>Python'a özgü püf noktalar</b><code>in</code> listede O(n), kümede O(1). String birleştirmede döngüde <code>+=</code> yerine liste toplayıp <code>"".join</code>. <code>list.pop(0)</code> O(n), <code>deque.popleft()</code> O(1). Bunları söylemek "dili biliyor" izlenimi verir.</div>
+
+<h2>Canlı kodlama ipuçları</h2>
+<div class="steps-list"><ol>
+<li><b>Soruyu tekrar et ve netleştir:</b> Girdi boş olabilir mi? Negatif sayı var mı? Tekrar eden eleman? Çıktı indeks mi değer mi? Her soru bir puan.</li>
+<li><b>Küçük bir örnek yaz:</b> 4-5 elemanlı girdi ve beklenen çıktı. Örnek olmadan kod yazma.</li>
+<li><b>Önce kaba çözümü söyle:</b> "Çift döngüyle O(n²) olur; sözlükle O(n)'e indirebilirim." Mülakatçı düşünme sürecini görmek ister.</li>
+<li><b>Sesli düşün, sessiz yazma:</b> Takıldığında "burada iki seçenek var" de. Sessizlik en kötü sinyaldir.</li>
+<li><b>Yazdıktan sonra örnekle izle:</b> Kodu satır satır örnek üzerinde yürüt. Kenar durumları (boş, tek eleman, hepsi aynı) kontrol et.</li>
+<li><b>Karmaşıklığı kendin söyle:</b> Sorulmadan "zaman O(n), bellek O(n)" de.</li>
+<li><b>Temiz ad ve küçük fonksiyon:</b> <code>a, b, tmp</code> yerine <code>gorulen, kalan</code>. Test edilebilir fonksiyon yaz, <code>print</code> ile değil <code>return</code> ile sonuç ver.</li>
+</ol></div>
+
+<h2>Sistem tasarımı için Python</h2>
+<p>Üst düzey pozisyonlarda "Ilgaz Bank'ın işlem akışını işleyen bir servis tasarla" tarzı sorular gelir. Beklenen, kod değil, bileşenler ve seçimler: giriş (API, kuyruk), işleme (worker havuzu), depolama (ilişkisel/belge), gözlemleme (log, metrik). Python özelinde şunları söyleyebilmek fark yaratır: I/O yoğun servis için asyncio + FastAPI; CPU yoğun iş için multiprocessing ya da ayrı worker; büyük veri için pandas yerine parçalı işleme ya da polars/duckdb; durum paylaşımı için Redis; kuyruk için Celery/RQ ya da bulut kuyruğu. Her seçimi "neden" ile bağla: "GIL yüzünden CPU işini thread'e değil process'e veririm."</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: eksik kalan beş kalıp</h2>
+<p>Ders boyunca sözlük, küme, kayan pencere, iki pointer, ikili arama ve BFS kalıplarını gördün. Mülakat sorularının geri kalanının çoğu beş kalıba daha iner: <b>yığın (stack)</b>, <b>yığın-kuyruk (heap)</b>, <b>önek toplamı (prefix sum)</b>, <b>dinamik programlama (dynamic programming)</b> ve <b>geri izleme (backtracking)</b>. Bunlara aralık birleştirme ve LRU önbellek gibi "tasarım" sorularını eklersen klasik soru havuzunun büyük bölümünü kapsamış olursun. Özyinelemenin (recursion) temelini "Özyineleme" dersinde, sıralama algoritmalarının içini "Algoritmalar" dersinde gördün; burada mülakat açısından bakıyoruz.</p>
+
+<div class="tbl-wrap"><table>
+<tr><th>Soruda duyduğun</th><th>Kalıp</th><th>Python aracı</th><th>Tipik karmaşıklık</th></tr>
+<tr><td>"eşleşen parantez", "bir sonraki büyük eleman", "geri al"</td><td>Yığın</td><td><code>list.append</code> / <code>pop</code></td><td>O(n)</td></tr>
+<tr><td>"en büyük k", "en sık k", "sıralı listeleri birleştir", "en kısa yol (ağırlıklı)"</td><td>Heap</td><td><code>heapq</code></td><td>O(n log k)</td></tr>
+<tr><td>"toplamı k olan alt dizi sayısı", "aralık toplamı"</td><td>Önek toplamı + sözlük</td><td><code>itertools.accumulate</code>, <code>dict</code></td><td>O(n)</td></tr>
+<tr><td>"en az kaç", "kaç farklı yol", "en uzun ortak"</td><td>Dinamik programlama</td><td>liste tablosu, <code>functools.cache</code></td><td>O(n·m)</td></tr>
+<tr><td>"tüm kombinasyonlar", "tüm permütasyonlar", "geçerli tüm yerleşimler"</td><td>Geri izleme</td><td>özyineleme + liste</td><td>üstel</td></tr>
+<tr><td>"çakışan aralıklar", "toplantı odası"</td><td>Sırala + tara</td><td><code>sorted(key=...)</code></td><td>O(n log n)</td></tr>
+</table></div>
+
+<h3>1. Yığın: son giren ilk çıkar</h3>
+<p>Parantez doğrulama en klasik yığın sorusudur. Bir adım ötesi <b>monoton yığın</b>dır: "her gün için fiyatın kaç gün sonra yükseleceğini bul" gibi sorularda, henüz cevabı bulunmamış günlerin indekslerini azalan sırada yığında tutarsın. Her indeks bir kez girip bir kez çıktığı için toplam O(n) olur.</p>
+<pre class="py">def gecerli_mi(ifade):
+    eslesme = {")": "(", "]": "[", "}": "{"}
+    yigin = []
+    for c in ifade:
+        if c in "([{":
+            yigin.append(c)
+        elif c in eslesme:
+            if not yigin or yigin.pop() != eslesme[c]:
+                return False
+    return not yigin
+
+print(gecerli_mi("{[()()]}"), gecerli_mi("([)]"), gecerli_mi("(("))
+
+def kac_gun_sonra(fiyat):
+    sonuc = [0] * len(fiyat)
+    yigin = []                          # cevabı bekleyen günlerin indeksleri
+    for i, f in enumerate(fiyat):
+        while yigin and fiyat[yigin[-1]] &lt; f:
+            j = yigin.pop()
+            sonuc[j] = i - j
+        yigin.append(i)
+    return sonuc
+
+print(kac_gun_sonra([73, 74, 75, 71, 69, 72, 76, 73]))</pre>
+
+<h3>2. Heap: en büyük k ve ağırlıklı en kısa yol</h3>
+<p><code>heapq</code> en küçük elemanı her zaman <code>h[0]</code>'da tutan bir min-heap'tir; ekleme ve çıkarma O(log n). "En büyük k" için boyutu k olan bir min-heap tut: yeni eleman tepedekinden büyükse değiştir. Böylece n elemanı O(n log k)'da tararsın; <code>heapq.nlargest</code> bunu hazır yapar. Max-heap gerekiyorsa değerleri eksiyle çarparak koy. Dijkstra algoritması da heap'e dayanır: her adımda en yakın düğümü çıkarırsın.</p>
+<pre class="py">import heapq
+
+siparisler = [("S1", 420), ("S2", 90), ("S3", 1250), ("S4", 610), ("S5", 300)]
+print(heapq.nlargest(2, siparisler, key=lambda s: s[1]))
+
+def dijkstra(graf, bas):
+    mesafe = {bas: 0}
+    h = [(0, bas)]
+    while h:
+        d, u = heapq.heappop(h)
+        if d &gt; mesafe.get(u, float("inf")):
+            continue                     # eski, geçersiz kayıt
+        for v, w in graf.get(u, []):
+            yeni = d + w
+            if yeni &lt; mesafe.get(v, float("inf")):
+                mesafe[v] = yeni
+                heapq.heappush(h, (yeni, v))
+    return mesafe
+
+yollar = {"Depo": [("Kadıköy", 12), ("Beşiktaş", 7)],
+          "Beşiktaş": [("Kadıköy", 3), ("Şişli", 4)],
+          "Kadıköy": [("Ataşehir", 6)], "Şişli": [("Ataşehir", 15)]}
+print(dijkstra(yollar, "Depo"))</pre>
+
+<h3>3. Önek toplamı</h3>
+<p><code>onek[i]</code> ilk i elemanın toplamıysa, i..j aralığının toplamı <code>onek[j+1] - onek[i]</code> olur. "Toplamı k olan kaç alt dizi var?" sorusunda her konumda "şimdiye kadarki toplam - k" değerinin daha önce kaç kez görüldüğünü sözlükte sayarsın. Negatif sayılar olduğunda kayan pencere çalışmaz, önek toplamı çalışır; bu ayrımı söylemek artı puandır.</p>
+
+<h3>4. Dinamik programlama</h3>
+<p>İki işaret ara: <b>optimal alt yapı</b> (büyük problemin cevabı küçüklerinkinden kurulur) ve <b>örtüşen alt problemler</b> (aynı küçük problem tekrar tekrar çözülür). İki yazım şekli vardır: yukarıdan aşağı (özyineleme + <code>functools.cache</code>) ve aşağıdan yukarı (tablo). Mülakatta önce özyinelemeli tanımı söyle, sonra tabloya çevir.</p>
+<pre class="py">from functools import cache
+
+def para_ustu(bozuklar, tutar):
+    """En az kaç bozuk para? Mümkün değilse -1."""
+    SONSUZ = float("inf")
+    dp = [0] + [SONSUZ] * tutar          # dp[t]: t tutarı için en az para
+    for t in range(1, tutar + 1):
+        for b in bozuklar:
+            if b &lt;= t and dp[t - b] + 1 &lt; dp[t]:
+                dp[t] = dp[t - b] + 1
+    return dp[tutar] if dp[tutar] != SONSUZ else -1
+
+print(para_ustu([1, 5, 10, 25], 63), para_ustu([5, 10], 3))
+
+@cache
+def yol_sayisi(satir, sutun):
+    """Izgarada sol üstten sağ alta yalnız sağ/aşağı giderek kaç yol?"""
+    if satir == 1 or sutun == 1:
+        return 1
+    return yol_sayisi(satir - 1, sutun) + yol_sayisi(satir, sutun - 1)
+
+print(yol_sayisi(3, 7), yol_sayisi.cache_info().hits)</pre>
+<div class="warn"><b>Açgözlü yaklaşım tuzağı</b>Para üstünde "her seferinde en büyük parayı al" (greedy) TL/kuruş gibi sistemlerde doğru çalışır ama <code>[1, 3, 4]</code> ile 6 için 4+1+1 (3 para) verir; doğrusu 3+3 (2 para). Mülakatçı tam bu karşı örneği sorar: greedy önerirsen neden doğru olduğunu kanıtlamaya hazır ol.</div>
+
+<h3>5. Geri izleme ve aralıklar</h3>
+<p>Geri izleme, seçim yap, özyinele, seçimi geri al döngüsüdür. "Toplamı hedef olan tüm kombinasyonlar" ya da "tüm alt kümeler" bu kalıptır; dalı erken kesmek (pruning, ör. sıralı adaylarda toplam aşınca <code>break</code>) süreyi ciddi biçimde düşürür. Aralık sorularında ise neredeyse her zaman ilk adım başlangıca göre sıralamaktır.</p>
+<pre class="py">def birlestir(araliklar):
+    sonuc = []
+    for bas, bit in sorted(araliklar):
+        if sonuc and bas &lt;= sonuc[-1][1]:
+            sonuc[-1][1] = max(sonuc[-1][1], bit)
+        else:
+            sonuc.append([bas, bit])
+    return sonuc
+
+print(birlestir([(9, 11), (1, 3), (2, 6), (8, 10), (15, 18)]))
+
+def alt_kumeler(ogeler):
+    sonuc, secim = [], []
+    def gez(i):
+        if i == len(ogeler):
+            sonuc.append(secim.copy())   # kopyala: secim değişmeye devam edecek
+            return
+        secim.append(ogeler[i]); gez(i + 1)   # al
+        secim.pop();             gez(i + 1)   # alma (geri al)
+    gez(0)
+    return sonuc
+
+print(alt_kumeler(["çay", "simit", "peynir"]))</pre>
+<div class="tip"><b>Python'a özgü kısa yollar</b>Mülakatçı izin veriyorsa <code>collections.Counter.most_common</code>, <code>heapq.merge</code>, <code>bisect.bisect_left</code>, <code>itertools.combinations</code> ve <code>functools.cache</code> kullanmak serbesttir; ama "bunu elle yazabilir misin?" sorusuna hazır ol. Önce hazır aracı söyle, sonra elle yazmayı teklif et.</div>
+<div class="note"><b>Gerçek işte</b>Bu kalıplar yalnız mülakat için değil: monoton yığın borsa/fiyat verisinde "bir sonraki zirve" hesabında, heap öncelikli iş kuyruklarında ve "en çok satan 10 ürün" raporlarında, önek toplamı kümülatif ciro ve tarih aralığı sorgularında, aralık birleştirme vardiya ve toplantı odası planlamada, LRU önbellek ise API yanıtlarını önbelleğe alırken doğrudan karşına çıkar.</div></section><section class="more"><span class="eyebrow">Derinleş</span><p>Bu ders her rol için ortak çekirdeği veriyor: Python kavramları, algoritma kalıpları, canlı kodlama ve davranışsal sorular. Ama bir veri analisti ile bir backend geliştiricinin mülakatı aynı değildir. Bu bölüm iki şey ekliyor: öğrenme yoluna göre "hangi bölüm sana ne kadar lazım" haritası ve kendi kendine uygulayabileceğin 45 dakikalık bir deneme mülakatı senaryosu.</p>
+<h2>Öğrenme yollarına göre harita</h2>
+<div class="tbl-wrap"><table><tr><th>Yol</th><th>Bu dersten öncelik</th><th>Ardından çalış</th><th>Mülakatta ağırlık</th></tr>
+<tr><td>Veri analisti</td><td>Kavram soruları, sözlükle sayım, davranışsal sorular</td><td><b>Veri mülakatı</b> (SQL, pandas, metrik, vaka), <b>İş metrikleri</b></td><td>SQL canlı yazım, pandas ile analiz, iş sorusunu metriğe çevirme</td></tr>
+<tr><td>Veri bilimci / ML</td><td>Kavramlar, Big-O, kayan pencere, heap</td><td><b>Veri mülakatı</b>, ML derslerindeki SSS'ler</td><td>İstatistik, model değerlendirme, sızıntı, A/B testi, ev ödevi</td></tr>
+<tr><td>Veri mühendisi</td><td>Kalıpların tamamı, Big-O, ev ödevi</td><td><b>Veri mülakatı</b>, <b>Mülakat kalıpları 2</b>, <b>Sistem tasarımı</b></td><td>SQL, ETL tasarımı, idempotentlik, bölümleme, orkestrasyon</td></tr>
+<tr><td>Backend / web</td><td>Kalıpların tamamı, canlı kodlama ipuçları</td><td><b>Mülakat kalıpları 2</b>, <b>Sistem tasarımı</b></td><td>Algoritma (orta), API ve veritabanı tasarımı, önbellek, güvenlik</td></tr>
+<tr><td>AI mühendisi</td><td>Kavramlar, sözlük/küme kalıpları, ev ödevi</td><td><b>Sistem tasarımı</b> (LLM servisleri), LLM dersleri</td><td>RAG tasarımı, değerlendirme, maliyet ve gecikme</td></tr>
+<tr><td>Otomasyon</td><td>Kavramlar, sayım ve metin kalıpları</td><td>Python Arena (Kolay/Orta)</td><td>Dosya, Excel, hata yönetimi; çoğunlukla pratik görev</td></tr>
+<tr><td>Sertifika (PCEP/PCAP)</td><td>Kavram soruları ve "yanlış ama sık verilen cevaplar"</td><td><b>Mülakat kalıpları 2</b>, sınav bölümü</td><td>Dil ayrıntısı: kapsam, değişebilirlik, istisnalar, OOP</td></tr></table></div>
+<p>Haritayı şöyle kullan: kendi satırındaki ilk sütunu bu derste pekiştir, ikinci sütundaki dersleri sırayla bitir, üçüncü sütunu deneme mülakatlarında ağırlık olarak kullan. Python Arena'da rolüne uygun alan süzgeciyle günde 1-2 soru çözmek, kalıpları otomatikleştirmenin en verimli yoludur.</p>
+<h2>45 dakikalık deneme mülakatı</h2>
+<p>Gerçek teknik mülakatların çoğu 45-60 dakikadır ve benzer bir akışı izler. Bir arkadaşınla rol değiştirerek ya da kendi kendine süre tutarak uygula; ekranını kaydet ve sonra izle. Senaryo Anadolu Market'in backend/veri pozisyonuna göre yazıldı.</p>
+<div class="tbl-wrap"><table><tr><th>Dakika</th><th>Bölüm</th><th>Görüşmeci ne yapar?</th><th>Sen ne yapmalısın?</th></tr>
+<tr><td>0-5</td><td>Tanışma</td><td>"Kendinden ve son projenden bahset."</td><td>90 saniyelik hazır özet: kim, ne yaptın, hangi sonuç</td></tr>
+<tr><td>5-10</td><td>Kavram ısınması</td><td>2-3 kısa soru: değişebilirlik, üreteç, GIL</td><td>Kısa tanım + örnek; bilmediğini kabul et ama akıl yürüt</td></tr>
+<tr><td>10-35</td><td>Canlı kodlama</td><td>Bir problem, sonra bir takip sorusu</td><td>Netleştir → örnek → kaba çözüm → iyileştir → test et</td></tr>
+<tr><td>35-40</td><td>Tasarım/vaka</td><td>"Bunu günde 10 milyon siparişe nasıl ölçeklersin?"</td><td>Darboğazı adlandır, iki seçenek ve ödünleşimini söyle</td></tr>
+<tr><td>40-45</td><td>Senin soruların</td><td>"Sormak istediğin bir şey var mı?"</td><td>Ekip, kod inceleme (code review), yayın süreci üzerine 2 hazır soru</td></tr></table></div>
+<h3>Canlı kodlama problemi (25 dakika)</h3>
+<p><b>Görev:</b> "Sipariş akışında her sipariş <code>(musteri_id, zaman_sn)</code> olarak geliyor. Son 60 saniyede 3'ten fazla sipariş veren müşterileri, sınırı ilk aştıkları an itibarıyla raporla." <b>Takip sorusu:</b> "Akış sıralı gelmiyorsa ne değişir? Bellek sınırlıysa?"</p>
+<pre class="py">from collections import defaultdict, deque
+
+def supheliler(siparisler, pencere=60, sinir=3):
+    son = defaultdict(deque)          # müşteri -&gt; penceredeki zamanlar
+    bulunan = {}
+    for musteri, t in siparisler:     # zaman sırasıyla geldiğini varsayıyoruz (netleştir!)
+        q = son[musteri]
+        q.append(t)
+        while q[0] &lt;= t - pencere:    # pencereden çıkanları at
+            q.popleft()
+        if len(q) &gt; sinir and musteri not in bulunan:
+            bulunan[musteri] = t
+    return bulunan
+
+akis = [(7, 0), (7, 10), (9, 12), (7, 30), (7, 55), (9, 70), (7, 61), (7, 62)]
+print(supheliler(akis))</pre>
+<p>Değerlendirme ölçütleri: Soruyu netleştirdin mi (pencere dahil mi, sıralı mı)? Kaba çözümü söyleyip (her siparişte tüm geçmişi taramak, O(n²)) iyileştirdin mi? Karmaşıklığı söyledin mi (her zaman en fazla bir kez eklenip çıkarılır: O(n) zaman, O(müşteri × pencere) bellek)? Kenar durumları denedin mi (aynı saniyede sipariş, tam 60 saniye sınırı)?</p>
+<h3>Kendini puanla</h3>
+<div class="tbl-wrap"><table><tr><th>Ölçüt</th><th>1 (zayıf)</th><th>3 (iyi)</th></tr>
+<tr><td>Problem çözme</td><td>Doğrudan koda atladı, varsayım sormadı</td><td>Netleştirdi, örnek üzerinde düşündü, alternatifleri tarttı</td></tr>
+<tr><td>Kod</td><td>Çalışmadı ya da okunmuyor</td><td>Çalışıyor, adlar anlamlı, fonksiyonlara bölünmüş</td></tr>
+<tr><td>İletişim</td><td>Sessiz yazdı</td><td>Düşündüğünü sesli anlattı, ipucunu kullandı</td></tr>
+<tr><td>Test</td><td>Hiç denemedi</td><td>Kendi örnekleriyle ve kenar durumlarla denedi</td></tr>
+<tr><td>Karmaşıklık</td><td>Bilmiyor</td><td>Zaman ve bellek için doğru O(...) ve gerekçe</td></tr></table></div>
+<div class="tip"><b>Haftalık plan</b>Mülakat sürecindeysen haftada iki deneme yap: biri bu senaryoyla, biri Python Arena'dan rastgele bir Orta soruyla. Her denemeden sonra en düşük puanlı ölçüt için bir sonraki haftaya tek bir hedef yaz ("kodlamadan önce iki örnek yazacağım").</div>
+<div class="note"><b>Gerçek işte</b>İşe alım ekipleri adayı tek bir doğru cevaptan çok sürece göre değerlendirir: belirsizlik karşısında soru sorması, takıldığında ilerleyebilmesi ve kendi kodunu test etmesi. Bu yüzden deneme mülakatı, soru ezberlemekten çok daha verimli bir hazırlıktır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Soruyu kalıba indirgeme pratiği</h3>
+<p>Her gün bir soru çöz ve çözümden sonra şu üç satırı yaz: kalıp (sözlük / küme / pencere / iki pointer / ikili arama / BFS-DFS / dinamik programlama), karmaşıklık, kenar durumları. Bir ay sonra soruları duyar duymaz kalıbı göreceksin. Dinamik programlama (en uzun ortak alt dizi, para üstü) ve heap (en büyük k eleman, <code>heapq.nlargest</code>) bu dersin kapsamı dışında kalan ama sık sorulan iki kalıptır; sırada onlar olsun.</p>
+<h3>Yanlış ama sık verilen cevaplar</h3>
+<p>"GIL Python'ı tek çekirdekli yapar" (yanlış: multiprocessing ve C uzantıları çekirdekleri kullanır). "Tuple değişmezdir, içi de değişmez" (yanlış: tuple içindeki liste değişir). "Decorator yalnızca loglama içindir" (eksik: önbellek, yetki, yeniden deneme, kayıt). "is daha hızlıdır, hep onu kullan" (yanlış: kimlik ile eşitlik farklı sorulardır; küçük tamsayı önbelleği yanıltır).</p>
+<h3>Ev ödevi projesi (take-home)</h3>
+<p>Bazı şirketler canlı kodlama yerine ev ödevi verir. Değerlendirme ölçütleri: README (nasıl çalışır, nasıl test edilir), testler, tip ipuçları (type hint), lint temizliği, küçük ve odaklı commit'ler, hata yönetimi. Bir önceki dersin kalite zincirini uygula; "çalışıyor" yetmez, "üretime konabilir" izlenimi ver.</p>
+<h3>Davranışsal sorular</h3>
+<p>"Zor bir hatayı nasıl buldun?" sorusuna STAR biçiminde cevap ver: Durum, Görev, Eylem, Sonuç. Teknik ayrıntı ver (profil aldım, darboğaz sorgu birleştirmedeydi, indeks ekledim) ama bir dakikayı geçme.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mulakat-hazirlik">Alıştırmalara geç (37)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kalite-ci/">← Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions</a><a href="../proje-ileri/">Bitirme projesi: Anadolu Market müşteri analitiği paketi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

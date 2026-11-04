@@ -1,0 +1,221 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kapsam ve kapanışlar (closures) derinlemesine | Kesit Python</title><meta name="description" content="LEGB kuralını, global ile nonlocal farkını, kapanışın değişkeni nasıl yakaladığını, döngüdeki geç bağlama tuzağını, fabrika fonksiyonlarını, __closure__…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kapanis-kapsam/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kapsam ve kapanışlar (closures) derinlemesine"><meta property="og:description" content="LEGB kuralını, global ile nonlocal farkını, kapanışın değişkeni nasıl yakaladığını, döngüdeki geç bağlama tuzağını, fabrika fonksiyonlarını, __closure__…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kapanis-kapsam/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kapsam ve kapanışlar (closures) derinlemesine","description":"LEGB kuralını, global ile nonlocal farkını, kapanışın değişkeni nasıl yakaladığını, döngüdeki geç bağlama tuzağını, fabrika fonksiyonlarını, __closure__…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/kapanis-kapsam/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Kapsam ve kapanışlar (closures) derinlemesine</h1><p class="st-l">LEGB kuralını, global ile nonlocal farkını, kapanışın değişkeni nasıl yakaladığını, döngüdeki geç bağlama tuzağını, fabrika fonksiyonlarını, __closure__ hücrelerini ve functools.partial ile ilişkisini iş senaryolarıyla derinlemesine öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapanis-kapsam">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in kampanya ekibi her hafta yeni kural tanımlıyor: "500 TL üstüne yüzde 10", "Ankara'ya kargo 30 TL indirimli", "ilk siparişe 50 TL". Ilgaz Bank'ta ise her kart için farklı günlük harcama limiti var. Bu kuralları tek tek <code>if</code> bloklarıyla yazarsan kod büyüdükçe yönetilemez olur. Python'ın cevabı şudur: kuralı bir <b>fonksiyon olarak üret</b>, ayarını içine göm, ihtiyaç olunca çağır. Ayarını içinde taşıyan bu fonksiyona <b>kapanış</b> (closure) denir.</p>
+<p>Fonksiyonel araçlar dersinde kapanışla ilk kez tanıştın (sayaç ve komisyon hesaplayıcı yazdın). Bu derste perdenin arkasına geçiyoruz: Python bir adı nerede arar, iç fonksiyon dış değişkeni nasıl "hatırlar", hatırladığı şey değer mi yoksa değişkenin kendisi mi, ve bu farkın döngülerde neden can sıktığı. Bu bilgi dekoratörlerin (decorator), geri çağırma (callback) fonksiyonlarının ve PCAP sınavının 5.3 konusunun temelidir.</p>
+
+<h2>LEGB tekrar: bir ad nerede aranır?</h2>
+<p>Kapsam ve modüller dersinde gördüğün kural: Python bir adı okurken sırayla dört yere bakar ve ilk bulduğunu kullanır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Harf</th><th>Kapsam</th><th>Örnek</th></tr>
+<tr><td>L</td><td>Yerel (Local): fonksiyonun kendi adları</td><td>Parametreler, fonksiyon içinde atanan adlar</td></tr>
+<tr><td>E</td><td>Kapsayan (Enclosing): dıştaki fonksiyonların adları</td><td>İç fonksiyonun gördüğü dış değişken</td></tr>
+<tr><td>G</td><td>Genel (Global): modül düzeyindeki adlar</td><td>Dosyanın en üstünde tanımlanan sabitler</td></tr>
+<tr><td>B</td><td>Yerleşik (Built-in): Python'ın hazır adları</td><td><code>len</code>, <code>sum</code>, <code>print</code></td></tr>
+</table></div>
+<pre class="py">kdv = 0.20                      # G: genel
+
+def fatura(tutar):              # tutar: L (fatura için)
+    kargo = 30                  # L (fatura için)
+    def satir(adet):            # adet: L (satir için)
+        # kargo E'den, kdv G'den, round B'den gelir
+        return round(adet * tutar * (1 + kdv) + kargo, 2)
+    return satir(2)
+
+print(fatura(100))</pre>
+<p>Önemli ayrıntı: Bir adın hangi kapsama ait olduğuna Python <b>derleme anında</b> karar verir, çalışma anında değil. Fonksiyonun gövdesinde bir ada herhangi bir yerde atama yapılıyorsa, o ad fonksiyonun tamamı boyunca yereldir. Bu yüzden aşağıdaki kod, atama satırı okumadan sonra gelse bile hata verir:</p>
+<pre class="py">toplam = 0
+
+def ekle(tutar):
+    try:
+        toplam += tutar          # toplam = toplam + tutar: önce okur!
+    except UnboundLocalError as h:
+        print("Hata:", h)
+
+ekle(50)</pre>
+<p><code>toplam += tutar</code> bir atama olduğu için <code>toplam</code> yerel sayılır; okumaya çalıştığında yerel <code>toplam</code> henüz bağlanmamıştır (unbound). Hata adı da buradan gelir: <b>UnboundLocalError</b>.</p>
+
+<h2>global ve nonlocal: hangi kutuya yazıyorsun?</h2>
+<p>Okumak için bildirim gerekmez; <b>atamak</b> istediğin ad yerel değilse Python'a söylemen gerekir. İki anahtar kelime vardır ve farklı kutulara yazar:</p>
+<div class="tbl-wrap"><table>
+<tr><th></th><th><code>global ad</code></th><th><code>nonlocal ad</code></th></tr>
+<tr><td>Nereye yazar?</td><td>Modül düzeyindeki ada</td><td>En yakın kapsayan fonksiyondaki ada</td></tr>
+<tr><td>Ad önceden var olmalı mı?</td><td>Hayır, yoksa oluşturur</td><td>Evet, yoksa SyntaxError</td></tr>
+<tr><td>Modül düzeyinde kullanılır mı?</td><td>Anlamsız ama hata değil</td><td>Hayır, SyntaxError</td></tr>
+<tr><td>Tipik kullanım</td><td>Nadiren; yapılandırma, önbellek</td><td>Kapanışta sayaç, bakiye, durum</td></tr>
+<tr><td>Test edilebilirlik</td><td>Kötü: gizli paylaşılan durum</td><td>İyi: durum kapanışa özel</td></tr>
+</table></div>
+<pre class="py">sayac = 0                       # genel
+
+def genel_artir():
+    global sayac
+    sayac += 1
+
+def kasa_ac():
+    sayac = 100                 # kasa_ac'a ait, genel sayac'tan bağımsız
+    def islem():
+        nonlocal sayac          # kasa_ac'taki sayac'a yazar
+        sayac += 1
+        return sayac
+    return islem
+
+genel_artir(); genel_artir()
+k = kasa_ac()
+print(k(), k())                 # 101 102
+print("genel sayac:", sayac)    # 2: nonlocal genele dokunmadı</pre>
+<div class="warn"><b>nonlocal genel değişkeni bulmaz</b><code>nonlocal</code> yalnızca kapsayan <i>fonksiyonlara</i> bakar, modül düzeyine asla çıkmaz. Dış fonksiyonda o ad yoksa kod daha çalışmadan <code>SyntaxError: no binding for nonlocal</code> verir.</div>
+
+<h2>Kapanış neyi yakalar: değeri mi, değişkeni mi?</h2>
+<p>İç fonksiyon dıştaki bir adı kullandığında ve dış fonksiyon bittikten sonra da yaşamaya devam ettiğinde kapanış oluşur. Python o adı bir <b>hücre</b> (cell) nesnesine koyar; dış fonksiyon da iç fonksiyon da aynı hücreyi görür. Yakalanan şey o anki <b>değer değil, hücrenin kendisidir</b>. Hücredeki değer sonradan değişirse iç fonksiyon yeni değeri görür.</p>
+<pre class="py">def carpan(k):
+    def uygula(x):
+        return x * k
+    k = k + 1                   # dönmeden önce k değişti
+    return uygula
+
+c = carpan(3)
+print(c(10))                                # 40, 30 değil
+print(c.__code__.co_freevars)               # serbest değişken adları
+print(c.__closure__)                        # hücre demeti
+print(c.__closure__[0].cell_contents)       # hücredeki güncel değer</pre>
+<p><code>__code__.co_freevars</code> iç fonksiyonun dışarıdan kullandığı <b>serbest değişkenlerin</b> (free variables) adlarını, <code>__closure__</code> ise aynı sırayla hücreleri verir. Hiç serbest değişken kullanmayan fonksiyonda <code>__closure__</code> <code>None</code> olur. Bu özellikler hata ayıklamada (debugging) ve PCAP sorularında karşına çıkar.</p>
+<p>Hücre paylaşıldığı için aynı dış fonksiyondan dönen <b>iki</b> iç fonksiyon tek bir durumu ortak kullanabilir. Her yeni çağrı ise yeni hücre ve bağımsız durum üretir:</p>
+<pre class="py">def hesap(bakiye):
+    def yatir(tutar):
+        nonlocal bakiye
+        bakiye += tutar
+    def goster():
+        return bakiye
+    return yatir, goster
+
+yatir_a, goster_a = hesap(100)
+yatir_b, goster_b = hesap(0)
+yatir_a(50)
+yatir_b(10)
+print(goster_a(), goster_b())                          # 150 10
+print(yatir_a.__closure__[0] is goster_a.__closure__[0])  # aynı hücre</pre>
+
+<h2>Geç bağlama (late binding) tuzağı</h2>
+<p>"Hücreyi yakalar" kuralının en ünlü sonucu budur. Döngüde fonksiyon üretirsen hepsi döngü değişkeninin <b>aynı</b> hücresini paylaşır. Değer, fonksiyon <b>çağrıldığında</b> okunur; o anda döngü çoktan bitmiştir.</p>
+<pre class="py">oranlar = [0.05, 0.10, 0.20]
+kurallar = []
+for oran in oranlar:
+    kurallar.append(lambda tutar: tutar * oran)
+
+print([k(100) for k in kurallar])      # üçü de 20.0!
+
+# Çözüm 1: varsayılan argüman, değeri TANIM anında kopyalar
+kurallar = [lambda tutar, oran=oran: tutar * oran for oran in oranlar]
+print([k(100) for k in kurallar])
+
+# Çözüm 2: fabrika fonksiyonu, her çağrı yeni hücre açar
+def kural_uret(oran):
+    return lambda tutar: tutar * oran
+kurallar = [kural_uret(o) for o in oranlar]
+print([k(100) for k in kurallar])
+
+# Çözüm 3: functools.partial, argümanı o anda sabitler
+from functools import partial
+def kural(tutar, oran):
+    return tutar * oran
+kurallar = [partial(kural, oran=o) for o in oranlar]
+print([k(100) for k in kurallar])</pre>
+<div class="tip"><b>Hangi çözüm?</b>Varsayılan argüman en kısa çözümdür ama fonksiyonun imzasına çağıranın değiştirebileceği gizli bir parametre ekler (<code>k(100, oran=5)</code>). Ekip kodunda fabrika fonksiyonu ya da <code>partial</code> daha temiz ve niyeti daha açıktır.</div>
+
+<h2>Fabrika fonksiyonları: kural üreten kural</h2>
+<p>Fabrika fonksiyonu (factory function), ayarları alıp bu ayarlarla çalışan yeni bir fonksiyon döndürür. Doğrulamayı fabrikada bir kez yaparsın; üretilen fonksiyon her çağrıda hızlı ve sade kalır.</p>
+<pre class="py">def indirim_kurali(oran, esik=0):
+    if not 0 &lt; oran &lt; 1:
+        raise ValueError("oran 0 ile 1 arasında olmalı")
+    def uygula(tutar):
+        if tutar &gt;= esik:
+            return round(tutar * (1 - oran), 2)
+        return tutar
+    uygula.__name__ = f"indirim_{int(oran * 100)}"
+    return uygula
+
+hafta_sonu = indirim_kurali(0.10, esik=500)
+ogrenci = indirim_kurali(0.15)
+for tutar in [300, 750]:
+    print(tutar, hafta_sonu(tutar), ogrenci(tutar))
+print(hafta_sonu.__name__, ogrenci.__name__)</pre>
+<p>Ilgaz Bank'ta kart başına günlük limit de aynı kalıptır; bu kez kapanış durumu <b>değiştirir</b>, bu yüzden <code>nonlocal</code> gerekir:</p>
+<pre class="py">def gunluk_limit(limit):
+    kalan = limit
+    def harca(tutar):
+        nonlocal kalan
+        if tutar &gt; kalan:
+            return f"RED: {tutar} TL, kalan {kalan} TL"
+        kalan -= tutar
+        return f"ONAY: {tutar} TL, kalan {kalan} TL"
+    return harca
+
+kart = gunluk_limit(1000)
+for t in [400, 500, 200]:
+    print(kart(t))</pre>
+
+<h2>Kapanış mı, sınıf mı?</h2>
+<p>Kapanış "tek metotlu küçük bir nesne" gibidir. Durum büyüdükçe ve davranış çoğaldıkça sınıf daha okunur olur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Kapanış</th><th>Sınıf</th></tr>
+<tr><td>Davranış sayısı</td><td>Bir (ya da birkaç iç fonksiyon)</td><td>Çok sayıda metot</td></tr>
+<tr><td>Durumu dışarıdan görmek</td><td>Zor: <code>__closure__</code> ile</td><td>Kolay: <code>nesne.alan</code></td></tr>
+<tr><td>Kalıtım (inheritance), <code>__repr__</code>, karşılaştırma</td><td>Yok</td><td>Var</td></tr>
+<tr><td>Satır sayısı</td><td>Az</td><td>Daha fazla</td></tr>
+<tr><td>Tipik yer</td><td>Dekoratör, callback, <code>key=</code>, kural</td><td>Hesap, sepet, bağlantı</td></tr>
+</table></div>
+<pre class="py">class Carpan:
+    def __init__(self, k):
+        self.k = k
+    def __call__(self, x):        # nesneyi fonksiyon gibi çağrılabilir yapar
+        return x * self.k
+
+def carpan(k):
+    return lambda x: x * k
+
+kdv_sinif = Carpan(1.2)
+kdv_kapanis = carpan(1.2)
+print(kdv_sinif(100), kdv_kapanis(100))
+print(kdv_sinif.k, kdv_kapanis.__closure__[0].cell_contents)</pre>
+
+<h2>functools.partial ile ilişkisi</h2>
+<p><code>partial</code>, "argümanı önceden doldur" işini kapanış yazmadan yapar ve ayarı açıkça gösterir: <code>.func</code>, <code>.args</code>, <code>.keywords</code>. Kendi iç mantığı yoksa, sadece argüman sabitliyorsan <code>partial</code> seç; fabrikada doğrulama, hesap ya da durum varsa kapanış seç.</p>
+<pre class="py">from functools import partial
+
+def kargo_ucreti(desi, sehir, ekspres=False):
+    tarife = {"İstanbul": 40, "Ankara": 45, "Van": 70}
+    ucret = tarife[sehir] + desi * 5
+    return ucret * 1.5 if ekspres else ucret
+
+ankara = partial(kargo_ucreti, sehir="Ankara")
+print(ankara(4), ankara(4, ekspres=True))
+print(ankara.func.__name__, ankara.args, ankara.keywords)
+
+def sehir_tarifesi(sehir):                 # aynı işin kapanış hâli
+    def hesapla(desi, ekspres=False):
+        return kargo_ucreti(desi, sehir, ekspres)
+    return hesapla
+print(sehir_tarifesi("Ankara")(4))</pre>
+
+<div class="note"><b>Gerçek işte</b>Kapanışları en çok üç yerde görürsün: (1) dekoratörlerde, sarılan fonksiyonu hatırlayan iç fonksiyon olarak; (2) arayüz ve olay sistemlerinde, "butona basılınca şu sipariş için şunu yap" geri çağırmalarında (geç bağlama hatasının en sık çıktığı yer burasıdır: tüm butonlar son siparişi işler); (3) iş kurallarının yapılandırmadan üretildiği kural motorlarında. Kod incelemesinde (code review) döngü içinde <code>lambda</code> gördüğünde ilk sorulacak soru şudur: "Bu değişken çağrı anında ne olacak?"</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Hücreler ve bellek</h3>
+<p>Kapanış dış fonksiyonun yalnızca kullandığı adları tutar, tüm yerel değişkenleri değil. Yine de büyük bir listeyi yakalayan kapanış yaşadıkça liste de bellekte kalır. Uzun ömürlü callback'lerde yalnızca gerekeni yakala: <code>adet = len(buyuk_liste)</code> deyip <code>adet</code>'i kullan.</p>
+<h3>Değiştirilebilir nesneyle nonlocal'sız durum</h3>
+<p>Hücredeki ad yeniden bağlanmıyorsa <code>nonlocal</code> gerekmez: <code>onbellek = {}</code> yakalayıp <code>onbellek[k] = v</code> demek bir atama değil, nesneyi değiştirmektir. Hafızalı (memoize) fonksiyonlar ve <code>lru_cache</code>'in basit hâli böyle yazılır. Ama <code>onbellek = {}</code> diye yeniden atarsan yine <code>nonlocal</code> ister.</p>
+<h3>Kapanış ve eşzamanlılık</h3>
+<p>Paylaşılan hücreyi birden fazla iş parçacığı (thread) değiştiriyorsa <code>sayac += 1</code> atomik değildir; Eşzamanlılık (concurrency) dersinde bunun için kilit (lock) kullanacaksın. Ayrıca kapanışlar <code>pickle</code> ile serileştirilemez; çok işlemcili (multiprocessing) kodda modül düzeyi fonksiyon ya da <code>partial</code> tercih edilir.</p>
+<h3>PCAP 5.3 için kontrol listesi</h3>
+<ul><li>İç fonksiyon dış adı okuyorsa bildirim gerekmez; atıyorsa <code>nonlocal</code> gerekir.</li><li>Dış fonksiyon döndükten sonra da iç fonksiyon dış değeri görür: kapanış.</li><li>Döngüde üretilen lambdalar son değeri görür; <code>i=i</code> ile düzelir.</li><li><code>__closure__</code> yoksa <code>None</code>; varsa hücre demeti, değer <code>cell_contents</code>'te.</li></ul>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapanis-kapsam">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../prompt-muhendisligi/">← Prompt mühendisliği ve yapılandırılmış çıktı</a><a href="../kutuphane-turu/">Python kütüphane haritası: hangi iş için hangi paket? →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

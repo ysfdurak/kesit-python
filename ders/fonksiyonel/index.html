@@ -1,0 +1,297 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure) | Kesit Python</title><meta name="description" content="Fonksiyonları değer gibi kullanmayı öğrenir; lambda, map/filter/reduce, çok anahtarlı sorted, any/all, closure ve functools.partial ile veriyi kısa ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/fonksiyonel/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)"><meta property="og:description" content="Fonksiyonları değer gibi kullanmayı öğrenir; lambda, map/filter/reduce, çok anahtarlı sorted, any/all, closure ve functools.partial ile veriyi kısa ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/fonksiyonel/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)","description":"Fonksiyonları değer gibi kullanmayı öğrenir; lambda, map/filter/reduce, çok anahtarlı sorted, any/all, closure ve functools.partial ile veriyi kısa ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/fonksiyonel/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)</h1><p class="st-l">Fonksiyonları değer gibi kullanmayı öğrenir; lambda, map/filter/reduce, çok anahtarlı sorted, any/all, closure ve functools.partial ile veriyi kısa ve esnek biçimde işlersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonel">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in rapor ekibinden şu istek gelsin: "Siparişleri önce şehre göre alfabetik, aynı şehirde tutara göre büyükten küçüğe sırala." Ya da Ilgaz Bank'tan: "Her şube için farklı komisyon oranıyla hesaplama yapan bir fonksiyon üret." Bu isteklerin ortak noktası, <b>fonksiyonun kendisinin bir veri gibi</b> ele alınmasıdır: sıralama ölçütünü fonksiyon olarak ver, komisyon oranını fonksiyona gömüp yeni fonksiyon üret. Python'da fonksiyonlar birinci sınıf (first-class) nesnelerdir: değişkene atanır, listeye konur, argüman olarak geçirilir, başka fonksiyondan döndürülür. Bu dersteki araçların hepsi bu tek fikrin üstüne kuruludur.</p>
+
+<h2>Fonksiyon bir değerdir</h2>
+<pre class="py">def kdv_ekle(tutar):
+    return round(tutar * 1.20, 2)
+
+def indirim_uygula(tutar):
+    return round(tutar * 0.90, 2)
+
+# Değişkene ata (parantez yok: çağırmıyoruz, işaret ediyoruz)
+islem = kdv_ekle
+print(islem(100))
+
+# Listeye koy, sırayla uygula
+boru = [indirim_uygula, kdv_ekle]
+tutar = 1000
+for f in boru:
+    tutar = f(tutar)
+    print(f.__name__, "->", tutar)
+
+# Argüman olarak geçir
+def uygula(fonk, degerler):
+    return [fonk(d) for d in degerler]
+
+print(uygula(kdv_ekle, [100, 250]))</pre>
+<p><code>kdv_ekle</code> ile <code>kdv_ekle()</code> arasındaki fark kritik: ilki fonksiyon nesnesinin kendisi, ikincisi onun çağrılıp dönen sonucu. Argüman olarak her zaman parantezsiz halini verirsin.</p>
+
+<h2>lambda: tek satırlık isimsiz fonksiyon</h2>
+<p><code>lambda parametreler: ifade</code>, tek bir ifade döndüren küçük bir fonksiyon üretir. Adı yoktur, <code>return</code> yazılmaz, gövdesi tek ifadedir. Yeri, başka fonksiyona kısa bir ölçüt verirken.</p>
+<pre class="py">kare = lambda x: x * x
+print(kare(7))
+
+# Asıl kullanım: argüman olarak
+siparisler = [("IST-1", 1200), ("ANK-2", 350), ("IZM-3", 4800)]
+print(sorted(siparisler, key=lambda s: s[1]))
+print(max(siparisler, key=lambda s: s[1]))</pre>
+<div class="warn"><b>lambda'yı değişkene atama</b><code>kare = lambda x: x * x</code> çalışır ama PEP 8 buna karşıdır: hata mesajlarında adı "&lt;lambda&gt;" görünür ve docstring yazamazsın. Bir ad verecek kadar önemliyse <code>def</code> yaz. lambda yalnız "o anda, o satırda" gereken küçük ölçütler içindir.</div>
+
+<h2>sorted ve key: tek, çoklu ve karışık yönlü sıralama</h2>
+<p><code>sorted(kaynak, key=f)</code>, her öğe için <code>f(öğe)</code>'yi hesaplar ve bu değere göre sıralar; öğenin kendisi değişmez. Birden fazla ölçüt için key bir demet döndürür: Python demetleri soldan sağa karşılaştırır.</p>
+<pre class="py">siparisler = [
+    {"no": 101, "sehir": "İstanbul", "tutar": 1200},
+    {"no": 102, "sehir": "Ankara", "tutar": 350},
+    {"no": 103, "sehir": "İstanbul", "tutar": 4800},
+    {"no": 104, "sehir": "Ankara", "tutar": 2100},
+    {"no": 105, "sehir": "İzmir", "tutar": 90},
+]
+
+# Tek anahtar
+for s in sorted(siparisler, key=lambda s: s["tutar"], reverse=True):
+    print(s["no"], s["tutar"])
+print("---")
+
+# Çok anahtar: şehir artan, sonra tutar artan
+for s in sorted(siparisler, key=lambda s: (s["sehir"], s["tutar"])):
+    print(s["sehir"], s["tutar"])
+print("---")
+
+# Karışık yön: şehir artan, tutar AZALAN -> sayıyı eksiyle ters çevir
+for s in sorted(siparisler, key=lambda s: (s["sehir"], -s["tutar"])):
+    print(s["sehir"], s["tutar"])</pre>
+<p>Karışık yön hilesi sayılar için <code>-değer</code>. Metin alanını ters çevirmek gerekirse iki aşamalı sıralama yaparsın: önce ikincil anahtara göre sırala, sonra birincil anahtara göre <code>reverse=True</code> ile; Python'ın sıralaması kararlı (stable) olduğu için eşit öğelerin önceki sırası korunur. Sözlük alanlarına erişim için <code>operator.itemgetter("sehir", "tutar")</code> lambda'nın hazır ve biraz daha hızlı karşılığıdır.</p>
+<div class="note"><b>Türkçe harf sırası</b>Varsayılan sıralama Unicode kod noktasına göredir; "İzmir" ile "Istanbul" beklediğin sırada gelmeyebilir ve "ç", "z"den sonra gelir. Basit işler için <code>key=str.casefold</code> yeter; tam Türkçe sıralama için <code>locale</code> ya da özel bir anahtar fonksiyonu gerekir.</div>
+
+<h2>map, filter, reduce</h2>
+<p>Üç klasik: <code>map(f, kaynak)</code> her öğeye f uygular, <code>filter(f, kaynak)</code> f'nin True döndürdüğü öğeleri tutar, <code>functools.reduce(f, kaynak)</code> öğeleri ikişer ikişer birleştirerek tek değere indirger. map ve filter tembel yineleyici (iterator) döndürür.</p>
+<pre class="py">from functools import reduce
+
+tutarlar = [1200, 350, 4800, 90]
+
+print(list(map(lambda t: t * 1.2, tutarlar)))
+print(list(filter(lambda t: t &gt; 500, tutarlar)))
+print(reduce(lambda a, b: a + b, tutarlar))
+print(reduce(lambda a, b: a if a &gt; b else b, tutarlar))
+
+# map ile hazır fonksiyon: lambda gerekmez
+metin_tutarlar = ["1200", "350"]
+print(list(map(int, metin_tutarlar)))
+print(sum(map(int, metin_tutarlar)))
+
+# Aynı işler comprehension ile
+print([t * 1.2 for t in tutarlar])
+print([t for t in tutarlar if t &gt; 500])
+print(sum(tutarlar), max(tutarlar))</pre>
+<p>Son blok önemli bir dersi gösteriyor: map/filter'ın lambda ile kullanımı çoğu zaman comprehension'dan daha az okunur, ve <code>reduce</code>'un en yaygın iki kullanımı zaten <code>sum</code> ve <code>max</code> olarak hazır. Kural şu:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th><th>Örnek</th></tr>
+<tr><td>Hazır fonksiyon uygulanacak</td><td>map</td><td><code>map(int, satirlar)</code>, <code>map(str.strip, satirlar)</code></td></tr>
+<tr><td>Dönüşüm bir ifade</td><td>comprehension</td><td><code>[t * 1.2 for t in tutarlar]</code></td></tr>
+<tr><td>Süzme + dönüşüm birlikte</td><td>comprehension</td><td><code>[t * 1.2 for t in tutarlar if t &gt; 500]</code></td></tr>
+<tr><td>Toplam, en büyük, en küçük</td><td>sum/max/min</td><td><code>sum(tutarlar)</code></td></tr>
+<tr><td>Özel ikili birleştirme</td><td>reduce</td><td>Sözlükleri birleştirmek, çarpım</td></tr>
+<tr><td>Fonksiyonu zincire argüman vermek</td><td>map/filter</td><td>Boru hattında (pipeline) ölçüt dışarıdan geliyorsa</td></tr>
+</table></div>
+
+<h2>any ve all</h2>
+<p>İki küçük ama çok kullanılan araç. <code>any</code> "en az biri doğru mu", <code>all</code> "hepsi doğru mu" sorar; ikisi de üreteç (generator) ifadesiyle en güzel okunur ve sonucu bulur bulmaz durur (kısa devre).</p>
+<pre class="py">basvurular = [
+    {"ad": "Ayşe", "gelir": 25000, "kara_liste": False},
+    {"ad": "Mehmet", "gelir": 9000, "kara_liste": False},
+    {"ad": "Zeynep", "gelir": 40000, "kara_liste": True},
+]
+print(any(b["kara_liste"] for b in basvurular))
+print(all(b["gelir"] &gt;= 10000 for b in basvurular))
+print(all(b["ad"] for b in basvurular))   # boş ad yok mu?
+print(any([]), all([]))                     # boş kaynakta: False, True</pre>
+
+<h2>Closure: ayarını içinde taşıyan fonksiyon</h2>
+<p>Bir fonksiyon, içinde tanımlanan başka bir fonksiyonu döndürürse, içteki fonksiyon dıştakinin değişkenlerini "hatırlar". Bu yapıya closure (kapanış) denir. Ilgaz Bank'ta her şubenin komisyon oranı farklı olsun: tek bir fabrika (factory) fonksiyonundan şubeye özel hesaplayıcılar üretirsin.</p>
+<pre class="py">def komisyon_hesaplayici(oran, asgari):
+    def hesapla(tutar):
+        return max(round(tutar * oran, 2), asgari)
+    return hesapla
+
+kadikoy = komisyon_hesaplayici(0.015, 5)
+merkez = komisyon_hesaplayici(0.010, 10)
+
+print(kadikoy(1000), kadikoy(100))
+print(merkez(1000), merkez(100))
+
+# İçteki fonksiyon neyi hatırlıyor?
+print(kadikoy.__closure__[0].cell_contents, kadikoy.__closure__[1].cell_contents)
+
+# Sayaç: durum tutan closure (nonlocal gerekir)
+def sayac():
+    adet = 0
+    def arttir():
+        nonlocal adet
+        adet += 1
+        return adet
+    return arttir
+
+say = sayac()
+print(say(), say(), say())</pre>
+<p><code>nonlocal</code>, içteki fonksiyonun dıştaki değişkene <b>yazmasına</b> izin verir; yalnız okuyorsan gerekmez. Closure, "ayar + davranış" paketlemenin hafif yoludur; sınıf yazmaya değmeyecek kadar küçük durumlar için idealdir. Bir sonraki derste göreceğin dekoratörler (decorator) tümüyle closure'dur.</p>
+
+<h2>functools.partial: argümanı önceden doldur</h2>
+<p>Varolan bir fonksiyonun bazı argümanlarını sabitleyip yeni fonksiyon üretmek istiyorsan closure yazmana gerek yok; <code>partial</code> bunu tek satırda yapar.</p>
+<pre class="py">from functools import partial
+
+def fiyatla(tutar, kdv, indirim):
+    return round(tutar * (1 - indirim) * (1 + kdv), 2)
+
+standart = partial(fiyatla, kdv=0.20, indirim=0.0)
+kampanya = partial(fiyatla, kdv=0.20, indirim=0.15)
+
+print(standart(1000))
+print(kampanya(1000))
+print(list(map(kampanya, [100, 200])))
+
+# Hazır fonksiyonlarla da
+ikili = partial(int, base=2)
+print(ikili("1010"))</pre>
+<p><code>partial</code> ürünü sıradan bir çağrılabilirdir; <code>map</code>'e, <code>sorted</code>'ın key'ine, bir dekoratöre argüman olarak verilebilir. Doldurduğun argümanları çağrı anında yeniden geçersen senin verdiğin kazanır.</p>
+
+<h2>Hepsi bir arada: Anadolu Market sipariş raporu</h2>
+<pre class="py">from functools import partial
+
+siparisler = [
+    {"no": 101, "sehir": "İstanbul", "tutar": 1200, "durum": "teslim"},
+    {"no": 102, "sehir": "Ankara", "tutar": 350, "durum": "iptal"},
+    {"no": 103, "sehir": "İstanbul", "tutar": 4800, "durum": "kargoda"},
+    {"no": 104, "sehir": "Ankara", "tutar": 2100, "durum": "teslim"},
+]
+
+def esik_ustu(esik, s):
+    return s["durum"] != "iptal" and s["tutar"] &gt;= esik
+
+buyukler = list(filter(partial(esik_ustu, 1000), siparisler))
+sirali = sorted(buyukler, key=lambda s: (s["sehir"], -s["tutar"]))
+for s in sirali:
+    print(f'{s["sehir"]:&lt;10}{s["no"]:&gt;5}{s["tutar"]:&gt;8}')
+print("Hepsi 1000 üstü mü:", all(s["tutar"] &gt;= 1000 for s in sirali))</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: fonksiyonlarla çalışan araç kutusu</h2>
+<p>lambda, sorted/key, map/filter/reduce, any/all, closure ve partial'ı gördün. Bu bölüm, iş kodunda bunları daha temiz ve doğru kullanmanı sağlayan araçları ekliyor: <code>operator</code> modülü, kararlı sıralamayla karışık yönlü sıralama, Türkçe alfabetik sıralama, <code>min</code>/<code>max</code>'ın <code>default</code> parametresi, fonksiyon tabloları (dispatch) ve fonksiyon birleştirme (composition). Closure'ların kapsam ayrıntıları için <b>Kapsam ve kapanışlar</b> dersine bakabilirsin.</p>
+
+<h3>operator modülü: lambda yazmadan anahtar</h3>
+<p><code>key=lambda k: k["tutar"]</code> o kadar sık yazılır ki standart kütüphane bunun hazırını sunar. <code>itemgetter</code> sözlük anahtarı ya da indeksle, <code>attrgetter</code> nesne özniteliğiyle, <code>methodcaller</code> metot çağrısıyla değer çeken fonksiyonlar üretir. Birden çok alan verirsen demet döndürür; çoklu sıralama anahtarı hazır olur. Ayrıca biraz daha hızlıdır ve adı ne yaptığını söyler.</p>
+<div class="tbl-wrap"><table>
+<tr><th>lambda ile</th><th>operator ile</th></tr>
+<tr><td><code>lambda k: k["tutar"]</code></td><td><code>itemgetter("tutar")</code></td></tr>
+<tr><td><code>lambda k: (k["sehir"], k["tutar"])</code></td><td><code>itemgetter("sehir", "tutar")</code></td></tr>
+<tr><td><code>lambda d: d[1]</code></td><td><code>itemgetter(1)</code></td></tr>
+<tr><td><code>lambda m: m.bakiye</code></td><td><code>attrgetter("bakiye")</code></td></tr>
+<tr><td><code>lambda s: s.strip()</code></td><td><code>methodcaller("strip")</code></td></tr>
+<tr><td><code>lambda a, b: a * b</code></td><td><code>operator.mul</code></td></tr>
+</table></div>
+<pre class="py">from operator import itemgetter, mul
+from functools import reduce
+
+siparisler = [
+    {"id": 3, "sehir": "İzmir", "tutar": 820.0},
+    {"id": 1, "sehir": "Ankara", "tutar": 1830.0},
+    {"id": 2, "sehir": "Ankara", "tutar": 450.0},
+]
+for s in sorted(siparisler, key=itemgetter("sehir", "tutar")):
+    print(s["id"], s["sehir"], s["tutar"])
+
+kac = itemgetter("id", "tutar")
+print([kac(s) for s in siparisler])
+print("Faktöriyel 5:", reduce(mul, range(1, 6), 1))
+</pre>
+
+<h3>Kararlı sıralama: karışık yönler, metinlerde bile</h3>
+<p>Sayısal alanda azalan sıralama için eksi işareti hilesini (<code>-k["tutar"]</code>) gördün. Ama metni "eksi" yapamazsın: "şehre göre artan, aynı şehirde <b>ada göre azalan</b>" isteğinde ne yaparsın? Python'un sıralaması <b>kararlıdır</b> (stable): eşit anahtarlı elemanların önceki sırası korunur. Bu yüzden önce <b>ikincil</b> ölçüte göre, sonra <b>birincil</b> ölçüte göre sıralarsın; her geçiş kendi yönünü alır.</p>
+<pre class="py">from operator import itemgetter
+
+calisanlar = [("Satış", "Ayşe"), ("BT", "Can"), ("Satış", "Mehmet"), ("BT", "Ali"), ("Satış", "Zeynep")]
+
+adim1 = sorted(calisanlar, key=itemgetter(1), reverse=True)   # ikincil: ad, azalan
+adim2 = sorted(adim1, key=itemgetter(0))                      # birincil: departman, artan
+for dep, ad in adim2:
+    print(dep, ad)
+</pre>
+<div class="tip"><b>Sıra ters!</b>Çok geçişli sıralamada en önemsiz ölçütten başlarsın, en önemli ölçütü <b>en son</b> uygularsın. Son geçiş "kazanır"; önceki geçişler yalnızca eşitlikleri çözer.</div>
+
+<h3>Türkçe alfabetik sıralama</h3>
+<p><code>sorted(["Çorum", "Bursa", "Ağrı", "Iğdır", "İzmir"])</code> Unicode kod sırasına göre sıralar: Ç, I, İ, Ş, Ğ gibi harfler Latin harflerinin <b>sonuna</b> düşer. Türkçe sıralama için kendi anahtarını yazarsın: her harfi Türk alfabesindeki sıra numarasına çeviren bir fonksiyon. (Kendi bilgisayarında <code>locale.strxfrm</code> ile işletim sisteminin Türkçe ayarı da kullanılabilir ama sunucuda o ayar kurulu olmayabilir.)</p>
+<pre class="py">ALFABE = "abcçdefgğhıijklmnoöprsştuüvyz"
+SIRA = {h: i for i, h in enumerate(ALFABE)}
+
+def tr_kucuk(metin):
+    return metin.replace("I", "ı").replace("İ", "i").lower()
+
+def tr_anahtar(metin):
+    return [SIRA.get(h, 100 + ord(h)) for h in tr_kucuk(metin)]
+
+iller = ["Çorum", "Bursa", "Şanlıurfa", "Iğdır", "İzmir", "Ağrı", "Uşak", "Ordu", "Ödemiş"]
+print("Varsayılan:", sorted(iller))
+print("Türkçe    :", sorted(iller, key=tr_anahtar))
+</pre>
+
+<h3>min, max: key ve default</h3>
+<p><code>max(siparisler, key=itemgetter("tutar"))</code> en büyük tutarlı <b>siparişi</b> (sözlüğü) döndürür, tutarın kendisini değil. Boş veride ValueError fırlatır; <code>default=</code> parametresi bunu önler. Eşitlikte ilk karşılaşılan eleman döner.</p>
+<pre class="py">from operator import itemgetter
+
+depolar = [{"ad": "Gebze", "km": 42, "stok": 0}, {"ad": "Tuzla", "km": 18, "stok": 5}, {"ad": "Esenyurt", "km": 18, "stok": 9}]
+uygun = [d for d in depolar if d["stok"] &gt; 0]
+print(min(uygun, key=itemgetter("km"))["ad"])                     # eşitlikte ilki
+print(min((d for d in depolar if d["stok"] &gt; 100), key=itemgetter("km"), default=None))
+</pre>
+
+<h3>Fonksiyon tablosu ve fonksiyon birleştirme</h3>
+<p>Fonksiyonlar değer olduğu için sözlüğe konabilir. Uzun bir <code>if/elif</code> zinciri yerine "işlem adı → fonksiyon" tablosu (dispatch table) kurarsın; yeni işlem eklemek tek satırdır. Fonksiyonları sıralı bir boru hattına bağlamak (composition) ise <code>reduce</code> ile birkaç satırdır.</p>
+<pre class="py">from functools import reduce
+
+KOMISYON = {
+    "havale": lambda t: 0.0,
+    "eft": lambda t: 4.5,
+    "swift": lambda t: max(25.0, round(t * 0.002, 2)),
+}
+
+def komisyon(tur, tutar):
+    try:
+        return KOMISYON[tur](tutar)
+    except KeyError:
+        raise ValueError(f"bilinmeyen işlem türü: {tur}") from None
+
+print(komisyon("eft", 1000), komisyon("swift", 50000))
+
+def boru(*fonksiyonlar):
+    return lambda x: reduce(lambda deger, f: f(deger), fonksiyonlar, x)
+
+temizle = boru(str.strip, str.lower, lambda s: s.replace(" ", "_"))
+print(temizle("  Anadolu Market Rapor "))
+</pre>
+<div class="warn"><b>reduce'un başlangıç değeri</b><code>reduce(f, liste)</code> boş listede TypeError verir. Üçüncü argüman (initializer) hem boş durumu çözer hem de türü belirler: <code>reduce(mul, sayilar, 1)</code>. Toplama için ise reduce yerine <code>sum</code> kullan.</div>
+
+<h3>map ve filter'ın iki küçük sırrı</h3>
+<ul>
+<li><code>map(f, a, b)</code> birden çok yinelenebilir alır ve <code>f(a[i], b[i])</code> çağırır; en kısa olan bitince durur: <code>list(map(mul, fiyatlar, adetler))</code>.</li>
+<li><code>filter(None, veri)</code> yalnız doğru (truthy) değerleri bırakır: boş metinleri, 0'ları ve None'ları atmanın kısa yolu. Dikkat: 0 da gider; 0 geçerli bir değerse kullanma.</li>
+</ul>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal kodda fonksiyonel araçlar en çok üç yerde görülür: (1) raporlarda çok ölçütlü sıralama (<code>itemgetter</code> ve iki geçişli sıralama), (2) iş kurallarının tablo hâlinde tutulması (komisyon türleri, KDV oranları, durum geçişleri: if/elif yerine sözlük), (3) veri temizleme adımlarının sıralı bir fonksiyon listesi olarak yazılması. Üçünde de amaç aynı: kural değişince kodun yapısı değil, yalnızca tablo ya da liste değişsin. Türkçe sıralama ise müşteri listesi, il listesi gibi kullanıcıya gösterilen her ekranda istenir; "Çorum neden en sonda?" sorusu mutlaka gelir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Saf fonksiyon ve test edilebilirlik</h3>
+<p>Fonksiyonel programlamanın kalbi saf fonksiyondur (pure function): aynı girdiye her zaman aynı çıktıyı verir, dışarıdaki hiçbir şeyi değiştirmez. <code>kdv_ekle(100)</code> saftır; "global listeye ekleyen" bir fonksiyon değildir. Saf fonksiyonlar test etmesi en kolay kod parçalarıdır: girdi ver, çıktıyı assert et, bitti. İş kodunda veri dönüşümlerini saf fonksiyonlara, yan etkileri (dosya yazma, veritabanı, e-posta) ise sınırlı birkaç noktaya toplarsan hem test hem hata ayıklama (debugging) kolaylaşır.</p>
+<h3>Closure'ın geç bağlanma tuzağı</h3>
+<p>Döngü içinde lambda ya da iç fonksiyon üretirken dikkat: <code>[lambda: i for i in range(3)]</code> listesindeki üç fonksiyon da çağrıldığında 2 döndürür; çünkü <code>i</code> çağrı anında okunur, döngü bitmiştir. Çözüm değeri o anda bağlamak: <code>lambda i=i: i</code> ya da <code>partial</code>. Bu tuzak kod incelemelerinde (code review) ve mülakatlarda sık çıkar.</p>
+<h3>İş hayatında nasıl görünür?</h3>
+<p>pandas'ta <code>df["tutar"].map(f)</code> ve <code>df.apply(f, axis=1)</code>, bu dersteki map'in sütun üzerinde çalışan hali. Web çerçevelerinde yol (route) işleyicileri, olay dinleyicileri ve geri çağırma (callback) fonksiyonları hep "fonksiyonu argüman olarak geçir" kalıbıdır. Konfigürasyonla davranış üretme (şube bazlı komisyon, müşteri segmentine göre indirim) ise closure ve partial'ın doğal alanıdır; bu desenle bir "if şube == ... elif şube == ..." zincirinden kurtulursun.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fonksiyonel">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../iteratorler-uretecler/">← Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle</a><a href="../dekoratorler/">Dekoratörler (decorators) ve bağlam yöneticileri (context managers) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,258 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python'ın iç yapısı: nesne, referans, bellek | Kesit Python</title><meta name="description" content="Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/bellek-ic-yapi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Python'ın iç yapısı: nesne, referans, bellek"><meta property="og:description" content="Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/bellek-ic-yapi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Python'ın iç yapısı: nesne, referans, bellek","description":"Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/bellek-ic-yapi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>Python'ın iç yapısı: nesne, referans, bellek</h1><p class="st-l">Her şey nesne; id/is ve ==, referans sayımı ve gc, değişebilirlik ve copy/deepcopy, interning, __slots__, sys.getsizeof ve dis ile bytecode.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/bellek-ic-yapi">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden iç yapı?</h2>
+<p>Ilgaz Bank'ta bir geliştirici müşteri listesini "kopyalayıp" değiştirdi; asıl liste de değişti ve yanlış hesaplara SMS gitti. Başka biri <code>if durum is "aktif"</code> yazdı, bazen çalıştı bazen çalışmadı. Üçüncüsü 10 milyon küçük nesneyle belleği doldurdu. Üçü de Python'ın nesne modelini bilmemekten kaynaklanır. Bu ders, günlük hatalara yol açan iç mekanizmaları gösterir.</p>
+
+<h2>Her şey nesne, değişken bir etiket</h2>
+<p>Python'da <code>a = [1, 2]</code> demek, bellekte bir liste nesnesi yaratıp <code>a</code> adını ona bağlamaktır. <code>b = a</code> ikinci bir ad bağlar, yeni nesne yaratmaz. <code>id()</code> nesnenin kimliğini (CPython'da adresi) verir; <code>is</code> "aynı nesne mi", <code>==</code> "aynı değer mi" sorar.</p>
+<pre class="py">a = [1, 2, 3]
+b = a                 # aynı nesneye ikinci etiket
+c = [1, 2, 3]         # ayrı nesne, aynı değer
+print(a is b, a is c, a == c)
+print(id(a) == id(b), id(a) == id(c))
+
+b.append(4)
+print(a)              # a da değişti; çünkü aynı nesne
+
+def ekle(lst):
+    lst.append(99)    # çağıranın listesi değişir
+ekle(a)
+print(a)
+</pre>
+<div class="note"><b>Çağrı modeli</b>Python "nesne referansıyla çağırır": fonksiyona nesnenin adresi gider. Değişebilir (mutable) nesneyi içeride değiştirirsen dışarısı etkilenir; değişmez (immutable) nesneye yeniden atama yaparsan yalnızca yerel ad değişir.</div>
+
+<h2>Değişebilirlik ve kopya</h2>
+<p>int, float, str, tuple, frozenset değişmezdir; list, dict, set ve kendi sınıfların değişebilir. Bağımsız bir liste istiyorsan kopyala: <code>lst.copy()</code>, <code>lst[:]</code>, <code>list(lst)</code> <b>sığ kopya</b> (shallow) verir: dış kap yeni, içindeki nesneler aynı. İç içe yapıda <code>copy.deepcopy</code> gerekir.</p>
+<pre class="py">import copy
+
+musteri = {"ad": "Ayşe", "hesaplar": [1500.0, 320.0]}
+sig = musteri.copy()
+derin = copy.deepcopy(musteri)
+
+sig["ad"] = "Ayşe K."            # dış sözlük bağımsız
+sig["hesaplar"].append(50.0)     # iç liste paylaşılıyor!
+print(musteri["ad"], musteri["hesaplar"])
+
+derin["hesaplar"].append(999.0)
+print(musteri["hesaplar"], derin["hesaplar"])
+
+print(musteri["hesaplar"] is sig["hesaplar"], musteri["hesaplar"] is derin["hesaplar"])
+</pre>
+<div class="warn"><b>Varsayılan argüman tuzağı</b><code>def ekle(x, liste=[])</code> yazarsan liste bir kez yaratılır ve tüm çağrılar arasında paylaşılır. <code>liste=None</code> ver, içeride <code>if liste is None: liste = []</code>.</div>
+
+<h2>Referans sayımı ve çöp toplayıcı</h2>
+<p>CPython her nesnede bir sayaç tutar: kaç ad/kap ona işaret ediyor. Sayı sıfıra inince nesne anında silinir. <code>sys.getrefcount</code> bunu gösterir (çağrının kendisi +1 ekler). Sayım, birbirini gösteren <b>döngüsel</b> referanslarda yetmez (a → b → a); bunları periyodik çalışan <code>gc</code> modülü bulup temizler.</p>
+<pre class="py">import sys, gc
+
+veri = [1, 2, 3]
+print(sys.getrefcount(veri))          # 2: veri + getrefcount argümanı
+alias = veri
+print(sys.getrefcount(veri))          # 3
+del alias
+print(sys.getrefcount(veri))          # 2
+
+class Dugum:
+    def __init__(self, ad):
+        self.ad = ad
+        self.es = None
+
+a, b = Dugum("a"), Dugum("b")
+a.es, b.es = b, a                     # döngü
+del a, b                              # sayaç sıfıra inmez
+print("gc topladı:", gc.collect() &gt;= 2)
+print("gc eşikleri:", gc.get_threshold())
+</pre>
+<div class="tip"><b>Pratikte</b>gc'yi elle çağırman nadiren gerekir. Sızıntı şüphesinde <code>tracemalloc</code> ile anlık görüntü al, büyüyen satırı bul; çoğu zaman sorun küresel bir liste ya da önbelleğin sınırsız büyümesidir, gc değil.</div>
+
+<h2>Interning: is tuzağı</h2>
+<p>CPython küçük tam sayıları (-5..256) ve bazı kısa string'leri bir kez yaratıp paylaşır (interning). Bu yüzden <code>a = 100; b = 100; a is b</code> True çıkar ama 1000 için False olabilir. Çıkarım: değer karşılaştırması <b>her zaman</b> <code>==</code>; <code>is</code> yalnızca <code>None</code>, <code>True</code>, <code>False</code> ve "aynı nesne mi" sorusu için.</p>
+<pre class="py">a, b = 100, 100
+c, d = 10**5, 10**5
+print(a is b, c is d, c == d)          # interning küçük sayıda
+
+s1 = "aktif"
+s2 = "".join(["ak", "tif"])
+print(s1 == s2, s1 is s2)              # değer eşit, kimlik farklı olabilir
+
+import sys
+s3 = sys.intern(s2)
+print(s3 is sys.intern("aktif"))       # intern ile zorla paylaştırma
+</pre>
+
+<h2>Bellek boyutu ve __slots__</h2>
+<p><code>sys.getsizeof(x)</code> nesnenin kendi boyutunu verir (içindekileri saymaz). Normal bir sınıf örneği öznitelikleri bir <code>__dict__</code> sözlüğünde tutar; milyonlarca küçük nesnede bu sözlükler belleği yutar. <code>__slots__</code> tanımlarsan öznitelikler sabit yuvalarda saklanır, sözlük oluşmaz, bellek belirgin düşer ve erişim biraz hızlanır. Bedeli: tanımlanmamış öznitelik eklenemez.</p>
+<pre class="py">import sys
+
+class Islem:
+    def __init__(self, hesap, tutar):
+        self.hesap = hesap
+        self.tutar = tutar
+
+class IslemSlots:
+    __slots__ = ("hesap", "tutar")
+    def __init__(self, hesap, tutar):
+        self.hesap = hesap
+        self.tutar = tutar
+
+n = Islem(1, 10.0)
+s = IslemSlots(1, 10.0)
+print("normal:", sys.getsizeof(n) + sys.getsizeof(n.__dict__), "bayt")
+print("slots :", sys.getsizeof(s), "bayt")
+print(hasattr(s, "__dict__"))
+try:
+    s.aciklama = "x"
+except AttributeError as e:
+    print("slots engelledi:", e)
+print(sys.getsizeof([]), sys.getsizeof([1, 2, 3]), sys.getsizeof((1, 2, 3)), sys.getsizeof("ab"))
+</pre>
+<div class="tbl-wrap"><table><tr><th>Kavram</th><th>Araç</th><th>Günlük etkisi</th></tr>
+<tr><td>Kimlik vs değer</td><td><code>is</code>, <code>==</code>, <code>id</code></td><td>is yalnızca None/singleton için</td></tr>
+<tr><td>Kopya</td><td><code>copy()</code>, <code>deepcopy</code></td><td>İç içe yapıda deepcopy</td></tr>
+<tr><td>Ömür</td><td>refcount, <code>gc</code></td><td>Döngüsel referans, sızıntı</td></tr>
+<tr><td>Bellek</td><td><code>getsizeof</code>, <code>__slots__</code>, <code>tracemalloc</code></td><td>Çok sayıda küçük nesne</td></tr>
+<tr><td>Çalışma</td><td><code>dis</code></td><td>Neden bazı ifadeler hızlı</td></tr>
+</table></div>
+
+<h2>Bytecode: dis ile kısa bakış</h2>
+<p>Python kaynak kodu önce <b>bytecode</b>'a derlenir, sonra sanal makine bu komutları yorumlar. <code>dis</code> modülü bu komutları gösterir; "neden yerel değişken küreselden hızlı?" gibi soruların cevabı buradadır (LOAD_FAST vs LOAD_GLOBAL).</p>
+<pre class="py">import dis
+
+def kdv(tutar):
+    return tutar * 1.2
+
+komutlar = [i.opname for i in dis.get_instructions(kdv)]
+print(komutlar)
+print("sabit katlama:", [i.argval for i in dis.get_instructions(lambda: 60 * 60 * 24) if i.opname == "RETURN_CONST" or i.opname == "LOAD_CONST"])
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Fonksiyona geçen ne? "Nesne referansıyla çağrı"</h2>
+<p>Python'da fonksiyona ne değer kopyası ne de C++'taki gibi bir referans geçer; parametre adı, çağıranın verdiği <b>aynı nesneye</b> bağlanır (call by sharing / call by object reference). Sonuç iki kurala iner: fonksiyon içinde nesneyi <b>değiştirirsen</b> (append, anahtar atama) çağıran da görür; ada <b>yeni nesne atarsan</b> (<code>x = ...</code>) yalnızca yerel ad değişir.</p>
+<pre class="py">def indirim_uygula(sepet):
+    sepet["indirim"] = 50            # nesneyi değiştirir: çağıran görür
+
+def sepeti_sifirla(sepet):
+    sepet = {}                       # yalnız yerel adı yeni nesneye bağlar
+
+def kalem_ekle(kalemler):
+    kalemler += ["kalem"]            # list için += yerinde değiştirir (extend)
+
+def kalem_ekle_kopya(kalemler):
+    kalemler = kalemler + ["kalem"]  # + yeni liste üretir
+
+s = {"tutar": 400}
+indirim_uygula(s); sepeti_sifirla(s)
+print(s)
+
+k1, k2 = ["defter"], ["defter"]
+kalem_ekle(k1); kalem_ekle_kopya(k2)
+print(k1, k2)
+</pre>
+<div class="warn"><b>+= her türde aynı değil</b>Liste için <code>a += b</code> yerinde değiştirir (<code>__iadd__</code>); demet, str ve int değişmez olduğu için aynı satır yeni nesne üretir. Kodu okurken türü bilmeden <code>+=</code>'ın yan etkisini tahmin edemezsin.</div>
+
+<h2>Liste neden "fazla" yer ayırır?</h2>
+<p>Liste elemanları değil, elemanlara işaretçileri (pointer) yan yana tutar. Her <code>append</code>'te yeniden bellek istememek için CPython listeyi büyütürken <b>fazladan yer</b> (over-allocation) ayırır; bu yüzden <code>append</code> ortalamada O(1)'dir. Boyutu aşağıda kademeli artarken görürsün; tam sayılar sürüme göre değişebilir.</p>
+<pre class="py">import sys
+
+liste = []
+onceki = sys.getsizeof(liste)
+print(f"boş: {onceki} bayt")
+for i in range(20):
+    liste.append(i)
+    boyut = sys.getsizeof(liste)
+    if boyut != onceki:
+        print(f"{len(liste):2} eleman -&gt; {boyut} bayt (yeniden ayırma)")
+        onceki = boyut
+</pre>
+
+<h2>Sayılar için kompakt kaplar: array, bytes, bytearray, memoryview</h2>
+<p>Bir listede bir milyon tamsayı, bir milyon ayrı <code>int</code> nesnesi + bir milyon işaretçi demektir. Aynı türden çok sayıda sayıyı ham bayt olarak saklamak için <code>array</code> modülü, ikili veri için <code>bytes</code> (değişmez) ve <code>bytearray</code> (değişebilir) vardır. <code>memoryview</code> ise bu tamponların bir bölümüne <b>kopyalamadan</b> bakmanı sağlar: büyük bir dosya tamponunu dilimlemek bellek harcamaz.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kap</th><th>Eleman</th><th>Değişebilir?</th><th>Ne zaman?</th></tr>
+<tr><td><code>list</code></td><td>Herhangi bir nesneye işaretçi</td><td>Evet</td><td>Genel amaçlı, karışık türler</td></tr>
+<tr><td><code>array.array('d', ...)</code></td><td>Ham C double</td><td>Evet</td><td>Tek tip çok sayı, numpy yoksa</td></tr>
+<tr><td><code>bytes</code></td><td>0-255 bayt</td><td>Hayır</td><td>Dosya/ağ verisi, hash, anahtar</td></tr>
+<tr><td><code>bytearray</code></td><td>0-255 bayt</td><td>Evet</td><td>Tampon doldurma, protokol yazma</td></tr>
+<tr><td><code>memoryview</code></td><td>Başka tampona görünüm</td><td>Kaynağa bağlı</td><td>Kopyasız dilimleme</td></tr>
+<tr><td><code>numpy.ndarray</code></td><td>Ham, çok boyutlu</td><td>Evet</td><td>Sayısal hesap (numpy dersi)</td></tr>
+</table></div>
+<pre class="py">import sys
+from array import array
+
+n = 100_000
+liste = [float(i) for i in range(n)]
+dizi = array("d", liste)
+liste_toplam = sys.getsizeof(liste) + sum(sys.getsizeof(x) for x in liste)
+print(f"list : {liste_toplam / 1024:7.0f} KB")
+print(f"array: {sys.getsizeof(dizi) / 1024:7.0f} KB")
+
+tampon = bytearray(b"HDR|ILGAZ-BANKA|0001234500|TRY")
+gorunum = memoryview(tampon)
+tutar_alani = gorunum[16:26]          # kopya yok, aynı belleğe pencere
+print(bytes(tutar_alani).decode())
+tutar_alani[0:2] = b"99"              # pencereden yazmak kaynağı değiştirir
+print(tampon.decode())
+</pre>
+
+<h2>gc modülü: döngüsel çöp toplayıcıyı yönetmek</h2>
+<p>Referans sayımı nesnelerin çoğunu anında temizler; yalnızca <b>döngüler</b> (a → b → a) için ayrı bir toplayıcı çalışır. Bu toplayıcı nesneleri üç kuşakta (generation 0, 1, 2) izler: yeni nesneler 0. kuşaktadır, bir toplamadan sağ çıkanlar yukarı kuşağa geçer. Eşikler <code>gc.get_threshold()</code> ile görülür.</p>
+<pre class="py">import gc
+
+class Hesap:
+    def __init__(self, no):
+        self.no = no
+        self.ortak = None
+
+print("eşikler:", gc.get_threshold())
+a, b = Hesap(1), Hesap(2)
+a.ortak, b.ortak = b, a          # döngü
+del a, b                         # referans sayısı 0'a inmez
+print("toplanan nesne:", gc.collect() &gt;= 2)
+</pre>
+<ul>
+<li><code>gc.collect()</code>: elle tam toplama; toplanan nesne sayısını döndürür. Büyük bir toplu işin sonunda belleği hemen geri istemek için kullanılır.</li>
+<li><code>gc.disable()</code>: milyonlarca küçük nesne oluşturan kısa ömürlü bir betikte toplayıcının sık sık devreye girmesini engeller; iş bitince <code>gc.enable()</code>. Döngü üreten kodda bellek büyür, dikkat.</li>
+<li><code>gc.freeze()</code> (3.7+): sunucu süreçleri çatallamadan (fork) önce mevcut nesneleri toplayıcıdan saklar; kopya-yazma (copy-on-write) sayfalarını korur.</li>
+<li><code>__del__</code> metoduna güvenme: ne zaman çağrılacağı garanti değildir, içindeki hata yalnız uyarı basar. Kaynak kapatmak için <code>with</code> ve bağlam yöneticisi (context manager) kullan.</li>
+</ul>
+
+<h2>Zayıf referanslı önbellek: WeakValueDictionary</h2>
+<p>Bir önbellek nesneleri sözlükte tutarsa, nesneler hiç ölmez ve bellek sızıntısı (memory leak) başlar. <code>weakref.WeakValueDictionary</code> değerlere zayıf referans tutar: programda o nesneye başka güçlü referans kalmayınca kayıt kendiliğinden silinir. "Bellekte zaten varsa aynı nesneyi ver, yoksa yükle" (identity map) kalıbı ORM'lerde böyle çalışır.</p>
+<pre class="py">import weakref
+
+class Urun:
+    def __init__(self, kod):
+        self.kod = kod
+
+kayit = weakref.WeakValueDictionary()
+
+def urun_getir(kod):
+    u = kayit.get(kod)
+    if u is None:
+        u = Urun(kod)            # gerçekte veritabanından yüklenir
+        kayit[kod] = u
+    return u
+
+x = urun_getir("AM-100")
+print(x is urun_getir("AM-100"), len(kayit))
+del x
+print(len(kayit))               # kullanılmayan nesne önbellekten düştü
+</pre>
+<div class="tip"><b>Sızıntı kontrol listesi</b>Uzun yaşayan süreçte bellek sürekli artıyorsa sırayla bak: sınırsız büyüyen modül düzeyi listeler/sözlükler (önbellek, olay kaydı), hiç çıkarılmayan gözlemci (observer) abonelikleri, kapanışların (closure) yakaladığı büyük nesneler, istisna nesnesinde saklanan traceback'in tuttuğu yerel değişkenler. <code>tracemalloc</code> anlık görüntü farkı (performans dersi) büyüyen satırı gösterir.</div>
+<div class="note"><b>Gerçek işte</b>Bir web servisinin belleği günler içinde yavaşça artıp konteyner yeniden başlıyorsa klasik suçlu, istek başına bir şey ekleyip hiç silmeyen modül düzeyi bir sözlüktür. Önbelleğe her zaman bir sınır koy (<code>lru_cache(maxsize=...)</code>, TTL ya da WeakValueDictionary) ve servis metriklerinde süreç belleğini (RSS) izle. "Yeniden başlatınca düzeliyor" bir çözüm değil, bir belirtidir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Değişmezliği tasarımda kullan</h3>
+<p>Fonksiyona verilen listeyi değiştirmeyen, yeni liste döndüren "saf" fonksiyonlar paylaşım hatalarını baştan önler. <code>@dataclass(frozen=True)</code>, <code>tuple</code>, <code>frozenset</code> ve <code>MappingProxyType</code> değişmez arayüz sağlar; eşzamanlı kodda kilit ihtiyacını azaltır.</p>
+<h3>Zayıf referans</h3>
+<p>Önbellek tutarken nesnelerin ömrünü uzatmak istemezsin; <code>weakref</code> sayaç artırmadan referans tutar, nesne başka yerde silinince önbellek girdisi de düşer (<code>WeakValueDictionary</code>).</p>
+<h3>Bellek ayırıcı</h3>
+<p>CPython küçük nesneler için kendi havuz ayırıcısını (pymalloc) kullanır; serbest bırakılan bellek işletim sistemine hemen dönmeyebilir. Uzun süreli süreçlerde "bellek düşmüyor" gözlemi çoğu zaman sızıntı değil bu havuzlamadır. Gerçek sızıntıyı <code>tracemalloc</code> ile iki anlık görüntü arasındaki farktan bul.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/bellek-ic-yapi">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../performans/">← Profil ve optimizasyon</a><a href="../ileri-oop/">İleri OOP: dunder metotlar, ABC, Protocol ve descriptor →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,265 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları | Kesit Python</title><meta name="description" content="Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sql-analitik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları"><meta property="og:description" content="Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sql-analitik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları","description":"Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/sql-analitik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları</h1><p class="st-l">Anadolu Market'in gerçek şemasında CTE ile adım adım sorgu, ROW_NUMBER/RANK/LAG/LEAD, kümülatif toplam ve hareketli ortalama, tekilleştirme, boşluk-ada, kohort sorgusu, JOIN yayılması ve NULL tuzakları, tarih fonksiyonları ve her kalıbın pandas karşılığı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden Python'dan SQL?</h2>
+<p>Veri ilanlarının neredeyse hepsinde ilk satır aynıdır: "İleri düzey SQL". Şirketin verisi bir veritabanında ya da veri ambarında (data warehouse) durur; analist, bilimci ve veri mühendisi günün büyük kısmında SQL yazar, sonucu Python'a alıp pandas ile işler, grafiğe ya da modele verir. <b>sqlite3 ile Python</b> dersinde bağlantı, parametreli sorgu ve transaction'ı gördün. Bu ders bir üst katman: <b>analitik SQL</b>. Yani CTE (Common Table Expression) ile sorguyu adım adım kurmak, pencere fonksiyonları (window functions) ile "satırı kaybetmeden" grup hesabı yapmak ve aynı işin pandas karşılığını bilmek.</p>
+<p>Bütün örnekler Anadolu Market'in gerçek şemasında: <code>orders</code> (910 sipariş), <code>order_items</code> (1.620 satır), <code>customers</code> (150), <code>products</code> (40). <code>veri.baglan("anadolu_market")</code> tüm tabloları bellek içi bir SQLite veritabanına yükler; SQLite 3.25 ve sonrası pencere fonksiyonlarını destekler (tarayıcıdaki sürüm çok daha yeni).</p>
+<pre class="py">import veri
+import pandas as pd
+
+con = veri.baglan("anadolu_market")
+print(con.execute("SELECT sqlite_version()").fetchone()[0])
+
+# pd.read_sql: sorgu sonucunu doğrudan DataFrame yapar; değerleri ? ile parametre olarak ver
+sql = """
+SELECT channel, status, COUNT(*) AS siparis
+FROM orders
+WHERE order_date &gt;= ?
+GROUP BY channel, status
+ORDER BY channel, siparis DESC
+"""
+df = pd.read_sql(sql, con, params=("2024-01-01",))
+print(df.head(6))
+print(df.groupby("channel")["siparis"].sum())</pre>
+<div class="warn"><b>f-string ile sorgu kurma</b>Kullanıcıdan ya da dosyadan gelen değeri <code>f"... WHERE city = '{sehir}'"</code> diye sorguya gömmek SQL enjeksiyonuna (SQL injection) kapı açar ve tırnaklı değerlerde (ör. "Ka'an") sorguyu bozar. Değerler için her zaman <code>?</code> (SQLite) ya da <code>%s</code>/<code>:ad</code> (PostgreSQL sürücüleri) parametresi kullan. Tablo ve sütun adları parametre olamaz; onları sabit bir izin listesinden seç.</div>
+
+<h2>Ciro tanımı: önce sözleşme</h2>
+<p>Analitik sorgunun ilk adımı SQL değil, tanımdır. Bu derste <b>net ciro</b> = <code>quantity * unit_price * (1 - discount)</code>; yalnız <code>status IN ('delivered', 'shipped')</code> siparişler sayılır (iptal ve iade hariç). Bu tanımı her sorguda yeniden yazmak yerine bir CTE'ye koyarız ve diğer adımlar onun üzerine kurulur.</p>
+
+<h2>CTE: sorguyu adım adım kurmak</h2>
+<p><code>WITH ad AS (...)</code> bir sorguya isim verir; sonraki adımlar bu ismi tablo gibi kullanır. İç içe alt sorgu (subquery) ile aynı işi yapar ama yukarıdan aşağı okunur, her adım ayrı test edilebilir ve aynı ara sonuç birden çok yerde kullanılabilir.</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market")
+
+sql = """
+WITH gecerli AS (                 -- 1) iptal/iade dışı siparişler
+    SELECT order_id, customer_id, order_date, channel
+    FROM orders
+    WHERE status IN ('delivered', 'shipped')
+),
+satir AS (                        -- 2) satır bazında net tutar
+    SELECT g.order_id, g.channel, strftime('%Y', g.order_date) AS yil,
+           i.quantity * i.unit_price * (1 - i.discount) AS net
+    FROM gecerli g
+    JOIN order_items i ON i.order_id = g.order_id
+)
+SELECT yil, channel, ROUND(SUM(net), 2) AS ciro,
+       COUNT(DISTINCT order_id) AS siparis
+FROM satir
+GROUP BY yil, channel
+ORDER BY yil, ciro DESC
+"""
+for satir in con.execute(sql):
+    print(satir)</pre>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Alt sorgu</th><th>CTE</th></tr>
+<tr><td>Okuma yönü</td><td>İçten dışa</td><td>Yukarıdan aşağı, adım adım</td></tr>
+<tr><td>Tekrar kullanım</td><td>Aynı alt sorguyu iki kez yazarsın</td><td>Bir kez tanımla, istediğin kadar kullan</td></tr>
+<tr><td>Hata ayıklama (debugging)</td><td>Parçayı ayırmak zor</td><td>Son SELECT'i <code>SELECT * FROM adim2</code> yapıp ara sonucu gör</td></tr>
+<tr><td>Performans</td><td colspan="2">Modern motorlarda çoğunlukla aynı plan; fark okunurlukta</td></tr>
+</table></div>
+
+<h2>Pencere fonksiyonları: satırı kaybetmeden grup hesabı</h2>
+<p><code>GROUP BY</code> her grubu tek satıra indirir. Pencere fonksiyonu ise her satırı yerinde bırakır ve yanına "penceresine" göre hesaplanan bir değer ekler. Kalıp hep aynıdır:</p>
+<pre class="code">FONKSIYON(...) OVER (PARTITION BY grup ORDER BY sıra ROWS BETWEEN ... )</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Fonksiyon</th><th>Ne yapar</th><th>Tipik soru</th></tr>
+<tr><td><code>ROW_NUMBER()</code></td><td>1, 2, 3… (eşitlikte de farklı numara)</td><td>Her müşterinin son siparişi (tekilleştirme)</td></tr>
+<tr><td><code>RANK()</code></td><td>Eşitlere aynı sıra, sonra boşluk: 1, 2, 2, 4</td><td>Sıralama tablosu</td></tr>
+<tr><td><code>DENSE_RANK()</code></td><td>Eşitlere aynı sıra, boşluksuz: 1, 2, 2, 3</td><td>"İkinci en yüksek maaş"</td></tr>
+<tr><td><code>LAG(x) / LEAD(x)</code></td><td>Önceki / sonraki satırın değeri</td><td>Aylık değişim, iki sipariş arası süre</td></tr>
+<tr><td><code>SUM(x) OVER (ORDER BY ...)</code></td><td>Kümülatif toplam</td><td>Yılbaşından bugüne (YTD) ciro</td></tr>
+<tr><td><code>AVG(x) OVER (... ROWS BETWEEN 2 PRECEDING AND CURRENT ROW)</code></td><td>Hareketli ortalama</td><td>3 aylık trend</td></tr>
+<tr><td><code>SUM(x) OVER ()</code></td><td>Tüm tablonun toplamı her satırda</td><td>Pay (yüzde) hesabı</td></tr>
+</table></div>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market")
+
+sql = """
+WITH aylik AS (
+    SELECT strftime('%Y-%m', o.order_date) AS ay,
+           SUM(i.quantity * i.unit_price * (1 - i.discount)) AS ciro
+    FROM orders o JOIN order_items i ON i.order_id = o.order_id
+    WHERE o.status IN ('delivered', 'shipped')
+    GROUP BY ay
+),
+hesap AS (
+    SELECT ay, ciro,
+           LAG(ciro) OVER (ORDER BY ay)                                   AS onceki,
+           SUM(ciro) OVER (PARTITION BY substr(ay, 1, 4) ORDER BY ay)     AS ytd,
+           AVG(ciro) OVER (ORDER BY ay ROWS BETWEEN 2 PRECEDING AND CURRENT ROW) AS ort3
+    FROM aylik
+)
+SELECT ay, ROUND(ciro) AS ciro,
+       ROUND(100.0 * (ciro - onceki) / onceki, 1) AS mom_yuzde,
+       ROUND(ytd) AS ytd, ROUND(ort3) AS ort3
+FROM hesap
+WHERE ay &gt;= '2024-01'          -- filtre pencereden SONRA: Ocak'ın LAG'i Aralık 2023'ü görür
+ORDER BY ay
+"""
+for r in con.execute(sql).fetchall()[:6]:
+    print(r)</pre>
+<div class="warn"><b>WHERE pencereden önce çalışır</b>SQL'in mantıksal sırası: FROM → WHERE → GROUP BY → HAVING → pencere fonksiyonları → SELECT → ORDER BY. Aynı SELECT içinde <code>WHERE ay &gt;= '2024-01'</code> yazarsan Aralık 2023 satırı pencereye hiç girmez; Ocak'ın <code>LAG</code> değeri NULL olur. Çözüm: pencereyi bir CTE'de hesapla, filtreyi dış sorguya koy (yukarıdaki gibi). Aynı nedenle pencere sonucunu WHERE'de kullanamazsın (<code>WHERE ROW_NUMBER() ... = 1</code> hata verir); önce CTE, sonra filtre.</div>
+
+<h3>Tekilleştirme: her müşterinin son siparişi</h3>
+<p>Analitikte en sık kalıplardan biri "her X'in en son / en büyük / ilk satırı"dır. <code>ROW_NUMBER()</code> grubu numaralar, dış sorgu 1 numarayı alır. Eşitlik ihtimali varsa ORDER BY'a ikinci bir anahtar (ör. <code>order_id</code>) ekle ki sonuç her çalıştırmada aynı olsun.</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market")
+
+sql = """
+WITH sirali AS (
+    SELECT customer_id, order_id, order_date, channel,
+           ROW_NUMBER() OVER (PARTITION BY customer_id
+                              ORDER BY order_date DESC, order_id DESC) AS rn
+    FROM orders
+)
+SELECT customer_id, order_id, order_date, channel
+FROM sirali WHERE rn = 1
+ORDER BY customer_id
+LIMIT 4
+"""
+for r in con.execute(sql):
+    print(r)</pre>
+
+<h3>Boşluk ve ada (gaps and islands): ardışık günler</h3>
+<p>"Art arda kaç gün sipariş aldık?" sorusunun klasik hilesi: tarihleri sırala, her tarihten sıra numarasını çıkar. Ardışık günlerde hem tarih hem numara birer artar; fark sabit kalır. Aynı farka sahip satırlar bir "ada"dır.</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market")
+
+sql = """
+WITH gunler AS (SELECT DISTINCT order_date AS gun FROM orders),
+adalar AS (
+    SELECT gun, julianday(gun) - ROW_NUMBER() OVER (ORDER BY gun) AS grup
+    FROM gunler
+)
+SELECT MIN(gun) AS bas, MAX(gun) AS son, COUNT(*) AS gun_sayisi
+FROM adalar GROUP BY grup
+ORDER BY gun_sayisi DESC, bas
+LIMIT 3
+"""
+print(con.execute(sql).fetchall())</pre>
+
+<h2>JOIN tuzakları: satır çoğalması ve NULL</h2>
+<p>Sipariş tablosunu sipariş satırlarıyla birleştirdiğin anda tablo 910 satırdan 1.620 satıra çıkar: bir siparişte birden çok ürün vardır. Sonra <code>COUNT(*)</code> ile "sipariş sayısı" saymak ya da sipariş düzeyindeki bir alanı (ör. kargo ücreti) <code>SUM</code> ile toplamak sonucu şişirir. Buna yayılma (fan-out) denir. Üç kural:</p>
+<ul>
+<li>Birleştirmeden önce her tablonun <b>tanecik düzeyini (grain)</b> söyle: "orders: sipariş başına bir satır", "order_items: sipariş-ürün başına bir satır".</li>
+<li>Çoğalan tabloda sipariş say: <code>COUNT(DISTINCT order_id)</code>. Daha iyisi: önce satırları sipariş düzeyine topla (CTE), sonra birleştir.</li>
+<li><code>COUNT(*)</code> satır sayar; <code>COUNT(sutun)</code> NULL olmayanları sayar. <code>customers</code>'ta <code>COUNT(*)</code> 150, <code>COUNT(email)</code> 139'dur.</li>
+</ul>
+<p>LEFT JOIN'in ikinci tuzağı: sağ tablo için koşulu <code>WHERE</code>'e yazarsan eşleşmeyen satırlar (NULL'lar) elenir ve LEFT JOIN sessizce INNER JOIN'e döner. "2024'te hiç sipariş vermeyen müşteriler dahil" bir sayım istiyorsan tarih koşulu <code>ON</code> içinde olmalı.</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market")
+
+yanlis = """
+SELECT COUNT(*) FROM (
+  SELECT c.customer_id, COUNT(o.order_id) AS n
+  FROM customers c LEFT JOIN orders o ON o.customer_id = c.customer_id
+  WHERE o.order_date &gt;= '2024-01-01'            -- NULL'ları eler
+  GROUP BY c.customer_id)
+"""
+dogru = """
+SELECT COUNT(*), SUM(n = 0) FROM (
+  SELECT c.customer_id, COUNT(o.order_id) AS n
+  FROM customers c LEFT JOIN orders o
+       ON o.customer_id = c.customer_id AND o.order_date &gt;= '2024-01-01'
+  GROUP BY c.customer_id)
+"""
+print("WHERE ile müşteri sayısı:", con.execute(yanlis).fetchone()[0])
+print("ON ile (toplam, 2024'te sıfır):", con.execute(dogru).fetchone())</pre>
+
+<h2>Tarih fonksiyonları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>İş</th><th>SQLite</th><th>DuckDB / PostgreSQL</th><th>pandas</th></tr>
+<tr><td>Ay anahtarı</td><td><code>strftime('%Y-%m', d)</code></td><td><code>date_trunc('month', d)</code></td><td><code>s.dt.to_period("M")</code></td></tr>
+<tr><td>Yıl</td><td><code>strftime('%Y', d)</code> (metin)</td><td><code>year(d)</code> / <code>EXTRACT(year FROM d)</code></td><td><code>s.dt.year</code></td></tr>
+<tr><td>İki tarih farkı (gün)</td><td><code>julianday(b) - julianday(a)</code></td><td><code>b - a</code> / <code>date_diff('day', a, b)</code></td><td><code>(b - a).dt.days</code></td></tr>
+<tr><td>Tarih ekle</td><td><code>date(d, '+7 days')</code></td><td><code>d + INTERVAL 7 DAY</code></td><td><code>s + pd.Timedelta(days=7)</code></td></tr>
+</table></div>
+<p>SQLite'ta tarih yoktur, ISO metni vardır (<code>'2024-03-05'</code>). ISO biçim metin olarak da doğru sıralanır, bu yüzden <code>order_date &gt;= '2024-01-01'</code> çalışır. <code>'05.03.2024'</code> gibi bir biçim ise sıralamayı bozar; önce dönüştür (bkz. veri temizleme dersi).</p>
+
+<h2>Aynı iş pandas'ta: çeviri tablosu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>SQL</th><th>pandas</th></tr>
+<tr><td><code>WITH a AS (...)</code></td><td>Ara DataFrame'e isim ver ya da <code>.pipe()</code> zinciri</td></tr>
+<tr><td><code>ROW_NUMBER() OVER (PARTITION BY k ORDER BY t)</code></td><td><code>df.sort_values(t).groupby(k).cumcount() + 1</code></td></tr>
+<tr><td><code>RANK() / DENSE_RANK()</code></td><td><code>groupby(k)[x].rank(method="min")</code> / <code>method="dense"</code></td></tr>
+<tr><td><code>LAG(x) OVER (PARTITION BY k ORDER BY t)</code></td><td><code>df.sort_values(t).groupby(k)[x].shift(1)</code></td></tr>
+<tr><td><code>SUM(x) OVER (PARTITION BY k ORDER BY t)</code></td><td><code>groupby(k)[x].cumsum()</code></td></tr>
+<tr><td><code>AVG(x) OVER (ROWS 2 PRECEDING)</code></td><td><code>x.rolling(3, min_periods=1).mean()</code></td></tr>
+<tr><td><code>SUM(x) OVER (PARTITION BY k)</code></td><td><code>groupby(k)[x].transform("sum")</code></td></tr>
+<tr><td>Son satır (rn = 1)</td><td><code>sort_values(...).drop_duplicates(k, keep="last")</code></td></tr>
+</table></div>
+<pre class="py">import veri
+import pandas as pd
+
+o = veri.oku("anadolu_market", "orders")
+o = o.sort_values(["customer_id", "order_date", "order_id"])
+o["rn"] = o.groupby("customer_id").cumcount() + 1                    # ROW_NUMBER
+o["onceki"] = o.groupby("customer_id")["order_date"].shift(1)         # LAG
+o["ara_gun"] = (pd.to_datetime(o["order_date"]) - pd.to_datetime(o["onceki"])).dt.days
+son = o.drop_duplicates("customer_id", keep="last")                   # her müşterinin son siparişi
+print(o[o["customer_id"] == 1][["order_id", "order_date", "rn", "ara_gun"]].head(4))
+print(len(son), "müşteri;", "ortalama sipariş arası:", round(o["ara_gun"].mean(), 1), "gün")</pre>
+
+<h3>DuckDB: DataFrame'e doğrudan SQL</h3>
+<p>DuckDB, bellekteki DataFrame'i tablo gibi sorgulayan analitik bir motordur; <code>date_trunc</code>, <code>QUALIFY</code> (pencere sonucunu doğrudan filtreleme) gibi kolaylıkları vardır. Ayrıntısı <b>polars ve DuckDB</b> dersinde.</p>
+<pre class="py">import duckdb
+import veri
+
+orders = veri.oku("anadolu_market", "orders")
+sonuc = duckdb.sql("""
+    SELECT customer_id, order_id, order_date
+    FROM orders
+    QUALIFY ROW_NUMBER() OVER (PARTITION BY customer_id ORDER BY order_date DESC, order_id DESC) = 1
+    ORDER BY customer_id
+    LIMIT 3
+""").fetchall()
+print(sonuc)</pre>
+
+<h2>SQL'de mi, pandas'ta mı?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th><th>Neden</th></tr>
+<tr><td>Milyonlarca satırdan küçük bir özet lazım</td><td>SQL</td><td>Veri ağdan taşınmaz; motor indeks ve paralellik kullanır</td></tr>
+<tr><td>Filtre, JOIN, GROUP BY, pencere</td><td>SQL</td><td>Tanım veritabanında kalır, BI aracı da aynı sorguyu kullanabilir</td></tr>
+<tr><td>İstatistik testi, model, grafik</td><td>pandas</td><td>SQL'de yoktur ya da çok zahmetlidir</td></tr>
+<tr><td>Karmaşık metin temizliği, regex, Python fonksiyonu</td><td>pandas</td><td>Python ekosistemi</td></tr>
+<tr><td>Keşif, hızlı deneme</td><td>İkisi de</td><td>Özet SQL'den, ince ayar pandas'ta</td></tr>
+</table></div>
+<p>Kural: <b>veriyi küçült, sonra çek</b>. <code>SELECT *</code> ile 10 milyon satırı pandas'a alıp <code>groupby</code> yapmak yerine GROUP BY'ı veritabanına yaptır.</p>
+<p>Sorgu yavaşsa motorun planına bak. SQLite'ta <code>EXPLAIN QUERY PLAN</code>, PostgreSQL'de <code>EXPLAIN ANALYZE</code>:</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market", tablolar=["orders"])
+plan = "EXPLAIN QUERY PLAN SELECT * FROM orders WHERE customer_id = ?"
+print(con.execute(plan, (5,)).fetchall())        # SCAN: tüm tablo taranıyor
+con.execute("CREATE INDEX ix_orders_customer ON orders(customer_id)")
+print(con.execute(plan, (5,)).fetchall())        # SEARCH ... USING INDEX</pre>
+
+<div class="note"><b>Gerçek işte</b>Bir analist ekibinde en sık geri dönen hata ciro raporunun "neden Power BI ile tutmadığı" sorusudur. Neredeyse her seferinde neden aynı üç şeyden biridir: iptal/iade siparişlerin dahil edilip edilmediği, JOIN sonrası yayılma ya da filtrenin pencere hesabından önce uygulanması. Bu yüzden iyi ekipler ciro tanımını tek bir CTE'de (ya da veritabanında bir görünümde, view) tutar ve her rapor onu kullanır. Kod incelemesinde (code review) ilk sorulan soru da "bu tablonun tanecik düzeyi ne?" olur.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Pencere çerçevesi: ROWS ile RANGE</h3>
+<p><code>ORDER BY</code> olan bir pencerede varsayılan çerçeve <code>RANGE BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code>'dur. RANGE, sıralama değeri <i>eşit</i> olan tüm satırları "şimdiki satır" sayar; aynı günde iki sipariş varsa kümülatif toplam ikisinde de iki siparişin toplamını gösterir. Satır satır birikim istiyorsan çerçeveyi açıkça <code>ROWS BETWEEN UNBOUNDED PRECEDING AND CURRENT ROW</code> yaz.</p>
+<h3>Özyinelemeli CTE</h3>
+<p><code>WITH RECURSIVE</code> hiyerarşi (yönetici-çalışan ağacı) ve tarih serisi üretmek için kullanılır. Örnek: eksik ayları da gösteren bir takvim üretip ciroyu LEFT JOIN'le bağlamak, "sıfır satışlı ay"ların rapordan kaybolmasını önler.</p>
+<pre class="py">import veri
+con = veri.baglan("anadolu_market", tablolar=["employees"])
+sql = """
+WITH RECURSIVE agac(emp_id, ad, seviye) AS (
+    SELECT emp_id, first_name, 0 FROM employees WHERE manager_id IS NULL
+    UNION ALL
+    SELECT e.emp_id, e.first_name, a.seviye + 1
+    FROM employees e JOIN agac a ON e.manager_id = a.emp_id
+)
+SELECT seviye, COUNT(*) FROM agac GROUP BY seviye ORDER BY seviye
+"""
+print(con.execute(sql).fetchall())</pre>
+<h3>Üretim ortamında</h3>
+<p>PostgreSQL, BigQuery, Snowflake ve DuckDB'de aynı pencere sözdizimi geçerlidir; farklar tarih fonksiyonlarında ve <code>QUALIFY</code> gibi eklerdedir. Python tarafında bağlantıyı SQLAlchemy ile kurup <code>pd.read_sql(text(sql), engine, params={...})</code> yazarsın (bkz. SQLAlchemy dersi). Büyük sonuçları <code>chunksize</code> ile parça parça okumak belleği korur.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sql-analitik">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../is-metrikleri/">← İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV</a><a href="../veri-mulakat/">Veri rolleri mülakatı: SQL, pandas, istatistik ve vaka soruları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

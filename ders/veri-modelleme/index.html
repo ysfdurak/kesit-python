@@ -1,0 +1,174 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD | Kesit Python</title><meta name="description" content="OLTP ile OLAP'ı ayırır, normalizasyonu ve bilinçli denormalizasyonu öğrenirsin; Kimball yöntemiyle tanecik, olgu ve boyut tasarlar, kesit_bi yıldız…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/veri-modelleme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD"><meta property="og:description" content="OLTP ile OLAP'ı ayırır, normalizasyonu ve bilinçli denormalizasyonu öğrenirsin; Kimball yöntemiyle tanecik, olgu ve boyut tasarlar, kesit_bi yıldız…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/veri-modelleme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD","description":"OLTP ile OLAP'ı ayırır, normalizasyonu ve bilinçli denormalizasyonu öğrenirsin; Kimball yöntemiyle tanecik, olgu ve boyut tasarlar, kesit_bi yıldız…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/veri-modelleme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD</h1><p class="st-l">OLTP ile OLAP'ı ayırır, normalizasyonu ve bilinçli denormalizasyonu öğrenirsin; Kimball yöntemiyle tanecik, olgu ve boyut tasarlar, kesit_bi yıldız şemasını okur, tarih boyutu ve vekil anahtar üretir, SCD 1-2-3 uygular ve anadolu_market'i yıldız şemaya dönüştürürsün.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-modelleme">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden veri modelleme?</h2>
+<p>Anadolu Market'in sipariş sistemi saniyede onlarca küçük işlem yapar: sepete ekle, stok düş, ödeme al. Bu sistemin tabloları hızlı ve tutarlı <b>yazmak</b> için tasarlanmıştır. Pazarlama müdürü ise şunu sorar: "2024'te bölge ve kategori bazında ciro nasıl değişti, hedefin ne kadarını tuttuk?" Bu soruyu sipariş sisteminin on tablosu üzerinden her seferinde yeniden JOIN'leyerek yanıtlamak hem yavaştır hem de her analist farklı bir tanım kullanır. Çözüm, analize uygun ikinci bir model kurmaktır: <b>veri ambarı</b> (data warehouse) ve onun en yaygın deseni olan <b>yıldız şema</b> (star schema).</p>
+<p>Bu derste iki dünyayı ayıracak, normalizasyonu ve bilinçli denormalizasyonu, Kimball yönteminin olgu (fact) ve boyut (dimension) kavramlarını, tanecik (grain) seçimini, ölçü türlerini, tarih boyutunu, vekil anahtarı ve yavaş değişen boyutları (SCD) öğreneceksin. Örnekler Kesit Power BI'daki <code>kesit_bi</code> modeli ve Kesit SQL'deki <code>anadolu_market</code> verisiyle çalışır. SQL tarafını <i>sql-analitik</i>, yükleme tarafını <i>veri-boru-hatti</i> dersinde gördün.</p>
+
+<h2>OLTP ile OLAP</h2>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>OLTP (işlem sistemi)</th><th>OLAP (analitik sistem)</th></tr>
+<tr><td>Amaç</td><td>Tek tek kayıt yaz/oku</td><td>Milyonlarca satırı topla, karşılaştır</td></tr>
+<tr><td>Sorgu</td><td><code>WHERE id = ?</code>, kısa transaction</td><td><code>GROUP BY</code> ay, bölge, kategori</td></tr>
+<tr><td>Model</td><td>Normalize (3NF), çok tablo</td><td>Yıldız şema, az ve geniş tablo</td></tr>
+<tr><td>Geçmiş</td><td>Çoğunlukla güncel durum</td><td>Zaman içindeki değişim (SCD)</td></tr>
+<tr><td>Örnek</td><td>PostgreSQL, MySQL, SQLite</td><td>BigQuery, Snowflake, DuckDB, Power BI modeli</td></tr>
+</table></div>
+
+<h2>Normalizasyon: 1NF, 2NF, 3NF</h2>
+<p>Normalizasyon, aynı bilginin tek yerde tutulması için tabloları bölmektir. Amaç güncelleme anomalilerini (bir müşterinin şehrini üç satırda değiştirip birini unutmak) önlemektir.</p>
+<ul>
+<li><b>1NF</b>: Her hücrede tek değer. "urunler: Kulaklık, Klavye" gibi listeli hücre yok; her ürün ayrı satır.</li>
+<li><b>2NF</b>: Bileşik anahtarlı tabloda her sütun anahtarın <i>tamamına</i> bağlı. <code>(siparis_no, urun_no)</code> anahtarlı kalem tablosunda <code>urun_adi</code> yalnız <code>urun_no</code>'ya bağlıdır; ürün tablosuna taşınır.</li>
+<li><b>3NF</b>: Anahtar olmayan sütun başka bir anahtar olmayan sütuna bağlı değil. Siparişte <code>musteri_no</code> ve <code>musteri_sehri</code> birlikte duruyorsa şehir müşteriye bağlıdır; müşteri tablosuna gider.</li>
+</ul>
+<pre class="py">duz = [   # tek tablo: her satırda müşteri ve ürün bilgisi tekrar ediyor
+    {"siparis": 1, "musteri": 7, "sehir": "İzmir", "urun": 27, "urun_adi": "Keten Gömlek", "adet": 1},
+    {"siparis": 1, "musteri": 7, "sehir": "İzmir", "urun": 9, "urun_adi": "Suç ve Ceza", "adet": 2},
+    {"siparis": 2, "musteri": 7, "sehir": "İzmir", "urun": 9, "urun_adi": "Suç ve Ceza", "adet": 1},
+]
+musteri = {r["musteri"]: {"sehir": r["sehir"]} for r in duz}
+urun = {r["urun"]: {"ad": r["urun_adi"]} for r in duz}
+siparis = {r["siparis"]: {"musteri": r["musteri"]} for r in duz}
+kalem = [(r["siparis"], r["urun"], r["adet"]) for r in duz]
+print(musteri, urun, siparis, kalem, sep="\n")</pre>
+<p>Ambar tarafında ise bilinçli olarak <b>denormalize</b> ederiz: ürün boyutunda kategori adı ürünün yanında durur, kategori ayrı tabloya bölünmez. Okuma çok, yazma az olduğu için tekrar maliyeti düşük, JOIN tasarrufu büyüktür.</p>
+
+<h2>Kimball: olgu, boyut ve tanecik</h2>
+<p><b>Olgu tablosu</b> (fact table) ölçülebilir olayları tutar: satış satırı, uçuş, banka işlemi. Sütunları boyut anahtarları ve sayısal <b>ölçüler</b>dir (adet, tutar). <b>Boyut tablosu</b> (dimension table) olayın bağlamını verir: kim (müşteri), ne (ürün), ne zaman (tarih), nerede (mağaza). Filtreler ve gruplamalar boyutlardan gelir.</p>
+<p>Modelin ilk ve en önemli kararı <b>tanecik</b>tir (grain): "olgu tablosunda bir satır tam olarak neyi temsil eder?" Kimball'ın sırası: iş sürecini seç, tanecik bildir, boyutları belirle, ölçüleri belirle. Tanecik net değilse sayılar ikiye katlanır ya da kaybolur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçü türü</th><th>Tanım</th><th>Örnek (kesit_bi)</th></tr>
+<tr><td>Toplanabilir (additive)</td><td>Tüm boyutlarda toplanabilir</td><td><code>Satislar.Tutar</code>, <code>Adet</code></td></tr>
+<tr><td>Yarı toplanabilir (semi-additive)</td><td>Bazı boyutlarda toplanır, <b>zamanda</b> toplanmaz</td><td><code>StokGorunum.StokAdet</code>, banka bakiyesi</td></tr>
+<tr><td>Toplanamaz (non-additive)</td><td>Hiç toplanmaz; bileşenlerinden yeniden hesaplanır</td><td><code>BirimFiyat</code>, <code>Indirim</code> oranı, kâr marjı</td></tr>
+</table></div>
+<div class="warn"><b>Stok toplanmaz</b>Ocak sonu stoğu 307, şubat sonu 303 ise "çeyrek stoğu 610" diye bir şey yoktur. Yarı toplanabilir ölçüde zaman boyunca <b>dönem sonu</b> (son değer) ya da ortalama alınır; ürünler ve depolar arasında ise toplanabilir.</div>
+
+<h2>Yıldız ve kar tanesi: kesit_bi modelini okumak</h2>
+<p><b>Yıldız şemada</b> olgu tablosu ortada, her boyut tek bir JOIN uzaklığındadır. <b>Kar tanesi</b> (snowflake) şemada boyutlar da normalize edilir (ürün → kategori → departman); daha az tekrar, daha çok JOIN. Power BI ve çoğu ambar için önerilen yıldızdır.</p>
+<p>Kesit Power BI'daki <code>kesit_bi</code> modeli tipik bir yıldızdır: <code>Satislar</code> olgu tablosu (tanecik: <b>sipariş satırı</b>, <code>SatirNo</code> benzersiz), <code>Urunler</code>, <code>Musteriler</code>, <code>Tarih</code> boyutları. <code>Hedefler</code> ayrı bir olgu tablosudur ve taneciği farklıdır (<b>ay × kategori</b>). <code>StokGorunum</code> ise periyodik anlık görüntü (periodic snapshot) olgusudur: her ay sonu, her ürün için bir satır.</p>
+<pre class="py">import veri
+
+con = veri.baglan("kesit_bi", tablolar=["Satislar", "Urunler", "Musteriler", "Tarih"])
+sql = """
+SELECT t.Yil, u.Kategori, ROUND(SUM(s.Tutar), 2) AS ciro
+FROM Satislar s
+JOIN Tarih t      ON t.Tarih = s.Tarih
+JOIN Urunler u    ON u.UrunNo = s.UrunNo
+JOIN Musteriler m ON m.MusteriNo = s.MusteriNo
+WHERE s.Durum NOT IN ('İptal', 'İade') AND t.Yil = 2024 AND m.Segment = 'Premium'
+GROUP BY t.Yil, u.Kategori
+ORDER BY ciro DESC
+LIMIT 3
+"""
+for satir in con.execute(sql):
+    print(satir)
+# tanecik kontrolü: SatirNo benzersiz mi?
+print(con.execute("SELECT COUNT(*), COUNT(DISTINCT SatirNo) FROM Satislar").fetchone())</pre>
+<p>Sorgunun şekline dikkat: tüm filtreler (yıl, segment) boyutlardan, toplanan değer olgudan gelir. Power BI'da aynı şeyi model görünümünde 1-çok (one-to-many) ilişkilerle, dilimleyicilerle (slicer) yaparsın; Kesit Power BI'daki modelin tam bu yapıda olmasının nedeni budur.</p>
+
+<h2>Tarih boyutu ve vekil anahtar</h2>
+<p>Tarih boyutu her ambarın ilk boyutudur: her gün için bir satır; yıl, çeyrek, ay adı, hafta sonu, tatil gibi sütunlar. Böylece "hafta sonu satışları" ya da "çeyrek bazında" sorgular tarih fonksiyonu yazmadan, basit bir filtreyle yapılır. Tarih boyutunu Python ile birkaç satırda üretebilirsin:</p>
+<pre class="py">from datetime import date, timedelta
+
+AYLAR = ["Oca", "Şub", "Mar", "Nis", "May", "Haz", "Tem", "Ağu", "Eyl", "Eki", "Kas", "Ara"]
+
+def tarih_satiri(g):
+    return {
+        "tarih_key": g.year * 10000 + g.month * 100 + g.day,   # 20240315 gibi okunur vekil anahtar
+        "tarih": g.isoformat(),
+        "yil": g.year,
+        "ceyrek": (g.month - 1) // 3 + 1,
+        "ay_adi": AYLAR[g.month - 1],
+        "hafta_sonu": g.weekday() &gt;= 5,
+    }
+
+baslangic = date(2024, 3, 29)
+for i in range(3):
+    print(tarih_satiri(baslangic + timedelta(days=i)))</pre>
+<p><b>Vekil anahtar</b> (surrogate key), boyut satırına ambarın verdiği anlamsız tamsayı kimliktir; kaynak sistemin <b>doğal anahtarı</b> (natural/business key: müşteri no, ürün kodu) ayrı sütunda durur. Neden? (1) Aynı müşterinin geçmiş sürümlerini (SCD2) ayırt etmek için her sürüme ayrı anahtar gerekir; (2) farklı kaynak sistemlerin numaraları çakışabilir; (3) tamsayı JOIN'leri hızlıdır; (4) "bilinmeyen müşteri" için <code>-1</code> gibi özel bir satır tutabilirsin. Tarih boyutunda ise <code>20240315</code> biçimi istisnai olarak okunur bir vekil anahtardır.</p>
+
+<h2>Yavaş değişen boyutlar (SCD)</h2>
+<p>Müşteri Ankara'dan İzmir'e taşındı. Geçen yılın satışları hangi bölgede görünmeli? Bu sorunun cevabı SCD (slowly changing dimension) tipidir:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Tip</th><th>Ne yapar?</th><th>Geçmiş satışlar</th><th>Ne zaman?</th></tr>
+<tr><td>Tip 0</td><td>Hiç değişmez</td><td>İlk değer</td><td>Doğum tarihi, ilk kayıt kanalı</td></tr>
+<tr><td>Tip 1</td><td>Üstüne yazar</td><td>Yeni değerle görünür (geçmiş kaybolur)</td><td>Yazım düzeltmesi, e-posta</td></tr>
+<tr><td>Tip 2</td><td>Yeni satır ekler; eski satır kapanır (<code>gecerli_bitis</code>, <code>guncel</code>)</td><td>O tarihteki değerle görünür</td><td>Şehir, segment, fiyat listesi</td></tr>
+<tr><td>Tip 3</td><td>Önceki değer için ayrı sütun</td><td>Hem eski hem yeni karşılaştırılabilir</td><td>Bölge yeniden yapılanması</td></tr>
+</table></div>
+<pre class="py">boyut = [{"key": 1, "musteri_no": 7, "sehir": "Ankara", "baslangic": "2023-01-01", "bitis": None, "guncel": True}]
+
+def scd2(boyut, musteri_no, yeni_sehir, tarih):
+    eski = next(r for r in boyut if r["musteri_no"] == musteri_no and r["guncel"])
+    if eski["sehir"] == yeni_sehir:
+        return                                   # değişiklik yok, yeni sürüm açma
+    eski["bitis"], eski["guncel"] = tarih, False  # eski sürümü kapat
+    boyut.append({"key": max(r["key"] for r in boyut) + 1, "musteri_no": musteri_no,
+                  "sehir": yeni_sehir, "baslangic": tarih, "bitis": None, "guncel": True})
+
+scd2(boyut, 7, "İzmir", "2024-06-01")
+scd2(boyut, 7, "İzmir", "2024-07-01")            # tekrar: etkisiz
+for r in boyut:
+    print(r)</pre>
+<p>SCD2'de olgu satırı, olay tarihinde geçerli olan sürümün <b>vekil anahtarını</b> taşır; böylece 2023 satışı Ankara'da, 2024 Temmuz satışı İzmir'de görünür. SCD2'nin SQL ve upsert ile yüklenmesini <i>veri-boru-hatti</i> dersinde, dbt snapshot ile otomatikleştirilmesini <i>dbt-elt</i> dersinde görürsün.</p>
+
+<h2>anadolu_market'ten yıldız şemaya</h2>
+<p>Kesit SQL'deki <code>anadolu_market</code> bir OLTP modelidir: <code>orders</code> (başlık), <code>order_items</code> (kalem), <code>customers</code>, <code>products</code>. Bunu yıldıza çevirmek için: tanecik = sipariş kalemi; boyutlar = tarih, müşteri, ürün (+ kanal, durum gibi düşük kardinaliteli sütunlar olguda kalabilir); ölçüler = adet, brüt tutar, indirim, net tutar. DuckDB ile:</p>
+<pre class="py">import duckdb
+import veri
+
+con = duckdb.connect()
+for t in ["orders", "order_items", "products"]:
+    con.execute(f"CREATE TABLE {t} AS SELECT * FROM read_csv('{veri.yol('anadolu_market', t)}')")
+
+con.execute("""
+CREATE TABLE dim_urun AS
+SELECT ROW_NUMBER() OVER (ORDER BY product_id) AS urun_key, product_id, name AS urun, category AS kategori
+FROM products
+""")
+con.execute("""
+CREATE TABLE fact_satis AS
+SELECT i.item_id,
+       CAST(strftime(o.order_date, '%Y%m%d') AS INTEGER) AS tarih_key,
+       d.urun_key, o.customer_id, o.channel AS kanal, o.status AS durum,
+       i.quantity AS adet,
+       ROUND(i.quantity * i.unit_price * (1 - i.discount), 2) AS net_tutar
+FROM order_items i
+JOIN orders o   ON o.order_id = i.order_id
+JOIN dim_urun d ON d.product_id = i.product_id
+""")
+print(con.execute("SELECT COUNT(*), ROUND(SUM(net_tutar), 2) FROM fact_satis").fetchone())
+print(con.execute("""
+    SELECT d.kategori, ROUND(SUM(f.net_tutar), 2) FROM fact_satis f JOIN dim_urun d USING (urun_key)
+    WHERE f.durum &lt;&gt; 'cancelled' GROUP BY 1 ORDER BY 2 DESC LIMIT 3
+""").fetchall())</pre>
+<p>Olgu tablosu 1620 satır, kalem tablosuyla aynı: tanecik korundu. Toplam net tutar <code>kesit_bi.Satislar</code>'ın tutar toplamıyla (1.346.189,85) bire bir aynı; Kesit Power BI modeli de tam olarak bu dönüşümle üretilmiştir.</p>
+
+<h2>Data vault ve one-big-table</h2>
+<ul>
+<li><b>Data vault</b>: hub (iş anahtarları), link (ilişkiler) ve satellite (zamanla değişen öznitelikler) tablolarıyla, kaynakları değiştirmeden ve tam denetim izi bırakarak entegre eder. Çok kaynaklı, düzenlemeye tabi kurumlarda ham entegrasyon katmanı olarak kullanılır; üstüne yine yıldız şema kurulur.</li>
+<li><b>One-big-table (OBT)</b>: tüm boyut sütunlarını olguya katlayıp tek geniş tablo yapmak. Sütun tabanlı ambarlarda (BigQuery, DuckDB) basit raporlar için hızlı ve kolaydır; ama SCD, tutarlı boyut ve bakım zorlaşır. Genellikle yıldızın <i>üstüne</i> bir sunum katmanı olarak üretilir.</li>
+</ul>
+<div class="note"><b>Gerçek işte</b>Bir veri ekibine katıldığında ilk soracağın şey "bu tablonun taneciği ne?" olmalı. Panolardaki sayı farklarının çoğu model hatasıdır: başlık düzeyindeki kargo ücretini kalem düzeyindeki tabloya JOIN'leyip toplamak (fan-out), stoğu aylar boyunca toplamak, ya da müşteri boyutunu tip 1 tutup geçmiş bölge raporlarının her ay değişmesi. Kıdemli mühendisler her olgu tablosunun yanına tek cümlelik tanecik tanımını ve "toplanabilir mi?" notunu yazar; bu, dbt belgelerinde ve Power BI ölçü açıklamalarında standarttır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tutarlı boyutlar ve veri yolu matrisi</h3>
+<p>Aynı <code>dim_tarih</code> ve <code>dim_urun</code>'u satış, stok ve hedef olgularının hepsi paylaşırsa (conformed dimension), farklı olgular aynı satırda karşılaştırılabilir (drill-across): "hedef ve gerçekleşen, kategori ve ay bazında". Kimball'ın veri yolu matrisi (bus matrix) satırlarda iş süreçlerini, sütunlarda boyutları gösterir ve ambar yol haritası olarak kullanılır.</p>
+<h3>Rol yapan boyut</h3>
+<p><code>Satislar</code> tablosunda iki tarih var: <code>Tarih</code> (sipariş) ve <code>TeslimTarihi</code>. Tek bir tarih boyutu iki farklı rolde, iki ayrı takma adla JOIN'lenir (role-playing dimension). Power BI'da biri etkin, diğeri <code>USERELATIONSHIP</code> ile kullanılan pasif ilişkidir.</p>
+<h3>Bilinmeyen üye ve geç gelen boyut</h3>
+<p><code>kesit_bi.Musteriler</code>'de 7 müşterinin bölgesi boş. Raporda NULL grubu yerine boyuta "Bilinmiyor" değeri koymak (ya da <code>-1</code> anahtarlı bilinmeyen üye satırı) standarttır. Olgu, boyut kaydından önce gelirse (late-arriving dimension) olguyu <code>-1</code>'e bağlar, boyut gelince düzeltirsin.</p>
+<h3>Olgu tablosu türleri</h3>
+<p>İşlem (transaction: her satış), periyodik anlık görüntü (her ay sonu stok), biriken anlık görüntü (accumulating snapshot: siparişin sipariş, kargo, teslim tarihleri tek satırda güncellenir) ve olgusuz olgu (factless fact: derse katılım gibi yalnız "oldu" bilgisi).</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-modelleme">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../postgresql-python/">← PostgreSQL ile Python: psycopg, transaction, indeks ve toplu yükleme</a><a href="../django-ileri/">İleri Django ve DRF: ORM optimizasyonu, izinler ve test →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

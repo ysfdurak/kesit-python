@@ -1,0 +1,288 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri Django ve DRF: ORM optimizasyonu, izinler ve test | Kesit Python</title><meta name="description" content="Özel QuerySet ve manager yazar, N+1 sorununu ölçüp select_related/prefetch_related ile çözer, annotate/F/Q ve transaction.atomic'i SQL karşılıklarıyla…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/django-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri Django ve DRF: ORM optimizasyonu, izinler ve test"><meta property="og:description" content="Özel QuerySet ve manager yazar, N+1 sorununu ölçüp select_related/prefetch_related ile çözer, annotate/F/Q ve transaction.atomic'i SQL karşılıklarıyla…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/django-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri Django ve DRF: ORM optimizasyonu, izinler ve test","description":"Özel QuerySet ve manager yazar, N+1 sorununu ölçüp select_related/prefetch_related ile çözer, annotate/F/Q ve transaction.atomic'i SQL karşılıklarıyla…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/django-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>İleri Django ve DRF: ORM optimizasyonu, izinler ve test</h1><p class="st-l">Özel QuerySet ve manager yazar, N+1 sorununu ölçüp select_related/prefetch_related ile çözer, annotate/F/Q ve transaction.atomic'i SQL karşılıklarıyla kavrar; DRF serializer, izin, sayfalama ve filtreleme mantığını Pusula İK izin onay API'si üzerinde kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/django-ileri">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Django'ya giriş dersinde proje kurmayı, modeli, migration'ı, admin'i ve temel ORM sorgularını gördün. İş ilanlarında "Django + DRF deneyimi" yazdığında beklenen bundan fazlasıdır: liste sayfası 400 sorgu attığında bunu ölçüp bir sorguya indirmek, izin onayı yarıda kalınca veritabanını tutarlı bırakmak, API'de doğrulama, sayfalama, filtreleme ve nesne düzeyinde izinleri doğru kurmak, kodu testlerle güvenceye almak. Bu derste Pusula İK'nın izin onay API'sini bu gözle tasarlayacağız.</p>
+<div class="warn"><b>Django tarayıcıda çalışmaz</b>Django ve DRF kodları <code>pre</code> kutularında gösterim içindir; kendi bilgisayarında <code>pip install django djangorestframework django-filter pytest-django factory-boy</code> ile dene. Çalıştırılabilir kutular ve alıştırmalar, ORM'in ürettiği SQL'in eşdeğerini <code>sqlite3</code> ve gerçek Pusula İK ve Lezzet Kurye verisiyle kurar; böylece her ORM satırının veritabanında neye dönüştüğünü görürsün.</div>
+
+<h2>Model ilişkileri, özel Manager ve QuerySet</h2>
+<p>Pusula İK'nın çekirdeği üç modeldir: <code>Calisan</code> kendi yöneticisine (aynı tabloya) bağlıdır, <code>Izin</code> bir çalışana bağlıdır. Tekrarlanan süzgeçleri her view'da yazmak yerine <b>özel QuerySet</b> metotlarına koy; zincirlenebilir kalırlar ve iş dilini koda taşırlar.</p>
+<pre class="code"># izin/models.py
+from django.db import models
+from django.db.models import Q
+
+class IzinQuerySet(models.QuerySet):
+    def bekleyen(self):
+        return self.filter(durum="beklemede")
+
+    def gorunur(self, kullanici):                     # nesne düzeyinde yetki tek yerde
+        c = kullanici.calisan
+        return self.filter(Q(calisan=c) | Q(calisan__yonetici=c))
+
+class Calisan(models.Model):
+    ad = models.CharField(max_length=120)
+    yonetici = models.ForeignKey("self", null=True, on_delete=models.SET_NULL, related_name="ekip")
+    kullanici = models.OneToOneField("auth.User", on_delete=models.CASCADE)
+
+class Izin(models.Model):
+    TUR = [("yıllık", "Yıllık"), ("hastalık", "Hastalık"), ("mazeret", "Mazeret"), ("ücretsiz", "Ücretsiz")]
+    calisan = models.ForeignKey(Calisan, on_delete=models.CASCADE, related_name="izinler")
+    tur = models.CharField(max_length=20, choices=TUR)
+    baslangic = models.DateField()
+    gun = models.PositiveSmallIntegerField()
+    durum = models.CharField(max_length=20, default="beklemede", db_index=True)
+
+    objects = IzinQuerySet.as_manager()
+
+# kullanım: Izin.objects.gorunur(request.user).bekleyen().order_by("baslangic")</pre>
+<p><code>ForeignKey</code> çoğa-bir, <code>OneToOneField</code> bire-bir, <code>ManyToManyField</code> çoğa-çok ilişkidir; <code>related_name</code> ters yönün adıdır (<code>yonetici.ekip.all()</code>). <code>on_delete</code> seçimi bir iş kararıdır: <code>CASCADE</code> çalışan silinince izinleri de siler, <code>PROTECT</code> silmeyi engeller, <code>SET_NULL</code> bağı koparır.</p>
+
+<h2>Sorgu sayısını ölç: N+1 sorunu</h2>
+<p>QuerySet tembeldir ve ilişkili nesneye her erişim, önceden getirilmemişse yeni bir sorgu atar. 100 izinlik listede her satırda <code>izin.calisan.ad</code> yazdırmak 1 + 100 sorgu demektir. Önce <b>ölç</b>: Django'da <code>django-debug-toolbar</code>, testte <code>assertNumQueries</code> ya da <code>connection.queries</code>. sqlite3'te aynı ölçümü <code>set_trace_callback</code> ile yapabilirsin; aşağıdaki kutu gerçek Pusula İK verisinde üç yolu karşılaştırıyor.</p>
+<pre class="py">import veri
+
+con = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves"])
+sorgular = []
+con.set_trace_callback(sorgular.append)
+
+def n_arti_1(limit):                                     # for izin in Izin.objects.all()[:limit]: izin.calisan.ad
+    izinler = con.execute("SELECT leave_id, emp_id FROM ik_leaves ORDER BY leave_id LIMIT ?", (limit,)).fetchall()
+    return [(lid, con.execute("SELECT full_name FROM ik_employees WHERE emp_id = ?", (e,)).fetchone()[0])
+            for lid, e in izinler]
+
+def select_related(limit):                               # Izin.objects.select_related("calisan")
+    return con.execute("""SELECT l.leave_id, e.full_name FROM ik_leaves l
+                          JOIN ik_employees e ON e.emp_id = l.emp_id
+                          ORDER BY l.leave_id LIMIT ?""", (limit,)).fetchall()
+
+def prefetch_related(limit):                             # ikinci sorgu: WHERE emp_id IN (...)
+    izinler = con.execute("SELECT leave_id, emp_id FROM ik_leaves ORDER BY leave_id LIMIT ?", (limit,)).fetchall()
+    idler = sorted({e for _, e in izinler})
+    yer = ",".join("?" * len(idler))
+    ad = dict(con.execute(f"SELECT emp_id, full_name FROM ik_employees WHERE emp_id IN ({yer})", idler))
+    return [(lid, ad[e]) for lid, e in izinler]
+
+for f in (n_arti_1, select_related, prefetch_related):
+    sorgular.clear()
+    sonuc = f(100)
+    print(f"{f.__name__:17} sorgu={len(sorgular):3}  ilk={sonuc[0]}")</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>İlişki türü</th><th>SQL</th><th>Ne zaman?</th></tr>
+<tr><td><code>select_related("calisan")</code></td><td>İleri FK, OneToOne</td><td>Tek sorgu, JOIN</td><td>Her satırda tek ilişkili nesne</td></tr>
+<tr><td><code>prefetch_related("izinler")</code></td><td>Ters FK, ManyToMany</td><td>İki sorgu, <code>IN (...)</code> + Python'da eşleme</td><td>Her satırda birden çok ilişkili nesne</td></tr>
+<tr><td><code>Prefetch("izinler", queryset=...)</code></td><td>Ters FK, süzülmüş</td><td>İkinci sorgu süzülür</td><td>Yalnız bekleyen izinleri getirmek gibi</td></tr>
+<tr><td><code>only()</code> / <code>defer()</code></td><td>-</td><td>Sütun listesini daraltır</td><td>Büyük metin alanlarını taşımamak</td></tr>
+</table></div>
+<div class="tip"><b>Testle kilitle</b>Bir kez düzelttiğin N+1 sonraki bir değişiklikle geri gelir. <code>with self.assertNumQueries(2):</code> (ya da pytest-django'da <code>django_assert_num_queries</code>) ile liste uç noktasının sorgu sayısını test et; satır sayısı artınca sorgu sayısının sabit kaldığını görmek gerçek kanıttır.</div>
+
+<h2>annotate, aggregate, F ve Q</h2>
+<p><code>aggregate</code> tüm kümeyi tek değere indirir (<code>{"toplam": 1234}</code>); <code>annotate</code> her satıra (ya da <code>values()</code> ile gruplanan her gruba) hesaplanmış bir alan ekler, yani SQL'deki <code>GROUP BY</code>'dır. <code>Q</code> nesneleri <code>|</code> (VEYA), <code>&amp;</code> (VE) ve <code>~</code> (DEĞİL) ile birleşir; <code>F</code> bir sütuna Python'a çekmeden başvurur ve yarış durumunu önler.</p>
+<pre class="code">from django.db.models import Count, Sum, Q, F
+
+(Izin.objects
+    .filter(baslangic__year=2024)
+    .values("calisan__pozisyon__bolum__ad")
+    .annotate(talep=Count("id"),
+              gun=Sum("gun"),
+              hastalik_gun=Sum("gun", filter=Q(tur="hastalık")))
+    .order_by("-gun"))
+
+Calisan.objects.filter(pk=418).update(izin_bakiyesi=F("izin_bakiyesi") - 3)   # UPDATE ... SET x = x - 3</pre>
+<pre class="py">import veri
+
+con = veri.baglan("pusula_ik", tablolar=["ik_employees", "ik_leaves", "ik_positions", "ik_departments"])
+satirlar = con.execute("""
+    SELECT d.name, COUNT(*) AS talep, SUM(l.days) AS gun,
+           SUM(CASE WHEN l.leave_type = 'hastalık' THEN l.days ELSE 0 END) AS hastalik_gun
+    FROM ik_leaves l
+    JOIN ik_employees e   ON e.emp_id = l.emp_id
+    JOIN ik_positions p   ON p.position_id = e.position_id
+    JOIN ik_departments d ON d.dept_id = p.dept_id
+    WHERE l.start_date &gt;= '2024-01-01'
+    GROUP BY d.name ORDER BY gun DESC LIMIT 4""").fetchall()
+for ad, talep, gun, hasta in satirlar:
+    print(f"{ad:22} talep={talep:4} gün={gun:5} hastalık payı=%{100 * hasta / gun:.0f}")</pre>
+<p><code>Sum("gun", filter=Q(...))</code> SQL'de <code>SUM(...) FILTER (WHERE ...)</code> ya da <code>CASE WHEN</code> olarak çıkar. Çift yönlü alt çizgi (<code>calisan__pozisyon__bolum__ad</code>) her adımda bir JOIN ekler.</p>
+
+<h2>Sinyaller ve transaction.atomic</h2>
+<p>Sinyaller (<code>post_save</code>, <code>pre_delete</code>) bir model kaydedildiğinde başka bir kodu tetikler. Kolay görünür ama gizli yan etki üretir: kaydın nereden e-posta gönderdiğini bulmak zorlaşır, <code>bulk_create</code> ve <code>update()</code> sinyal tetiklemez, testler yavaşlar. Kural: kendi uygulamanın içinde açık bir servis fonksiyonu çağır; sinyali yalnız değiştiremediğin üçüncü taraf uygulamalara tepki için kullan.</p>
+<p>Birden çok yazma işlemi "ya hep ya hiç" olmalıdır. İzin onayı hem talebin durumunu değiştirir hem bakiyeyi düşürür; ikincisi başarısız olursa birincisi geri alınmalıdır.</p>
+<pre class="code">from django.db import transaction
+
+def izni_onayla(talep_id, onaylayan):
+    with transaction.atomic():
+        talep = Izin.objects.select_for_update().get(pk=talep_id)    # satırı kilitle
+        if talep.durum != "beklemede":
+            raise ValueError("zaten işlenmiş")
+        talep.durum = "onaylandi"
+        talep.save(update_fields=["durum"])
+        Calisan.objects.filter(pk=talep.calisan_id).update(izin_bakiyesi=F("izin_bakiyesi") - talep.gun)
+        transaction.on_commit(lambda: bildirim_gonder.delay(talep_id))   # Celery: commit SONRASI</pre>
+<pre class="py">import sqlite3
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE talep (id INTEGER PRIMARY KEY, durum TEXT)")
+con.execute("CREATE TABLE bakiye (emp_id INTEGER PRIMARY KEY, gun INTEGER CHECK (gun &gt;= 0))")
+con.execute("INSERT INTO talep VALUES (1, 'beklemede')")
+con.execute("INSERT INTO bakiye VALUES (418, 2)")
+con.commit()
+
+try:
+    with con:                                     # transaction.atomic karşılığı
+        con.execute("UPDATE talep SET durum = 'onaylandi' WHERE id = 1")
+        con.execute("UPDATE bakiye SET gun = gun - 5 WHERE emp_id = 418")   # CHECK ihlali
+except sqlite3.IntegrityError as e:
+    print("geri alındı:", e)
+print(con.execute("SELECT durum FROM talep").fetchone(), con.execute("SELECT gun FROM bakiye").fetchone())</pre>
+<p><code>with con:</code> blok hatasız biterse commit, hata çıkarsa rollback yapar; talep "beklemede" kaldı. <code>transaction.on_commit</code> önemlidir: Celery görevini atomic bloğun içinde doğrudan çağırırsan işçi, henüz commit edilmemiş kaydı bulamayabilir.</p>
+
+<h2>Django REST Framework: serializer'dan router'a</h2>
+<p>DRF'te bir isteğin yolu: router URL'i ViewSet eylemine eşler → kimlik doğrulama → izin sınıfları (<code>has_permission</code>) → throttling → <code>get_queryset</code> ve filtreler → nesne alınırsa <code>has_object_permission</code> → serializer doğrulaması → kaydetme → sayfalanmış yanıt.</p>
+<pre class="code"># izin/api.py
+from rest_framework import serializers, viewsets, permissions, decorators, response, status
+from django_filters.rest_framework import DjangoFilterBackend
+
+class IzinSerializer(serializers.ModelSerializer):
+    calisan_ad = serializers.CharField(source="calisan.ad", read_only=True)
+
+    class Meta:
+        model = Izin
+        fields = ["id", "calisan_ad", "tur", "baslangic", "gun", "durum"]
+        read_only_fields = ["durum"]
+
+    def validate_gun(self, deger):                       # alan düzeyi
+        if not 1 &lt;= deger &lt;= 30:
+            raise serializers.ValidationError("1 ile 30 gün arası olmalı.")
+        return deger
+
+    def validate(self, veri):                            # nesne düzeyi (alanlar arası)
+        if veri["tur"] == "hastalık" and veri["gun"] &gt; 10:
+            raise serializers.ValidationError("10 günden uzun hastalık izni rapor ister.")
+        return veri
+
+class YoneticiMi(permissions.BasePermission):
+    def has_object_permission(self, request, view, obj):
+        if request.method in permissions.SAFE_METHODS:
+            return True
+        return obj.calisan.yonetici_id == request.user.calisan.id
+
+class IzinViewSet(viewsets.ModelViewSet):
+    serializer_class = IzinSerializer
+    permission_classes = [permissions.IsAuthenticated, YoneticiMi]
+    filter_backends = [DjangoFilterBackend]
+    filterset_fields = ["tur", "durum"]
+    throttle_scope = "izin"
+
+    def get_queryset(self):
+        return Izin.objects.gorunur(self.request.user).select_related("calisan")
+
+    def perform_create(self, serializer):
+        serializer.save(calisan=self.request.user.calisan)
+
+    @decorators.action(detail=True, methods=["post"])
+    def onayla(self, request, pk=None):
+        izin = self.get_object()                         # has_object_permission burada çalışır
+        izni_onayla(izin.pk, request.user)
+        return response.Response({"durum": "onaylandi"}, status=status.HTTP_200_OK)
+
+# urls.py
+# router = routers.DefaultRouter(); router.register("izinler", IzinViewSet, basename="izin")
+# settings.py
+# REST_FRAMEWORK = {"DEFAULT_PAGINATION_CLASS": "rest_framework.pagination.PageNumberPagination",
+#                   "PAGE_SIZE": 20,
+#                   "DEFAULT_THROTTLE_CLASSES": ["rest_framework.throttling.ScopedRateThrottle"],
+#                   "DEFAULT_THROTTLE_RATES": {"izin": "60/min"}}</pre>
+<div class="tbl-wrap"><table>
+<tr><th>DRF parçası</th><th>Görevi</th><th>Bu derste taklidi</th></tr>
+<tr><td>Serializer</td><td>Girdiyi doğrular ve tipe çevirir; modeli JSON'a çevirir</td><td>Alan + nesne doğrulayıcı, hata sözlüğü</td></tr>
+<tr><td>Permission</td><td><code>has_permission</code> (her istek), <code>has_object_permission</code> (nesne alınınca)</td><td>İzin sınıfı zinciri</td></tr>
+<tr><td>Pagination</td><td><code>count/next/previous/results</code></td><td>Sayfa numaralı ve imleçli (keyset) sayfalama</td></tr>
+<tr><td>Filter backend</td><td>Sorgu parametrelerini <code>filter()</code>'a çevirir</td><td>İzin listeli güvenli WHERE üretici</td></tr>
+<tr><td>Throttle</td><td>Kullanıcı/kapsam başına istek sınırı</td><td>Redis ve kuyruk dersinde token bucket</td></tr>
+</table></div>
+<p>Serializer'ın doğrulama sırası: her alan için tip dönüşümü ve alan doğrulayıcıları → <code>validate_&lt;alan&gt;</code> → tüm alanlar geçerliyse <code>validate()</code>. Hatalar <code>{"alan": ["mesaj"], "non_field_errors": [...]}</code> biçiminde toplanır ve 400 ile döner.</p>
+<pre class="py">import datetime as dt
+
+TURLER = {"yıllık", "hastalık", "mazeret", "ücretsiz"}
+
+def dogrula(girdi):
+    hatalar, temiz = {}, {}
+    for alan, cevir in (("tur", str), ("baslangic", dt.date.fromisoformat), ("gun", int)):
+        if alan not in girdi:
+            hatalar.setdefault(alan, []).append("Bu alan zorunlu.")
+            continue
+        try:
+            temiz[alan] = cevir(girdi[alan])
+        except (TypeError, ValueError):
+            hatalar.setdefault(alan, []).append("Geçersiz değer.")
+    if "tur" in temiz and temiz["tur"] not in TURLER:
+        hatalar.setdefault("tur", []).append(f"{temiz['tur']!r} geçerli bir seçim değil.")
+    if not hatalar and temiz["tur"] == "hastalık" and temiz["gun"] &gt; 10:
+        hatalar["non_field_errors"] = ["10 günden uzun hastalık izni rapor ister."]
+    return (temiz, {}) if not hatalar else ({}, hatalar)
+
+print(dogrula({"tur": "yıllık", "baslangic": "2025-07-01", "gun": "5"}))
+print(dogrula({"tur": "tatil", "baslangic": "2025-13-01"}))
+print(dogrula({"tur": "hastalık", "baslangic": "2025-02-03", "gun": 14}))</pre>
+
+<h2>Ayarlar, yönetim komutları ve test</h2>
+<p>Tek bir <code>settings.py</code> ile geliştirme ve üretimi yönetmek hataya açıktır. Yaygın yapı: <code>settings/base.py</code> (ortak), <code>dev.py</code> ve <code>prod.py</code> (<code>from .base import *</code> + farklar); hangisinin yükleneceğini <code>DJANGO_SETTINGS_MODULE</code> belirler, sırlar ortam değişkeninden okunur (Docker dersindeki 12-factor ilkesi). Tekrarlanan bakım işleri (gece bakiye hesabı, eski kayıt temizliği) için özel yönetim komutu yaz:</p>
+<pre class="code"># izin/management/commands/bakiye_yenile.py   -&gt;   python manage.py bakiye_yenile --yil 2025
+from django.core.management.base import BaseCommand
+
+class Command(BaseCommand):
+    help = "Yıllık izin bakiyelerini yeniden hesaplar"
+
+    def add_arguments(self, parser):
+        parser.add_argument("--yil", type=int, required=True)
+
+    def handle(self, *args, yil, **kw):
+        n = bakiye_hesapla(yil)
+        self.stdout.write(self.style.SUCCESS(f"{n} çalışanın bakiyesi güncellendi"))</pre>
+<pre class="code"># tests/test_izin_api.py      -&gt;  pip install pytest-django factory-boy ; pytest
+import factory, pytest
+from rest_framework.test import APIClient
+
+class CalisanFactory(factory.django.DjangoModelFactory):
+    class Meta:
+        model = Calisan
+    ad = factory.Faker("name", locale="tr_TR")
+    kullanici = factory.SubFactory(UserFactory)
+
+@pytest.mark.django_db
+def test_yonetici_ekibinin_iznini_onaylar(django_assert_num_queries):
+    yonetici = CalisanFactory()
+    izin = IzinFactory(calisan__yonetici=yonetici)
+    api = APIClient(); api.force_authenticate(yonetici.kullanici)
+    r = api.post(f"/api/izinler/{izin.pk}/onayla/")
+    assert r.status_code == 200
+    izin.refresh_from_db(); assert izin.durum == "onaylandi"
+
+@pytest.mark.django_db
+def test_baskasi_onaylayamaz():
+    izin = IzinFactory()
+    api = APIClient(); api.force_authenticate(CalisanFactory().kullanici)
+    assert api.post(f"/api/izinler/{izin.pk}/onayla/").status_code == 404   # görünmüyor</pre>
+<p>Factory'ler test verisini tek satırda, ilişkileriyle birlikte üretir; sabit JSON fixture'larından daha bakımı kolaydır. <code>@pytest.mark.django_db</code> her testi kendi transaction'ında çalıştırıp sonunda geri alır.</p>
+
+<h2>Celery, statik ve medya dosyaları</h2>
+<p>E-posta, PDF rapor, toplu içe aktarma gibi uzun işler isteğin içinde yapılmaz; Celery görevine verilir ve <code>transaction.on_commit</code> ile commit'ten sonra kuyruğa atılır. Broker, yeniden deneme ve ölü mektup kuyruğu ayrıntılarını Redis ve kuyruk dersinde göreceksin. Statik dosyalar (CSS, JS) <code>collectstatic</code> ile tek klasöre toplanır ve WhiteNoise ya da CDN ile sunulur; kullanıcı yüklemeleri (medya, ör. hastalık raporu) ise <code>MEDIA_ROOT</code> ya da S3 benzeri nesne deposuna gider ve <b>asla</b> uygulama sunucusunun kod klasöründe tutulmaz.</p>
+<div class="note"><b>Gerçek işte</b>Django projelerindeki performans sorunlarının büyük kısmı ORM kullanımından gelir: şablonda ya da serializer'da gizlenmiş N+1, gereksiz <code>count()</code>, indekssiz süzgeç. Kod incelemesinde (code review) liste uç noktası için "kaç sorgu atıyor?" sorusu sorulur ve cevabı bir testle verilir. DRF'te güvenlik hatalarının çoğu da <code>get_queryset</code>'in kullanıcıya göre süzülmemesinden çıkar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sorgu planı ve indeks</h3>
+<p><code>print(qs.query)</code> ORM'in SQL'ini, <code>qs.explain()</code> veritabanının planını gösterir. Sık süzülen alanlara <code>Meta.indexes</code> ile indeks ekle; bileşik indekste sütun sırası sorgudaki eşitlik ve sıralama sırasına uymalı.</p>
+<h3>Subquery, Exists ve pencere fonksiyonları</h3>
+<p><code>annotate(son_izin=Subquery(Izin.objects.filter(calisan=OuterRef("pk")).order_by("-baslangic").values("baslangic")[:1]))</code> her çalışana tek sorguda son iznini ekler; <code>Exists</code> "en az bir bekleyen izni var mı" sorusunu JOIN çoğalması olmadan cevaplar; <code>Window(Rank(), partition_by=...)</code> sıralama raporlarını veritabanında yapar.</p>
+<h3>Büyük veriyle çalışmak</h3>
+<p><code>bulk_create</code> ve <code>bulk_update</code> binlerce satırı birkaç sorguda yazar (sinyal tetiklemez); <code>iterator(chunk_size=2000)</code> büyük QuerySet'i belleğe almadan gezer; büyük tablolarda sayfa numaralı sayfalama yerine imleçli (cursor) sayfalama <code>OFFSET</code> maliyetinden kurtarır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/django-ileri">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../veri-modelleme/">← Veri modelleme ve ambar: normalizasyon, yıldız şema, SCD</a><a href="../gozlemlenebilirlik/">Gözlemlenebilirlik: log, metrik, iz ve SLO →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

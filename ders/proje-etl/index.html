@@ -1,0 +1,119 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Anadolu Market web olayları ETL | Kesit Python</title><meta name="description" content="Kirli ham partileri doğrular, reddedilenleri ayırır, dönüştürür, SQLite'a idempotent ve artımlı yükler, günlük tutar, kalite testi yazar ve aynı işi iki…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-etl/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Anadolu Market web olayları ETL"><meta property="og:description" content="Kirli ham partileri doğrular, reddedilenleri ayırır, dönüştürür, SQLite'a idempotent ve artımlı yükler, günlük tutar, kalite testi yazar ve aynı işi iki…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-etl/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Anadolu Market web olayları ETL","description":"Kirli ham partileri doğrular, reddedilenleri ayırır, dönüştürür, SQLite'a idempotent ve artımlı yükler, günlük tutar, kalite testi yazar ve aynı işi iki…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-etl/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market web olayları ETL</h1><p class="st-l">Kirli ham partileri doğrular, reddedilenleri ayırır, dönüştürür, SQLite'a idempotent ve artımlı yükler, günlük tutar, kalite testi yazar ve aynı işi iki kez çalıştırınca satır çiftlenmediğini kanıtlarsın. Gerçek web_events verisiyle, tarayıcıda.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-etl">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: Anadolu Market web olayları için ETL</h2>
+<p>Anadolu Market'in analiz ekibi huni raporunu her sabah elle düzeltiyor: bazı günlerde aynı olay iki kez sayılıyor, sistem yeniden çalışınca rakamlar şişiyor, ertesi gün gelen eski olaylar rapora girmiyor. Senden her gece çalışacak bir veri işi istiyorlar: ham dosyayı alsın, bozuk satırı ayırsın, temiz satırı SQLite'a yüklesin, aynı iş iki kez çalışsa da hiçbir şey çiftlenmesin ve sabah neyin olduğu görülebilsin.</p>
+<p>Bu ders yeni kavramdan çok, Veri Mühendisi yolunda öğrendiklerini tek bir çalışan işe bağlar. <a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a> dersindeki parçaları gerçek veriyle ve kanıtıyla kuracaksın. Her adımda önceki adımın kodu hazır gelir; sonda sonucu testle kanıtlarsın.</p>
+<div class="tbl-wrap"><table><tr><th>Adım</th><th>Soru</th><th>Çıktı</th></tr>
+<tr><td>1. Doğrula</td><td>Bu satır işe yarar mı?</td><td><code>satir_dogrula</code></td></tr>
+<tr><td>2. Dönüştür</td><td>Satırı tek biçime nasıl getiririm?</td><td><code>parti_isle</code></td></tr>
+<tr><td>3. Yükle</td><td>İkinci yükleme ne yapar?</td><td><code>sema_kur</code>, <code>yukle</code></td></tr>
+<tr><td>4. Artımlı</td><td>Neyi yeniden işlemem gerekir?</td><td><code>filigran_yaz</code>, <code>bekleyen_partiler</code></td></tr>
+<tr><td>5. Yönet</td><td>Hata çıkarsa ne kalır?</td><td><code>calistir</code>, günlük</td></tr>
+<tr><td>6. Sına</td><td>Sonuca nasıl güvenirim?</td><td><code>kalite_testleri</code></td></tr>
+<tr><td>7. Kanıtla</td><td>İki kez çalışınca ne olur?</td><td><code>kanit</code></td></tr></table></div>
+<h2>Ham veri: gerçek tablo, belgelenmiş bozulma</h2>
+<p>Kaynak, <code>anadolu_market</code> setindeki <code>web_events</code> tablosu: 2.819 olay, 60 gün. Bu tabloda iki gerçek kusur zaten var: 40 olay iki kez gönderilmiş (farklı <code>event_id</code>, aynı kullanıcı, tür, zaman ve cihaz) ve bazı kullanıcıların istemci saati kaymış. Reddedilecek satır ise yok; bu yüzden <code>ham_partiler()</code> satırları günlük CSV dosyalarına bölerken numarası belli kurallara göre bozulmalar ekler. Bozulmaların kuralı kodda açıktır, rastgele değildir; yani sonuçlar her çalıştırmada aynıdır. Bu ekleme derse aittir, veri setinin kendisinde yoktur.</p>
+<div class="tbl-wrap"><table><tr><th>Bozulma</th><th>Ne olur</th></tr>
+<tr><td>Büyük harf ve boşluk, başka tarih biçimi</td><td>Düzeltilir, yüklenir</td></tr>
+<tr><td>Boş kullanıcı, tanınmayan olay, 13. ay, tanınmayan cihaz</td><td>Nedeniyle reddedilir</td></tr>
+<tr><td>Geç gelen olay</td><td>İki gün sonraki partide gelir, yüklenir</td></tr></table></div>
+<pre class="py">import csv, io
+from datetime import date, datetime, timedelta
+import veri
+
+SUTUNLAR = ["event_id", "user_id", "event_type", "event_time", "device"]
+
+def ham_partiler():
+    """Gerçek web_events satırlarını günlük CSV partilerine böler ve belgelenmiş bozulmaları ekler."""
+    gunler = {}
+    for r in veri.kayitlar("anadolu_market", "web_events"):
+        s = {k: str(r[k]) for k in SUTUNLAR}
+        n = r["event_id"]
+        z = s["event_time"]
+        parti = z[:10]
+        if n % 101 == 0:   # düzeltilebilir: harf ve boşluk
+            s["event_type"] = " " + s["event_type"].upper() + " "
+        if n % 103 == 0:   # düzeltilebilir: başka tarih biçimi
+            s["event_time"] = z[8:10] + "." + z[5:7] + "." + z[:4] + z[10:]
+        if n % 211 == 0:   # reddedilir: kullanıcı yok
+            s["user_id"] = ""
+        if n % 223 == 0:   # reddedilir: tanınmayan olay
+            s["event_type"] = "sayfa_gorunum"
+        if n % 227 == 0:   # reddedilir: imkânsız tarih
+            s["event_time"] = z[:5] + "13" + z[7:]
+        if n % 229 == 0:   # reddedilir: tanınmayan cihaz
+            s["device"] = "buzdolabi"
+        if n % 59 == 0:    # geç gelen satır: iki gün sonraki partide
+            parti = (date.fromisoformat(parti) + timedelta(days=2)).isoformat()
+        gunler.setdefault(parti, []).append(s)
+    partiler = {}
+    for parti in sorted(gunler):
+        f = io.StringIO()
+        y = csv.DictWriter(f, SUTUNLAR, lineterminator="\n")
+        y.writeheader()
+        y.writerows(gunler[parti])
+        partiler[parti] = f.getvalue()
+    return partiler
+
+partiler = ham_partiler()
+print(len(partiler), "parti,", sum(m.count("\n") - 1 for m in partiler.values()), "satır")
+print(partiler["2024-10-01"][:170])</pre>
+<h2>Doğrulama: düzeltilebilir olanla olmayanı ayır</h2>
+<p>Doğrulamanın amacı satır atmak değil, karar vermektir. <code> VISIT </code> ile <code>visit</code> aynı şeydir: düzelt. Boş kullanıcı numarası düzeltilemez: uydurma, ayır. Reddedilen satırı nedeniyle bir tabloya yazmak, kaynak ekibine "şu satırlarınız şu sebeple gelmedi" diyebilmeni sağlar.</p>
+<div class="warn"><b>Önce temizle, sonra tekrar ara</b>Tekrar denetimini temizlikten önce yaparsan <code>VISIT</code> ile <code>visit</code> farklı görünür ve çift satır kaçar. Bu yüzden doğal anahtar, dönüştürülmüş değerler üzerindedir.</div>
+<h2>Doğal anahtar ve idempotent yükleme</h2>
+<p>Akla ilk gelen anahtar <code>event_id</code>'dir, ama burada yanlıştır: yinelenen olayların numaraları farklıdır. Anahtar, bir olayı olay yapan alanlardır: kullanıcı, tür, zaman, cihaz. Kısıtı veritabanına koyarsın, çünkü bu kuralın her kod yolundan geçerli olmasını istersin.</p>
+<pre class="py">import sqlite3
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE o (id INTEGER, kul INTEGER, tur TEXT, zaman TEXT, UNIQUE (kul, tur, zaman))")
+satirlar = [(1, 5, "visit", "10:00"), (2, 5, "visit", "10:00"), (3, 6, "visit", "10:05")]
+for tur_no in (1, 2):
+    once = con.total_changes
+    con.executemany("INSERT INTO o VALUES (?, ?, ?, ?) ON CONFLICT (kul, tur, zaman) DO NOTHING", satirlar)
+    print("tur", tur_no, "eklenen:", con.total_changes - once, "toplam:", con.execute("SELECT COUNT(*) FROM o").fetchone()[0])</pre>
+<p>Olaylar değişmez, bu yüzden <code>DO NOTHING</code> yeter. Sipariş durumu gibi değişen veride <code>DO UPDATE</code> kullanırsın; <a href="../veri-boru-hatti/">Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a> dersi onu gösterdi.</p>
+<h2>Artımlı yükleme: filigran neye bakmalı?</h2>
+<p>Her gece tüm tarihçeyi yeniden işlemek israftır; yalnız yeniyi işlemek istersin. "Buraya kadar işledim" kaydına filigran (watermark) denir. Asıl soru filigranın neye baktığıdır. Olay zamanına bakarsan geç gelen olayı kaybedersin; bu veride bu şekilde 46 olay kayboluyor ve hiçbir hata çıkmıyor. Parti tarihine bakarsan olay ne kadar eski olursa olsun, geldiği partiyle işlenir.</p>
+<pre class="py">from datetime import date, timedelta
+filigran = "2024-10-05"; geri_bakis = 2
+alt = (date.fromisoformat(filigran) - timedelta(days=geri_bakis)).isoformat()
+gelenler = ["2024-10-03", "2024-10-04", "2024-10-05", "2024-10-06"]
+print("işlenecek:", [p for p in gelenler if p &gt; alt])</pre>
+<p>Geri bakış neden var? Kaynak bazen son günlerin dosyasını düzeltip yeniden gönderir. Son iki günü her gece yeniden okumak bunu yakalar. Bu da ancak yükleme idempotent olduğu için güvenlidir: artımlılık ve idempotentlik birbirini tamamlar.</p>
+<h2>Parti başına tek işlem ve günlük</h2>
+<p>Her parti tek bir veritabanı işlemidir (transaction): satırlar, reddedilenler, günlük kaydı ve filigran ya birlikte yazılır ya hiç yazılmaz. Python'da <code>with con:</code> bloğu bunu sağlar. Günlüğün iki yüzü vardır: <code>logging</code> ile akan satırlar sabah ne olduğunu anlatır, <code>calisma_gunlugu</code> tablosu ise sayıları sorgulanabilir tutar.</p>
+<pre class="py">import logging, sqlite3
+log = logging.getLogger("ornek"); log.setLevel(logging.INFO)
+log.handlers[:] = [logging.StreamHandler(__import__("sys").stdout)]; log.propagate = False
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE t (x INTEGER)")
+try:
+    with con:
+        con.execute("INSERT INTO t VALUES (1)")
+        raise RuntimeError("disk doldu")
+except RuntimeError as e:
+    log.error("parti geri alındı: %s", e)
+print("satır:", con.execute("SELECT COUNT(*) FROM t").fetchone()[0])</pre>
+<h2>Kalite testleri: hata ve uyarı ayrımı</h2>
+<p>Bazı ihlaller işi geçersiz kılar: sayılar tutmuyorsa ya da çift satır varsa raporu yayımlama. Bazıları ise gerçek dünyanın kusurudur: saati kaymış istemci gerçek bir kayıttır, silmezsin, sayar ve raporlarsın. En önemli test satır mutabakatıdır: <code>gelen = eklenen + tekrar + red</code>. Bir satır bu dengeye girmiyorsa bir yerde kaybolmuştur.</p>
+<h2>Bitince göreceğin sonuç</h2>
+<p>Aşağıdaki sayılar bu dersin kodu gerçek veride çalıştırılarak hesaplandı; son adımda kendi kodun da aynısını üretecek.</p>
+<div class="tbl-wrap"><table><tr><th>Ölçü</th><th>Değer</th></tr>
+<tr><td>Gelen satır</td><td>2.819</td></tr>
+<tr><td>Eklenen</td><td>2.730</td></tr>
+<tr><td>Tekrar (veride gerçekten çift gönderilmiş)</td><td>40</td></tr>
+<tr><td>Reddedilen</td><td>49 (kullanıcı 13, tür 12, zaman 12, cihaz 12)</td></tr>
+<tr><td>Geç gelen ve yine de yüklenen</td><td>46</td></tr>
+<tr><td>İkinci çalıştırma</td><td>2 parti işlendi, 0 satır eklendi</td></tr>
+<tr><td>Huni uyarısı</td><td>18 kullanıcı (ham tabloda 17; reddedilen satırlar sayıyı değiştirir, silinmez, raporlanır)</td></tr></table></div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bu işi gerçek bir ortama taşırken</h3><p>Aynı tasarım PostgreSQL'de de geçerlidir; <code>ON CONFLICT</code> söz dizimi aynıdır, toplu yüklemede <code>COPY</code> ile geçici tablo kullanılır. Airflow gibi bir orkestratörde parti tarihi görevin veri aralığına karşılık gelir ve geriye dönük çalıştırma (backfill) bu sayede güvenlidir. dbt testleri ve Great Expectations, burada elle yazdığın kalite testlerinin bildirimsel hâlidir. Reddedilen oranına eşik koymak da yaygındır: satırların önemli bir kısmı reddedilmişse yüklemeyi durdurup haber vermek, eksik veriyi sessizce yayımlamaktan iyidir. Bu eşiği iş birimiyle birlikte seç. Geri bakış penceresinden eski bir parti düzeltilirse bu iş onu kendiliğinden görmez; o tarih için filigranı geri alıp geriye dönük çalıştırman gerekir.</p></section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-etl">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../yerel-modeller-hf/">← Hugging Face ve yerel modellerle Python</a><span></span></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

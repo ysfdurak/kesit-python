@@ -1,0 +1,243 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kapsülleme ve iç gözlem: property, __dict__ ve getattr | Kesit Python</title><meta name="description" content="Örnek ve sınıf değişkenini, paylaşım tuzağını, _korunan ve __gizli adları (name mangling), property ile doğrulamayı, salt okunur alanları ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kapsulleme-ozellik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kapsülleme ve iç gözlem: property, __dict__ ve getattr"><meta property="og:description" content="Örnek ve sınıf değişkenini, paylaşım tuzağını, _korunan ve __gizli adları (name mangling), property ile doğrulamayı, salt okunur alanları ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kapsulleme-ozellik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kapsülleme ve iç gözlem: property, __dict__ ve getattr","description":"Örnek ve sınıf değişkenini, paylaşım tuzağını, _korunan ve __gizli adları (name mangling), property ile doğrulamayı, salt okunur alanları ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/kapsulleme-ozellik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Kapsülleme ve iç gözlem: property, __dict__ ve getattr</h1><p class="st-l">Örnek ve sınıf değişkenini, paylaşım tuzağını, _korunan ve __gizli adları (name mangling), property ile doğrulamayı, salt okunur alanları ve getattr/setattr/vars ile çalışma anında nesne incelemeyi öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsulleme-ozellik">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın mobil uygulamasında bir geliştirici, hata ayıklarken şu satırı yazıp unutuyor: <code>hesap.bakiye = -25000</code>. Kod çalışıyor, test geçiyor, ama müşterinin hesabı hiçbir işlem kaydı olmadan eksiye düşüyor. Sınıflar dersinde nesnenin veriyi ve davranışı bir arada tuttuğunu gördün. Bu derste o verinin <b>nasıl korunacağını</b> (kapsülleme, encapsulation) ve bir nesnenin içine çalışma anında <b>nasıl bakılacağını</b> (iç gözlem, introspection) öğreneceksin. İkisi de PCAP sınavının 4. bölümünün çekirdeğidir ve gerçek projelerde her gün kullanılır: doğrulayan setter'lar, salt okunur alanlar, nesneyi dinamik olarak JSON'a çeviren yardımcılar, eklenti sistemleri.</p>
+<p>Kapsüllemenin özü şudur: nesnenin iç durumunu yalnızca kendi metotları değiştirsin, dışarıya kontrollü bir kapı açılsın. Python bunu derleyici zoruyla değil, <b>sözleşme ve araçlarla</b> yapar: alt çizgi adlandırması, name mangling ve <code>property</code>.</p>
+
+<h2>Örnek değişkeni ve sınıf değişkeni: arama sırası</h2>
+<p>Sınıflar dersinde ikisinin farkını gördün; şimdi işin mekaniğine bakalım. <code>nesne.ad</code> yazdığında Python önce <b>nesnenin</b> sözlüğüne, bulamazsa <b>sınıfın</b> sözlüğüne, sonra üst sınıflara bakar. Okurken bu zincir izlenir; ama <b>atama</b> her zaman nesnenin kendi sözlüğüne yazar. Bu yüzden <code>k1.oran = 35</code> sınıf değişkenini değiştirmez, onu gölgeleyen (shadowing) yeni bir örnek değişkeni yaratır.</p>
+<pre class="py">class Kur:
+    oran = 32.5            # sınıf değişkeni: tüm nesneler paylaşır
+
+k1 = Kur()
+k2 = Kur()
+k1.oran = 33.0             # k1'e ÖZEL yeni değişken; sınıfa dokunmaz
+Kur.oran = 34.0            # sınıfı değiştir: gölgelenmeyen herkes görür
+print(k1.oran, k2.oran, Kur.oran)
+print(k1.__dict__, k2.__dict__)
+del k1.oran                # gölgeyi kaldır
+print(k1.oran)             # artık sınıfınkini görür</pre>
+<p>Asıl tehlike <b>değiştirilebilir</b> (mutable) bir sınıf değişkenidir. Liste ya da sözlük sınıf gövdesinde tanımlanıp <code>self.liste.append(...)</code> ile değiştirilirse atama olmadığı için gölge oluşmaz; herkes aynı listeye yazar.</p>
+<pre class="py">class Musteri:
+    siparisler = []                    # TUZAK: tek liste, herkes paylaşır
+    def __init__(self, ad):
+        self.ad = ad
+    def siparis_ver(self, no):
+        self.siparisler.append(no)
+
+a = Musteri("Ayşe")
+b = Musteri("Burak")
+a.siparis_ver("AM-101")
+print(b.siparisler)                     # Burak'ın siparişi yok ama görünüyor!
+
+class MusteriDuzgun:
+    def __init__(self, ad):
+        self.ad = ad
+        self.siparisler = []           # her nesneye kendi listesi
+c = MusteriDuzgun("Can")
+print(c.siparisler, "siparisler" in vars(c))</pre>
+<div class="warn"><b>Kural</b>Sınıf değişkeni olarak yalnızca değişmez (immutable) değerler tut: sabitler, oranlar, sayaçlar. Liste, sözlük, küme gibi kaplar her zaman <code>__init__</code> içinde <code>self.</code> ile oluşturulur.</div>
+
+<h2>__dict__ ve vars(): nesnenin içi</h2>
+<p>Her nesnenin niteliklerini tutan bir sözlüğü vardır: <code>nesne.__dict__</code>. <code>vars(nesne)</code> aynı sözlüğü döndürür ve daha okunurdur. Sınıfın da bir <code>__dict__</code>'i vardır; metotlar, sınıf değişkenleri ve property'ler oradadır. Sınıfınki salt okunur bir <code>mappingproxy</code>'dir, doğrudan yazamazsın.</p>
+<pre class="py">class Urun:
+    kdv = 0.20
+    def __init__(self, ad, fiyat):
+        self.ad = ad
+        self.fiyat = fiyat
+    def kdvli(self):
+        return round(self.fiyat * (1 + self.kdv), 2)
+
+u = Urun("Kulaklık", 1000)
+print(vars(u))                                  # yalnız örnek verisi
+print([k for k in vars(Urun) if not k.startswith("__")])
+print(type(vars(Urun)).__name__)
+u.__dict__["stok"] = 7                          # sözlüğe yazmak = nitelik eklemek
+print(u.stok, u.kdvli())</pre>
+<p><code>vars()</code> özellikle hata ayıklarken ve nesneyi sözlüğe/JSON'a çevirirken işe yarar. Ama dikkat: property'ler ve sınıf değişkenleri nesnenin sözlüğünde <b>görünmez</b>.</p>
+
+<h2>Tek alt çizgi, çift alt çizgi ve name mangling</h2>
+<p>Python'da <code>private</code> anahtar sözcüğü yoktur. Bunun yerine iki adlandırma kuralı vardır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Anlamı</th><th>Dışarıdan erişim</th></tr>
+<tr><td><code>bakiye</code></td><td>Genel (public) arayüz</td><td>Serbest</td></tr>
+<tr><td><code>_bakiye</code></td><td>Korunan (protected): "iç ayrıntı, dokunma" sözleşmesi</td><td>Teknik olarak serbest; <code>from m import *</code> almaz</td></tr>
+<tr><td><code>__bakiye</code></td><td>Gizli (private): ad karıştırma (name mangling) uygulanır</td><td><code>_Hesap__bakiye</code> adıyla erişilir</td></tr>
+<tr><td><code>__init__</code></td><td>Dunder (özel metot): iki yanda çift alt çizgi</td><td>Karıştırma YOK</td></tr>
+</table></div>
+<p>Sınıf gövdesinde <code>__ad</code> biçimindeki (sonunda çift alt çizgi olmayan) her ad, derleme sırasında <code>_SinifAdi__ad</code> olarak yeniden yazılır. Amaç gizlemek değil, <b>alt sınıflarla ad çakışmasını önlemektir</b>: alt sınıf da <code>__bakiye</code> tanımlarsa o <code>_AltSinif__bakiye</code> olur, üst sınıfınkini ezmez.</p>
+<pre class="py">class Hesap:
+    def __init__(self, sahip, bakiye):
+        self.sahip = sahip
+        self._limit = 5000          # korunan: sözleşme
+        self.__bakiye = bakiye      # gizli: ad karıştırılır
+
+h = Hesap("Ayşe", 1200)
+print(sorted(vars(h)))
+try:
+    print(h.__bakiye)
+except AttributeError as e:
+    print("Hata:", e)
+print(h._Hesap__bakiye)              # mümkün ama YAPMA
+h.__bakiye = 0                       # sınıf dışında karıştırma olmaz: YENİ nitelik
+print(sorted(vars(h)))</pre>
+<p>Son satır PCAP'te sevilen bir tuzaktır: sınıf <b>dışında</b> yazılan <code>h.__bakiye = 0</code> karıştırılmaz; nesneye <code>__bakiye</code> adında ikinci bir nitelik ekler, gerçek bakiye yerinde durur.</p>
+
+<h2>property: kontrollü kapı</h2>
+<p><code>property</code>, bir metodu nitelik gibi okutur ve atamayı kendi kodundan geçirir. Getter (okuyucu), setter (yazıcı) ve deleter (silici) olmak üzere üç parçası vardır. Böylece dış arayüz <code>urun.fiyat = 250</code> gibi sade kalır ama içeride doğrulama çalışır.</p>
+<pre class="py">class Urun:
+    def __init__(self, ad, fiyat):
+        self.ad = ad
+        self.fiyat = fiyat          # setter'dan geçer, doğrulanır
+
+    @property
+    def fiyat(self):
+        return self._fiyat
+
+    @fiyat.setter
+    def fiyat(self, deger):
+        if not isinstance(deger, (int, float)) or deger &lt; 0:
+            raise ValueError(f"Geçersiz fiyat: {deger!r}")
+        self._fiyat = round(float(deger), 2)
+
+    @fiyat.deleter
+    def fiyat(self):
+        print("Fiyat kaldırıldı")
+        del self._fiyat
+
+u = Urun("Termos", 349.999)
+print(u.fiyat)
+try:
+    u.fiyat = -10
+except ValueError as e:
+    print(e)
+print(vars(u))
+del u.fiyat
+print(hasattr(u, "fiyat"))</pre>
+<p>İki ayrıntıya dikkat: değer <code>_fiyat</code> adında saklanır (property ile aynı adı kullanırsan setter kendini sonsuza kadar çağırır, RecursionError). Ve kurucuda <code>self.fiyat = fiyat</code> yazmak bilinçli bir seçimdir: doğrulama nesne ilk oluşturulurken de çalışır.</p>
+<h3>Salt okunur nitelik</h3>
+<p>Yalnız getter tanımlarsan nitelik salt okunur olur; atama <code>AttributeError</code> verir. Bakiye, müşteri numarası, oluşturma tarihi gibi değerler için idealdir. Bakiye değişecekse bunu <code>yatir</code>/<code>cek</code> gibi kurallı metotlar yapar.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, bakiye=0.0):
+        self._no = no
+        self.__bakiye = float(bakiye)
+
+    @property
+    def no(self):
+        return self._no
+
+    @property
+    def bakiye(self):
+        return self.__bakiye
+
+    def yatir(self, tutar):
+        if tutar &lt;= 0:
+            raise ValueError("Tutar pozitif olmalı")
+        self.__bakiye += tutar
+
+h = Hesap("AB-001", 500)
+h.yatir(250)
+print(h.no, h.bakiye)
+try:
+    h.bakiye = 1_000_000
+except AttributeError as e:
+    print("Engellendi:", e)</pre>
+
+<h2>getattr, setattr, hasattr, delattr: adı çalışma anında belli olan nitelikler</h2>
+<p>Niteliğin adı bir değişkende (ör. formdan ya da CSV başlığından gelen bir metinde) duruyorsa nokta sözdizimi işe yaramaz. Dört yerleşik fonksiyon bu işi yapar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Fonksiyon</th><th>Eşdeğeri</th><th>Not</th></tr>
+<tr><td><code>getattr(n, "ad")</code></td><td><code>n.ad</code></td><td>Üçüncü argüman varsayılan: <code>getattr(n, "ad", None)</code> hata vermez</td></tr>
+<tr><td><code>setattr(n, "ad", d)</code></td><td><code>n.ad = d</code></td><td>Property setter'ı da çalışır</td></tr>
+<tr><td><code>hasattr(n, "ad")</code></td><td>getattr dener, AttributeError olursa False</td><td>Property içindeki AttributeError da False'a döner</td></tr>
+<tr><td><code>delattr(n, "ad")</code></td><td><code>del n.ad</code></td><td>Deleter varsa onu çağırır</td></tr>
+</table></div>
+<pre class="py">class Calisan:
+    def __init__(self, ad, departman, maas):
+        self.ad, self.departman, self.maas = ad, departman, maas
+
+c = Calisan("Elif", "İK", 42000)
+guncelleme = {"departman": "Finans", "maas": 45000, "unvan": "Uzman"}
+for alan, deger in guncelleme.items():
+    if hasattr(c, alan):
+        setattr(c, alan, deger)
+    else:
+        print("Bilinmeyen alan atlandı:", alan)
+print(vars(c))
+print(getattr(c, "unvan", "belirtilmemiş"))
+metot_adi = "upper"
+print(getattr(c.ad, metot_adi)())     # metotlar da nitelik</pre>
+<div class="tip"><b>Varsayılanı unutma</b><code>getattr(n, ad)</code> nitelik yoksa AttributeError fırlatır. Dışarıdan gelen adlarla çalışırken ya varsayılan ver ya da önce <code>hasattr</code> ile sor.</div>
+
+<h2>İç gözlem nitelikleri: __name__, __module__, __bases__, __class__</h2>
+<p>Sınıflar da nesnedir ve kendileri hakkında bilgi taşır. PCAP bunları doğrudan sorar:</p>
+<pre class="py">class Hesap:
+    pass
+class VadeliHesap(Hesap):
+    pass
+
+v = VadeliHesap()
+print(VadeliHesap.__name__)                     # sınıfın adı
+print(VadeliHesap.__module__)                   # tanımlandığı modül
+print(VadeliHesap.__bases__)                    # doğrudan üst sınıflar (demet)
+print(v.__class__.__name__, type(v) is VadeliHesap)
+print(isinstance(v, Hesap), type(v) is Hesap)   # isinstance kalıtımı gözetir
+print(issubclass(VadeliHesap, Hesap), issubclass(Hesap, object))
+print(Hesap.__bases__)</pre>
+<p><code>type(n)</code> nesnenin tam sınıfını verir; <code>isinstance</code> ise alt sınıfları da kabul eder. "Bu bir Hesap mı?" sorusunda neredeyse her zaman <code>isinstance</code> doğrudur. <code>__bases__</code> yalnız <b>doğrudan</b> üst sınıfları içerir; tüm zinciri görmek için <code>__mro__</code> kullanılır (çoklu kalıtım (inheritance) dersinde).</p>
+
+<h2>classmethod ile alternatif kurucu</h2>
+<p>Bir sınıfı farklı kaynaklardan (CSV satırı, sözlük, API yanıtı) kurmak istediğinde <code>__init__</code>'i şişirmek yerine <code>@classmethod</code> ile adlandırılmış kurucular yazarsın. İlk parametre <code>cls</code>'dir; <code>cls(...)</code> çağırdığın için alt sınıflarda da doğru türü üretir.</p>
+<pre class="py">class Hesap:
+    _sayac = 0                                   # değişmez sayaç: sınıf değişkeni uygun
+
+    def __init__(self, sahip, bakiye=0.0):
+        Hesap._sayac += 1
+        self.no = f"AB-{Hesap._sayac:04d}"
+        self.sahip = sahip
+        self.bakiye = float(bakiye)
+
+    @classmethod
+    def satirdan(cls, satir):
+        sahip, bakiye = satir.split(";")
+        return cls(sahip.strip(), float(bakiye))
+
+    @classmethod
+    def sozlukten(cls, d):
+        return cls(d["sahip"], d.get("bakiye", 0))
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.no}, {self.sahip}, {self.bakiye:.2f})"
+
+print(Hesap.satirdan("Ayşe Kaya; 1500.5"))
+print(Hesap.sozlukten({"sahip": "Burak Demir"}))
+print(Hesap._sayac)</pre>
+<p>Sayaçta <code>Hesap._sayac += 1</code> yazdık, <code>self._sayac += 1</code> değil. İkincisi okumayı sınıftan yapar ama sonucu nesneye yazar; sayaç hiç artmamış gibi görünür. Gölgeleme kuralının pratik sonucu budur.</p>
+
+<div class="note"><b>Gerçek işte</b>Bankacılık ve sağlık yazılımlarında denetim (audit) ekipleri "bakiye/teşhis alanı nerede değiştirilebiliyor?" diye sorar. Cevabın "yalnız şu iki metotta" olması kod incelemesini (code review) dakikalara indirir. Salt okunur property ve tek giriş noktalı metotlar bu cevabı mümkün kılar. Ayrıca pydantic, SQLAlchemy, Django ORM gibi kütüphaneler içeride tam olarak bu dersteki araçları kullanır: <code>setattr</code> ile alan doldurma, <code>__dict__</code> ile serileştirme, property ile hesaplanan alanlar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>"Hepimiz yetişkiniz" felsefesi</h3>
+<p>Python topluluğunun sözü: "We are all consenting adults." Dil seni <code>_Hesap__bakiye</code>'ye erişmekten alıkoymaz; alt çizgi bir uyarı levhasıdır, kilit değil. Gerçek güvenlik (yetkilendirme, şifreleme) uygulama katmanında sağlanır. Kapsülleme ise <b>hata önleme ve bakım kolaylığı</b> içindir. Bu yüzden çoğu proje <code>__gizli</code> yerine tek alt çizgi <code>_korunan</code> kullanır; çift alt çizgiyi yalnızca kalıtımda ad çakışması gerçek bir risk olduğunda seçer.</p>
+<h3>Önce düz nitelik, sonra property</h3>
+<p>Java alışkanlığıyla her alana <code>get_x</code>/<code>set_x</code> yazma. Python'da alanı düz nitelik olarak başlat; ileride doğrulama gerekirse aynı adla property'ye çevir. Çağıran kodun tek satırı bile değişmez. Bu, property'nin varlık sebebidir.</p>
+<h3>__getattr__ ve __setattr__</h3>
+<p><code>__getattr__(self, ad)</code> yalnız normal arama <b>başarısız olduğunda</b> çağrılır; eksik alanlara varsayılan vermek ya da başka bir nesneye yönlendirmek (delegation) için kullanılır. <code>__setattr__</code> ise <b>her</b> atamada çalışır; içinde <code>self.x = ...</code> yazarsan sonsuz döngüye girersin, <code>super().__setattr__(ad, deger)</code> kullanmalısın. Bu derste bir meydan okuma görevinde göreceksin. Tekrarlanan doğrulama mantığını birçok sınıfta kullanmak için descriptor'lar ve <code>__slots__</code> İleri OOP dersinde.</p>
+<h3>PCAP için hızlı kontrol listesi</h3>
+<ul>
+<li><code>hasattr(Sinif, "x")</code> sınıf değişkenleri için True, yalnız <code>__init__</code>'te atanan örnek değişkenleri için False'tur.</li>
+<li><code>__name__</code> sınıfta vardır, sıradan bir nesnede yoktur: <code>n.__class__.__name__</code> yazılır.</li>
+<li><code>__bases__</code> demettir; <code>object</code>'ten türeyen sınıf için <code>(&lt;class 'object'&gt;,)</code>.</li>
+<li>Name mangling yalnız sınıf gövdesi içinde yazılan adlara uygulanır.</li>
+</ul>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kapsulleme-ozellik">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../gui-tkinter/">← Masaüstü arayüz: tkinter ve MVC</a><a href="../logging/">logging: profesyonel kayıt tutma →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

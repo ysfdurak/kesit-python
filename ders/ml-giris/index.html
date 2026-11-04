@@ -1,0 +1,191 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Makine öğrenmesine giriş | Kesit Python</title><meta name="description" content="Denetimli/denetimsiz öğrenme, özellik ve hedef, eğitim/test ayrımı, scikit-learn estimator API'si (fit/predict/score), ilk modeller, aşırı/eksik öğrenme,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ml-giris/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Makine öğrenmesine giriş"><meta property="og:description" content="Denetimli/denetimsiz öğrenme, özellik ve hedef, eğitim/test ayrımı, scikit-learn estimator API'si (fit/predict/score), ilk modeller, aşırı/eksik öğrenme,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ml-giris/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Makine öğrenmesine giriş","description":"Denetimli/denetimsiz öğrenme, özellik ve hedef, eğitim/test ayrımı, scikit-learn estimator API'si (fit/predict/score), ilk modeller, aşırı/eksik öğrenme,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/ml-giris/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>Makine öğrenmesine giriş</h1><p class="st-l">Denetimli/denetimsiz öğrenme, özellik ve hedef, eğitim/test ayrımı, scikit-learn estimator API'si (fit/predict/score), ilk modeller, aşırı/eksik öğrenme, veri sızıntısı, temel metrikler ve CRISP-DM akışı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-giris">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Kural yazmak yerine kuralı öğrenmek</h2>
+<p>Ilgaz Bank'ın kredi biriminde yıllardır şöyle kurallar yazılır: "Geliri 30 bin TL'nin altındaysa ve son bir yılda iki gecikmesi varsa reddet." Kurallar çoğaldıkça birbirine çarpar, yeni bir müşteri profili geldiğinde kimse hangi kuralı güncelleyeceğini bilemez. <b>Makine öğrenmesi</b> (machine learning, ML) bu işi tersine çevirir: kuralı sen yazmazsın, geçmiş örneklerden (geçmiş başvurular ve sonuçları) bir algoritma kuralı kendisi <b>öğrenir</b>. Sen veriyi hazırlar, doğru soruyu sorar ve öğrenilen modelin gerçekten işe yarayıp yaramadığını <b>ölçersin</b>.</p>
+<p>Bu derste ML'in temel sözlüğünü, scikit-learn kütüphanesinin ortak arayüzünü, ilk üç modelini ve en önemlisi bir modeli <b>dürüstçe değerlendirmeyi</b> öğreneceksin. numpy dizilerini (<i>numpy</i> dersi) ve pandas DataFrame'lerini (<i>pandas-giris</i>) bildiğini varsayıyoruz; ortalama, varyans gibi kavramlar <i>istatistik</i> dersinden tanıdık gelecek.</p>
+
+<h2>Öğrenme türleri</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Tür</th><th>Veride ne var?</th><th>Soru</th><th>Örnek</th></tr>
+<tr><td><b>Denetimli</b> (supervised) — regresyon</td><td>Özellikler + sayısal hedef</td><td>"Ne kadar?"</td><td>Sepet tutarı, teslim süresi, ev fiyatı</td></tr>
+<tr><td><b>Denetimli</b> — sınıflandırma</td><td>Özellikler + kategorik hedef</td><td>"Hangisi?"</td><td>Kredi temerrüde düşer mi, e-posta spam mı</td></tr>
+<tr><td><b>Denetimsiz</b> (unsupervised)</td><td>Yalnızca özellikler, hedef yok</td><td>"Nasıl gruplanıyor?"</td><td>Müşteri segmentleri, anormal işlemler</td></tr>
+<tr><td><b>Pekiştirmeli</b> (reinforcement)</td><td>Ortam + ödül sinyali</td><td>"Hangi hamle?"</td><td>Depo robotu rotası, oyun oynayan ajan</td></tr>
+</table></div>
+<p>Bu dersten itibaren üç ders boyunca denetimli öğrenmeye odaklanacağız; kümeleme gibi denetimsiz yöntemleri <i>ml-kumeleme</i> dersinde göreceksin.</p>
+
+<h2>Özellik, hedef ve X/y</h2>
+<p>Bir tablo düşün: her <b>satır</b> bir örnek (sample; bir müşteri, bir sipariş), her <b>sütun</b> bir özellik (feature; yaş, gelir, sepet adedi). Tahmin etmek istediğin sütun ise <b>hedef</b> (target, label). scikit-learn geleneği: özellik matrisine büyük <code>X</code>, hedef vektörüne küçük <code>y</code> denir. <code>X</code> her zaman <b>iki boyutludur</b>: şekli <code>(örnek_sayısı, özellik_sayısı)</code>. Tek özelliğin olsa bile <code>(n, 1)</code> olmalı.</p>
+<pre class="py">import numpy as np
+from sklearn.datasets import load_iris, make_classification
+
+iris = load_iris()                    # internet gerektirmez, kütüphaneyle gelir
+X, y = iris.data, iris.target
+print(X.shape, y.shape)               # 150 çiçek, 4 özellik
+print(iris.feature_names)
+print(list(iris.target_names), np.bincount(y))
+
+# Sentetik veri: kontrollü deneyler için
+Xs, ys = make_classification(n_samples=200, n_features=5, n_informative=3, random_state=42)
+print(Xs.shape, np.bincount(ys))
+
+metrekare = np.array([65, 90, 120, 150])
+print(metrekare.shape, metrekare.reshape(-1, 1).shape)   # tek özellik: (n, 1)
+</pre>
+<div class="note"><b>Neden yerleşik veri setleri?</b><code>load_iris</code>, <code>load_diabetes</code>, <code>load_wine</code>, <code>load_breast_cancer</code> scikit-learn ile birlikte diske gelir; ağ istemez. <code>make_classification</code> ve <code>make_regression</code> ise istediğin boyutta sentetik veri üretir. <code>random_state</code> verdiğinde her çalıştırmada aynı veri çıkar; deneylerin tekrarlanabilir olur.</div>
+
+<h2>Eğitim ve test: modelin sınav kâğıdı</h2>
+<p>Bir öğrenciyi, çalıştığı soruların aynısıyla sınava sokarsan ezberlediği için tam not alır ama konuyu anlayıp anlamadığını öğrenemezsin. Modeller de böyledir. Bu yüzden veriyi en baştan ikiye ayırırız: <b>eğitim seti</b> (training set) ile model öğrenir, <b>test seti</b> (test set) ile hiç görmediği veride nasıl davrandığını ölçeriz. Test setine değerlendirme anına kadar <b>dokunulmaz</b>.</p>
+<pre class="py">import numpy as np
+from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.2, random_state=42, stratify=y
+)
+print(X_train.shape, X_test.shape)
+print("eğitim sınıf dağılımı:", np.bincount(y_train))
+print("test sınıf dağılımı:  ", np.bincount(y_test))
+</pre>
+<ul>
+<li><code>test_size=0.2</code>: verinin %20'si teste ayrılır (yaygın aralık %20-30).</li>
+<li><code>random_state=42</code>: karıştırma her seferinde aynı olur. Vermezsen her çalıştırmada farklı bölme ve farklı skor görürsün; hata ayıklamak imkânsızlaşır.</li>
+<li><code>stratify=y</code>: sınıf oranları eğitim ve testte korunur. Sınıflandırmada, özellikle dengesiz sınıflarda (temerrüt oranı %5 gibi) neredeyse her zaman ver.</li>
+</ul>
+<div class="warn"><b>Zaman verisi karıştırılmaz</b>Satış tahmini gibi zamana bağlı problemlerde rastgele bölme, modele "gelecekten" bilgi sızdırır. Orada eğitim eski tarihler, test yeni tarihler olur (ör. Ocak-Eylül ile eğit, Ekim-Aralık ile test et). <i>pandas-zaman-serisi</i> dersindeki tarih süzmesi tam bunun için.</div>
+
+<h2>scikit-learn'ün ortak dili: estimator API</h2>
+<p>scikit-learn'ün en güzel yanı tutarlılığıdır: yüzlerce farklı algoritma <b>aynı metotlarla</b> kullanılır. Bir modeli öğrendiğinde hepsini öğrenmiş olursun.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Metot</th><th>Ne yapar</th><th>Kimde var</th></tr>
+<tr><td><code>fit(X, y)</code></td><td>Veriden öğrenir, nesnenin kendisini döndürür</td><td>Hepsi (denetimsizde yalnız <code>fit(X)</code>)</td></tr>
+<tr><td><code>predict(X)</code></td><td>Yeni örnekler için tahmin üretir</td><td>Modeller (regresör, sınıflandırıcı)</td></tr>
+<tr><td><code>score(X, y)</code></td><td>Varsayılan metrik: regresyonda R², sınıflandırmada doğruluk</td><td>Modeller</td></tr>
+<tr><td><code>predict_proba(X)</code></td><td>Sınıf olasılıkları</td><td>Çoğu sınıflandırıcı</td></tr>
+<tr><td><code>transform(X)</code> / <code>fit_transform</code></td><td>Veriyi dönüştürür (ölçekleme, kodlama)</td><td>Dönüştürücüler (transformer)</td></tr>
+</table></div>
+<p>Öğrenilen her şey alt çizgiyle biten özniteliklerde saklanır: <code>coef_</code>, <code>intercept_</code>, <code>classes_</code>, <code>feature_importances_</code>. Alt çizgi "bu değer fit sırasında hesaplandı" demektir; fit etmeden erişirsen <code>AttributeError</code> ya da <code>NotFittedError</code> alırsın. Hiperparametreler (kullanıcının seçtiği ayarlar: <code>n_neighbors</code>, <code>max_depth</code>) ise kurucuda verilir.</p>
+
+<h2>İlk üç model</h2>
+<h3>Doğrusal regresyon (LinearRegression)</h3>
+<p>Hedefi özelliklerin ağırlıklı toplamı olarak modeller: <code>ŷ = b + w1·x1 + w2·x2 + ...</code>. Hızlı, yorumlanabilir, her regresyon projesinde ilk denenecek temel çizgidir (baseline).</p>
+<pre class="py">import numpy as np
+from sklearn.datasets import load_diabetes
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
+
+X, y = load_diabetes(return_X_y=True)   # 442 hasta, 10 özellik, hedef: 1 yıl sonraki hastalık ilerlemesi
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.2, random_state=42)
+
+model = LinearRegression()
+model.fit(X_train, y_train)
+tahmin = model.predict(X_test)
+
+print("MAE :", round(mean_absolute_error(y_test, tahmin), 1))
+print("RMSE:", round(float(np.sqrt(mean_squared_error(y_test, tahmin))), 1))
+print("R²  :", round(r2_score(y_test, tahmin), 3))
+print("score() ile aynı mı:", round(model.score(X_test, y_test), 3))
+
+taban = np.full_like(y_test, y_train.mean(), dtype=float)   # hep ortalamayı söyleyen model
+print("Taban çizgi MAE:", round(mean_absolute_error(y_test, taban), 1))
+</pre>
+<h3>k-en yakın komşu (KNeighborsClassifier) ve karar ağacı (DecisionTreeClassifier)</h3>
+<p>KNN yeni örneğe en yakın <code>k</code> eğitim örneğine bakar ve çoğunluğun sınıfını söyler; "öğrenme" aslında veriyi ezberlemektir. Karar ağacı ise veriyi "petal uzunluğu 2.45'ten küçük mü?" gibi evet/hayır sorularıyla dallara böler; kuralları insanın okuyabileceği biçimdedir.</p>
+<pre class="py">from sklearn.datasets import load_iris
+from sklearn.model_selection import train_test_split
+from sklearn.neighbors import KNeighborsClassifier
+from sklearn.tree import DecisionTreeClassifier, export_text
+
+X, y = load_iris(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42, stratify=y)
+
+knn = KNeighborsClassifier(n_neighbors=5).fit(X_train, y_train)
+agac = DecisionTreeClassifier(max_depth=2, random_state=0).fit(X_train, y_train)
+print("KNN doğruluk  :", round(knn.score(X_test, y_test), 3))
+print("Ağaç doğruluk :", round(agac.score(X_test, y_test), 3))
+print("İlk 5 tahmin  :", agac.predict(X_test[:5]), "gerçek:", y_test[:5])
+print(export_text(agac, feature_names=["sepal_l", "sepal_w", "petal_l", "petal_w"]))
+</pre>
+
+<h2>Metrikler: neyi ölçüyoruz?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Metrik</th><th>Problem</th><th>Yorum</th><th>Ne zaman</th></tr>
+<tr><td><b>MAE</b> (ortalama mutlak hata)</td><td>Regresyon</td><td>Ortalama kaç birim yanılıyorum; hedefle aynı birim (TL, gün)</td><td>İş birimine anlatmak kolay</td></tr>
+<tr><td><b>RMSE</b> (kök ortalama kare hata)</td><td>Regresyon</td><td>Büyük hataları daha çok cezalandırır</td><td>Büyük sapmalar pahalıysa</td></tr>
+<tr><td><b>R²</b> (belirleme katsayısı)</td><td>Regresyon</td><td>1 mükemmel, 0 "hep ortalamayı söylemek" kadar, negatif daha kötü</td><td>Modeller arası karşılaştırma</td></tr>
+<tr><td><b>Accuracy</b> (doğruluk)</td><td>Sınıflandırma</td><td>Doğru tahmin oranı</td><td>Sınıflar dengeliyse</td></tr>
+</table></div>
+<p>Bir metrik tek başına anlamsızdır; her zaman bir <b>taban çizgiyle</b> (baseline) karşılaştır. Regresyonda "hep eğitim ortalamasını söyle", sınıflandırmada "hep en sık sınıfı söyle" modelleri (<code>DummyRegressor</code>, <code>DummyClassifier</code>) en ucuz rakiptir. Temerrüt oranı %5 olan bir portföyde "kimse temerrüde düşmez" diyen model %95 doğruluk alır ve tamamen işe yaramaz. Dengesiz sınıflar için precision, recall ve ROC-AUC'yi bir sonraki derste göreceksin.</p>
+
+<h2>Aşırı ve eksik öğrenme</h2>
+<p><b>Eksik öğrenme</b> (underfitting): model veriyi yakalayamayacak kadar basittir; eğitimde de testte de kötüdür. <b>Aşırı öğrenme</b> (overfitting): model eğitim verisindeki gürültüyü bile ezberler; eğitimde parlak, testte sönüktür. Teşhis aracın, eğitim ve test skorlarını <b>yan yana</b> görmektir.</p>
+<pre class="py">from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeClassifier
+
+# flip_y=0.15: etiketlerin %15'i rastgele bozuk (gerçek hayattaki gürültü)
+X, y = make_classification(n_samples=600, n_features=8, n_informative=4, flip_y=0.15, random_state=1)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
+
+print("derinlik  eğitim  test")
+for derinlik in [1, 3, 5, 10, None]:
+    m = DecisionTreeClassifier(max_depth=derinlik, random_state=0).fit(X_tr, y_tr)
+    print(f"{str(derinlik):&gt;8}  {m.score(X_tr, y_tr):.3f}  {m.score(X_te, y_te):.3f}")
+</pre>
+<p>Derinlik 1'de iki skor da düşük: eksik öğrenme. Derinlik sınırsızken eğitim 1.000'e çıkar ama test düşer: model gürültüyü ezberledi. Tatlı nokta ikisinin arasındadır. Bu ayarı test setine bakarak seçersen test seti artık "görülmemiş" değildir; doğru yöntem (doğrulama seti ve çapraz doğrulama (cross-validation)) <i>ml-pipeline-degerlendirme</i> dersinde.</p>
+
+<h2>Veri sızıntısı: en pahalı hata</h2>
+<p><b>Veri sızıntısı</b> (data leakage), modelin eğitim sırasında tahmin anında elinde olmayacak bir bilgiyi görmesidir. Sonuç: testte muhteşem, canlıda felaket. Tipik biçimleri:</p>
+<ul>
+<li><b>Hedeften türetilmiş özellik</b>: kredi temerrüdü tahmininde "tahsilat departmanına devredildi mi" sütunu. Bu bilgi ancak temerrütten <i>sonra</i> oluşur.</li>
+<li><b>Test verisinin ön işlemeye karışması</b>: ölçekleyiciyi ya da ortalamayla eksik doldurmayı bölmeden önce tüm veriye fit etmek.</li>
+<li><b>Zaman sızıntısı</b>: gelecekteki satırlarla eğitip geçmişi test etmek.</li>
+<li><b>Tekrarlanan kayıtlar</b>: aynı müşterinin satırları hem eğitimde hem testte.</li>
+</ul>
+<div class="tip"><b>Sızıntı testi</b>Bir model "fazla iyi" görünüyorsa (sınıflandırmada %99, R² 0.99) önce sevinme, şüphelen. En önemli özelliklere bak ve her biri için "tahmin anında bu bilgi elimde olur mu?" diye sor.</div>
+
+<h2>ML proje akışı: CRISP-DM</h2>
+<p>Endüstride en yaygın süreç modeli CRISP-DM'dir (Cross-Industry Standard Process for Data Mining). Doğrusal değil, döngüseldir; değerlendirmede çıkan sonuç seni sık sık başa döndürür.</p>
+<div class="steps-list"><ol>
+<li><b>İş anlayışı</b>: Hangi karar iyileşecek? Başarı nasıl ölçülecek (ör. "temerrüt kayıplarını %10 azalt")?</li>
+<li><b>Veri anlayışı</b>: Hangi veri var, kalitesi ne, hedef nasıl tanımlanıyor (90 gün gecikme = temerrüt)?</li>
+<li><b>Veri hazırlama</b>: Temizleme, birleştirme, özellik üretme; zamanın çoğu buraya gider.</li>
+<li><b>Modelleme</b>: Taban çizgi, sonra birkaç aday model.</li>
+<li><b>Değerlendirme</b>: Test metrikleri ve iş metriği; sızıntı kontrolü, adalet ve açıklanabilirlik.</li>
+<li><b>Yayına alma</b> (deployment): Modeli servis et, izle, performans düşerse yeniden eğit.</li>
+</ol></div>
+
+<div class="note"><b>Gerçek işte</b>Bir bankanın kredi modelinde ilk sorulan soru "doğruluğun kaç?" değil, "neyle karşılaştırdın ve hangi tarih aralığında test ettin?" olur. Model risk ekipleri tekrarlanabilirlik ister: aynı kod, aynı <code>random_state</code>, aynı veri sürümüyle aynı sayılar çıkmalıdır. Bu yüzden ilk günden bölme tohumlarını sabitlemek, taban çizgiyi raporlamak ve test setini en sona saklamak profesyonel alışkanlıktır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Yanlılık-varyans dengesi</h3>
+<p>Bir modelin hatası kabaca üç parçaya ayrılır: <b>yanlılık</b> (bias; modelin varsayımları gerçeği yakalayamıyor, eksik öğrenme), <b>varyans</b> (variance; model eğitim verisindeki küçük değişikliklere aşırı duyarlı, aşırı öğrenme) ve <b>indirgenemez gürültü</b>. Model karmaşıklığını artırmak yanlılığı düşürür ama varyansı artırır. KNN'de küçük <code>k</code>, ağaçta büyük <code>max_depth</code> varyansı artırır. Daha fazla veri toplamak varyansı azaltmanın en güvenilir yoludur.</p>
+<h3>fit sonrası nesne ve zincirleme</h3>
+<p><code>fit</code> nesnenin kendisini döndürdüğü için <code>KNeighborsClassifier(3).fit(X, y).predict(X_yeni)</code> yazılabilir. Aynı nesneyi farklı veriyle yeniden <code>fit</code> etmek önceki öğrenmeyi tamamen siler; iki ayrı model istiyorsan iki nesne oluştur ya da <code>sklearn.base.clone</code> kullan.</p>
+<pre class="py">import numpy as np
+from sklearn.base import clone
+from sklearn.neighbors import KNeighborsClassifier
+
+X = np.array([[1], [2], [3], [10], [11], [12]])
+y = np.array([0, 0, 0, 1, 1, 1])
+sablon = KNeighborsClassifier(n_neighbors=3)
+m1 = clone(sablon).fit(X, y)
+m2 = clone(sablon).fit(X[:4], y[:4])
+print(m1.predict([[9]]), m2.predict([[9]]))
+print(sablon.get_params()["n_neighbors"], hasattr(sablon, "classes_"))
+</pre>
+<h3>Tekrarlanabilirlik kontrol listesi</h3>
+<p>Bölmede, sentetik veride ve rastgelelik içeren her modelde (<code>DecisionTreeClassifier</code>, <code>RandomForestClassifier</code>) <code>random_state</code> ver; kütüphane sürümlerini <code>requirements.txt</code> ile sabitle; veri kesim tarihini kaydet. Aynı sayıyı yarın yeniden üretemiyorsan modeli savunamazsın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-giris">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../seaborn-plotly/">← İleri görselleştirme: seaborn, plotly ve doğru grafik</a><a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

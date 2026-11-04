@@ -1,0 +1,169 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV | Kesit Python</title><meta name="description" content="KPI ağacı ve metrik sözleşmesi, web_events ile huni, çeyreklik kohort tutundurma ve churn penceresi, basit ve kohort bazlı LTV ile LTV/CAC, MoM/YoY/YTD ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/is-metrikleri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV"><meta property="og:description" content="KPI ağacı ve metrik sözleşmesi, web_events ile huni, çeyreklik kohort tutundurma ve churn penceresi, basit ve kohort bazlı LTV ile LTV/CAC, MoM/YoY/YTD ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/is-metrikleri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV","description":"KPI ağacı ve metrik sözleşmesi, web_events ile huni, çeyreklik kohort tutundurma ve churn penceresi, basit ve kohort bazlı LTV ile LTV/CAC, MoM/YoY/YTD ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/is-metrikleri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV</h1><p class="st-l">KPI ağacı ve metrik sözleşmesi, web_events ile huni, çeyreklik kohort tutundurma ve churn penceresi, basit ve kohort bazlı LTV ile LTV/CAC, MoM/YoY/YTD ve aynı dönem kıyası, fiyat-hacim-karma köprüsü, Pareto (ABC) ve metrik tuzakları: oranların ortalaması, Simpson paradoksu, payda kayması.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/is-metrikleri">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Metrik, analistin ürünüdür</h2>
+<p>Yönetim "ciro neden düştü?", pazarlama "kampanya işe yaradı mı?", finans "bir müşteri bize ne kadar kazandırıyor?" diye sorar. Bu soruların hepsi bir <b>metrik</b> (metric) ve onun doğru hesaplanmış, doğru karşılaştırılmış bir değeri ister. pandas ile gruplamayı, istatistik dersinde A/B testini gördün. Bu ders analitik ekiplerin her gün kullandığı kalıpları toplar: KPI ağacı, huni, kohort ve tutundurma, LTV, dönem karşılaştırmaları, köprü analizi, Pareto ve en sık metrik tuzakları.</p>
+<p>Veri: Anadolu Market <code>orders</code>, <code>order_items</code>, <code>products</code> ve <code>web_events</code> (Ekim–Kasım 2024 site olayları); ayrıca Kesit Power BI'daki <code>kesit_bi</code> yıldız şemasının <code>Satislar</code> tablosu. Ciro tanımı bu derste de aynı: net = <code>quantity × unit_price × (1 − discount)</code>, yalnız <code>delivered</code> ve <code>shipped</code> siparişler.</p>
+
+<h2>1. KPI ağacı ve metrik sözleşmesi</h2>
+<p>Ciro tek başına "neden" söylemez. Onu çarpanlarına ayırınca hangi kolun hareket ettiği görünür:</p>
+<pre class="code">ciro = aktif müşteri × müşteri başına sipariş (frekans) × ortalama sepet (AOV)
+AOV  = sipariş başına ürün adedi × ortalama birim fiyat
+web cirosu = ziyaretçi × dönüşüm oranı × AOV</pre>
+<pre class="py">import veri
+import pandas as pd
+
+o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+i = veri.oku("anadolu_market", "order_items")
+i["net"] = i["quantity"] * i["unit_price"] * (1 - i["discount"])
+x = o[o["status"].isin(["delivered", "shipped"])].merge(i, on="order_id", validate="one_to_many")
+
+yil = x.groupby(x["order_date"].dt.year).agg(
+    ciro=("net", "sum"), siparis=("order_id", "nunique"), musteri=("customer_id", "nunique"))
+yil["frekans"] = yil["siparis"] / yil["musteri"]
+yil["aov"] = yil["ciro"] / yil["siparis"]
+print(yil.round(2))
+
+# 2023 → 2024 büyümesinin kaynakları (çarpanların oranları)
+b = yil.loc[2024] / yil.loc[2023]
+print("ciro x", round(b["ciro"], 3), "= müşteri x", round(b["musteri"], 3),
+      "· frekans x", round(b["frekans"], 3), "· AOV x", round(b["aov"], 3))</pre>
+<p>2024'te ciro 1,88 katına çıkmış; bunun büyük kısmı aktif müşteri sayısındaki artıştan (×1,62), daha azı frekans (×1,08) ve AOV'den (×1,07) geliyor. Yönetime "büyüme yeni müşteriden geldi" demek artık bir sayıya dayanıyor.</p>
+<p>Her metrik için yazılı bir <b>sözleşme</b> (metric definition) tut: ad, formül, pay ve payda, dahil/hariç durumlar (iptal, iade, test kullanıcıları), zaman damgası (sipariş mi teslim tarihi mi?), sahibi. "Dönüşüm oranı" iki ekipte iki farklı şey demeye başladığı an, toplantılar sayı tartışmasına döner.</p>
+
+<h2>2. Huni analizi</h2>
+<p>Huni (funnel), kullanıcıların adım adım nerede döküldüğünü gösterir. Her adımda o adımı yapan <b>tekil kullanıcı</b> sayılır; olay sayısı değil. Bu veride fark büyüktür: kullanıcılar geri gelir ve adımları tekrar eder, 40 olay da iki kez gönderilmiştir; 2.819 satır 600 kullanıcıdan gelir.</p>
+<pre class="py">import veri
+import pandas as pd
+
+w = veri.oku("anadolu_market", "web_events")
+adimlar = ["visit", "product_view", "add_to_cart", "checkout", "purchase"]
+
+huni = w.groupby("event_type")["user_id"].nunique().reindex(adimlar).to_frame("kullanici")
+huni["adim_donusum"] = (huni["kullanici"] / huni["kullanici"].shift(1)).round(3)
+huni["toplam_donusum"] = (huni["kullanici"] / huni["kullanici"].iloc[0]).round(3)
+print(huni)
+
+cihaz = w.pivot_table(index="event_type", columns="device", values="user_id", aggfunc="nunique").reindex(adimlar)
+print((cihaz.loc["purchase"] / cihaz.loc["visit"]).round(3))</pre>
+<p>En büyük kayıp ürün görüntülemeden sepete geçişte (%40); mobilde ziyaretten satın almaya dönüşüm masaüstünden düşük. Huniyi bir kırılımla (cihaz, kaynak, yeni/eski kullanıcı) okumak "nerede" sorusunu "kimde" sorusuna çevirir.</p>
+<div class="tip"><b>Katı huni mi, gevşek huni mi?</b>Gevşek huni her adımı bağımsız sayar. Katı (strict) huni ise bir adımı yalnız önceki adımları da yapmış kullanıcılar için sayar; sırayı ve zaman penceresini (ör. 7 gün içinde) de şart koşabilir. Bu veride tekil kullanıcıda ikisi aynı sonucu veriyor; sıra şartı eklersen farklılaşır, çünkü 24 kullanıcıda iki adımın zamanı yer değiştirmiştir. Gerçek veride sepete doğrudan bağlantıyla gelenler yüzünden de genellikle farklıdır. Hangisini kullandığını sözleşmeye yaz.</div>
+
+<h2>3. Kohort, tutundurma ve churn</h2>
+<p>Kohort (cohort), aynı dönemde başlayan müşteri grubudur. Tutundurma (retention) tablosu her kohortun sonraki dönemlerde ne kadarının geri geldiğini gösterir. SQL sürümünü <b>Python'dan SQL ile analiz</b> dersinde yazdın; burada pandas ile çeyreklik kohort kuruyoruz.</p>
+<pre class="py">import veri
+import pandas as pd
+
+o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+o["donem"] = o["order_date"].dt.to_period("Q")
+o["kohort"] = o.groupby("customer_id")["donem"].transform("min")
+o["fark"] = (o["donem"] - o["kohort"]).apply(lambda d: d.n)
+
+sayim = o.groupby(["kohort", "fark"])["customer_id"].nunique().unstack()   # gelecekteki hücreler NaN kalır
+oran = sayim.div(sayim[0], axis=0).round(2)
+print(oran.iloc[-6:, :5])</pre>
+<div class="warn"><b>Gelecek hücreleri 0 ile doldurma</b><code>unstack(fill_value=0)</code> yazarsan 2024Q4 kohortunun 1. çeyreği "%0 tutundurma" görünür; oysa o çeyrek henüz yaşanmadı. Ortalama tutundurma eğrisini hesaplarken bu sıfırlar eğriyi aşağı çeker. Gözlemlenmemiş dönemi NaN bırak; ortalamayı yalnız gözlemlenen hücrelerden al.</div>
+<p><b>Churn</b> (müşteri kaybı) sözleşme gerektiren bir metriktir. Abonelik işinde iptal tarihi bellidir; e-ticarette "kaybedildi" demek için bir hareketsizlik penceresi seçersin: "son siparişin üzerinden 180 gün geçti". Pencere kısalırsa churn yükselir; pencereyi satın alma döngüsüne göre seç (bu veride iki sipariş arası ortalama süre 86 gün).</p>
+
+<h2>4. LTV ve CAC</h2>
+<p>Müşteri yaşam boyu değeri (customer lifetime value, LTV), bir müşterinin ilişki boyunca bıraktığı <b>katkı payıdır</b> (ciro değil, marj). İki yaygın hesap:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Formül</th><th>Ne zaman</th></tr>
+<tr><td>Basit</td><td>AOV × yıllık frekans × marj oranı × beklenen ömür (yıl)</td><td>Hızlı tahmin, yönetim sunumu</td></tr>
+<tr><td>Kohort bazlı</td><td>Kohort başına kümülatif marj / kohort büyüklüğü, dönem dönem</td><td>Gerçekleşen değeri görmek, kanalları karşılaştırmak</td></tr>
+<tr><td>Olasılıksal</td><td>BG/NBD + Gamma-Gamma (lifetimes kütüphanesi)</td><td>Bireysel müşteri tahmini</td></tr>
+</table></div>
+<p>Müşteri edinme maliyeti (customer acquisition cost, CAC) = pazarlama harcaması / yeni müşteri. <b>LTV/CAC</b> oranı yaygın bir sağlık göstergesidir; 3 civarı sağlıklı kabul edilir, 1'in altı her müşteride para kaybetmek demektir. Oranı yorumlarken geri ödeme süresine (CAC'nin kaç ayda geri kazanıldığı) de bak.</p>
+
+<h2>5. Dönem karşılaştırmaları: MoM, YoY, YTD</h2>
+<p>MoM (month over month) kısa vadeli ivmeyi, YoY (year over year) mevsimsellikten arındırılmış büyümeyi, YTD (year to date) yılbaşından bugüne birikimi gösterir. Kural: <b>karşılaştırdığın iki dönem aynı uzunlukta ve aynı takvim yapısında olmalı</b>.</p>
+<pre class="py">import veri
+import pandas as pd
+
+o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+i = veri.oku("anadolu_market", "order_items")
+i["net"] = i["quantity"] * i["unit_price"] * (1 - i["discount"])
+x = o[o["status"].isin(["delivered", "shipped"])].merge(i, on="order_id")
+
+def donem(bas, son):
+    m = (x["order_date"] &gt;= bas) &amp; (x["order_date"] &lt;= son)
+    return round(x.loc[m, "net"].sum(), 2)
+
+bu = donem("2024-01-01", "2024-06-15")
+gecen = donem("2023-01-01", "2023-06-15")          # aynı gün: 15 Haziran
+print("YTD 2024:", bu, "| aynı dönem 2023:", gecen, "| YoY:", round(bu / gecen - 1, 3))
+print("YANLIŞ kıyas (tüm 2023):", donem("2023-01-01", "2023-12-31"))</pre>
+<p>Takvim etkisi: Bir ayda 5 cumartesi, diğerinde 4 olabilir; bayramlar her yıl başka aya düşer. Günlük ciroda haftanın günü etkisi güçlüyse "aynı gün" karşılaştırması (bu yılın 2. pazartesisi ile geçen yılın 2. pazartesisi) ya da gün başına ortalama kullanılır.</p>
+
+<h2>6. Köprü analizi: fiyat, hacim ve karma etkisi</h2>
+<p>"Ciro 329 bin TL arttı; ne kadarı daha çok satmaktan, ne kadarı fiyattan, ne kadarı ürün karmasından?" Köprü (bridge, price-volume-mix) analizi değişimi parçalara ayırır. Kategori düzeyinde, <code>A</code> adet ve <code>P</code> ortalama birim fiyat olmak üzere:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Etki</th><th>Formül</th><th>Anlamı</th></tr>
+<tr><td>Hacim</td><td>(ΣA₁ − ΣA₀) × P̄₀</td><td>Karma ve fiyat sabitken toplam adedin artışı</td></tr>
+<tr><td>Karma</td><td>Σ (payᵢ₁ − payᵢ₀) × ΣA₁ × Pᵢ₀</td><td>Satışın pahalı/ucuz kategorilere kayması</td></tr>
+<tr><td>Fiyat</td><td>Σ (Pᵢ₁ − Pᵢ₀) × Aᵢ₁</td><td>Aynı kategoride birim fiyat değişimi</td></tr>
+</table></div>
+<p>Üçünün toplamı ciro farkına birebir eşittir; köprü grafiği (waterfall) bu üç çubuğu başlangıç ve bitiş cirosu arasına dizer. Uygulamasını alıştırmalarda yapacaksın.</p>
+
+<h2>7. Pareto (ABC) analizi</h2>
+<p>Ürünleri ciroya göre sırala, kümülatif payı hesapla: ilk %80'i oluşturanlar A, sonraki %15 B, kalan C. Stok, kampanya ve raf kararları bu sınıflara göre verilir. "80/20" bir yasa değil, kontrol edilmesi gereken bir hipotezdir: Anadolu Market'te ürünlerin ilk %20'si cironun yalnız yaklaşık %37'sini yapıyor; ciro geniş bir ürün yelpazesine yayılmış. Müşteri tarafında aynı fikrin çok boyutlu hâli RFM segmentasyonudur (bitirme projesi dersinde).</p>
+
+<h2>8. Metrik tuzakları</h2>
+<h3>Oranların ortalaması ≠ ortalama oran</h3>
+<pre class="py">import veri
+import pandas as pd
+
+w = veri.oku("anadolu_market", "web_events", parse_dates=["event_time"])
+w["gun"] = w["event_time"].dt.date
+gunluk = w.pivot_table(index="gun", columns="event_type", values="user_id", aggfunc="nunique", fill_value=0)
+gunluk = gunluk[gunluk["visit"] &gt; 0]
+
+print("günlük oranların ortalaması:", round((gunluk["purchase"] / gunluk["visit"]).mean(), 4))
+print("toplam / toplam (doğru):   ", round(gunluk["purchase"].sum() / gunluk["visit"].sum(), 4))</pre>
+<p>Günlük oranların ortalaması her güne eşit ağırlık verir: 3 ziyaretçili bir gün ile 30 ziyaretçili bir gün aynı etkiyi yapar. Oran metriklerini daima <b>pay toplamı / payda toplamı</b> olarak hesapla.</p>
+<h3>Simpson paradoksu ve payda kayması</h3>
+<p>Bir karşılaştırma her alt grupta bir yönü gösterirken toplamda ters yönü gösterebilir. Aşağıdaki küçük örnekte A kampanyası hem mobilde hem masaüstünde B'den iyidir, ama trafiğinin çoğu düşük dönüşümlü mobilden geldiği için toplamda kötü görünür:</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "kampanya": ["A", "A", "B", "B"],
+    "cihaz": ["mobil", "masaüstü", "mobil", "masaüstü"],
+    "ziyaret": [1000, 100, 100, 1000],
+    "satis": [100, 30, 8, 250],
+})
+df["oran"] = df["satis"] / df["ziyaret"]
+print(df.pivot(index="cihaz", columns="kampanya", values="oran"))
+t = df.groupby("kampanya")[["satis", "ziyaret"]].sum()
+print((t["satis"] / t["ziyaret"]).round(3))</pre>
+<p>Gerçek veride paradoks nadirdir ama <b>karma (mix) etkisi</b> her yerdedir: toplam AOV düştüğünde önce "her kanalda mı düştü, yoksa ucuz kanalın payı mı arttı?" diye sor. Payda kayması da benzer bir tuzaktır: dönüşüm oranı yükseldi, çünkü paydadaki "ziyaret" tanımı bot trafiği filtrelenerek değişti. Metrik sözleşmesi tam da bu yüzden vardır.</p>
+<pre class="py">import veri
+
+s = veri.oku("kesit_bi", "Satislar")
+s = s[s["Durum"] != "İptal"]
+s["marj"] = s["Tutar"] - s["Maliyet"]
+k = s.groupby("Kanal")[["marj", "Tutar"]].sum()
+print("ağırlıklı marj oranı (doğru):", (k["marj"] / k["Tutar"]).round(4).to_dict())
+print("satır oranlarının ortalaması:", (s["marj"] / s["Tutar"]).groupby(s["Kanal"]).mean().round(4).to_dict())</pre>
+
+<div class="note"><b>Gerçek işte</b>Haftalık iş incelemesinde (weekly business review) en sık duyulan cümle "bu sayı geçen haftaki rapordakiyle tutmuyor"dur. Olgun ekipler bunu bir semantik katmanla (dbt metrics, Power BI ölçüleri, LookML) çözer: metrik bir kez tanımlanır, her rapor oradan okur. Analistin işi de sayıyı üretmekle bitmez; "ciro %10 düştü" dediğinde hemen ardından KPI ağacının hangi kolunun, hangi segmentte, karma mı oran mı yüzünden düştüğünü söyleyebilmektir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kuzey yıldızı metriği ve koruyucu metrikler</h3>
+<p>Ürün ekipleri tek bir kuzey yıldızı metriğine (north star metric) odaklanır: ör. "haftalık en az bir sipariş veren aktif müşteri". Onu yükseltirken bozulmaması gerekenler koruyucu metriklerdir (guardrail): iade oranı, ortalama teslim süresi, müşteri şikâyeti. A/B testlerinde de karar yalnız hedef metrikle değil, koruyucularla birlikte verilir.</p>
+<h3>Göreli ve mutlak değişim</h3>
+<p>%2'den %3'e çıkan dönüşüm "yüzde 50 arttı" (göreli) ya da "1 puan arttı" (mutlak, yüzde puan) diye anlatılabilir. Sunumda ikisini birlikte ver; küçük tabanlı göreli değişimler abartılı görünür.</p>
+<h3>Olasılıksal LTV</h3>
+<pre class="code">pip install lifetimes
+from lifetimes import BetaGeoFitter, GammaGammaFitter
+from lifetimes.utils import summary_data_from_transaction_data
+ozet = summary_data_from_transaction_data(df, "customer_id", "order_date", "net", observation_period_end="2024-12-31")
+bgf = BetaGeoFitter(penalizer_coef=0.01).fit(ozet["frequency"], ozet["recency"], ozet["T"])</pre>
+<p>Kendi bilgisayarında dene: bu model her müşterinin gelecekteki sipariş sayısını ve harcamasını tahmin eder; tarayıcıda çalışmaz.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/is-metrikleri">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../eda-kesifsel/">← Keşifsel veri analizi (EDA): sorudan bulguya</a><a href="../sql-analitik/">Python'dan SQL ile analiz: CTE, pencere fonksiyonları (window functions) ve pandas karşılıkları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

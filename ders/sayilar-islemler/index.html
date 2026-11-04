@@ -1,0 +1,138 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sayılar ve işlemler | Kesit Python</title><meta name="description" content="Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sayilar-islemler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sayılar ve işlemler"><meta property="og:description" content="Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sayilar-islemler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sayılar ve işlemler","description":"Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/sayilar-islemler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Değerler ve metinler</span><h1>Sayılar ve işlemler</h1><p class="st-l">Aritmetik işlemleri, tam bölme ve kalanı, üs almayı, yuvarlamayı, kayan nokta hatasını ve math modülünü Ilgaz Bank faiz hesabı üzerinden öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sayilar-islemler">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Sayılar neden bu kadar önemli?</h2>
+<p>Ilgaz Bank'ta bir mevduat hesabının faizi, Anadolu Market'te bir sepetin indirimli tutarı, bir kargonun kaç kutuya sığacağı... Hepsi sayı işlemi. Python'ın aritmetiği hesap makinesine benzer ama birkaç yerde sürpriz yapar: bölme hep ondalıklı sonuç verir, ondalıklı sayılar bazen "yanlış" görünür ve yuvarlama sandığın gibi çalışmaz. Bu derste bu sürprizlerin hepsini önceden göreceksin.</p>
+
+<h2>Temel operatörler</h2>
+<pre class="py">bakiye = 10000
+print(bakiye + 2500)     # toplama
+print(bakiye - 750)      # çıkarma
+print(bakiye * 1.05)     # çarpma
+print(bakiye / 3)        # bölme: her zaman float
+print(bakiye // 3)       # tam bölme: ondalık atılır
+print(bakiye % 3)        # kalan (mod)
+print(2 ** 10)           # üs alma</pre>
+<p>En çok dikkat isteyen üçlü: <code>/</code> her zaman <code>float</code> döndürür, 10 / 2 bile 5.0'dır. <code>//</code> tam bölme (floor division) aşağı yuvarlanmış tam sonucu verir. <code>%</code> ise kalanı (modulo). Bu ikili birlikte çok iş görür: 10000 TL'yi 3 taksite bölersen taksit başına 3333 TL düşer, 1 TL artar.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Operatör</th><th>Anlamı</th><th>Örnek</th><th>Sonuç</th></tr>
+<tr><td><code>+ - *</code></td><td>Toplama, çıkarma, çarpma</td><td><code>7 * 3</code></td><td><code>21</code></td></tr>
+<tr><td><code>/</code></td><td>Bölme (hep float)</td><td><code>7 / 2</code></td><td><code>3.5</code></td></tr>
+<tr><td><code>//</code></td><td>Tam bölme</td><td><code>7 // 2</code></td><td><code>3</code></td></tr>
+<tr><td><code>%</code></td><td>Kalan</td><td><code>7 % 2</code></td><td><code>1</code></td></tr>
+<tr><td><code>**</code></td><td>Üs</td><td><code>2 ** 3</code></td><td><code>8</code></td></tr>
+<tr><td><code>-x</code></td><td>İşaret değiştirme</td><td><code>-(5 - 8)</code></td><td><code>3</code></td></tr>
+</table></div>
+<p>İşlem önceliği matematikteki gibidir: önce parantez, sonra üs, sonra çarpma-bölme-kalan, en son toplama-çıkarma. Emin değilsen parantez kullan; parantez ücretsizdir ve okuyana yardım eder. Bir de kısayol atamalar var: <code>bakiye += 500</code>, <code>bakiye = bakiye + 500</code> demektir. Aynı şekilde <code>-=</code>, <code>*=</code>, <code>/=</code>, <code>//=</code>, <code>%=</code> kullanılır.</p>
+
+<h2>Tam bölme ve kalanla gerçek problemler</h2>
+<p>Anadolu Market deposunda 250 ürün var, her kutuya 12 ürün sığıyor. Kaç tam kutu dolar, kaç ürün açıkta kalır, toplam kaç kutu gerekir?</p>
+<pre class="py">urun = 250
+kutu_kapasitesi = 12
+tam_kutu = urun // kutu_kapasitesi
+artan = urun % kutu_kapasitesi
+print("Tam kutu:", tam_kutu)
+print("Açıkta kalan:", artan)
+gereken_kutu = tam_kutu + (1 if artan else 0)
+print("Gereken kutu:", gereken_kutu)
+print("Çift mi?", 250 % 2 == 0)</pre>
+<p>Son satır, kalan operatörünün klasik kullanımı: bir sayının 2'ye bölümünden kalan 0 ise sayı çifttir. Aynı mantıkla "her 100. sipariş hediye" kuralı <code>siparis_no % 100 == 0</code> ile yazılır. <code>divmod(250, 12)</code> fonksiyonu ise tam bölüm ve kalanı tek seferde verir: <code>(20, 10)</code>.</p>
+
+<h2>Kayan nokta hatası</h2>
+<p>Şimdi sürpriz. Şu kodu çalıştır:</p>
+<pre class="py">print(0.1 + 0.2)
+print(0.1 + 0.2 == 0.3)
+print(1499.90 * 3)
+print(round(0.1 + 0.2, 2))
+print(round(2.675, 2), round(2.5), round(3.5))</pre>
+<p>0.1 + 0.2, 0.30000000000000004 çıkar. Bu Python'ın hatası değil; bilgisayarlar sayıları ikilik tabanda saklar ve 0.1, ikilik tabanda sonsuz basamaklı bir sayıdır (ondalıkta 1/3'ün 0.333... olması gibi). Her dil aynı sonucu verir. Sonuçları yuvarlamak için <code>round(x, basamak)</code> kullanırsın. Ancak <code>round</code>'un kendisi de sürprizli: Python "bankacı yuvarlaması" yapar, tam .5 durumunda en yakın <b>çift</b> sayıya gider; bu yüzden <code>round(2.5)</code> 2, <code>round(3.5)</code> 4 verir. <code>round(2.675, 2)</code> ise 2.67 çıkar çünkü 2.675 bellekte aslında 2.67499... olarak durur.</p>
+<div class="warn"><b>Ondalıklı sayıları == ile karşılaştırma</b><code>a == b</code> yerine <code>abs(a - b) &lt; 0.001</code> gibi bir tolerans kullan ya da sonucu önce yuvarla. Bu uygulamadaki testler de aynı yöntemi kullanır.</div>
+<div class="tip"><b>Para hesabında güvenli yol</b>Tutarları kuruş cinsinden tam sayı tut (1499.90 TL = 149990 kuruş) ve sadece gösterirken 100'e böl. Ya da <code>decimal</code> modülünü kullan. Analiz ve raporlamada float ile round yeterlidir.</div>
+
+<h2>Yuvarlama seçenekleri bir arada</h2>
+<p>Aynı sayıyı farklı amaçlarla yuvarlayabilirsin: rapor için iki ondalık, fatura için kuruşa, kutu sayısı için yukarı. Hangi fonksiyonun ne verdiğini yan yana gör:</p>
+<pre class="py">import math
+x = 7.456
+print(round(x, 1), round(x, 2))   # en yakına
+print(math.floor(x), math.ceil(x))  # aşağı, yukarı
+print(int(x))                        # ondalığı at
+print(round(-7.456), math.floor(-7.456), int(-7.456))</pre>
+<p>Son satır negatif sayılarda farkı gösterir: <code>int</code> sıfıra doğru keser (-7), <code>floor</code> aşağı iner (-8), <code>round</code> en yakını seçer (-7). Bakiye ve borç hesaplarında bu üçünü karıştırmak kuruş farklarına yol açar.</p>
+
+<h2>math modülü</h2>
+<p>Daha fazlası için <code>math</code> modülünü içe aktarırsın. En sık kullanacakların: yukarı yuvarlama <code>ceil</code>, aşağı yuvarlama <code>floor</code>, karekök <code>sqrt</code>, sabit <code>pi</code>.</p>
+<pre class="py">import math
+print(math.ceil(250 / 12))     # 21: gereken kutu, tek satırda
+print(math.floor(7.9))         # 7
+print(math.sqrt(144))          # 12.0
+print(round(math.pi, 4))
+print(abs(-350), max(3, 9, 4), min(3, 9, 4))
+print(pow(2, 10), 10 ** 3)</pre>
+<p><code>abs</code>, <code>max</code>, <code>min</code>, <code>pow</code> ve <code>round</code> hazır (built-in) fonksiyonlardır, içe aktarmaya gerek yoktur. Kutu problemine geri dönersen: <code>math.ceil(250 / 12)</code> tek satırda "gereken kutu" sayısını verir.</p>
+
+<h2>Ilgaz Bank faiz hesabı</h2>
+<p>Bir müşteri 50.000 TL'yi yıllık %30 faizle 3 yıl vadeli hesaba yatırıyor. Basit faizde her yıl ana para üzerinden faiz işler; bileşik faizde (compound interest) faiz de faiz kazanır. Formül: bileşik tutar = anapara × (1 + oran) üzeri yıl.</p>
+<pre class="py">anapara = 50_000
+oran = 0.30
+yil = 3
+basit = anapara * (1 + oran * yil)
+bilesik = anapara * (1 + oran) ** yil
+print("Basit faizle:", round(basit, 2))
+print("Bileşik faizle:", round(bilesik, 2))
+print("Fark:", round(bilesik - basit, 2))</pre>
+<p><code>50_000</code> yazımına dikkat: alt çizgi, büyük sayıları okunur yapar ve Python onu yok sayar. Üs operatörünün çarpmadan önce hesaplandığını da gör; parantez yalnızca <code>1 + oran</code> için gerekti.</p>
+<div class="note"><b>Oran yüzde değil kesirdir</b>%30'u koda <code>30</code> değil <code>0.30</code> olarak yazarsın. Kullanıcıdan 30 alıyorsan 100'e bölmeyi unutma; en sık yapılan finans hatalarından biridir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Operatörlerin tamamını (karşılaştırma, mantıksal, bit, öncelik) <b>Operatörler</b> dersinde ayrıca göreceksin. Bu bölüm sayıların kendisine odaklanıyor: yazım biçimleri, özel değerler, güvenilir yuvarlama ve finans hesaplarında gerçekten kullanılan araçlar.</p><h2>Sayı yazım biçimleri (literal)</h2><p>Python bir sayıyı birçok biçimde yazmana izin verir; hepsi aynı <code>int</code> ya da <code>float</code> türüne dönüşür:</p><div class="tbl-wrap"><table><tr><th>Yazım</th><th>Değer</th><th>Nerede görürsün?</th></tr><tr><td><code>1_250_000</code></td><td>1250000</td><td>Büyük tutarlar; alt çizgi yalnız okunurluk için</td></tr><tr><td><code>1.5e6</code>, <code>2e-3</code></td><td>1500000.0, 0.002</td><td>Bilimsel gösterim; sonuç hep float</td></tr><tr><td><code>0b1011</code></td><td>11</td><td>İkilik taban: izin bayrakları</td></tr><tr><td><code>0o755</code></td><td>493</td><td>Sekizlik: Linux dosya izinleri</td></tr><tr><td><code>0xFF</code></td><td>255</td><td>Onaltılık: renk kodları, bellek adresleri</td></tr><tr><td><code>3 + 4j</code></td><td>complex</td><td>Karmaşık sayı: mühendislik hesapları</td></tr></table></div><pre class="py">print(1_250_000 + 1, 1.5e6, 2e-3)
+print(0b1011, 0o755, 0xFF)
+print(bin(11), hex(255), oct(493))      # tersine: sayıdan metne
+print(int("ff", 16), int("1011", 2))    # metinden, tabanı vererek
+z = 3 + 4j
+print(z.real, z.imag, abs(z))           # karmaşık sayının büyüklüğü 5.0</pre><p><code>int(metin, taban)</code> özellikle veri temizlemede işe yarar: renk kodları, donanım kimlikleri ya da bazı banka sistemlerinin onaltılık işlem numaraları bu yolla sayıya çevrilir. Karmaşık sayılar (complex) PCEP sınavında sorulur ama iş hayatında nadirdir; varlığını bilmen yeterli.</p><h2>Özel float değerleri ve güvenli karşılaştırma</h2><p>float türünde üç özel değer vardır: artı sonsuz, eksi sonsuz ve "sayı değil" (NaN, not a number). Veri setlerinde eksik değer çoğunlukla NaN olarak gelir; pandas derslerinde onunla sürekli karşılaşacaksın. NaN'ın en garip özelliği kendine bile eşit olmamasıdır.</p><pre class="py">import math
+sonsuz = float("inf")
+eksik = float("nan")
+print(sonsuz &gt; 10**100, -sonsuz &lt; -10**100)
+print(eksik == eksik, math.isnan(eksik))      # NaN kendine eşit değil!
+print(math.isinf(sonsuz), math.isfinite(1.5))
+
+print(0.1 + 0.2 == 0.3)
+print(math.isclose(0.1 + 0.2, 0.3))           # göreli tolerans
+print(math.isclose(1000.004, 1000.0, abs_tol=0.01))
+elle = 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1 + 0.1
+print(elle, math.fsum([0.1] * 10))   # fsum hata birikimini önler</pre><p><code>math.isclose(a, b)</code> kendi tolerans hesabını yapan güvenli karşılaştırmadır; varsayılan göreli tolerans çok küçüktür, tutar karşılaştırmasında <code>abs_tol=0.005</code> (yarım kuruş) gibi mutlak bir tolerans vermek daha anlamlıdır. <code>math.fsum</code> ise çok sayıda float topladığında biriken küçük hataları telafi eder. (Python 3.12 ile hazır <code>sum</code> da float toplarken benzer bir telafi yapmaya başladı; ama elle <code>+</code> ile biriktirdiğin toplamlarda hata hâlâ birikir.)</p><h2>Yuvarlama: round, Decimal ve muhasebe kuralı</h2><p><code>round</code> fonksiyonu bankacı yuvarlaması (yarımda çifte) yapar ve ikinci parametresi negatif de olabilir: <code>round(1234.5, -2)</code> yüzlere yuvarlar. Ama faturada Türkiye'deki alışılmış kural "yarım ve üstü yukarı"dır (ROUND_HALF_UP). Bunu float ile güvenilir yapamazsın; <code>decimal</code> modülünün <code>quantize</code> metodu tam bu iş içindir.</p><pre class="py">from decimal import Decimal, ROUND_HALF_UP, ROUND_HALF_EVEN
+
+print(round(1234.567, -2), round(1250, -2), round(1350, -2))
+
+fiyat = Decimal("2.675")
+kurus = Decimal("0.01")
+print(fiyat.quantize(kurus, rounding=ROUND_HALF_UP))    # 2.68: muhasebe
+print(fiyat.quantize(kurus, rounding=ROUND_HALF_EVEN))  # 2.68: tam yarım, 8 çift
+print(Decimal("2.665").quantize(kurus, rounding=ROUND_HALF_EVEN))  # 2.66
+print(round(2.675, 2))                                    # float: 2.67!
+
+tutar = Decimal("19.99") * 3
+kdv = (tutar * Decimal("0.20")).quantize(kurus, rounding=ROUND_HALF_UP)
+print(tutar, kdv, tutar + kdv)</pre><div class="tbl-wrap"><table><tr><th>Yöntem</th><th>2.665 →</th><th>2.675 →</th><th>Ne zaman?</th></tr><tr><td><code>round(x, 2)</code> (float)</td><td>2.67*</td><td>2.67*</td><td>Analiz, grafik, yaklaşık rapor</td></tr><tr><td><code>ROUND_HALF_UP</code></td><td>2.67</td><td>2.68</td><td>Fatura, makbuz, muhasebe</td></tr><tr><td><code>ROUND_HALF_EVEN</code></td><td>2.66</td><td>2.68</td><td>İstatistik; birikimli yuvarlama hatasını azaltır</td></tr><tr><td><code>ROUND_DOWN</code></td><td>2.66</td><td>2.67</td><td>Kuruş küsuratını kesme (faiz tahakkuku politikasına göre)</td></tr></table></div><p>* İkisi de 2.67 çıkar: 2.665 bellekte biraz üstünde, 2.675 biraz altında saklanır. float sonuçları sayının bellekteki ikilik karşılığına bağlıdır; tam yarım gibi görünen değerler aslında biraz altında ya da üstünde olabilir. Decimal ise yazdığın ondalığı tam olarak saklar. <b>Decimal'ı hep metinden oluştur:</b> <code>Decimal(2.675)</code> bozuk float'ı kopyalar.</p><div class="warn"><b>Decimal ile float karıştırma</b><code>Decimal("1.5") + 0.1</code> TypeError verir; Python iki farklı kesinlikteki sayıyı sessizce birleştirmez. Hesaba giren her sabiti <code>Decimal("0.20")</code> gibi metinden oluştur; tam sayılarla (<code>Decimal("19.99") * 3</code>) karıştırmak serbesttir.</div><h2>math ve statistics: sık kullanılan araçlar</h2><div class="tbl-wrap"><table><tr><th>Fonksiyon</th><th>Ne yapar?</th><th>İş örneği</th></tr><tr><td><code>math.prod(liste)</code></td><td>Çarpım</td><td>Ardışık büyüme oranlarını birleştirmek</td></tr><tr><td><code>math.gcd(a, b)</code>, <code>math.lcm(a, b)</code></td><td>EBOB, EKOK</td><td>Paket boyutu, ortak sevkiyat günü</td></tr><tr><td><code>math.log10(x)</code>, <code>math.log(x)</code></td><td>Logaritma</td><td>Büyüklük mertebesi, sürekli faiz</td></tr><tr><td><code>math.exp(x)</code></td><td>e üzeri x</td><td>Sürekli bileşik faiz</td></tr><tr><td><code>math.comb(n, k)</code></td><td>Kombinasyon</td><td>Kaç farklı kampanya paketi kurulabilir?</td></tr><tr><td><code>statistics.mean / median</code></td><td>Ortalama, ortanca</td><td>Sepet tutarı özeti (aykırı değere dayanıklı ortanca)</td></tr></table></div><pre class="py">import math, statistics
+print(math.lcm(6, 8), math.gcd(48, 36))     # 24. günde iki tır aynı gün; 12'li paket
+print(round(math.prod([1.10, 1.05, 0.97]), 4))   # üç dönemin toplam büyüme çarpanı
+print(math.comb(10, 3))                     # 10 üründen 3'lü paket sayısı
+sepetler = [120, 135, 98, 110, 4200]        # bir kurumsal sipariş aykırı
+print(statistics.mean(sepetler), statistics.median(sepetler))
+eski, yeni = 84_000, 96_600
+print(f"Değişim: %{(yeni - eski) / eski * 100:.1f}")</pre><p>Son iki satır, iş hayatının en sık formülünü gösteriyor: yüzde değişim = (yeni − eski) / eski × 100. Eski değer sıfırsa formül tanımsızdır; raporda "yeni" ya da "—" yazmak gerekir. Ortalama ile ortanca arasındaki büyük fark ise verinde aykırı değer olduğunun işaretidir: tek bir kurumsal sipariş "ortalama sepeti" bir anda on katına çıkarabilir.</p><div class="note"><b>Gerçek işte</b>Finans ekiplerinde kabul görmüş düzen şudur: tutarlar veritabanında ya kuruş cinsinden tam sayı ya da sabit ondalıklı (DECIMAL(18,2)) sütunlarda tutulur; Python tarafında Decimal ile hesaplanır; yuvarlama yalnızca belirlenmiş noktalarda (satır toplamı, KDV, genel toplam) ve yazılı bir kurala göre (ROUND_HALF_UP) yapılır. Taksitlendirmede bölünemeyen kuruş farkı genelde ilk ya da son taksite eklenir. Bu kuralları kodun en üstüne sabit olarak yazmak, denetimde "bu kuruş nereden geldi" sorusuna cevap verir.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Decimal ve Fraction</h3>
+<p><code>from decimal import Decimal</code> ile ondalık sayıları tam olarak temsil edersin: <code>Decimal("0.1") + Decimal("0.2")</code> tam 0.3 verir. Dikkat, Decimal'ı metinden oluşturmalısın; <code>Decimal(0.1)</code> zaten bozuk float'ı alır. Muhasebe, faturalama ve faiz hesapları Decimal ister. <code>fractions.Fraction</code> ise kesirleri tam tutar: 1/3 + 1/3, 2/3 çıkar. Analizde nadir, bilimsel hesapta değerlidir.</p>
+<h3>Tam sayı bölmede negatif sayılar</h3>
+<p><code>-7 // 2</code> sonucu -4'tür, -3 değil. Python tam bölmeyi her zaman aşağı (eksi sonsuza) yuvarlar ve <code>%</code> işareti bölenin işaretini alır: <code>-7 % 2</code> 1 verir. Bu tutarlılık takvim hesaplarında (haftanın günü, ay döngüsü) işe yarar, ama C ya da JavaScript'ten gelenleri şaşırtır.</p>
+<h3>Büyük sayılar ve performans</h3>
+<p>Python tam sayıları sınırsızdır: <code>2 ** 1000</code> sorunsuz hesaplanır. Bu rahatlığın bedeli hızdır; milyonlarca sayıyla işlem yapacaksan numpy'nin sabit boyutlu sayı tipleri çok daha hızlıdır. İleri seviyede bu geçişi yapacaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sayilar-islemler">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../degiskenler/">← Değişkenler ve veri türleri</a><a href="../metinler/">Metinler (string) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

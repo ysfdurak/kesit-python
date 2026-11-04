@@ -1,0 +1,343 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle | Kesit Python</title><meta name="description" content="Anadolu Market günlük satış ETL'i: pathlib ile dosya düzeni, logging, şema doğrulama, hata kuyruğu, idempotent yükleme (sqlite3) ve zamanlama kavramı."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/veri-boru-hatti/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle"><meta property="og:description" content="Anadolu Market günlük satış ETL'i: pathlib ile dosya düzeni, logging, şema doğrulama, hata kuyruğu, idempotent yükleme (sqlite3) ve zamanlama kavramı."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/veri-boru-hatti/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle","description":"Anadolu Market günlük satış ETL'i: pathlib ile dosya düzeni, logging, şema doğrulama, hata kuyruğu, idempotent yükleme (sqlite3) ve zamanlama kavramı.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/veri-boru-hatti/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</h1><p class="st-l">Anadolu Market günlük satış ETL'i: pathlib ile dosya düzeni, logging, şema doğrulama, hata kuyruğu, idempotent yükleme (sqlite3) ve zamanlama kavramı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-boru-hatti">Uygulamada aç, 30 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Anadolu Market her gece mağaza sistemlerinden gelen satış dosyalarını merkez veritabanına yükler. Bu iş bir kez yazılıp yıllarca her gece çalışır; bu yüzden "çalışıyor" yetmez: dosya yarım gelirse ne olur, aynı dosya iki kez gelirse mükerrer kayıt oluşur mu, bozuk satır tüm yüklemeyi durdurur mu, sabah ekip neyin yüklendiğini nereden görür? Bu derste bir <b>veri boru hattı</b> (data pipeline) kurarken sorulan bu soruların standart cevaplarını öğreneceksin. ETL = Extract (çıkar), Transform (dönüştür), Load (yükle).</p>
+
+<h2>Dosya düzeni ve pathlib</h2>
+<p>Klasik düzen üç klasördür: <code>gelen/</code> (ham dosyalar bırakılır), <code>islenen/</code> (başarıyla yüklenenler taşınır), <code>hatali/</code> (işlenemeyenler ve hata kuyruğu). <code>pathlib.Path</code> ile klasörleri oluştur, dosyaları desenle bul, taşı. Pyodide'de bellek içi dosya sistemi olduğu için aynı kod tarayıcıda da çalışır.</p>
+<pre class="py">from pathlib import Path
+import shutil
+
+KOK = Path('etl_demo')
+GELEN, ISLENEN, HATALI = KOK / 'gelen', KOK / 'islenen', KOK / 'hatali'
+for k in (GELEN, ISLENEN, HATALI):
+    k.mkdir(parents=True, exist_ok=True)
+
+(GELEN / 'satis_2024-05-01.csv').write_text(
+    'siparis_no,sehir,tutar,adet\n1001,İzmir,149.90,2\n1002,Bursa,80.00,1\n', encoding='utf-8')
+(GELEN / 'satis_2024-05-02.csv').write_text(
+    'siparis_no,sehir,tutar,adet\n1003,Ankara,abc,1\n1004,İzmir,20.5,3\n', encoding='utf-8')
+(GELEN / 'notlar.txt').write_text('bu dosya ETL konusu değil')
+
+for p in sorted(GELEN.glob('satis_*.csv')):
+    print(p.name, p.stem, p.suffix, p.stat().st_size, 'bayt')
+shutil.move(str(GELEN / 'notlar.txt'), str(HATALI / 'notlar.txt'))
+print('hatali:', [p.name for p in HATALI.iterdir()])
+</pre>
+<div class="tip"><b>Dosya adında tarih</b><code>satis_2024-05-01.csv</code> gibi ISO tarihli adlar hem sıralamayı hem "bu dosya daha önce yüklendi mi?" sorusunu kolaylaştırır. İş tarihi (business date) ile dosyanın geliş zamanını karıştırma; ikisini de kaydet.</div>
+
+<h2>Extract ve şema doğrulama</h2>
+<p>Çıkarma adımı ham satırları okur; dönüştürme adımı her satırı şemaya göre doğrular ve tipler. Bozuk satır tüm işi durdurmamalı; <b>hata kuyruğuna</b> (dead-letter queue) yazılıp iş devam etmeli. Her hata kaydı: kaynak dosya, satır numarası, ham veri, hata nedeni.</p>
+<pre class="py">import csv, io
+from dataclasses import dataclass
+from decimal import Decimal, InvalidOperation
+
+@dataclass(frozen=True)
+class Satis:
+    siparis_no: int
+    sehir: str
+    tutar: Decimal
+    adet: int
+
+SEHIRLER = {'İzmir', 'Bursa', 'Ankara', 'İstanbul'}
+
+def dogrula(ham: dict) -&gt; Satis:
+    try:
+        no = int(ham['siparis_no'])
+        tutar = Decimal(ham['tutar'])
+        adet = int(ham['adet'])
+    except (KeyError, ValueError, InvalidOperation) as e:
+        raise ValueError(f'tip hatası: {e}') from e
+    if tutar &lt; 0: raise ValueError('tutar negatif')
+    if adet &lt;= 0: raise ValueError('adet pozitif olmalı')
+    sehir = ham['sehir'].strip()
+    if sehir not in SEHIRLER: raise ValueError(f'bilinmeyen şehir: {sehir}')
+    return Satis(no, sehir, tutar, adet)
+
+def extract_transform(metin: str, kaynak: str):
+    gecerli, hatalar = [], []
+    for i, ham in enumerate(csv.DictReader(io.StringIO(metin)), start=2):   # 1 = başlık
+        try:
+            gecerli.append(dogrula(ham))
+        except ValueError as e:
+            hatalar.append({'kaynak': kaynak, 'satir': i, 'ham': ham, 'neden': str(e)})
+    return gecerli, hatalar
+
+metin = 'siparis_no,sehir,tutar,adet\n1003,Ankara,abc,1\n1004,İzmir,20.5,3\n1005,Mars,5,1\n'
+g, h = extract_transform(metin, 'satis_2024-05-02.csv')
+print('geçerli:', g)
+for x in h:
+    print('HATA', x['satir'], x['neden'])
+</pre>
+<div class="note"><b>Para için Decimal</b>Satış tutarlarını float ile toplarsan kuruş farkları birikir. Dönüştürme adımında <code>Decimal</code>'e çevir, veritabanına kuruş cinsinden tam sayı ya da metin olarak yaz.</div>
+
+<h2>Load: idempotent yükleme</h2>
+<p>İdempotent yükleme, aynı dosyayı iki kez çalıştırınca sonucun değişmemesi demektir. İki araç: tabloda doğal anahtar üzerinde <code>UNIQUE</code> kısıtı ve <code>INSERT ... ON CONFLICT DO UPDATE</code> (upsert); ayrıca hangi dosyanın yüklendiğini tutan bir <code>yukleme_kaydi</code> tablosu. Yükleme bir <b>işlem</b> (transaction) içinde yapılır: ya hepsi ya hiçbiri.</p>
+<pre class="py">import sqlite3
+from decimal import Decimal
+
+def semayi_kur(con):
+    con.executescript('''
+        CREATE TABLE IF NOT EXISTS satis (
+            siparis_no INTEGER PRIMARY KEY, sehir TEXT NOT NULL,
+            tutar_kurus INTEGER NOT NULL, adet INTEGER NOT NULL, kaynak TEXT NOT NULL);
+        CREATE TABLE IF NOT EXISTS yukleme_kaydi (
+            kaynak TEXT PRIMARY KEY, satir INTEGER, hata INTEGER, yuklendi_utc TEXT);
+    ''')
+
+def load(con, satislar, kaynak, hata_sayisi):
+    with con:                                   # transaction: hata olursa geri alınır
+        con.executemany('''
+            INSERT INTO satis (siparis_no, sehir, tutar_kurus, adet, kaynak)
+            VALUES (?, ?, ?, ?, ?)
+            ON CONFLICT(siparis_no) DO UPDATE SET
+                sehir=excluded.sehir, tutar_kurus=excluded.tutar_kurus,
+                adet=excluded.adet, kaynak=excluded.kaynak
+        ''', [(s.siparis_no, s.sehir, int(s.tutar * 100), s.adet, kaynak) for s in satislar])
+        con.execute('''INSERT INTO yukleme_kaydi VALUES (?, ?, ?, datetime('now'))
+                       ON CONFLICT(kaynak) DO UPDATE SET satir=excluded.satir, hata=excluded.hata,
+                       yuklendi_utc=excluded.yuklendi_utc''', (kaynak, len(satislar), hata_sayisi))
+
+con = sqlite3.connect(':memory:')
+semayi_kur(con)
+veri = [Satis(1001, 'İzmir', Decimal('149.90'), 2), Satis(1002, 'Bursa', Decimal('80.00'), 1)]
+load(con, veri, 'satis_2024-05-01.csv', 0)
+load(con, veri, 'satis_2024-05-01.csv', 0)     # ikinci çalıştırma: mükerrer yok
+print(con.execute('SELECT COUNT(*), SUM(tutar_kurus) FROM satis').fetchone())
+print(con.execute('SELECT kaynak, satir FROM yukleme_kaydi').fetchall())
+</pre>
+<div class="warn"><b>Yarım yükleme</b><code>with con:</code> bloğu istisna durumunda <code>ROLLBACK</code> yapar. Dosyayı <code>islenen/</code> klasörüne taşıma işlemini yalnızca commit başarılı olduktan sonra yap; yoksa veritabanında olmayan bir dosya "işlendi" görünür.</div>
+
+<h2>logging ile izlenebilirlik</h2>
+<p><code>print</code> yerine <code>logging</code>: seviye (INFO/WARNING/ERROR), zaman damgası, modül adı, ve üretimde dosyaya ya da merkezi log sistemine yönlendirme. Her çalıştırma için bir <b>çalıştırma kimliği</b> (run id) üret; sabah ekip "dün gece 03:00 çalıştırması" diye arar.</p>
+<pre class="py">import logging, io, uuid
+
+akis = io.StringIO()
+logging.basicConfig(stream=akis, level=logging.INFO,
+                    format='%(asctime)s %(levelname)s %(name)s: %(message)s', force=True)
+log = logging.getLogger('etl.satis')
+
+run_id = uuid.UUID(int=12345)            # gerçekte uuid.uuid4()
+log.info('başladı run_id=%s', run_id)
+log.info('dosya=%s geçerli=%d hata=%d', 'satis_2024-05-02.csv', 1, 2)
+log.warning('hata kuyruğuna yazıldı: %d satır', 2)
+log.error('dosya okunamadı: %s', 'satis_2024-05-03.csv')
+print(akis.getvalue())
+</pre>
+<div class="tbl-wrap"><table><tr><th>Adım</th><th>Girdi</th><th>Çıktı</th><th>Hata durumunda</th></tr><tr><td>Extract</td><td>gelen/*.csv</td><td>ham satır listesi</td><td>Dosya hatali/ klasörüne, ERROR log</td></tr><tr><td>Transform</td><td>ham satırlar</td><td>Satis nesneleri + hata kuyruğu</td><td>Satır kuyruğa, WARNING log, iş devam</td></tr><tr><td>Load</td><td>Satis nesneleri</td><td>DB satırları + yükleme kaydı</td><td>ROLLBACK, dosya gelen/ içinde kalır</td></tr><tr><td>Arşiv</td><td>işlenen dosya</td><td>islenen/ klasörü</td><td>Yalnızca commit sonrası</td></tr></table></div>
+
+<h2>Uçtan uca: Anadolu Market günlük satış ETL'i</h2>
+<pre class="py">import sqlite3, shutil, json, logging, io
+from pathlib import Path
+
+def calistir(kok: Path, con, log):
+    gelen, islenen, hatali = kok / 'gelen', kok / 'islenen', kok / 'hatali'
+    for k in (gelen, islenen, hatali): k.mkdir(parents=True, exist_ok=True)
+    ozet = []
+    for dosya in sorted(gelen.glob('satis_*.csv')):
+        gecerli, hatalar = extract_transform(dosya.read_text(encoding='utf-8'), dosya.name)
+        if hatalar:
+            (hatali / (dosya.stem + '.hatalar.jsonl')).write_text(
+                '\n'.join(json.dumps(h, ensure_ascii=False) for h in hatalar), encoding='utf-8')
+        load(con, gecerli, dosya.name, len(hatalar))
+        shutil.move(str(dosya), str(islenen / dosya.name))
+        log.info('%s: %d yüklendi, %d hatalı', dosya.name, len(gecerli), len(hatalar))
+        ozet.append((dosya.name, len(gecerli), len(hatalar)))
+    return ozet
+
+akis = io.StringIO()
+logging.basicConfig(stream=akis, level=logging.INFO, format='%(levelname)s %(message)s', force=True)
+con = sqlite3.connect(':memory:'); semayi_kur(con)
+print(calistir(Path('etl_demo'), con, logging.getLogger('etl')))
+print('kalan gelen:', [p.name for p in Path('etl_demo/gelen').iterdir()])
+print(con.execute('SELECT sehir, SUM(tutar_kurus)/100.0 FROM satis GROUP BY sehir').fetchall())
+print(akis.getvalue().strip())
+</pre>
+
+<h2>Zamanlama: cron ve Airflow</h2>
+<p>Betiği her gece çalıştırmak için en basit araç <code>cron</code>'dur: <code>0 3 * * * /opt/etl/.venv/bin/python -m etl.satis</code> satırı her gün 03:00'te çalıştırır. Boru hattı büyüyünce (bağımlılıklar, yeniden deneme, izleme, geriye dönük çalıştırma) Airflow, Prefect ya da Dagster gibi orkestratörler kullanılır: her adım bir görev (task), görevler yönlü çevrimsiz çizge (DAG) oluşturur, başarısız görev tek başına yeniden denenir. İdempotent yazılmış bir ETL, bu araçlarla sorunsuz çalışır; idempotent olmayan ise her yeniden denemede mükerrer kayıt üretir.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Tam yükleme mi, artımlı yükleme mi?</h2>
+<p>Derste her gün gelen dosyayı yükledin. Kaynak bir veritabanı ya da API olduğunda iki yol var: her gece tüm tabloyu çekmek (<b>tam yükleme</b>, full load) ya da yalnız son çalıştırmadan beri değişenleri çekmek (<b>artımlı yükleme</b>, incremental load). Küçük tablolarda tam yükleme basit ve güvenlidir. Milyonlarca satırda artımlı yükleme şarttır; bunun için bir <b>su seviyesi işareti</b> (watermark, high-water mark) tutulur: "en son hangi <code>guncellenme</code> zamanına kadar aldım?"</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Nasıl?</th><th>Artısı</th><th>Dikkat</th></tr>
+<tr><td>Tam yükleme</td><td>Hedefi boşalt, hepsini yükle</td><td>Basit, silinen kayıtlar da yansır</td><td>Yavaş; yüklerken tablo boş kalmasın (geçici tablo + yer değiştir)</td></tr>
+<tr><td>Artımlı (watermark)</td><td><code>WHERE guncellenme &gt; :son</code></td><td>Hızlı, kaynağa az yük</td><td>Kaynakta silinen satırları görmez; aynı zaman damgasındaki satırlar kaçabilir</td></tr>
+<tr><td>Değişiklik yakalama (CDC)</td><td>Veritabanı günlüğünden ekle/güncelle/sil olaylarını oku</td><td>Silmeler dahil her değişiklik</td><td>Ek altyapı (Debezium vb.)</td></tr>
+<tr><td>Yavaş değişen boyut (SCD 2)</td><td>Değişen kaydı kapat, yeni sürüm aç</td><td>Geçmiş korunur ("Mart'ta müşteri hangi şehirdeydi?")</td><td>Sorgular geçerlilik tarihini hesaba katmalı</td></tr>
+</table></div>
+<p>Watermark'ı yalnızca yükleme <b>başarıyla bittikten sonra</b> ilerlet; aksi hâlde yarım kalan çalıştırmanın kayıtları sonsuza kadar kaçar. Aynı zaman damgasına sahip satırlar için <code>(guncellenme, id)</code> çiftini watermark olarak tutmak ya da <code>&gt;=</code> ile çekip upsert ile tekrarları zararsız yapmak iki yaygın çözümdür.</p>
+<pre class="py">import sqlite3, json
+
+kaynak = sqlite3.connect(":memory:")
+kaynak.execute("CREATE TABLE musteri(id INTEGER PRIMARY KEY, sehir TEXT, guncellenme TEXT)")
+kaynak.executemany("INSERT INTO musteri VALUES (?,?,?)", [
+    (1, "İzmir", "2024-05-01T10:00"), (2, "Bursa", "2024-05-01T12:00"),
+    (3, "Ankara", "2024-05-02T09:00")])
+
+durum = {"watermark": "2024-05-01T11:00"}          # gerçekte dosya/tabloda saklanır
+
+def artimli_cek(con, son):
+    return con.execute("SELECT id, sehir, guncellenme FROM musteri "
+                       "WHERE guncellenme &gt; ? ORDER BY guncellenme", (son,)).fetchall()
+
+yeni = artimli_cek(kaynak, durum["watermark"])
+print("çekilen:", [r[0] for r in yeni])
+# ... yükleme başarılı olduktan SONRA:
+if yeni:
+    durum["watermark"] = yeni[-1][2]
+print(json.dumps(durum))
+</pre>
+
+<h2>Büyük dosyalar: akış ve parti</h2>
+<p>10 GB'lık bir CSV'yi <code>list(csv.DictReader(f))</code> ile belleğe almak sunucuyu düşürür. Üreteçlerle (iteratorler-uretecler dersi) her adım bir sonrakine satır satır akar; bellekte aynı anda yalnız bir parti durur. Veritabanına da satır satır değil <b>parti parti</b> (batch) yazılır: <code>executemany</code> ile 500-5000 satırlık partiler, her parti bir işlem (transaction) içinde. Python 3.12'deki <code>itertools.batched</code> bu işi tek satıra indirir.</p>
+<pre class="py">import csv, io, sqlite3
+from itertools import batched
+
+ham = "no,tutar\n" + "\n".join(f"{i},{i * 1.5}" for i in range(1, 2501))
+
+def oku(metin):                       # gerçekte: open(yol, newline="", encoding="utf-8")
+    yield from csv.DictReader(io.StringIO(metin))
+
+def donustur(satirlar):
+    for s in satirlar:
+        yield int(s["no"]), round(float(s["tutar"]) * 100)     # kuruş
+
+con = sqlite3.connect(":memory:")
+con.execute("CREATE TABLE satis(no INTEGER PRIMARY KEY, tutar_kurus INTEGER)")
+parti_sayisi = 0
+for parti in batched(donustur(oku(ham)), 1000):
+    with con:                          # her parti ayrı işlem: ya hep ya hiç
+        con.executemany("INSERT OR REPLACE INTO satis VALUES (?, ?)", parti)
+    parti_sayisi += 1
+print(parti_sayisi, "parti,", con.execute("SELECT COUNT(*), SUM(tutar_kurus) FROM satis").fetchone())
+</pre>
+<div class="tip"><b>pandas ile parça parça</b>pandas kullanıyorsan aynı fikir <code>pd.read_csv(yol, chunksize=100_000)</code> ile gelir: her döngüde bir DataFrame parçası alırsın. Sütunlu ve sıkıştırılmış biçim için ara katmanda CSV yerine Parquet kullan (<code>pip install pyarrow</code>, <code>df.to_parquet("satis.parquet")</code>); hem 5-10 kat küçük hem tipleri korur. Kurulumda <code>pyarrow</code> tekerleği bulunamazsa Python sürümünün desteklendiğini kontrol et ve pip'i güncelle: <code>python -m pip install -U pip</code>.</div>
+
+<h2>Veri kalitesi kapıları</h2>
+<p>Boru hattı hata vermeden bitti diye veri doğru değildir. Kaynak sistem bir gece sütun sırasını değiştirir, tutarlar kuruş yerine lira gelir ya da dosya yarım kesilir. Yükleme sonrası (ya da yayına almadan önce) küçük kontroller çalıştır ve eşik aşılırsa işi <b>başarısız</b> say:</p>
+<ul>
+<li><b>Satır sayısı mutabakatı:</b> kaynaktaki satır = yüklenen + reddedilen. Fark varsa satır kaybolmuştur.</li>
+<li><b>Boşluk oranı:</b> zorunlu sütunda <code>None</code> oranı eşiğin (ör. %1) üstündeyse dur.</li>
+<li><b>Tekillik:</b> anahtar sütunda tekrar olmamalı.</li>
+<li><b>Aralık ve küme:</b> tutar 0 ile makul bir üst sınır arasında, şehir bilinen listede.</li>
+<li><b>Tazelik:</b> en yeni kaydın tarihi beklenen iş gününden eski olmamalı.</li>
+<li><b>Hacim:</b> bugünkü satır sayısı son 7 günün ortalamasının yarısından azsa kaynakta sorun olabilir.</li>
+</ul>
+<p>Bu kontroller büyüyünce Great Expectations, Soda ya da dbt testleri gibi araçlara taşınır (<i>orkestrasyon</i> dersindeki kalite kapıları); fikir aynıdır.</p>
+
+<h2>Atomik yazma ve dosya parmak izi</h2>
+<p>Çıktı dosyasını doğrudan hedef ada yazarken iş yarıda kesilirse, sonraki adım <b>yarım bir dosya</b> okur. Doğru yol: önce aynı klasörde geçici bir dosyaya yaz, tamamlanınca <code>os.replace(gecici, hedef)</code> ile adını değiştir. Aynı dosya sistemi içinde ad değiştirme atomiktir: okuyan ya eski dosyayı ya yeni dosyayı görür, yarısını asla. Gelen dosyalar için de <b>parmak izi</b> (SHA-256 özeti) tut: aynı içerik farklı adla ikinci kez gelirse tanırsın.</p>
+<pre class="py">import hashlib, os, tempfile
+from pathlib import Path
+
+def atomik_yaz(yol: Path, metin: str) -&gt; None:
+    fd, gecici = tempfile.mkstemp(dir=yol.parent, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(metin)
+            f.flush()
+            os.fsync(f.fileno())       # diske gerçekten yazıldığından emin ol
+        os.replace(gecici, yol)        # atomik ad değiştirme
+    except BaseException:
+        os.unlink(gecici)
+        raise
+
+def parmak_izi(yol: Path) -&gt; str:
+    h = hashlib.sha256()
+    with open(yol, "rb") as f:
+        for parca in iter(lambda: f.read(65536), b""):
+            h.update(parca)
+    return h.hexdigest()
+
+klasor = Path("etl_cikti"); klasor.mkdir(exist_ok=True)
+atomik_yaz(klasor / "rapor.csv", "sehir,ciro\nİzmir,1250\n")
+atomik_yaz(klasor / "rapor_kopya.csv", "sehir,ciro\nİzmir,1250\n")
+print(parmak_izi(klasor / "rapor.csv") == parmak_izi(klasor / "rapor_kopya.csv"))
+print(sorted(p.name for p in klasor.iterdir()))
+</pre>
+<div class="warn"><b>Windows ve ağ sürücüleri</b><code>os.replace</code> aynı dosya sistemi içinde atomiktir; geçici dosyayı hedefle <b>aynı klasörde</b> oluşturmanın nedeni budur (<code>/tmp</code> başka bir diskte olabilir). Windows'ta hedef dosya başka bir programda (ör. Excel'de) açıksa <code>PermissionError</code> alırsın; raporu açık tutan kullanıcılar için yeniden deneme ya da tarihli dosya adı kullan.</div>
+<div class="note"><b>Gerçek işte</b>Veri ekiplerinde en pahalı hatalar sessiz olanlardır: iş "başarılı" biter ama yarım dosya, kaçan artımlı kayıtlar ya da iki kez yüklenen bir gün raporlara girer ve haftalar sonra fark edilir. Her çalıştırmanın sonunda bir özet satırı logla (kaynak satır, yüklenen, reddedilen, watermark, süre) ve kalite kapılarından biri kırmızıysa işi başarısız say. "Sessiz başarı" yerine "gürültülü başarısızlık" tercih edilir.</div>
+</section><section class="more"><span class="eyebrow">Derinleş</span><p>Derste kalite kapılarını bir kontrol listesi olarak gördün. Bu bölüm onları uygulamaya döküyor: kalitenin boyutlarını ölçmek, kuralları koddan ayırıp bir <b>şemaya</b> yazmak, kötü satırları <b>karantinaya</b> almak, üretici ile tüketici arasındaki beklentiyi bir <b>veri sözleşmesine</b> bağlamak ve her çalıştırmanın sonunda okunabilir bir rapor üretmek. Örnekler gerçek kirli tablolarla: Anadolu Market'in <code>raw_signups</code> kayıt dökümü ve Power Query'den tanıdığın <code>kirli_veri</code> bayi raporu.</p>
+<h2>Kalitenin boyutları</h2>
+<div class="tbl-wrap"><table><tr><th>Boyut</th><th>Soru</th><th>raw_signups'ta örnek</th></tr>
+<tr><td>Tamlık (completeness)</td><td>Zorunlu alanlar dolu mu?</td><td>10 satırda şehir boş</td></tr>
+<tr><td>Tekillik (uniqueness)</td><td>Anahtar tekrar ediyor mu?</td><td>52 satır, 40 benzersiz <code>id</code></td></tr>
+<tr><td>Geçerlilik (validity)</td><td>Değer biçime ve kurala uyuyor mu?</td><td>Tarih kimi satırda <code>29.07.2024</code>, kiminde <code>2024-02-10</code></td></tr>
+<tr><td>Tutarlılık (consistency)</td><td>Aynı şey hep aynı mı yazılmış?</td><td><code>ISTANBUL</code>, <code>istanbul</code>, <code>İstanbul</code></td></tr>
+<tr><td>Doğruluk (accuracy)</td><td>Değer gerçeği yansıtıyor mu?</td><td>Kaynakla mutabakat gerekir; tek başına ölçülemez</td></tr>
+<tr><td>Tazelik (timeliness)</td><td>Veri yeterince güncel mi?</td><td>En yeni kayıt beklenen günden eski mi?</td></tr></table></div>
+<p>Her boyutu bir orana çevirmek (ör. tamlık = zorunlu alanları dolu satır / tüm satırlar) kaliteyi zaman içinde izlenebilir kılar: "bu hafta tamlık %98'den %81'e düştü" demek, "veride sorun var" demekten çok daha işe yarar.</p>
+<pre class="py">import veri, re
+from collections import Counter
+r = veri.kayitlar("anadolu_market", "raw_signups")
+n = len(r)
+tamlik = sum(x["city"] is not None for x in r) / n
+tekillik = len({x["id"] for x in r}) / n
+gecerlilik = sum(bool(re.fullmatch(r"\d{4}-\d{2}-\d{2}", x["signup_date"])) for x in r) / n
+yazimlar = Counter(x["city"] for x in r if x["city"])
+print(f"satır={n} tamlık={tamlik:.1%} tekillik={tekillik:.1%} ISO tarih={gecerlilik:.1%}")
+print("şehir yazımları:", len(yazimlar), sorted(yazimlar)[:4])</pre>
+<h2>Kurallar koddan ayrı: şema</h2>
+<p>Kuralları <code>if</code> yığınları olarak yazmak yerine bir şemada (schema) toplarsan hem okunur hem yeniden kullanılır. Python dünyasında bunun en yaygın aracı <b>pandera</b>'dır (pandas/polars DataFrame şeması); satır bazlı API girdisinde ise pydantic. Mantık aynı: sütun → tür + kurallar.</p>
+<pre class="code">import pandera.pandas as pa   # pip install pandera
+sema = pa.DataFrameSchema({
+    "id":          pa.Column(int, unique=True),
+    "email":       pa.Column(str, pa.Check.str_matches(r"^[^@\s]+@[^@\s]+\.[a-z]+$")),
+    "city":        pa.Column(str, pa.Check.isin(["İstanbul", "Ankara", "İzmir"]), nullable=False),
+    "signup_date": pa.Column("datetime64[ns]"),
+}, strict=True)                # şemada olmayan sütun gelirse hata
+try:
+    sema.validate(df, lazy=True)          # lazy: ilk hatada durma, hepsini topla
+except pa.errors.SchemaErrors as e:
+    print(e.failure_cases)                # hangi sütun, hangi kural, hangi değer</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>pandera tarayıcıda yüklü değil. Aşağıdaki alıştırmalarda aynı fikri saf Python ile, sözlükten oluşan bir şemayla kuracaksın; böylece kütüphanenin içinde ne olduğunu da görmüş olacaksın.</div>
+<h2>Karantina tablosu: ne at, ne durdur</h2>
+<p>Kötü satırla ne yapmalı? Sessizce atmak veri kaybettirir ve kimse fark etmez; tüm partiyi durdurmak tek bir bozuk satır için bütün raporu bekletir. Orta yol <b>karantinadır</b> (quarantine): geçen satırlar hedefe, kalanlar ham hâliyle ve <b>neden</b> bilgisiyle ayrı bir tabloya yazılır. Veri sahibi karantinayı inceler, kaynağı düzeltir, satırlar yeniden işlenir. Karantina oranı eşiği aşarsa (ör. %5) parti yine durdurulur; bu, derste gördüğün hata kuyruğunun veritabanındaki karşılığıdır.</p>
+<pre class="py">import sqlite3, json
+c = sqlite3.connect(":memory:")
+c.execute("CREATE TABLE karantina (parti TEXT, kayit TEXT, nedenler TEXT)")
+bayi = veri.kayitlar("kirli_veri", "bayi")[2:]          # ilk iki satır başlık
+for satir in bayi:
+    nedenler = []
+    if not satir["Column1"]:
+        nedenler.append("bayi boş")
+    if satir["Column4"] in (None, "-"):
+        nedenler.append("tutar yok")
+    if satir["Column3"] and not re.fullmatch(r"\d{2}\.\d{2}\.\d{4}", satir["Column3"]):
+        nedenler.append("tarih geçersiz")
+    if nedenler:
+        c.execute("INSERT INTO karantina VALUES (?, ?, ?)",
+                  ("2024-01", json.dumps(satir, ensure_ascii=False), ", ".join(nedenler)))
+for parti, nedenler in c.execute("SELECT parti, nedenler FROM karantina"):
+    print(parti, "|", nedenler)</pre>
+<h2>Veri sözleşmesi (data contract)</h2>
+<p>Kaynak ekip bir gün sütun adını değiştirir ve senin boru hattın kırılır. Veri sözleşmesi, üretici ile tüketici arasında bu beklentileri yazıya döker: şema, kalite kuralları, tazelik taahhüdü (SLA), sahip ve iletişim. Çoğunlukla YAML'dır, git'te durur, değişiklikleri kod incelemesinden (code review) geçer ve CI'da otomatik denetlenir.</p>
+<pre class="code"># contracts/raw_signups.yaml
+dataset: anadolu_market.raw_signups
+owner: crm-ekibi@anadolu.example
+sla: {tazelik_saat: 24}
+columns:
+  - {name: id, type: int, required: true, unique: true}
+  - {name: email, type: str, required: true, pattern: "^[^@ ]+@[^@ ]+$"}
+  - {name: city, type: str, required: true, allowed: [İstanbul, Ankara, İzmir]}
+  - {name: signup_date, type: str, required: true, pattern: "^\\d{4}-\\d{2}-\\d{2}$"}
+quality:
+  max_karantina_orani: 0.05</pre>
+<p>Sözleşmeyi koda çevirmek, şema doğrulayıcını YAML'dan beslemek demektir: <code>yaml.safe_load</code> ile oku, her sütun tanımını bir kurala dönüştür, sonuçları bir rapora topla. Raporun sonunda tek bir karar olmalı: GEÇTİ ya da KALDI. Bu raporu JSON olarak saklamak, kalitenin zaman içindeki eğilimini panoda göstermeyi sağlar.</p>
+<div class="warn"><b>Normalleştir, sonra doğrula</b><code>" Ankara"</code> ve <code>"izmir "</code> gibi değerler gerçekte geçerlidir; yalnız yazım bozuk. Doğrulamadan önce kırpma, büyük/küçük harf ve tarih biçimi gibi güvenli dönüşümleri yap; ama "anlamı tahmin eden" düzeltmeleri (boş şehri "İstanbul" saymak) asla otomatik yapma.</div>
+<div class="note"><b>Gerçek işte</b>Veri ekiplerinde Great Expectations, Soda, dbt testleri ve pandera bu işi yapar; veri sözleşmeleri için açık standartlar (Open Data Contract Standard) da var. Hangisini kullanırsan kullan, mülakatta ve işte sorulan şey aynıdır: "Kötü veriyi nasıl yakalıyorsun, nereye koyuyorsun, kime haber veriyorsun?"</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretim ETL'inde olgunluk işaretleri</h3>
+<p>İyi bir boru hattı; yapılandırmayı koddan ayırır (ortam değişkeni, TOML), her çalıştırma için metrik üretir (satır sayısı, süre, hata oranı) ve bu metrikleri bir panoya ya da uyarı sistemine gönderir. Hata oranı bir eşiği aşarsa (örneğin satırların yüzde biri) yükleme durdurulur; sessizce yüzde kırk hatalı dosya yüklemek, hiç yüklememekten kötüdür.</p>
+<p>Veri kalitesi kontrolleri (data quality checks) yüklemeden sonra çalışır: bugünün toplamı dünün yüzde ellisinden azsa uyar, şehir listesinde bilinmeyen değer varsa uyar. Great Expectations ve pandera bu kontrolleri bildirimsel yazmanı sağlar. Büyük hacimde satır satır Python yerine pandas (ya da Polars) ile vektörel dönüştürme ve <code>to_sql</code>/COPY ile toplu yükleme yapılır; ancak hata kuyruğu, idempotency ve log disiplini aynı kalır.</p>
+<p>Geriye dönük çalıştırma (backfill) için betik tarih parametresi almalı: <code>python -m etl.satis --tarih 2024-05-01</code>. Bugünün tarihini kodun içinde <code>date.today()</code> ile sabitlemek, bir hafta sonra "geçen pazartesiyi yeniden yükle" ihtiyacını imkânsız kılar.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/veri-boru-hatti">Alıştırmalara geç (30)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../api-web/">← API tasarımına giriş: HTTP, doğrulama ve ilk servis</a><a href="../paketleme-dagitim/">Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

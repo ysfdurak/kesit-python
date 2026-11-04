@@ -1,0 +1,294 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel | Kesit Python</title><meta name="description" content="Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker'a kısa…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/paketleme-dagitim/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel"><meta property="og:description" content="Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker'a kısa…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/paketleme-dagitim/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel","description":"Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker'a kısa…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/paketleme-dagitim/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel</h1><p class="st-l">Kodunu kurulabilir bir pakete dönüştür: pyproject.toml, src düzeni, argparse ile CLI, entry point, semver, wheel/sdist, pip install -e ve Docker'a kısa bakış.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/paketleme-dagitim">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>"Bilgisayarımda çalışıyor" cümlesi, kurumsal yazılımda bir hata raporudur. Ilgaz Bank'ta yazdığın kredi skoru modülü üç farklı ekibin projesinde, bir zamanlanmış görevde ve bir Docker konteynerinde çalışacaksa; kodu <b>paket</b> olarak kurulabilir, sürümlenebilir ve komut satırından çağrılabilir yapman gerekir. Bu ders modern Python paketleme standardını (PEP 517/518/621) ve dağıtım zincirini anlatır. Pyodide'de <code>pip</code> ve derleme araçları yok; bu yüzden yapılandırma dosyalarını gösterim olarak okuyacak, CLI ve sürümleme mantığını ise gerçekten çalıştıracağız.</p>
+
+<h2>pyproject.toml ve src düzeni</h2>
+<p><code>pyproject.toml</code>, paketin tek yapılandırma dosyasıdır: ad, sürüm, bağımlılıklar, derleme aracı ve araç ayarları (ruff, mypy, pytest). <b>src düzeni</b> (src layout) paketi <code>src/paket_adi/</code> altına koyar; böylece testler kurulmamış kaynak klasörü yerine kurulu paketi içe aktarır ve "yerelde çalışıyor, kurulunca çalışmıyor" hatası erken yakalanır.</p>
+<pre class="py">PYPROJECT = '''
+[build-system]
+requires = ["setuptools&gt;=69", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "anadolu-skor"
+version = "1.2.0"
+description = "Ilgaz Bank kredi skoru araçları"
+requires-python = "&gt;=3.11"
+dependencies = ["httpx&gt;=0.27", "pydantic&gt;=2"]
+
+[project.optional-dependencies]
+dev = ["pytest", "ruff", "mypy"]
+
+[project.scripts]
+anadolu-skor = "anadolu_skor.cli:main"
+
+[tool.setuptools.packages.find]
+where = ["src"]
+'''
+import tomllib
+cfg = tomllib.loads(PYPROJECT)
+print(cfg['project']['name'], cfg['project']['version'])
+print('bağımlılıklar:', cfg['project']['dependencies'])
+print('komut:', cfg['project']['scripts'])
+</pre>
+<div class="tbl-wrap"><table><tr><th>Dosya / klasör</th><th>Görevi</th></tr><tr><td>pyproject.toml</td><td>Paket üst verisi, bağımlılıklar, araç ayarları</td></tr><tr><td>src/anadolu_skor/__init__.py</td><td>Paket kökü; <code>__version__</code> burada</td></tr><tr><td>src/anadolu_skor/cli.py</td><td>Komut satırı giriş noktası</td></tr><tr><td>tests/</td><td>pytest testleri (paketin dışında)</td></tr><tr><td>README.md, LICENSE, CHANGELOG.md</td><td>Belgeleme ve lisans; README PyPI sayfası olur</td></tr><tr><td>dist/</td><td>Üretilen wheel ve sdist (git'e girmez)</td></tr></table></div>
+<div class="note"><b>requirements.txt ile farkı</b><code>dependencies</code> paketin ihtiyaç duyduğu <i>aralıkları</i> söyler (<code>httpx&gt;=0.27</code>). <code>requirements.txt</code> ya da lock dosyası (pip-tools, uv, poetry) ise belirli bir ortamda kurulan <i>tam sürümleri</i> sabitler. Kütüphane yazıyorsan geniş aralık; uygulama dağıtıyorsan lock dosyası.</div>
+
+<h2>argparse ile CLI</h2>
+<p>Paket bir komut sunuyorsa giriş noktası <code>main(argv=None)</code> imzalı olmalı: <code>parse_args(argv)</code> listeyi parametre alır; böylece test, <code>sys.argv</code>'ye dokunmadan <code>main(['skor', '--gelir', '5000'])</code> çağırabilir. Alt komutlar (<code>skor</code>, <code>rapor</code>) için <code>add_subparsers</code> kullan ve her alt komuta <code>set_defaults(func=...)</code> ile işlev bağla.</p>
+<pre class="py">import argparse, json
+
+def skor_hesapla(gelir: float, gecikme: int) -&gt; int:
+    return int(max(300, min(900, gelir / 100 - gecikme * 40)))
+
+def cmd_skor(args):
+    s = skor_hesapla(args.gelir, args.gecikme)
+    if args.json:
+        print(json.dumps({'gelir': args.gelir, 'gecikme': args.gecikme, 'skor': s}))
+    else:
+        print(f'Skor: {s}')
+    return 0 if s &gt;= 500 else 2            # çıkış kodu: 2 = riskli
+
+def cmd_surum(args):
+    print('anadolu-skor 1.2.0'); return 0
+
+def build_parser():
+    p = argparse.ArgumentParser(prog='anadolu-skor', description='Kredi skoru araçları')
+    p.add_argument('-v', '--verbose', action='store_true')
+    sub = p.add_subparsers(dest='komut', required=True)
+    s = sub.add_parser('skor', help='skor hesapla')
+    s.add_argument('--gelir', type=float, required=True)
+    s.add_argument('--gecikme', type=int, default=0)
+    s.add_argument('--json', action='store_true')
+    s.set_defaults(func=cmd_skor)
+    sub.add_parser('surum', help='sürümü yaz').set_defaults(func=cmd_surum)
+    return p
+
+def main(argv=None) -&gt; int:
+    args = build_parser().parse_args(argv)
+    return args.func(args)
+
+print('çıkış:', main(['skor', '--gelir', '60000', '--gecikme', '1']))
+print('çıkış:', main(['skor', '--gelir', '20000', '--gecikme', '3', '--json']))
+print('çıkış:', main(['surum']))
+</pre>
+<div class="tip"><b>Çıkış kodu</b><code>main</code> int döndürsün, <code>if __name__ == '__main__': raise SystemExit(main())</code> ile çağrılsın. 0 başarı, 1 genel hata, 2 kullanım hatası geleneği cron ve CI'da "iş başarısız" sinyalini ücretsiz verir. Hata mesajları <code>stderr</code>'a, veri <code>stdout</code>'a: böylece çıktı boruyla başka komuta aktarılabilir.</div>
+
+<h2>Entry point ve editable kurulum</h2>
+<p><code>[project.scripts]</code> altındaki <code>anadolu-skor = "anadolu_skor.cli:main"</code> satırı, kurulumda <code>anadolu-skor</code> adlı bir çalıştırılabilir üretir; bu dosya <code>main()</code>'i çağırıp dönüş değerini çıkış koduna çevirir. Geliştirme sırasında <code>pip install -e .</code> (editable) paketi kopyalamak yerine kaynağa bağlar: kodu değiştirince yeniden kurmadan etkisi görülür.</p>
+<div class="steps-list"><ol><li><code>python -m venv .venv &amp;&amp; source .venv/bin/activate</code></li><li><code>pip install -e ".[dev]"</code> → paket + geliştirme bağımlılıkları</li><li><code>anadolu-skor skor --gelir 50000</code> → entry point çalışır</li><li><code>pytest</code> → testler kurulu paketi içe aktarır</li><li><code>python -m build</code> → <code>dist/anadolu_skor-1.2.0-py3-none-any.whl</code> ve <code>.tar.gz</code></li><li><code>twine upload dist/*</code> (ya da şirket içi depo: Artifactory, Nexus, devpi)</li></ol></div>
+
+<h2>Sürümleme: semver</h2>
+<p>Semantik sürümleme <code>MAJOR.MINOR.PATCH</code>: PATCH hata düzeltmesi (geriye uyumlu), MINOR yeni özellik (geriye uyumlu), MAJOR kırıcı değişiklik. Ön sürüm ekleri (<code>1.3.0rc1</code>) sıralamada final sürümün önüne gelir. Bağımlılık belirtirken <code>&gt;=1.2,&lt;2</code> (ya da <code>~=1.2</code>) kalıbı, kırıcı değişikliği dışarıda bırakır. Sürümü tek yerde tut: <code>pyproject.toml</code>'da ya da <code>__init__.py</code>'de (<code>dynamic = ["version"]</code> ile diğerinden okunur).</p>
+<pre class="py">import re
+from functools import total_ordering
+
+@total_ordering
+class Surum:
+    _rx = re.compile(r'^(\d+)\.(\d+)\.(\d+)(?:rc(\d+))?$')
+
+    def __init__(self, metin):
+        m = self._rx.match(metin)
+        if not m:
+            raise ValueError(f'geçersiz sürüm: {metin!r}')
+        self.major, self.minor, self.patch = (int(m[i]) for i in (1, 2, 3))
+        self.rc = int(m[4]) if m[4] else None
+
+    def _anahtar(self):
+        # rc'li sürüm aynı numaralı finalden küçük: (.., 0, rc) &lt; (.., 1, 0)
+        return (self.major, self.minor, self.patch, 0 if self.rc is not None else 1, self.rc or 0)
+
+    def __eq__(self, o): return self._anahtar() == o._anahtar()
+    def __lt__(self, o): return self._anahtar() &lt; o._anahtar()
+    def __repr__(self):
+        return f'{self.major}.{self.minor}.{self.patch}' + (f'rc{self.rc}' if self.rc is not None else '')
+
+    def uyumlu(self, diger):
+        """~= uyumu: aynı major, en az bu sürüm."""
+        return self.major == diger.major and diger &gt;= self
+
+print(sorted(Surum(s) for s in ['1.10.0', '1.2.0', '1.2.0rc1', '2.0.0', '1.9.3']))
+print(Surum('1.2.0').uyumlu(Surum('1.9.3')), Surum('1.2.0').uyumlu(Surum('2.0.0')))
+</pre>
+<div class="warn"><b>Sürüm metni sıralaması</b><code>'1.10.0' &lt; '1.9.0'</code> metin olarak doğrudur ama sürüm olarak yanlıştır. Her zaman sayısal parçalara ayır ya da <code>packaging.version.Version</code> kullan.</div>
+
+<h2>wheel, sdist ve Docker</h2>
+<p><b>sdist</b> (source distribution) kaynak kodun arşividir; kurulumda derlenir. <b>wheel</b> önceden derlenmiş, doğrudan kopyalanan biçimdir; saf Python paketlerde <code>py3-none-any</code>, C uzantılılarda platforma özel etiket taşır. Kurumsal depolara wheel yüklemek kurulumu hızlandırır ve derleme araçları gerektirmez.</p>
+<p>Docker, paketi işletim sistemi ve Python sürümüyle birlikte paketler. Tipik <code>Dockerfile</code> iki aşamalıdır: ilk aşamada wheel üretilir, ikinci aşamada yalnızca wheel kurulur; böylece derleme araçları son imaja girmez ve imaj küçük kalır.</p>
+<pre class="py">DOCKERFILE = '''
+FROM python:3.12-slim AS build
+WORKDIR /src
+COPY . .
+RUN pip install --no-cache-dir build &amp;&amp; python -m build --wheel
+
+FROM python:3.12-slim
+COPY --from=build /src/dist/*.whl /tmp/
+RUN pip install --no-cache-dir /tmp/*.whl &amp;&amp; rm /tmp/*.whl
+USER 1000
+ENTRYPOINT ["anadolu-skor"]
+CMD ["--help"]
+'''
+asamalar = [s for s in DOCKERFILE.splitlines() if s.startswith('FROM')]
+print('aşama sayısı:', len(asamalar))
+for s in asamalar:
+    print(' ', s)
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: PyPI'ye adım adım yayımlama</h2>
+<p>Paketi yerelde kurabilmek işin yarısı. Diğer yarısı onu başkalarının <code>pip install anadolu-skor</code> diyerek kurabileceği hale getirmek: doğru derleme arka ucu (build backend) seçmek, dağıtım dosyalarını üretmek, TestPyPI'de prova yapmak, gerçek PyPI'ye yüklemek ve her yayını bir git etiketine bağlamak. Bu bölüm bu zinciri baştan sona yürür. Docker tarafını "Docker ile dağıtım" dersinde, CI iş akışlarını "Kalite ve CI" dersinde ayrıntılı göreceksin; burada yalnızca yayına dokunan kısmı ele alıyoruz.</p>
+
+<h3>1. [build-system]: paketi kim derleyecek?</h3>
+<p><code>pip</code> ve <code>python -m build</code> önce <code>[build-system]</code> tablosunu okur (PEP 517/518). <code>requires</code> derleme sırasında geçici ortama kurulacak paketleri, <code>build-backend</code> ise çağrılacak modülü söyler. Bu tablo yoksa araçlar eski setuptools davranışına düşer; uyarı verir ve sonuç tahmin edilemez olur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Arka uç</th><th>requires</th><th>build-backend</th><th>Ne zaman?</th></tr>
+<tr><td>hatchling</td><td><code>["hatchling"]</code></td><td><code>hatchling.build</code></td><td>Yeni saf Python projeleri; sade ayar, src düzenini kendisi bulur</td></tr>
+<tr><td>setuptools</td><td><code>["setuptools&gt;=69"]</code></td><td><code>setuptools.build_meta</code></td><td>Eski projeler, C uzantıları, şirket şablonları</td></tr>
+<tr><td>flit-core</td><td><code>["flit_core&gt;=3.9"]</code></td><td><code>flit_core.buildapi</code></td><td>Tek modüllü küçük kütüphaneler</td></tr>
+<tr><td>poetry-core</td><td><code>["poetry-core"]</code></td><td><code>poetry.core.masonry.api</code></td><td>Ekip poetry kullanıyorsa</td></tr>
+<tr><td>pdm-backend</td><td><code>["pdm-backend"]</code></td><td><code>pdm.backend</code></td><td>pdm iş akışı</td></tr>
+</table></div>
+<p>Aşağıda hatchling ile yayına hazır bir <code>pyproject.toml</code> var. PyPI sayfasında görünen her şey (açıklama, README, lisans, sınıflandırıcılar, bağlantılar) <code>[project]</code> tablosundan gelir. Sürümü git etiketinden almak için <code>dynamic = ["version"]</code> ve <code>hatch-vcs</code> eklentisi kullanılır.</p>
+<pre class="py">import tomllib
+
+PYPROJECT = """
+[build-system]
+requires = ["hatchling", "hatch-vcs"]
+build-backend = "hatchling.build"
+
+[project]
+name = "anadolu-skor"
+dynamic = ["version"]
+description = "Ilgaz Bank kredi skoru araçları"
+readme = "README.md"
+license = "MIT"
+requires-python = "&gt;=3.11"
+authors = [{name = "Veri Ekibi", email = "veri@example.com"}]
+classifiers = ["Programming Language :: Python :: 3", "Operating System :: OS Independent"]
+dependencies = ["httpx&gt;=0.27,&lt;1"]
+
+[project.urls]
+Homepage = "https://example.com/anadolu-skor"
+
+[project.scripts]
+anadolu-skor = "anadolu_skor.cli:main"
+
+[project.entry-points."anadolu_skor.raporlar"]
+pdf = "anadolu_skor.rapor:pdf_yaz"
+
+[tool.hatch.version]
+source = "vcs"
+"""
+cfg = tomllib.loads(PYPROJECT)
+p = cfg["project"]
+print("arka uç:", cfg["build-system"]["build-backend"])
+print("dinamik alanlar:", p["dynamic"])
+print("komutlar:", p["scripts"])
+print("eklenti grupları:", list(p["entry-points"]))</pre>
+
+<h3>2. Dağıtımı üret: python -m build</h3>
+<p><code>build</code> paketi, arka ucu yalıtılmış geçici bir ortamda çağırır ve <code>dist/</code> klasörüne iki dosya bırakır: <code>.tar.gz</code> (sdist) ve <code>.whl</code> (wheel). Wheel adı bilgi taşır: <code>ad-sürüm(-derleme)-python-abi-platform.whl</code>. Adın içindeki tireler alt çizgiye çevrilir, çünkü ayırıcı tiredir.</p>
+<div class="steps-list"><ol>
+<li><code>python -m pip install --upgrade build twine</code> → araçları kur (sanal ortam (virtual environment) içinde).</li>
+<li><code>rm -rf dist/</code> (Windows: <code>rmdir /s /q dist</code>) → eski sürüm dosyalarını temizle.</li>
+<li><code>python -m build</code> → <code>dist/anadolu_skor-1.2.0.tar.gz</code> ve <code>dist/anadolu_skor-1.2.0-py3-none-any.whl</code>.</li>
+<li><code>python -m twine check dist/*</code> → README'nin PyPI'de düzgün görüneceğini ve üst verinin geçerli olduğunu denetler; <code>PASSED</code> görmelisin.</li>
+<li>Yeni bir sanal ortamda <code>pip install dist/*.whl</code> ve <code>anadolu-skor --help</code> → wheel gerçekten çalışıyor mu?</li>
+</ol></div>
+<pre class="py">import re
+
+def wheel_oku(dosya):
+    govde = dosya.removesuffix(".whl").split("-")
+    ad, surum, *orta, py, abi, plat = govde
+    return {"ad": ad, "surum": surum, "derleme": orta[0] if orta else None,
+            "python": py, "abi": abi, "platform": plat}
+
+for d in ["anadolu_skor-1.2.0-py3-none-any.whl",
+          "numpy-2.1.0-cp312-cp312-manylinux_2_17_x86_64.whl"]:
+    w = wheel_oku(d)
+    saf = w["abi"] == "none" and w["platform"] == "any"
+    print(w["ad"], w["surum"], "saf Python" if saf else "platforma özel: " + w["platform"])
+
+# PyPI ad normalleştirmesi (PEP 503): Anadolu_Skor, anadolu.skor ve anadolu-skor AYNI projedir
+print({re.sub(r"[-_.]+", "-", a).lower() for a in ["Anadolu_Skor", "anadolu.skor", "anadolu-skor"]})</pre>
+
+<h3>3. Önce TestPyPI, sonra PyPI</h3>
+<p>TestPyPI (<code>test.pypi.org</code>) gerçek PyPI'nin ayrı veritabanlı kopyasıdır. Hesabı ayrıdır; orada yaptığın hata gerçek projeyi etkilemez. PyPI'de bir sürüm numarasını <b>bir kez</b> yükleyebilirsin: dosyayı silsen bile aynı numarayı tekrar kullanamazsın. Provayı bu yüzden TestPyPI'de yaparsın.</p>
+<pre class="code"># 1) pypi.org ve test.pypi.org'da hesap aç, 2FA'yı aç, Account settings → API tokens → token üret
+# 2) TestPyPI'ye yükle (kullanıcı adı: __token__, parola: pypi-... ile başlayan token)
+python -m twine upload --repository testpypi dist/*
+
+# 3) Temiz ortamda TestPyPI'den kurmayı dene (bağımlılıklar gerçek PyPI'den gelsin)
+python -m pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ anadolu-skor
+
+# 4) Her şey yolundaysa gerçek PyPI
+python -m twine upload dist/*</pre>
+<p>Token'ı her seferinde yazmamak için <code>~/.pypirc</code> dosyası kullanılır; dosya izinlerini <code>chmod 600 ~/.pypirc</code> ile kısıtla ve asla git'e koyma. CI'da daha iyisi <b>Trusted Publishing</b>: PyPI proje ayarlarında GitHub deposunu "güvenilir yayıncı" olarak eklersin; iş akışı OIDC ile kısa ömürlü kimlik alır, depoda hiç gizli token tutulmaz.</p>
+<pre class="code">[distutils]
+index-servers = pypi testpypi
+
+[pypi]
+username = __token__
+password = pypi-AgEIcHlwaS5vcmc...
+
+[testpypi]
+repository = https://test.pypi.org/legacy/
+username = __token__
+password = pypi-AgENdGVzdC5weXBp...</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr>
+<tr><td><code>400 File already exists</code></td><td>Bu sürüm daha önce yüklendi (silinmiş olsa bile)</td><td>Sürümü yükselt, yeniden derle</td></tr>
+<tr><td><code>403 Forbidden</code> / "not allowed to upload"</td><td>Ad başkasına ait ya da yanlış token</td><td>Farklı ad seç; proje kapsamlı token üret</td></tr>
+<tr><td><code>twine check</code>: README render hatası</td><td><code>readme</code> türü yanlış ya da RST hatası</td><td>Markdown kullan, <code>readme = "README.md"</code></td></tr>
+<tr><td>Kurulumdan sonra <code>ModuleNotFoundError</code></td><td>Paket klasörü wheel'e girmemiş</td><td>wheel'i <code>unzip -l</code> ile incele; src düzeni ayarını kontrol et</td></tr>
+<tr><td>Eski sürüm de yüklenmeye çalışıyor</td><td><code>dist/</code> temizlenmemiş</td><td>Derlemeden önce <code>dist/</code> klasörünü sil</td></tr>
+<tr><td>TestPyPI'den kurarken bağımlılık bulunamadı</td><td>Bağımlılık TestPyPI'de yok</td><td><code>--extra-index-url https://pypi.org/simple/</code></td></tr>
+</table></div>
+
+<h3>4. Sürüm etiketleme</h3>
+<p>Yayın akışı şöyledir: CHANGELOG'u güncelle, sürümü yükselt, commit et, <b>açıklamalı etiket</b> at, etiketi it. <code>hatch-vcs</code> ya da <code>setuptools-scm</code> kullanıyorsan sürüm numarasını hiçbir dosyaya yazmazsın; etiketten okunur, etiketsiz commit'lerde <code>1.2.1.dev3+g1a2b3c</code> gibi geliştirme sürümü üretilir.</p>
+<pre class="code">git tag -a v1.2.0 -m "Sürüm 1.2.0"
+git push origin v1.2.0          # CI bu etiketi görünce derler ve yayımlar
+git describe --tags             # v1.2.0-3-g1a2b3c: etiketten bu yana 3 commit</pre>
+<div class="warn"><b>Yanlış sürüm yayımladıysan</b>PyPI'de sürümü silmek yerine "yank" et: <code>pip install anadolu-skor</code> o sürümü artık seçmez ama <code>==1.2.0</code> ile sabitleyenler kırılmaz. Ardından düzeltilmiş <code>1.2.1</code> yayımla.</div>
+
+<h3>5. Entry point'ler ayrıntılı</h3>
+<p>Entry point, "bu ad şu modülün şu nesnesidir" diyen kayıttır: <code>ad = "paket.modul:nesne"</code>. Üç türü vardır:</p>
+<ul>
+<li><code>[project.scripts]</code> → <code>console_scripts</code> grubu: kurulumda <code>bin/</code> (Windows'ta <code>Scripts</code>) altına çalıştırılabilir dosya üretilir. Fonksiyonun dönüş değeri çıkış kodu olur.</li>
+<li><code>[project.gui-scripts]</code> → Windows'ta konsol penceresi açmadan çalışan GUI uygulamaları.</li>
+<li><code>[project.entry-points."grup.adi"]</code> → eklenti (plugin) sistemi: başka paketler senin grubuna kayıt ekler, sen <code>importlib.metadata.entry_points(group=...)</code> ile bulup yüklersin. pytest eklentileri bu yolla çalışır.</li>
+</ul>
+<p><code>python -m anadolu_skor</code> ile de çalışsın istiyorsan paketin içine <code>__main__.py</code> koy ve içinde <code>from .cli import main; raise SystemExit(main())</code> yaz.</p>
+<pre class="py">from importlib.metadata import EntryPoint
+
+# Kurulu paketlerin kaydını taklit ediyoruz: başka ekipler kendi dışa aktarıcılarını ekledi
+kayitlar = [
+    EntryPoint(name="json", value="json:dumps", group="anadolu.export"),
+    EntryPoint(name="girinti", value="textwrap:indent", group="anadolu.export"),
+    EntryPoint(name="bozuk", value="olmayan_paket.mod:yaz", group="anadolu.export"),
+]
+eklentiler = {}
+for ep in kayitlar:
+    try:
+        eklentiler[ep.name] = ep.load()          # import + getattr
+    except ImportError as e:
+        print(f"atlandı: {ep.name} ({type(e).__name__})")
+print(sorted(eklentiler))
+print(ep.module, ep.attr)
+print(eklentiler["json"]({"sube": 34, "adet": 3}))</pre>
+<div class="note"><b>Gerçek işte</b>Şirket içi kütüphanelerde akış neredeyse hep aynıdır: <code>main</code> dalına birleştirilen PR → <code>v1.4.0</code> etiketi → CI testleri koşar, <code>python -m build</code>, <code>twine check</code>, önce iç TestPyPI benzeri "staging" depoya, onaydan sonra Artifactory/Nexus'a yükler. Senden beklenen, bu adımları elle bir kez yapıp anlamış olman ve <code>pyproject.toml</code>'daki bir hatanın hangi adımda patlayacağını tahmin edebilmendir.</div>
+<div class="tip"><b>Paket verisi</b>Pakete JSON/CSV gibi dosya koyuyorsan <code>open("veri/oranlar.json")</code> yazma; kurulumdan sonra çalışma klasörü farklıdır. <code>importlib.resources.files("anadolu_skor") / "veri/oranlar.json"</code> kullan ve dosyanın wheel'e girdiğini <code>unzip -l</code> ile doğrula.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kurumsal dağıtım zinciri</h3>
+<p>Olgun ekiplerde paket sürümü git etiketinden türetilir (<code>setuptools-scm</code> ya da <code>hatch-vcs</code>): <code>v1.2.0</code> etiketi atılınca CI wheel üretir, testleri koşar, şirket içi PyPI'ye yükler ve Docker imajını aynı etiketle kayıt defterine (registry) iter. Elle sürüm numarası yazmak ve "unuttum" hataları böylece biter. CHANGELOG, "Keep a Changelog" biçiminde tutulur ve her MINOR/MAJOR sürümde kırıcı değişiklikler açıkça yazılır.</p>
+<p>Bağımlılık güvenliği: lock dosyası tekrarlanabilir kurulum sağlar; <code>pip-audit</code> bilinen zafiyetleri tarar; Dependabot/Renovate güncellemeleri otomatik PR olarak açar. Docker imajında <code>root</code> olmayan kullanıcı, sabitlenmiş temel imaj etiketi ve <code>--no-cache-dir</code> standarttır.</p>
+<p>Alternatif araç zincirleri: <code>uv</code> (çok hızlı pip/venv/lock), <code>poetry</code> ve <code>hatch</code> (bağımlılık + derleme + yayın tek araç). Hepsi aynı <code>pyproject.toml</code> standardına dayanır; ekip hangisini seçerse seçsin bu dersteki kavramlar değişmez.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/paketleme-dagitim">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../veri-boru-hatti/">← Veri boru hattı (ETL, data pipeline): çıkar, dönüştür, yükle</a><a href="../kalite-ci/">Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

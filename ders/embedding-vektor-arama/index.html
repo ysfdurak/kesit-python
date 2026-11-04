@@ -1,0 +1,220 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı | Kesit Python</title><meta name="description" content="Embedding, normalizasyon ve benzerlik ölçülerinden numpy ile kNN'ye, ANN indekslerine (HNSW, IVF, FAISS, pgvector), parçalama stratejilerine, BM25 +…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/embedding-vektor-arama/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı"><meta property="og:description" content="Embedding, normalizasyon ve benzerlik ölçülerinden numpy ile kNN'ye, ANN indekslerine (HNSW, IVF, FAISS, pgvector), parçalama stratejilerine, BM25 +…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/embedding-vektor-arama/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı","description":"Embedding, normalizasyon ve benzerlik ölçülerinden numpy ile kNN'ye, ANN indekslerine (HNSW, IVF, FAISS, pgvector), parçalama stratejilerine, BM25 +…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/embedding-vektor-arama/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</h1><p class="st-l">Embedding, normalizasyon ve benzerlik ölçülerinden numpy ile kNN'ye, ANN indekslerine (HNSW, IVF, FAISS, pgvector), parçalama stratejilerine, BM25 + vektör hibrit aramaya, RRF ve MMR'ye, recall@k/MRR ile değerlendirmeye ve yetki filtresine kadar getirme katmanını Lezzet Kurye yorumları üzerinde uygularsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/embedding-vektor-arama">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Kelimeyle değil anlamla aramak</h2>
+<p>Lezzet Kurye destek ekibi "yemek buz gibiydi" diye yazan müşterinin şikâyetine benzer eski kayıtları bulmak istiyor. Klasik anahtar kelime araması "soğuk geldi" yazan kayıtları kaçırır, çünkü ortak kelime yoktur. <b>Embedding</b> (gömme vektörü), bir metni anlamını temsil eden sayı dizisine çevirir: anlamca yakın metinlerin vektörleri de birbirine yakın düşer. Anlamsal arama, öneri sistemleri, kümeleme, yinelenen kayıt bulma ve RAG'in (Retrieval-Augmented Generation) "getirme" (retrieval) katmanı bu fikre dayanır.</p>
+<p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde TF-IDF ile basit bir RAG kurdun. Bu derste getirme katmanını mühendis gözüyle derinleştireceksin: vektör benzerliği, numpy ile kNN, ANN indeksleri, parçalama stratejileri, BM25 ile hibrit arama, RRF, yeniden sıralama, değerlendirme metrikleri ve yetki filtresi.</p>
+<div class="note"><b>Tarayıcıda sahte embedding</b>Gerçek embedding modelleri (sentence-transformers, OpenAI, Cohere, Voyage...) yüzlerce MB'lık ağlar ya da ağ üzerinden API'lerdir. Alıştırmalarda karakter üçlülerini (trigram) hash'leyen 256 boyutlu bir <b>sahte embedding</b> kullanacağız. Anlamı değil yazım benzerliğini yakalar; ama vektör aramanın tüm mühendisliği (normalizasyon, kNN, indeks, değerlendirme) birebir aynıdır. Sahte modelin hatalarını görmek, gerçek modelin neden gerektiğini de gösterecek.</div>
+
+<h2>1. Embedding, boyut ve benzerlik ölçüleri</h2>
+<p>Bir embedding, sabit uzunlukta bir ondalık sayı vektörüdür; uzunluğa <b>boyut</b> (dimension) denir (yaygın değerler 384, 768, 1024, 1536, 3072). Benzerliği üç ölçüyle hesaplarsın:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçü</th><th>Formül</th><th>Yorum</th></tr>
+<tr><td>Kosinüs benzerliği (cosine similarity)</td><td>a·b / (‖a‖·‖b‖)</td><td>-1..1; vektörlerin <b>yönüne</b> bakar, uzunluğu yok sayar</td></tr>
+<tr><td>Nokta çarpımı (dot product)</td><td>a·b</td><td>Vektörler birim uzunluktaysa kosinüsle aynıdır ve en hızlısıdır</td></tr>
+<tr><td>Öklid uzaklığı (L2)</td><td>‖a − b‖</td><td>Küçük = yakın; birim vektörlerde ‖a−b‖² = 2 − 2·cos</td></tr>
+</table></div>
+<p>Pratikte vektörler bir kez <b>normalize</b> edilir (L2 normu 1 yapılır); sonra her karşılaştırma tek bir nokta çarpımıdır.</p>
+<pre class="py">import numpy as np
+
+a = np.array([3.0, 4.0])
+b = np.array([6.0, 8.0])     # a ile aynı yön, iki kat uzun
+c = np.array([4.0, -3.0])    # a'ya dik
+
+def kosinus(x, y):
+    return float(x @ y / (np.linalg.norm(x) * np.linalg.norm(y)))
+
+print("cos(a, b) =", round(kosinus(a, b), 3), " cos(a, c) =", round(kosinus(a, c), 3))
+an, bn = a / np.linalg.norm(a), b / np.linalg.norm(b)
+print("normalize sonrası nokta çarpımı:", round(float(an @ bn), 3))
+print("L2(a, b) =", round(float(np.linalg.norm(a - b)), 3), " normalize L2:", round(float(np.linalg.norm(an - bn)), 3))</pre>
+
+<h2>2. Sahte embedding modeli ve gerçek veri</h2>
+<p>Modelimiz her kelimenin başına ve sonuna boşluk koyup üç karakterlik parçalarını çıkarır, her parçayı <code>zlib.crc32</code> ile 256 kutudan birine düşürür ve sayar (hashing trick). Sonra vektörü normalize eder. Lezzet Kurye'nin gerçek <code>lk_ratings</code> tablosundaki yorumlar üzerinde deneyelim:</p>
+<pre class="py">import re
+import zlib
+import numpy as np
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+def sahte_embedding(metin, boyut=256):
+    v = np.zeros(boyut)
+    for kelime in re.findall(r"\w+", tr_kucuk(metin)):
+        k = f" {kelime} "
+        for i in range(len(k) - 2):
+            v[zlib.crc32(k[i:i + 3].encode()) % boyut] += 1
+    n = np.linalg.norm(v)
+    return v / n if n else v
+
+
+import veri
+from collections import Counter
+
+kayitlar = veri.kayitlar("lezzet_kurye", "lk_ratings")
+sayim = Counter(k["comment"] for k in kayitlar if k["comment"])
+yorumlar = sorted(sayim)
+M = np.array([sahte_embedding(y) for y in yorumlar])   # yorum sayısı × 256 matris
+print(len(kayitlar), "puan,", len(yorumlar), "farklı yorum, matris", M.shape)
+print("normlar:", np.round(np.linalg.norm(M, axis=1)[:3], 3))</pre>
+
+<h2>3. numpy ile kNN: kaba kuvvet arama</h2>
+<p>En yakın k komşu (k-nearest neighbors, kNN) aramasında sorgu vektörünü tüm belge vektörleriyle çarparsın: <code>M @ q</code> tek bir matris-vektör çarpımıdır ve 100 bin belgede bile milisaniyeler sürer. En büyük k skoru bulmak için tüm diziyi sıralamak yerine <code>np.argpartition</code> O(n) çalışır; sonra yalnız k elemanı sıralarsın.</p>
+<pre class="py">def en_yakin(sorgu, k=3):
+    s = M @ sahte_embedding(sorgu)
+    aday = np.argpartition(-s, k)[:k]          # sırasız ilk k
+    aday = aday[np.argsort(-s[aday], kind="stable")]
+    return [(yorumlar[i], round(float(s[i]), 3)) for i in aday]
+
+for soru in ["kurye geç geldi", "porsiyon az", "yemek soğuktu"]:
+    print(soru, "→", en_yakin(soru))</pre>
+<p>Son satıra dikkat: "yemek soğuktu" için ilk sonuç doğru ("Yemek soğumuştu") ama ikinci sırada "Yemek dökülmüştü" var, "Soğuk geldi"nin önünde. Sahte model "yemek" kelimesindeki ortak harfleri anlamdan önemli sayıyor. Gerçek bir anlamsal model "soğuktu" ile "Soğuk geldi" arasındaki anlam yakınlığını yakalardı. Bu, model seçiminin getirme kalitesini doğrudan belirlediğini gösterir.</p>
+<pre class="code"># Gerçek embedding modeli (pip install sentence-transformers)
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")   # Türkçe destekli çok dilli model
+M = model.encode(yorumlar, normalize_embeddings=True)                    # (13, 384)
+q = model.encode(["yemek buz gibiydi"], normalize_embeddings=True)[0]
+print(yorumlar[int((M @ q).argmax())])</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install sentence-transformers</code> modeli ilk çalıştırmada indirir (~100-500 MB). API tabanlı modellerde (OpenAI <code>text-embedding-3-small</code>, Voyage, Cohere) aynı vektörleri HTTP üzerinden alırsın; model adlarını sağlayıcı belgesinden kontrol et.</div>
+
+<h2>4. ANN indeksleri ve vektör veritabanları</h2>
+<p>Kaba kuvvet arama birkaç milyon vektöre kadar iş görür. Daha büyük ölçekte <b>yaklaşık en yakın komşu</b> (Approximate Nearest Neighbor, ANN) indeksleri kullanılır: biraz isabetten (recall) feragat edip yüzlerce kat hız kazanırsın.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem / Araç</th><th>Fikir</th><th>Not</th></tr>
+<tr><td>HNSW</td><td>Katmanlı "küçük dünya" grafı; üst katmanda uzun atlamalar, altta ince arama</td><td>Çok hızlı, bellek yoğun; pgvector, Qdrant, Weaviate destekler</td></tr>
+<tr><td>IVF</td><td>Vektörleri k-means kümelerine böl, yalnız en yakın birkaç kümede ara</td><td><code>nprobe</code> arttıkça doğruluk artar, hız düşer</td></tr>
+<tr><td>PQ (product quantization)</td><td>Vektörü sıkıştırarak sakla</td><td>Milyarlarca vektörde bellek tasarrufu</td></tr>
+<tr><td>FAISS</td><td>Meta'nın C++/Python kütüphanesi</td><td>Kendi sunucunda, kütüphane olarak</td></tr>
+<tr><td>Chroma</td><td>Gömülü, geliştirici dostu vektör deposu</td><td>Prototip ve küçük projeler</td></tr>
+<tr><td>pgvector</td><td>PostgreSQL eklentisi</td><td>Veri zaten Postgres'teyse; SQL ile filtre + vektör</td></tr>
+</table></div>
+<pre class="code"># FAISS (pip install faiss-cpu)
+import faiss
+indeks = faiss.IndexFlatIP(M.shape[1])     # iç çarpım = normalize vektörde kosinüs
+indeks.add(M.astype("float32"))
+skorlar, idler = indeks.search(q.reshape(1, -1).astype("float32"), 3)
+
+# pgvector (PostgreSQL)
+# CREATE EXTENSION vector;
+# CREATE TABLE yorum (id serial, metin text, sahip text, emb vector(384));
+# CREATE INDEX ON yorum USING hnsw (emb vector_cosine_ops);
+# SELECT metin FROM yorum WHERE sahip = %s ORDER BY emb &lt;=&gt; %s LIMIT 5;   -- &lt;=&gt; kosinüs uzaklığı</pre>
+
+<h2>5. Parçalama (chunking) stratejileri</h2>
+<p>Uzun belge tek bir vektöre sığdırılırsa anlamı "ortalanır" ve ayrıntı kaybolur; bu yüzden belgeler parçalara bölünür. <a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde sabit kelime sayısıyla örtüşmeli parçalamayı yazdın. Diğer stratejiler:</p>
+<ul>
+<li><b>Cümle bazlı</b>: cümle sınırlarından bölüp karakter sınırına kadar cümle eklemek; cümleler yarıda kesilmez.</li>
+<li><b>Başlık bazlı</b>: Markdown/HTML başlıklarına göre bölmek; her parça "İade &gt; Süre" gibi bir başlık yolu (metadata) taşır. Yönetmelik ve yardım merkezi metinleri için en iyi başlangıçtır.</li>
+<li><b>Örtüşme</b> (overlap): ardışık parçaların bir-iki cümle paylaşması, sınırdaki bilginin kaybolmasını azaltır.</li>
+</ul>
+<pre class="py">import re
+
+def cumlelere_bol(metin):
+    return [c for c in re.split(r"(?&lt;=[.!?])\s+", metin.strip()) if c]
+
+politika = "İade süresi 14 gündür. Hasarlı ürünlerde kargo bizden. Kampanyalı ürünler iade edilebilir! Hediye kartı iade edilemez."
+print(cumlelere_bol(politika))</pre>
+<div class="tip"><b>Parça boyutu nasıl seçilir?</b>Tek bir doğru değer yok: küçük parçalar isabetli ama bağlamsız, büyük parçalar bağlamlı ama gürültülü olur. 200–800 token aralığından başla, altın soru setiyle recall@k ölçerek ayarla. Her parçaya belge kimliği, başlık ve tarih gibi metadata ekle.</div>
+
+<h2>6. Hibrit arama: BM25 + vektör ve RRF</h2>
+<p>Vektör araması "AM-4471" gibi ürün kodlarını, kişi adlarını ve nadir terimleri kaçırabilir; anahtar kelime araması ise eş anlamlıları kaçırır. <b>Hibrit arama</b> ikisini birleştirir. Anahtar kelime tarafında standart <b>BM25</b>'tir: TF-IDF'e benzer ama terim sıklığının etkisini doyurur (k1) ve uzun belgeleri cezalandırır (b).</p>
+<p>BM25 skoru ile kosinüs skoru farklı ölçeklerdedir; doğrudan toplanamaz. <b>RRF</b> (Reciprocal Rank Fusion) skorları değil <b>sıraları</b> birleştirir: her listede r. sıradaki belge 1/(k + r) puan alır (genelde k = 60). İki listede de üst sıralarda olan belge öne çıkar.</p>
+<pre class="py">import math
+import re
+from collections import Counter
+
+def kelimeler(metin):
+    return re.findall(r"\w+", metin.replace("I", "ı").replace("İ", "i").lower())
+
+class BM25:
+    def __init__(self, belgeler, k1=1.5, b=0.75):
+        self.k1, self.b = k1, b
+        self.tf = [Counter(kelimeler(d)) for d in belgeler]
+        self.uzunluk = [sum(t.values()) for t in self.tf]
+        self.ort = sum(self.uzunluk) / len(belgeler) if belgeler else 0
+        self.df = Counter(w for t in self.tf for w in t)
+        self.N = len(belgeler)
+
+    def idf(self, w):
+        n = self.df.get(w, 0)
+        return math.log((self.N - n + 0.5) / (n + 0.5) + 1)
+
+    def skorla(self, sorgu):
+        q = kelimeler(sorgu)
+        sonuc = []
+        for tf, dl in zip(self.tf, self.uzunluk):
+            s = 0.0
+            for w in q:
+                f = tf.get(w, 0)
+                if f:
+                    s += self.idf(w) * f * (self.k1 + 1) / (f + self.k1 * (1 - self.b + self.b * dl / self.ort))
+            sonuc.append(s)
+        return sonuc
+
+
+def rrf(siralamalar, k=60):
+    skor = {}
+    for sira in siralamalar:
+        for r, d in enumerate(sira, 1):
+            skor[d] = skor.get(d, 0.0) + 1 / (k + r)
+    return sorted(skor, key=lambda d: (-skor[d], d))
+
+belgeler = ["iade süresi 14 gündür", "AM-4471 kablosuz kulaklık stokta", "kulaklık iadesinde kutu şart"]
+bm = BM25(belgeler).skorla("AM-4471 kulaklık")
+vek = [float(sahte_embedding(d) @ sahte_embedding("AM-4471 kulaklık")) for d in belgeler]
+s_bm = sorted(range(3), key=lambda i: -bm[i])
+s_vek = sorted(range(3), key=lambda i: -vek[i])
+print("BM25:", [round(x, 2) for x in bm], s_bm)
+print("Vektör:", [round(x, 2) for x in vek], s_vek)
+print("RRF:", rrf([s_bm, s_vek]))</pre>
+<h3>Yeniden sıralama (reranking)</h3>
+<p>Hibrit arama hızlıca 20–100 aday getirir; ardından daha pahalı bir <b>çapraz kodlayıcı</b> (cross-encoder) model her (soru, parça) çiftini birlikte okuyup alaka puanı verir ve en iyi 3–5'i seçer. Bi-encoder (embedding) soru ve belgeyi ayrı kodladığı için hızlıdır; cross-encoder birlikte kodladığı için daha isabetlidir ama her aday için ayrı çalışır. Çeşitlilik için MMR (Maximal Marginal Relevance) gibi yöntemler, birbirinin kopyası olan sonuçları cezalandırır.</p>
+
+<h2>7. Getirmeyi ölçmek: recall@k ve MRR</h2>
+<p>"Arama iyi mi?" sorusu hisle değil <b>altın soru setiyle</b> (golden set) cevaplanır: her soru için doğru belge(ler) önceden etiketlenir. <b>recall@k</b>: doğru belgenin ilk k sonuçta olma oranı. <b>MRR</b> (Mean Reciprocal Rank): doğru belgenin sırasının tersinin ortalaması (1. sıra 1, 2. sıra 0,5, yoksa 0).</p>
+<pre class="py">altin = {"iade süresi": "iade-1", "kargo ücreti": "kargo-1", "garanti": "urun-4471"}
+sonuclar = {"iade süresi": ["iade-1", "iade-2", "kargo-1"],
+            "kargo ücreti": ["iade-2", "kargo-1", "kargo-2"],
+            "garanti": ["kargo-2", "iade-1", "iade-2"]}
+
+def metrikler(sonuclar, altin, k):
+    isabet = [altin[s] in sonuclar[s][:k] for s in altin]
+    rr = [1 / (sonuclar[s].index(altin[s]) + 1) if altin[s] in sonuclar[s][:k] else 0 for s in altin]
+    return round(sum(isabet) / len(altin), 3), round(sum(rr) / len(altin), 3)
+
+for k in (1, 3):
+    print(f"recall@{k}, MRR@{k} =", metrikler(sonuclar, altin, k))</pre>
+
+<h2>8. Metadata filtreleme ve yetki</h2>
+<p>Kurumsal aramada her kullanıcı yalnız görme yetkisi olan belgeleri görmelidir: Ali'nin iade notu Ayşe'nin sonuçlarında çıkmamalı. Filtre <b>sıralamadan önce</b> uygulanmalıdır (pre-filtering). Önce ilk k'yı alıp sonra yetkisizleri atmak (post-filtering) iki sorun yaratır: k'dan az sonuç döner ve hata yapılırsa yetkisiz belge LLM istemine (prompt) sızar. Vektör veritabanları bu yüzden <code>where</code> koşulunu indeks aramasıyla birlikte uygular. Ayrıca embedding'ler de kişisel veri sayılabilir; silinen bir belgenin vektörü de silinmelidir (KVKK).</p>
+
+<h2>9. Kullanım alanları</h2>
+<ul>
+<li><b>Benzer şikâyet bulma</b>: yeni yorumun en yakın geçmiş kayıtları ve onların ortalama puanı.</li>
+<li><b>Kümeleme</b>: <a href="../ml-kumeleme/">Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti</a> dersindeki k-means'i embedding'lere uygulayıp şikâyet konularını keşfetmek.</li>
+<li><b>Anomali / yeni konu</b>: hiçbir bilinen kayda yeterince benzemeyen (en yüksek kosinüs &lt; eşik) yorum, yeni bir sorun türünün habercisidir.</li>
+<li><b>Yinelenen kayıt</b>: kosinüs &gt; 0,95 olan ürün açıklamaları ya da destek talepleri.</li>
+</ul>
+<pre class="py">bilinen = M
+for yeni in ["Biraz geç geldi", "Ambalaj yırtıktı", "Kurye kapıyı çarptı"]:
+    en_yuksek = float((bilinen @ sahte_embedding(yeni)).max())
+    print(f"{yeni:22} en yüksek benzerlik {en_yuksek:.2f}", "→ YENİ KONU" if en_yuksek &lt; 0.4 else "")</pre>
+<div class="note"><b>Gerçek işte</b>Üretimdeki RAG sistemlerinde sorunların çoğu modelden değil getirmeden çıkar: yanlış parçalama, eksik metadata, yetki filtresi unutulmuş indeks, güncellenmeyen vektörler. Ekipler 50–200 soruluk bir altın setle recall@5 ve MRR'yi her değişiklikte (yeni model, yeni parça boyutu) ölçer; ancak getirme yeterince iyiyse üretim istemiyle uğraşır. Embedding modelini değiştirmek tüm belgeleri yeniden vektörleştirmek demektir; bu yüzden model adı ve sürümü vektörlerle birlikte saklanır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Model seçimi ve maliyet</h3>
+<p>Türkçe içerik için çok dilli modelleri kendi altın setinde karşılaştır; genel liderlik tabloları senin alanını temsil etmeyebilir. Boyut arttıkça depolama ve arama maliyeti artar; bazı modeller vektörü kısaltmaya (Matryoshka) izin verir. float32 yerine int8 ya da ikili niceleme (quantization) belleği 4–32 kat azaltır.</p>
+<h3>Sorgu tarafı iyileştirmeleri</h3>
+<p>Soru ile belge farklı dilde konuşur ("kargom nerede" ↔ "takip numarası SMS ile gönderilir"). Sorgu genişletme, LLM ile varsayımsal cevap üretip onu aramak (HyDE) ve çok sorgulu arama bu boşluğu kapatır; her biri ek gecikme ve maliyettir, altın setle ölçmeden ekleme.</p>
+<h3>İndeks bakımı</h3>
+<p>Belge güncellenince eski parçaları sil, yenileri ekle (upsert); belge kimliği + parça sırası anahtardır. Silinen belgelerin vektörlerinin kalması hem yanlış cevap hem gizlilik ihlalidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/embedding-vektor-arama">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../redis-kuyruk/">← Redis, önbellek ve arka plan işleri (Celery/RQ)</a><a href="../llm-ajanlar/">LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

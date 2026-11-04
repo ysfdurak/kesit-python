@@ -1,0 +1,256 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>matplotlib ile görselleştirme | Kesit Python</title><meta name="description" content="Figure/Axes modeli; çizgi, çubuk, histogram ve dağılım grafikleri; başlık, eksen, legend; savefig ile dosyaya yazma; pandas .plot kısayolu."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/gorsellestirme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="matplotlib ile görselleştirme"><meta property="og:description" content="Figure/Axes modeli; çizgi, çubuk, histogram ve dağılım grafikleri; başlık, eksen, legend; savefig ile dosyaya yazma; pandas .plot kısayolu."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/gorsellestirme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"matplotlib ile görselleştirme","description":"Figure/Axes modeli; çizgi, çubuk, histogram ve dağılım grafikleri; başlık, eksen, legend; savefig ile dosyaya yazma; pandas .plot kısayolu.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/gorsellestirme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>matplotlib ile görselleştirme</h1><p class="st-l">Figure/Axes modeli; çizgi, çubuk, histogram ve dağılım grafikleri; başlık, eksen, legend; savefig ile dosyaya yazma; pandas .plot kısayolu.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/gorsellestirme">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Tablo mu grafik mi?</h2>
+<p>Anadolu Market'in haftalık ciro tablosunu yöneticiye gönderirsen 12 sayıya bakar; aynı veriyi çizgi grafik yaparsan düşüşü saniyede görür. Grafik bir bulgu iletişim aracıdır. Python'da temel kütüphane <b>matplotlib</b>; pandas'ın <code>.plot()</code> kısayolu da altında onu kullanır.</p>
+
+<div class="note"><b>Bu ortamda</b>Tarayıcıdaki Python (Pyodide) görüntü penceresi açamaz; bu yüzden örneklerde <code>matplotlib.use("Agg")</code> ile görüntüsüz (headless) arka uç kullanıyor, figürü dosyaya yazıyor ve grafiğin <b>yapısını</b> (başlık, çizgi sayısı, çubuk sayısı) print ile gösteriyoruz. Kendi bilgisayarında aynı kod <code>plt.show()</code> ile pencere açar.</div>
+
+<h2>Figure ve Axes</h2>
+<p>Bir <b>Figure</b> tuvaldir; içinde bir ya da daha çok <b>Axes</b> (grafik alanı) bulunur. Modern kullanım: <code>fig, ax = plt.subplots()</code> ile ikisini al, çizimi <code>ax</code> üzerinden yap. <code>plt.plot()</code> gibi "durum makinesi" çağrıları da çalışır ama birden çok grafikte karışır.</p>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+haftalar = ["H1", "H2", "H3", "H4", "H5", "H6"]
+ciro = [1213, 1480, 1390, 1725, 1610, 1950]
+hedef = [1300, 1400, 1500, 1600, 1700, 1800]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.plot(haftalar, ciro, marker="o", label="Ciro")
+ax.plot(haftalar, hedef, linestyle="--", color="gray", label="Hedef")
+ax.set_title("Anadolu Market haftalık ciro")
+ax.set_xlabel("Hafta")
+ax.set_ylabel("TL")
+ax.legend()
+ax.grid(True, alpha=0.3)
+fig.savefig("ciro.png", dpi=120, bbox_inches="tight")
+plt.close(fig)
+
+print("başlık:", ax.get_title())
+print("çizgi sayısı:", len(ax.lines))
+print("ilk çizginin y verisi:", list(ax.lines[0].get_ydata()))
+</pre>
+<div class="tip"><b>savefig ve close</b>Her figürü dosyaya yazdıktan sonra <code>plt.close(fig)</code> çağır. Döngüde yüz grafik üretirken kapatmazsan bellek şişer ve matplotlib uyarı verir.</div>
+
+<h2>Grafik türü seçimi</h2>
+<div class="tbl-wrap"><table><tr><th>Soru</th><th>Grafik</th><th>matplotlib</th><th>pandas</th></tr>
+<tr><td>Zaman içinde nasıl değişti?</td><td>Çizgi</td><td><code>ax.plot</code></td><td><code>s.plot()</code></td></tr>
+<tr><td>Kategoriler arası karşılaştırma</td><td>Çubuk</td><td><code>ax.bar / ax.barh</code></td><td><code>s.plot.bar()</code></td></tr>
+<tr><td>Bir değişkenin dağılımı</td><td>Histogram</td><td><code>ax.hist</code></td><td><code>s.plot.hist()</code></td></tr>
+<tr><td>İki değişken ilişkisi</td><td>Dağılım</td><td><code>ax.scatter</code></td><td><code>df.plot.scatter(x, y)</code></td></tr>
+<tr><td>Parça-bütün (az kategori)</td><td>Pasta (dikkatli)</td><td><code>ax.pie</code></td><td><code>s.plot.pie()</code></td></tr>
+</table></div>
+
+<h2>Çubuk ve histogram</h2>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+sehirler = ["İstanbul", "Ankara", "İzmir", "Bursa"]
+ciro = [4210, 2980, 2450, 1120]
+
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(9, 3.5))
+cubuklar = ax1.bar(sehirler, ciro, color="steelblue")
+ax1.set_title("Şehir bazında ciro")
+ax1.bar_label(cubuklar, fmt="%d")           # çubuk üstüne değer
+ax1.tick_params(axis="x", rotation=20)
+
+tutarlar = [45, 120, 80, 95, 310, 60, 75, 899, 130, 55, 210, 48, 1250, 90, 70]
+ax2.hist(tutarlar, bins=6, color="darkorange", edgecolor="white")
+ax2.set_title("Sipariş tutarı dağılımı")
+ax2.set_xlabel("TL")
+fig.tight_layout()
+fig.savefig("sehir_hist.png")
+plt.close(fig)
+
+print("çubuk sayısı:", len(ax1.patches), "histogram kutusu:", len(ax2.patches))
+print("en yüksek çubuk:", max(p.get_height() for p in ax1.patches))
+</pre>
+<p><code>ax.patches</code> çubukları ve histogram kutularını dikdörtgen nesneler olarak tutar; <code>get_height()</code> yüksekliğini verir. Testlerde grafiğin doğru veriyle çizildiğini bu şekilde kontrol ederiz.</p>
+
+<h2>Dağılım grafiği ve pandas .plot</h2>
+<p>Bir DataFrame'den hızlı keşif grafiği için <code>df.plot(...)</code>: döndürdüğü nesne yine bir Axes'tir, üstüne matplotlib ile başlık ve etiket ekleyebilirsin. <code>ax=</code> parametresiyle kendi Axes'ine çizdirirsin.</p>
+<pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["İstanbul", "Ankara", "İzmir", "Bursa", "Antalya"],
+    "musteri": [820, 540, 460, 210, 330],
+    "ciro": [4210, 2980, 2450, 1120, 1890],
+})
+fig, ax = plt.subplots(figsize=(5, 4))
+df.plot.scatter(x="musteri", y="ciro", ax=ax, s=60, color="seagreen")
+for _, r in df.iterrows():
+    ax.annotate(r["sehir"], (r["musteri"], r["ciro"]), textcoords="offset points", xytext=(5, 5))
+ax.set_title("Müşteri sayısı ve ciro")
+fig.savefig("scatter.png")
+plt.close(fig)
+print("başlık:", ax.get_title(), "| nokta koleksiyonu:", len(ax.collections))
+
+ax2 = df.set_index("sehir")["ciro"].sort_values().plot.barh(title="Ciro (TL)")
+print("barh çubuk sayısı:", len(ax2.patches))
+plt.close("all")
+</pre>
+
+<h2>Okunur grafik için kontrol listesi</h2>
+<ul>
+<li><b>Başlık</b> bulguyu söylesin: "Ciro" değil, "Haftalık ciro hedefin altında kaldı".</li>
+<li><b>Eksen etiketleri</b> birim içersin (TL, adet, %).</li>
+<li>Birden çok seri varsa <b>legend</b>; tek seriyse legend gereksiz.</li>
+<li>Çubuk grafiği sıralı çiz (<code>sort_values</code>), y ekseni sıfırdan başlasın.</li>
+<li>Renk az ve anlamlı olsun: vurgulanacak çubuk farklı, gerisi gri.</li>
+<li><code>fig.tight_layout()</code> ya da <code>bbox_inches="tight"</code> ile kesilen etiketleri düzelt.</li>
+</ul>
+<div class="warn"><b>Pasta grafiği</b>Dörtten fazla dilimde insan gözü oranları karşılaştıramaz; sıralı yatay çubuk neredeyse her zaman daha iyidir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: kurulum, çoklu grafik, vurgu ve rapora gömme</h2><p>Tek bir çizgi, çubuk ya da histogram çizebiliyorsun. Gerçek bir yönetim raporunda ise daha fazlası istenir: aynı figürde birden çok grafik, iki farklı birimi (TL ve adet) aynı grafikte göstermek, hedef çizgisi ve not eklemek, eksende "1.250.000 TL" gibi Türkçe sayı biçimi, yığılmış çubuk ve grafiği bir HTML rapora gömmek. Bu bölüm bunları tamamlıyor. İstatistiksel grafikler (seaborn) ve etkileşimli grafikler (plotly) "İleri görselleştirme" dersinde.</p><h3>Kurulum ve arka uç (backend)</h3><pre class="code">python -m pip install matplotlib
+python -c "import matplotlib; print(matplotlib.__version__, matplotlib.get_backend())"
+
+# Jupyter'de grafik hücre altında görünsün:
+%matplotlib inline
+</pre><div class="tbl-wrap"><table><tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr><tr><td><code>plt.show()</code> hiçbir şey göstermiyor</td><td>Görüntüsüz arka uç (Agg) seçili ya da sunucuda çalışıyorsun</td><td>Dosyaya kaydet (<code>fig.savefig</code>); masaüstünde <code>matplotlib.use("TkAgg")</code></td></tr><tr><td>Kaydedilen PNG boş</td><td><code>savefig</code>, <code>plt.show()</code>'dan sonra çağrılmış; show figürü kapatır</td><td>Önce <code>savefig</code>, sonra <code>show</code></td></tr><tr><td><code>More than 20 figures have been opened</code> uyarısı</td><td>Döngüde figürler kapatılmıyor</td><td>Her turda <code>plt.close(fig)</code></td></tr><tr><td>Eksen etiketleri kesik</td><td>Uzun şehir adları tuvale sığmıyor</td><td><code>fig.tight_layout()</code> ya da <code>bbox_inches="tight"</code></td></tr><tr><td>Sunucuda (Linux, ekransız) <code>TclError: no display</code></td><td>Pencereli arka uç seçilmiş</td><td>pyplot'u içe aktarmadan önce <code>matplotlib.use("Agg")</code></td></tr></table></div><h3>Izgara düzeni: subplots(satır, sütun)</h3><p><code>plt.subplots(2, 2)</code> bir figür ve <b>2×2 numpy dizisi</b> halinde Axes döndürür; <code>axes[0, 1]</code> sağ üst grafiktir. Hepsini dolaşmak için <code>axes.flat</code> kullanılır. <code>sharey=True</code> tüm grafiklerin y eksenini ortak yapar; şehirleri karşılaştırırken bu şarttır, yoksa her grafik kendi ölçeğini seçer ve küçük şehir büyük görünür. Kullanılmayan alanı <code>ax.remove()</code> kaldırır.</p><pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+satis = {"İstanbul": [420, 450, 480], "Ankara": [300, 280, 310], "İzmir": [250, 260, 300]}
+fig, axes = plt.subplots(2, 2, figsize=(8, 6), sharey=True)
+print(type(axes).__name__, axes.shape)
+for ax, (sehir, degerler) in zip(axes.flat, satis.items()):
+    ax.plot(["Oca", "Şub", "Mar"], degerler, marker="o")
+    ax.set_title(sehir)
+axes[1, 1].remove()                      # 4. alan boş kalmasın
+fig.suptitle("Şehir bazında aylık satış")
+fig.tight_layout()
+print("Axes sayısı:", len(fig.axes))
+print("ortak y sınırı:", axes[0, 0].get_ylim() == axes[1, 0].get_ylim())
+plt.close(fig)
+</pre><h3>İki birim tek grafikte: twinx</h3><p>Ciro (TL) ve sipariş adedi aynı eksende çizilirse adet çizgisi sıfıra yapışır. <code>ax.twinx()</code> aynı x eksenini paylaşan, sağda kendi y ekseni olan ikinci bir Axes verir. Okuyucunun hangi serinin hangi eksene ait olduğunu anlaması için eksen etiketlerini serinin rengiyle boyamak iyi bir alışkanlıktır.</p><pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+aylar = ["Oca", "Şub", "Mar", "Nis"]
+ciro = [125000, 98000, 143000, 151000]
+siparis = [410, 350, 470, 455]
+
+fig, ax = plt.subplots(figsize=(7, 4))
+ax.bar(aylar, ciro, color="lightsteelblue")
+ax.set_ylabel("Ciro (TL)")
+ax2 = ax.twinx()
+ax2.plot(aylar, siparis, color="darkred", marker="o")
+ax2.set_ylabel("Sipariş (adet)", color="darkred")
+print("sol çubuk:", len(ax.patches), "| sağ çizgi:", len(ax2.lines))
+print(ax.get_ylabel(), "/", ax2.get_ylabel())
+plt.close(fig)
+</pre><h3>Vurgu: hedef çizgisi, bölge ve not</h3><p>Grafiğin mesajını okuyucuya söyletmek için üç araç yeter: <code>ax.axhline(y)</code> yatay referans çizgisi (hedef, ortalama), <code>ax.axvspan(x1, x2)</code> bir aralığı gölgeler (kampanya haftaları), <code>ax.annotate(metin, xy=..., xytext=..., arrowprops=...)</code> bir noktaya oklu not koyar. Vurgulanacak çubuğu farklı renkle boyamak için renk listesini koşulla kur.</p><pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+
+haftalar = ["H1", "H2", "H3", "H4", "H5"]
+ciro = [1210, 1480, 990, 1725, 1610]
+hedef = 1300
+
+fig, ax = plt.subplots()
+renk = ["firebrick" if c &lt; hedef else "lightgray" for c in ciro]
+ax.bar(haftalar, ciro, color=renk)
+ax.axhline(hedef, linestyle="--", color="black", label="Hedef")
+ax.axvspan(2.5, 4.5, alpha=0.15, color="green")      # kampanya haftaları
+ax.annotate("Stok sorunu", xy=(2, 990), xytext=(2.2, 1550),
+            arrowprops={"arrowstyle": "-&gt;"})
+ax.set_title("İki hafta hedefin altında kaldı")
+print("hedef altı hafta:", sum(c &lt; hedef for c in ciro))
+print("çizgi:", len(ax.lines), "| not:", len(ax.texts))
+plt.close(fig)
+</pre><h3>Türkçe sayı biçimi ve yığılmış çubuk</h3><p>matplotlib eksende 1e6 gibi bilimsel gösterim ya da 1,250,000 gibi İngilizce ayraç kullanır. <code>matplotlib.ticker.FuncFormatter</code> her eksen değerini senin fonksiyonundan geçirir; fonksiyon <code>(değer, konum)</code> alır ve metin döndürür. Yığılmış (stacked) çubukta her kategori, bir önceki katmanların toplamı üzerine <code>bottom=</code> parametresiyle oturtulur; pandas'ta aynı iş <code>pivot.plot.bar(stacked=True)</code> ile yapılır.</p><pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+from matplotlib.ticker import FuncFormatter
+import numpy as np
+
+def tl(x, pos):
+    return f"{x:,.0f} TL".replace(",", ".")
+
+sehirler = ["İstanbul", "Ankara", "İzmir"]
+katmanlar = {"Gıda": [500000, 320000, 210000], "Elektronik": [900000, 410000, 380000]}
+
+fig, ax = plt.subplots()
+alt = np.zeros(len(sehirler))
+for kategori, degerler in katmanlar.items():
+    ax.bar(sehirler, degerler, bottom=alt, label=kategori)
+    alt += degerler
+ax.yaxis.set_major_formatter(FuncFormatter(tl))
+ax.legend()
+print(tl(1250000, 0))
+print("çubuk parçası:", len(ax.patches), "| İstanbul toplam:", int(alt[0]))
+plt.close(fig)
+</pre><h3>Dışa aktarma ve HTML rapora gömme</h3><p><code>savefig</code> uzantıya göre biçim seçer: PNG (ekran, e-posta; <code>dpi=150</code> baskıda net), SVG ve PDF (vektör, büyütünce bozulmaz). Grafiği dosya yerine belleğe yazmak için <code>io.BytesIO</code> kullanılır; base64 ile metne çevrilen PNG, tek dosyalık bir HTML rapora <code>&lt;img src="data:image/png;base64,..."&gt;</code> olarak gömülür. E-posta ile giden otomatik raporlar genellikle böyle üretilir.</p><pre class="py">import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import io, base64
+
+fig, ax = plt.subplots(figsize=(4, 3))
+ax.bar(["A", "B"], [3, 5])
+tampon = io.BytesIO()
+fig.savefig(tampon, format="png", dpi=100, bbox_inches="tight")
+plt.close(fig)
+ham = tampon.getvalue()
+print("PNG imzası:", ham[:4] == b"\x89PNG")
+kod = base64.b64encode(ham).decode("ascii")
+html = f'&lt;img alt="Ciro" src="data:image/png;base64,{kod[:20]}..."&gt;'
+print(html)
+</pre><div class="tip"><b>Stil bir kere tanımlanır</b>Kurumsal renkleri ve yazı boyutlarını <code>plt.rcParams.update({"axes.spines.top": False, "axes.spines.right": False, "font.size": 10})</code> ile betiğin başında bir kez ayarla. Üst ve sağ çerçeveyi kaldırmak grafiği hemen sadeleştirir.</div><div class="warn"><b>pyplot ile Axes'i karıştırma</b><code>plt.title()</code>, <code>plt.xlabel()</code> "geçerli" Axes'e, yani en son oluşturulana yazar. <code>subplots(1, 2)</code> sonrası <code>plt.title</code> sağdaki grafiğe gider. Birden çok grafikte daima <code>ax.set_title</code> kullan.</div><div class="note"><b>Gerçek işte</b>Analist ekiplerinde haftalık raporlar çoğunlukla bir betikle üretilir: veri çekilir, her grafik için ayrı bir fonksiyon PNG ya da base64 üretir, bir HTML şablonu bunları birleştirir ve rapor e-postayla gider. Bu düzende en sık iki sorun çıkar: kapatılmayan figürlerin sunucuda belleği doldurması ve şehirler arası grafiklerin ortak eksen kullanmaması yüzünden yanlış karşılaştırma. İkisini de bu bölümdeki alışkanlıklar çözer.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek veriyle dakiklik panosu</h2><p>Grafik kurallarını küçük listelerle öğrendin; şimdi bunları gerçek bir operasyon sorusuna uygulayalım. Kanat Havayolları'nın Eylül–Aralık 2024 arasındaki <b>3.173 uçuşu</b> (<code>kanat_havayollari/hv_flights</code>) ve <b>1.350 rötar nedeni kaydı</b> (<code>hv_delays</code>) elimizde. Operasyon direktörü üç soru soruyor: Gecikmeler nasıl dağılıyor? En çok dakikayı hangi neden yiyor? Dakiklik (on-time performance) zamanla kötüleşiyor mu? Her soru için doğru grafik türünü seçip okunur hale getireceğiz.</p><div class="tbl-wrap"><table><tr><th>Soru</th><th>Grafik</th><th>Neden bu tür?</th></tr><tr><td>Gecikmeler nasıl dağılıyor?</td><td>Histogram + eşik çizgisi</td><td>Tek sayısal değişkenin şekli; çarpıklık ve kuyruk görünür</td></tr><tr><td>Hangi neden en çok dakika yiyor?</td><td>Sıralı yatay çubuk</td><td>Kategorik karşılaştırma; uzun etiketler okunur</td></tr><tr><td>Dakiklik zamanla nasıl değişiyor?</td><td>İşaretli çizgi + hedef çizgisi</td><td>Zaman ekseni; hedefe uzaklık tek bakışta</td></tr><tr><td>Hangi rota sorunlu?</td><td>Küçük çoklu grafik (aynı y ölçeği)</td><td>Birden çok seriyi karmaşaya boğmadan kıyaslar</td></tr></table></div><h3>Önce sayıyı üret</h3><p>Kalkış gecikmesi = gerçek kalkış − planlanan kalkış (dakika). İptal edilen uçuşlarda gerçek kalkış yoktur; onları dağılımdan çıkar ama ayrı bir sayı olarak raporla. Havacılıkta yaygın tanım: 15 dakikadan az gecikme "zamanında" sayılır.</p><pre class="py">import veri
+
+f = veri.oku("kanat_havayollari", "hv_flights", parse_dates=["sched_dep", "actual_dep"])
+print(f["status"].value_counts().to_dict())
+u = f[f["status"] != "cancelled"].copy()
+u["gecikme"] = (u["actual_dep"] - u["sched_dep"]).dt.total_seconds() / 60
+print(u["gecikme"].describe().round(1).to_dict())
+print("zamanında (%):", round((u["gecikme"] &lt; 15).mean() * 100, 1))
+</pre><p>Ortalama gecikme 25 dakika ama medyan 7 dakika: dağılım sağa çarpık, birkaç uzun rötar ortalamayı yukarı çekiyor. Bu, histogramı tek başına gösterilmesi gereken bir dağılım yapar.</p><h3>Çarpık dağılım: kuyruğu kırp, eşiği çiz</h3><p>Uzun kuyruk (289 dakikaya kadar) eksenini genişletir ve asıl kitleyi sola sıkıştırır. Değerleri 180'de <code>clip</code> ile kırpıp son kutuyu "180+" diye açıkla; 15 dakika eşiğini dikey çizgiyle göster. Kutu sınırlarını 15'in katı seçmek, eşiğin bir kutu sınırına denk gelmesini sağlar.</p><pre class="py">import veri
+import matplotlib.pyplot as plt
+
+f = veri.oku("kanat_havayollari", "hv_flights", parse_dates=["sched_dep", "actual_dep"])
+u = f[f["status"] != "cancelled"]
+gecikme = (u["actual_dep"] - u["sched_dep"]).dt.total_seconds() / 60
+
+fig, ax = plt.subplots(figsize=(8, 4))
+sayilar, kenarlar, _ = ax.hist(gecikme.clip(upper=180), bins=range(-15, 181, 15), color="#6b7c93")
+ax.axvline(15, color="#c0392b", linestyle="--", label="15 dk eşiği")
+ax.set_title("Kalkış gecikmesi dağılımı (180+ son kutuda)")
+ax.set_xlabel("Dakika")
+ax.set_ylabel("Uçuş sayısı")
+ax.legend()
+print(sayilar[:4].astype(int).tolist(), "...", int(sayilar[-1]))
+plt.close(fig)
+</pre><h3>Nedenler: sıralı yatay çubuk</h3><p>Kategorik ve uzun adlı nedenleri karşılaştırmak için yatay çubuk en okunur türdür. Çubukları değere göre sırala; matplotlib yatay çubukta ilk değeri en alta koyduğu için <b>artan</b> sıralarsan en büyük neden en üstte görünür. Pasta grafik beş kategoride bile farkları okutmaz.</p><pre class="py">import veri
+import matplotlib.pyplot as plt
+
+d = veri.oku("kanat_havayollari", "hv_delays")
+toplam = d.groupby("reason")["minutes"].sum().sort_values()
+pay = (toplam / toplam.sum() * 100).round(1)
+
+fig, ax = plt.subplots(figsize=(7, 3.5))
+ax.barh(toplam.index, toplam.values, color="#6b7c93")
+for y, (deger, yuzde) in enumerate(zip(toplam.values, pay.values)):
+    ax.text(deger, y, f" %{yuzde}", va="center")
+ax.set_title("Rötar dakikası nedene göre")
+ax.set_xlabel("Toplam dakika")
+print(pay.to_dict())
+plt.close(fig)
+</pre><div class="tip"><b>Grafiği test etmek</b>Grafik üreten fonksiyonları da test edebilirsin: <code>ax.patches</code> çubukları, <code>ax.lines</code> çizgileri, <code>ax.get_title()</code> başlığı verir. <code>[p.get_height() for p in ax.patches]</code> ile çizilen değerlerin veriyle tuttuğunu denetlersin. Bu dersin alıştırmaları tam olarak böyle denetleniyor; gece çalışan rapor işlerinde de aynı yöntem kullanılır.</div><div class="note"><b>Gerçek işte</b>Operasyon panolarında "aylık dakiklik + hedef çizgisi" en çok bakılan grafiktir. Ortalama gecikmeyi değil, eşiğin altındaki uçuş yüzdesini çiz: yönetim hedefi (ör. %80) bu birimle koyar. Kötüleşen bir trendi gördüğünde bir sonraki grafik her zaman kırılımdır: hangi rota, hangi saat, hangi neden?</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Rapor üretimini fonksiyonlaştır</h3>
+<p>Her grafik için <code>def ciz_ciro(df, yol: str) -&gt; None</code> gibi bir fonksiyon yaz: veri alır, figür kurar, dosyaya yazar, kapatır. Raporlama betiği bu fonksiyonları sırayla çağırır ve PNG'leri bir HTML ya da PDF şablonuna gömer. Fonksiyonun test edilebilir olması için <code>ax</code> döndürmek de yaygındır; test başlığı ve çizgi sayısını kontrol eder.</p>
+<h3>Stil ve tutarlılık</h3>
+<p><code>plt.rcParams</code> ya da <code>plt.style.use("ggplot")</code> ile tüm grafiklerde aynı yazı tipi, renk ve ızgara. Kurumsal renkler için bir liste tanımla ve <code>color=</code> ile sırayla kullan. Türkçe karakter sorunu yaşarsan DejaVu Sans gibi Unicode destekli bir yazı tipi seç.</p>
+<h3>Ötesi</h3>
+<p>İstatistiksel grafikler için seaborn (matplotlib üstüne), etkileşimli panolar için plotly ya da Power BI. Ama hepsinin temelinde aynı sorular: hangi soru, hangi grafik, hangi vurgu.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/gorsellestirme">Alıştırmalara geç (27)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pandas-groupby/">← groupby, pivot ve merge</a><a href="../async/">asyncio: eşzamansız kod, coroutine, await ve gather →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

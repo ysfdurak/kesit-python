@@ -1,0 +1,182 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yapay zekâ asistanıyla Python yazmak | Kesit Python</title><meta name="description" content="Claude, ChatGPT ve Copilot gibi asistanlardan bağlamlı, örnekli ve kısıtlı istemlerle doğru kod alır; üretilen kodu testle doğrular, uydurma API, eski…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/yapay-zeka-ile-kod/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Yapay zekâ asistanıyla Python yazmak"><meta property="og:description" content="Claude, ChatGPT ve Copilot gibi asistanlardan bağlamlı, örnekli ve kısıtlı istemlerle doğru kod alır; üretilen kodu testle doğrular, uydurma API, eski…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/yapay-zeka-ile-kod/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Yapay zekâ asistanıyla Python yazmak","description":"Claude, ChatGPT ve Copilot gibi asistanlardan bağlamlı, örnekli ve kısıtlı istemlerle doğru kod alır; üretilen kodu testle doğrular, uydurma API, eski…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/yapay-zeka-ile-kod/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Yapay zekâ asistanıyla Python yazmak</h1><p class="st-l">Claude, ChatGPT ve Copilot gibi asistanlardan bağlamlı, örnekli ve kısıtlı istemlerle doğru kod alır; üretilen kodu testle doğrular, uydurma API, eski sözdizimi, sessiz mantık hatası ve güvenlik açıklarını yakalar; yapay zekâ çıktısını (JSON) ayrıştırıp doğrularsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yapay-zeka-ile-kod">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Bugün profesyonel geliştiricilerin büyük kısmı günlük işinde bir yapay zekâ asistanı kullanıyor: sohbet arayüzünde Claude ya da ChatGPT, editörün içinde GitHub Copilot ya da Cursor, terminalde Claude Code gibi ajanlar. Bu araçlar iskelet kodu, test, belge ve yeniden düzenlemeyi dakikalara indirir. Ama asistan <b>emin görünen bir dille yanılabilir</b>: var olmayan bir fonksiyonu çağırabilir, iki yıl önce kaldırılmış bir API kullanabilir, testsiz bırakıldığında yalnızca "mutlu yol"u çalıştıran kod yazabilir. Bu derste asistanı hızlandırıcı olarak kullanmayı, ama son sözü her zaman <b>testlere ve senin muhakemene</b> bırakmayı öğreneceksin. LLM API dersinde modeli kendi kodundan çağırmayı görüyorsun; burada asistanı bir çalışma arkadaşı olarak kullanmaya odaklanıyoruz.</p>
+
+<div class="tbl-wrap"><table>
+<tr><th>Araç türü</th><th>Örnek</th><th>En iyi olduğu iş</th><th>Dikkat</th></tr>
+<tr><td>Sohbet asistanı</td><td>Claude, ChatGPT, Gemini</td><td>Tasarım tartışması, açıklama, fonksiyon/test yazma, hata ayıklama (debugging)</td><td>Projenin tamamını görmez; bağlamı sen verirsin</td></tr>
+<tr><td>Editör içi tamamlama</td><td>GitHub Copilot, Cursor</td><td>Satır/blok tamamlama, tekrarlayan kalıplar</td><td>Hızlı kabul alışkanlığı; okumadan Tab'a basma</td></tr>
+<tr><td>Kodlama ajanı</td><td>Claude Code ve benzerleri</td><td>Çok dosyalı değişiklik, test çalıştırıp düzeltme döngüsü</td><td>Değişikliği diff olarak incele, yetkileri sınırla</td></tr>
+</table></div>
+
+<h2>İyi istemin anatomisi</h2>
+<p>Asistan senin projeni, veri biçimini, Python sürümünü ve kurum kurallarını bilmez. Ne kadar belirsiz sorarsan o kadar "ortalama internet kodu" alırsın. İyi bir kodlama istemi (prompt) şu parçaları içerir:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Parça</th><th>Örnek</th></tr>
+<tr><td>Rol ve bağlam</td><td>"Anadolu Market'in sipariş servisinde çalışıyorum; Python 3.12, yalnız standart kütüphane."</td></tr>
+<tr><td>Görev</td><td>"Siparişleri şehre göre gruplayıp ciroyu hesaplayan fonksiyon yaz."</td></tr>
+<tr><td>Girdi-çıktı örneği</td><td>"Girdi: <code>[{"sehir": "İzmir", "tutar": 100}]</code> → Çıktı: <code>{"İzmir": 100.0}</code>"</td></tr>
+<tr><td>Kısıtlar</td><td>"Para için Decimal kullan, tip ipuçları (type hint) ekle, harici paket yok, iptal siparişleri sayma."</td></tr>
+<tr><td>Kenar durumlar</td><td>"Boş liste, eksik şehir alanı, negatif tutar ne olmalı?"</td></tr>
+<tr><td>Çıktı biçimi</td><td>"Önce fonksiyonu, sonra pytest testlerini ayrı kod bloklarında ver; açıklama 3 maddeyi geçmesin."</td></tr>
+</table></div>
+<pre class="code">ZAYIF:  python ile ciro hesaplama kodu yaz
+
+GÜÇLÜ:  Python 3.12, yalnız standart kütüphane.
+        Görev: sehir_ciro(siparisler: list[dict]) -&gt; dict[str, Decimal]
+        Her sipariş {"sehir": str, "tutar": str, "durum": str}; tutar metin ("149.90").
+        Kurallar: durum "iptal" olanları atla; şehir yoksa "Bilinmiyor".
+        Örnek: [{"sehir":"İzmir","tutar":"100.50","durum":"teslim"}] -&gt; {"İzmir": Decimal("100.50")}
+        Önce bu kurallar için 5 pytest testi yaz, sonra testleri geçen fonksiyonu yaz.
+        Varsayım yapman gerekirse kodun üstünde madde olarak yaz.</pre>
+<div class="tip"><b>Adım adım iste</b>Büyük bir görevi tek istemde isteme. Önce "tasarımı madde madde öner, kod yazma" de; tasarımı onayla; sonra parça parça kodu iste. Hata aldığında tam hata mesajını ve ilgili kodu yapıştır, "neden olduğunu açıkla, sonra düzelt" de. Asistanın önce test yazmasını istemek (test-first) çoğu zaman en verimli yoldur.</div>
+
+<h2>Doğrulama döngüsü: güven ama test et</h2>
+<p>Asistanın kodunu üç adımda doğrularsın: <b>oku</b> (anlamadığın satırı kabul etme), <b>çalıştır</b> (gerçek örnekle), <b>test et</b> (kenar durumlarla). Aşağıda bir asistanın yazdığı, ilk bakışta doğru görünen bir fonksiyon var; küçük bir test kümesi hatayı hemen ortaya çıkarıyor.</p>
+<pre class="py">def ortalama_sepet(tutarlar):
+    """Yapay zekâ çıktısı: sepet tutarlarının ortalaması."""
+    return sum(tutarlar) / len(tutarlar)
+
+denemeler = [[100, 200, 300], [49.9], []]
+for girdi in denemeler:
+    try:
+        print(girdi, "-&gt;", ortalama_sepet(girdi))
+    except Exception as e:
+        print(girdi, "-&gt; HATA:", type(e).__name__, e)</pre>
+<p>Boş liste, "mutlu yol" testinde hiç akla gelmeyen ama üretimde ilk gün karşına çıkacak durumdur. Asistana "bu fonksiyonun kenar durumlarını listele ve her biri için test yaz" demek, en ucuz kalite yatırımıdır. Testleri sen de okumalısın: asistan bazen yanlış kodu "doğrulayan" yanlış test yazar.</p>
+
+<h2>Yapay zekânın tipik hataları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Hata türü</th><th>Örnek</th><th>Nasıl yakalarsın?</th></tr>
+<tr><td>Uydurma API (halüsinasyon)</td><td><code>liste.push(x)</code>, <code>metin.contains("a")</code>, <code>math.clamp</code></td><td>Çalıştır; resmi belgeye bak; <code>hasattr</code>/<code>help()</code></td></tr>
+<tr><td>Eski sürüm kodu</td><td><code>from collections import Mapping</code> (3.10'da kaldırıldı), pandas <code>df.append</code> (2.0'da kaldırıldı)</td><td>Sürümünü istemde belirt; uyarıları (DeprecationWarning) oku</td></tr>
+<tr><td>Sessiz mantık hatası</td><td>Değiştirilebilir varsayılan argüman, sayfalamada bir eksik/fazla, metin olarak sayı sıralama, float ile para</td><td>Kenar durum testleri, özellik (property) testleri</td></tr>
+<tr><td>Güvenlik açığı</td><td>f-string ile SQL, <code>eval</code>, <code>shell=True</code>, <code>random</code> ile token</td><td>Web güvenliği kontrol listesi, bandit</td></tr>
+<tr><td>Aşırı geniş hata yakalama</td><td><code>except Exception: return None</code></td><td>Hangi hatanın neden yakalandığını sor</td></tr>
+<tr><td>Gereksiz bağımlılık / karmaşıklık</td><td>Tek satırlık iş için paket önermek</td><td>"Yalnız standart kütüphane" kısıtı</td></tr>
+</table></div>
+<p>Uydurma API şüphesinde kendi ortamında hızlıca kontrol et:</p>
+<pre class="py">import builtins, importlib
+
+def api_var_mi(yol: str) -&gt; bool:
+    modul_adi, *oznitelikler = yol.split(".")
+    try:
+        nesne = importlib.import_module(modul_adi)
+    except ImportError:
+        if not hasattr(builtins, modul_adi):
+            return False
+        nesne = getattr(builtins, modul_adi)
+    for ad in oznitelikler:
+        if not hasattr(nesne, ad):
+            return False
+        nesne = getattr(nesne, ad)
+    return True
+
+for yol in ["str.removeprefix", "str.contains", "list.push", "math.isclose", "math.clamp", "json.loads"]:
+    print(f"{yol:18} {api_var_mi(yol)}")</pre>
+
+<h2>Kod inceleme kontrol listesi</h2>
+<div class="steps-list"><ol>
+<li><b>Anlıyor muyum?</b> Her satırı açıklayabiliyor musun? Açıklayamıyorsan asistana sor ya da yeniden yazdır.</li>
+<li><b>Çalışıyor mu?</b> Gerçek bir örnekle çalıştır; hatasız çalışması doğru olduğu anlamına gelmez.</li>
+<li><b>Testi var mı?</b> Mutlu yol + boş girdi + sınır değerler + hatalı girdi.</li>
+<li><b>API gerçek mi, güncel mi?</b> Kullandığın Python ve paket sürümüyle uyumlu mu?</li>
+<li><b>Güvenli mi?</b> SQL parametreli mi, kullanıcı girdisi doğrulanıyor mu, gizli bilgi koda gömülü mü?</li>
+<li><b>Projeye uyuyor mu?</b> Adlandırma, hata yönetimi, loglama ve klasör yapısı ekip standardına uygun mu?</li>
+<li><b>Lisans sorunu var mı?</b> Uzun, tanıdık görünen bir blok bilinen bir projeden kopya olabilir.</li>
+</ol></div>
+
+<h2>Yeniden düzenleme ve belge yazdırma</h2>
+<p>Asistanlar çalışan ama dağınık kodu toparlamada çok iyidir: "davranışı değiştirmeden fonksiyonu küçük parçalara böl, tip ipuçları ve docstring ekle" de. Kural: <b>önce test, sonra yeniden düzenleme</b>. Testler, asistanın davranışı sessizce değiştirmediğini kanıtlar. Docstring'e örnek koyarsan <code>doctest</code> ile belge de test olur:</p>
+<pre class="py">import doctest
+from decimal import Decimal
+
+def kdv_ekle(tutar: Decimal, oran: Decimal = Decimal("0.20")) -&gt; Decimal:
+    """Tutara KDV ekler ve kuruşa yuvarlar.
+
+    &gt;&gt;&gt; kdv_ekle(Decimal("100"))
+    Decimal('120.00')
+    &gt;&gt;&gt; kdv_ekle(Decimal("49.90"), Decimal("0.10"))
+    Decimal('54.89')
+    """
+    return (tutar * (1 + oran)).quantize(Decimal("0.01"))
+
+runner = doctest.DocTestRunner()
+for test in doctest.DocTestFinder().find(kdv_ekle, "kdv_ekle", globs={"Decimal": Decimal, "kdv_ekle": kdv_ekle}):
+    runner.run(test)
+print("doctest:", runner.tries, "örnek,", runner.failures, "hata")</pre>
+
+<h2>Yapay zekâ çıktısını programla işlemek</h2>
+<p>Asistanı bir boru hattında (pipeline) kullandığında (ör. müşteri yorumlarını sınıflandırma) yanıtı insan değil kod okur. Modelden JSON iste, ama gelen metnin her zaman temiz JSON olacağını varsayma: başında açıklama cümlesi, etrafında üç ters tırnaklı kod çiti, sonunda fazladan virgül olabilir. Önce ayıkla, sonra <code>json.loads</code>, sonra şemaya göre doğrula; doğrulama başarısızsa hatayı modele geri gönderip yeniden dene.</p>
+<pre class="py">import json, re
+
+CIT = chr(96) * 3   # üç ters tırnak
+yanit = ("Tabii, sonuç aşağıda:\n" + CIT + "json\n"
+         '{"yorum_id": 17, "duygu": "olumsuz", "konu": "kargo", "guven": 0.92}\n' + CIT)
+
+eslesme = re.search(CIT + r"(?:json)?\s*(\{.*?\})\s*" + CIT, yanit, re.S)
+veri = json.loads(eslesme.group(1) if eslesme else yanit)
+
+hatalar = []
+if veri.get("duygu") not in {"olumlu", "olumsuz", "notr"}:
+    hatalar.append("duygu geçersiz")
+if not (isinstance(veri.get("guven"), (int, float)) and 0 &lt;= veri["guven"] &lt;= 1):
+    hatalar.append("guven 0-1 aralığında olmalı")
+print(veri)
+print("hatalar:", hatalar)</pre>
+<p>Pydantic dersinde gördüğün modellerle bu doğrulamayı tek satıra indirebilirsin; birçok LLM API'si de "yapılandırılmış çıktı" (structured output) ya da araç çağrısı (tool use) özelliğiyle şemaya uyan JSON üretmeyi destekler.</p>
+
+<h2>Gizli bilgi, kişisel veri ve lisans</h2>
+<div class="warn"><b>Asistana yapıştırmadan önce düşün</b>API anahtarı, veritabanı parolası, müşteri adı, TC kimlik numarası, kart bilgisi, iç sunucu adresleri asla istem içine girmez. Kurumunun onaylı (kurumsal sözleşmeli, veriyi eğitimde kullanmayan) aracını kullan; hata ayıklama için gerçek veri yerine maskelenmiş ya da sahte örnek ver. Yanlışlıkla bir anahtar paylaştıysan anahtarı hemen iptal edip yenile.</div>
+<p>Lisans ve telif tarafında: üretilen kod bazen açık kaynak bir projeden neredeyse birebir parça içerebilir; GPL gibi "copyleft" lisanslı kod, kapalı kaynak ürününe girerse hukuki risk doğurur. Uzun, özgün görünen blokları kaynak aramasıyla kontrol et, editör araçlarının "kamuya açık kodla eşleşmeyi engelle" ayarlarını aç ve kurumunun yapay zekâ kullanım politikasına uy. Yazdığın koddan, kim üretmiş olursa olsun, <b>sen sorumlusun</b>.</p>
+
+<div class="note"><b>Gerçek işte</b>Ekiplerde yapay zekâ ile yazılmış kod, diğer kodlarla aynı kod incelemesinden (code review) geçer; "yapay zekâ yazdı" bir mazeret değildir. Verimli ekipler asistanı en çok test yazdırma, eski kodu anlama ("bu modül ne yapıyor, akışı madde madde anlat"), hata mesajı yorumlama, belge ve commit mesajı taslağı için kullanır. Mülakatlarda da artık "asistanın önerdiği bu kodda ne yanlış?" türü sorular soruluyor: bu dersteki Hata avı alıştırmaları tam olarak bu beceriyi çalıştırıyor.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: ajanlı kodlama iş akışı</h2><p>Sohbet asistanı sana kod parçası verir; <b>kodlama ajanı</b> (coding agent) ise depoyu okur, dosyaları düzenler, testleri ve komutları çalıştırır, çıktıya bakıp kendini düzeltir. Claude Code (terminal ve IDE), Cursor'ın ajan modu ve GitHub'daki ajanlar bu sınıftadır. Güç arttıkça senin rolün "kodu yazan"dan <b>görevi tanımlayan, sınırları çizen ve sonucu inceleyen</b> kişiye kayar. Bu bölüm o rolü anlatıyor.</p><h3>Döngü: keşfet → planla → uygula → doğrula</h3><div class="steps-list"><ol><li><b>Keşfet:</b> Ajandan önce kodu okumasını iste ("ilgili dosyaları bul, henüz değiştirme"). Yanlış varsayımlar en ucuz bu aşamada yakalanır.</li><li><b>Planla:</b> Değişikliği adımlara bölmesini ve planı sana göstermesini iste. Planı onayla ya da düzelt.</li><li><b>Uygula:</b> Küçük adımlarla; her adım ayrı commit. Büyük tek seferlik değişiklik incelenemez.</li><li><b>Doğrula:</b> Testler, linter, tip denetimi ajanın kendi çalıştırabileceği komutlar olmalı. "Bitti" demesi değil, testlerin yeşil olması ölçüttür.</li></ol></div><p>İyi görev tanımı bir iş biletine benzer: amaç, kapsam (hangi dosyalar/modüller), kapsam dışı, kabul ölçütleri (hangi testler geçmeli), kısıtlar (yeni bağımlılık yok, genel API değişmez). Büyük işi bağımsız alt görevlere böl: "CSV içe aktarmayı yeniden yaz" yerine önce "mevcut davranışı belgeleyen testleri yaz", sonra "ayrıştırıcıyı ayır", sonra "hata raporlamayı ekle".</p><pre class="py">gorevler = {
+    "testleri_yaz": [],
+    "ayristiriciyi_ayir": ["testleri_yaz"],
+    "hata_raporu": ["ayristiriciyi_ayir"],
+    "belgeleri_guncelle": ["ayristiriciyi_ayir"],
+}
+from graphlib import TopologicalSorter
+print(list(TopologicalSorter(gorevler).static_order()))</pre><h3>Kurallar dosyası: projenin hafızası</h3><p>Ajan her oturuma sıfır bağlamla başlar. Projenin kökündeki kurallar dosyası (Claude Code için <code>CLAUDE.md</code>, Cursor için <code>.cursor/rules</code>, birçok araç için <code>AGENTS.md</code>) her oturumda otomatik okunur. İçine yalnız <b>kalıcı ve doğrulanabilir</b> bilgi koy: nasıl kurulur, nasıl test edilir, kod stili, dokunulmayacak yerler. Uzun ve belirsiz dosya ("temiz kod yaz") işe yaramaz; kısa ve komut odaklı olsun.</p><pre class="code"># CLAUDE.md — Anadolu Market sipariş servisi
+
+## Komutlar
+- Kurulum: uv sync
+- Test: uv run pytest -q   (her değişiklikten sonra çalıştır)
+- Lint/biçim: uv run ruff check . &amp;&amp; uv run ruff format --check .
+
+## Kurallar
+- Python 3.12, tip ipuçları zorunlu; para tutarları Decimal.
+- Yeni bağımlılık eklemeden önce sor.
+- migrations/ ve config/prod.yaml dosyalarını DEĞİŞTİRME.
+- Veritabanı sorgularında f-string YOK; parametre kullan.
+
+## Mimari
+- api/ (FastAPI uç noktaları) → servis/ (iş kuralları) → depo/ (SQL). Katman atlama yok.</pre><h3>MCP ile araç bağlamak</h3><p><b>Model Context Protocol</b> (MCP), ajanın dış araçlara (veritabanı, hata takip sistemi, belge deposu, tarayıcı) standart bir arayüzle bağlanmasını sağlar. Bir MCP sunucusu araçlarını adı, açıklaması ve JSON şemalı girdileriyle ilan eder; ajan gerektiğinde çağırır. LLM API dersindeki araç çağırma döngüsünün standartlaşmış hâlidir. Güvenlik kuralı: ajana yalnız gereken araçları ve en az yetkiyi ver (salt okunur veritabanı kullanıcısı, test ortamı anahtarı). Araçtan gelen metin de güvenilmeyen girdidir; istem enjeksiyonu taşıyabilir.</p><pre class="code">// .mcp.json (proje kökü) — örnek yapı
+{
+  "mcpServers": {
+    "market-db": {
+      "command": "uvx",
+      "args": ["mcp-server-sqlite", "--db-path", "./yerel_kopya.db"]
+    }
+  }
+}</pre><h3>Ajan çıktısını PR olarak incelemek</h3><p>Ajanın değişikliği bir dal (branch) ve çekme isteği (pull request) olarak gelmeli; ana dala doğrudan yazmamalı. İncelerken bir insanın kodunu incelerken baktığın her şeye ek olarak ajanlara özgü risklere bak:</p><div class="tbl-wrap"><table><tr><th>Kontrol</th><th>Neden?</th></tr><tr><td>Diff kapsamı görevle uyumlu mu? İlgisiz dosya değişmiş mi?</td><td>Ajanlar "bu arada" düzeltmeler yapar; incelenmemiş değişiklik riski.</td></tr><tr><td>Testler silinmiş, atlanmış (<code>skip</code>) ya da beklenen değer kodu tutacak şekilde değiştirilmiş mi?</td><td>Testi geçirmenin en kolay yolu testi bozmaktır.</td></tr><tr><td>Yeni bağımlılık var mı? Paket gerçekten var mı, adı doğru mu?</td><td>Uydurma ya da adı benzeyen kötü niyetli paketler (typosquatting).</td></tr><tr><td>Sır, anahtar, kişisel veri eklenmiş mi?</td><td>Ajan log ya da örnek veriyi koda gömebilir.</td></tr><tr><td>Hata yutma: çıplak <code>except</code>, <code>pass</code>, sessiz <code>None</code></td><td>Çalışıyor gibi görünür, hatayı gizler.</td></tr><tr><td>CI yeşil mi ve sen de yerelde çalıştırdın mı?</td><td>"Testler geçti" cümlesi kanıt değildir.</td></tr></table></div><div class="warn"><b>İzinler</b>Ajana komut çalıştırma izni verirken izin listesini dar tut (test, lint, git diff). <code>rm -rf</code>, üretim veritabanı, <code>git push --force</code>, dağıtım komutları insan onayı istemeli. Mümkünse ajanı konteyner ya da ayrı bir çalışma ağacında (git worktree) çalıştır.</div><div class="note"><b>Gerçek işte</b>Ekipler ajanları en çok iyi tanımlı işlerde verimli buluyor: test yazma, bağımlılık güncelleme, tip ipucu ekleme, küçük hata düzeltmeleri, belge. Mimari kararlar ve belirsiz gereksinimler hâlâ insanın işi. Mülakatlarda "yapay zekâ araçlarını nasıl kullanıyorsun?" sorusuna iyi cevap, aracın adını değil doğrulama alışkanlığını anlatır: kurallar dosyası, küçük PR, test kanıtı, inceleme listesi.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Projeye kalıcı bağlam ver</h3>
+<p>Kodlama ajanları proje kökündeki talimat dosyalarını (ör. Claude Code için <code>CLAUDE.md</code>) okuyabilir: Python sürümü, test komutu, kod stili, yasaklı kalıplar, klasör yapısı. Her istemde aynı bağlamı tekrar yazmak yerine bir kez yazarsın. Ajanın çalıştırabileceği komutları ve erişebileceği dosyaları sınırla; değişikliği her zaman diff olarak incele.</p>
+<h3>Testi sözleşme olarak kullan</h3>
+<p>Önce kendi yazdığın (ya da okuyup onayladığın) testler, sonra "bu testleri geçen kodu yaz" istemi: buna yapay zekâ ile TDD diyebilirsin. Testler sözleşmedir; asistan kodu değiştirdikçe testler korur. Testin de yanlış olabileceğini unutma: bilerek hatalı bir sürüme karşı testi çalıştırıp başarısız olduğunu görmek (mutasyon testi fikri), testin işe yaradığını kanıtlar.</p>
+<h3>Değerlendirme (eval) kümesi</h3>
+<p>Yapay zekâyı bir ürün özelliğinde (ör. yorum sınıflandırma) kullanıyorsan, beklenen çıktısı bilinen 50-200 örneklik bir değerlendirme kümesi kur; istem ya da model değiştiğinde doğruluğu yeniden ölç. Sezgiyle "daha iyi oldu" demek yerine sayıyla karar verirsin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yapay-zeka-ile-kod">Alıştırmalara geç (29)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../web-guvenlik/">← Güvenli Python ve web güvenliği</a><a href="../docker-deploy/">Docker ve dağıtım: konteyner, compose, bulut →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,232 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>threading, concurrent.futures ve GIL | Kesit Python</title><meta name="description" content="Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL'in etkisi ve ProcessPoolExecutor kavramı; hangi…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/eszamanlilik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="threading, concurrent.futures ve GIL"><meta property="og:description" content="Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL'in etkisi ve ProcessPoolExecutor kavramı; hangi…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/eszamanlilik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"threading, concurrent.futures ve GIL","description":"Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL'in etkisi ve ProcessPoolExecutor kavramı; hangi…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/eszamanlilik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>threading, concurrent.futures ve GIL</h1><p class="st-l">Thread ve havuz (ThreadPoolExecutor), Lock ile paylaşılan durumu koruma, queue ile üretici-tüketici, GIL'in etkisi ve ProcessPoolExecutor kavramı; hangi iş için hangi araç.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eszamanlilik">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><div class="warn"><b>Bu derste örnekler tarayıcıda farklı davranır</b>Tarayıcıdaki Python gerçek iş parçacığı başlatamaz: thread'ler sırayla çalışır. Bu yüzden thread örneklerinde hız kazancı ya da yarış durumu burada görünmez. Her örneğin altında <b>kendi bilgisayarında beklenen çıktı</b> yazıyor; bu dersi bilgisayarında da çalıştırman iyi olur.</div>
+<h2>Üç araç, üç farklı iş</h2>
+<p>Anadolu Market'in gece işi: 200 tedarikçi dosyasını indir (ağ beklemesi), her birini ayrıştır (hafif), sonra 2 milyon satırda fiyat optimizasyonu hesapla (ağır hesap). Üçü de "aynı anda daha çok iş" ister ama farklı araçlarla: ağ için thread ya da asyncio, ağır hesap için süreç (process). Bu dersin amacı doğru aracı seçmeyi ve paylaşılan veriyi güvenle korumayı öğretmek.</p>
+
+<h2>İş parçacığı (thread) ve havuz</h2>
+<p>Thread, aynı süreç içinde paralel akan bir çalışma hattıdır; belleği paylaşır. Elle <code>threading.Thread</code> başlatabilirsin ama modern kalıp <code>concurrent.futures.ThreadPoolExecutor</code>: sabit sayıda işçi, <code>submit</code> ile iş ver, <code>Future</code> ile sonucu al; ya da <code>map</code> ile liste gibi kullan.</p>
+<pre class="py">import time
+from concurrent.futures import ThreadPoolExecutor, as_completed
+
+def indir(tedarikci: str) -&gt; str:
+    time.sleep(0.1)                       # sahte ağ beklemesi
+    return f"{tedarikci}.csv"
+
+tedarikciler = ["Ege", "Marmara", "Karadeniz", "Akdeniz", "Anadolu", "Trakya"]
+
+t0 = time.perf_counter()
+sirali = [indir(t) for t in tedarikciler]
+print(f"sıralı: {time.perf_counter() - t0:.2f} s")
+
+t0 = time.perf_counter()
+with ThreadPoolExecutor(max_workers=3) as havuz:
+    sonuc = list(havuz.map(indir, tedarikciler))      # sıra korunur
+print(sonuc, f"havuz(3): {time.perf_counter() - t0:.2f} s")
+
+with ThreadPoolExecutor(max_workers=6) as havuz:
+    gelecekler = {havuz.submit(indir, t): t for t in tedarikciler}
+    for f in as_completed(gelecekler):                  # bitiş sırasıyla
+        print("bitti:", f.result())
+</pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (süre değişebilir, "bitti" sırası her seferinde farklı olabilir):
+sıralı: 0.60 s
+['Ege.csv', 'Marmara.csv', 'Karadeniz.csv', 'Akdeniz.csv', 'Anadolu.csv', 'Trakya.csv'] havuz(3): 0.20 s
+bitti: Marmara.csv
+bitti: Ege.csv
+…
+Tarayıcıda iki süre de 0.60 s görünür, çünkü thread'ler sırayla çalışır.</pre>
+<div class="tip"><b>map mi submit mi?</b><code>map</code> girdi sırasında sonuç verir ve kısa yazılır. <code>submit</code> + <code>as_completed</code> biten işi hemen işlemene, hataları tek tek yakalamana izin verir; <code>f.result()</code> işçideki istisnayı burada yeniden fırlatır.</div>
+
+<h2>GIL: tek anda tek Python</h2>
+<p>CPython'da <b>GIL</b> (Global Interpreter Lock) aynı anda yalnızca bir thread'in Python bytecode çalıştırmasına izin verir. Thread'ler beklerken (ağ, disk, <code>sleep</code>) GIL'i bırakır; o yüzden I/O işinde havuz gerçek hız sağlar. Ama saf Python hesabında iki thread sırayla çalışır, toplam süre düşmez, hatta kilit alışverişi yüzünden artabilir.</p>
+<pre class="py">import time
+from concurrent.futures import ThreadPoolExecutor
+
+def hesap(n: int) -&gt; int:
+    return sum(i * i for i in range(n))         # saf Python, CPU işi
+
+N = 300_000
+t0 = time.perf_counter()
+[hesap(N) for _ in range(4)]
+tek = time.perf_counter() - t0
+
+t0 = time.perf_counter()
+with ThreadPoolExecutor(max_workers=4) as havuz:
+    list(havuz.map(hesap, [N] * 4))
+coklu = time.perf_counter() - t0
+print(f"sıralı {tek:.2f} s, 4 thread {coklu:.2f} s -&gt; GIL yüzünden kazanç yok")
+</pre>
+<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14'te resmî destek kazanan "free-threaded" yapı GIL'siz çalışabiliyor ama varsayılan değil ve henüz varsayılan değil.</div>
+
+<h2>Yarış durumu ve Lock</h2>
+<p>İki thread aynı sayacı artırırsa ne olur? <code>sayac += 1</code> aslında oku-artır-yaz üç adımdır; GIL adımların arasında thread değiştirebilir ve bir artış kaybolur. Buna <b>yarış durumu</b> (race condition) denir. Çözüm: paylaşılan veriye erişimi <code>threading.Lock</code> ile tek seferde bir thread'e vermek.</p>
+<pre class="py">import threading, time
+from concurrent.futures import ThreadPoolExecutor
+
+bakiye = 0
+kilit = threading.Lock()
+
+def yatir_guvensiz(n):
+    global bakiye
+    for _ in range(n):
+        tmp = bakiye            # oku
+        time.sleep(0)           # başka thread'e sıra ver: yarışı görünür kılar
+        bakiye = tmp + 1        # yaz
+
+def yatir_guvenli(n):
+    global bakiye
+    for _ in range(n):
+        with kilit:             # kritik bölge
+            bakiye += 1
+
+for fn in (yatir_guvensiz, yatir_guvenli):
+    bakiye = 0
+    with ThreadPoolExecutor(max_workers=4) as havuz:
+        list(havuz.map(fn, [2_000] * 4))
+    print(fn.__name__, "beklenen 8000, gelen", bakiye)
+</pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (ilk sayı her çalıştırmada farklı olur, 8000'den küçüktür):
+yatir_guvensiz beklenen 8000, gelen 2004
+yatir_guvenli beklenen 8000, gelen 8000
+Tarayıcıda ikisi de 8000 görünür, çünkü thread'ler sırayla çalışır: yarış burada oluşmaz.</pre>
+<div class="warn"><b>Kilit her yerde değil</b>Kilit tutulan süre kısa olsun; kilit içinde I/O yapma. Birden çok kilit varsa hep aynı sırada al, yoksa karşılıklı bekleme (deadlock) oluşur. Mümkünse paylaşılan durumdan kaçın: her işçi kendi sonucunu döndürsün, ana thread toplasın.</div>
+
+<h2>queue ile üretici-tüketici</h2>
+<p><code>queue.Queue</code> thread-güvenli bir kuyruktur: üreticiler <code>put</code>, tüketiciler <code>get</code> yapar, kilitle uğraşmazsın. <code>None</code> gibi bir "zehirli hap" (sentinel) ile tüketicilere bitişi bildir; <code>task_done</code>/<code>join</code> ile tüm işlerin bittiğini bekle.</p>
+<pre class="py">import queue, threading, time
+
+kuyruk: queue.Queue = queue.Queue()
+islenen = []
+kilit = threading.Lock()
+
+def tuketici(ad):
+    while True:
+        siparis = kuyruk.get()
+        if siparis is None:          # bitiş sinyali
+            kuyruk.task_done()
+            break
+        time.sleep(0.01)             # sahte işleme
+        with kilit:
+            islenen.append((ad, siparis))
+        kuyruk.task_done()
+
+isciler = [threading.Thread(target=tuketici, args=(f"isci{i}",)) for i in range(3)]
+for t in isciler:
+    t.start()
+for sid in range(1001, 1011):
+    kuyruk.put(sid)
+for _ in isciler:
+    kuyruk.put(None)
+kuyruk.join()
+print("işlenen sipariş:", sorted(s for _, s in islenen))
+print("işçi başına:", {ad: sum(1 for a, _ in islenen if a == ad) for ad in ("isci0", "isci1", "isci2")})
+</pre>
+<pre class="out">Kendi bilgisayarında beklenen çıktı (dağılım her seferinde değişir):
+işlenen sipariş: [1001, 1002, 1003, 1004, 1005, 1006, 1007, 1008, 1009, 1010]
+işçi başına: {'isci0': 3, 'isci1': 3, 'isci2': 4}
+Tarayıcıda işin tamamını ilk işçi yapar: {'isci0': 10, 'isci1': 0, 'isci2': 0}.</pre>
+
+<h2>Hangi iş için hangisi?</h2>
+<div class="tbl-wrap"><table><tr><th>İş türü</th><th>Araç</th><th>Neden</th></tr>
+<tr><td>Çok sayıda ağ/disk beklemesi, kütüphane async destekliyor</td><td>asyncio</td><td>Tek thread, binlerce bağlantı, düşük bellek</td></tr>
+<tr><td>Ağ/disk beklemesi, kütüphane senkron (requests, sqlite)</td><td>ThreadPoolExecutor</td><td>Kodu değiştirmeden paralel; GIL beklerken bırakılır</td></tr>
+<tr><td>Saf Python CPU hesabı</td><td>ProcessPoolExecutor</td><td>GIL'i aşar, çekirdekleri kullanır</td></tr>
+<tr><td>Sayısal hesap</td><td>numpy/pandas (önce bunu dene)</td><td>Vektörel işlem C'de çalışır, çoğu zaman tek çekirdekte bile en hızlısıdır; numpy birçok döngüde GIL'i bırakır, pandas'ta bu işleme göre değişir</td></tr>
+<tr><td>Basit betik</td><td>Hiçbiri</td><td>Karmaşıklık maliyeti kazancı geçer</td></tr>
+</table></div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: süreç havuzu, Amdahl, kilit disiplini ve Future arayüzü</h2><p>Thread havuzu, GIL, Lock ve queue temellerini gördün. Bu bölüm gerçek projelerde karşına çıkan eksik parçaları tamamlıyor: ProcessPoolExecutor'ı Windows ve macOS'ta çalıştırmanın kuralları, işi süreçlere doğru bölmek, paralelliğin ne kadar hız getirebileceğini önceden hesaplamak (Amdahl yasası), kilitlerde kilitlenme (deadlock) önleme ve Future nesnesinin tam arayüzü.</p><div class="note"><b>Bu ortamda</b>Tarayıcıdaki Python (Pyodide) yeni thread ya da süreç başlatamaz. Bu yüzden thread/süreç başlatan örnekleri çalıştırılamaz kod kutusunda veriyoruz; çalıştırılabilir örnekler ve alıştırmalar ise Lock, RLock, Event, Future gibi nesneleri ve iş bölme mantığını thread başlatmadan kullanıyor. Aynı kod kendi bilgisayarında gerçek thread'lerle birebir çalışır.</div><h3>ProcessPoolExecutor'ı doğru kurmak</h3><pre class="code"># fiyat_opt.py — kendi bilgisayarında: python fiyat_opt.py
+import os
+from concurrent.futures import ProcessPoolExecutor
+
+def optimize(urun_id: int) -&gt; tuple[int, float]:      # modül düzeyinde (pickle edilebilir)
+    toplam = sum((urun_id * i) % 97 for i in range(200_000))
+    return urun_id, toplam / 200_000
+
+def main():
+    urunler = range(1, 401)
+    with ProcessPoolExecutor(max_workers=os.cpu_count()) as havuz:
+        sonuc = dict(havuz.map(optimize, urunler, chunksize=25))
+    print(len(sonuc), "ürün hesaplandı")
+
+if __name__ == "__main__":       # Windows ve macOS'ta ZORUNLU
+    main()
+</pre><p>Windows ve macOS (Python 3.8+) yeni süreci <b>spawn</b> yöntemiyle başlatır: çocuk süreç betiğini baştan içe aktarır. <code>if __name__ == "__main__":</code> koruması yoksa her çocuk yeniden havuz kurmaya çalışır. <code>chunksize</code>, işleri süreçlere tek tek değil paketler halinde gönderir; çok sayıda küçük işte pickle ve iletişim maliyetini belirgin azaltır.</p><div class="tbl-wrap"><table><tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr><tr><td><code>RuntimeError: An attempt has been made to start a new process before the current process has finished its bootstrapping phase</code></td><td><code>__main__</code> koruması yok (spawn)</td><td>Havuzu <code>if __name__ == "__main__":</code> altında kur</td></tr><tr><td><code>PicklingError: Can't pickle &lt;function &lt;lambda&gt;&gt;</code></td><td>lambda, iç fonksiyon ya da yerel sınıf gönderildi</td><td>Fonksiyonu modül düzeyinde tanımla; parametre için <code>functools.partial</code></td></tr><tr><td><code>AttributeError: Can't get attribute 'f' on &lt;module '__main__'&gt;</code></td><td>Jupyter'de tanımlanan fonksiyon süreçte bulunamıyor</td><td>Fonksiyonu bir <code>.py</code> modülüne taşı ve içe aktar</td></tr><tr><td><code>BrokenProcessPool</code></td><td>Çocuk süreç çöktü (bellek yetmedi, sistem sonlandırdı)</td><td>Daha küçük parçalar, daha az işçi; logları incele</td></tr><tr><td>Süreçlerle daha yavaş</td><td>İşler çok küçük, kopyalama maliyeti hesabı aşıyor</td><td><code>chunksize</code> büyüt ya da işi birleştir; önce numpy/pandas dene</td></tr></table></div><h3>Ne kadar hızlanır? Amdahl yasası</h3><p>Programın yalnızca bir kısmı paralelleştirilebilir: dosyayı okumak, sonuçları birleştirmek sıralı kalır. Paralel oran <code>p</code>, işçi sayısı <code>n</code> ise en iyi hızlanma <code>1 / ((1 - p) + p / n)</code> olur. İşin %90'ı paralel olsa bile sınır 10 kattır; 64 çekirdek almadan önce bu hesabı yapmak para kazandırır.</p><pre class="py">def hizlanma(p: float, n: int) -&gt; float:
+    return 1 / ((1 - p) + p / n)
+
+for n in (1, 2, 4, 8, 16, 64):
+    print(f"{n:&gt;3} işçi: %90 paralel -&gt; {hizlanma(0.90, n):5.2f}x   %50 paralel -&gt; {hizlanma(0.50, n):4.2f}x")
+print("üst sınır (%90):", round(1 / (1 - 0.90), 1))
+</pre><h3>İşi parçalara bölmek ve birleştirmek</h3><p>Süreç havuzunda en verimli kalıp böl-hesapla-birleştir (map-reduce) kalıbıdır: veriyi yaklaşık eşit parçalara böl, her parça kendi kısmi özetini döndürsün, ana süreç özetleri birleştirsin. Paylaşılan değişken yok, kilit yok. Kısmi özet fonksiyonunu ayrı yazmak bir avantaj daha getirir: aynı kodu önce sıralı <code>map</code> ile test eder, sonra <code>havuz.map</code> ile paralel çalıştırırsın.</p><pre class="py">from collections import Counter
+
+siparisler = [("Ankara", 120.0), ("İzmir", 80.0), ("Ankara", 45.5), ("Bursa", 300.0),
+              ("İzmir", 19.9), ("Ankara", 10.0), ("Bursa", 5.0)]
+
+def parcala(veri, n):
+    boyut, artan = divmod(len(veri), n)
+    parcalar, bas = [], 0
+    for i in range(n):
+        son = bas + boyut + (1 if i &lt; artan else 0)
+        parcalar.append(veri[bas:son])
+        bas = son
+    return parcalar
+
+def kismi_ciro(parca):
+    c = Counter()
+    for sehir, tutar in parca:
+        c[sehir] += tutar
+    return c
+
+parcalar = parcala(siparisler, 3)
+print([len(p) for p in parcalar])
+toplam = sum(map(kismi_ciro, parcalar), Counter())    # havuz.map ile aynı arayüz
+print(dict(sorted(toplam.items())))
+</pre><h3>Senkronizasyon araçları</h3><div class="tbl-wrap"><table><tr><th>Araç</th><th>Ne işe yarar</th><th>Örnek</th></tr><tr><td><code>Lock</code></td><td>Kritik bölgeye tek seferde tek thread</td><td>Bakiye güncelleme</td></tr><tr><td><code>RLock</code></td><td>Aynı thread kilidi iç içe tekrar alabilir</td><td>Kilitli bir metot başka kilitli metodu çağırıyor</td></tr><tr><td><code>Semaphore(n)</code></td><td>Aynı anda en çok n thread</td><td>Veritabanına en çok 5 bağlantı</td></tr><tr><td><code>Event</code></td><td>Bir thread'in diğerlerine "başla/dur" sinyali</td><td>Kapanış bayrağı: <code>while not dur.is_set()</code></td></tr><tr><td><code>Condition</code></td><td>Bir koşul gerçekleşene kadar bekle-uyandır</td><td>Kendi kuyruğunu yazarken (çoğu zaman <code>queue</code> yeter)</td></tr></table></div><pre class="py">import threading
+
+kilit = threading.Lock()
+kilit.acquire()
+print("Lock ikinci kez alınabilir mi?", kilit.acquire(blocking=False))   # kendini kilitler
+kilit.release()
+
+rk = threading.RLock()
+with rk:
+    with rk:                       # aynı thread: sorun yok
+        print("RLock iç içe alındı")
+
+dur = threading.Event()
+print("dur?", dur.is_set())
+dur.set()                          # işçi döngüleri bunu görüp çıkar
+print("dur?", dur.is_set(), "| bekleme sonucu:", dur.wait(timeout=0.01))
+</pre><h3>Kilitlenme (deadlock) ve kilit sırası</h3><p>Thread A önce hesap 1'in, sonra hesap 2'nin kilidini; thread B aynı anda önce hesap 2'nin, sonra hesap 1'in kilidini almaya çalışırsa ikisi de sonsuza kadar bekler. En basit ve etkili kural: birden çok kilit gerektiğinde onları <b>her zaman aynı sırada</b> al (ör. hesap numarasına göre artan). Ek savunma olarak <code>kilit.acquire(timeout=1)</code> False dönerse işlemi geri al ve hata raporla.</p><h3>Future: sonucun sözü</h3><p><code>submit</code> bir <code>Future</code> döndürür. <code>done()</code> bitti mi, <code>result(timeout=...)</code> sonucu (işçideki istisnayı yeniden fırlatarak) verir, <code>exception()</code> istisnayı döndürür, <code>cancel()</code> henüz başlamamış işi iptal eder, <code>add_done_callback</code> bitince çalışacak fonksiyonu kaydeder. Havuzu kapatırken <code>shutdown(cancel_futures=True)</code> kuyrukta bekleyen işleri iptal eder.</p><pre class="py">from concurrent.futures import Future
+
+f = Future()                      # havuzun içeride yaptığını elle yapıyoruz
+f.add_done_callback(lambda g: print("geri çağrı: bitti =", g.done()))
+f.set_result({"USD": 32.5})
+print(f.result())
+
+hata = Future()
+hata.set_exception(TimeoutError("kur servisi cevap vermedi"))
+try:
+    hata.result()
+except TimeoutError as e:
+    print("result() istisnayı yeniden fırlattı:", e)
+
+bekleyen = Future()
+print("iptal edildi mi?", bekleyen.cancel(), bekleyen.cancelled())
+</pre><div class="tip"><b>Yürütücüyü parametre yap</b>Fonksiyonların <code>havuz</code> nesnesini dışarıdan alırsa (bağımlılık enjeksiyonu), testte sıralı çalışan sahte bir yürütücü verip deterministik test yazabilir, üretimde gerçek <code>ThreadPoolExecutor</code> ya da <code>ProcessPoolExecutor</code> kullanırsın.</div><div class="warn"><b>GIL'siz Python</b>Python 3.13 ile deneysel gelen "free-threaded" (GIL'siz) derleme 3.14'te resmî destek kazandı; saf Python CPU işinde thread'ler gerçekten paralel çalışabiliyor. Varsayılan değil, ayrıca kurulur ve bazı paketler henüz desteklemiyor. Kilit disiplini GIL olsa da olmasa da gerekir: GIL hiçbir zaman <code>sayac += 1</code> gibi işlemleri atomik yapma sözü vermedi.</div><div class="note"><b>Gerçek işte</b>Veri ekiplerinde paralellik çoğunlukla gece çalışan toplu işlerde görülür: dosyalar thread havuzuyla indirilir, ağır hesap süreç havuzunda parçalara bölünerek yapılır, sonuçlar ana süreçte birleştirilir. Bu düzende en pahalı hatalar kilitlenen ve sabaha kadar asılı kalan işler ile Windows sunucuda unutulan <code>__main__</code> korumasıdır. Her bekleme noktasına zaman aşımı koymak ve işi paylaşılan durum yerine "parça → özet → birleştir" biçiminde tasarlamak bu riskleri büyük ölçüde ortadan kaldırır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İşçi sayısı</h3>
+<p>I/O işinde işçi sayısı çekirdek sayısından bağımsızdır; karşı sistemin kaldırabileceği kadar (10-50) seçilir. CPU işinde <code>os.cpu_count()</code> kadar süreç yeterlidir; fazlası bağlam değişimine harcanır. ThreadPoolExecutor'ın varsayılanı <code>min(32, cpu_count + 4)</code>'tür.</p>
+<h3>Hata ve zaman aşımı</h3>
+<p><code>future.result(timeout=5)</code> bekleme süresini sınırlar; <code>concurrent.futures.wait(..., return_when=FIRST_EXCEPTION)</code> ilk hatada durmanı sağlar. Thread içindeki yakalanmamış istisna kaybolmaz, <code>result()</code> çağrısında yeniden fırlatılır; ama <code>threading.Thread</code> ile elle başlattığın thread'de yalnızca stderr'e yazılır, bu yüzden havuz tercih edilir.</p>
+<h3>asyncio ile köprü</h3>
+<p>Async kodda senkron bir kütüphane çağırman gerekiyorsa <code>await asyncio.to_thread(func)</code> arka planda bir ThreadPoolExecutor kullanır. Tersine, senkron koddan async kütüphane çağırmak için ayrı bir thread'de olay döngüsü çalıştırılır. İki dünya birbirini dışlamaz; sınırı bilinçli çiz.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eszamanlilik">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../async/">← asyncio: eşzamansız kod, coroutine, await ve gather</a><a href="../performans/">Profil ve optimizasyon →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,340 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sınıflar: veri ve davranışı bir arada tutmak | Kesit Python</title><meta name="description" content="class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/siniflar-oop/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sınıflar: veri ve davranışı bir arada tutmak"><meta property="og:description" content="class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/siniflar-oop/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sınıflar: veri ve davranışı bir arada tutmak","description":"class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/siniflar-oop/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Sınıflar: veri ve davranışı bir arada tutmak</h1><p class="st-l">class, __init__, self, nitelik ve metotlarla kendi veri tipini tanımlar; __repr__, sınıf niteliği ve property ile Ilgaz Bank Hesap sınıfını kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/siniflar-oop">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ta bir hesabı temsil etmek için şimdiye kadar sözlük kullandın: <code>{"no": "TR01", "sahip": "Ayşe", "bakiye": 1200}</code>. Para çekme fonksiyonunu ayrı yazdın, bakiye kontrolünü başka bir yere koydun; üç ay sonra "bakiye" anahtarını birisi "balance" yazdı ve raporlar sessizce boş geldi. <b>Sınıf</b> (class), veriyi ve o veriye ait davranışı tek bir çatı altında toplar: hesap kendi bakiyesini bilir, kendi para çekme kuralını uygular, kendini okunur biçimde yazdırır. Nesne yönelimli programlama (OOP) büyük projelerin, kütüphanelerin ve iş mantığının yazılma biçimidir; bu derste temeli kuruyoruz.</p>
+
+<h2>class, __init__ ve self</h2>
+<p><code>class</code> bir kalıp tanımlar; o kalıptan üretilen her nesneye <b>örnek</b> (instance) denir. <code>__init__</code> örnek oluşturulurken otomatik çalışan kurucu metottur. <code>self</code>, metodun üzerinde çalıştığı örneğin kendisidir; Python onu ilk parametre olarak otomatik geçirir.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no = no            # örnek niteliği (instance attribute)
+        self.sahip = sahip
+        self.bakiye = bakiye
+
+    def yatir(self, tutar):
+        self.bakiye += tutar
+
+    def cek(self, tutar):
+        if tutar &gt; self.bakiye:
+            return False
+        self.bakiye -= tutar
+        return True
+
+h = Hesap("TR01", "Ayşe Kaya", 1200.0)
+h.yatir(300)
+print(h.cek(2000))
+print(h.cek(500))
+print(h.sahip, h.bakiye)
+
+# h.cek(500) aslında Hesap.cek(h, 500) demektir
+print(Hesap.cek(h, 100), h.bakiye)</pre>
+
+<div class="note"><b>self bir anahtar kelime değil</b>İlk parametreye istediğin adı verebilirsin ama tüm Python dünyası <code>self</code> der; farklı yazmak kodu okuyan herkesi yavaşlatır.</div>
+
+<h2>__repr__ ve __str__: nesneyi yazdırmak</h2>
+<p>Yukarıdaki <code>h</code>'yi doğrudan yazdırırsan <code>&lt;__main__.Hesap object at 0x...&gt;</code> görürsün; işe yaramaz. <code>__repr__</code> geliştiriciye yönelik, mümkünse nesneyi yeniden oluşturacak biçimde bir dize döndürür; <code>__str__</code> son kullanıcıya yönelik güzel gösterimdir. Yalnızca birini yazacaksan <code>__repr__</code> yaz: <code>__str__</code> tanımlı değilse Python ona düşer.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no, self.sahip, self.bakiye = no, sahip, bakiye
+
+    def __repr__(self):
+        return f"Hesap(no={self.no!r}, sahip={self.sahip!r}, bakiye={self.bakiye})"
+
+    def __str__(self):
+        return f"{self.no} - {self.sahip}: {self.bakiye:,.2f} TL"
+
+h = Hesap("TR01", "Ayşe Kaya", 1200.0)
+print(h)              # __str__
+print(repr(h))        # __repr__
+print([h])            # liste içinde __repr__ kullanılır</pre>
+
+<div class="tip"><b>!r ne yapıyor?</b>f-string içinde <code>{x!r}</code>, <code>repr(x)</code> çağırır: dizeler tırnaklı görünür, böylece "TR01" ile TR01 karışmaz.</div>
+
+<h2>Sınıf niteliği ile örnek niteliği</h2>
+<p><code>__init__</code> içinde <code>self.x = ...</code> ile tanımlanan nitelik her örneğe aittir. Sınıf gövdesine doğrudan yazılan nitelik ise <b>tüm örneklerce paylaşılır</b>: sabitler, sayaçlar, varsayılan ayarlar için kullanılır.</p>
+<pre class="py">class Hesap:
+    faiz_orani = 0.30          # sınıf niteliği: tüm hesaplar için ortak
+    adet = 0                   # kaç hesap açıldı
+
+    def __init__(self, no, bakiye=0.0):
+        self.no = no           # örnek niteliği
+        self.bakiye = bakiye
+        Hesap.adet += 1        # sınıf niteliğini güncelle
+
+    def yillik_faiz(self):
+        return round(self.bakiye * self.faiz_orani, 2)
+
+a = Hesap("TR01", 1000)
+b = Hesap("TR02", 5000)
+print(Hesap.adet)
+print(a.yillik_faiz(), b.yillik_faiz())
+
+Hesap.faiz_orani = 0.35       # tüm örnekler etkilenir
+print(a.yillik_faiz(), b.yillik_faiz())
+
+a.faiz_orani = 0.10           # yalnızca a için örnek niteliği oluşur, sınıfı gölgeler
+print(a.yillik_faiz(), b.yillik_faiz())</pre>
+
+<div class="warn"><b>Değiştirilebilir sınıf niteliği tuzağı</b><code>islemler = []</code> satırını sınıf gövdesine yazarsan tüm hesaplar aynı listeyi paylaşır; birine eklenen işlem hepsinde görünür. Liste, sözlük gibi değiştirilebilir nitelikleri <b>her zaman</b> <code>__init__</code> içinde <code>self.islemler = []</code> olarak tanımla.</div>
+
+<h2>property: metodu nitelik gibi okutmak</h2>
+<p>Bazen bir değer saklanmaz, hesaplanır (kullanılabilir bakiye = bakiye + kredili mevduat). Bazen de doğrudan atanmasını engellemek, kural koymak istersin. <code>@property</code> bir metodu parantezsiz okunan nitelik yapar; <code>@ad.setter</code> ise atamada çalışacak doğrulamayı ekler.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, bakiye=0.0, limit=0.0):
+        self.no = no
+        self._bakiye = bakiye      # alt çizgi: "dışarıdan doğrudan dokunma"
+        self.limit = limit
+
+    @property
+    def bakiye(self):
+        return self._bakiye
+
+    @bakiye.setter
+    def bakiye(self, deger):
+        if deger &lt; -self.limit:
+            raise ValueError(f"bakiye {-self.limit} altına inemez")
+        self._bakiye = deger
+
+    @property
+    def kullanilabilir(self):      # salt okunur, hesaplanan nitelik
+        return self._bakiye + self.limit
+
+h = Hesap("TR01", 500, limit=1000)
+print(h.bakiye, h.kullanilabilir)
+h.bakiye = -800                   # setter çalışır, limit içinde
+print(h.bakiye, h.kullanilabilir)
+try:
+    h.bakiye = -2000
+except ValueError as e:
+    print("Reddedildi:", e)
+try:
+    h.kullanilabilir = 1
+except AttributeError as e:
+    print("Salt okunur:", e)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Yapı</th><th>Nasıl erişilir</th><th>Ne zaman</th></tr>
+<tr><td>Örnek niteliği <code>self.x</code></td><td><code>h.x</code></td><td>Her nesnenin kendi verisi</td></tr>
+<tr><td>Sınıf niteliği</td><td><code>Hesap.x</code> ya da <code>h.x</code></td><td>Tüm örneklerde ortak sabit/sayaç</td></tr>
+<tr><td>Metot</td><td><code>h.cek(100)</code></td><td>Nesnenin davranışı</td></tr>
+<tr><td><code>@property</code></td><td><code>h.kullanilabilir</code></td><td>Hesaplanan ya da korunan değer</td></tr>
+<tr><td><code>@classmethod</code></td><td><code>Hesap.csv_den(...)</code></td><td>Alternatif kurucu, sınıf düzeyi iş</td></tr>
+<tr><td><code>@staticmethod</code></td><td><code>Hesap.iban_gecerli(...)</code></td><td>Sınıfla ilgili ama ne self ne cls kullanan yardımcı</td></tr>
+</table></div>
+
+<h2>classmethod ve staticmethod</h2>
+<p><code>@classmethod</code> ilk parametre olarak örneği değil <b>sınıfı</b> (<code>cls</code>) alır; en yaygın kullanımı farklı girdiden nesne üreten <b>alternatif kurucular</b>dır. <code>@staticmethod</code> ne örnek ne sınıf alır; sadece sınıfın ad alanında yaşayan sıradan bir fonksiyondur.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no, self.sahip, self.bakiye = no, sahip, bakiye
+
+    def __repr__(self):
+        return f"Hesap({self.no!r}, {self.sahip!r}, {self.bakiye})"
+
+    @classmethod
+    def csv_den(cls, satir):
+        no, sahip, bakiye = satir.split(",")
+        return cls(no.strip(), sahip.strip(), float(bakiye))
+
+    @staticmethod
+    def no_gecerli(no):
+        return no.startswith("TR") and no[2:].isdigit()
+
+print(Hesap.csv_den("TR07, Mehmet Demir, 2500.50"))
+print(Hesap.no_gecerli("TR07"), Hesap.no_gecerli("07TR"))
+
+hesaplar = [Hesap.csv_den(s) for s in ["TR01,Ayşe,100", "TR02,Can,250"]]
+print(sum(h.bakiye for h in hesaplar))</pre>
+
+<h2>Bir araya getirelim: işlem geçmişli Hesap</h2>
+<pre class="py">from datetime import date
+
+class Hesap:
+    para_birimi = "TL"
+
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no = no
+        self.sahip = sahip
+        self._bakiye = bakiye
+        self.islemler = []           # her örneğe ait, __init__ içinde
+
+    @property
+    def bakiye(self):
+        return self._bakiye
+
+    def _kaydet(self, tur, tutar):
+        self.islemler.append((date.today().isoformat(), tur, tutar))
+
+    def yatir(self, tutar):
+        if tutar &lt;= 0:
+            raise ValueError("tutar pozitif olmalı")
+        self._bakiye += tutar
+        self._kaydet("yatırma", tutar)
+
+    def cek(self, tutar):
+        if tutar &gt; self._bakiye:
+            raise ValueError("yetersiz bakiye")
+        self._bakiye -= tutar
+        self._kaydet("çekme", tutar)
+
+    def __repr__(self):
+        return f"Hesap({self.no!r}, bakiye={self._bakiye} {self.para_birimi})"
+
+h = Hesap("TR01", "Ayşe Kaya")
+h.yatir(1000)
+h.cek(250)
+try:
+    h.cek(5000)
+except ValueError as e:
+    print("Hata:", e)
+print(h)
+print(len(h.islemler), "işlem;", [t for _, t, _ in h.islemler])</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: nesnelerle gerçek tasarım</h2>
+<p>Buraya kadar tek bir sınıf yazmayı öğrendin. Gerçek projelerde ise sınıflar birbirini içerir, fonksiyonlara geçirilir, kopyalanır, sıralanır ve "geçersiz durumda hiç oluşmasın" diye korunur. Bu bölümde PCAP'ın ve iş görüşmelerinin sevdiği beş konuyu derinleştiriyoruz: nesne kimliği ve takma adlar (aliasing), kopyalama, kompozisyon, değişmezler (invariant) ve metot zincirleme. Dunder metotların tamamını (karşılaştırma, <code>__getitem__</code>, <code>__iter__</code>) "İleri OOP" dersinde, property ve <code>getattr</code> ayrıntılarını "Kapsülleme" dersinde göreceksin.</p>
+
+<h3>1. Değişken nesneyi değil, nesneye giden oku tutar</h3>
+<p><code>h2 = h1</code> yeni bir hesap açmaz; aynı nesneye ikinci bir ad (takma ad, alias) verir. Fonksiyona nesne geçirdiğinde de kopyası değil kendisi gider; fonksiyon içinde <code>h.bakiye = 0</code> yazarsan dışarıdaki hesap da sıfırlanır. <code>==</code> "değer olarak eşit mi?" diye sorar; <code>is</code> ise "aynı nesne mi?" diye. <code>__eq__</code> yazmadığın sınıflarda ikisi aynı sonucu verir, çünkü varsayılan eşitlik kimlik karşılaştırmasıdır.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, bakiye):
+        self.no = no
+        self.bakiye = bakiye
+
+def faiz_isle(h, oran):          # parametre aynı nesneyi gösterir
+    h.bakiye = round(h.bakiye * (1 + oran), 2)
+
+h1 = Hesap("TR01", 1000)
+h2 = h1                          # takma ad: yeni nesne YOK
+faiz_isle(h2, 0.05)
+print(h1.bakiye)                 # h1 de değişti
+
+h3 = Hesap("TR01", 1050.0)       # aynı veriler, AYRI nesne
+print(h1 == h3, h1 is h3, h1 is h2)
+print(id(h1) == id(h2))</pre>
+<div class="warn"><b>Sessiz yan etki</b>Bir fonksiyon kendisine verilen nesneyi değiştiriyorsa bunu adında ya da belgesinde söyle (<code>faiz_isle</code>, <code>guncelle</code>). Değiştirmemesi gerekiyorsa yeni nesne döndürsün. Ekip içindeki hataların önemli kısmı "bu fonksiyon benim nesnemi değiştirmiş" sürprizinden çıkar.</div>
+
+<h3>2. Kopyalamak: copy.copy ve copy.deepcopy</h3>
+<p>Bir nesnenin bağımsız bir kopyası gerektiğinde <code>copy</code> modülünü kullanırsın. <b>Sığ kopya</b> (shallow copy, <code>copy.copy</code>) yeni bir nesne yaratır ama içindeki liste ve sözlükler hâlâ ortaktır. <b>Derin kopya</b> (deep copy, <code>copy.deepcopy</code>) iç içe her şeyi de kopyalar. Anadolu Market'te bir kampanyayı şablondan çoğaltırken derin kopya şarttır; yoksa yeni kampanyaya eklediğin kural eskisine de eklenir.</p>
+<pre class="py">import copy
+
+class Kampanya:
+    def __init__(self, ad, kurallar):
+        self.ad = ad
+        self.kurallar = kurallar          # liste: değiştirilebilir
+
+sablon = Kampanya("Yaz", ["min_tutar=500"])
+sig = copy.copy(sablon)
+derin = copy.deepcopy(sablon)
+
+sig.ad = "Yaz-2"                          # düz nitelik: bağımsız
+sig.kurallar.append("kargo_bedava")       # liste ORTAK
+derin.kurallar.append("yuzde=10")         # liste ayrı
+
+print(sablon.ad, sablon.kurallar)
+print(derin.kurallar)
+print(sig.kurallar is sablon.kurallar, derin.kurallar is sablon.kurallar)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>İşlem</th><th>Yeni nesne?</th><th>İçteki liste/sözlük</th><th>Ne zaman</th></tr>
+<tr><td><code>b = a</code></td><td>Hayır</td><td>Ortak</td><td>Aynı nesneye ikinci ad</td></tr>
+<tr><td><code>copy.copy(a)</code></td><td>Evet</td><td>Ortak</td><td>İçinde yalnız değişmez değerler varsa</td></tr>
+<tr><td><code>copy.deepcopy(a)</code></td><td>Evet</td><td>Kopyalanır</td><td>Şablondan bağımsız nesne üretmek</td></tr>
+<tr><td>Kendi <code>kopyala()</code> metodun</td><td>Evet</td><td>Sen seçersin</td><td>Kimlik (no, id) sıfırlanacaksa</td></tr>
+</table></div>
+
+<h3>3. Kompozisyon: "sahiptir" ilişkisi</h3>
+<p>Bir sipariş birden çok kalem <b>içerir</b>; bir kalem bir sipariş <b>değildir</b>. Bu "sahiptir" (has-a) ilişkisine kompozisyon (composition) denir ve gerçek kodda kalıtımdan (inheritance) çok daha sık kullanılır. Kurallar: her sınıf kendi işini bilsin (Kalem kendi tutarını hesaplar), dış sınıf iç nesnelere iş <b>devretsin</b> (delegation).</p>
+<pre class="py">class Kalem:
+    def __init__(self, urun, fiyat, adet=1):
+        self.urun, self.fiyat, self.adet = urun, fiyat, adet
+
+    def tutar(self):
+        return self.fiyat * self.adet
+
+class Siparis:
+    def __init__(self, no):
+        self.no = no
+        self.kalemler = []                    # Siparis, Kalem nesnelerine SAHİP
+
+    def ekle(self, kalem):
+        self.kalemler.append(kalem)
+        return self                           # zincirleme için
+
+    def toplam(self):
+        return sum(k.tutar() for k in self.kalemler)   # işi kaleme devret
+
+    def en_pahali(self):
+        return max(self.kalemler, key=lambda k: k.tutar())
+
+s = Siparis("AM-501")
+s.ekle(Kalem("Kulaklık", 750)).ekle(Kalem("Kablo", 90, 3))
+print(s.toplam(), s.en_pahali().urun)</pre>
+<div class="tip"><b>Tasarım kısayolu</b>Gereksinim metnindeki <b>isimler</b> sınıf adayıdır (sipariş, kalem, müşteri), <b>fiiller</b> metot adayıdır (ekle, iptal et, öde), <b>sıfatlar</b> nitelik ya da property adayıdır (toplam, geçerli, gecikmiş). "X bir Y midir?" sorusuna evet diyorsan kalıtım, "X'in bir Y'si var mı?" sorusuna evet diyorsan kompozisyon düşün.</div>
+
+<h3>4. Değişmezler: geçersiz nesne hiç doğmasın</h3>
+<p>Değişmez (invariant), nesnenin ömrü boyunca hep doğru kalması gereken kuraldır: "bakiye eksiye inmez", "randevu saati mesai içindedir", "maaş pozitiftir". Bu kuralı <code>__init__</code> içinde ve durumu değiştiren her metotta denetlersin; ihlalde <code>ValueError</code> fırlatırsın. Böylece hata kaynağına en yakın yerde patlar (fail fast), üç modül ötede sessizce bozuk rapor üretmez.</p>
+<pre class="py">class Personel:
+    def __init__(self, ad, maas):
+        if not ad.strip():
+            raise ValueError("ad boş olamaz")
+        if maas &lt;= 0:
+            raise ValueError(f"maaş pozitif olmalı: {maas}")
+        self.ad = ad.strip()
+        self.maas = maas
+
+    def zam_yap(self, yuzde):
+        if not 0 &lt; yuzde &lt;= 50:
+            raise ValueError("zam oranı 0-50 arasında olmalı")
+        self.maas = round(self.maas * (1 + yuzde / 100), 2)
+        return self.maas
+
+p = Personel("  Elif Şahin ", 40000)
+print(p.ad, p.zam_yap(12.5))
+for ad, maas in [("", 30000), ("Can", -5)]:
+    try:
+        Personel(ad, maas)
+    except ValueError as e:
+        print("Reddedildi:", e)</pre>
+
+<h3>5. Nesne listelerini sıralamak ve süzmek</h3>
+<p>Gerçekte tek nesneyle değil, yüzlercesiyle çalışırsın. <code>sorted</code>, <code>max</code>, <code>min</code> ve comprehension'lar nesnelerle de çalışır; <code>key</code> parametresine bir nitelik okuyan fonksiyon verirsin. <code>operator.attrgetter("bakiye")</code>, <code>lambda h: h.bakiye</code> ile aynı işi yapar ve birden çok niteliği aynı anda alabilir.</p>
+<pre class="py">from operator import attrgetter
+
+class Hesap:
+    def __init__(self, no, sube, bakiye):
+        self.no, self.sube, self.bakiye = no, sube, bakiye
+    def __repr__(self):
+        return f"{self.no}({self.bakiye})"
+
+hesaplar = [Hesap("TR03", "Ankara", 900), Hesap("TR01", "İzmir", 2500),
+            Hesap("TR02", "Ankara", 2500)]
+print(sorted(hesaplar, key=lambda h: (-h.bakiye, h.no)))
+print(sorted(hesaplar, key=attrgetter("sube", "no")))
+print([h.no for h in hesaplar if h.sube == "Ankara"])
+print(max(hesaplar, key=attrgetter("bakiye")))</pre>
+<div class="note"><b>Neden max TR01 verdi?</b>İki hesap eşit en büyük bakiyedeyse <code>max</code> listede <b>ilk</b> karşılaştığını döndürür. Eşitlikte belirli bir kural istiyorsan anahtara ikinci bir öğe ekle.</div>
+
+<h3>6. Metot zincirleme ve None tuzağı</h3>
+<p>Durumu değiştiren metot <code>return self</code> derse <code>s.ekle(a).ekle(b)</code> gibi akıcı (fluent) bir arayüz kurarsın; pandas ve SQLAlchemy'deki <code>.filter().order_by()</code> yazımı buna dayanır. Ama bir metotta <code>return</code> unutulursa <code>None</code> döner ve zincirin ikinci halkası <code>AttributeError: 'NoneType' object has no attribute ...</code> verir. Bu hata mesajını gördüğünde ilk bakacağın yer zincirdeki bir önceki metottur. Python'un kendi <code>list.append</code> ve <code>list.sort</code>'u bilinçli olarak <code>None</code> döndürür: "yerinde değiştiren metot yeni değer döndürmez" sözleşmesi. Kendi sınıfında hangisini seçtiğini tutarlı uygula.</p>
+
+<div class="note"><b>Gerçek işte</b>Kod incelemelerinde (code review) en sık yorumlar şunlardır: "Bu fonksiyon parametreyi değiştiriyor, adı bunu söylemiyor", "Bu nesne geçersiz değerle oluşturulabiliyor, kurucuda doğrula", "Varsayılan argüman olarak liste verilmiş". Bir sınıf yazdıktan sonra kendine üç soru sor: Geçersiz durumda oluşturulabilir mi? Dışarıdan verilen liste/sözlüğü kopyalamadan mı sakladım? Hangi metotlar nesneyi değiştiriyor ve bu adlarından anlaşılıyor mu?</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Alt çizgi sözleşmesi</h3>
+<p>Python'da gerçek "private" yoktur. <code>_bakiye</code> tek alt çizgi "iç kullanım, dışarıdan dokunma" uyarısıdır; <code>__bakiye</code> çift alt çizgi ise ad karıştırma (name mangling) ile <code>_Hesap__bakiye</code> olur ve alt sınıflarla çakışmayı önler. Günlük kodda tek alt çizgi yeterlidir.</p>
+<h3>__eq__ ve __hash__</h3>
+<p>İki Hesap nesnesi varsayılan olarak yalnızca aynı nesneyse eşittir. "Aynı hesap numarası = aynı hesap" istiyorsan <code>__eq__</code> yazarsın; o zaman küme ve sözlük anahtarı olarak kullanmak için <code>__hash__</code> da tanımlaman gerekir. Bir sonraki derslerde dataclass bunları senin yerine üretecek.</p>
+<h3>__slots__ ile bellek</h3>
+<p>Milyonlarca küçük nesne yaratacaksan <code>__slots__ = ("no", "bakiye")</code> satırı her örnekteki <code>__dict__</code> sözlüğünü kaldırıp belleği ciddi azaltır; karşılığında örneğe sonradan yeni nitelik ekleyemezsin. "Bellek ve iç yapı" dersinde ölçeceksin.</p>
+<h3>Ne zaman sınıf, ne zaman sözlük?</h3>
+<p>Veri sadece taşınıyorsa ve davranışı yoksa sözlük ya da dataclass yeter. Verinin kuralları (bakiye eksiye inemez), davranışı (çek, yatır) ve tutarlılığı (işlem kaydı) varsa sınıf yaz. Fonksiyonlarına hep aynı sözlüğü ilk parametre olarak geçiriyorsan bu bir sınıf olmak istiyor demektir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/siniflar-oop">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../dekoratorler/">← Dekoratörler (decorators) ve bağlam yöneticileri (context managers)</a><a href="../kalitim-polimorfizm/">Kalıtım (inheritance) ve polimorfizm →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

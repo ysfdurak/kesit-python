@@ -1,0 +1,465 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: haftalık satış raporu otomasyonu | Kesit Python</title><meta name="description" content="Anadolu Market'in günlük CSV dökümlerini okuyan, pydantic ile doğrulayıp tekrarları ayıklayan, collections/itertools ile özetleyen, Jinja2 ile HTML rapor…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-orta-otomasyon/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: haftalık satış raporu otomasyonu"><meta property="og:description" content="Anadolu Market'in günlük CSV dökümlerini okuyan, pydantic ile doğrulayıp tekrarları ayıklayan, collections/itertools ile özetleyen, Jinja2 ile HTML rapor…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-orta-otomasyon/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: haftalık satış raporu otomasyonu","description":"Anadolu Market'in günlük CSV dökümlerini okuyan, pydantic ile doğrulayıp tekrarları ayıklayan, collections/itertools ile özetleyen, Jinja2 ile HTML rapor…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/proje-orta-otomasyon/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Orta bitirme</span><h1>Bitirme projesi: haftalık satış raporu otomasyonu</h1><p class="st-l">Anadolu Market'in günlük CSV dökümlerini okuyan, pydantic ile doğrulayıp tekrarları ayıklayan, collections/itertools ile özetleyen, Jinja2 ile HTML rapor ve EmailMessage taslağı üreten; log, dry-run ve argparse CLI ile zamanlanmaya hazır bir otomasyon aracı kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta-otomasyon">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Proje tanımı</h2>
+<p>Anadolu Market'in 12 mağazası her gün kasa sisteminden bir CSV dökümü üretir ve bunları ortak bir klasöre bırakır. Bölge müdürü her pazartesi sabahı bu dosyaları Excel'de birleştirir, hatalı satırları ayıklar, mağaza ve ürün bazında özet çıkarır, bir e-posta yazıp tabloyu yapıştırır. Bu iş yaklaşık iki saat sürüyor ve geçen ay iki kez aynı dosya iki kere eklendiği için ciro şişik raporlandı.</p>
+<p>Senin görevin bu süreci uçtan uca otomatikleştiren, cron ya da Görev Zamanlayıcı ile her pazartesi 07:45'te çalışacak bir komut satırı aracı yazmak: <b>"Anadolu Market haftalık satış raporu otomasyonu"</b>. Bu proje orta seviyedeki otomasyon derslerinin hepsini birleştirir: <i>Ofis ve iş akışı otomasyonu</i> (pathlib, dry-run, log, EmailMessage), <i>Veri doğrulama ve pydantic v2</i>, <i>collections ve itertools</i>, <i>Şablonla rapor üretme</i> (Jinja2) ve <i>Standart kütüphane turu</i> (argparse).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Gereksinim</th><th>Nasıl karşılanır</th></tr>
+<tr><td>Klasördeki tüm günlük CSV'leri oku, başka dosyaları yok say</td><td><code>Path.glob("*.csv")</code> + <code>csv.DictReader</code></td></tr>
+<tr><td>Hatalı satırları ayıkla, hangi dosyanın hangi satırı olduğunu raporla</td><td>pydantic modeli + <code>_kaynak</code> alanı</td></tr>
+<tr><td>Aynı satır iki kez gelirse bir kez say</td><td>(sipariş no, ürün) anahtarlı küme</td></tr>
+<tr><td>Mağaza cirosu, en çok satan 3 ürün, günlük ciro</td><td><code>Counter</code>, <code>groupby</code></td></tr>
+<tr><td>Okunur HTML rapor ve e-posta taslağı</td><td>Jinja2 (autoescape) + <code>EmailMessage</code></td></tr>
+<tr><td>Güvenli çalıştırma, iz bırakma</td><td>Varsayılan dry-run, <code>--uygula</code> bayrağı, <code>logging</code></td></tr>
+<tr><td>Zamanlayıcıdan parametreyle çağrılabilme</td><td><code>argparse</code> CLI, çıkış kodu</td></tr>
+</table></div>
+
+<h2>Mimari: küçük, test edilebilir parçalar</h2>
+<p>Her adım <b>tek bir iş yapan saf bir fonksiyon</b> olsun: girdi alır, çıktı döndürür, mümkünse dosyaya ya da ağa dokunmaz. Yan etkiler (dosya yazma, e-posta) yalnızca en dıştaki <code>calistir</code> fonksiyonunda toplanır. Bu tasarım her parçayı ayrı test etmeni, dry-run'ı tek bir <code>if</code> ile kurmanı ve ileride bir parçayı (ör. CSV yerine veritabanı) değiştirmeni kolaylaştırır.</p>
+<div class="steps-list"><ol>
+<li><code>klasoru_oku(klasor)</code> → ham satır sözlükleri (her biri <code>_kaynak</code>: "dosya.csv:satır")</li>
+<li><code>SatisSatiri</code> modeli → tek satırın kuralları</li>
+<li><code>temizle(satirlar)</code> → (geçerli modeller, hata metinleri)</li>
+<li><code>ozetle(gecerli)</code> → özet sözlüğü</li>
+<li><code>html_rapor(ozet, hafta, hatalar)</code> → HTML metni</li>
+<li><code>eposta_taslagi(html, ozet, hafta, alicilar)</code> → <code>EmailMessage</code></li>
+<li><code>arguman_ayristir(argv)</code> → komut satırı ayarları</li>
+<li><code>calistir(argv)</code> → hepsini sırayla çağırır, loglar, dry-run değilse dosyaları yazar, çıkış kodu döndürür</li>
+</ol></div>
+<div class="tip"><b>Dosya düzeni</b>Gerçek projede bu kod <code>haftalik_rapor/</code> paketinde <code>okuma.py</code>, <code>model.py</code>, <code>ozet.py</code>, <code>rapor.py</code>, <code>cli.py</code> ve <code>templates/rapor.html</code> olarak bölünür; <code>tests/</code> klasöründe her modülün testi durur. Burada tek dosyada ilerliyoruz ki tarayıcıda çalıştırabilesin.</div>
+
+<h2>Adım 1: Klasörü okumak</h2>
+<p>Gerçek klasöre dokunmadan çalışmak için örnek veriyi geçici bir klasöre yazıyoruz. Veriye kasıtlı olarak sorunlar ekledik: virgüllü fiyat, boşluklu mağaza adı, boş kategori, iki kez gelmiş bir satır, adedi 0 olan satır, bozuk sipariş numarası ve klasöre karışmış bir .txt dosyası.</p>
+<pre class="py">import tempfile
+from pathlib import Path
+
+BASLIK = "siparis_no,tarih,magaza,urun,kategori,adet,birim_fiyat\n"
+
+def ornek_klasor():
+    k = Path(tempfile.mkdtemp()) / "satis"
+    k.mkdir()
+    (k / "satis_2026-10-26.csv").write_text(BASLIK
+        + 'AM-1001,2026-10-26,Kadıköy,Türk kahvesi,İçecek,2,"89,90"\n'
+        + "AM-1002,2026-10-26,Çankaya,Çay,İçecek,5,45\n"
+        + 'AM-1003,2026-10-26, Kadıköy ,Çaydanlık,Mutfak,1,"1.249,00"\n', encoding="utf-8")
+    (k / "satis_2026-10-27.csv").write_text(BASLIK
+        + "AM-1004,2026-10-27,Bornova,Çay,İçecek,10,45\n"
+        + "AM-1002,2026-10-26,Çankaya,Çay,İçecek,5,45\n"
+        + "AM-1005,2026-10-27,Çankaya,Filtre kahve,,3,120.5\n"
+        + "AM-1006,2026-10-27,Bornova,Su,İçecek,0,7.5\n"
+        + "X-1,2026-10-27,Konak,Su,İçecek,2,abc\n", encoding="utf-8")
+    (k / "okubeni.txt").write_text("CSV değil, okunmamalı", encoding="utf-8")
+    return k
+
+import csv
+from pathlib import Path
+
+def klasoru_oku(klasor):
+    """Klasördeki tüm .csv dosyalarını ad sırasıyla okur; her satıra _kaynak ekler."""
+    satirlar = []
+    for dosya in sorted(Path(klasor).glob("*.csv")):
+        with dosya.open(encoding="utf-8", newline="") as f:
+            for no, satir in enumerate(csv.DictReader(f), start=2):
+                satir["_kaynak"] = f"{dosya.name}:{no}"
+                satirlar.append(satir)
+    return satirlar
+
+satirlar = klasoru_oku(ornek_klasor())
+print(len(satirlar), "satır")
+for s in satirlar[:2]:
+    print(s)</pre>
+<p><code>enumerate(..., start=2)</code> satır numarasını dosyadaki gerçek satırla eşler (1. satır başlık). Hata raporunda "satis_2026-10-27.csv:5" yazmak, mağaza çalışanının sorunu Excel'de saniyede bulmasını sağlar. <code>newline=""</code> csv modülünün tırnak içindeki satır sonlarını doğru işlemesi için önerilen ayardır.</p>
+
+<h2>Adım 2: Model ve temizlik</h2>
+<p>Tek bir satırın kuralları pydantic modelinde durur: sipariş numarası <code>AM-</code> ile başlar, adet ve fiyat pozitiftir, Türkçe ondalık (<code>"1.249,00"</code>) kabul edilir, boş kategori "Diğer" olur. Temizlik fonksiyonu modeli her satıra uygular, hatalıları ve tekrarları ayırır. Tekrarı tanımlayan anahtar <b>(sipariş no, ürün)</b>: bir sipariş birden çok ürün içerebilir ama aynı ürün aynı siparişte iki satır olamaz.</p>
+<pre class="py">from datetime import date
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+
+class SatisSatiri(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    siparis_no: str = Field(pattern=r"^AM-\d+$")
+    tarih: date
+    magaza: str = Field(min_length=1)
+    urun: str = Field(min_length=1)
+    kategori: str = "Diğer"
+    adet: int = Field(gt=0)
+    birim_fiyat: float = Field(gt=0)
+
+    @field_validator("birim_fiyat", mode="before")
+    @classmethod
+    def tr_ondalik(cls, v):
+        if isinstance(v, str) and "," in v:
+            v = v.replace(".", "").replace(",", ".")
+        return v
+
+    @field_validator("kategori", mode="before")
+    @classmethod
+    def bos_kategori(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "Diğer"
+        return v
+
+    @property
+    def tutar(self):
+        return round(self.adet * self.birim_fiyat, 2)
+
+def temizle(satirlar):
+    """(geçerli SatisSatiri listesi, hata metinleri) döndürür."""
+    gecerli, hatalar, gorulen = [], [], set()
+    for satir in satirlar:
+        kaynak = satir.get("_kaynak", "?")
+        veri = {k: v for k, v in satir.items() if not k.startswith("_")}
+        try:
+            s = SatisSatiri.model_validate(veri)
+        except ValidationError as e:
+            alanlar = ",".join(".".join(map(str, h["loc"])) for h in e.errors())
+            hatalar.append(f"{kaynak} geçersiz: {alanlar}")
+            continue
+        anahtar = (s.siparis_no, s.urun)
+        if anahtar in gorulen:
+            hatalar.append(f"{kaynak} tekrar: {s.siparis_no}/{s.urun}")
+            continue
+        gorulen.add(anahtar)
+        gecerli.append(s)
+    return gecerli, hatalar
+
+ham = [
+    {"siparis_no": "AM-1", "tarih": "2026-10-26", "magaza": " Kadıköy ", "urun": "Çay", "kategori": "", "adet": "2", "birim_fiyat": "1.249,50", "_kaynak": "a.csv:2"},
+    {"siparis_no": "AM-1", "tarih": "2026-10-26", "magaza": "Kadıköy", "urun": "Çay", "kategori": "", "adet": "2", "birim_fiyat": "1249.5", "_kaynak": "b.csv:7"},
+    {"siparis_no": "X-2", "tarih": "2026-10-26", "magaza": "Konak", "urun": "Su", "kategori": "İçecek", "adet": "0", "birim_fiyat": "7,5", "_kaynak": "b.csv:8"},
+]
+gecerli, hatalar = temizle(ham)
+print(gecerli[0].magaza, gecerli[0].kategori, gecerli[0].birim_fiyat, gecerli[0].tutar)
+print(hatalar)</pre>
+<div class="warn"><b>Tekrarlı veri sessiz bir felakettir</b>Aynı dosyanın iki kez kopyalanması rapora hata olarak değil, <i>daha yüksek ciro</i> olarak yansır ve kimse şikâyet etmez. Tekrarları atmak kadar, atıldıklarını loglamak da önemlidir: log'da 300 "tekrar" satırı görmek, kaynakta bir sorun olduğunun işaretidir.</div>
+
+<h2>Adım 3: Özet</h2>
+<p>Özet bir sözlük: toplam ciro, sipariş ve satır sayısı, mağaza cirosu (büyükten küçüğe), en çok satan 3 ürün (adet), günlük ciro. Mağaza ve ürün için <code>Counter</code>, gün için <code>itertools.groupby</code> kullanıyoruz. groupby yalnızca <b>ardışık</b> eşit anahtarları gruplar; bu yüzden önce sıralamak zorunludur. Eşitlikte sıralamayı ada göre sabitlemek (<code>key=lambda x: (-x[1], x[0])</code>) raporun her çalıştırmada aynı çıkmasını sağlar; <code>most_common</code> eşitlikleri ekleme sırasına göre bırakır.</p>
+<pre class="py">from collections import namedtuple
+from datetime import date
+S = namedtuple("S", "siparis_no tarih magaza urun adet tutar")
+D = date.fromisoformat
+
+from collections import Counter
+from itertools import groupby
+
+def ozetle(gecerli):
+    magaza, urun_adet = Counter(), Counter()
+    for s in gecerli:
+        magaza[s.magaza] += s.tutar
+        urun_adet[s.urun] += s.adet
+    sirali = sorted(gecerli, key=lambda s: s.tarih)
+    gunluk = {t.isoformat(): round(sum(s.tutar for s in grup), 2)
+              for t, grup in groupby(sirali, key=lambda s: s.tarih)}
+    return {
+        "toplam_ciro": round(sum(magaza.values()), 2),
+        "satir_sayisi": len(gecerli),
+        "siparis_sayisi": len({s.siparis_no for s in gecerli}),
+        "magaza_ciro": sorted(((m, round(c, 2)) for m, c in magaza.items()), key=lambda x: (-x[1], x[0])),
+        "en_cok_satan": sorted(urun_adet.items(), key=lambda x: (-x[1], x[0]))[:3],
+        "gunluk_ciro": gunluk,
+    }
+
+veri = [S("AM-1", D("2026-10-27"), "Kadıköy", "Çay", 5, 225.0),
+        S("AM-2", D("2026-10-26"), "Çankaya", "Kahve", 2, 179.8),
+        S("AM-2", D("2026-10-26"), "Çankaya", "Çay", 1, 45.0),
+        S("AM-3", D("2026-10-27"), "Kadıköy", "Su", 6, 45.0)]
+for anahtar, deger in ozetle(veri).items():
+    print(f"{anahtar:15} {deger}")</pre>
+<p>Testlerde pydantic modeli yerine aynı niteliklere sahip bir <code>namedtuple</code> kullandık: <code>ozetle</code> yalnızca <code>.magaza</code>, <code>.tutar</code> gibi niteliklere ihtiyaç duyar (ördek tiplemesi, duck typing). Parçalar arası bağımlılık ne kadar azsa test o kadar kolaydır.</p>
+
+<h2>Adım 4: HTML rapor ve e-posta taslağı</h2>
+<p>Sunum Jinja şablonunda, biçim (<code>tl</code> filtresi) tek bir fonksiyonda. autoescape açık: mağaza ya da ürün adında <code>&lt;</code> olsa bile rapor bozulmaz. E-posta taslağı düz metin + HTML alternatifi + mağaza cirosu CSV eki içerir; müdür isterse eki doğrudan Excel'de açar.</p>
+<pre class="py">from jinja2 import Environment
+
+def tl(x):
+    return f"{x:,.2f}".translate(str.maketrans(",.", ".,")) + " TL"
+
+ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True)
+ENV.filters["tl"] = tl
+RAPOR = ENV.from_string("""&lt;h1&gt;Anadolu Market | {{ hafta }} haftalık satış raporu&lt;/h1&gt;
+&lt;p&gt;Toplam ciro: &lt;b&gt;{{ ozet.toplam_ciro|tl }}&lt;/b&gt; ({{ ozet.siparis_sayisi }} sipariş, {{ ozet.satir_sayisi }} satır)&lt;/p&gt;
+&lt;table&gt;
+{% for magaza, ciro in ozet.magaza_ciro %}
+&lt;tr&gt;&lt;td&gt;{{ magaza }}&lt;/td&gt;&lt;td&gt;{{ ciro|tl }}&lt;/td&gt;&lt;/tr&gt;
+{% endfor %}
+&lt;/table&gt;
+&lt;ol&gt;
+{% for urun, adet in ozet.en_cok_satan %}
+&lt;li&gt;{{ urun }} ({{ adet }} adet)&lt;/li&gt;
+{% endfor %}
+&lt;/ol&gt;
+{% if hatalar %}
+&lt;p&gt;Uyarı: {{ hatalar|length }} satır rapora alınmadı.&lt;/p&gt;
+{% endif %}""")
+
+def html_rapor(ozet, hafta, hatalar=()):
+    return RAPOR.render(ozet=ozet, hafta=hafta, hatalar=hatalar)
+
+from email.message import EmailMessage
+
+def eposta_taslagi(html, ozet, hafta, alicilar):
+    msg = EmailMessage()
+    msg["From"] = "rapor@anadolumarket.com.tr"
+    msg["To"] = ", ".join(alicilar)
+    msg["Subject"] = f"{hafta} haftalık satış raporu - {tl(ozet['toplam_ciro'])}"
+    msg.set_content(f"Merhaba,\n\n{hafta} haftasında toplam ciro {tl(ozet['toplam_ciro'])}.\nAyrıntılar HTML raporda ve ekteki CSV'de.\n")
+    msg.add_alternative(html, subtype="html")
+    satirlar = ["magaza,ciro"] + [f"{m},{c:.2f}" for m, c in ozet["magaza_ciro"]]
+    msg.add_attachment("\n".join(satirlar) + "\n", subtype="csv", filename=f"magaza_ciro_{hafta}.csv")
+    return msg
+
+ozet = {"toplam_ciro": 2465.3, "satir_sayisi": 5, "siparis_sayisi": 5,
+        "magaza_ciro": [("Kadıköy", 1428.8), ("Çankaya", 586.5), ("Bornova", 450.0)],
+        "en_cok_satan": [("Çay", 15), ("Filtre kahve", 3), ("Türk kahvesi", 2)], "gunluk_ciro": {}}
+html = html_rapor(ozet, "2026-W44", ["x.csv:3 tekrar"])
+print(html)
+msg = eposta_taslagi(html, ozet, "2026-W44", ["mudur@anadolumarket.com.tr"])
+print(msg["Subject"])
+print([p.get_content_type() for p in msg.iter_parts()], [p.get_filename() for p in msg.iter_attachments()])</pre>
+
+<h2>Adım 5: Komut satırı, log ve dry-run</h2>
+<p>Zamanlayıcı betiği parametrelerle çağırır: <code>python haftalik_rapor.py --klasor /veri/satis --hafta 2026-W44 --alici mudur@... --uygula</code>. <code>argparse</code> argümanları ayrıştırır, <code>--help</code> çıktısını otomatik üretir ve hatalı girdide anlaşılır mesajla 2 koduyla çıkar. Önemli kararlar:</p>
+<ul>
+<li><b>Varsayılan dry-run:</b> <code>--uygula</code> verilmedikçe hiçbir dosya yazılmaz. <code>action="store_true"</code> bayrağı değer almaz; <code>type=bool</code> kullanma (<code>bool("False")</code> True'dur).</li>
+<li><b>Birden çok alıcı:</b> <code>action="append"</code> aynı bayrağın tekrarlanmasıyla liste oluşturur.</li>
+<li><b>Hafta doğrulama:</b> <code>type=</code> parametresine kendi fonksiyonunu verip <code>ArgumentTypeError</code> fırlatırsan argparse güzel bir hata mesajı basar.</li>
+<li><b>Çıkış kodu:</b> 0 başarı, 1 iş hatası (CSV yok). Zamanlayıcı ve izleme araçları buna bakar.</li>
+<li><b>Log seviyesi:</b> cron'da <code>WARNING</code>, elle denemede <code>DEBUG</code>. Mesajlarda <code>%s</code> yer tutucu kullan.</li>
+</ul>
+
+<h2>Tam çözüm</h2>
+<p>Aşağıdaki program tüm parçaları birleştirir ve önce dry-run, sonra gerçek çalıştırma yapar. Çalıştırıp log satırlarını, çıkış kodlarını ve üretilen HTML'i incele.</p>
+<pre class="py">import tempfile
+from pathlib import Path
+
+BASLIK = "siparis_no,tarih,magaza,urun,kategori,adet,birim_fiyat\n"
+
+def ornek_klasor():
+    k = Path(tempfile.mkdtemp()) / "satis"
+    k.mkdir()
+    (k / "satis_2026-10-26.csv").write_text(BASLIK
+        + 'AM-1001,2026-10-26,Kadıköy,Türk kahvesi,İçecek,2,"89,90"\n'
+        + "AM-1002,2026-10-26,Çankaya,Çay,İçecek,5,45\n"
+        + 'AM-1003,2026-10-26, Kadıköy ,Çaydanlık,Mutfak,1,"1.249,00"\n', encoding="utf-8")
+    (k / "satis_2026-10-27.csv").write_text(BASLIK
+        + "AM-1004,2026-10-27,Bornova,Çay,İçecek,10,45\n"
+        + "AM-1002,2026-10-26,Çankaya,Çay,İçecek,5,45\n"
+        + "AM-1005,2026-10-27,Çankaya,Filtre kahve,,3,120.5\n"
+        + "AM-1006,2026-10-27,Bornova,Su,İçecek,0,7.5\n"
+        + "X-1,2026-10-27,Konak,Su,İçecek,2,abc\n", encoding="utf-8")
+    (k / "okubeni.txt").write_text("CSV değil, okunmamalı", encoding="utf-8")
+    return k
+
+import csv
+from pathlib import Path
+
+def klasoru_oku(klasor):
+    """Klasördeki tüm .csv dosyalarını ad sırasıyla okur; her satıra _kaynak ekler."""
+    satirlar = []
+    for dosya in sorted(Path(klasor).glob("*.csv")):
+        with dosya.open(encoding="utf-8", newline="") as f:
+            for no, satir in enumerate(csv.DictReader(f), start=2):
+                satir["_kaynak"] = f"{dosya.name}:{no}"
+                satirlar.append(satir)
+    return satirlar
+
+from datetime import date
+from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+
+class SatisSatiri(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True)
+    siparis_no: str = Field(pattern=r"^AM-\d+$")
+    tarih: date
+    magaza: str = Field(min_length=1)
+    urun: str = Field(min_length=1)
+    kategori: str = "Diğer"
+    adet: int = Field(gt=0)
+    birim_fiyat: float = Field(gt=0)
+
+    @field_validator("birim_fiyat", mode="before")
+    @classmethod
+    def tr_ondalik(cls, v):
+        if isinstance(v, str) and "," in v:
+            v = v.replace(".", "").replace(",", ".")
+        return v
+
+    @field_validator("kategori", mode="before")
+    @classmethod
+    def bos_kategori(cls, v):
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return "Diğer"
+        return v
+
+    @property
+    def tutar(self):
+        return round(self.adet * self.birim_fiyat, 2)
+
+def temizle(satirlar):
+    """(geçerli SatisSatiri listesi, hata metinleri) döndürür."""
+    gecerli, hatalar, gorulen = [], [], set()
+    for satir in satirlar:
+        kaynak = satir.get("_kaynak", "?")
+        veri = {k: v for k, v in satir.items() if not k.startswith("_")}
+        try:
+            s = SatisSatiri.model_validate(veri)
+        except ValidationError as e:
+            alanlar = ",".join(".".join(map(str, h["loc"])) for h in e.errors())
+            hatalar.append(f"{kaynak} geçersiz: {alanlar}")
+            continue
+        anahtar = (s.siparis_no, s.urun)
+        if anahtar in gorulen:
+            hatalar.append(f"{kaynak} tekrar: {s.siparis_no}/{s.urun}")
+            continue
+        gorulen.add(anahtar)
+        gecerli.append(s)
+    return gecerli, hatalar
+
+from collections import Counter
+from itertools import groupby
+
+def ozetle(gecerli):
+    magaza, urun_adet = Counter(), Counter()
+    for s in gecerli:
+        magaza[s.magaza] += s.tutar
+        urun_adet[s.urun] += s.adet
+    sirali = sorted(gecerli, key=lambda s: s.tarih)
+    gunluk = {t.isoformat(): round(sum(s.tutar for s in grup), 2)
+              for t, grup in groupby(sirali, key=lambda s: s.tarih)}
+    return {
+        "toplam_ciro": round(sum(magaza.values()), 2),
+        "satir_sayisi": len(gecerli),
+        "siparis_sayisi": len({s.siparis_no for s in gecerli}),
+        "magaza_ciro": sorted(((m, round(c, 2)) for m, c in magaza.items()), key=lambda x: (-x[1], x[0])),
+        "en_cok_satan": sorted(urun_adet.items(), key=lambda x: (-x[1], x[0]))[:3],
+        "gunluk_ciro": gunluk,
+    }
+
+from jinja2 import Environment
+
+def tl(x):
+    return f"{x:,.2f}".translate(str.maketrans(",.", ".,")) + " TL"
+
+ENV = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True)
+ENV.filters["tl"] = tl
+RAPOR = ENV.from_string("""&lt;h1&gt;Anadolu Market | {{ hafta }} haftalık satış raporu&lt;/h1&gt;
+&lt;p&gt;Toplam ciro: &lt;b&gt;{{ ozet.toplam_ciro|tl }}&lt;/b&gt; ({{ ozet.siparis_sayisi }} sipariş, {{ ozet.satir_sayisi }} satır)&lt;/p&gt;
+&lt;table&gt;
+{% for magaza, ciro in ozet.magaza_ciro %}
+&lt;tr&gt;&lt;td&gt;{{ magaza }}&lt;/td&gt;&lt;td&gt;{{ ciro|tl }}&lt;/td&gt;&lt;/tr&gt;
+{% endfor %}
+&lt;/table&gt;
+&lt;ol&gt;
+{% for urun, adet in ozet.en_cok_satan %}
+&lt;li&gt;{{ urun }} ({{ adet }} adet)&lt;/li&gt;
+{% endfor %}
+&lt;/ol&gt;
+{% if hatalar %}
+&lt;p&gt;Uyarı: {{ hatalar|length }} satır rapora alınmadı.&lt;/p&gt;
+{% endif %}""")
+
+def html_rapor(ozet, hafta, hatalar=()):
+    return RAPOR.render(ozet=ozet, hafta=hafta, hatalar=hatalar)
+
+from email.message import EmailMessage
+
+def eposta_taslagi(html, ozet, hafta, alicilar):
+    msg = EmailMessage()
+    msg["From"] = "rapor@anadolumarket.com.tr"
+    msg["To"] = ", ".join(alicilar)
+    msg["Subject"] = f"{hafta} haftalık satış raporu - {tl(ozet['toplam_ciro'])}"
+    msg.set_content(f"Merhaba,\n\n{hafta} haftasında toplam ciro {tl(ozet['toplam_ciro'])}.\nAyrıntılar HTML raporda ve ekteki CSV'de.\n")
+    msg.add_alternative(html, subtype="html")
+    satirlar = ["magaza,ciro"] + [f"{m},{c:.2f}" for m, c in ozet["magaza_ciro"]]
+    msg.add_attachment("\n".join(satirlar) + "\n", subtype="csv", filename=f"magaza_ciro_{hafta}.csv")
+    return msg
+
+import argparse, re
+
+def hafta_tipi(metin):
+    if not re.fullmatch(r"\d{4}-W\d{2}", metin):
+        raise argparse.ArgumentTypeError(f"hafta YYYY-Www biçiminde olmalı: {metin}")
+    return metin
+
+def arguman_ayristir(argv=None):
+    p = argparse.ArgumentParser(prog="haftalik_rapor", description="Anadolu Market haftalık satış raporu")
+    p.add_argument("--klasor", required=True, help="CSV dosyalarının klasörü")
+    p.add_argument("--hafta", required=True, type=hafta_tipi, help="ör. 2026-W44")
+    p.add_argument("--cikti", default="cikti", help="rapor klasörü")
+    p.add_argument("--alici", action="append", default=[], dest="alicilar", help="birden çok kez verilebilir")
+    p.add_argument("--uygula", action="store_true", help="dosyaları gerçekten yaz (varsayılan: dry-run)")
+    p.add_argument("--log-seviye", default="INFO", choices=["DEBUG", "INFO", "WARNING", "ERROR"])
+    return p.parse_args(argv)
+
+import logging
+
+log = logging.getLogger("haftalik_rapor")
+
+def calistir(argv=None):
+    args = arguman_ayristir(argv)
+    log.setLevel(args.log_seviye)
+    satirlar = klasoru_oku(args.klasor)
+    if not satirlar:
+        log.error("klasörde CSV satırı yok: %s", args.klasor)
+        return 1
+    log.info("%d satır okundu", len(satirlar))
+    gecerli, hatalar = temizle(satirlar)
+    for h in hatalar:
+        log.warning(h)
+    ozet = ozetle(gecerli)
+    html = html_rapor(ozet, args.hafta, hatalar)
+    msg = eposta_taslagi(html, ozet, args.hafta, args.alicilar or ["mudurler@anadolumarket.com.tr"])
+    cikti = Path(args.cikti)
+    hedefler = [cikti / f"rapor_{args.hafta}.html", cikti / f"taslak_{args.hafta}.eml"]
+    if not args.uygula:
+        for h in hedefler:
+            log.info("[DRY-RUN] yazılacaktı: %s", h.name)
+        return 0
+    cikti.mkdir(parents=True, exist_ok=True)
+    hedefler[0].write_text(html, encoding="utf-8")
+    hedefler[1].write_bytes(bytes(msg))
+    log.info("yazıldı: %s", ", ".join(h.name for h in hedefler))
+    return 0
+
+if __name__ == "__main__":
+    import sys
+    logging.basicConfig(stream=sys.stdout, format="%(levelname)-7s %(message)s", force=True)
+    klasor = ornek_klasor()
+    cikti = klasor.parent / "cikti"
+    print("Çıkış kodu:", calistir(["--klasor", str(klasor), "--hafta", "2026-W44", "--cikti", str(cikti)]))
+    print("Çıkış kodu:", calistir(["--klasor", str(klasor), "--hafta", "2026-W44", "--cikti", str(cikti),
+                                   "--alici", "mudur@anadolumarket.com.tr", "--uygula", "--log-seviye", "WARNING"]))
+    print(sorted(p.name for p in cikti.iterdir()))
+    print((cikti / "rapor_2026-W44.html").read_text(encoding="utf-8"))</pre>
+<h3>Çıktıyı okumak</h3>
+<p>İlk çalıştırmada (dry-run) log önce okunan satır sayısını, ardından atılan üç satırı nedenleriyle gösterir: <code>satis_2026-10-27.csv:3</code> önceki dosyadaki siparişin tekrarı, <code>:5</code> adedi 0 olan satır, <code>:6</code> hem sipariş numarası hem fiyatı bozuk satır. Sonra yazılacak iki dosyanın adını söyler ama klasör oluşturulmaz. İkinci çalıştırmada <code>--uygula</code> ve <code>--log-seviye WARNING</code> verdik: bilgi satırları kaybolur, yalnızca uyarılar kalır ve dosyalar yazılır. Bu, cron'daki tipik kullanımdır: her şey yolundaysa log sessizdir, bir sorun varsa yalnızca o görünür.</p>
+<p>Rapordaki toplam ciro 2.465,30 TL'dir. Tekrar ayıklanmasaydı Çankaya'nın cirosu 225 TL fazla, yani yaklaşık %38 şişik görünecekti; bu, otomasyona eklediğin tek bir kümenin değerini somut olarak gösterir. Alıştırmalarda bu parçaları tek tek yazacak, ardından iki mini projeyle aracı genişleteceksin: tüm boru hattını (pipeline) birleştiren <code>calistir</code> ve geçen haftayla karşılaştırma tablosu. Meydan okuma görevindeki anomali tespiti de rapora "dikkat" bölümü eklemenin ilk adımıdır.</p>
+<p>Kendi bilgisayarında bu dosyayı <code>haftalik_rapor.py</code> olarak kaydedip <code>ornek_klasor()</code> yerine gerçek klasörü vererek çalıştırabilirsin. Gönderim için <i>Ofis ve iş akışı otomasyonu</i> dersindeki <code>smtplib.SMTP_SSL</code> bloğunu <code>--gonder</code> bayrağının arkasına ekle; varsayılan davranış her zaman yalnızca taslak üretmek olsun.</p>
+<pre class="code"># Linux/macOS cron (crontab -e): her pazartesi 07:45
+45 7 * * 1 /opt/rapor/.venv/bin/python /opt/rapor/haftalik_rapor.py --klasor /veri/satis --hafta $(date +\%G-W\%V) --uygula &gt;&gt; /var/log/rapor.log 2&gt;&amp;1
+
+# Windows Görev Zamanlayıcı
+schtasks /create /sc weekly /d MON /st 07:45 /tn HaftalikRapor /tr "C:\rapor\.venv\Scripts\python.exe C:\rapor\haftalik_rapor.py --klasor D:\satis --hafta 2026-W44 --uygula"</pre>
+
+<div class="note"><b>Gerçek işte</b>Bu tür bir rapor otomasyonu genellikle küçük başlar ve hızla kritikleşir: birkaç ay sonra finans ekibi kararlarını o rapora göre verir. O noktada üç soru sorulur: "Rapor bu hafta çalıştı mı?" (log ve çıkış kodu izlemesi), "Rakam neden geçen haftadan farklı?" (atılan satırların raporu, tekrar sayısı) ve "Bunu kim değiştirdi?" (git, testler, kod incelemesi (code review)). Projeyi baştan bu sorulara cevap verecek biçimde kurmak, onu bir betikten bir <b>ürüne</b> dönüştürür.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Bu projeyi üretime taşısaydın</h3>
+<ul>
+<li><b>Testler:</b> Her parça için pytest testleri; <code>tmp_path</code> fikstürü ile geçici klasör; HTML çıktısı için anlık görüntü (snapshot) testi. <code>calistir</code> için uçtan uca test: örnek klasör → dry-run → çıkış kodu 0 ve hiç dosya yok.</li>
+<li><b>Yapılandırma:</b> Alıcılar, SMTP ve klasör yolları <code>pydantic-settings</code> ile ortam değişkenlerinden; şifre <code>SecretStr</code>.</li>
+<li><b>İdempotentlik:</b> Aynı hafta için rapor zaten gönderildiyse (durum dosyası ya da SQLite tablosu) ikinci çalıştırma göndermesin.</li>
+<li><b>Ölçek:</b> Dosyalar büyüdüğünde satır satır pydantic yerine pandas/polars ile vektörel doğrulama; özetleme <code>groupby</code> ile.</li>
+<li><b>Gözlemlenebilirlik:</b> Log'u JSON biçiminde yazıp merkezi bir sisteme gönder; "atılan satır oranı %5'i aştı" gibi eşiklerde uyarı üret.</li>
+<li><b>Paketleme:</b> <code>pyproject.toml</code> içinde <code>[project.scripts] haftalik-rapor = "haftalik_rapor.cli:calistir"</code> ile komut olarak kur.</li>
+</ul>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-orta-otomasyon">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ofis-otomasyon/">← Ofis ve iş akışı otomasyonu</a><a href="../pydantic-dogrulama/">Veri doğrulama ve pydantic v2 →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

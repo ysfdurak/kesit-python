@@ -1,0 +1,414 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba | Kesit Python</title><meta name="description" content="Belge yükleme ve temizlemeden başlık + cümle parçalamaya, meta veriye, TF-IDF ve sahte embedding ile hibrit indekse, bağlam bütçesine, kaynak gösterme ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/rag-uygulamasi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba"><meta property="og:description" content="Belge yükleme ve temizlemeden başlık + cümle parçalamaya, meta veriye, TF-IDF ve sahte embedding ile hibrit indekse, bağlam bütçesine, kaynak gösterme ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/rag-uygulamasi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba","description":"Belge yükleme ve temizlemeden başlık + cümle parçalamaya, meta veriye, TF-IDF ve sahte embedding ile hibrit indekse, bağlam bütçesine, kaynak gösterme ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/rag-uygulamasi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Uçtan uca RAG uygulaması: belgeden kaynaklı cevaba</h1><p class="st-l">Belge yükleme ve temizlemeden başlık + cümle parçalamaya, meta veriye, TF-IDF ve sahte embedding ile hibrit indekse, bağlam bütçesine, kaynak gösterme ve "bilmiyorum" davranışına, önbelleğe ve güncelleme/silmeye kadar üretim kalitesinde bir RAG hattı kurar; FastAPI uç noktası ile LangChain/LlamaIndex karşılığını görür, gerçek Pusula İK verisiyle ölçülen bir politika asistanıyla bitirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/rag-uygulamasi">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Demo RAG ile üretim RAG arasındaki fark</h2>
+<p><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersinde bir belgeyi cümlelere bölüp TF-IDF ile en ilgili cümleleri isteme (prompt) koydun; <a href="../embedding-vektor-arama/">Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</a> dersinde getirme (retrieval) katmanını (embedding, BM25, RRF, recall@k) derinlemesine kurdun. Bu derste parçaları birleştirip <b>uçtan uca bir RAG uygulaması</b> (Retrieval-Augmented Generation, getirmeyle zenginleştirilmiş üretim) yazıyorsun: belge gelir, temizlenir, parçalanır, indekslenir; soru gelir, getirilir, bütçeye sığdırılır, kaynaklı cevaba dönüşür; belge değişince indeks güncellenir.</p>
+<p>Senaryo: <b>Pusula İK</b> çalışanları izin, çalışma düzeni ve eğitim kurallarını soruyor. Kaynaklar kurgusal bir yönetmelik metni ile gerçek <code>pusula_ik</code> tablolarından üretilen istatistik belgeleri; ürün sorularını da sınamak için <code>anadolu_market</code> ürünlerinden kısa ürün kartları ekliyoruz.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Hat</th><th>Adımlar</th><th>Ne zaman çalışır?</th></tr>
+<tr><td>İndeksleme (çevrim dışı)</td><td>yükle → temizle → parçala → meta veri ekle → vektörleştir → indeksle</td><td>Belge eklenince, değişince, silinince</td></tr>
+<tr><td>Sorgu (çevrim içi)</td><td>soru → getir (hibrit) → yeniden sırala → bağlam bütçesi → istem → LLM → atıf denetimi → cevap</td><td>Her soruda, milisaniyeler içinde</td></tr>
+</table></div>
+
+<h2>1. Belge yükleme ve temizleme</h2>
+<p>Gerçek belgeler PDF, HTML, Word ya da wiki sayfası olarak gelir ve içinde gürültü taşır: HTML etiketleri, <code>&amp;amp;</code> gibi kaçışlar, sayfa numaraları, her sayfada tekrar eden "Kurum içi - Gizli" altbilgisi, çift boşluklar. Bu gürültü hem parçaları şişirir hem de aramayı bozar. Bir de görünmez tuzak var: aynı "ü" harfi tek karakter (NFC) ya da "u + iki nokta" (NFD) olarak gelebilir; normalleştirmezsen iki metin eşit görünür ama eşleşmez.</p>
+<pre class="py">import re, html, unicodedata, hashlib
+from dataclasses import dataclass, field
+
+@dataclass
+class Belge:
+    id: str
+    metin: str
+    meta: dict = field(default_factory=dict)
+
+    @property
+    def parmak_izi(self):
+        """İçerik değişti mi? Güncellemede bu özetle karşılaştırırız."""
+        return hashlib.sha256(self.metin.encode("utf-8")).hexdigest()[:12]
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+ALTBILGI = re.compile(r"^(sayfa \d+ / \d+|kurum içi - gizli)$")
+
+def temizle(ham):
+    metin = re.sub(r"&lt;[^&gt;]+&gt;", " ", ham)                 # HTML etiketleri
+    metin = unicodedata.normalize("NFC", html.unescape(metin))
+    satirlar = []
+    for s in metin.splitlines():
+        s = re.sub(r"\s+", " ", s).strip()               # sekme, çift boşluk
+        if s and not ALTBILGI.match(tr_kucuk(s)):        # boş satır, altbilgi
+            satirlar.append(s)
+    return "\n".join(satirlar)
+
+ham = "&lt;h2&gt;Hastalık izni&lt;/h2&gt;\n&lt;p&gt;Doktor raporu   en geç 2 iş günü &amp;amp; içinde iletilir.&lt;/p&gt;\n\nSayfa 1 / 3\nKurum içi - Gizli\n"
+temiz = temizle(ham)
+print(temiz)
+b = Belge("pusula-izin", temiz, {"kaynak": "izin_yonetmeligi.html", "erisim": "tum_calisanlar"})
+print(b.parmak_izi, len(b.metin))</pre>
+<p>Her belge bir <b>kimlik</b>, temiz metin ve <b>meta veri</b> (metadata) taşır: kaynak dosya, tür, tarih ve en önemlisi <b>erişim</b> bilgisi. <code>parmak_izi</code> metnin özetidir; belge yeniden geldiğinde değişip değişmediğini bununla anlarsın. Şimdi korpusu gerçek veriyle kuralım:</p>
+<pre class="py">POLITIKA = """# İzin yönetmeliği
+## Yıllık izin
+Yıllık izin hakkı kıdeme göre belirlenir: 1-5 yıl arası 14 gün, 5-15 yıl arası 20 gün, 15 yıl ve üzeri 26 gün. Yıllık izin en az 7 gün önceden İK portalından talep edilir. Talep yönetici onayıyla kesinleşir.
+## Hastalık izni
+Doktor raporu en geç 2 iş günü içinde İK'ya iletilir. Raporsuz hastalık izni yılda en fazla 3 gündür.
+## Mazeret izni
+Evlilik, doğum ve vefat durumlarında 3 güne kadar ücretli mazeret izni verilir.
+## Ücretsiz izin
+Ücretsiz izin yönetici ve İK direktörünün onayıyla en fazla 30 gün verilebilir.
+# Çalışma düzeni
+## Hibrit çalışma
+Hibrit çalışanlar haftada en az 2 gün ofiste bulunur. Ofis günlerini takım lideri belirler.
+## Uzaktan çalışma
+Tam uzaktan çalışma yalnızca Yazılım Geliştirme ile Veri ve Analitik departmanlarında mümkündür.
+# Eğitim
+## Zorunlu eğitimler
+Bilgi Güvenliği Farkındalığı ve KVKK Temel eğitimleri tüm çalışanlar için zorunludur. Her ikisi de 2 saattir ve her yıl yenilenir.
+"""
+
+import statistics
+from collections import defaultdict
+import veri
+
+def ik_istatistik_belgeleri():
+    """Gerçek ik_leaves tablosundan izin türü başına kısa bir istatistik belgesi üretir."""
+    izin = defaultdict(list)
+    for r in veri.kayitlar("pusula_ik", "ik_leaves"):
+        izin[r["leave_type"]].append(r["days"])
+    return [Belge(f"ik-izin-{tur}",
+                  f"{tur.capitalize()} izin kayıtları: {len(g)} kayıt, ortalama {statistics.mean(g):.1f} gün, en uzun {max(g)} gün.",
+                  {"kaynak": "ik_leaves", "tur": "istatistik", "erisim": "ik"})
+            for tur, g in sorted(izin.items())]
+
+def urun_belgeleri():
+    return [Belge(f"urun-{u['product_id']}",
+                  f"{u['name']} ({u['category']}): fiyat {u['price']:.0f} TL, stok {u['stock']} adet.",
+                  {"kaynak": "products", "tur": "urun", "erisim": "tum_calisanlar"})
+            for u in veri.kayitlar("anadolu_market", "products")]
+
+KORPUS = [Belge("pusula-politika", POLITIKA, {"kaynak": "ik_politika.md", "tur": "politika", "erisim": "tum_calisanlar"})]
+KORPUS += ik_istatistik_belgeleri() + urun_belgeleri()
+print(len(KORPUS), "belge")
+print(KORPUS[2].metin)
+print(KORPUS[-1].metin)</pre>
+<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Tarayıcıda PDF okuyucu yok; kendi makinende <code>pip install pypdf python-docx</code> ile <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
+
+<h2>2. Parçalama ve meta veri</h2>
+<p>Parçalama (chunking) stratejilerini (sabit pencere, cümle, başlık, örtüşme) embedding dersinde ayrıntılı gördün. Üretimde bunları <b>birleştirirsin</b>: önce başlıklara göre bölümlere ayır, bölüm içinde cümleleri karakter sınırına kadar topla, ardışık parçalar arasında bir cümle örtüştür. En önemli iki ek:</p>
+<ul>
+<li><b>Başlık yolu</b> ("İzin yönetmeliği &gt; Hastalık izni") her parçaya eklenir. "Raporsuz 3 gündür" cümlesi tek başına hangi izinden söz ettiğini söylemez; başlık söyler.</li>
+<li><b>Kararlı kimlik</b>: <code>belge_id#sıra</code>. Atıf, güncelleme ve silme bu kimlikle yapılır.</li>
+</ul>
+<pre class="py">def cumleler(metin):
+    return [c for c in re.split(r"(?&lt;=[.!?])\s+", metin.strip()) if c]
+
+def parcala(belge, max_karakter=220, ortusme=1):
+    """Başlık + cümle tabanlı parçalama: her parça başlık yolunu taşır, ardışık parçalar ortusme cümle paylaşır."""
+    bolumler, yol = [], {}
+    for satir in belge.metin.splitlines():
+        if m := re.match(r"(#+) (.+)", satir):
+            seviye = len(m.group(1))
+            yol = {k: v for k, v in yol.items() if k &lt; seviye} | {seviye: m.group(2)}
+        elif satir.strip():
+            bolumler.append((" &gt; ".join(yol[k] for k in sorted(yol)), satir))
+    parcalar = []
+    for baslik, paragraf in bolumler:
+        cs, i = cumleler(paragraf), 0
+        while i &lt; len(cs):
+            j = i + 1
+            while j &lt; len(cs) and len(" ".join(cs[i:j + 1])) &lt;= max_karakter:
+                j += 1
+            parcalar.append({"id": f"{belge.id}#{len(parcalar)}", "belge_id": belge.id,
+                             "baslik": baslik, "metin": " ".join(cs[i:j]), "meta": dict(belge.meta)})
+            if j &gt;= len(cs):
+                break
+            i = max(j - ortusme, i + 1)
+    return parcalar
+
+PARCALAR = [p for b in KORPUS for p in parcala(b, max_karakter=120)]
+print(len(PARCALAR), "parça")
+for p in PARCALAR[:3]:
+    print(p["id"], "|", p["baslik"], "|", p["metin"])</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Strateji</th><th>Güçlü yanı</th><th>Zayıf yanı</th><th>Uygun belge</th></tr>
+<tr><td>Sabit pencere + örtüşme</td><td>Basit, her metinde çalışır</td><td>Cümleyi ortadan böler</td><td>Yapısız düz metin, log</td></tr>
+<tr><td>Cümle tabanlı</td><td>Anlam bütünlüğü korunur</td><td>Kısaltmalar ("vb.") bölmeyi bozar</td><td>Haber, e-posta</td></tr>
+<tr><td>Başlık tabanlı</td><td>Bağlam (başlık yolu) korunur</td><td>Bölümler çok uzun ya da çok kısa olabilir</td><td>Yönetmelik, wiki, dokümantasyon</td></tr>
+<tr><td>Başlık + cümle (hibrit)</td><td>İkisinin iyi yanları</td><td>Biraz daha kod</td><td>Kurumsal belgelerin çoğu</td></tr>
+</table></div>
+
+<h2>3. İndeks: TF-IDF ve sahte embedding ile hibrit arama</h2>
+<p>İki sinyal kullanıyoruz: <b>kelime</b> sinyali (TF-IDF; "KVKK", ürün kodu gibi tam eşleşmelerde güçlü) ve <b>vektör</b> sinyali (embedding; yazım farkı ve anlam yakınlığında güçlü). Tarayıcıda gerçek embedding modeli çalıştıramadığımız için harf üçlülerinden üretilen <b>sahte embedding</b> kullanıyoruz; arayüz gerçeğiyle aynı (metin → normalize vektör). Türkçe eklemeli bir dil olduğu için TF-IDF'e kaba bir kök bulucu veriyoruz: kelimenin ilk 5 harfi. Bu basit yöntem Türkçe bilgi erişiminde şaşırtıcı derecede iyi sonuç verir.</p>
+<pre class="py">import numpy as np
+import zlib
+from sklearn.feature_extraction.text import TfidfVectorizer
+
+def kok_analiz(metin):
+    """Türkçe için kaba ama etkili kök: kelimenin ilk 5 harfi (izni, izin, izinler → izin)."""
+    return [k[:5] for k in re.findall(r"\w+", tr_kucuk(metin))]
+
+def sahte_embedding(metin, boyut=256):
+    """Ağsız embedding taklidi: harf üçlülerini sabit bir özetle (crc32) kovalara sayar, normalize eder."""
+    v = np.zeros(boyut)
+    t = f" {tr_kucuk(metin)} "
+    for i in range(len(t) - 2):
+        v[zlib.crc32(t[i:i + 3].encode()) % boyut] += 1
+    n = np.linalg.norm(v)
+    return v / n if n else v
+
+def parca_metni(p):
+    return f"{p['baslik']}: {p['metin']}" if p["baslik"] else p["metin"]
+
+class HibritIndeks:
+    def __init__(self, parcalar, alfa=0.5):
+        self.parcalar, self.alfa = parcalar, alfa
+        metinler = [parca_metni(p) for p in parcalar]
+        self.tfidf = TfidfVectorizer(analyzer=kok_analiz)
+        self.X = self.tfidf.fit_transform(metinler)
+        self.E = np.array([sahte_embedding(m) for m in metinler])
+
+    def ara(self, sorgu, k=3, filtre=None):
+        s_kelime = (self.X @ self.tfidf.transform([sorgu]).T).toarray().ravel()
+        s_vektor = self.E @ sahte_embedding(sorgu)
+        skor = self.alfa * s_kelime + (1 - self.alfa) * s_vektor
+        adaylar = [i for i in np.argsort(-skor, kind="stable")
+                   if filtre is None or filtre(self.parcalar[i]["meta"])]
+        return [(self.parcalar[i], round(float(skor[i]), 3)) for i in adaylar[:k]]
+
+IDX = HibritIndeks(PARCALAR)
+for p, s in IDX.ara("Raporsuz hastalık izni kaç gün?"):
+    print(s, p["id"], p["metin"][:60])</pre>
+<p><code>filtre</code> parametresine dikkat: yetki ve meta veri filtresi sıralamadan <b>önce</b> uygulanır (embedding dersindeki kural). Örneğin İK dışındaki bir çalışan için <code>filtre=lambda m: m["erisim"] == "tum_calisanlar"</code> istatistik belgelerini hiç göstermez.</p>
+
+<h3>Yeniden sıralama ve hata analizi</h3>
+<p>Üretimde ilk aşama 20–50 aday getirir, bir <b>çapraz kodlayıcı</b> (cross-encoder) soru ile her adayı birlikte okuyup en iyi 3–5'ini seçer. Ama önce sistemin nerede yanıldığını görmelisin. Şu soruda ilk sonuç yanlış:</p>
+<pre class="py">soru = "Evlilikte kaç gün izin var?"
+for p, s in IDX.ara(soru, k=3):
+    print(s, p["id"], p["baslik"])
+print(kok_analiz(soru))
+print(kok_analiz("Evlilik, doğum ve vefat durumlarında 3 güne kadar ücretli mazeret izni verilir."))</pre>
+<p>Teşhis: kaba kök "izni" ile "izin"i, "güne" ile "gün"ü eşleştiremiyor; yıllık izin parçası "izin" ve "gün" kelimeleriyle kazanıyor. Çözüm seçenekleri: gerçek bir morfolojik çözümleyici (Zemberek gibi), gerçek embedding modeli ya da çapraz kodlayıcı. Bu tür hataları ancak bir <b>altın soru seti</b> ile yakalarsın; değerlendirme ölçütlerini <a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek</a> dersinde ayrıntılı göreceksin.</p>
+<pre class="code"># pip install sentence-transformers   (Kendi bilgisayarında dene)
+from sentence_transformers import CrossEncoder
+model = CrossEncoder("cross-encoder/mmarco-mMiniLMv2-L12-H384-v1")   # çok dilli
+adaylar = IDX.ara(soru, k=20)
+puanlar = model.predict([(soru, parca_metni(p)) for p, _ in adaylar])
+en_iyi = [p for (p, _), s in sorted(zip(adaylar, puanlar), key=lambda x: -x[1])][:4]</pre>
+
+<h2>4. Bağlam penceresi bütçesi</h2>
+<p>Modelin bağlam penceresi büyük olsa da her parça token, yani para ve gecikme demektir. Üstelik alakasız parçalar gürültü katar ve modeller uzun bağlamın <b>ortasındaki</b> bilgiyi daha sık kaçırır. Bu yüzden getirilen parçaları bir <b>token bütçesine</b> sığdırırsın: skor sırasıyla ekle, sığmayanı atla, aynı metni iki kez koyma.</p>
+<pre class="py">import math
+
+def token_tahmini(metin):
+    return math.ceil(len(metin) / 4)
+
+def baglam_sec(sonuclar, butce=120):
+    """Skor sırasıyla parça ekle; bütçeyi aşanı atla, aynı metni iki kez koyma."""
+    secilen, kullanilan, gorulen = [], 0, set()
+    for p, skor in sonuclar:
+        t = token_tahmini(parca_metni(p))
+        if p["metin"] in gorulen or kullanilan + t &gt; butce:
+            continue
+        secilen.append(p); kullanilan += t; gorulen.add(p["metin"])
+    return secilen, kullanilan
+
+secilen, t = baglam_sec(IDX.ara("Yıllık izin kaç gün ve nasıl talep edilir?", k=6), butce=90)
+print([p["id"] for p in secilen], t, "token")</pre>
+<p>Bütçe şöyle hesaplanır: <code>pencere - sistem istemi - soru - sohbet geçmişi - cevap için ayrılan</code>. Token tahmini için <a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı</a> dersindeki "4 karakter ≈ 1 token" kuralını kullandık; Türkçede gerçek oran daha yüksektir, üretimde modelin kendi tokenizer'ı ile say (bunu <a href="../yerel-modeller-hf/">Hugging Face ve yerel modellerle Python</a> dersinde göreceksin).</p>
+
+<h2>5. İstem birleştirme, kaynak gösterme ve "bilmiyorum"</h2>
+<p>İstem üç şey söyler: yalnız kaynaklara dayan, her iddiaya <b>[n]</b> atfı koy, cevap yoksa "Bilmiyorum." de. İstem şablonu yazma tekniklerini <a href="../prompt-muhendisligi/">Prompt mühendisliği ve yapılandırılmış çıktı</a> dersinde ayrıntılı göreceksin; burada önemli olan <b>kodun</b> modelin sözüne güvenmemesi. İki savunma hattı kurarsın:</p>
+<ol>
+<li><b>Getirmeden önce</b>: en iyi skor eşiğin altındaysa modeli hiç çağırma. Hem halüsinasyonu hem maliyeti keser.</li>
+<li><b>Üretimden sonra</b>: cevapta atıf yoksa ya da var olmayan bir kaynağa ([7] gibi) atıf varsa cevabı reddet.</li>
+</ol>
+<pre class="py">def istem_kur(soru, parcalar):
+    kaynak = "\n".join(f"[{i}] {parca_metni(p)}" for i, p in enumerate(parcalar, 1))
+    return ("Yalnızca aşağıdaki numaralı kaynaklara dayanarak cevap ver. Her cümlenin sonuna "
+            "kullandığın kaynağı [n] biçiminde yaz. Kaynaklarda cevap yoksa yalnızca 'Bilmiyorum.' de.\n"
+            f"Kaynaklar:\n{kaynak}\nSoru: {soru}")
+
+class SahteLLM:
+    """Ağsız model: istemdeki kaynaklardan soruyla en çok kök paylaşanı seçip atıfla döndürür."""
+    def tamamla(self, istem):
+        soru = istem.rsplit("Soru:", 1)[-1]
+        kaynaklar = re.findall(r"^\[(\d+)\] (.+)$", istem, re.M)
+        if not kaynaklar:
+            return "Bilmiyorum."
+        q = set(kok_analiz(soru))
+        no, metin = max(kaynaklar, key=lambda k: len(q &amp; set(kok_analiz(k[1]))))
+        return f"{metin.split(': ', 1)[-1]} [{no}]"
+
+def atiflari_dogrula(cevap, n_kaynak):
+    atif = [int(x) for x in re.findall(r"\[(\d+)\]", cevap)]
+    return bool(atif) and all(1 &lt;= a &lt;= n_kaynak for a in atif)
+
+def cevapla(soru, llm, esik=0.25, k=4):
+    sonuclar = IDX.ara(soru, k=k)
+    if not sonuclar or sonuclar[0][1] &lt; esik:
+        return {"cevap": "Bilmiyorum.", "kaynaklar": [], "neden": "düşük getirme skoru"}
+    parcalar, _ = baglam_sec(sonuclar, butce=150)
+    cevap = llm.tamamla(istem_kur(soru, parcalar))
+    if not atiflari_dogrula(cevap, len(parcalar)):
+        return {"cevap": "Bilmiyorum.", "kaynaklar": [], "neden": "atıfsız cevap"}
+    nolar = sorted({int(x) for x in re.findall(r"\[(\d+)\]", cevap)})
+    return {"cevap": cevap, "kaynaklar": [parcalar[n - 1]["id"] for n in nolar], "neden": "ok"}
+
+llm = SahteLLM()
+print(cevapla("Raporsuz hastalık izni kaç gün?", llm))
+print(cevapla("Şirket aracı kimlere verilir?", llm))</pre>
+<p>İkinci soru yönetmelikte yok ama yine de bir cevap geldi: "verilir" kelimesi mazeret izni parçasıyla eşleşti ve skor 0.25 eşiğini geçti. Eşiği 0.35'e çıkarırsan <code>cevapla("Şirket aracı kimlere verilir?", llm, esik=0.35)</code> "Bilmiyorum." döndürür. Eşik sezgiyle değil, altın setteki cevaplı ve cevapsız sorularla <b>ölçerek</b> seçilir; çok yüksek eşik de doğru soruları reddeder.</p>
+<div class="warn"><b>Atıf, doğruluk garantisi değildir</b>Model doğru kaynağa atıf yapıp cümleyi yine de çarpıtabilir. Atıf denetimi "var olmayan kaynak" hatasını yakalar; içeriğin kaynakla tutarlılığını (sadakat, faithfulness) ölçmek değerlendirme işidir.</div>
+
+<h2>6. Önbellek</h2>
+<p>İK asistanına aynı sorular tekrar tekrar gelir. Önbellek (cache) anahtarı soru metninin <b>normalleştirilmiş</b> hâli ve <b>indeks sürümü</b>nden oluşur; böylece belge güncellenince eski cevaplar kendiliğinden geçersiz olur.</p>
+<pre class="py">class OnbellekliRAG:
+    def __init__(self, cevapla_fn, surum=1):
+        self.fn, self.surum, self.kayit = cevapla_fn, surum, {}
+        self.isabet = self.iska = 0
+
+    def anahtar(self, soru):
+        normal = " ".join(re.findall(r"\w+", tr_kucuk(soru)))
+        return hashlib.sha256(f"v{self.surum}|{normal}".encode()).hexdigest()[:16]
+
+    def sor(self, soru):
+        a = self.anahtar(soru)
+        if a in self.kayit:
+            self.isabet += 1
+        else:
+            self.iska += 1
+            self.kayit[a] = self.fn(soru)
+        return self.kayit[a]
+
+r = OnbellekliRAG(lambda s: cevapla(s, llm))
+r.sor("Raporsuz hastalık izni kaç gün?")
+r.sor("  raporsuz HASTALIK izni kaç gün ")
+r.surum += 1                     # indeks güncellendi: eski kayıtlar artık eşleşmez
+r.sor("Raporsuz hastalık izni kaç gün?")
+print(r.isabet, r.iska)</pre>
+<p>Üç katman önbellek vardır: <b>embedding önbelleği</b> (aynı metin için ikinci kez embedding hesaplanmaz), <b>getirme önbelleği</b> (soru → parça kimlikleri) ve <b>cevap önbelleği</b>. Cevap önbelleğini kullanıcıya özel içerikte (ör. "benim izin bakiyem") kullanma; anahtara kullanıcı ya da yetki grubunu ekle. Sağlayıcıların <b>istem önbelleği</b> (prompt caching) ise sabit sistem istemini ucuzlatır; ikisi birbirinin yerine geçmez.</p>
+
+<h2>7. Güncelleme ve silme</h2>
+<p>Belge değişince en sık yapılan hata yeni parçaları eskilerin üzerine yazmaktır: yeni sürüm daha kısaysa eski parçaların bir kısmı indekste <b>hayalet</b> olarak kalır ve model artık geçerli olmayan kuralı söyler. Doğru yol belge düzeyinde düşünmektir: parmak izi aynıysa hiçbir şey yapma; değiştiyse belgenin <b>tüm</b> eski parçalarını sil, yenilerini ekle, sürümü artır.</p>
+<pre class="py">class CanliIndeks:
+    """Belge düzeyinde ekle/güncelle/sil; değişmeyen belgeyi yeniden işlemez."""
+    def __init__(self):
+        self.belgeler, self.parcalar, self.surum = {}, {}, 0
+
+    def yukle(self, belge):
+        eski = self.belgeler.get(belge.id)
+        if eski and eski.parmak_izi == belge.parmak_izi:
+            return "değişmedi"
+        self.sil(belge.id, sessiz=True)                  # önce eski parçaların hepsi gider
+        self.belgeler[belge.id] = belge
+        for p in parcala(belge, max_karakter=120):
+            self.parcalar[p["id"]] = p
+        self.surum += 1
+        return "güncellendi" if eski else "eklendi"
+
+    def sil(self, belge_id, sessiz=False):
+        self.belgeler.pop(belge_id, None)
+        for pid in [pid for pid, p in self.parcalar.items() if p["belge_id"] == belge_id]:
+            del self.parcalar[pid]
+        if not sessiz:
+            self.surum += 1
+
+c = CanliIndeks()
+print(c.yukle(KORPUS[0]), len(c.parcalar), c.surum)
+print(c.yukle(KORPUS[0]), c.surum)
+kisa = Belge("pusula-politika", "# İzin yönetmeliği\nYıllık izin 14 gündür.", KORPUS[0].meta)
+print(c.yukle(kisa), len(c.parcalar), c.surum)</pre>
+<p>Silme de aynı yoldan geçer; KVKK kapsamında "unutulma hakkı" talebi geldiğinde ilgili belgenin parçaları, vektörleri ve önbellek kayıtları birlikte silinmelidir. Vektör veritabanlarında bunun için parçalara <code>belge_id</code> meta verisi koyup "bu belge kimliğine sahip her şeyi sil" filtresiyle silersin.</p>
+
+<h2>8. FastAPI uç noktası</h2>
+<p>Asistanı bir web servisine çevirmek <a href="../fastapi/">FastAPI ile API geliştirme</a> dersindeki kalıplarla birkaç satırdır. İstek ve cevabı pydantic ile tanımla, indeksi uygulama başlarken bir kez yükle:</p>
+<pre class="code"># pip install fastapi uvicorn scikit-learn numpy     (Kendi bilgisayarında dene)
+# Çalıştır: uvicorn rag_api:app --reload   →   http://127.0.0.1:8000/docs
+from fastapi import FastAPI, HTTPException
+from pydantic import BaseModel, Field
+
+app = FastAPI(title="Pusula İK Asistanı")
+llm = GercekLLMIstemcisi()            # llm-api dersindeki sağlayıcıdan bağımsız istemci
+onbellek = OnbellekliRAG(lambda s: cevapla(s, llm, esik=0.35))
+
+class Soru(BaseModel):
+    soru: str = Field(min_length=3, max_length=500)
+
+class Cevap(BaseModel):
+    cevap: str
+    kaynaklar: list[str]
+    neden: str
+
+@app.post("/sor", response_model=Cevap)
+def sor(istek: Soru):
+    return onbellek.sor(istek.soru)
+
+@app.post("/belgeler/{belge_id}")
+def belge_yukle(belge_id: str, metin: str):
+    durum = canli.yukle(Belge(belge_id, temizle(metin), {"erisim": "tum_calisanlar"}))
+    onbellek.surum = canli.surum
+    return {"durum": durum, "surum": canli.surum}
+
+@app.delete("/belgeler/{belge_id}")
+def belge_sil(belge_id: str):
+    if belge_id not in canli.belgeler:
+        raise HTTPException(404, "belge yok")
+    canli.sil(belge_id)
+    onbellek.surum = canli.surum
+    return {"silindi": belge_id}</pre>
+
+<h2>9. LangChain ve LlamaIndex ile karşılaştırma</h2>
+<p>Bu derste her adımı elle yazdın; çerçeveler aynı adımları hazır bileşenlerle sunar. Aynı hattın LangChain hâli:</p>
+<pre class="code"># pip install langchain langchain-community langchain-text-splitters faiss-cpu langchain-huggingface
+from langchain_text_splitters import RecursiveCharacterTextSplitter
+from langchain_huggingface import HuggingFaceEmbeddings
+from langchain_community.vectorstores import FAISS
+
+bolucu = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=80)
+parcalar = bolucu.create_documents([POLITIKA], metadatas=[{"kaynak": "ik_politika.md"}])
+emb = HuggingFaceEmbeddings(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+db = FAISS.from_documents(parcalar, emb)
+getirici = db.as_retriever(search_kwargs={"k": 4})
+for d in getirici.invoke("Raporsuz hastalık izni kaç gün?"):
+    print(d.metadata, d.page_content[:60])</pre>
+<p>LlamaIndex ise belge odaklıdır; yükleme, indeks ve sorgu motoru tek akışta gelir:</p>
+<pre class="code"># pip install llama-index llama-index-embeddings-huggingface
+from llama_index.core import VectorStoreIndex, SimpleDirectoryReader, Settings
+from llama_index.embeddings.huggingface import HuggingFaceEmbedding
+
+Settings.embed_model = HuggingFaceEmbedding(model_name="sentence-transformers/paraphrase-multilingual-MiniLM-L12-v2")
+belgeler = SimpleDirectoryReader("politikalar/").load_data()     # PDF, docx, md
+indeks = VectorStoreIndex.from_documents(belgeler)
+motor = indeks.as_query_engine(similarity_top_k=4)               # Settings.llm ile model seçilir
+yanit = motor.query("Raporsuz hastalık izni kaç gün?")
+print(yanit, [n.node.metadata for n in yanit.source_nodes])</pre>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Elle (bu ders)</th><th>LangChain</th><th>LlamaIndex</th></tr>
+<tr><td>Odak</td><td>Tam kontrol, az bağımlılık</td><td>Genel LLM uygulama bileşenleri, zincirler</td><td>Belge yükleme, indeksleme, sorgu motorları</td></tr>
+<tr><td>Parçalama</td><td>Kendi kuralın (başlık + cümle)</td><td><code>RecursiveCharacterTextSplitter</code> vb.</td><td><code>SentenceSplitter</code>, düğüm ayrıştırıcıları</td></tr>
+<tr><td>Atıf ve "bilmiyorum"</td><td>Açıkça kodda</td><td>İstem + çıktı ayrıştırıcı ile senin işin</td><td><code>source_nodes</code> hazır; eşik senin işin</td></tr>
+<tr><td>Ne zaman?</td><td>Küçük-orta sistem, öğrenme, sıkı denetim</td><td>Çok bileşenli akışlar, ajanlar (LangGraph)</td><td>Çok sayıda belge kaynağı, hızlı prototip</td></tr>
+</table></div>
+<p>Çerçeve seçsen de bu derste yazdığın parçaları anlaman gerekir: hata ayıklarken "hangi parça neden geldi, neden bütçeye girmedi, atıf neden reddedildi" sorularını cevaplayabilmelisin.</p>
+
+<div class="note"><b>Gerçek işte</b>Kurum içi RAG projeleri en çok üç yerde zorlanır: belge kalitesi (taranmış PDF'ler, eski sürümler), yetki (herkesin her belgeyi görmemesi) ve güncellik (yürürlükten kalkmış kuralın cevapta çıkması). Başarılı ekipler belge sahiplerini (İK, hukuk) sürece katar, her belgeye geçerlilik tarihi ve sahibi meta verisi koyar, "Bilmiyorum" cevaplarını kaydedip hangi belgenin eksik olduğunu düzenli raporlar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Ebeveyn-çocuk parçalar</h3>
+<p>Küçük parçalarla ara (isabet artar), modele parçanın ait olduğu büyük bölümü ya da komşu parçaları ver (bağlam artar). Meydan okuma alıştırmasında komşu parça genişletmeyi yazacaksın.</p>
+<h3>Sorgu dönüşümü</h3>
+<p>Sohbette "peki ya ücretsiz olanı?" sorusu tek başına aranamaz; önce geçmişle birlikte bağımsız bir soruya yeniden yazılır. HyDE yaklaşımında model önce varsayımsal bir cevap yazar, arama o cevapla yapılır.</p>
+<h3>Değerlendirme hattı</h3>
+<p>Getirme (recall@k, MRR), cevap sadakati, atıf doğruluğu ve ret oranını ayrı ayrı ölç; her indeks ya da istem değişikliğinde altın seti otomatik çalıştır. Ölçütlerin ayrıntısı <a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek</a> dersinde.</p>
+<h3>Ne zaman RAG yetmez?</h3>
+<p>"Geçen yıl kaç gün hastalık izni kullanıldı?" gibi toplama soruları metin aramasıyla değil SQL ile cevaplanır; bu soruları bir yönlendirici ile text-to-SQL ajanına (<a href="../llm-ajanlar/">LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</a>) gönder.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/rag-uygulamasi">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-ai/">← Bitirme projesi: Python ile yapay zekâ asistanı</a><a href="../yerel-modeller-hf/">Hugging Face ve yerel modellerle Python →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,203 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Şablonla rapor üretme: string.Template ve Jinja2 | Kesit Python</title><meta name="description" content="string.Template ile güvenli basit metinler, Jinja2 ile değişken, filtre, döngü, koşul, makro ve kalıtım kullanan HTML/Markdown raporlar üretir; autoescape…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/sablon-rapor/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Şablonla rapor üretme: string.Template ve Jinja2"><meta property="og:description" content="string.Template ile güvenli basit metinler, Jinja2 ile değişken, filtre, döngü, koşul, makro ve kalıtım kullanan HTML/Markdown raporlar üretir; autoescape…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/sablon-rapor/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Şablonla rapor üretme: string.Template ve Jinja2","description":"string.Template ile güvenli basit metinler, Jinja2 ile değişken, filtre, döngü, koşul, makro ve kalıtım kullanan HTML/Markdown raporlar üretir; autoescape…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/sablon-rapor/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Şablonla rapor üretme: string.Template ve Jinja2</h1><p class="st-l">string.Template ile güvenli basit metinler, Jinja2 ile değişken, filtre, döngü, koşul, makro ve kalıtım kullanan HTML/Markdown raporlar üretir; autoescape ile XSS'i önler, CSV'den HTML e-postaya giden bir rapor boru hattı kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sablon-rapor">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Anadolu Market her pazartesi 12 mağaza müdürüne haftalık satış raporu, her ay 40.000 müşteriye kişiselleştirilmiş kampanya e-postası gönderir. Bunları <code>print</code> ve metin birleştirmeyle üretmeye çalışırsan kod ile görünüm birbirine dolanır: tasarımcı bir tabloya sütun eklemek istediğinde Python kodunu değiştirmen gerekir, müşteri adında bir <code>&lt;</code> karakteri sayfayı bozar. Çözüm <b>şablon</b> (template) kullanmaktır: görünüm bir şablonda, veri Python'da durur; şablon motoru ikisini birleştirir (render).</p>
+<p><i>Metin biçimlendirme ve rapor üretme</i> dersinde f-string ve <code>format</code> ile küçük raporlar yazdın. Bu derste üç basamak çıkıyoruz: standart kütüphanedeki <code>string.Template</code>, endüstri standardı <b>Jinja2</b> (Flask, Ansible, dbt, Airflow ve sayısız raporlama aracı onu kullanır) ve bunlarla HTML e-posta, HTML ve Markdown rapor üreten bir boru hattı (pipeline). Jinja2 tarayıcı motorunda hazır; kendi bilgisayarında <code>pip install jinja2</code>.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Mantık (döngü, koşul)</th><th>Güvenli mi?</th><th>Ne zaman?</th></tr>
+<tr><td>f-string</td><td>Python içinde</td><td>Şablon koda gömülü, dışarıdan gelemez</td><td>Kısa, tek satırlık mesajlar ve loglar</td></tr>
+<tr><td><code>str.format</code></td><td>Yok</td><td>Kullanıcı şablonunda tehlikeli</td><td>Eski kod; şablon sabitse</td></tr>
+<tr><td><code>string.Template</code></td><td>Yok</td><td>Evet, yalnızca ad değiştirir</td><td>Kullanıcının düzenlediği basit metinler (SMS, bildirim)</td></tr>
+<tr><td>Jinja2</td><td>Var: for, if, makro, kalıtım</td><td>autoescape ile evet</td><td>HTML rapor, e-posta, yapılandırma dosyası, belge</td></tr>
+</table></div>
+
+<h2>string.Template: güvenli ve basit</h2>
+<p><code>string.Template</code> yer tutucuları <code>$ad</code> biçiminde yazar (bitişik metin gerekiyorsa süslü parantezli biçim de vardır: <code>$&#123;ad&#125;TL</code>). Yalnızca ad değiştirir; ifade, nitelik erişimi ya da çağrı yapmaz. Bu yüzden şablonu pazarlama ekibinin bir yönetim panelinden düzenlemesine izin verebilirsin.</p>
+<pre class="py">from string import Template
+
+sms = Template("Sayın $ad, $tutar TL tutarlı siparişiniz $sehir şubesine ulaştı. Kod: $kod")
+print(sms.substitute(ad="Ayşe", tutar="1.249,90", sehir="İzmir", kod="AM-1042"))
+
+eksik = {"ad": "Mehmet", "tutar": "89,90"}
+print(sms.safe_substitute(eksik))       # eksikler olduğu gibi kalır
+try:
+    sms.substitute(eksik)
+except KeyError as e:
+    print("Eksik alan:", e)
+print(Template("İndirim: %$oran").substitute(oran=15), Template("Fiyat: $$100").substitute())</pre>
+<p><code>substitute</code> eksik anahtarda <code>KeyError</code> verir (üretimde tercih edilir: eksik veriyle mesaj gitmesin); <code>safe_substitute</code> eksik yer tutucuyu olduğu gibi bırakır (taslak önizleme için). Gerçek bir <code>$</code> işareti için <code>$$</code> yazılır.</p>
+
+<h2>f-string ve format'ın sınırı: şablon kimden geliyor?</h2>
+<p>f-string harikadır ama şablon <b>kodun içinde</b> yazılmak zorundadır; dosyadan ya da veritabanından okunan bir metni f-string'e çeviremezsin. Akla gelen ilk çözüm <code>str.format</code>'tır; ama şablonu kullanıcı yazıyorsa bu bir güvenlik açığıdır, çünkü format alanı nitelik ve indeks erişimine izin verir:</p>
+<pre class="py">class Musteri:
+    def __init__(self, ad):
+        self.ad = ad
+        self._kart_no = "4543 1234 5678 9012"     # gizli olmalı
+
+m = Musteri("Ayşe")
+print("Merhaba {m.ad}".format(m=m))                 # beklenen kullanım
+print("Merhaba {m._kart_no}".format(m=m))           # kötü niyetli şablon
+print("{m.__class__.__init__.__globals__[Musteri]}".format(m=m))   # içeriye sızma</pre>
+<div class="warn"><b>Kural</b>Kullanıcının yazdığı metni asla <code>str.format</code>, <code>eval</code> ya da f-string'e dönüştürüp çalıştırma. Basit metin için <code>string.Template</code>, mantık gerekiyorsa Jinja2'nin <code>SandboxedEnvironment</code>'ını kullan.</div>
+
+<h2>Jinja2 temelleri: değişken, filtre, for, if</h2>
+<p>Jinja üç tür işaretleme kullanır: <code>{{ ... }}</code> ifade yazdırır, <code>{% ... %}</code> komut çalıştırır (for, if, set, macro), <code>{# ... #}</code> yorumdur. Sözlük anahtarına ve nesne niteliğine aynı noktalı yazımla erişirsin: <code>{{ s.tutar }}</code>.</p>
+<pre class="py">from jinja2 import Environment
+
+env = Environment(trim_blocks=True, lstrip_blocks=True)
+sablon = env.from_string("""Haftalık özet - {{ magaza|upper }}
+{% for s in siparisler %}
+{{ loop.index }}. {{ s.no }} {{ s.musteri|default("Misafir") }} {{ "%.2f"|format(s.tutar) }} TL{% if s.tutar &gt; 1000 %} *{% endif %}
+
+{% else %}
+Bu hafta sipariş yok.
+{% endfor %}
+Toplam: {{ siparisler|sum(attribute="tutar")|round(2) }} TL ({{ siparisler|length }} sipariş)
+""")
+veri = [{"no": "AM-1", "musteri": "Ayşe", "tutar": 1249.9},
+        {"no": "AM-2", "musteri": None, "tutar": 89.5},
+        {"no": "AM-3", "tutar": 450}]
+print(sablon.render(magaza="Kadıköy", siparisler=veri))
+print(sablon.render(magaza="Bornova", siparisler=[]))</pre>
+<p>Burada birçok şey bir arada: <code>loop.index</code> 1'den sayar (<code>loop.index0</code>, <code>loop.first</code>, <code>loop.last</code>, <code>loop.length</code> da var), <code>{% else %}</code> liste boşsa çalışır, <code>trim_blocks</code> ve <code>lstrip_blocks</code> komut satırlarının bıraktığı boş satırları ve girintileri temizler. <code>default</code> filtresi tanımsız değeri yakalar; <code>None</code> için <code>default("Misafir", true)</code> yazman gerekir (çıktıdaki "None"a dikkat).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Filtre</th><th>Örnek</th><th>Sonuç</th></tr>
+<tr><td><code>upper, lower, title, capitalize</code></td><td><code>{{ "çay"|upper }}</code></td><td>ÇAY</td></tr>
+<tr><td><code>default(x, true)</code></td><td><code>{{ none_deger|default("-", true) }}</code></td><td>-</td></tr>
+<tr><td><code>round(n), int, float</code></td><td><code>{{ 3.14159|round(2) }}</code></td><td>3.14</td></tr>
+<tr><td><code>format</code></td><td><code>{{ "%.2f"|format(5) }}</code></td><td>5.00</td></tr>
+<tr><td><code>length, sum, min, max</code></td><td><code>{{ liste|sum(attribute="tutar") }}</code></td><td>Toplam</td></tr>
+<tr><td><code>join, sort, unique, groupby</code></td><td><code>{{ adlar|sort|join(", ") }}</code></td><td>Sıralı liste</td></tr>
+<tr><td><code>e (escape), safe, striptags</code></td><td><code>{{ yorum|e }}</code></td><td>HTML kaçışlı</td></tr>
+</table></div>
+
+<h2>Kendi filtren: Türk lirası biçimi</h2>
+<p>Hazır filtreler İngilizce biçim kullanır (1,249.90). Türkiye'de beklenen <b>1.249,90 TL</b>'dir. Bir Python fonksiyonunu <code>env.filters</code> sözlüğüne eklersen şablonda filtre olarak kullanırsın. Filtre, şablon derlenmeden <b>önce</b> kaydedilmelidir.</p>
+<pre class="py">from jinja2 import Environment
+
+def tl(deger, ondalik=2):
+    metin = f"{deger:,.{ondalik}f}"                   # 1,249.90
+    return metin.translate(str.maketrans(",.", ".,")) + " TL"   # 1.249,90 TL
+
+env = Environment()
+env.filters["tl"] = tl
+print(env.from_string("Ciro: {{ ciro|tl }} | Ortalama: {{ ort|tl(0) }}").render(ciro=182450.5, ort=1249.9))</pre>
+
+<h2>Makro ve kalıtım: tekrarı kaldırmak</h2>
+<p><b>Makro</b> (macro) şablon içindeki fonksiyondur: aynı rozeti, butonu ya da tablo satırını tekrar tekrar yazmazsın. <b>Kalıtım</b> (template inheritance) ise tüm raporların ortak iskeletini (logo, CSS, alt bilgi) bir <i>taban şablonda</i> tutar; alt şablonlar yalnızca <code>{% block %}</code> bölümlerini doldurur. Gerçek projede şablonlar <code>templates/</code> klasöründe dosya olarak durur ve <code>FileSystemLoader("templates")</code> ile yüklenir; burada aynı şeyi <code>DictLoader</code> ile bellekte yapıyoruz.</p>
+<pre class="py">from jinja2 import Environment, DictLoader
+
+sablonlar = {
+    "taban.html": """&lt;html&gt;&lt;body&gt;
+&lt;h1&gt;Anadolu Market | {% block baslik %}Rapor{% endblock %}&lt;/h1&gt;
+{% block icerik %}{% endblock %}
+&lt;footer&gt;Otomatik üretildi&lt;/footer&gt;
+&lt;/body&gt;&lt;/html&gt;""",
+    "makrolar.html": """{% macro rozet(durum) -%}
+&lt;span class="rozet {{ durum }}"&gt;{{ {"teslim": "Teslim", "kargoda": "Yolda"}.get(durum, "Bekliyor") }}&lt;/span&gt;
+{%- endmacro %}""",
+    "kargo.html": """{% extends "taban.html" %}
+{% from "makrolar.html" import rozet %}
+{% block baslik %}Kargo durumu{% endblock %}
+{% block icerik %}&lt;ul&gt;
+{% for g in gonderiler %}&lt;li&gt;{{ g.no }} {{ rozet(g.durum) }}&lt;/li&gt;
+{% endfor %}&lt;/ul&gt;{% endblock %}""",
+}
+env = Environment(loader=DictLoader(sablonlar), autoescape=True)
+print(env.get_template("kargo.html").render(gonderiler=[{"no": "AM-1", "durum": "teslim"}, {"no": "AM-2", "durum": "hazir"}]))</pre>
+<div class="tip"><b>Kalıtım kuralları</b><code>{% extends %}</code> alt şablonun ilk komutu olmalıdır; alt şablonda block dışında yazılan metin görünmez. Taban bloğun içeriğini silmeden üstüne eklemek için <code>{{ super() }}</code> kullanılır.</div>
+
+<h2>autoescape ve XSS</h2>
+<p>HTML üretirken en büyük tehlike <b>XSS</b> (cross-site scripting): kullanıcıdan gelen bir metnin (ürün yorumu, müşteri adı) içindeki <code>&lt;script&gt;</code> etiketi, raporu açan yöneticinin tarayıcısında çalışır. Jinja'da <code>autoescape=True</code> değişkenlerden gelen <code>&lt; &gt; &amp; " '</code> karakterlerini HTML varlıklarına çevirir; şablonun kendi etiketlerine dokunmaz.</p>
+<pre class="py">from jinja2 import Environment, select_autoescape
+
+yorum = '&lt;script&gt;alert("hack")&lt;/script&gt; Çok güzel &amp; hızlı'
+tehlikeli = Environment().from_string("&lt;p&gt;{{ y }}&lt;/p&gt;").render(y=yorum)
+guvenli = Environment(autoescape=True).from_string("&lt;p&gt;{{ y }}&lt;/p&gt;").render(y=yorum)
+print(tehlikeli)
+print(guvenli)
+env = Environment(autoescape=select_autoescape(["html", "xml"]))   # dosya uzantısına göre
+print(env.from_string("{{ x|safe }}").render(x="&lt;b&gt;güvendiğin HTML&lt;/b&gt;"))</pre>
+<p><code>Environment()</code>'ın varsayılanı <b>autoescape kapalıdır</b> (Jinja HTML dışında YAML, SQL, Markdown da ürettiği için). HTML üreten her ortamda açıkça aç. <code>|safe</code> filtresi kaçışı kapatır: yalnızca senin ürettiğin, kullanıcı girdisi içermeyen HTML için kullan.</p>
+
+<h2>Boru hattı: CSV → özet → HTML rapor</h2>
+<p>Şimdi parçaları birleştirelim: ham CSV satırlarını oku, şehre göre özetle, Jinja ile satır içi CSS'li (e-posta istemcileri harici CSS'i çoğunlukla yok sayar) bir HTML tablo üret. Bu kalıp her haftalık raporun iskeletidir; bitirme projesinde bunu tam bir otomasyona dönüştüreceksin.</p>
+<pre class="py">import csv, io
+from collections import defaultdict
+from jinja2 import Environment
+
+CSV = """sehir,urun,tutar
+İzmir,Çay,450
+Ankara,Kahve,1249.9
+İzmir,Kahve,890
+İstanbul,Çay,2100
+Ankara,Su,75.5
+"""
+
+ozet = defaultdict(lambda: {"adet": 0, "ciro": 0.0})
+for satir in csv.DictReader(io.StringIO(CSV)):
+    ozet[satir["sehir"]]["adet"] += 1
+    ozet[satir["sehir"]]["ciro"] += float(satir["tutar"])
+satirlar = sorted(({"sehir": s, **d} for s, d in ozet.items()), key=lambda r: -r["ciro"])
+
+env = Environment(autoescape=True, trim_blocks=True, lstrip_blocks=True)
+env.filters["tl"] = lambda x: f"{x:,.2f}".translate(str.maketrans(",.", ".,")) + " TL"
+rapor = env.from_string("""&lt;h2 style="color:#1a5"&gt;Şehir bazında satış&lt;/h2&gt;
+&lt;table style="border-collapse:collapse"&gt;
+{% for r in satirlar %}
+  &lt;tr&gt;&lt;td&gt;{{ r.sehir }}&lt;/td&gt;&lt;td&gt;{{ r.adet }}&lt;/td&gt;&lt;td style="text-align:right"&gt;{{ r.ciro|tl }}&lt;/td&gt;&lt;/tr&gt;
+{% endfor %}
+  &lt;tr&gt;&lt;th&gt;Toplam&lt;/th&gt;&lt;th&gt;{{ satirlar|sum(attribute="adet") }}&lt;/th&gt;&lt;th&gt;{{ satirlar|sum(attribute="ciro")|tl }}&lt;/th&gt;&lt;/tr&gt;
+&lt;/table&gt;""").render(satirlar=satirlar)
+print(rapor)</pre>
+<p>Aynı veriden <b>Markdown</b> rapor (GitHub, Teams, Notion, Confluence okur) üretmek de bir şablon değişikliğidir. Markdown HTML olmadığı için burada autoescape kapalı kalır:</p>
+<pre class="py">from jinja2 import Environment
+
+env = Environment(trim_blocks=True, lstrip_blocks=True)
+md = env.from_string("""# {{ baslik }}
+
+| Şehir | Sipariş | Ciro |
+|---|---:|---:|
+{% for r in satirlar %}
+| {{ r.sehir }} | {{ r.adet }} | {{ "%.2f"|format(r.ciro) }} |
+{% endfor %}
+
+**En iyi şehir:** {{ (satirlar|first).sehir }}
+""")
+print(md.render(baslik="43. hafta", satirlar=[{"sehir": "İstanbul", "adet": 1, "ciro": 2100.0},
+                                             {"sehir": "İzmir", "adet": 2, "ciro": 1340.0}]))</pre>
+<p>HTML raporu e-postaya koymak <i>Ofis ve iş akışı otomasyonu</i> dersindeki <code>EmailMessage</code> ile tek satırdır: <code>msg.set_content(duz_metin)</code> ardından <code>msg.add_alternative(html, subtype="html")</code>. Hem düz metin hem HTML sürümü göndermek spam filtrelerinde puanını iyileştirir ve HTML göstermeyen istemcilerde de okunur kalır.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir e-ticaret firmasında kampanya e-postaları pazarlama ekibinin düzenlediği Jinja şablonlarıyla üretilir. Ekip bir gün şablona <code>{{ musteri.ad }}</code> yerine <code>{{ musteri.isim }}</code> yazdı; varsayılan <code>Undefined</code> sessizce boş metin bastığı için 40.000 kişiye "Merhaba ," diye başlayan e-posta gitti. Çözüm: <code>Environment(undefined=StrictUndefined)</code> ile tanımsız değişkende hata almak ve gönderimden önce şablonu örnek veriyle render eden bir test eklemek.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>StrictUndefined ve şablon testleri</h3>
+<p>Varsayılan davranışta tanımsız değişken boş metin olur. Üretim ortamında <code>StrictUndefined</code> kullan: hata erken ve yüksek sesle gelsin. Şablonları birim testiyle denetle: örnek veriyle render et, beklenen parçaların çıktıda olduğunu (ya da tüm çıktının kayıtlı bir "anlık görüntüyle" aynı olduğunu, snapshot testing) doğrula.</p>
+<h3>Dosya düzeni ve önbellek</h3>
+<pre class="code">from pathlib import Path
+from jinja2 import Environment, FileSystemLoader, StrictUndefined, select_autoescape
+
+KLASOR = Path(__file__).parent / "templates"      # templates/taban.html, templates/haftalik.html
+env = Environment(
+    loader=FileSystemLoader(KLASOR),
+    autoescape=select_autoescape(["html", "xml"]),
+    undefined=StrictUndefined,
+    trim_blocks=True, lstrip_blocks=True,
+)
+html = env.get_template("haftalik.html").render(ozet=ozet)
+Path("cikti/haftalik.html").write_text(html, encoding="utf-8")</pre>
+<p>Environment'ı bir kez oluştur ve yeniden kullan: derlenen şablonlar önbelleğe (cache) alınır. Her render'da yeni Environment kurmak gereksiz yere yavaştır.</p>
+<h3>Kullanıcı şablonları ve sandbox</h3>
+<p>Müşterilerin kendi şablonunu yazdığı bir üründe <code>jinja2.sandbox.SandboxedEnvironment</code> kullanılır: alt çizgili niteliklere ve tehlikeli metotlara erişimi engeller. Yine de zaman aşımı ve çıktı boyutu sınırı gibi ek önlemler gerekir.</p>
+<h3>PDF ve Word</h3>
+<p>HTML raporu PDF'e çevirmek için <code>weasyprint</code> (<code>HTML(string=html).write_pdf("rapor.pdf")</code>), Word şablonunu Jinja sözdizimiyle doldurmak için <code>docxtpl</code> kullanılır. İkisi de kendi bilgisayarında çalışır (<code>pip install weasyprint docxtpl</code>); mantık bu dersteki şablonlarla aynıdır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/sablon-rapor">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pydantic-dogrulama/">← Veri doğrulama ve pydantic v2</a><a href="../proje-analist/">Bitirme projesi: Kanat Havayolları gecikme analizi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

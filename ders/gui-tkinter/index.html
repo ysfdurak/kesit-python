@@ -1,0 +1,254 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Masaüstü arayüz: tkinter ve MVC | Kesit Python</title><meta name="description" content="tkinter ile pencere, widget, grid/pack yerleşimi, olay ve callback, StringVar ve messagebox kullanmayı; bahşiş hesaplayıcı ve hesap makinesi örnekleriyle…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/gui-tkinter/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Masaüstü arayüz: tkinter ve MVC"><meta property="og:description" content="tkinter ile pencere, widget, grid/pack yerleşimi, olay ve callback, StringVar ve messagebox kullanmayı; bahşiş hesaplayıcı ve hesap makinesi örnekleriyle…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/gui-tkinter/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Masaüstü arayüz: tkinter ve MVC","description":"tkinter ile pencere, widget, grid/pack yerleşimi, olay ve callback, StringVar ve messagebox kullanmayı; bahşiş hesaplayıcı ve hesap makinesi örnekleriyle…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/gui-tkinter/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Masaüstü arayüz: tkinter ve MVC</h1><p class="st-l">tkinter ile pencere, widget, grid/pack yerleşimi, olay ve callback, StringVar ve messagebox kullanmayı; bahşiş hesaplayıcı ve hesap makinesi örnekleriyle mantığı arayüzden ayıran MVC düzenini ve tkinter alternatiflerini öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/gui-tkinter">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in deposunda çalışan ekip her sabah bir Excel dosyasını açıp aynı üç hesabı elle yapıyor. Python betiğini yazdın ama ekip terminal kullanmıyor. Çözüm küçük bir masaüstü penceresi: iki kutu, bir düğme, bir sonuç etiketi. Kurumlarda bu tür <b>iç araçlar</b> (internal tools) çok yaygındır: fiyat etiketi basıcı, vardiya planlayıcı, kur hesaplayıcı. Python'un yanında gelen <b>tkinter</b>, bunları ek kurulum olmadan yazmanı sağlar.</p>
+<p>Bu derste iki şeyi birlikte öğreneceksin: grafik arayüzün (GUI) temel kavramları (pencere, widget, yerleşim, olay, callback, olay döngüsü) ve daha önemlisi <b>mantığı arayüzden ayırmak</b>. İyi yazılmış bir GUI uygulamasında hesap kodu pencereden habersizdir; bu yüzden test edilebilir ve aynı kod yarın bir web sayfasına taşınabilir.</p>
+<div class="warn"><b>tkinter tarayıcıda çalışmaz</b>Bu sayfadaki Python motoru tarayıcıda çalışır ve pencere açamaz. Arayüz kodlarını gri kutularda (çalıştır düğmesi olmadan) gösteriyoruz; bunları <b>kendi bilgisayarında dene</b>. Alıştırmalar ise arayüzden bağımsız mantık katmanını yazdırır ve burada çalışır.</div>
+
+<h2>Kurulum ve ilk pencere</h2>
+<p>Windows ve macOS'te python.org yükleyicisi tkinter'ı içerir. Linux'ta çoğu dağıtım ayrı paket ister. Kurulumu sınamak için terminalde küçük bir deneme penceresi açabilirsin:</p>
+<pre class="code"># Linux (Debian/Ubuntu)
+sudo apt install python3-tk
+# Her işletim sisteminde deneme penceresi
+python -m tkinter</pre>
+<p>En küçük uygulama: bir pencere, bir etiket, bir düğme.</p>
+<pre class="code">import tkinter as tk
+
+pencere = tk.Tk()
+pencere.title("Anadolu Market")
+pencere.geometry("320x120")
+
+etiket = tk.Label(pencere, text="Merhaba depo ekibi!")
+etiket.pack(pady=10)
+
+def selamla():
+    etiket.config(text="Düğmeye basıldı")
+
+tk.Button(pencere, text="Bas", command=selamla).pack()
+
+pencere.mainloop()      # olay döngüsü: pencere kapanana kadar burada kalır</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Kodu <code>ilk_pencere.py</code> olarak kaydet ve <code>python ilk_pencere.py</code> ile çalıştır. VS Code'da da "Run Python File" yeterlidir; tkinter için <code>pip install</code> gerekmez.</div>
+
+<h2>Widget'lar</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Widget</th><th>Ne işe yarar?</th><th>Sık kullanılan</th></tr>
+<tr><td><code>Label</code></td><td>Metin ya da resim gösterir</td><td><code>text=</code>, <code>textvariable=</code>, <code>config()</code></td></tr>
+<tr><td><code>Entry</code></td><td>Tek satır girdi kutusu</td><td><code>get()</code>, <code>delete(0, "end")</code>, <code>insert()</code></td></tr>
+<tr><td><code>Button</code></td><td>Tıklanınca fonksiyon çağırır</td><td><code>command=</code></td></tr>
+<tr><td><code>Listbox</code></td><td>Seçilebilir satır listesi</td><td><code>insert("end", x)</code>, <code>curselection()</code>, <code>delete(i)</code></td></tr>
+<tr><td><code>Checkbutton</code>, <code>Radiobutton</code></td><td>Seçenekler</td><td><code>variable=</code> (BooleanVar/StringVar)</td></tr>
+<tr><td><code>Frame</code></td><td>Widget'ları gruplayan kap</td><td>İç içe yerleşim</td></tr>
+<tr><td><code>ttk.Combobox</code></td><td>Açılır liste</td><td><code>values=</code>, <code>get()</code></td></tr>
+</table></div>
+<p><code>tkinter.ttk</code> modülü aynı widget'ların işletim sistemine daha uygun görünen "temalı" sürümlerini sunar; yeni projelerde <code>ttk.Button</code>, <code>ttk.Entry</code> tercih edilir.</p>
+
+<h2>Yerleşim: pack, grid, place</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Mantık</th><th>Ne zaman?</th></tr>
+<tr><td><code>pack()</code></td><td>Widget'ları üstten alta (ya da yan yana) dizer</td><td>Basit, tek sütunlu düzen</td></tr>
+<tr><td><code>grid(row=, column=)</code></td><td>Satır/sütun tablosu; <code>columnspan</code>, <code>sticky</code></td><td>Formlar, hesap makinesi tuşları</td></tr>
+<tr><td><code>place(x=, y=)</code></td><td>Piksel koordinatı</td><td>Nadiren; pencere boyutu değişince bozulur</td></tr>
+</table></div>
+<div class="warn"><b>Aynı kapta pack ve grid karıştırma</b>Bir pencere ya da Frame içinde bazı widget'ları <code>pack</code>, bazılarını <code>grid</code> ile yerleştirirsen tkinter ikisini uzlaştırmaya çalışırken donar ya da <code>TclError</code> verir. Farklı yöntem gerekiyorsa ayrı Frame'ler kullan.</div>
+<p>Grid, hesap makinesi gibi düzenlerde etiket listesinden satır/sütun hesaplamayı gerektirir; bu tamamen sıradan Python'dur:</p>
+<pre class="py">tuslar = ["7", "8", "9", "/", "4", "5", "6", "*", "1", "2", "3", "-", "0", ".", "=", "+"]
+sutun_sayisi = 4
+for i, tus in enumerate(tuslar):
+    satir, sutun = divmod(i, sutun_sayisi)
+    satir += 1                      # 0. satır ekrana ayrıldı
+    print(f"{tus!r:5} -> grid(row={satir}, column={sutun})")
+    if i == 5:
+        print("...")
+        break</pre>
+
+<h2>Olaylar ve callback'ler</h2>
+<p>GUI programı yukarıdan aşağı akmaz; <b>olay güdümlüdür</b> (event-driven). Sen fonksiyonları kaydedersin, kullanıcı tıklayınca ya da tuşa basınca tkinter onları çağırır. Bu fonksiyonlara <b>callback</b> denir. En sık hata, fonksiyonu kaydetmek yerine <b>çağırmaktır</b>:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Ne olur?</th></tr>
+<tr><td><code>command=hesapla</code></td><td>Fonksiyon nesnesi kaydedilir; tıklanınca çalışır. Doğru.</td></tr>
+<tr><td><code>command=hesapla()</code></td><td>Fonksiyon pencere kurulurken HEMEN bir kez çalışır, dönüş değeri (çoğu zaman None) kaydedilir; tıklama hiçbir şey yapmaz.</td></tr>
+<tr><td><code>command=lambda: ekle("7")</code></td><td>Argümanlı çağrı için sarmalayıcı; tıklanınca <code>ekle("7")</code> çalışır.</td></tr>
+<tr><td><code>entry.bind("&lt;Return&gt;", f)</code></td><td>Klavye/fare olayı; <code>f(event)</code> biçiminde bir olay nesnesiyle çağrılır.</td></tr>
+</table></div>
+<p>Bunu tkinter'sız, sahte bir düğme sınıfıyla burada görebilirsin:</p>
+<pre class="py">class Dugme:                       # tk.Button'ın davranışını taklit eder
+    def __init__(self, metin, command=None):
+        self.metin = metin
+        self.command = command
+    def tikla(self):
+        if self.command is not None:
+            self.command()
+        else:
+            print(f"[{self.metin}] tıklandı ama bağlı komut yok")
+
+def hesapla():
+    print("Hesaplandı!")
+    return None
+
+dogru = Dugme("Hesapla", command=hesapla)
+yanlis = Dugme("Hesapla", command=hesapla())   # burada bir kez çalışır!
+print("--- kullanıcı tıklıyor ---")
+dogru.tikla()
+yanlis.tikla()</pre>
+
+<h2>mainloop: olay döngüsü</h2>
+<p><code>mainloop()</code> sonsuz bir döngüdür: işletim sisteminden olayları (tıklama, tuş, yeniden çizim, zamanlayıcı) bir kuyruktan alır ve ilgili callback'i çağırır. Bu yüzden callback'ler <b>kısa</b> olmalıdır; 10 saniyelik bir hesap yaparsan döngü o süre boyunca olay işleyemez ve pencere "yanıt vermiyor" olur. Mekanizma kabaca şöyledir:</p>
+<pre class="py">from collections import deque
+
+kuyruk = deque()
+kayitli = {}                                   # olay adı -> callback listesi
+
+def bind(olay, fonk):
+    kayitli.setdefault(olay, []).append(fonk)
+
+def mainloop():
+    while kuyruk:                              # gerçekte: pencere kapanana dek
+        olay, veri = kuyruk.popleft()
+        for fonk in kayitli.get(olay, []):
+            fonk(veri)
+
+bind("tikla", lambda v: print("Sepete eklendi:", v))
+bind("tus", lambda v: print("Basılan tuş:", v))
+bind("tus", lambda v: print("  (arama kutusu güncellendi)"))
+kuyruk.extend([("tus", "a"), ("tikla", "Termos"), ("kapat", None), ("tus", "b")])
+mainloop()
+print("Pencere kapandı")</pre>
+<p>Zamanlayıcı için tkinter <code>pencere.after(1000, fonk)</code> sunar: "1 saniye sonra fonk'u kuyruğa koy". Saat, ilerleme çubuğu, periyodik yenileme hep bununla yapılır; <code>time.sleep</code> ise döngüyü dondurur.</p>
+
+<h2>StringVar: widget ile değişkeni bağlamak</h2>
+<p><code>tk.StringVar</code>, <code>IntVar</code>, <code>DoubleVar</code>, <code>BooleanVar</code> bir değeri tutar ve ona bağlı widget'ları otomatik günceller. <code>Label(textvariable=sonuc)</code> yazarsan <code>sonuc.set("...")</code> etiketi değiştirir; <code>trace_add("write", f)</code> ile değer her yazıldığında bir fonksiyon çalıştırabilirsin (canlı doğrulama). Bu, <b>gözlemci</b> (observer) kalıbıdır:</p>
+<pre class="py">class Degisken:                               # tk.StringVar'ın sade taklidi
+    def __init__(self, deger=""):
+        self._deger = deger
+        self._izleyiciler = []
+    def get(self):
+        return self._deger
+    def set(self, yeni):
+        self._deger = yeni
+        for f in self._izleyiciler:
+            f(yeni)
+    def trace_add(self, f):
+        self._izleyiciler.append(f)
+
+tutar = Degisken()
+tutar.trace_add(lambda v: print("Etiket:", v or "(boş)"))
+tutar.trace_add(lambda v: print("Geçerli mi?", v.replace(",", ".", 1).replace(".", "", 1).isdigit()))
+tutar.set("250,50")
+tutar.set("abc")</pre>
+
+<h2>messagebox ve bahşiş hesaplayıcı</h2>
+<p><code>tkinter.messagebox</code> hazır diyalog pencereleri sunar: <code>showinfo</code>, <code>showwarning</code>, <code>showerror</code>, <code>askyesno</code>. Şimdi küçük ama tam bir uygulama yazalım. Önce <b>mantık</b> (model): saf Python, tarayıcıda çalışır.</p>
+<pre class="py">def bahsis_hesapla(tutar, yuzde, kisi):
+    if tutar &lt;= 0 or not 0 &lt;= yuzde &lt;= 100 or kisi &lt; 1:
+        raise ValueError("Geçersiz girdi")
+    bahsis = round(tutar * yuzde / 100, 2)
+    toplam = round(tutar + bahsis, 2)
+    return {"bahsis": bahsis, "toplam": toplam, "kisi_basi": round(toplam / kisi, 2)}
+
+print(bahsis_hesapla(1250.0, 10, 4))
+print(bahsis_hesapla(480, 15, 3))
+try:
+    bahsis_hesapla(100, 120, 2)
+except ValueError as e:
+    print("Hata:", e)</pre>
+<p>Sonra <b>arayüz</b>: yalnız girdiyi okur, modeli çağırır, sonucu gösterir.</p>
+<pre class="code">import tkinter as tk
+from tkinter import ttk, messagebox
+from bahsis_model import bahsis_hesapla      # yukarıdaki fonksiyon
+
+pencere = tk.Tk()
+pencere.title("Bahşiş Hesaplayıcı")
+tutar, yuzde, kisi, sonuc = tk.StringVar(), tk.StringVar(value="10"), tk.StringVar(value="1"), tk.StringVar()
+
+for satir, (etiket, degisken) in enumerate([("Tutar (TL)", tutar), ("Bahşiş %", yuzde), ("Kişi", kisi)]):
+    ttk.Label(pencere, text=etiket).grid(row=satir, column=0, sticky="w", padx=8, pady=4)
+    ttk.Entry(pencere, textvariable=degisken, width=12).grid(row=satir, column=1, padx=8)
+
+def hesapla(event=None):
+    try:
+        s = bahsis_hesapla(float(tutar.get().replace(",", ".")), float(yuzde.get()), int(kisi.get()))
+    except ValueError:
+        messagebox.showerror("Hata", "Lütfen geçerli sayılar girin.")
+        return
+    sonuc.set(f"Bahşiş {s['bahsis']:.2f} | Toplam {s['toplam']:.2f} | Kişi başı {s['kisi_basi']:.2f}")
+
+ttk.Button(pencere, text="Hesapla", command=hesapla).grid(row=3, column=0, columnspan=2, pady=6)
+ttk.Label(pencere, textvariable=sonuc).grid(row=4, column=0, columnspan=2, pady=4)
+pencere.bind("&lt;Return&gt;", hesapla)            # Enter tuşu da hesaplasın
+pencere.mainloop()</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Mantığı <code>bahsis_model.py</code>, arayüzü <code>bahsis_app.py</code> olarak aynı klasöre kaydet ve <code>python bahsis_app.py</code> çalıştır. <code>hesapla(event=None)</code> imzası sayesinde aynı fonksiyon hem düğmeden (argümansız) hem Enter tuşundan (olay nesnesiyle) çağrılabilir.</div>
+
+<h2>MVC: mantığı arayüzden ayırmak</h2>
+<p><b>Model–View–Controller</b> (Model–Görünüm–Denetleyici) bu ayrımı adlandırır. <b>Model</b> iş kuralıdır (hesap, doğrulama, veri). <b>View</b> pencere ve widget'lardır, kural içermez. <b>Controller</b> görünümden girdiyi alır, modeli çağırır, sonucu görünüme yazar. Controller'ı, <code>get()</code>/<code>set()</code> sunan herhangi bir nesneyle çalışacak biçimde yazarsan onu gerçek pencere olmadan, sahte bir görünümle test edebilirsin. Bu dersin mini projesi tam olarak bu.</p>
+
+<h2>Hesap makinesi bir durum makinesidir</h2>
+<p>Hesap makinesinin ekranı, o ana kadar basılan tuşlara bağlı bir <b>durumdur</b>: ekrandaki sayı, bekleyen işlem, biriken değer ve "yeni sayı mı başlıyor?" bayrağı. Her tuş bu durumu değiştirir. Arayüzdeki 16 düğmenin her biri yalnızca <code>makine.bas("7")</code> çağırır ve <code>ekran</code>'ı etikete yazar.</p>
+<pre class="py">class MiniHesap:
+    def __init__(self):
+        self.ekran, self.birikim, self.islem, self.yeni = "0", None, None, True
+    def bas(self, tus):
+        if tus.isdigit():
+            self.ekran = tus if self.yeni or self.ekran == "0" else self.ekran + tus
+            self.yeni = False
+        elif tus in "+-":
+            self.esittir()
+            self.birikim, self.islem, self.yeni = float(self.ekran), tus, True
+        elif tus == "=":
+            self.esittir()
+    def esittir(self):
+        if self.islem and not self.yeni:
+            b, s = self.birikim, float(self.ekran)
+            sonuc = b + s if self.islem == "+" else b - s
+            self.ekran = str(int(sonuc)) if sonuc == int(sonuc) else str(sonuc)
+            self.islem, self.yeni = None, True
+
+m = MiniHesap()
+for tus in "12+30-5=":
+    m.bas(tus)
+    print(f"{tus} -> ekran {m.ekran}")</pre>
+
+<h2>Döngüde düğme oluşturma tuzağı</h2>
+<p>Tuşları döngüyle oluştururken <code>command=lambda: ekle(tus)</code> yazarsan bütün düğmeler <b>son</b> tuşu ekler. Lambda <code>tus</code>'un değerini değil adını hatırlar; tıklandığında döngü çoktan bitmiş ve <code>tus</code> son değerde kalmıştır (geç bağlama, late binding). Çözüm: değeri varsayılan argümanla dondurmak.</p>
+<pre class="py">ekran = []
+yanlis = [lambda: ekran.append(t) for t in "123"]
+dogru = [lambda t=t: ekran.append(t) for t in "123"]
+for f in yanlis:
+    f()
+print("yanlış:", "".join(ekran))
+ekran.clear()
+for f in dogru:
+    f()
+print("doğru :", "".join(ekran))</pre>
+
+<h2>Alternatifler</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Güçlü yanı</th><th>Dikkat</th><th>Kurulum</th></tr>
+<tr><td>tkinter (+ttk)</td><td>Python ile gelir, hafif, öğrenmesi kolay</td><td>Görünüm sade; karmaşık arayüzde zahmetli</td><td>Yok</td></tr>
+<tr><td>customtkinter</td><td>tkinter üstünde modern, koyu tema</td><td>Topluluk projesi</td><td><code>pip install customtkinter</code></td></tr>
+<tr><td>PySide6 (Qt)</td><td>Profesyonel, zengin widget, Qt Designer</td><td>Büyük paket; öğrenme eğrisi</td><td><code>pip install PySide6</code></td></tr>
+<tr><td>PyQt6</td><td>PySide6 ile benzer API</td><td>GPL/ticari lisans; kapalı kaynakta dikkat</td><td><code>pip install PyQt6</code></td></tr>
+<tr><td>Flet</td><td>Flutter tabanlı; masaüstü, web ve mobil tek kod</td><td>Görece yeni; sürüm değişiklikleri</td><td><code>pip install flet</code></td></tr>
+<tr><td>Kivy</td><td>Dokunmatik ve mobil odaklı</td><td>Kendine özgü görünüm</td><td><code>pip install kivy</code></td></tr>
+</table></div>
+<p>Uygulamayı Python kurulu olmayan bir bilgisayara dağıtmak için <code>pip install pyinstaller</code> ve <code>pyinstaller --onefile --windowed bahsis_app.py</code> ile tek dosyalık çalıştırılabilir üretebilirsin.</p>
+
+<div class="note"><b>Gerçek işte</b>Şirket içinde masaüstü araçlar genellikle bir uzmanın tekrar eden işini otomatikleştirmek için doğar: depoda etiket basma, muhasebede dosya birleştirme, İK'da izin hesabı. Bu araçların ömrü çoğu zaman beklenenden uzun olur ve bir gün web'e taşınması istenir. Mantığı arayüzden ayırdıysan taşıma, yalnız görünüm katmanını yeniden yazmaktır; ayırmadıysan baştan yazmaktır. Ayrıca ayrık mantık birim testiyle güvenceye alınır; GUI'yi elle tıklayarak test etmek ise yavaş ve güvenilmezdir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Uzun işlerde donmayan arayüz</h3>
+<p>Rapor oluşturmak gibi uzun bir işi callback içinde yaparsan pencere donar. Çözüm: işi <code>threading.Thread</code> ile arka planda çalıştırmak ve sonucu bir <code>queue.Queue</code>'ya koymak; arayüz ise <code>pencere.after(100, kontrol_et)</code> ile kuyruğu periyodik olarak yoklar. Altın kural: widget'lara <b>yalnız ana iş parçacığı</b> dokunur; arka plandaki thread'den <code>label.config(...)</code> çağırmak rastgele çökmelere yol açar.</p>
+<h3>Olay nesnesi ve "break"</h3>
+<p><code>bind</code> ile bağlanan fonksiyon bir <code>event</code> alır: <code>event.char</code>, <code>event.keysym</code>, <code>event.x</code>, <code>event.widget</code>. Fonksiyon <code>"break"</code> döndürürse olayın diğer işleyicilere (ör. Entry'nin harfi yazması) gitmesi durur; yalnız rakam kabul eden bir kutu böyle yapılır.</p>
+<h3>Test edilebilir GUI</h3>
+<p>Controller'ı sahte görünümle test etmek ilk adımdır. Gerçek widget testleri için pytest-qt (Qt) ya da tkinter'da <code>widget.event_generate</code> kullanılabilir, ama bunlar yavaştır ve ekran gerektirir. Kuralların yüzde doksanını model ve controller testleri kapsamalı.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/gui-tkinter">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../coklu-kalitim/">← Çoklu kalıtım, MRO ve mixin'ler</a><a href="../kapsulleme-ozellik/">Kapsülleme ve iç gözlem: property, __dict__ ve getattr →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

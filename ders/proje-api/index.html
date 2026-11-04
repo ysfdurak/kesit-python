@@ -1,0 +1,446 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Anadolu Market Sipariş API'si | Kesit Python</title><meta name="description" content="Katmanlı mimariyle (şema → depo → servis → uç nokta) bir sipariş API'si kurarsın: pydantic şemaları, SQLAlchemy deposu, stok-indirim-durum kurallarını…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-api/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Anadolu Market Sipariş API'si"><meta property="og:description" content="Katmanlı mimariyle (şema → depo → servis → uç nokta) bir sipariş API'si kurarsın: pydantic şemaları, SQLAlchemy deposu, stok-indirim-durum kurallarını…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-api/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Anadolu Market Sipariş API'si","description":"Katmanlı mimariyle (şema → depo → servis → uç nokta) bir sipariş API'si kurarsın: pydantic şemaları, SQLAlchemy deposu, stok-indirim-durum kurallarını…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-api/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market Sipariş API'si</h1><p class="st-l">Katmanlı mimariyle (şema → depo → servis → uç nokta) bir sipariş API'si kurarsın: pydantic şemaları, SQLAlchemy deposu, stok-indirim-durum kurallarını taşıyan servis, mini yönlendirici ve FastAPI karşılığı, hata→HTTP eşleme, hmac token, testler, Dockerfile ve README.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-api">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: Anadolu Market Sipariş API'si</h2>
+<p>Bu bitirme projesinde, ileri seviyede öğrendiklerini tek bir üretim kalitesinde serviste birleştireceksin: müşterinin sepetini siparişe çeviren, stoğu düşen, kuponu uygulayan, sipariş durumunu yöneten ve bunu güvenli bir HTTP API'si olarak sunan <b>Anadolu Market Sipariş API'si</b>. İşe alım mülakatlarında "bana bir sipariş servisi tasarla" sorusunun cevabı tam olarak bu projedir.</p>
+<p>Tarayıcıda FastAPI çalışmaz; ama projenin asıl değeri web çatısında değil, katmanlarda. Şema, depo ve servis katmanlarını <b>gerçek</b> pydantic ve SQLAlchemy ile (bellek içi SQLite) kuracak, uç noktaları küçük bir yönlendiriciyle taklit edeceksin. Her adımın FastAPI karşılığını da göreceksin; kendi bilgisayarında birkaç satırla gerçek API'ye dönüşür.</p>
+
+<h2>Mimari: dört katman</h2>
+<p><b>Katmanlı mimari</b> (layered architecture), her katmanın tek bir sorumluluğu olduğu ve yalnızca bir alttaki katmanı tanıdığı bir düzendir. İstek yukarıdan aşağıya akar, cevap aşağıdan yukarıya döner:</p>
+<pre class="out">  HTTP isteği  ──►  [ Uç nokta (endpoint) ]   yol, kimlik, şema doğrulama, HTTP kodu
+                          │
+                          ▼
+                    [ Servis (service) ]       iş kuralları: stok, indirim, durum geçişi
+                          │
+                          ▼
+                    [ Depo (repository) ]      veritabanı erişimi: ekle, getir, sorgula
+                          │
+                          ▼
+                    [ Model / ORM ]            tablolar: urunler, siparisler, kalemler</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Katman</th><th>Sorumluluk</th><th>Bilmez</th><th>Araç</th></tr>
+<tr><td>Şema (schema)</td><td>Dışarıdan gelen/giden verinin biçimi ve doğrulaması</td><td>Veritabanı, iş kuralı</td><td>pydantic</td></tr>
+<tr><td>Uç nokta</td><td>HTTP'yi servise çevirir, hatayı HTTP koduna eşler</td><td>SQL, indirim hesabı</td><td>FastAPI / mini yönlendirici</td></tr>
+<tr><td>Servis</td><td>İş kuralları ve işlem (transaction) sınırı</td><td>HTTP, JSON</td><td>Saf Python</td></tr>
+<tr><td>Depo</td><td>Kalıcılık: sorgu ve kayıt</td><td>İş kuralları</td><td>SQLAlchemy Session</td></tr>
+<tr><td>Model</td><td>Tablo ve ilişki tanımları</td><td>Her şey</td><td>SQLAlchemy ORM</td></tr>
+</table></div>
+<p>Kazanç: servis katmanını HTTP olmadan test edersin, veritabanını değiştirmek yalnızca depoyu etkiler, aynı servisi yarın bir CLI ya da kuyruk tüketicisi de kullanabilir.</p>
+<pre class="code">anadolu-siparis/
+├── market/
+│   ├── modeller.py      # SQLAlchemy ORM
+│   ├── semalar.py       # pydantic
+│   ├── depolar.py       # repository
+│   ├── servisler.py     # iş kuralları
+│   ├── hatalar.py       # alan hataları
+│   ├── guvenlik.py      # hmac token
+│   └── api.py           # FastAPI uç noktaları
+├── tests/
+├── Dockerfile
+├── pyproject.toml
+└── README.md</pre>
+
+<h2>Adım 1: Şemalar (pydantic)</h2>
+<p>Dış dünyadan gelen her veri güvenilmezdir. pydantic şeması türü, aralığı ve fazladan alanları <b>sınırda</b> denetler; servis katmanına yalnızca temiz veri ulaşır. Pydantic dersinde (<a href="../pydantic-dogrulama/">Veri doğrulama ve pydantic v2</a>) temelini gördün, burada API sözleşmesini kuruyoruz:</p>
+<pre class="py">from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
+
+class KalemGirdi(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    urun_id: int = Field(gt=0)
+    adet: int = Field(ge=1, le=100)
+
+class SiparisOlustur(BaseModel):
+    model_config = ConfigDict(extra="forbid")
+    kalemler: list[KalemGirdi] = Field(min_length=1)
+    kupon: str | None = None
+
+    @field_validator("kupon")
+    @classmethod
+    def kuponu_duzenle(cls, v):
+        v = (v or "").strip().upper()
+        return v or None
+
+g = SiparisOlustur(kalemler=[{"urun_id": 1, "adet": 2}], kupon=" hosgeldin10 ")
+print(g.kupon, g.model_dump())
+try:
+    SiparisOlustur(kalemler=[{"urun_id": 1, "adet": 0}], indirim=99)
+except ValidationError as e:
+    for h in e.errors():
+        print(h["loc"], h["type"])</pre>
+
+<h2>Adım 2: ORM modelleri ve depo</h2>
+<p>Fiyatları <b>kuruş cinsinden tamsayı</b> tutuyoruz: kayan noktalı sayı (<code>0.1 + 0.2</code>) para için uygun değildir, SQLite ise <code>Decimal</code>'ı doğal desteklemez. Depo (repository) sınıfı SQLAlchemy oturumunu (Session) sarmalar; servis SQL görmez. SQLAlchemy dersinde ORM'i gördün; burada onu bir desenin parçası yapıyoruz.</p>
+<pre class="py">from sqlalchemy import ForeignKey, String, create_engine, select
+from sqlalchemy.orm import DeclarativeBase, Mapped, Session, mapped_column, relationship
+
+class Base(DeclarativeBase):
+    pass
+
+class Urun(Base):
+    __tablename__ = "urunler"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    ad: Mapped[str] = mapped_column(String(80), unique=True)
+    fiyat_kurus: Mapped[int]
+    stok: Mapped[int]
+
+class Siparis(Base):
+    __tablename__ = "siparisler"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    musteri: Mapped[str]
+    durum: Mapped[str] = mapped_column(default="yeni")
+    toplam_kurus: Mapped[int] = mapped_column(default=0)
+    kalemler: Mapped[list["Kalem"]] = relationship(back_populates="siparis")
+
+class Kalem(Base):
+    __tablename__ = "kalemler"
+    id: Mapped[int] = mapped_column(primary_key=True)
+    siparis_id: Mapped[int] = mapped_column(ForeignKey("siparisler.id"))
+    urun_id: Mapped[int] = mapped_column(ForeignKey("urunler.id"))
+    adet: Mapped[int]
+    birim_kurus: Mapped[int]
+    siparis: Mapped[Siparis] = relationship(back_populates="kalemler")
+
+class UrunDepo:
+    def __init__(self, oturum):
+        self.oturum = oturum
+    def ekle(self, ad, fiyat_kurus, stok):
+        u = Urun(ad=ad, fiyat_kurus=fiyat_kurus, stok=stok)
+        self.oturum.add(u)
+        self.oturum.flush()          # id'yi almak için
+        return u
+    def getir(self, urun_id):
+        return self.oturum.get(Urun, urun_id)
+    def stokta_olanlar(self):
+        return self.oturum.scalars(select(Urun).where(Urun.stok &gt; 0).order_by(Urun.ad)).all()
+
+motor = create_engine("sqlite://")      # bellek içi
+Base.metadata.create_all(motor)
+with Session(motor) as oturum:
+    depo = UrunDepo(oturum)
+    depo.ekle("Çay 1 kg", 18950, 40)
+    depo.ekle("Fındık 500 g", 24900, 0)
+    depo.ekle("Bal 850 g", 42500, 12)
+    oturum.commit()
+    print([u.ad for u in depo.stokta_olanlar()], depo.getir(1).fiyat_kurus)</pre>
+
+<h2>Adım 3: Servis katmanı ve iş kuralları</h2>
+<p>Projenin kalbi burası. Kurallar:</p>
+<ul>
+<li><b>Stok:</b> siparişteki <b>bütün</b> kalemlerin stoğu önce kontrol edilir, ancak hepsi yeterliyse düşülür (ya hep ya hiç).</li>
+<li><b>İndirim:</b> <code>HOSGELDIN10</code> ara toplamdan %10 (aşağı yuvarlanmış kuruş), <code>SEPET50</code> 5.000 kuruş (50 TL) indirir ama ara toplamı geçemez; bilinmeyen kupon hatadır.</li>
+<li><b>Kargo:</b> indirim sonrası tutar 75.000 kuruş (750 TL) ve üzeriyse ücretsiz, değilse 3.990 kuruş.</li>
+<li><b>Durum geçişleri:</b> sipariş bir <b>durum makinesi</b>dir (state machine); yalnızca izinli geçişler yapılabilir.</li>
+</ul>
+<pre class="py">KUPONLAR = {"HOSGELDIN10": ("yuzde", 10), "SEPET50": ("tutar", 5000)}
+KARGO_ESIK, KARGO_UCRET = 75000, 3990
+GECISLER = {"yeni": {"odendi", "iptal"}, "odendi": {"kargoda", "iptal"},
+            "kargoda": {"teslim"}, "teslim": set(), "iptal": set()}
+
+class GecersizKupon(Exception): pass
+class GecersizGecis(Exception): pass
+
+def fiyat_hesapla(kalemler, kupon=None):
+    ara = sum(fiyat * adet for fiyat, adet in kalemler)
+    indirim = 0
+    if kupon:
+        if kupon not in KUPONLAR:
+            raise GecersizKupon(kupon)
+        tur, deger = KUPONLAR[kupon]
+        indirim = ara * deger // 100 if tur == "yuzde" else min(deger, ara)
+    net = ara - indirim
+    kargo = 0 if net &gt;= KARGO_ESIK else KARGO_UCRET
+    return {"ara_toplam": ara, "indirim": indirim, "kargo": kargo, "toplam": net + kargo}
+
+def gecis_kontrol(eski, yeni):
+    if yeni not in GECISLER.get(eski, set()):
+        raise GecersizGecis(f"{eski} -&gt; {yeni}")
+    return yeni
+
+print(fiyat_hesapla([(18950, 2), (42500, 1)], "HOSGELDIN10"))
+print(fiyat_hesapla([(42500, 2)]))
+print(gecis_kontrol("yeni", "odendi"))
+try:
+    gecis_kontrol("teslim", "iptal")
+except GecersizGecis as e:
+    print("Reddedildi:", e)</pre>
+<div class="warn"><b>Servis HTTP bilmez</b>Servis katmanında <code>return 404</code> ya da <code>HTTPException</code> görürsen katmanlar karışmış demektir. Servis <b>alan hatası</b> (domain exception: <code>StokYetersiz</code>, <code>GecersizGecis</code>) fırlatır; onu HTTP koduna çevirmek uç noktanın işidir.</div>
+
+<h2>Adım 4: Uç noktalar ve yönlendirme</h2>
+<p>Bir web çatısının çekirdeği <b>yönlendiricidir</b> (router): metot + yol desenini işleyici fonksiyona eşler ve yoldaki parametreleri (<code>/siparisler/42</code> → <code>sid=42</code>) çıkarır. Önce gerçek FastAPI kodu:</p>
+<pre class="code">from fastapi import Depends, FastAPI, Header, HTTPException
+
+app = FastAPI(title="Anadolu Market Sipariş API")
+
+def aktif_kullanici(authorization: str = Header()) -&gt; str:
+    return token_dogrula(authorization.removeprefix("Bearer "), GIZLI, time.time())
+
+@app.post("/siparisler", status_code=201)
+def siparis_olustur(girdi: SiparisOlustur, kullanici: str = Depends(aktif_kullanici),
+                    servis: SiparisServisi = Depends(servis_al)):
+    return servis.olustur(kullanici, girdi)
+
+@app.get("/siparisler/{sid}")
+def siparis_getir(sid: int, kullanici: str = Depends(aktif_kullanici),
+                  servis: SiparisServisi = Depends(servis_al)):
+    return servis.getir(kullanici, sid)</pre>
+<p>Kendi bilgisayarında dene: <code>pip install fastapi uvicorn sqlalchemy</code>, sonra <code>uvicorn market.api:app --reload</code> ve tarayıcıda <code>http://127.0.0.1:8000/docs</code>. FastAPI şemadan otomatik belge üretir. Aynı mantığı tarayıcıda küçük bir yönlendiriciyle kuralım:</p>
+<pre class="py">class Yonlendirici:
+    def __init__(self):
+        self.rotalar = []
+
+    def rota(self, metot, desen):
+        def kaydet(f):
+            self.rotalar.append((metot, desen.strip("/").split("/"), f))
+            return f
+        return kaydet
+
+    def coz(self, metot, yol):
+        parcalar = yol.strip("/").split("/")
+        for m, desen, f in self.rotalar:
+            if m != metot or len(desen) != len(parcalar):
+                continue
+            params = {}
+            for d, p in zip(desen, parcalar):
+                if d.startswith("{"):
+                    ad, _, tur = d[1:-1].partition(":")
+                    if tur == "int" and not p.isdigit():
+                        break
+                    params[ad] = int(p) if tur == "int" else p
+                elif d != p:
+                    break
+            else:
+                return f, params
+        return None, {}
+
+api = Yonlendirici()
+
+@api.rota("GET", "/siparisler/{sid:int}")
+def siparis_getir(sid):
+    return 200, {"id": sid, "durum": "kargoda"}
+
+f, params = api.coz("GET", "/siparisler/42")
+print(params, f(**params))
+print(api.coz("GET", "/siparisler/abc")[0])</pre>
+
+<h2>Adım 5: Hata → HTTP durum kodu</h2>
+<p>Her alan hatası tek bir yerde HTTP koduna eşlenir. FastAPI'de bu <code>@app.exception_handler(IsKuraliHatasi)</code> ile yapılır. Eşleme sınıf hiyerarşisini izler: <code>StokYetersiz</code>, <code>IsKuraliHatasi</code>'nin alt sınıfıysa kendi kaydı yoksa üst sınıfın kodunu alır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Hata</th><th>HTTP</th><th>Anlamı</th></tr>
+<tr><td>Şema doğrulama (<code>ValidationError</code>)</td><td>422</td><td>İstek biçimi hatalı</td></tr>
+<tr><td><code>YetkiHatasi</code></td><td>401</td><td>Token yok, bozuk ya da süresi dolmuş</td></tr>
+<tr><td><code>BulunamadiHatasi</code></td><td>404</td><td>Kayıt yok (ya da başkasına ait: varlığını sızdırma)</td></tr>
+<tr><td><code>IsKuraliHatasi</code> (stok, kupon, geçiş)</td><td>409</td><td>İstek geçerli ama mevcut durumla çelişiyor</td></tr>
+<tr><td>Beklenmeyen istisna</td><td>500</td><td>Genel mesaj; ayrıntı yalnızca loga</td></tr>
+</table></div>
+<div class="tip"><b>500'de ayrıntı verme</b>Beklenmeyen hatanın metni (SQL sorgusu, dosya yolu) saldırgana sistem hakkında bilgi verir. İstemciye "Beklenmeyen bir hata oluştu" ve bir istek kimliği dön; asıl istisnayı istek kimliğiyle loga yaz.</div>
+
+<h2>Adım 6: Kimlik doğrulama: hmac imzalı token</h2>
+<p>Gerçek projelerde JWT ve OAuth2 kullanılır (Web güvenliği dersinde gördün); hepsinin çekirdeği <b>imzadır</b>. Sunucu <code>kullanici.son_kullanma</code> metnini gizli anahtarla HMAC-SHA256 ile imzalar; token değiştirilirse imza tutmaz. Karşılaştırmayı <code>hmac.compare_digest</code> ile yaparsın; <code>==</code> ilk farklı karakterde durduğu için zamanlama saldırısına (timing attack) açıktır.</p>
+<pre class="py">import hashlib, hmac
+
+GIZLI = b"gelistirme-anahtari"     # üretimde ortam değişkeninden
+
+class YetkiHatasi(Exception): pass
+
+def imza(metin, gizli):
+    return hmac.new(gizli, metin.encode(), hashlib.sha256).hexdigest()
+
+def token_uret(kullanici, son, gizli=GIZLI):
+    govde = f"{kullanici}.{son}"
+    return f"{govde}.{imza(govde, gizli)}"
+
+def token_dogrula(token, gizli, simdi):
+    try:
+        kullanici, son, gelen = token.rsplit(".", 2)
+        son = int(son)
+    except ValueError:
+        raise YetkiHatasi("bozuk token")
+    if not hmac.compare_digest(gelen, imza(f"{kullanici}.{son}", gizli)):
+        raise YetkiHatasi("imza geçersiz")
+    if simdi &gt;= son:
+        raise YetkiHatasi("süresi dolmuş")
+    return kullanici
+
+t = token_uret("ayse", 1_800_000_000)
+print(t[:30] + "...")
+print(token_dogrula(t, GIZLI, 1_700_000_000))
+for sahte in [t.replace("ayse", "ali_"), "rastgele"]:
+    try:
+        token_dogrula(sahte, GIZLI, 1_700_000_000)
+    except YetkiHatasi as e:
+        print("Reddedildi:", e)</pre>
+
+<h2>Adım 7: Testler</h2>
+<p>Katmanlar sayesinde her düzeyi ayrı test edersin: fiyat ve geçiş kuralları için saf birim testleri, depo için bellek içi SQLite ile entegrasyon testleri, servis için depo yerine mock, uç noktalar için istek sözlüğüyle uçtan uca testler.</p>
+<pre class="py">import unittest
+from unittest.mock import Mock
+
+class StokYetersiz(Exception): pass
+
+class SiparisServisi:
+    def __init__(self, urun_depo):
+        self.urun_depo = urun_depo
+    def stok_dus(self, kalemler):
+        urunler = {uid: self.urun_depo.getir(uid) for uid, _ in kalemler}
+        eksik = [uid for uid, adet in kalemler if urunler[uid]["stok"] &lt; adet]
+        if eksik:
+            raise StokYetersiz(eksik)
+        for uid, adet in kalemler:
+            self.urun_depo.stok_guncelle(uid, urunler[uid]["stok"] - adet)
+
+class ServisTest(unittest.TestCase):
+    def setUp(self):
+        self.depo = Mock()
+        self.depo.getir.side_effect = lambda uid: {1: {"stok": 5}, 2: {"stok": 1}}[uid]
+
+    def test_hepsi_yeterli(self):
+        SiparisServisi(self.depo).stok_dus([(1, 2), (2, 1)])
+        self.assertEqual(self.depo.stok_guncelle.call_count, 2)
+
+    def test_biri_yetersizse_hicbiri_dusmez(self):
+        with self.assertRaises(StokYetersiz):
+            SiparisServisi(self.depo).stok_dus([(1, 2), (2, 3)])
+        self.depo.stok_guncelle.assert_not_called()
+
+sonuc = unittest.TextTestRunner(verbosity=0).run(unittest.TestLoader().loadTestsFromTestCase(ServisTest))
+print("Başarılı:", sonuc.wasSuccessful(), "| test:", sonuc.testsRun)</pre>
+
+<h2>Adım 8: Dockerfile ve README</h2>
+<p>Docker dersindeki kurallarla imajı hazırla ve projeyi bir README ile teslim et:</p>
+<pre class="code">FROM python:3.12-slim
+WORKDIR /app
+COPY requirements.txt .
+RUN pip install --no-cache-dir -r requirements.txt
+COPY market/ market/
+RUN useradd --create-home app
+USER app
+EXPOSE 8000
+CMD ["uvicorn", "market.api:app", "--host", "0.0.0.0", "--port", "8000"]</pre>
+<pre class="code"># Anadolu Market Sipariş API
+
+## Çalıştırma
+    docker compose up --build        # API + PostgreSQL
+    open http://localhost:8000/docs
+
+## Ortam değişkenleri
+| Ad            | Zorunlu | Açıklama                    |
+| DATABASE_URL  | evet    | postgresql://...            |
+| TOKEN_GIZLI   | evet    | HMAC imza anahtarı          |
+
+## Uç noktalar
+POST  /siparisler                 201  sipariş oluştur
+GET   /siparisler/{id}            200  sipariş getir
+PATCH /siparisler/{id}/durum      200  durum değiştir
+
+## Test
+    python -m pytest -q</pre>
+<div class="note"><b>Gerçek işte</b>E-ticaret ekiplerinde sipariş servisi en kritik servislerden biridir ve mülakatlarda en çok sorulan tasarım konularındandır. Kod incelemesinde (code review) bakılanlar genellikle şunlardır: iş kuralları servis katmanında mı, stok düşümü bir işlem (transaction) içinde mi, aynı istek iki kez gelirse (ağ tekrarı) iki sipariş oluşuyor mu, başka kullanıcının siparişi 404 ile mi gizleniyor, para tamsayı kuruşla mı tutuluyor ve hata yolları test edilmiş mi. Bu projede hepsini tek tek kuruyorsun.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Projenin çekirdeği hazır: şemalar, depo, servis, uç noktalar, testler ve tek konteynerlik bir Dockerfile. Gerçek bir backend portföy projesinde işverenin görmek istediği bir sonraki katman şudur: kalıcı bir veritabanı ve onun migration'ları, sık okunan veriler için önbellek, isteği bekletmeyen arka plan işleri ve kötüye kullanımı sınırlayan hız sınırı. Bu bölüm dört parçayı tek bir <code>docker compose</code> dosyasında birleştiriyor.</p>
+<h2>Hedef mimari</h2>
+<div class="tbl-wrap"><table><tr><th>Servis</th><th>Görev</th><th>Derste nerede gördün?</th></tr>
+<tr><td><code>api</code></td><td>FastAPI + uvicorn; istekleri karşılar</td><td>fastapi, bu proje</td></tr>
+<tr><td><code>db</code></td><td>PostgreSQL 16; kalıcı veri (adlandırılmış birim)</td><td>postgresql-python</td></tr>
+<tr><td><code>migrate</code></td><td>Tek seferlik: <code>alembic upgrade head</code>, sonra çıkar</td><td>sqlalchemy-orm (Derinleş)</td></tr>
+<tr><td><code>redis</code></td><td>Ürün kataloğu önbelleği, hız sınırı sayaçları, iş kuyruğu</td><td>redis-kuyruk</td></tr>
+<tr><td><code>worker</code></td><td>Kuyruktan iş alır: sipariş onay e-postası</td><td>redis-kuyruk</td></tr></table></div>
+<pre class="code"># compose.yaml
+services:
+  db:
+    image: postgres:16
+    environment: {POSTGRES_USER: market, POSTGRES_PASSWORD: ${DB_SIFRE}, POSTGRES_DB: market}
+    volumes: [pgdata:/var/lib/postgresql/data]
+    healthcheck: {test: ["CMD-SHELL", "pg_isready -U market"], interval: 5s, retries: 10}
+  redis:
+    image: redis:7-alpine
+    healthcheck: {test: ["CMD", "redis-cli", "ping"], interval: 5s}
+  migrate:
+    build: .
+    command: alembic upgrade head
+    environment: &amp;ortam
+      DATABASE_URL: postgresql+psycopg://market:${DB_SIFRE}@db/market
+      REDIS_URL: redis://redis:6379/0
+    depends_on: {db: {condition: service_healthy}}
+  api:
+    build: .
+    command: uvicorn market.app:app --host 0.0.0.0 --port 8000
+    environment: *ortam
+    ports: ["8000:8000"]
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+  worker:
+    build: .
+    command: python -m market.worker
+    environment: *ortam
+    depends_on:
+      migrate: {condition: service_completed_successfully}
+      redis: {condition: service_healthy}
+volumes:
+  pgdata:</pre>
+<p><code>service_completed_successfully</code> sayesinde API, migration bitmeden başlamaz; birden çok API kopyası aynı anda migration çalıştırmaya kalkmaz. <code>&amp;ortam</code> / <code>*ortam</code> YAML çapası, ortam değişkenlerini tek yerde tanımlar. <code>${DB_SIFRE}</code> depoya girmeyen <code>.env</code> dosyasından gelir.</p>
+<h2>Önbellek: önce Redis'e bak</h2>
+<p>Ürün listesi sık okunur, seyrek değişir: önbellek kalıbı (cache-aside) için ideal. Okurken önce Redis'e bak, yoksa veritabanından oku ve süreli (TTL) yaz; ürün güncellenince anahtarı sil.</p>
+<pre class="code">async def urunleri_getir(kategori: str) -&gt; list[dict]:
+    anahtar = f"urunler:{kategori}:v1"
+    if (hazir := await redis.get(anahtar)) is not None:
+        return json.loads(hazir)
+    urunler = await depo.kategoriye_gore(kategori)
+    await redis.set(anahtar, json.dumps(urunler), ex=300)     # 5 dakika
+    return urunler
+
+async def urun_guncelle(urun_id, alanlar):
+    urun = await depo.guncelle(urun_id, alanlar)
+    await redis.delete(f"urunler:{urun.kategori}:v1")         # geçersiz kıl
+    return urun</pre>
+<h2>Arka plan işi: onay e-postası isteği bekletmesin</h2>
+<p>Sipariş oluşturan istek, SMTP sunucusunun 2 saniyelik yanıtını beklememeli. Uç nokta siparişi kaydedip kuyruğa bir iş bırakır ve hemen 201 döner; <code>worker</code> işi alıp e-postayı gönderir, başarısız olursa artan aralıklarla yeniden dener. İş, siparişle <b>aynı transaction'da</b> bir "giden kutusu" (outbox) tablosuna yazılırsa sipariş kaydedilip iş kaybolamaz.</p>
+<pre class="code"># market/worker.py  (RQ ile; Celery ya da arq da olur)
+from redis import Redis
+from rq import Worker, Queue
+Worker([Queue("eposta", connection=Redis.from_url(REDIS_URL))]).work()
+
+# uç noktada
+kuyruk.enqueue("market.isler.onay_epostasi", siparis.id, retry=Retry(max=3, interval=[10, 60, 300]))</pre>
+<h2>Hız sınırı</h2>
+<p>Giriş ve sipariş uç noktaları kaba kuvvete ve kötüye kullanıma açıktır. En yaygın iki algoritma: <b>sabit pencere</b> (her dakika için bir sayaç: <code>INCR</code> + <code>EXPIRE</code>; basit ama pencere sınırında iki kat patlamaya izin verir) ve <b>jeton kovası</b> (token bucket: kova saniyede r jetonla dolar, en fazla b jeton tutar; her istek bir jeton harcar; kısa patlamalara izin verip ortalamayı sınırlar). Sınır aşılınca <b>429 Too Many Requests</b> ve <code>Retry-After</code> başlığı dönülür. Anahtar olarak giriş yapmış kullanıcının kimliği, yoksa istemci IP'si kullanılır (Nginx arkasında <code>X-Forwarded-For</code>'a dikkat). Redis'te tutmak, birden çok API kopyasının aynı sayacı paylaşmasını sağlar.</p>
+<pre class="py">import time
+
+class JetonKovasi:
+    def __init__(self, hiz, kapasite, saat=time.monotonic):
+        self.hiz, self.kapasite, self.saat = hiz, kapasite, saat
+        self.durum = {}                            # anahtar -&gt; (jeton, son_zaman)
+
+    def izin(self, anahtar):
+        simdi = self.saat()
+        jeton, son = self.durum.get(anahtar, (self.kapasite, simdi))
+        jeton = min(self.kapasite, jeton + (simdi - son) * self.hiz)
+        if jeton &gt;= 1:
+            self.durum[anahtar] = (jeton - 1, simdi)
+            return True, 0.0
+        self.durum[anahtar] = (jeton, simdi)
+        return False, round((1 - jeton) / self.hiz, 2)    # Retry-After (sn)
+
+zaman = [0.0]
+kova = JetonKovasi(hiz=1, kapasite=3, saat=lambda: zaman[0])
+for t in [0, 0, 0, 0, 0.5, 1.2, 5]:
+    zaman[0] = t
+    print(t, kova.izin("ip:10.0.0.7"))</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>docker compose up --build</code> ile tüm yığını başlat; <code>docker compose logs -f worker</code> ile e-posta işini izle. E-postayı gerçekten göndermemek için compose'a <code>mailpit</code> servisini ekleyip SMTP adresini ona yönlendir; gönderilen postaları tarayıcıda görürsün. Hız sınırını <code>for i in $(seq 20); do curl -s -o /dev/null -w "%{http_code}\n" localhost:8000/giris; done</code> ile dene.</div>
+<div class="note"><b>Gerçek işte</b>README'de bu mimarinin bir şeması, "tek komutla çalıştır" talimatı ve her bileşenin neden orada olduğunu açıklayan birer cümle, portföy projesini sıradan bir CRUD örneğinden ayırır. Mülakatta "Redis çökerse ne olur?" sorusuna hazır ol: önbellek atlanır (veritabanından okunur), hız sınırı ya gevşek moda geçer ya da istekleri reddeder; bu bir tasarım kararıdır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Eşzamanlı stok ve kilitleme</h3>
+<p>Aynı anda iki müşteri son ürünü alırsa ikisi de "stok 1" okuyup düşebilir (yarış durumu, race condition). PostgreSQL'de <code>SELECT ... FOR UPDATE</code> (SQLAlchemy: <code>select(Urun).with_for_update()</code>) satırı işlem bitene kadar kilitler; alternatif olarak koşullu güncelleme yapılır: <code>UPDATE urunler SET stok = stok - 2 WHERE id = 1 AND stok &gt;= 2</code> ve etkilenen satır sayısı 0 ise stok yetersizdir.</p>
+<h3>Tekrar güvenliği (idempotency)</h3>
+<p>Mobil uygulama zaman aşımına uğrayıp isteği tekrar gönderirse iki sipariş oluşmamalı. İstemci her işlem için bir <code>Idempotency-Key</code> başlığı gönderir; sunucu anahtarı ve ilk cevabı saklar, aynı anahtarla gelen ikinci isteğe aynı cevabı döner.</p>
+<h3>Şema göçleri ve sürümleme</h3>
+<p>Üretimde tablo yapısı <code>create_all</code> ile değil <b>Alembic</b> göçleriyle (migration) değişir. API'yi kıran değişiklikler <code>/v2/</code> önekiyle ya da yeni alanları isteğe bağlı ekleyerek yapılır; eski istemciler bir süre çalışmaya devam etmelidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-api">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../docker-deploy/">← Docker ve dağıtım: konteyner, compose, bulut</a><a href="../test-ileri/">İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

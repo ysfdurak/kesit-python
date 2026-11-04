@@ -1,0 +1,220 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veri temizleme: eksik, tür, metin, yinelenen | Kesit Python</title><meta name="description" content="isna/fillna/dropna ile eksik değer, to_numeric/to_datetime/astype ile tür dönüşümü, .str metotları, duplicated, IQR ile aykırı değer ve category türü."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pandas-temizlik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Veri temizleme: eksik, tür, metin, yinelenen"><meta property="og:description" content="isna/fillna/dropna ile eksik değer, to_numeric/to_datetime/astype ile tür dönüşümü, .str metotları, duplicated, IQR ile aykırı değer ve category türü."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pandas-temizlik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Veri temizleme: eksik, tür, metin, yinelenen","description":"isna/fillna/dropna ile eksik değer, to_numeric/to_datetime/astype ile tür dönüşümü, .str metotları, duplicated, IQR ile aykırı değer ve category türü.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/pandas-temizlik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri analizine giriş</span><h1>Veri temizleme: eksik, tür, metin, yinelenen</h1><p class="st-l">isna/fillna/dropna ile eksik değer, to_numeric/to_datetime/astype ile tür dönüşümü, .str metotları, duplicated, IQR ile aykırı değer ve category türü.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-temizlik">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Gerçek veri kirlidir</h2>
+<p>Ilgaz Bank'ın şubelerden toplanan kredi başvuru dosyasında şehir adı bir satırda "ankara", diğerinde " ANKARA " yazar; tutar sütunu "12.500,00 TL" gibi metindir; bazı gelirler boştur; aynı başvuru iki kez girilmiştir. Analizin yüzde yetmişi bu temizliktir. Bu derste pandas'ın temizlik araçlarını bir akış olarak öğreneceksin: <b>eksikleri gör → türleri düzelt → metni standartlaştır → yinelenenleri at → aykırıları işaretle</b>.</p>
+
+<h2>Eksik değer: isna, fillna, dropna</h2>
+<p>pandas eksik değeri <code>NaN</code> (sayısal) ya da <code>NaT</code> (tarih) ile gösterir. <code>isna()</code> maske verir; <code>isna().sum()</code> sütun başına eksik sayısı. Karar iki yönlü: satırı at (<code>dropna</code>) ya da doldur (<code>fillna</code>). Doldurma değeri iş bilgisine bağlıdır: gelir için medyan, şehir için "Bilinmiyor", sayaç için 0.</p>
+<pre class="py">import pandas as pd, io
+
+csv = """basvuru,musteri,sehir,gelir,skor
+1,Ayşe,Ankara,25000,710
+2,Mehmet,,18000,
+3,Zeynep,İzmir,,655
+4,Ali,Bursa,42000,780
+5,Can,,,
+"""
+df = pd.read_csv(io.StringIO(csv))
+print(df.isna().sum())
+print(df.dropna(subset=["gelir"]).shape)          # geliri olmayanı at
+print(df.dropna(thresh=4).shape)                  # en az 4 dolu alanı olanı tut
+
+temiz = df.copy()
+temiz["gelir"] = temiz["gelir"].fillna(temiz["gelir"].median())
+temiz["sehir"] = temiz["sehir"].fillna("Bilinmiyor")
+temiz["skor"] = temiz["skor"].fillna(0)
+print(temiz)
+</pre>
+<div class="warn"><b>inplace kullanma</b><code>df.fillna(0, inplace=True)</code> hâlâ çalışır ama Copy-on-Write ile beklenmedik davranır ve pandas ekibi kaldırmayı planlıyor. Her zaman sonucu ata: <code>df["x"] = df["x"].fillna(0)</code>.</div>
+
+<h2>Tür dönüşümü</h2>
+<p>CSV'den gelen "12.500,00 TL" metni toplanamaz. Önce metni temizle, sonra <code>pd.to_numeric</code> ile sayıya çevir. <code>errors="coerce"</code> çevrilemeyeni NaN yapar; hata fırlatmak yerine sonradan <code>isna</code> ile yakalarsın. Tarih için <code>pd.to_datetime(..., format=...)</code>; biçimi açıkça yazmak hem hız hem güvenlik sağlar. Tam sayı/kategori gibi dönüşümler <code>astype</code>.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "tutar": ["12.500,00 TL", "1.250,50 TL", "bilinmiyor", "800,00 TL"],
+    "tarih": ["05.03.2024", "17.03.2024", "01.04.2024", "hatalı"],
+    "taksit": ["12", "6", "3", "24"],
+})
+tmp = (df["tutar"].str.replace(" TL", "", regex=False)
+                  .str.replace(".", "", regex=False)
+                  .str.replace(",", ".", regex=False))
+df["tutar_num"] = pd.to_numeric(tmp, errors="coerce")
+df["tarih_dt"] = pd.to_datetime(df["tarih"], format="%d.%m.%Y", errors="coerce")
+df["taksit"] = df["taksit"].astype(int)
+print(df.dtypes)
+print(df[["tutar_num", "tarih_dt", "taksit"]])
+print("çevrilemeyen tutar:", int(df["tutar_num"].isna().sum()))
+</pre>
+
+<h2>Metin temizliği: .str</h2>
+<p>Bir metin Series'inin <code>.str</code> erişimcisi, Python string metotlarını tüm sütuna vektörleştirilmiş uygular: <code>strip, lower, upper, title, replace, contains, startswith, split, len</code>. Eksik değerler atlanır (NaN kalır).</p>
+<pre class="py">import pandas as pd
+
+s = pd.Series([" ankara", "ANKARA ", "İzmir", "izmir", "Bursa  ", None])
+std = s.str.strip().str.title()
+print(std.tolist())
+print(std.value_counts())
+print(s.str.contains("ank", case=False, na=False).tolist())
+
+email = pd.Series(["ayse@anadolu.com", "MEHMET@Gmail.COM", "zeynep@anadolu.com"])
+print(email.str.lower().str.split("@").str[1].value_counts())
+</pre>
+<div class="tip"><b>title ve Türkçe</b><code>str.title()</code> "izmir" → "Izmir" yapar (noktalı İ sorunu). Şehir gibi sınırlı listelerde bir eşleme sözlüğü ve <code>.map</code> daha güvenlidir: <code>s.str.strip().str.lower().map(sehir_sozlugu)</code>.</div>
+
+<h2>Yinelenen kayıtlar</h2>
+<p><code>duplicated()</code> ikinci ve sonraki tekrarlar için True verir; <code>subset</code> ile hangi sütunlara göre bakılacağını, <code>keep</code> ile hangisinin tutulacağını ("first", "last", False) seçersin. <code>drop_duplicates</code> aynı parametrelerle siler.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "basvuru": [1, 2, 2, 3, 1],
+    "musteri": ["Ayşe", "Mehmet", "Mehmet", "Zeynep", "Ayşe"],
+    "skor": [710, 640, 655, 700, 715],
+})
+print(df.duplicated(subset=["basvuru"]).tolist())
+print(df.drop_duplicates(subset=["basvuru"], keep="last").sort_values("basvuru"))
+print("tam kopya satır:", int(df.duplicated().sum()))
+</pre>
+
+<h2>Aykırı değer: IQR kuralı</h2>
+<p>Gelir sütununda 25.000'ler arasında bir 2.500.000 görürsen bu hata mı gerçek mi? Önce işaretle, sonra iş birimine sor. Basit ve sağlam yöntem <b>IQR</b>: Q1 ve Q3 çeyrekleri, IQR = Q3 - Q1; <code>[Q1 - 1.5·IQR, Q3 + 1.5·IQR]</code> dışı aykırıdır. <code>clip</code> ile sınırlara çekebilir ya da maskeyle ayırabilirsin.</p>
+<pre class="py">import pandas as pd
+
+gelir = pd.Series([25000, 18000, 31000, 42000, 27000, 2500000, 22000, 150])
+q1, q3 = gelir.quantile(0.25), gelir.quantile(0.75)
+iqr = q3 - q1
+alt, ust = q1 - 1.5 * iqr, q3 + 1.5 * iqr
+aykiri = (gelir &lt; alt) | (gelir &gt; ust)
+print(f"sınırlar: {alt:.0f} - {ust:.0f}")
+print(gelir[aykiri].tolist())
+print(gelir.clip(lower=alt, upper=ust).astype(int).tolist())
+</pre>
+
+<h2>Kategorik tür</h2>
+<p>Şehir, ürün kategorisi, durum gibi az sayıda değer alan metin sütunları <code>astype("category")</code> ile hem bellek hem hız kazandırır. groupby yaparken <code>observed=True</code> vererek yalnızca veride bulunan kategorileri al.</p>
+<div class="tbl-wrap"><table><tr><th>Sorun</th><th>Araç</th><th>Not</th></tr>
+<tr><td>Boş hücre</td><td><code>isna, fillna, dropna</code></td><td>Doldurma değeri iş kararıdır</td></tr>
+<tr><td>Metin sayı</td><td><code>.str.replace + to_numeric(errors="coerce")</code></td><td>Önce binlik/ondalık ayıracı düzelt</td></tr>
+<tr><td>Metin tarih</td><td><code>to_datetime(format=...)</code></td><td>Biçimi açıkça yaz</td></tr>
+<tr><td>Kirli metin</td><td><code>.str.strip().str.lower(), .map</code></td><td>Türkçe İ/ı için eşleme</td></tr>
+<tr><td>Tekrar</td><td><code>duplicated, drop_duplicates</code></td><td>subset ile iş anahtarı</td></tr>
+<tr><td>Uç değer</td><td><code>quantile, clip</code></td><td>Silme değil işaretle</td></tr>
+</table></div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Türkçe metin, grup bazlı doldurma, regex ve doğrulama</h2><p>Temel temizlik akışını (eksik → tür → metin → tekrar → aykırı) gördün. Gerçek projelerde bu akışı bozan birkaç tuzak daha vardır: Türkçe İ/ı harfleri, tutarsız sütun adları, tek bir medyanla doldurmanın yanlış olduğu gruplu veriler, telefon ve adet gibi metne gömülmüş değerler ve temizlikten sonra "gerçekten temiz mi?" sorusu. Bu bölüm bunları kapatıyor.</p><h3>Türkçe büyük-küçük harf tuzağı</h3><p>Python'un <code>lower()</code> metodu Unicode kurallarını uygular, Türkçe kurallarını değil: <code>"İ".lower()</code> iki karakterlik <code>"i̇"</code> (i + birleşen nokta) verir, <code>"I".lower()</code> ise <code>"i"</code> verir (Türkçede <code>"ı"</code> olmalıydı). Bu yüzden "İZMİR" küçültülünce "izmir" ile eşleşmez ve şehir sayımları bölünür. Çözüm: küçültmeden önce bu iki harfi elle çevirmek.</p><pre class="py">import pandas as pd
+
+print("İZMİR".lower() == "izmir", len("İ".lower()))
+
+TR_KUCUK = str.maketrans({"İ": "i", "I": "ı"})
+
+def tr_lower(s: pd.Series) -&gt; pd.Series:
+    return s.str.strip().str.translate(TR_KUCUK).str.lower()
+
+sehir = pd.Series(["İZMİR", " izmir", "ISPARTA", "Isparta ", "ıspartа"])
+print(tr_lower(sehir).tolist())
+print(tr_lower(sehir).value_counts().to_dict())
+</pre><p>Son elemanı dikkatle incele: "ıspartа" içinde Kiril "а" harfi var ve gözle fark edilmez. Kopyala-yapıştır verilerde böyle hayalet karakterler, sıfır genişlikli boşluk (<code>\u200b</code>) ve bölünmez boşluk (<code>\xa0</code>) sık görülür; <code>s.str.normalize("NFKC")</code> ve <code>s.str.replace("\xa0", " ")</code> ilk savunma hattıdır. Sınırlı değer kümelerinde (şehir, kategori) en güvenlisi bir eşleme sözlüğüyle <code>map</code> edip eşleşmeyenleri raporlamaktır.</p><h3>Sütun adlarını standartlaştırma</h3><p>Excel'den gelen başlıklar "Müşteri Adı ", "TUTAR (TL)" gibi olur. Kodda <code>df["müşteri_adı"]</code> yazmak hem yazım hatasına açık hem de klavyeye bağımlıdır. Tüm sütun adlarını bir kerede küçük harf, ASCII ve alt çizgili yapmak kodu sadeleştirir:</p><pre class="py">import pandas as pd
+
+df = pd.DataFrame(columns=["Müşteri Adı ", "TUTAR (TL)", "Şehir", "Sipariş Tarihi"])
+ceviri = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU")
+yeni = (df.columns.str.strip()
+          .str.translate(ceviri)
+          .str.lower()
+          .str.replace(r"[^a-z0-9]+", "_", regex=True)
+          .str.strip("_"))
+df.columns = yeni
+print(df.columns.tolist())
+</pre><h3>Grup bazlı ve sıralı doldurma</h3><p>Tüm sütunun medyanıyla doldurmak, İstanbul'daki eksik geliri Bursa'nın geliriyle karıştırır. Daha dürüst olan, eksiği <b>kendi grubunun</b> medyanıyla doldurmaktır: <code>groupby(...).transform("median")</code> her satıra grubunun değerini taşır, <code>fillna</code> bu Series'i satır satır kullanır. Zaman sıralı verilerde (günlük stok, kur) ise son bilinen değeri ileri taşımak (<code>ffill</code>) ya da iki değer arasını doğrusal tamamlamak (<code>interpolate</code>) daha anlamlıdır.</p><pre class="py">import pandas as pd
+import numpy as np
+
+df = pd.DataFrame({
+    "sehir": ["Ankara", "Ankara", "Ankara", "Bursa", "Bursa"],
+    "gelir": [20000, np.nan, 30000, 50000, np.nan],
+})
+grup_medyani = df.groupby("sehir")["gelir"].transform("median")
+df["gelir_dolu"] = df["gelir"].fillna(grup_medyani)
+print(df)
+
+stok = pd.Series([100, np.nan, np.nan, 70], index=pd.date_range("2024-03-01", periods=4))
+print(stok.ffill().tolist())        # son bilinen değer
+print(stok.interpolate().tolist())  # doğrusal: 90, 80
+</pre><h3>Regex ile değer ayıklama: str.extract</h3><p><code>str.extract(desen)</code> her satırda düzenli ifadenin (regular expression) yakalama gruplarını sütun olarak döndürür; eşleşmeyen satır NaN olur. Telefon, plaka, "3 adet x 45,50 TL" gibi metinlerden sayı çekmek için idealdir. Bir telefon numarasını standart biçime getirmek tipik bir örnektir:</p><pre class="py">import pandas as pd
+
+tel = pd.Series(["0532 111 22 33", "+90 (505) 444-5566", "5321112233", "212 555 00 00", "abc"])
+rakam = tel.str.replace(r"\D", "", regex=True)            # rakam dışı her şeyi sil
+gsm = rakam.str.extract(r"^(?:90|0)?(5\d{9})$")[0]        # ülke kodu / 0 isteğe bağlı
+print(gsm.tolist())
+
+aciklama = pd.Series(["3 adet x 45,50 TL", "12 adet x 9,90 TL"])
+parca = aciklama.str.extract(r"(?P&lt;adet&gt;\d+) adet x (?P&lt;fiyat&gt;[\d,]+)")
+parca["fiyat"] = pd.to_numeric(parca["fiyat"].str.replace(",", ".", regex=False))
+parca["adet"] = parca["adet"].astype(int)
+print(parca.assign(tutar=parca["adet"] * parca["fiyat"]))
+</pre><h3>Sayıyı aralığa çevirmek: pd.cut ve pd.qcut</h3><p>Yaş, tutar, skor gibi sürekli değerleri raporlamak için aralıklara (bin) bölersin. <code>pd.cut</code> senin verdiğin sınırları kullanır, aralıklar varsayılan olarak <b>sağdan kapalıdır</b>: <code>(18, 30]</code> 18'i içermez, 30'u içerir. <code>pd.qcut</code> ise veriyi eşit sayıda gözleme bölen çeyrek/dilim sınırlarını kendisi bulur.</p><div class="tbl-wrap"><table><tr><th>Araç</th><th>Ne zaman</th><th>Dikkat</th></tr><tr><td><code>replace({"E": "Evet"})</code></td><td>Birkaç değeri değiştir, kalanı aynen kalsın</td><td>Sözlükte olmayan değer korunur</td></tr><tr><td><code>map(sozluk)</code></td><td>Tüm değerleri bir sözlükle çevir</td><td>Sözlükte olmayan NaN olur (eşleşmeyeni yakalamak için iyi)</td></tr><tr><td><code>where / mask</code></td><td>Koşula uymayanı (where) ya da uyanı (mask) değiştir</td><td><code>s.mask(s &lt; 0, 0)</code> negatifleri 0 yapar</td></tr><tr><td><code>pd.cut</code></td><td>Sabit sınırlarla aralık</td><td>Sağdan kapalı; <code>right=False</code> ile değiştir</td></tr><tr><td><code>pd.qcut</code></td><td>Eşit büyüklükte dilimler</td><td>Çok tekrar eden değerde <code>duplicates="drop"</code></td></tr></table></div><pre class="py">import pandas as pd
+
+yas = pd.Series([17, 18, 25, 30, 31, 64])
+grup = pd.cut(yas, bins=[0, 18, 30, 120], labels=["genç", "yetişkin", "olgun"])
+print(grup.tolist())
+print(grup.value_counts(sort=False).to_dict())
+
+tutar = pd.Series([50, 120, 80, 900, 300, 60, 2000, 75])
+print(pd.qcut(tutar, q=4, labels=["Ç1", "Ç2", "Ç3", "Ç4"]).tolist())
+print(tutar.mask(tutar &gt; 1000, 1000).tolist())     # üst sınır
+</pre><h3>Temizlik sonrası doğrulama</h3><p>Temizleme fonksiyonunun sonunda veriye kısa "sözleşme" kontrolleri koymak, kaynak sistem değiştiğinde hatanın rapora sızmasını engeller: zorunlu sütunlar var mı, kimlik sütunu tekil mi, tutar negatif mi, tarih beklenen aralıkta mı? <code>assert</code> ile ya da hatalı satırları ayrı bir "karantina" tablosuna ayırarak yapılır.</p><div class="warn"><b>Temizliği belgele</b>Her doldurma, silme ve kırpma bir iş kararıdır. Kaç satırın atıldığını, kaç değerin doldurulduğunu raporun altına yaz; aksi halde iki ekip aynı veriden farklı rakam bulur ve hangisinin doğru olduğu tartışılır.</div><div class="note"><b>Gerçek işte</b>Bankacılık ve e-ticaret ekiplerinde temizlik kodu bir kere yazılıp her gün çalışır. Bu yüzden şehir eşleme sözlüğü, sütun adı standardı ve doğrulama kuralları çoğunlukla ayrı bir modülde ya da yapılandırma dosyasında tutulur; yeni bir şehir yazımı geldiğinde kod değil sözlük güncellenir. Eşleşmeyen değerleri sessizce "Bilinmiyor" yapmak yerine günlük bir "eşleşmeyenler" listesiyle veri sahibine bildirmek kaliteyi kalıcı olarak artırır.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek kirli veriyle temizlik</h2><p>Derste temizlik tekniklerini küçük, elle kurulmuş tablolarla gördün. Şimdi aynı teknikleri gerçek dağınıklıkta deneyelim. İki kaynak kullanacağız: <code>kirli_veri</code> seti (Kesit Power BI'daki Power Query derslerinin kaynak dosyaları: elle doldurulmuş Excel sayfaları ve CRM dökümü) ve <code>anadolu_market</code> setindeki <code>raw_signups</code> tablosu (web formundan gelen 52 ham kayıt). Power Query'de tıklayarak yaptığın her adımın pandas karşılığını burada kodla kuracaksın.</p><div class="tbl-wrap"><table><tr><th>Tablo</th><th>Sorunlar</th><th>pandas çaresi</th></tr><tr><td><code>kirli_veri/bayi</code></td><td>Üstte rapor başlığı, boş satır, yinelenen satır, " istanbul " gibi boşluklu şehir, "1.250,50" ve "-" tutarları, "bilinmiyor" tarihi</td><td><code>skiprows</code>, <code>dropna(how="all")</code>, <code>drop_duplicates</code>, <code>.str.strip</code>, <code>to_numeric(errors="coerce")</code></td></tr><tr><td><code>kirli_veri/hedef</code></td><td>Aylar ayrı sütunlarda (geniş tablo)</td><td><code>melt</code></td></tr><tr><td><code>kirli_veri/urun</code></td><td>Kategori yalnızca grubun ilk satırında; kod ve ad tek hücrede</td><td><code>ffill</code>, <code>str.split(n=1, expand=True)</code></td></tr><tr><td><code>kirli_veri/musteri</code></td><td>İkinci satır asıl başlık, e-posta harf karmaşası, yinelenen numara, 30 Şubat</td><td><code>skiprows=1</code>, <code>str.lower</code>, <code>errors="coerce"</code></td></tr><tr><td><code>anadolu_market/raw_signups</code></td><td>Aynı kişi iki kez, karışık harfli e-posta, "ISTANBUL" / "istanbul" / "İstanbul", iki tarih biçimi</td><td>Normalleştirilmiş anahtarla tekilleştirme, iki geçişli tarih çevirme</td></tr></table></div><h3>Önce bak, sonra temizle</h3><p>Temizliğe başlamadan ham tabloya bak. <code>bayi</code> dosyası Excel'den geldiği için ilk satır <code>Column1..Column5</code> gibi anlamsız adlar, ikinci satır rapor başlığı, asıl başlık üçüncü satırda. <code>skiprows=2</code> ilk iki satırı atlar ve üçüncüyü başlık yapar.</p><pre class="py">import veri
+
+ham = veri.oku("kirli_veri", "bayi")
+print(ham.head(3))
+df = veri.oku("kirli_veri", "bayi", skiprows=2)
+print(df.columns.tolist())
+print("tamamen boş satır:", int(df.isna().all(axis=1).sum()))
+print("yinelenen satır:", int(df.duplicated().sum()))
+</pre><h3>Türkçe sayı ve Türkçe büyük harf</h3><p>"1.250,50" metninde nokta binlik, virgül ondalıktır. Önce noktaları sil, sonra virgülü noktaya çevir; "-" gibi sayı olmayan değerleri <code>to_numeric(errors="coerce")</code> eksik yapar. Şehirlerde ise iki tuzak var: baş/son boşluk ve Türkçe I/İ. "ISTANBUL".lower() "istanbul" verir ama "İstanbul".lower() noktalı bir birleşik karakter üretir; ikisi eşleşmez. Pratik çözüm, karşılaştırma için ASCII'ye katlanmış bir <b>eşleme anahtarı</b> (matching key) üretmek ve görüntülenecek adı bir sözlükten almaktır.</p><pre class="py">import veri
+import pandas as pd
+
+OZEL = {"istanbul": "İstanbul", "izmir": "İzmir"}
+
+def sehir_std(s):
+    anahtar = (s.str.strip().str.replace("İ", "i").str.replace("I", "i").str.lower())
+    return anahtar.map(lambda x: OZEL.get(x, x.capitalize()) if isinstance(x, str) else x)
+
+df = veri.oku("kirli_veri", "bayi", skiprows=2).dropna(how="all").drop_duplicates()
+df["Şehir"] = sehir_std(df["Şehir"])
+metin = df["Tutar"].str.replace(".", "", regex=False).str.replace(",", ".", regex=False)
+df["Tutar"] = pd.to_numeric(metin, errors="coerce")
+print(df[["Bayi", "Şehir", "Tutar"]])
+print("Toplam:", df["Tutar"].sum())
+</pre><h3>İki tarih biçimi bir arada</h3><p><code>raw_signups</code> tablosunda tarihlerin bir kısmı "29.07.2024", bir kısmı "2024-02-10" biçiminde. Tek bir <code>format</code> ile çevirirsen diğer biçim NaT olur. Güvenli yol iki geçiştir: önce birinci biçimi dene, kalan boşlukları ikinci biçimle doldur. Her geçişte <code>format</code> açıkça verildiği için gün ile ay asla yer değiştirmez.</p><pre class="py">import veri
+import pandas as pd
+
+rs = veri.oku("anadolu_market", "raw_signups")
+t = rs["signup_date"].str.strip()
+tarih = pd.to_datetime(t, format="%d.%m.%Y", errors="coerce")
+tarih = tarih.fillna(pd.to_datetime(t, format="%Y-%m-%d", errors="coerce"))
+print("çevrilemeyen:", int(tarih.isna().sum()))
+
+rs["email"] = rs["email"].str.strip().str.lower()
+print("satır:", len(rs), "| farklı id:", rs["id"].nunique(), "| farklı e-posta:", rs["email"].nunique())
+</pre><div class="warn"><b>Hangi anahtarla tekilleştiriyorsun?</b>Formdaki <code>id</code> 40 farklı değer gösteriyor ama normalleştirilmiş e-posta 39. Çünkü "can.kaya@gmail.com" iki farklı id ile iki kez kayıt olmuş. Tekilleştirme anahtarını iş kuralı belirler: "aynı e-posta aynı kişidir" kuralını iş birimiyle teyit et ve raporuna yaz.</div><h3>Geniş tabloyu uzatmak ve gruplu listeyi doldurmak</h3><p>Finans ekibinin hedef dosyası her ayı ayrı sütunda tutar. Grafikte ay eksenine koymak ya da satışlarla birleştirmek için <b>uzun biçim</b> gerekir: <code>melt</code>. Satın alma listesinde kategori yalnızca grubun ilk satırında yazılıdır; <code>ffill</code> bir üstteki değeri aşağı taşır.</p><pre class="py">import veri
+
+hedef = veri.oku("kirli_veri", "hedef")
+uzun = hedef.melt(id_vars="Kategori", var_name="Ay", value_name="Hedef")
+print(uzun.head(5))
+urun = veri.oku("kirli_veri", "urun")
+urun["Kategori"] = urun["Kategori"].ffill()
+print(urun.head(4))
+</pre><div class="note"><b>Gerçek işte</b>Temizlik adımlarını tek seferlik hücrelere dağıtma; her kaynak için bir fonksiyon yaz (<code>bayi_temizle</code>, <code>signup_temizle</code>) ve sonunda bir <b>kalite raporu</b> üret: satır sayısı, tam tekrar, anahtar tekrarı, sütun başına eksik. Bu rapor her çalıştırmada aynı biçimde çıktığında, kaynak dosya bozulduğunda bunu ilk sen fark edersin.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Temizlik fonksiyonu kalıbı</h3>
+<p>Üretimde temizlik adımlarını <code>def temizle(df) -&gt; pd.DataFrame</code> biçiminde, girdiyi değiştirmeyen, zincirlenebilir fonksiyonlara böl ve <code>df.pipe(temizle_sehir).pipe(tutar_sayisal)</code> ile bağla. Her fonksiyona küçük bir test yaz: 5 satırlık örnek girdi, beklenen çıktı. Böylece veri kaynağı değiştiğinde hangi adımın kırıldığını saniyede görürsün.</p>
+<h3>Eksikliğin türü</h3>
+<p>Eksiklik rastgele mi (sensör arızası) yoksa anlamlı mı (müşteri gelir beyan etmedi)? İkinci durumda doldurmak yerine "beyan_yok" bayrağı eklemek modele ve rapora daha dürüst bilgi verir. Eksik oranı yüzde 40'ı aşan sütunu doldurmak yerine çoğunlukla atmak doğrudur.</p>
+<h3>Nullable türler</h3>
+<p>Tam sayı sütununda NaN olunca pandas sütunu float yapar. <code>astype("Int64")</code> (büyük I) eksik destekleyen tam sayı türüdür; pandas 3 ile metinler için varsayılan <code>str</code> türü de gelir. Üretim kodunda tür kontrolünü dtype adına değil davranışa göre yap (<code>pd.api.types.is_numeric_dtype</code>).</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-temizlik">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../pandas-giris/">← pandas giriş: Series ve DataFrame</a><a href="../pandas-groupby/">groupby, pivot ve merge →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

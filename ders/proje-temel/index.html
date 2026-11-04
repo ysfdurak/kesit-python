@@ -1,0 +1,280 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Anadolu Market sipariş raporu | Kesit Python</title><meta name="description" content="Temel seviyede öğrendiğin her şeyi birleştir: sipariş listesinden toplam ciro, şehre göre toplam, en çok satan ürün ve biçimli rapor metni üreten, dosyaya…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-temel/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Anadolu Market sipariş raporu"><meta property="og:description" content="Temel seviyede öğrendiğin her şeyi birleştir: sipariş listesinden toplam ciro, şehre göre toplam, en çok satan ürün ve biçimli rapor metni üreten, dosyaya…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-temel/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Anadolu Market sipariş raporu","description":"Temel seviyede öğrendiğin her şeyi birleştir: sipariş listesinden toplam ciro, şehre göre toplam, en çok satan ürün ve biçimli rapor metni üreten, dosyaya…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/proje-temel/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Bitirme</span><h1>Bitirme projesi: Anadolu Market sipariş raporu</h1><p class="st-l">Temel seviyede öğrendiğin her şeyi birleştir: sipariş listesinden toplam ciro, şehre göre toplam, en çok satan ürün ve biçimli rapor metni üreten, dosyaya yazan küçük bir program.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-temel">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>İş isteği</h2>
+<p>Anadolu Market operasyon müdürü senden şunu istiyor: "Her sabah dünkü siparişlerin özetini istiyorum: toplam ciro, hangi şehre ne kadar sattık, en çok satan ürün hangisi. Düz metin olsun, e-postaya yapıştırayım." Elinde sipariş kayıtları var; bu derste isteği adım adım çalışan bir programa çevireceksin. Alıştırmalar projenin parçalarıdır: her biri bir fonksiyon, sonuncusu hepsini birleştirir.</p>
+
+<h2>Veri</h2>
+<p>Her sipariş bir sözlük: <code>id</code>, <code>musteri</code>, <code>sehir</code>, <code>urun</code>, <code>adet</code>, <code>birim_fiyat</code>. Sipariş tutarı <code>adet × birim_fiyat</code>. Veriyi kodun içinde küçük bir liste olarak tutuyoruz; gerçekte CSV'den gelir, onu da 6. derste öğrendin.</p>
+<pre class="py">SIPARISLER = [
+    {"id": 1001, "musteri": "Ayşe", "sehir": "Ankara", "urun": "Kulaklık", "adet": 2, "birim_fiyat": 899.90},
+    {"id": 1002, "musteri": "Mehmet", "sehir": "İzmir", "urun": "Klavye", "adet": 1, "birim_fiyat": 1249.00},
+    {"id": 1003, "musteri": "Elif", "sehir": "Ankara", "urun": "Mouse", "adet": 3, "birim_fiyat": 349.50},
+    {"id": 1004, "musteri": "Can", "sehir": "İstanbul", "urun": "Kulaklık", "adet": 1, "birim_fiyat": 899.90},
+    {"id": 1005, "musteri": "Zeynep", "sehir": "İzmir", "urun": "Mouse", "adet": 2, "birim_fiyat": 349.50},
+    {"id": 1006, "musteri": "Burak", "sehir": "Ankara", "urun": "Monitör", "adet": 1, "birim_fiyat": 4599.00},
+]
+print(len(SIPARISLER), "sipariş")
+print(SIPARISLER[0])</pre>
+
+<h2>Adım 1: Planı fonksiyonlara böl</h2>
+<p>Büyük işi tek seferde yazmaya kalkma. Önce isteği parçala; her parça tek iş yapan, girdi alıp çıktı döndüren bir fonksiyon olsun:</p>
+<div class="steps-list"><ol>
+<li><code>siparis_tutari(siparis)</code>: tek siparişin tutarı.</li>
+<li><code>toplam_ciro(siparisler)</code>: tüm tutarların toplamı.</li>
+<li><code>sehre_gore_ciro(siparisler)</code>: şehir → toplam tutar sözlüğü.</li>
+<li><code>en_cok_satan(siparisler)</code>: adet toplamı en yüksek ürün ve adedi.</li>
+<li><code>rapor_metni(siparisler)</code>: yukarıdakileri çağırıp biçimli metin üretir.</li>
+<li><code>raporu_kaydet(metin, yol)</code>: metni dosyaya yazar.</li>
+</ol></div>
+<p>Hesap fonksiyonları (1-4) <b>saf</b>: yalnızca veri alır, sonuç döndürür, hiçbir şey yazdırmaz. Sunum (5) ve dosya (6) ayrıdır. Böylece her hesabı tek başına test edebilir, raporun biçimini değiştirirken hesaba dokunmazsın.</p>
+
+<h2>Adım 2: Tek siparişin tutarı ve toplam ciro</h2>
+<pre class="py">SIPARISLER = [
+    {"id": 1001, "sehir": "Ankara", "urun": "Kulaklık", "adet": 2, "birim_fiyat": 899.90},
+    {"id": 1002, "sehir": "İzmir", "urun": "Klavye", "adet": 1, "birim_fiyat": 1249.00},
+    {"id": 1003, "sehir": "Ankara", "urun": "Mouse", "adet": 3, "birim_fiyat": 349.50},
+]
+
+def siparis_tutari(siparis):
+    """adet × birim fiyat, 2 ondalığa yuvarlanmış."""
+    return round(siparis["adet"] * siparis["birim_fiyat"], 2)
+
+def toplam_ciro(siparisler):
+    toplam = 0.0
+    for s in siparisler:
+        toplam += siparis_tutari(s)
+    return round(toplam, 2)
+
+print(siparis_tutari(SIPARISLER[0]))
+print(toplam_ciro(SIPARISLER))</pre>
+<p>Küçük fonksiyon büyüğünün içinde kullanılır; tutar hesabı değişirse (örneğin indirim eklenirse) yalnız <code>siparis_tutari</code> değişir.</p>
+
+<h2>Adım 3: Şehre göre gruplama</h2>
+<p>Döngüler dersindeki sayaç kalıbının toplama versiyonu: anahtar şehir, değer biriken tutar.</p>
+<pre class="py">def sehre_gore_ciro(siparisler):
+    ciro = {}
+    for s in siparisler:
+        sehir = s["sehir"]
+        ciro[sehir] = round(ciro.get(sehir, 0.0) + siparis_tutari(s), 2)
+    return ciro
+
+print(sehre_gore_ciro(SIPARISLER))</pre>
+
+<h2>Adım 4: En çok satan ürün</h2>
+<p>Önce ürün → toplam adet sözlüğü kur, sonra en büyüğü bul. <code>max</code> fonksiyonuna <code>key</code> vererek sözlüğü değerine göre tarayabilirsin.</p>
+<pre class="py">def en_cok_satan(siparisler):
+    adetler = {}
+    for s in siparisler:
+        adetler[s["urun"]] = adetler.get(s["urun"], 0) + s["adet"]
+    if not adetler:
+        return None, 0
+    urun = max(adetler, key=adetler.get)
+    return urun, adetler[urun]
+
+print(en_cok_satan(SIPARISLER))</pre>
+<div class="note"><b>Boş veri</b>Hiç sipariş yoksa <code>max</code> boş sözlükte hata verir. Erken dönüşle <code>(None, 0)</code> döndürmek, raporun "Dün sipariş olmadı" diyebilmesini sağlar. Her hesap fonksiyonunda "boş gelirse ne olur?" diye sor.</div>
+
+<h2>Adım 5: Bozuk kayıtlara dayanıklılık</h2>
+<p>Gerçek veride <code>adet</code> metin olarak gelebilir, <code>birim_fiyat</code> eksik olabilir. Hesabı çökertmek yerine bozuk kayıtları ayır ve raporda sayısını göster. Temizleme işini de ayrı bir fonksiyona ver:</p>
+<pre class="py">def temizle(ham_siparisler):
+    """Geçerli siparişleri ve atlanan kayıt sayısını döndürür."""
+    temiz, atlanan = [], 0
+    for s in ham_siparisler:
+        try:
+            kayit = dict(s)
+            kayit["adet"] = int(s["adet"])
+            kayit["birim_fiyat"] = float(s["birim_fiyat"])
+            if kayit["adet"] &lt;= 0:
+                raise ValueError("adet pozitif olmalı")
+            temiz.append(kayit)
+        except (KeyError, ValueError, TypeError):
+            atlanan += 1
+    return temiz, atlanan
+
+ham = [
+    {"id": 1, "sehir": "Ankara", "urun": "Mouse", "adet": "3", "birim_fiyat": "349.5"},
+    {"id": 2, "sehir": "İzmir", "urun": "Klavye", "adet": "yok", "birim_fiyat": 1249},
+    {"id": 3, "sehir": "Bursa", "urun": "Kulaklık", "adet": 1},
+]
+temiz, atlanan = temizle(ham)
+print(len(temiz), "geçerli,", atlanan, "atlandı")
+print(temiz[0])</pre>
+
+<h2>Adım 6: Rapor metni ve dosya</h2>
+<p>Metin biçimlendirme dersindeki hizalama ve join kalıbı. Rapor fonksiyonu hesap yapmaz; hesap fonksiyonlarını çağırır ve satırları dizer.</p>
+<pre class="py">from datetime import date
+
+def rapor_metni(siparisler, tarih, atlanan=0):
+    toplam = toplam_ciro(siparisler)
+    sehirler = sehre_gore_ciro(siparisler)
+    urun, adet = en_cok_satan(siparisler)
+    satirlar = [
+        f"ANADOLU MARKET GÜNLÜK RAPOR - {tarih:%d.%m.%Y}",
+        "=" * 40,
+        f"Sipariş sayısı : {len(siparisler)}",
+        f"Toplam ciro    : {toplam:,.2f} TL",
+        "",
+        "Şehre göre ciro",
+    ]
+    for sehir, ciro in sorted(sehirler.items(), key=lambda x: x[1], reverse=True):
+        satirlar.append(f"  {sehir:&lt;12}{ciro:&gt;14,.2f} TL")
+    satirlar.append("")
+    satirlar.append(f"En çok satan   : {urun} ({adet} adet)")
+    if atlanan:
+        satirlar.append(f"Atlanan kayıt  : {atlanan}")
+    return "\n".join(satirlar)
+
+rapor = rapor_metni(SIPARISLER, date(2024, 3, 5), atlanan=1)
+print(rapor)
+
+with open("gunluk_rapor.txt", "w", encoding="utf-8") as f:
+    f.write(rapor + "\n")
+print("\nDosyadan geri okundu, satır sayısı:", len(open("gunluk_rapor.txt", encoding="utf-8").read().splitlines()))</pre>
+
+<h2>Kontrol listesi</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Neden</th></tr>
+<tr><td>Her fonksiyon tek iş mi yapıyor?</td><td>Test ve değişiklik kolaylığı</td></tr>
+<tr><td>Hesap fonksiyonları print ediyor mu?</td><td>Etmemeli; sunumdan ayrı kalmalı</td></tr>
+<tr><td>Boş liste verince çöküyor mu?</td><td>Sipariş olmayan gün de rapor ister</td></tr>
+<tr><td>Bozuk kayıt tüm raporu durduruyor mu?</td><td>Durdurmamalı; sayılıp raporlanmalı</td></tr>
+<tr><td>Para 2 ondalıkla ve binlik ayırıcıyla mı?</td><td>Müdür Excel'den alışkın</td></tr>
+</table></div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: aynı iskeletle yeni projeler</h2>
+<p>Sipariş raporunu bitirdin. Asıl kazanım raporun kendisi değil, <b>iskelet</b>: oku → temizle → hesapla → sun → kaydet. İş hayatında karşına çıkacak küçük otomasyonların çoğu bu beş adımın farklı verilerle tekrarıdır. Bu bölümde iskeleti açıkça adlandırıyor, programı bilgisayarında çalışacak bir dosya düzenine sokuyor ve dört yeni proje varyasyonu veriyoruz. Alıştırmalarda bunlardan birini, <b>Ilgaz Bank gün sonu raporunu</b>, adım adım rehberle sıfırdan inşa edeceksin.</p>
+
+<h3>Beş adımlık iskelet</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Adım</th><th>Sipariş raporu</th><th>Banka gün sonu</th><th>Stok uyarısı</th><th>İK mesai özeti</th></tr>
+<tr><td>Oku</td><td>CSV → sözlük listesi</td><td>hareket CSV metni</td><td>stok sözlüğü</td><td>giriş-çıkış kayıtları</td></tr>
+<tr><td>Temizle</td><td><code>temizle</code></td><td>hatalı satırı say</td><td>negatif adedi ele</td><td>eksik saati ayır</td></tr>
+<tr><td>Hesapla</td><td>ciro, şehir, en çok satan</td><td>bakiye, şüpheli işlem</td><td>eşik altı ürünler</td><td>toplam ve fazla mesai</td></tr>
+<tr><td>Sun</td><td><code>rapor_metni</code></td><td><code>banka_raporu</code></td><td>sipariş listesi</td><td>kişi başı tablo</td></tr>
+<tr><td>Kaydet</td><td>txt dosyası</td><td>tarihli txt</td><td>tedarikçiye CSV</td><td>bordroya CSV</td></tr>
+</table></div>
+<p>Kural aynı: her adım ayrı fonksiyon; hesap fonksiyonları <b>saf</b> (yazdırmaz, dosyaya dokunmaz, girdiyi değiştirmez), girdi/çıktı yalnızca uçlarda. Böylece "rapor biçimini değiştir" isteği hesaplara, "yeni veri kaynağı" isteği rapora dokunmaz.</p>
+
+<h3>Programın girişi: main ve __name__ koruması</h3>
+<p>Fonksiyonları yazdın; peki program nereden başlar? Python dosyası iki şekilde kullanılabilir: doğrudan çalıştırılır (<code>python rapor.py</code>) ya da başka bir dosya onu <code>import</code> eder (testler gibi). <code>if __name__ == "__main__":</code> bloğu yalnızca birinci durumda çalışır. Ayarlanabilir değerleri dosyanın başına BÜYÜK_HARFLİ sabitler olarak koy; ileride bunları ayar dosyasından ya da komut satırından okuyacaksın.</p>
+<pre class="py">ESIK_TL = 10_000            # ayarlar en üstte, tek yerde
+CIKTI = "gun_sonu.txt"
+
+def oku():
+    return [("TR01", "cekme", 1200.5), ("TR02", "havale", 15000.0), ("TR01", "yatirma", 5000.0)]
+
+def supheli(hareketler, esik):
+    return [h for h in hareketler if h[1] != "yatirma" and h[2] &gt;= esik]
+
+def rapor(hareketler, liste):
+    return f"{len(hareketler)} hareket, {len(liste)} şüpheli"
+
+def main():
+    hareketler = oku()
+    liste = supheli(hareketler, ESIK_TL)
+    metin = rapor(hareketler, liste)
+    with open(CIKTI, "w", encoding="utf-8") as f:
+        f.write(metin + "\n")
+    print(metin)
+
+if __name__ == "__main__":
+    main()
+</pre>
+<div class="tip"><b>Neden main()?</b>Kodu modül seviyesine dağınık yazarsan, test dosyası <code>import rapor</code> dediği anda rapor üretilir ve dosya yazılır. main içine alınca import yalnız fonksiyonları tanımlar; testler onları tek tek çağırır.</div>
+
+<h3>Kendi projeni test et: küçük assert seti</h3>
+<p>Henüz pytest bilmiyorsun ama bilmen gerekmiyor: bilinen küçük girdiler için beklenen çıktıyı <code>assert</code> ile yazan bir <code>testler()</code> fonksiyonu, kodu her değiştirdiğinde "bir şeyi bozdum mu?" sorusunu saniyede cevaplar. En az üç durum test et: normal veri, boş veri, bozuk veri.</p>
+<pre class="py">def sehre_gore(siparisler):
+    sonuc = {}
+    for sehir, tutar in siparisler:
+        sonuc[sehir] = round(sonuc.get(sehir, 0) + tutar, 2)
+    return sonuc
+
+def testler():
+    assert sehre_gore([("Ankara", 10.1), ("Ankara", 0.2)]) == {"Ankara": 10.3}, "kuruş yuvarlama"
+    assert sehre_gore([]) == {}, "boş gün"
+    assert sehre_gore([("İzmir", 5)]) == {"İzmir": 5}, "tek kayıt"
+    print("Tüm testler geçti")
+
+testler()
+</pre>
+
+<h3>Bilgisayarında proje düzeni</h3>
+<p>Tarayıcıda tek hücrede çalıştın; gerçek projede birkaç dosya olur. Basit ve yeterli düzen:</p>
+<pre class="code">gun_sonu_raporu/
+├── rapor.py          # fonksiyonlar + main()
+├── test_rapor.py     # assert'li testler (sonra pytest)
+├── veri/
+│   └── hareketler.csv
+├── cikti/            # üretilen raporlar (git'e eklenmez)
+└── README.md         # ne yapar, nasıl çalışır
+</pre>
+<pre class="code">cd gun_sonu_raporu
+python rapor.py              # Windows
+python3 rapor.py             # macOS / Linux
+python test_rapor.py         # testler
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr>
+<tr><td><code>can't open file 'rapor.py'</code></td><td>Terminal başka klasörde</td><td>Önce <code>cd</code> ile proje klasörüne geç</td></tr>
+<tr><td><code>FileNotFoundError: veri/hareketler.csv</code></td><td>Göreli yol çalışma klasörüne göre</td><td><code>Path(__file__).parent / "veri" / ...</code></td></tr>
+<tr><td><code>python</code> komutu Microsoft Store'u açıyor</td><td>Windows takma adı</td><td><code>py rapor.py</code> ya da kurulumu PATH'e ekle</td></tr>
+<tr><td>Türkçe harfler bozuk</td><td>encoding verilmemiş</td><td>Her <code>open</code>'a <code>encoding="utf-8"</code></td></tr>
+</table></div>
+
+<h3>Dört varyasyon: kendine meydan oku</h3>
+<ol>
+<li><b>Ilgaz Bank gün sonu</b> (alıştırmalarda rehberli): hareket CSV'sini oku, hesap bakiyelerini güncelle, eşiği aşan çekme/havaleleri işaretle, raporu yaz.</li>
+<li><b>Stok uyarı raporu</b>: ürün başına farklı kritik eşik, eşiği olmayana varsayılan eşik; kritik ürünleri adede göre sırala, tedarikçiye gönderilecek listeyi üret.</li>
+<li><b>İK mesai özeti</b>: çalışan, gün ve saat kayıtlarından kişi başı toplam saat ve günlük 9 saati aşan fazla mesai.</li>
+<li><b>Dönem karşılaştırma</b>: dünkü ve bugünkü şehir cirolarını karşılaştır, yüzde değişimi hesapla; dün satış olmayan şehirde yüzde yerine "yeni" yaz.</li>
+</ol>
+<div class="warn"><b>Girdiyi değiştirme</b>Temizleme fonksiyonunda <code>kayit = s</code> yazıp <code>kayit["adet"] = int(...)</code> dersen, çağıranın orijinal listesini de değiştirirsin; aynı veriyle ikinci rapor farklı çıkar. Önce kopyala: <code>kayit = dict(s)</code>. Bakiye sözlüğü için de aynısı: <code>bakiye = dict(acilis)</code>.</div>
+
+<h3>Bitirmeden önce: projeyi "teslim edilebilir" yapmak</h3>
+<ul>
+<li>README'de üç şey: ne yapar, nasıl çalıştırılır (komut), girdi dosyasının biçimi.</li>
+<li>Rapor dosyasının adında tarih: <code>gun_sonu_2026-10-27.txt</code>.</li>
+<li>Hatalı satır sayısı raporda görünür; sıfır değilse ayrıca hatalı satırları bir dosyaya yaz.</li>
+<li>Sihirli sayılar (10000, 9 saat) sabit olarak en üstte.</li>
+</ul>
+<pre class="py">from datetime import date
+
+RAPOR_TARIHI = date(2026, 10, 27)          # gerçek betikte date.today()
+ham = ["1,TR01,5000", "2,TR01,abc", "3,TR02,300", "4,TR02"]
+
+gecerli, hatalilar = [], []
+for no, satir in enumerate(ham, start=1):
+    parca = satir.split(",")
+    if len(parca) == 3 and parca[2].isdigit():
+        gecerli.append(parca)
+    else:
+        hatalilar.append(f"{no}: {satir}")
+
+ad = f"gun_sonu_{RAPOR_TARIHI.isoformat()}.txt"
+with open(ad, "w", encoding="utf-8") as f:
+    f.write(f"Geçerli hareket: {len(gecerli)}\n")
+if hatalilar:
+    with open(ad.replace(".txt", "_hatalar.txt"), "w", encoding="utf-8") as f:
+        f.write("\n".join(hatalilar) + "\n")
+print("Rapor:", ad)
+print("Hatalı satırlar:", hatalilar)
+</pre>
+
+<div class="note"><b>Gerçek işte</b>Bir analist ya da yeni başlayan geliştiricinin ilk aylarda yazdığı işlerin çoğu tam olarak bu ölçektedir: bir klasörden dosya okuyan, birkaç hesap yapan, e-postaya yapıştırılacak ya da paylaşılan klasöre bırakılacak bir rapor üreten 100–200 satırlık betik. Bu betik bir kez yazılıp unutulmaz; her ay biri "şu sütunu da ekler misin?" der. İskeleti temiz kurduysan değişiklik on dakika sürer, kurmadıysan yeniden yazarsın. Portfolyon için de bu varyasyonlardan ikisini GitHub'a README'li biçimde koymak, iş görüşmesinde "Python biliyorum" demekten çok daha ikna edicidir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Bu program gerçekte nasıl çalışır?</h3>
+<p>Orta seviyede aynı projeyi CSV modülüyle dosyadan okuyacak, <code>dataclass</code> ile siparişi tip güvenli bir nesneye çevirecek, <code>collections.Counter</code> ve <code>defaultdict</code> ile gruplama kodunu yarıya indirecek, <code>unittest</code> ile her fonksiyona test yazacaksın. İleri seviyede ise <code>pandas</code> ile <code>groupby("sehir")["tutar"].sum()</code> tek satır olacak. Temel bu: parçala, saf tut, biçimi ayır.</p>
+<h3>Zamanlama</h3>
+<p>"Her sabah" isteği kodun içine girmez; işletim sisteminin zamanlayıcısı (cron, Görev Zamanlayıcı) betiği 07:00'de çalıştırır. Betik <code>if __name__ == "__main__":</code> bloğunda veriyi okur, raporu üretir, dosyaya yazar ve çıkar. Betiğin kendisi "ne zaman" sorusunu bilmez; bu, sorumlulukları ayırmanın bir başka örneğidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-temel">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../hatalar/">← Hatalar ve istisnalar</a><a href="../kapsamli-ifadeler/">Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

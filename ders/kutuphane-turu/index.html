@@ -1,0 +1,174 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Python kütüphane haritası: hangi iş için hangi paket? | Kesit Python</title><meta name="description" content="Veri, görselleştirme, makine öğrenmesi, web, kazıma, ofis otomasyonu, CLI, test, veritabanı ve doğrulama için doğru kütüphaneyi seçmeyi; PyPI'da paket…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kutuphane-turu/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Python kütüphane haritası: hangi iş için hangi paket?"><meta property="og:description" content="Veri, görselleştirme, makine öğrenmesi, web, kazıma, ofis otomasyonu, CLI, test, veritabanı ve doğrulama için doğru kütüphaneyi seçmeyi; PyPI'da paket…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kutuphane-turu/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Python kütüphane haritası: hangi iş için hangi paket?","description":"Veri, görselleştirme, makine öğrenmesi, web, kazıma, ofis otomasyonu, CLI, test, veritabanı ve doğrulama için doğru kütüphaneyi seçmeyi; PyPI'da paket…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/kutuphane-turu/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Python kütüphane haritası: hangi iş için hangi paket?</h1><p class="st-l">Veri, görselleştirme, makine öğrenmesi, web, kazıma, ofis otomasyonu, CLI, test, veritabanı ve doğrulama için doğru kütüphaneyi seçmeyi; PyPI'da paket değerlendirmeyi, belge okumayı (help, __doc__, inspect.signature), sürüm uyumunu ve typosquatting gibi güvenlik risklerini öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kutuphane-turu">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Python'ın gücünün yarısı dilin kendisi, diğer yarısı da PyPI'daki (Python Package Index) yarım milyonu aşkın pakettir. Anadolu Market'te yeni başlayan bir analiste "aylık satış Excel'ini oku, grafiğini çiz, PDF raporunu e-postayla gönder" denildiğinde işin çoğu doğru kütüphaneyi seçmektir: Excel için openpyxl, analiz için pandas, grafik için matplotlib. Yanlış seçim haftalar kaybettirir; bakımı bırakılmış ya da sahte bir paket ise güvenlik açığı demektir.</p>
+<p>Bu ders bir harita sunar: her iş alanında sektörde yaygın kabul gören kütüphaneler, kurulum komutları, bu uygulamada tarayıcıda çalışıp çalışmadıkları ve hangi derste derinleştirileceği. Ardından paketi nasıl değerlendireceğini, belgesini nasıl okuyacağını ve güvenlik tuzaklarını öğreneceksin. Sanal ortam (virtual environment) ve pip ayrıntılarını Sanal ortam ve paket yönetimi dersinde, standart kütüphaneyi Standart kütüphane turu dersinde gördün; burada bakış açısı "dışarıdan ne alırım?" sorusudur.</p>
+
+<h2>Büyük harita</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Alan</th><th>Kütüphane</th><th>Ne işe yarar</th><th>Kurulum</th><th>Tarayıcıda</th><th>Nerede derinleşir</th></tr>
+<tr><td>Veri</td><td>pandas</td><td>Tablo verisi: oku, temizle, grupla, birleştir</td><td><code>pip install pandas</code></td><td>Evet</td><td>pandas giriş, temizlik, groupby</td></tr>
+<tr><td>Veri</td><td>polars</td><td>Çok hızlı, tembel (lazy) değerlendirmeli DataFrame</td><td><code>pip install polars</code></td><td>Evet</td><td>Veri boru hattı (ETL)</td></tr>
+<tr><td>Veri</td><td>numpy</td><td>Sayısal diziler, vektör işlemleri, lineer cebir</td><td><code>pip install numpy</code></td><td>Evet</td><td>numpy dersi</td></tr>
+<tr><td>Veri</td><td>duckdb</td><td>Dosya ve DataFrame üzerinde SQL</td><td><code>pip install duckdb</code></td><td>Evet</td><td>Veri boru hattı (pipeline)</td></tr>
+<tr><td>Görsel</td><td>matplotlib</td><td>Her tür statik grafik, tam kontrol</td><td><code>pip install matplotlib</code></td><td>Evet</td><td>matplotlib ile görselleştirme</td></tr>
+<tr><td>Görsel</td><td>seaborn</td><td>İstatistiksel grafiklerin kısa yolu (matplotlib üstüne)</td><td><code>pip install seaborn</code></td><td>Hayır</td><td>Görselleştirme (not)</td></tr>
+<tr><td>Görsel</td><td>plotly</td><td>Etkileşimli, tarayıcıda yakınlaştırılabilir grafik</td><td><code>pip install plotly</code></td><td>Hayır</td><td>Görselleştirme (not)</td></tr>
+<tr><td>ML</td><td>scikit-learn</td><td>Klasik makine öğrenmesi: regresyon, sınıflandırma, kümeleme</td><td><code>pip install scikit-learn</code></td><td>Evet</td><td>İleri seviye projeler</td></tr>
+<tr><td>ML</td><td>xgboost</td><td>Gradyan artırma; tablo verisinde yarışma favorisi</td><td><code>pip install xgboost</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>ML</td><td>pytorch</td><td>Derin öğrenme, sinir ağları, GPU</td><td><code>pip install torch</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Web</td><td>Django</td><td>Her şey dahil web çatısı: yönetim paneli, ORM, oturum</td><td><code>pip install django</code></td><td>Hayır</td><td>API ve web</td></tr>
+<tr><td>Web</td><td>Flask</td><td>Küçük, esnek web çatısı</td><td><code>pip install flask</code></td><td>Hayır</td><td>API ve web</td></tr>
+<tr><td>Web</td><td>FastAPI</td><td>Tip ipuçlarıyla (type hint) hızlı REST API, otomatik belge</td><td><code>pip install "fastapi[standard]"</code></td><td>Hayır</td><td>API ve web</td></tr>
+<tr><td>Kazıma</td><td>requests / httpx</td><td>HTTP istekleri; httpx async da destekler</td><td><code>pip install requests httpx</code></td><td>httpx (ağsız)</td><td>API ve web</td></tr>
+<tr><td>Kazıma</td><td>BeautifulSoup</td><td>HTML ayrıştırma ve veri çekme</td><td><code>pip install beautifulsoup4</code></td><td>Evet</td><td>API ve web</td></tr>
+<tr><td>Kazıma</td><td>Playwright</td><td>Gerçek tarayıcı sürerek JavaScript'li sayfa kazıma, test</td><td><code>pip install playwright</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Ofis</td><td>openpyxl</td><td>Excel (.xlsx) oku, yaz, biçimlendir</td><td><code>pip install openpyxl</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Ofis</td><td>python-docx</td><td>Word belgesi üret ve düzenle</td><td><code>pip install python-docx</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Ofis</td><td>pypdf</td><td>PDF birleştir, böl, metin çıkar</td><td><code>pip install pypdf</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>CLI</td><td>argparse</td><td>Komut satırı argümanları (standart kütüphane)</td><td>Kurulum yok</td><td>Evet</td><td>Standart kütüphane turu</td></tr>
+<tr><td>CLI</td><td>click / typer</td><td>Dekoratörle (decorator) CLI; typer tip ipuçlarından üretir</td><td><code>pip install click typer</code></td><td>click evet</td><td>Paketleme ve dağıtım</td></tr>
+<tr><td>CLI</td><td>rich</td><td>Renkli tablo, ilerleme çubuğu, güzel hata çıktısı</td><td><code>pip install rich</code></td><td>Evet</td><td>Bu ders</td></tr>
+<tr><td>Test</td><td>pytest</td><td>Düz assert ile test, fixture, parametrize</td><td><code>pip install pytest pytest-cov</code></td><td>Modül olarak</td><td>pytest ile test</td></tr>
+<tr><td>Veritabanı</td><td>SQLAlchemy</td><td>ORM ve SQL ifade dili, veritabanından bağımsız</td><td><code>pip install sqlalchemy</code></td><td>Evet</td><td>sqlite3 ile Python (not)</td></tr>
+<tr><td>Veritabanı</td><td>psycopg</td><td>PostgreSQL sürücüsü</td><td><code>pip install "psycopg[binary]"</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Doğrulama</td><td>pydantic</td><td>Tip ipuçlarıyla veri doğrulama ve dönüştürme</td><td><code>pip install pydantic</code></td><td>Evet</td><td>API ve web</td></tr>
+<tr><td>Tarih</td><td>python-dateutil</td><td>Esnek tarih ayrıştırma, "ayın son günü" gibi göreli tarihler</td><td><code>pip install python-dateutil</code></td><td>Evet</td><td>Tarih ve saat</td></tr>
+<tr><td>Tarih</td><td>pendulum</td><td>Saat dilimi dostu, okunur tarih API'si</td><td><code>pip install pendulum</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Görev</td><td>celery</td><td>Dağıtık arka plan görev kuyruğu (Redis/RabbitMQ ile)</td><td><code>pip install celery</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Görev</td><td>APScheduler</td><td>Uygulama içinde zamanlanmış görev (cron benzeri)</td><td><code>pip install apscheduler</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+</table></div>
+<div class="tip"><b>Önce standart kütüphane</b>İhtiyacın csv, json, sqlite3, datetime, pathlib, argparse ya da statistics ile çözülüyorsa paket ekleme. Her bağımlılık güncelleme, güvenlik ve lisans takibi demektir. "Bir fonksiyon için bir paket" alışkanlığı projeyi kırılgan yapar.</div>
+
+<h3>Kendi bilgisayarında: tarayıcıda çalışmayan iki örnek</h3>
+<pre class="code"># pip install openpyxl
+from openpyxl import Workbook
+
+wb = Workbook()
+ws = wb.active
+ws.append(["Şehir", "Ciro"])
+ws.append(["İzmir", 125000])
+ws["B2"].number_format = "#,##0 TL"
+wb.save("ciro.xlsx")</pre>
+<pre class="code"># pip install typer
+import typer
+
+def rapor(sehir: str, ay: int = 1, detay: bool = False):
+    """Şehir bazlı aylık satış raporu üretir."""
+    print(f"{sehir} için {ay}. ay raporu, detay={detay}")
+
+if __name__ == "__main__":
+    typer.run(rapor)        # python rapor.py Ankara --ay 3 --detay</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Bu iki örnek tarayıcıda çalışmaz. Sanal ortamını etkinleştirip yorumdaki <code>pip install</code> komutunu çalıştır, kodu bir .py dosyasına kaydet ve terminalden çalıştır.</div>
+
+<h2>rich: tarayıcıda da çalışan güzel çıktı</h2>
+<p>rich, terminal çıktısını tablolar ve renklerle okunur yapar. Komut satırı araçlarında ve hata ayıklamada (debugging) çok yaygındır:</p>
+<pre class="py">from rich.console import Console
+from rich.table import Table
+
+tablo = Table(title="Anadolu Market: kütüphane seçimi")
+tablo.add_column("İş", style="cyan")
+tablo.add_column("Kütüphane")
+tablo.add_column("Tarayıcıda", justify="center")
+tablo.add_row("Satış analizi", "pandas", "evet")
+tablo.add_row("Excel raporu", "openpyxl", "hayır")
+tablo.add_row("REST API", "FastAPI", "hayır")
+Console(width=70).print(tablo)</pre>
+
+<h2>PyPI'da paket seçmek: beş ölçüt</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Nereye bakarsın?</th><th>Kırmızı bayrak</th></tr>
+<tr><td>Bakım</td><td>Son sürüm tarihi, açık issue'lara yanıt, son commit</td><td>2 yıldır sürüm yok, issue'lar yanıtsız</td></tr>
+<tr><td>Sürüm olgunluğu</td><td>1.0 üstü mü, değişiklik günlüğü (changelog) düzenli mi</td><td>0.0.x, her sürümde kırıcı değişiklik</td></tr>
+<tr><td>Lisans</td><td>PyPI sayfası "License", depodaki LICENSE dosyası</td><td>Lisans yok ya da ticari kullanımı kısıtlayan GPL/AGPL (şirket politikasına bak)</td></tr>
+<tr><td>Kullanım</td><td>İndirme istatistikleri, bağımlı proje sayısı</td><td>Popüler bir pakete benzeyen adla çok az indirme</td></tr>
+<tr><td>Uyumluluk</td><td><code>Requires-Python</code>, desteklenen işletim sistemleri, wheel var mı</td><td>Senin Python sürümünü desteklemiyor</td></tr>
+</table></div>
+<div class="warn"><b>Typosquatting: sahte ikiz paketler</b>Saldırganlar popüler paketlere bir harf farkla benzeyen adlarla (ör. <code>reqeusts</code>, <code>pandsa</code>) kötü amaçlı paketler yükler. <code>pip install</code> kurulum sırasında paketin kodunu çalıştırabildiği için tek bir yazım hatası makineni ele geçirtebilir. Komutu kopyalamadan önce adı resmî belgeden doğrula, requirements dosyalarını kod incelemesinden (code review) geçir, kurumda iç PyPI aynası kullan.</div>
+<p>Bir de <b>pip adı ile import adı</b> farklı olabilir: <code>pip install scikit-learn</code> ama <code>import sklearn</code>; <code>beautifulsoup4</code> → <code>bs4</code>; <code>python-dateutil</code> → <code>dateutil</code>; <code>pyyaml</code> → <code>yaml</code>; <code>pillow</code> → <code>PIL</code>. Bu farkı bilmeyenler "kurdum ama import edemiyorum" diye saatlerini harcar.</p>
+
+<h2>Belge okumak: help, __doc__, inspect</h2>
+<p>Yeni bir kütüphaneyi öğrenmenin sırası: resmî belgenin "Quickstart" bölümü, sonra API referansı. Kod içinden ise dört araç vardır:</p>
+<pre class="py">import inspect, statistics
+
+def kdv_hesapla(tutar: float, oran: float = 0.20, *, yuvarla: bool = True) -&gt; float:
+    """Tutara KDV ekler.
+
+    oran ondalık verilir (0.20 = yüzde 20).
+    """
+    sonuc = tutar * (1 + oran)
+    return round(sonuc, 2) if yuvarla else sonuc
+
+imza = inspect.signature(kdv_hesapla)
+print(imza)
+for ad, p in imza.parameters.items():
+    varsayilan = "zorunlu" if p.default is inspect.Parameter.empty else p.default
+    print(f"  {ad:8} tür={p.kind.name:22} varsayılan={varsayilan}")
+print(inspect.getdoc(kdv_hesapla).splitlines()[0])
+print(inspect.signature(statistics.median))
+print(statistics.median.__doc__.strip().splitlines()[0])</pre>
+<p><code>help(nesne)</code> tüm bunları biçimlendirilmiş bir sayfa olarak yazdırır; etkileşimli kabukta en hızlı keşif aracıdır. <code>dir(modul)</code> içindeki adları, <code>inspect.getdoc</code> girintisi temizlenmiş belgeyi, <code>inspect.signature</code> parametreleri türleriyle birlikte verir. Parametre türleri PCAP ve gerçek API okuması için önemlidir: <code>*</code> sonrası parametreler yalnızca adla verilebilir (<code>KEYWORD_ONLY</code>).</p>
+
+<h2>Kurulu mu, hangi sürüm?</h2>
+<p>Bir paketi import etmek kodunu çalıştırır; yalnızca var olup olmadığını öğrenmek için <code>importlib.util.find_spec</code> kullan. Kurulu sürüm için <code>importlib.metadata.version</code> vardır.</p>
+<pre class="py">import importlib.util
+from importlib.metadata import version, PackageNotFoundError
+
+for ad in ["json", "sqlite3", "olmayan_paket_xyz"]:
+    print(ad, "kurulu" if importlib.util.find_spec(ad) else "YOK")
+
+try:
+    print("pip sürümü:", version("pip"))
+except PackageNotFoundError:
+    print("pip bu ortamda paket olarak kayıtlı değil")
+
+# Sürüm karşılaştırma: metin değil, sayı demeti
+a, b = "2.10.0", "2.9.3"
+print(a &gt; b)                                                    # yanlış sonuç!
+print(tuple(map(int, a.split("."))) &gt; tuple(map(int, b.split("."))))</pre>
+<p>Gerçek projede sürüm karşılaştırması için <code>packaging.version.Version</code> kullanılır; <code>"2.0.0rc1"</code> gibi ön sürüm etiketlerini de doğru sıralar. Semver (anlamsal sürümleme) kuralı: <b>BÜYÜK.küçük.yama</b>; büyük artış kırıcı değişiklik, küçük artış geriye uyumlu yeni özellik, yama artışı hata düzeltmesidir.</p>
+
+<h2>requirements dosyasından rapor</h2>
+<p>Yeni bir projeye katıldığında ilk iş <code>requirements.txt</code> ya da <code>pyproject.toml</code> dosyasını okumaktır; projenin ne yaptığını büyük ölçüde oradan anlarsın:</p>
+<pre class="py">import re
+from collections import defaultdict
+
+requirements = """
+pandas&gt;=2.2       # analiz
+openpyxl==3.1.2
+fastapi[standard]&gt;=0.110
+pydantic~=2.7
+pytest ; extra == 'test'
+"""
+KATALOG = {"pandas": "veri", "openpyxl": "ofis", "fastapi": "web", "pydantic": "doğrulama", "pytest": "test"}
+
+rapor = defaultdict(list)
+for satir in requirements.splitlines():
+    satir = satir.split("#")[0].strip()
+    if not satir:
+        continue
+    ad = re.split(r"[\[&lt;&gt;=!~; ]", satir, maxsplit=1)[0].lower()
+    rapor[KATALOG.get(ad, "diğer")].append(ad)
+for kategori, paketler in sorted(rapor.items()):
+    print(f"{kategori:10} {', '.join(paketler)}")</pre>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal ekiplerde yeni bir paket eklemek genelde bir onay sürecinden geçer: lisans kontrolü (hukuk), güvenlik taraması (<code>pip-audit</code>, Dependabot), bakım durumu ve "standart kütüphane ya da zaten kullandığımız bir paket bu işi yapıyor mu?" sorusu. Pull request açıklamasına "neden bu paket, alternatifleri neydi" yazmak iyi bir alışkanlıktır. Excel raporu, PDF birleştirme ve zamanlanmış görev gibi otomasyon işleri Python'a geçişin en sık nedenidir; bu işlerde openpyxl, pypdf ve APScheduler üçlüsü çok yaygındır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Bağımlılık ağacı ve çakışma</h3>
+<p>Bir paket kurmak onun bağımlılıklarını da kurar. <code>pip install pandas</code> numpy, python-dateutil, pytz ve tzdata'yı da getirir. İki paket aynı bağımlılığın uyumsuz sürümlerini isterse çakışma (dependency conflict) çıkar. <code>pip check</code> çakışmaları raporlar, <code>pipdeptree</code> ağacı gösterir. Az bağımlılıklı paketi tercih etmek uzun vadede kazandırır.</p>
+<h3>Wheel, saf Python ve derlenmiş paketler</h3>
+<p>numpy ve pandas gibi paketler C/Rust ile derlenmiş kod içerir; PyPI bunları işletim sistemi ve Python sürümüne özel <b>wheel</b> (.whl) dosyaları olarak sunar. Yeni bir Python sürümü çıktığında wheel henüz yoksa pip kaynaktan derlemeye çalışır ve derleyici hatası alırsın. Bu yüzden kurumlar yeni Python sürümüne birkaç ay gecikmeyle geçer. Tarayıcıdaki Pyodide da paketlerin WebAssembly'ye derlenmiş hâllerini kullanır; tablodaki "Hayır" satırlarının çoğu bu yüzdendir.</p>
+<h3>Belgeyi koddan üretmek</h3>
+<p>Kütüphanelerin API referans sayfaları çoğunlukla docstring'lerden otomatik üretilir (Sphinx, MkDocs + mkdocstrings). Kendi kodunda iyi docstring yazarsan aynı araçlarla belge siteni bedavaya alırsın ve <code>help()</code> senin kodunda da işe yarar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kutuphane-turu">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kapanis-kapsam/">← Kapsam ve kapanışlar (closures) derinlemesine</a><a href="../moduller-paketler/">Modüller ve paketler: import sisteminin içi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

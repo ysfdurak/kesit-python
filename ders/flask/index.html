@@ -1,0 +1,419 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Flask ile web uygulaması | Kesit Python</title><meta name="description" content="Flask uygulaması kurar; route, HTTP metotları, request/response, jsonify, Jinja2 şablonları, form doğrulama, hata işleyiciler, blueprint, uygulama…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/flask/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Flask ile web uygulaması"><meta property="og:description" content="Flask uygulaması kurar; route, HTTP metotları, request/response, jsonify, Jinja2 şablonları, form doğrulama, hata işleyiciler, blueprint, uygulama…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/flask/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Flask ile web uygulaması","description":"Flask uygulaması kurar; route, HTTP metotları, request/response, jsonify, Jinja2 şablonları, form doğrulama, hata işleyiciler, blueprint, uygulama…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/flask/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Flask ile web uygulaması</h1><p class="st-l">Flask uygulaması kurar; route, HTTP metotları, request/response, jsonify, Jinja2 şablonları, form doğrulama, hata işleyiciler, blueprint, uygulama fabrikası, test client ve gunicorn ile dağıtımı öğrenir, çatının içini mini bir yönlendirici yazarak kavrarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/flask">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>API ve web dersinde HTTP'nin temellerini (metot, durum kodu, başlık, JSON gövde) ve bir API'yi istemci tarafından tüketmeyi gördün. Şimdi masanın öbür tarafına geçiyoruz: <b>sunucuyu</b> sen yazacaksın. <b>Flask</b>, Python'un en yaygın "mikro" web çatısıdır (micro framework): çekirdeği küçüktür, yalnız yönlendirme (routing), istek/yanıt ve şablon motorunu verir; veritabanı, oturum açma, form gibi ihtiyaçları eklentilerle seçersin. Şirket içi yönetim panelleri, raporlama ekranları, makine öğrenmesi modellerini sunan küçük servisler ve prototipler için çok sık tercih edilir.</p>
+<p>Bu dersin özel bir yanı var: Flask bir sunucu çalıştırır ve ağ ister; bu yüzden <b>tarayıcıdaki Python motorunda çalışmaz</b>. Gerçek Flask kodunu gri kutularda göreceksin ve adım adım kendi bilgisayarında çalıştıracaksın. Alıştırmalarda ise Flask'ın içini taklit eden küçük parçaları (yönlendirici, yol parametresi ayrıştırıcı, şablon, form doğrulayıcı) kendin yazacaksın. Bir çatının içini yazan geliştirici, onu kullanırken hata ayıklamakta hiç zorlanmaz.</p>
+
+<h2>İlk uygulama ve kurulum</h2>
+<pre class="code"># app.py
+from flask import Flask
+
+app = Flask(__name__)
+
+@app.route("/")
+def ana_sayfa():
+    return "Anadolu Market'e hoş geldin!"
+
+@app.route("/saglik")
+def saglik():
+    return {"durum": "ok"}          # sözlük döndürmek otomatik JSON yanıtı üretir</pre>
+
+<div class="steps-list"><ol>
+<li>Proje klasörü aç ve sanal ortam (virtual environment) kur: <code>python -m venv .venv</code>, ardından Windows'ta <code>.venv\Scripts\activate</code>, macOS/Linux'ta <code>source .venv/bin/activate</code>.</li>
+<li>Flask'ı kur: <code>pip install flask</code></li>
+<li>Yukarıdaki kodu <code>app.py</code> olarak kaydet.</li>
+<li>Geliştirme sunucusunu başlat: <code>python -m flask --app app run --debug</code></li>
+<li>Tarayıcıda <code>http://127.0.0.1:5000/</code> ve <code>http://127.0.0.1:5000/saglik</code> adreslerini aç. Kodu değiştirip kaydettiğinde <code>--debug</code> sayesinde sunucu kendini yeniden başlatır.</li>
+</ol></div>
+<div class="note"><b>Kendi bilgisayarında dene</b>Flask bu sayfadaki motorda çalışmaz. Gri kutulardaki (<code>pre.code</code>) kodları kendi bilgisayarında, sanal ortam içinde dene. Yeşil "Çalıştır" düğmeli kutular ise Flask'ın arkasındaki fikirleri standart kütüphane ve jinja2 ile gösterir; onları burada çalıştırabilirsin.</div>
+
+<h2>Flask'ın kalbi: dekoratörle yönlendirme</h2>
+<p><code>@app.route("/")</code> sihirli değildir. Dekoratörler (decorator) dersinde gördüğün parametreli dekoratörün ta kendisidir: fonksiyonu bir kayda (URL kuralları tablosu) ekler ve fonksiyonu <b>değiştirmeden</b> geri döndürür. Gelen istekte Flask bu tabloda yol ve metodu arar, eşleşen fonksiyonu (view function) çağırır. Aşağıda bu mekanizmanın 20 satırlık bir modeli var.</p>
+<pre class="py">class MiniFlask:
+    def __init__(self):
+        self.kurallar = {}                       # (metot, yol) -&gt; fonksiyon
+
+    def route(self, yol, methods=("GET",)):
+        def kaydet(fn):
+            for m in methods:
+                self.kurallar[(m, yol)] = fn
+            return fn                            # fonksiyonu aynen geri ver
+        return kaydet
+
+    def dispatch(self, metot, yol):
+        if (metot, yol) in self.kurallar:
+            return self.kurallar[(metot, yol)](), 200
+        if any(y == yol for _, y in self.kurallar):
+            return "Method Not Allowed", 405
+        return "Not Found", 404
+
+app = MiniFlask()
+
+@app.route("/")
+def ana_sayfa():
+    return "Hoş geldin"
+
+@app.route("/sepet", methods=["GET", "POST"])
+def sepet():
+    return "Sepetin"
+
+print(app.dispatch("GET", "/"))
+print(app.dispatch("POST", "/sepet"))
+print(app.dispatch("DELETE", "/sepet"))
+print(app.dispatch("GET", "/yok"))</pre>
+
+<p>404 (bulunamadı) ile 405 (metot izinli değil) arasındaki farka dikkat: yol hiç yoksa 404, yol var ama bu metotla tanımlanmamışsa 405 döner. Gerçek Flask da tam olarak böyle davranır.</p>
+
+<h2>Yol parametreleri ve HTTP metotları</h2>
+<p>URL'nin bir parçasını değişken olarak almak için kuralda <code>&lt;ad&gt;</code> yazarsın; tür dönüştürücü (converter) eklersen Flask değeri dönüştürür ve uymayan URL'yi daha görünüm fonksiyonuna gelmeden 404 ile reddeder.</p>
+<pre class="code">from flask import Flask, request, abort
+
+app = Flask(__name__)
+URUNLER = {1: {"ad": "Çay", "fiyat": 85.5}, 2: {"ad": "Kahve", "fiyat": 240.0}}
+
+@app.get("/urunler/&lt;int:urun_id&gt;")             # @app.route(..., methods=["GET"]) kısayolu
+def urun_getir(urun_id):
+    if urun_id not in URUNLER:
+        abort(404)
+    return URUNLER[urun_id]
+
+@app.route("/urunler", methods=["GET", "POST"])
+def urunler():
+    if request.method == "POST":
+        veri = request.get_json()               # JSON gövde
+        yeni_id = max(URUNLER) + 1
+        URUNLER[yeni_id] = veri
+        return {"id": yeni_id, **veri}, 201     # (gövde, durum kodu)
+    kategori = request.args.get("kategori")     # ?kategori=İçecek
+    sayfa = request.args.get("sayfa", 1, type=int)
+    return {"sayfa": sayfa, "urunler": list(URUNLER.values())}</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Dönüştürücü</th><th>Eşleşir</th><th>Örnek</th></tr>
+<tr><td><code>&lt;ad&gt;</code> (string)</td><td>Eğik çizgi içermeyen metin</td><td><code>/sehir/İzmir</code></td></tr>
+<tr><td><code>&lt;int:ad&gt;</code></td><td>Pozitif tam sayı</td><td><code>/urunler/42</code></td></tr>
+<tr><td><code>&lt;float:ad&gt;</code></td><td>Ondalıklı sayı</td><td><code>/kur/32.5</code></td></tr>
+<tr><td><code>&lt;path:ad&gt;</code></td><td>Eğik çizgi dahil metin</td><td><code>/dosya/rapor/2024/ocak.pdf</code></td></tr>
+<tr><td><code>&lt;uuid:ad&gt;</code></td><td>UUID biçimi</td><td><code>/siparis/3f2a...</code></td></tr>
+</table></div>
+<p>Flask'ın yönlendiricisi (Werkzeug) kuralları düzenli ifadelere çevirerek eşler. Aynı fikri <code>re</code> ile kurabilirsin:</p>
+<pre class="py">import re
+
+DONUSTURUCU = {"int": (r"\d+", int), "str": (r"[^/]+", str)}
+
+def kural_derle(kural):
+    tipler = {}
+    def degistir(m):
+        tip, ad = (m.group(1) or "str"), m.group(2)
+        desen, cevir = DONUSTURUCU[tip]
+        tipler[ad] = cevir
+        return f"(?P&lt;{ad}&gt;{desen})"
+    regex = re.sub(r"&lt;(?:(\w+):)?(\w+)&gt;", degistir, kural)
+    return re.compile(f"^{regex}$"), tipler
+
+desen, tipler = kural_derle("/musteri/&lt;int:no&gt;/siparis/&lt;durum&gt;")
+for yol in ["/musteri/42/siparis/kargoda", "/musteri/abc/siparis/kargoda"]:
+    m = desen.match(yol)
+    print(yol, "-&gt;", {k: tipler[k](v) for k, v in m.groupdict().items()} if m else "404")</pre>
+
+
+<h2>request ve response</h2>
+<p>Görünüm fonksiyonu içinde <code>request</code> nesnesi o anki isteği temsil eder. Döndürdüğün değeri Flask bir yanıta (response) çevirir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İstek bilgisi</th><th>Flask'ta</th><th>Döndürülen değer</th><th>Flask ne yapar?</th></tr>
+<tr><td>Sorgu dizesi <code>?sayfa=2</code></td><td><code>request.args.get("sayfa", 1, type=int)</code></td><td><code>"metin"</code></td><td>200, text/html</td></tr>
+<tr><td>HTML form alanı</td><td><code>request.form["eposta"]</code></td><td><code>{"a": 1}</code> ya da liste</td><td>200, JSON (jsonify)</td></tr>
+<tr><td>JSON gövde</td><td><code>request.get_json()</code></td><td><code>(govde, 201)</code></td><td>Durum kodunu ayarlar</td></tr>
+<tr><td>Başlıklar</td><td><code>request.headers["Authorization"]</code></td><td><code>(govde, 200, {"X-Kaynak": "AM"})</code></td><td>Başlık ekler</td></tr>
+<tr><td>Yüklenen dosya</td><td><code>request.files["fatura"]</code></td><td><code>redirect(url_for("liste"))</code></td><td>302 yönlendirme</td></tr>
+</table></div>
+<p>Sorgu dizesi her zaman <b>metin</b> gelir; <code>type=int</code> verirsen dönüştürme başarısız olduğunda Flask hata vermez, varsayılanı döndürür. Aynı davranışı standart kütüphaneyle şöyle görebilirsin:</p>
+<pre class="py">from urllib.parse import urlsplit, parse_qs
+
+url = "/urunler?kategori=%C4%B0%C3%A7ecek&amp;sayfa=2&amp;etiket=yeni&amp;etiket=indirim&amp;limit=abc"
+parcalar = urlsplit(url)
+args = parse_qs(parcalar.query)
+print(parcalar.path)
+print(args)
+
+def get(args, anahtar, varsayilan=None, type=None):
+    if anahtar not in args:
+        return varsayilan
+    deger = args[anahtar][0]
+    try:
+        return type(deger) if type else deger
+    except ValueError:
+        return varsayilan
+
+print(get(args, "sayfa", 1, type=int), get(args, "limit", 20, type=int), get(args, "kategori"))</pre>
+
+
+<h2>Şablonlar: Jinja2</h2>
+<p>HTML sayfa üretirken Python içinde metin birleştirmek hem çirkin hem tehlikelidir. Flask, <b>Jinja2</b> şablon motorunu kullanır: <code>templates/</code> klasörüne HTML dosyası koyar, <code>render_template("liste.html", urunler=urunler)</code> ile değişkenleri gönderirsin. Şablonda <code>{{ ifade }}</code> değer basar, <code>{% for %}</code> ve <code>{% if %}</code> akış kurar, <code>|</code> ile filtre uygularsın. jinja2 bu motorda çalışır:</p>
+<pre class="py">from jinja2 import Environment, DictLoader
+
+sablonlar = {
+    "taban.html": "&lt;title&gt;{% block baslik %}Anadolu Market{% endblock %}&lt;/title&gt;\n{% block icerik %}{% endblock %}",
+    "liste.html": """{% extends "taban.html" %}
+{% block baslik %}Ürünler ({{ urunler|length }}){% endblock %}
+{% block icerik %}
+&lt;ul&gt;
+{% for u in urunler %}  &lt;li class="{{ 'tukendi' if u.stok == 0 else 'var' }}"&gt;{{ u.ad }}: {{ "%.2f"|format(u.fiyat) }} TL&lt;/li&gt;
+{% else %}  &lt;li&gt;Ürün yok&lt;/li&gt;
+{% endfor %}&lt;/ul&gt;
+&lt;p&gt;Yorum: {{ yorum }}&lt;/p&gt;
+{% endblock %}""",
+}
+env = Environment(loader=DictLoader(sablonlar), autoescape=True, trim_blocks=True)
+urunler = [{"ad": "Çay", "fiyat": 85.5, "stok": 10}, {"ad": "Kahve", "fiyat": 240, "stok": 0}]
+print(env.get_template("liste.html").render(urunler=urunler, yorum="&lt;script&gt;alert(1)&lt;/script&gt;"))</pre>
+
+<p>İki şeye dikkat: <code>{% extends %}</code> ve <code>{% block %}</code> ile tüm sayfaların ortak iskeletini tek dosyada tutarsın (şablon kalıtımı (inheritance)). <code>autoescape=True</code> kullanıcıdan gelen <code>&lt;script&gt;</code> gibi içeriği zararsız <code>&amp;lt;script&amp;gt;</code> metnine çevirir; Flask bunu <code>.html</code> şablonlarında varsayılan olarak açar. <code>|safe</code> filtresiyle kaçışı kapatmak, içeriğin güvenli olduğundan <b>emin olmadıkça</b> XSS (siteler arası betik) açığı demektir.</p>
+
+<h2>Form işleme ve POST/Redirect/GET</h2>
+<pre class="code">from flask import Flask, render_template, request, redirect, url_for, flash
+
+app = Flask(__name__)
+app.config["SECRET_KEY"] = "gelistirme-icin"     # flash ve oturum için gerekli
+
+@app.route("/iletisim", methods=["GET", "POST"])
+def iletisim():
+    hatalar = {}
+    if request.method == "POST":
+        ad = request.form.get("ad", "").strip()
+        eposta = request.form.get("eposta", "").strip()
+        if len(ad) &lt; 2:
+            hatalar["ad"] = "Ad en az 2 karakter olmalı"
+        if "@" not in eposta:
+            hatalar["eposta"] = "Geçerli bir e-posta gir"
+        if not hatalar:
+            # ... kaydet ...
+            flash("Mesajın alındı, teşekkürler!")
+            return redirect(url_for("iletisim"))   # POST'tan sonra yönlendir
+    return render_template("iletisim.html", hatalar=hatalar, form=request.form)</pre>
+
+<p>Başarılı bir POST'tan sonra sayfayı doğrudan döndürmek yerine <b>yönlendirirsin</b> (POST/Redirect/GET kalıbı). Böylece kullanıcı sayfayı yenilediğinde form ikinci kez gönderilmez; çift sipariş, çift ödeme gibi sorunlar önlenir. <code>url_for("iletisim")</code> URL'yi fonksiyon adından üretir; URL değişse bile kod kırılmaz. Gerçek projelerde formlar <b>Flask-WTF</b> ile doğrulanır; bu eklenti CSRF (siteler arası istek sahteciliği) korumasını da ekler.</p>
+
+<h2>Hata işleyiciler ve durum kodları</h2>
+<pre class="code">from flask import Flask, jsonify, abort
+
+app = Flask(__name__)
+
+class StokYetersiz(Exception):
+    pass
+
+@app.errorhandler(404)
+def bulunamadi(hata):
+    return jsonify(hata="Kaynak bulunamadı"), 404
+
+@app.errorhandler(StokYetersiz)
+def stok_hatasi(hata):
+    return jsonify(hata=str(hata)), 409
+
+@app.errorhandler(500)
+def sunucu_hatasi(hata):
+    app.logger.exception("Beklenmeyen hata")
+    return jsonify(hata="Sunucu hatası"), 500   # iç ayrıntıyı kullanıcıya sızdırma</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Kod</th><th>Anlam</th><th>Ne zaman döndürürsün?</th></tr>
+<tr><td>200 OK</td><td>Başarılı</td><td>GET, başarılı güncelleme</td></tr>
+<tr><td>201 Created</td><td>Oluşturuldu</td><td>POST ile yeni kayıt</td></tr>
+<tr><td>204 No Content</td><td>Gövdesiz başarı</td><td>DELETE</td></tr>
+<tr><td>302/303</td><td>Yönlendirme</td><td>Form gönderiminden sonra</td></tr>
+<tr><td>400 Bad Request</td><td>İstek bozuk</td><td>Geçersiz JSON, eksik alan</td></tr>
+<tr><td>401 / 403</td><td>Kimlik yok / yetki yok</td><td>Giriş yapılmamış / izin yok</td></tr>
+<tr><td>404 / 405</td><td>Yol yok / metot yok</td><td>Kayıt bulunamadı / yanlış metot</td></tr>
+<tr><td>409 Conflict</td><td>Durum çakışması</td><td>Stok yetersiz, aynı e-posta kayıtlı</td></tr>
+<tr><td>500</td><td>Sunucu hatası</td><td>Yakalanmamış istisna</td></tr>
+</table></div>
+
+<h2>Uygulama fabrikası, blueprint ve yapılandırma</h2>
+<p>Büyüyen bir projede tüm route'ları tek dosyaya koymak sürdürülemez. <b>Blueprint</b>, ilgili route'ları (ör. ürünler, siparişler, yönetim) ayrı modüllerde gruplar ve bir URL ön ekiyle uygulamaya bağlar. <b>Uygulama fabrikası</b> (application factory) ise uygulamayı modül düzeyinde değil bir fonksiyonda oluşturur: test için farklı, üretim için farklı yapılandırmayla istediğin kadar bağımsız uygulama üretebilirsin.</p>
+<pre class="code"># magaza/urunler.py
+from flask import Blueprint
+bp = Blueprint("urunler", __name__, url_prefix="/api/urunler")
+
+@bp.get("/")
+def liste():
+    return {"urunler": []}
+
+# magaza/__init__.py
+import os
+from flask import Flask
+
+def create_app(test_config=None):
+    app = Flask(__name__)
+    app.config.from_mapping(SECRET_KEY="dev", VERITABANI="sqlite:///magaza.db")
+    app.config.from_prefixed_env()           # FLASK_SECRET_KEY gibi ortam değişkenleri
+    if test_config:
+        app.config.update(test_config)
+    from . import urunler
+    app.register_blueprint(urunler.bp)
+    return app
+
+# Çalıştırma: python -m flask --app magaza run --debug</pre>
+
+<div class="warn"><b>Gizli anahtarlar koda yazılmaz</b><code>SECRET_KEY</code>, veritabanı şifresi ve API anahtarları ortam değişkeninden ya da gizli yönetim servisinden okunur. Yapılandırma dersindeki kurallar burada da geçerli. <code>debug=True</code> üretimde asla açık olmamalı: hata sayfasındaki etkileşimli konsol, sunucuda kod çalıştırmaya izin verir.</div>
+
+<h2>Test client ile test</h2>
+<pre class="code"># tests/test_urunler.py   (pip install pytest)
+import pytest
+from magaza import create_app
+
+@pytest.fixture
+def client():
+    app = create_app({"TESTING": True})
+    return app.test_client()
+
+def test_liste(client):
+    yanit = client.get("/api/urunler/")
+    assert yanit.status_code == 200
+    assert yanit.get_json() == {"urunler": []}
+
+def test_olmayan_yol(client):
+    assert client.get("/yok").status_code == 404
+
+def test_urun_ekle(client):
+    yanit = client.post("/api/urunler/", json={"ad": "Çay", "fiyat": 85.5})
+    assert yanit.status_code in (201, 405)</pre>
+
+<p>Test client gerçek bir sunucu başlatmadan isteği uygulamaya doğrudan iletir; testler milisaniyeler içinde çalışır. Fabrika kalıbının asıl faydası burada ortaya çıkar: her test temiz bir uygulama alır.</p>
+
+<h2>Eklentiler: Flask-SQLAlchemy ve Flask-Login (gösterim)</h2>
+<pre class="code"># pip install flask-sqlalchemy flask-login
+from flask import Flask
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_required, current_user
+from sqlalchemy.orm import Mapped, mapped_column
+
+db = SQLAlchemy()
+login = LoginManager()
+
+class Kullanici(UserMixin, db.Model):
+    id: Mapped[int] = mapped_column(primary_key=True)
+    eposta: Mapped[str] = mapped_column(unique=True)
+
+@login.user_loader
+def yukle(kullanici_id):
+    return db.session.get(Kullanici, int(kullanici_id))
+
+def create_app():
+    app = Flask(__name__)
+    app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///magaza.db"
+    app.config["SECRET_KEY"] = "dev"
+    db.init_app(app)
+    login.init_app(app)
+
+    @app.get("/hesabim")
+    @login_required
+    def hesabim():
+        return {"eposta": current_user.eposta}
+
+    return app</pre>
+
+<p>Flask-SQLAlchemy, SQLAlchemy dersinde öğrendiğin modelleri ve session'ı istek yaşam döngüsüne bağlar. Flask-Login oturum çerezini yönetir ve <code>@login_required</code> ile korunan sayfalara girişsiz erişimi engeller.</p>
+
+<h2>Dağıtım: gunicorn</h2>
+<p><code>flask run</code> yalnız geliştirme içindir; tek işlemlidir ve güvenlik için tasarlanmamıştır. Üretimde bir WSGI sunucusu kullanılır:</p>
+<pre class="code">pip install gunicorn
+gunicorn -w 4 -b 0.0.0.0:8000 "magaza:create_app()"
+# Windows'ta gunicorn çalışmaz; waitress kullan:
+pip install waitress
+waitress-serve --port=8000 --call magaza:create_app</pre>
+
+<p>Önüne genellikle nginx gibi bir ters vekil (reverse proxy) konur: HTTPS, statik dosyalar ve yük dengeleme orada yapılır. Docker ve dağıtım dersinde bu yapıyı konteynere taşıyacaksın.</p>
+
+<div class="note"><b>Gerçek işte</b>Anadolu Market'in depo ekibi, sabah sevkiyat listesini Excel'den kopyalıyordu. Bir geliştirici iki günde küçük bir Flask uygulaması yazdı: <code>/sevkiyat</code> sayfası veritabanından günün siparişlerini Jinja2 tablosuyla gösteriyor, <code>/sevkiyat/&lt;int:no&gt;/tamamla</code> POST isteği durumu güncelliyor, giriş Flask-Login ile korunuyor. Uygulama fabrikası sayesinde testler bellek içi SQLite ile, üretim PostgreSQL ile çalışıyor; gunicorn ve nginx arkasında şirket ağında yayında. Flask'ın gücü tam olarak bu: küçük bir iç araç için bir öğleden sonrada çalışan bir sistem.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: HTMX ile kısmi güncelleme, form ve fetch ile JSON</h2><p>Flask şablonları her istekte <b>tam sayfa</b> üretir. Modern arayüzlerde ise sayfanın yalnız bir parçası değişir: arama kutusuna yazdıkça liste süzülür, "Sepete ekle"ye basınca yalnız sepet rozeti güncellenir. Bunun üç yolu var ve bir web geliştiricisinin üçünü de tanıması gerekir.</p><div class="tbl-wrap"><table><tr><th>Yaklaşım</th><th>Sunucu ne döndürür?</th><th>Artısı</th><th>Eksisi</th></tr><tr><td>Sunucu tarafı oluşturma (SSR, klasik)</td><td>Tam HTML sayfa</td><td>Basit, SEO dostu, JavaScript gerekmez</td><td>Her tıklamada sayfa yenilenir</td></tr><tr><td>HTMX ("HTML over the wire")</td><td>HTML parçası (partial)</td><td>SSR'nin basitliği + kısmi güncelleme; tek dil Python</td><td>Çok zengin istemci etkileşiminde sınırlı</td></tr><tr><td>SPA (React, Vue) + JSON API</td><td>JSON</td><td>Zengin, uygulama gibi arayüz; mobil ile aynı API</td><td>İki kod tabanı, derleme araçları, durum yönetimi</td></tr></table></div><h3>Temel HTML formu</h3><p>Her şeyin temeli, JavaScript olmadan da çalışan formdur. Alanların <code>name</code> özniteliği <code>request.form</code> anahtarını belirler; <code>label</code> ile <code>for</code> erişilebilirlik içindir; tarayıcı doğrulaması (<code>required</code>, <code>min</code>) kullanıcıya kolaylıktır ama sunucu doğrulamasının yerini tutmaz.</p><pre class="code">&lt;form method="post" action="/sepet"&gt;
+  &lt;label for="urun"&gt;Ürün&lt;/label&gt;
+  &lt;select id="urun" name="urun_id"&gt;
+    &lt;option value="19"&gt;Bakır Cezve&lt;/option&gt;
+    &lt;option value="20"&gt;Seramik Kupa Seti&lt;/option&gt;
+  &lt;/select&gt;
+  &lt;label for="adet"&gt;Adet&lt;/label&gt;
+  &lt;input id="adet" name="adet" type="number" min="1" max="10" value="1" required&gt;
+  &lt;button type="submit"&gt;Sepete ekle&lt;/button&gt;
+&lt;/form&gt;</pre><h3>HTMX: öznitelikle AJAX</h3><p>HTMX küçük bir JavaScript kütüphanesidir; sayfaya tek <code>&lt;script&gt;</code> etiketiyle eklenir ve HTML'e yeni öznitelikler kazandırır: <code>hx-get</code>/<code>hx-post</code> hangi adrese istek atılacağını, <code>hx-target</code> gelen HTML'in nereye konacağını, <code>hx-swap</code> nasıl konacağını (<code>innerHTML</code>, <code>outerHTML</code>, <code>beforeend</code>), <code>hx-trigger</code> ne zaman tetikleneceğini söyler. Sunucu JSON değil <b>HTML parçası</b> döndürür.</p><pre class="code">&lt;script src="https://unpkg.com/htmx.org@2.0.4"&gt;&lt;/script&gt;
+
+&lt;input type="search" name="q" placeholder="Ürün ara..."
+       hx-get="/urunler" hx-trigger="input changed delay:300ms, search"
+       hx-target="#sonuclar" hx-swap="innerHTML"&gt;
+&lt;table&gt;&lt;tbody id="sonuclar"&gt;{% include "_urun_satirlari.html" %}&lt;/tbody&gt;&lt;/table&gt;</pre><pre class="code">from flask import Flask, render_template, request
+
+@app.get("/urunler")
+def urunler():
+    q = request.args.get("q", "")
+    liste = urun_ara(q)
+    if request.headers.get("HX-Request") == "true":            # HTMX isteği: yalnız parça
+        return render_template("_urun_satirlari.html", urunler=liste)
+    return render_template("urunler.html", urunler=liste, q=q)  # normal istek: tam sayfa</pre><p>HTMX her isteğe <code>HX-Request: true</code> başlığı ekler. Aynı adres böylece hem tam sayfayı (doğrudan açılınca, arama motoru gelince) hem parçayı (HTMX çağırınca) sunar; buna aşamalı geliştirme (progressive enhancement) denir. Parça şablonu (<code>_urun_satirlari.html</code>) tam sayfa şablonunda <code>{% include %}</code> ile kullanıldığı için HTML iki kez yazılmaz. Mantığı Anadolu Market'in gerçek ürün tablosuyla tarayıcıda dene:</p><pre class="py">import veri
+from jinja2 import Environment
+
+urunler = veri.kayitlar("anadolu_market", "products")
+env = Environment(autoescape=True)
+parca = env.from_string(
+    "{% for u in urunler %}&lt;tr&gt;&lt;td&gt;{{ u.name }}&lt;/td&gt;&lt;td&gt;{{ u.category }}&lt;/td&gt;"
+    "&lt;td&gt;{{ '%.0f'|format(u.price) }} TL&lt;/td&gt;&lt;/tr&gt;\n{% endfor %}")
+
+def yanit(basliklar, q):
+    liste = [u for u in urunler if q.lower() in u["name"].lower()]
+    govde = parca.render(urunler=liste)
+    if basliklar.get("HX-Request") == "true":
+        return govde
+    return "&lt;html&gt;&lt;body&gt;&lt;h1&gt;Ürünler&lt;/h1&gt;&lt;table&gt;" + govde + "&lt;/table&gt;&lt;/body&gt;&lt;/html&gt;"
+
+print(yanit({"HX-Request": "true"}, "set"))
+print(yanit({}, "kupa")[:60], "...")</pre><p>Kategori sütunundaki <code>Ev &amp; Yaşam</code> değerinin çıktıda <code>&amp;amp;</code> olarak kaçırıldığına dikkat et: autoescape parçalarda da geçerlidir ve XSS'e karşı korur. Başarılı bir HTMX formundan sonra yönlendirme (302) yerine güncellenmiş parçayı döndür; başka bir bölgeyi de haberdar etmek için <code>HX-Trigger: sepetGuncellendi</code> yanıt başlığıyla bir olay yayınla.</p><h3>fetch ile JSON çağrısı</h3><p>Bir sayfada küçük bir JavaScript etkileşimi gerekiyorsa (sepet tutarını anında hesaplamak gibi) tarayıcının yerleşik <code>fetch</code> fonksiyonu yeterlidir. Flask tarafında <code>request.get_json()</code> gövdeyi okur, <code>jsonify</code> ya da sözlük döndürmek JSON yanıt üretir. Hatalarda da JSON ve doğru durum kodu dön ki istemci <code>r.ok</code> ile ayırt edebilsin.</p><pre class="code">// static/sepet.js
+const r = await fetch("/api/sepet", {
+  method: "POST",
+  headers: {"Content-Type": "application/json"},
+  body: JSON.stringify({urun_id: 19, adet: 2}),
+});
+const veri = await r.json();
+if (r.ok) { document.querySelector("#tutar").textContent = veri.tutar + " TL"; }
+else { alert(veri.hata); }</pre><pre class="code">@app.post("/api/sepet")
+def sepet_api():
+    govde = request.get_json(silent=True) or {}
+    durum, sonuc = sepet_hesapla(govde)        # doğrulama + hesap, saf Python
+    return sonuc, durum                         # Flask sözlüğü JSON'a çevirir</pre><div class="note"><b>Gerçek işte</b>İç araçlar, yönetim panelleri ve küçük e-ticaret siteleri için Flask + Jinja + HTMX üçlüsü, ayrı bir React projesine göre çok daha az kodla aynı kullanıcı deneyimini verir. Mobil uygulama da aynı veriyi istiyorsa JSON API (FastAPI ya da Flask) ve SPA tercih edilir. Mülakatta "SSR mı SPA mı?" sorusunun iyi cevabı ihtiyaçtan başlar: SEO, etkileşim yoğunluğu, ekip becerisi ve kaç farklı istemcinin olduğu.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>WSGI: Flask aslında bir fonksiyondur</h3>
+<p>Flask uygulaması, WSGI standardına (PEP 3333) uyan çağrılabilir bir nesnedir: <code>app(environ, start_response)</code>. gunicorn her istekte bunu çağırır. Standart kütüphanedeki <code>wsgiref</code> ile en yalın WSGI uygulamasını yazıp sahte bir istekle çağırabilirsin:</p>
+<pre class="py">import json
+
+def uygulama(environ, start_response):
+    yol = environ["PATH_INFO"]
+    if yol == "/saglik":
+        govde, durum = {"durum": "ok"}, "200 OK"
+    else:
+        govde, durum = {"hata": "bulunamadı"}, "404 NOT FOUND"
+    veri = json.dumps(govde, ensure_ascii=False).encode("utf-8")
+    start_response(durum, [("Content-Type", "application/json"), ("Content-Length", str(len(veri)))])
+    return [veri]
+
+def sahte_istek(yol):
+    yakalanan = {}
+    def start_response(durum, basliklar):
+        yakalanan["durum"], yakalanan["basliklar"] = durum, dict(basliklar)
+    govde = b"".join(uygulama({"REQUEST_METHOD": "GET", "PATH_INFO": yol}, start_response))
+    return yakalanan["durum"], govde.decode()
+
+print(sahte_istek("/saglik"))
+print(sahte_istek("/yok"))</pre>
+
+<h3>Bağlam yerelleri: request ve g</h3>
+<p><code>request</code> küresel bir değişken gibi görünür ama her istek (ve her iş parçacığı) kendi değerini görür; Flask bunu bağlam yerelleri (context locals, <code>contextvars</code>) ile sağlar. İstek boyunca paylaşılacak nesneler (veritabanı bağlantısı, giriş yapan kullanıcı) <code>flask.g</code> içinde tutulur. Bu yüzden görünüm fonksiyonu dışında (ör. arka plan iş parçacığında) <code>request</code>'e erişmek "Working outside of request context" hatası verir.</p>
+<h3>Flask mı, FastAPI mı, Django mı?</h3>
+<p>Sunucu tarafında HTML üreten panellerde ve küçük servislerde Flask; tip ipuçlarından (type hint) otomatik doğrulama ve dokümantasyon isteyen JSON API'lerde FastAPI; yönetim paneli, ORM, kimlik doğrulama hepsi hazır gelsin isteyen büyük içerik uygulamalarında Django öne çıkar. Bir sonraki ders FastAPI; karşılaştırma tablosunu orada bulacaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/flask">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../fastapi/">← FastAPI ile API geliştirme</a><a href="../metaprogramlama/">Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

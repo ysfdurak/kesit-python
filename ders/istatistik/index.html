@@ -1,0 +1,256 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İstatistik ve hipotez testi | Kesit Python</title><meta name="description" content="Betimsel istatistik, normal/binom/Poisson dağılımları, merkezi limit teoremi, güven aralığı, t-testi, ki-kare, korelasyon, Anadolu Market A/B testi,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/istatistik/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İstatistik ve hipotez testi"><meta property="og:description" content="Betimsel istatistik, normal/binom/Poisson dağılımları, merkezi limit teoremi, güven aralığı, t-testi, ki-kare, korelasyon, Anadolu Market A/B testi,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/istatistik/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İstatistik ve hipotez testi","description":"Betimsel istatistik, normal/binom/Poisson dağılımları, merkezi limit teoremi, güven aralığı, t-testi, ki-kare, korelasyon, Anadolu Market A/B testi,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/istatistik/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İstatistik ve hipotez testi</h1><p class="st-l">Betimsel istatistik, normal/binom/Poisson dağılımları, merkezi limit teoremi, güven aralığı, t-testi, ki-kare, korelasyon, Anadolu Market A/B testi, p-değeri yanlışları, etki büyüklüğü ve statsmodels ile doğrusal regresyon.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/istatistik">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Veriden karara: neden istatistik?</h2>
+<p>Anadolu Market yeni bir kampanya sayfası denedi: ziyaretçilerin yarısı eski sayfayı (A), yarısı yeni sayfayı (B) gördü. A'da dönüşüm %12, B'de %15. Yönetim soruyor: "B'yi herkese açalım mı?" Üç puanlık fark gerçek bir iyileşme mi, yoksa şans eseri mi? Bin ziyaretçiyle mi ölçtük, yüz ziyaretçiyle mi? Bu sorunun cevabı tahmin değil, <b>istatistiksel çıkarım</b>dır (statistical inference).</p>
+<p>Bu derste betimsel istatistikten başlayıp dağılımlara, örneklemeye, güven aralığına, hipotez testlerine (t, ki-kare, korelasyon), A/B testine, etki büyüklüğüne ve doğrusal regresyona ilerleyeceğiz. Araçlar: <code>numpy</code> (bunu <a href="../numpy/">numpy: sayısal diziler ve vektörleştirme</a> dersinde gördün), <code>pandas</code>, <code>scipy.stats</code> ve <code>statsmodels</code>.</p>
+
+<h2>Betimsel istatistik: veriyi özetlemek</h2>
+<p>Her analiz veriye bakarak başlar. Merkez (ortalama, medyan), yayılım (standart sapma, çeyrekler arası açıklık) ve şekil (çarpıklık) üç temel sorudur.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+from scipy import stats
+
+sepet = pd.Series([120, 95, 410, 260, 180, 80, 150, 210, 175, 140, 190, 2400])
+print("ortalama:", round(sepet.mean(), 1), "| medyan:", sepet.median())
+print("std (örneklem, ddof=1):", round(sepet.std(), 1), "| numpy varsayılanı ddof=0:", round(np.std(sepet), 1))
+q1, q3 = sepet.quantile([0.25, 0.75])
+print("Q1:", q1, "Q3:", q3, "IQR:", q3 - q1)
+print("çarpıklık:", round(stats.skew(sepet), 2))
+print(sepet.describe().round(1))</pre>
+<p>Tek bir 2400 TL'lik sipariş ortalamayı 367 TL'ye çekti, medyan 177,5 TL'de kaldı. Gelir, sepet tutarı, bekleme süresi gibi sağa çarpık verilerde "tipik değer" için medyan, yayılım için IQR daha dürüsttür.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçü</th><th>pandas / numpy</th><th>Not</th></tr>
+<tr><td>Ortalama, medyan</td><td><code>mean()</code>, <code>median()</code></td><td>Aykırı değer ortalamayı çeker</td></tr>
+<tr><td>Standart sapma</td><td><code>s.std()</code> (ddof=1), <code>np.std(x)</code> (ddof=0)</td><td>Örneklemde ddof=1 kullan</td></tr>
+<tr><td>Çeyrekler, IQR</td><td><code>quantile([.25, .75])</code></td><td>Aykırı değere dayanıklı</td></tr>
+<tr><td>Çarpıklık</td><td><code>stats.skew</code></td><td>&gt; 0: sağ kuyruk uzun</td></tr>
+<tr><td>Mod</td><td><code>s.mode()</code></td><td>Kategorik veride anlamlı</td></tr>
+</table></div>
+<div class="warn"><b>ddof tuzağı</b><code>np.std</code> varsayılan olarak nüfus (population) formülünü (n'e böler), <code>pandas.Series.std</code> örneklem formülünü (n-1'e böler) kullanır. Küçük veride fark büyüktür. Örneklemden çıkarım yapıyorsan <code>ddof=1</code>.</div>
+
+<h2>Olasılık dağılımları: scipy.stats</h2>
+<p>Gerçek süreçler bilinen dağılımlarla iyi modellenir. <b>Normal</b> dağılım ölçüm hatası ve ortalamalar için, <b>binom</b> "n denemede kaç başarı" (100 siparişten kaçı iade?), <b>Poisson</b> "birim zamanda kaç olay" (çağrı merkezine saatte kaç arama?) için kullanılır. scipy'de her dağılımın aynı yöntemleri vardır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Soru</th><th>Örnek</th></tr>
+<tr><td><code>pmf(k)</code> / <code>pdf(x)</code></td><td>Tam olarak k olasılığı (yoğunluk)</td><td><code>binom.pmf(2, 10, 0.1)</code></td></tr>
+<tr><td><code>cdf(x)</code></td><td>x veya daha az</td><td><code>norm.cdf(1.96)</code> ≈ 0.975</td></tr>
+<tr><td><code>sf(x)</code></td><td>x'ten büyük (1 - cdf)</td><td><code>poisson.sf(4, 2.5)</code>: 4'ten fazla</td></tr>
+<tr><td><code>ppf(q)</code></td><td>q yüzdelik dilimin değeri</td><td><code>norm.ppf(0.975)</code> ≈ 1.96</td></tr>
+<tr><td><code>rvs(size, random_state)</code></td><td>Rastgele örnek üret</td><td>Simülasyon</td></tr>
+</table></div>
+<pre class="py">from scipy import stats
+
+# Teslimat süresi: ortalama 48 saat, std 8 saat (normal)
+teslim = stats.norm(loc=48, scale=8)
+print("72 saati aşma olasılığı:", round(teslim.sf(72), 4))
+print("siparişlerin %95'i kaç saatte teslim:", round(teslim.ppf(0.95), 1))
+
+# İade oranı %10, günde 10 sipariş (binom): tam 2 iade, en az 1 iade
+print("tam 2 iade:", round(stats.binom.pmf(2, 10, 0.10), 4))
+print("en az 1 iade:", round(1 - stats.binom.pmf(0, 10, 0.10), 4))
+
+# Ilgaz Bank çağrı merkezi: saatte ortalama 2.5 şikâyet (Poisson)
+print("bir saatte 4'ten fazla şikâyet:", round(stats.poisson.sf(4, 2.5), 4))</pre>
+<div class="tip"><b>cdf mi sf mi?</b>Kesikli dağılımlarda (binom, Poisson) "en az k" için <code>sf(k - 1)</code>, "k'dan fazla" için <code>sf(k)</code> yaz. Bir eksik/fazla yazılan k, en sık yapılan olasılık hatasıdır.</div>
+
+<h2>Örnekleme ve merkezi limit teoremi</h2>
+<p>Tüm müşterileri ölçemezsin; bir örneklem (sample) alırsın. <b>Merkezi limit teoremi</b> (central limit theorem) der ki: popülasyon dağılımı ne olursa olsun (çarpık bile), yeterince büyük örneklemlerin <b>ortalamaları</b> yaklaşık normal dağılır ve bu ortalamaların standart sapması (standart hata) <code>σ / √n</code> olur. Güven aralıklarının ve t-testlerinin çalışmasının sebebi budur.</p>
+<pre class="py">import numpy as np
+
+rng = np.random.default_rng(42)
+nufus = rng.exponential(scale=200, size=100_000)       # çok çarpık: sepet tutarı
+print("nüfus ortalaması:", round(nufus.mean(), 1), "| std:", round(nufus.std(), 1))
+
+for n in (5, 30, 200):
+    ortalamalar = rng.choice(nufus, size=(2000, n)).mean(axis=1)
+    print(f"n={n:&gt;3}: ortalamaların ortalaması={ortalamalar.mean():6.1f}  "
+          f"std hata={ortalamalar.std():5.1f}  teorik={nufus.std() / np.sqrt(n):5.1f}")</pre>
+<p>Örneklem büyüdükçe ortalamalar gerçek değerin etrafında daralır; 4 kat büyük örneklem hatayı yarıya indirir. "Neden 30 değil 3000 kişiyle test ettik?" sorusunun cevabı bu √n'dir.</p>
+
+<h2>Güven aralığı</h2>
+<p>Örneklem ortalaması tek bir sayıdır; <b>güven aralığı</b> (confidence interval) bu tahminin ne kadar kesin olduğunu söyler. Küçük örneklemde ve σ bilinmediğinde t dağılımı kullanılır: <code>ortalama ± t* · s / √n</code>.</p>
+<pre class="py">import numpy as np
+from scipy import stats
+
+bekleme = np.array([4.2, 6.1, 3.8, 7.5, 5.0, 4.9, 6.3, 5.5, 4.1, 5.8])   # dakika, şube kuyruğu
+n = len(bekleme)
+ort = bekleme.mean()
+se = bekleme.std(ddof=1) / np.sqrt(n)
+t_kritik = stats.t.ppf(0.975, df=n - 1)
+print(f"elle: {ort - t_kritik * se:.2f} – {ort + t_kritik * se:.2f}")
+alt, ust = stats.t.interval(0.95, df=n - 1, loc=ort, scale=se)
+print(f"scipy: {alt:.2f} – {ust:.2f}   (t*={t_kritik:.3f}, z ile 1.96 olurdu)")</pre>
+<div class="warn"><b>Güven aralığını doğru oku</b>"%95 güven aralığı 4.6–6.0" demek, "gerçek ortalama %95 olasılıkla bu aralıkta" demek değildir. Doğru yorum: bu yöntemi tekrar tekrar uygulasaydık, üretilen aralıkların %95'i gerçek ortalamayı kapsardı. Pratikte: aralık genişse elinde kesin bir bilgi yoktur, daha çok veri topla.</div>
+
+<h2>Hipotez testi çerçevesi</h2>
+<p>Her test aynı iskeleti izler: (1) <b>sıfır hipotezi</b> H0 "fark yok", alternatif H1 "fark var"; (2) anlamlılık düzeyi α'yı <b>önceden</b> seç (genellikle 0.05); (3) test istatistiğini ve <b>p-değerini</b> hesapla; (4) p &lt; α ise H0'ı reddet. p-değeri: H0 doğru olsaydı, gözlediğin kadar ya da daha uç bir sonuç görme olasılığı.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Veri</th><th>Test</th></tr>
+<tr><td>İki bağımsız grubun ortalaması farklı mı?</td><td>Sayısal, iki grup</td><td><code>ttest_ind(a, b, equal_var=False)</code> (Welch)</td></tr>
+<tr><td>Aynı birimlerde önce/sonra farkı var mı?</td><td>Sayısal, eşli</td><td><code>ttest_rel(once, sonra)</code></td></tr>
+<tr><td>İki kategorik değişken ilişkili mi?</td><td>Sayım tablosu</td><td><code>chi2_contingency(tablo)</code></td></tr>
+<tr><td>İki oran farklı mı? (A/B)</td><td>Başarı / deneme</td><td><code>proportions_ztest</code> ya da ki-kare</td></tr>
+<tr><td>İki sayısal değişken birlikte mi hareket ediyor?</td><td>Sayısal çiftler</td><td><code>pearsonr</code> (doğrusal), <code>spearmanr</code> (sıralı)</td></tr>
+</table></div>
+<pre class="py">import numpy as np
+from scipy import stats
+
+rng = np.random.default_rng(7)
+istanbul = rng.normal(310, 60, 40)      # sepet tutarı
+ankara = rng.normal(285, 75, 35)
+t, p = stats.ttest_ind(istanbul, ankara, equal_var=False)
+print(f"Welch t={t:.2f}, p={p:.4f}")
+
+# Eşli: aynı 8 kasiyerin eğitim öncesi/sonrası işlem süresi (sn)
+once = np.array([62, 58, 71, 66, 59, 73, 68, 64])
+sonra = np.array([57, 55, 66, 63, 58, 67, 62, 61])
+print("eşli t-testi p =", round(stats.ttest_rel(once, sonra).pvalue, 5))
+print("yanlış (bağımsız) t-testi p =", round(stats.ttest_ind(once, sonra).pvalue, 4))</pre>
+<p>Eşli veride bağımsız test kullanmak, kasiyerler arasındaki doğal farkı gürültü olarak sayar ve gerçek etkiyi gizler: aynı veriyle p birkaç binde birden 0,05'in üstüne çıkar.</p>
+<pre class="py">import pandas as pd
+from scipy import stats
+
+# Şehir ile ödeme yöntemi ilişkili mi? (sipariş sayıları)
+tablo = pd.DataFrame({"Kart": [320, 210, 150], "Kapıda": [80, 90, 110]},
+                     index=["İstanbul", "Ankara", "İzmir"])
+chi2, p, dof, beklenen = stats.chi2_contingency(tablo)
+print(f"ki-kare={chi2:.1f}, sd={dof}, p={p:.6f}")
+print(pd.DataFrame(beklenen, index=tablo.index, columns=tablo.columns).round(1))
+
+x = [1, 2, 3, 4, 5, 6]
+y = [2, 4, 9, 15, 30, 70]                       # artan ama doğrusal değil
+print("pearson:", round(stats.pearsonr(x, y)[0], 3), "| spearman:", round(stats.spearmanr(x, y)[0], 3))</pre>
+<p>Ki-kare testi gözlenen sayımları "ilişki olmasaydı" beklenecek sayımlarla kıyaslar. Spearman sıralar üzerinden çalıştığı için tekdüze (monoton) ama doğrusal olmayan ilişkide 1 verir; Pearson yalnızca doğrusallığı ölçer. Korelasyon nedensellik değildir: dondurma satışı ile klima satışı birlikte artar, ikisinin de sebebi sıcaklıktır.</p>
+
+<h2>A/B testi: Anadolu Market kampanyası</h2>
+<pre class="py">import numpy as np
+from statsmodels.stats.proportion import proportions_ztest, confint_proportions_2indep
+
+donusum = np.array([120, 150])        # A, B
+ziyaret = np.array([1000, 1000])
+oran = donusum / ziyaret
+z, p = proportions_ztest(donusum, ziyaret)
+lift = (oran[1] / oran[0] - 1) * 100
+alt, ust = confint_proportions_2indep(donusum[1], ziyaret[1], donusum[0], ziyaret[0])
+print(f"A={oran[0]:.1%}  B={oran[1]:.1%}  göreli artış={lift:.1f}%")
+print(f"z={z:.3f}  p={p:.4f}")
+print(f"B - A farkı için %95 GA: {alt:.3%} … {ust:.3%}")</pre>
+<p>p ≈ 0.0496: sınırda. Güven aralığı farkın neredeyse 0'dan %6'ya kadar olabileceğini söylüyor. Doğru karar cümlesi: "B muhtemelen daha iyi, ama etkinin büyüklüğü belirsiz; daha büyük örneklemle doğrula." Testi her gün kontrol edip p 0.05'in altına ilk düştüğünde durdurmak (peeking) yanlış pozitif oranını katlar: örneklem büyüklüğünü önceden hesapla ve sonuna kadar bekle.</p>
+
+<h2>p-değeri hakkında sık yanlışlar ve etki büyüklüğü</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Yanlış</th><th>Doğrusu</th></tr>
+<tr><td>"p = 0.03: H0'ın doğru olma olasılığı %3"</td><td>p, H0 doğruysa bu kadar uç veri görme olasılığıdır; H0'ın olasılığı değildir</td></tr>
+<tr><td>"p &gt; 0.05: fark yok, kanıtlandı"</td><td>Kanıt yetersiz demektir; örneklem küçükse gerçek fark kaçabilir (II. tip hata)</td></tr>
+<tr><td>"p çok küçük: etki çok büyük"</td><td>Milyon satırda önemsiz farklar bile anlamlı çıkar; etki büyüklüğüne bak</td></tr>
+<tr><td>"20 metrik test ettim, biri anlamlı"</td><td>α=0.05 ile 20 testte 1 yanlış pozitif beklenir; çoklu karşılaştırma düzeltmesi yap</td></tr>
+</table></div>
+<p><b>Etki büyüklüğü</b> (effect size) farkın pratikte ne kadar önemli olduğunu ölçer. Oranlarda göreli artış (lift), ortalamalarda <b>Cohen's d</b>: iki ortalama farkının ortak standart sapmaya bölümü. Kabaca 0.2 küçük, 0.5 orta, 0.8 büyük sayılır. İstatistiksel anlamlılık "fark gerçek mi?", etki büyüklüğü "fark önemli mi?" sorusunu cevaplar; karar için ikisi birlikte gerekir.</p>
+
+<h2>statsmodels ile doğrusal regresyon</h2>
+<p>Regresyon, bir sonucu (ciro) birden çok açıklayıcı değişkenle (reklam bütçesi, indirim oranı) ilişkilendirir ve her birinin etkisini diğerleri sabitken tahmin eder. statsmodels'in formül arayüzü R'a benzer: <code>"ciro ~ reklam + indirim"</code>.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+import statsmodels.formula.api as smf
+
+rng = np.random.default_rng(3)
+n = 60
+df = pd.DataFrame({"reklam": rng.uniform(5, 50, n), "indirim": rng.uniform(0, 20, n)})
+df["ciro"] = 120 + 2.5 * df["reklam"] + 1.2 * df["indirim"] + rng.normal(0, 15, n)
+
+model = smf.ols("ciro ~ reklam + indirim", data=df).fit()
+print(model.summary().tables[1])
+print("R²:", round(model.rsquared, 3), "| düzeltilmiş R²:", round(model.rsquared_adj, 3))
+print("reklam katsayısı GA:", model.conf_int().loc["reklam"].round(2).tolist())
+print("tahmin:", model.predict(pd.DataFrame({"reklam": [30], "indirim": [10]})).round(1).tolist())</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Özet tablosu sütunu</th><th>Anlamı</th></tr>
+<tr><td><code>coef</code></td><td>Diğerleri sabitken değişkendeki 1 birim artışın sonuca etkisi (reklama +1 bin TL → ciro +2.5 bin TL)</td></tr>
+<tr><td><code>std err</code></td><td>Katsayı tahmininin belirsizliği</td></tr>
+<tr><td><code>t</code>, <code>P&gt;|t|</code></td><td>"Katsayı 0" hipotezinin testi; küçük p, etkinin sıfırdan farklı olduğunu gösterir</td></tr>
+<tr><td><code>[0.025 0.975]</code></td><td>Katsayının %95 güven aralığı</td></tr>
+<tr><td><code>R-squared</code></td><td>Sonuçtaki değişkenliğin modelce açıklanan oranı; değişken eklendikçe hep artar, bu yüzden düzeltilmiş R²'ye de bak</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>E-ticaret ve bankacılıkta deney ekipleri her A/B testi için önceden bir plan yazar: birincil metrik (dönüşüm), en küçük anlamlı etki (ör. %1 puan), gereken örneklem büyüklüğü (güç analiziyle), test süresi (en az bir tam hafta, haftanın günü etkisi için) ve durdurma kuralı. Sonuç raporunda p-değeri tek başına durmaz: oranlar, fark, güven aralığı ve iş etkisi (yıllık ek ciro tahmini) birlikte sunulur. Regresyon ise "fiyat esnekliği", "kredi notunu etkileyen faktörler" gibi açıklama sorularının temel aracıdır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek bir A/B testini uçtan uca okumak</h2><p>Derste A/B testinin temel mantığını gördün. Gerçek bir deneyi raporlamadan önce kıdemli analistlerin sırayla sorduğu dört soru vardır: <b>(1) Gruplar doğru bölündü mü?</b> (SRM), <b>(2) Dönüşüm farkı anlamlı mı ve ne kadar büyük?</b> (oranlar için z-testi ve güven aralığı), <b>(3) Sonuca erken mi baktık?</b> (peeking), <b>(4) Daha az kullanıcıyla aynı kesinliğe ulaşabilir miydik?</b> (CUPED). Hepsini Anadolu Market'in gerçek deney tablosuyla yapacağız: <code>anadolu_market/ab_test</code>, 2.000 kullanıcı; <code>variant</code> A (eski tasarım) ya da B (yeni tasarım), <code>converted</code> 0/1, <code>revenue</code> kullanıcının getirdiği gelir.</p><pre class="py">import veri
+
+ab = veri.oku("anadolu_market", "ab_test")
+ozet = ab.groupby("variant").agg(kullanici=("user_id", "size"), donusum=("converted", "mean"),
+                                 gelir_kisi=("revenue", "mean"))
+print(ozet.round(4))
+</pre><h3>1. Önce SRM: örneklem oranı uyumsuzluğu</h3><p>Deney %50/%50 tasarlandıysa gruplar yaklaşık eşit olmalı. A'da 975, B'de 1.025 kullanıcı var. Bu fark şans eseri mi? <b>SRM</b> (sample ratio mismatch) kontrolü, beklenen oranla gözlenen sayıları ki-kare uygunluk testiyle karşılaştırır. SRM varsa (ör. B sayfası bazı tarayıcılarda çöküyor ve o kullanıcılar kaydedilmiyorsa) gruplar artık karşılaştırılabilir değildir ve <b>hiçbir sonuç yorumlanmaz</b>. Bu kontrol için çok küçük bir eşik (ör. p &lt; 0.001) kullanılır; amaç ciddi kırılmaları yakalamaktır.</p><pre class="py">import veri
+from scipy import stats
+
+ab = veri.oku("anadolu_market", "ab_test")
+n = ab["variant"].value_counts().reindex(["A", "B"])
+beklenen = [n.sum() * 0.5, n.sum() * 0.5]
+sonuc = stats.chisquare(n.values, f_exp=beklenen)
+print(n.to_dict(), "p =", round(float(sonuc.pvalue), 4))
+print("SRM var" if sonuc.pvalue &lt; 0.001 else "SRM yok: analize devam")
+</pre><h3>2. Oranlar için z-testi ve fark için güven aralığı</h3><p>İki dönüşüm oranını karşılaştırmanın standart yolu iki oran z-testidir. Test istatistiği birleşik (pooled) oranla hesaplanır: <code>z = (p_B − p_A) / √(p(1−p)(1/n_A + 1/n_B))</code>. Fark için güven aralığında ise her grubun kendi oranı kullanılır (birleştirilmemiş standart hata). Raporda p-değeri tek başına değil, <b>farkın büyüklüğü ve aralığıyla</b> birlikte verilir.</p><pre class="py">import veri
+import numpy as np
+from scipy import stats
+from statsmodels.stats.proportion import proportions_ztest
+
+ab = veri.oku("anadolu_market", "ab_test")
+g = ab.groupby("variant")["converted"].agg(["sum", "count"])
+xa, na = g.loc["A"]; xb, nb = g.loc["B"]
+pa, pb = xa / na, xb / nb
+p = (xa + xb) / (na + nb)
+z = (pb - pa) / np.sqrt(p * (1 - p) * (1 / na + 1 / nb))
+pdeg = 2 * stats.norm.sf(abs(z))
+se = np.sqrt(pa * (1 - pa) / na + pb * (1 - pb) / nb)
+print(f"A %{pa*100:.2f}  B %{pb*100:.2f}  fark {100*(pb-pa):.2f} puan")
+print(f"z = {z:.3f}, p = {pdeg:.4f}, %95 GA: [{100*(pb-pa-1.96*se):.2f}, {100*(pb-pa+1.96*se):.2f}] puan")
+print("statsmodels:", [round(float(v), 4) for v in proportions_ztest([xb, xa], [nb, na])])
+</pre><p>Gelir gibi çarpık metriklerde (kullanıcıların %87'si 0 gelir getiriyor) ortalama farkı için Welch t-testi ya da daha güvenli olarak <b>bootstrap</b> güven aralığı kullanılır; derste gördüğün yöntem burada da geçerlidir.</p><h3>3. Peeking: sonuca her gün bakmak</h3><p>Deneyi her gün açıp "p &lt; 0.05 oldu mu?" diye bakar ve olduğu gün durdurursan, yanlış pozitif oranın %5 değil çok daha yüksek olur. Aşağıda kullanıcılar geliş sırasına (<code>user_id</code>) göre birikirken p-değerinin nasıl dalgalandığını görüyorsun: 200 kullanıcıda p = 0.014 ile "anlamlı" görünüyor, sonra yüzlerce kullanıcı boyunca 0.05'in üstüne çıkıyor.</p><pre class="py">import veri
+import numpy as np
+from scipy import stats
+
+ab = veri.oku("anadolu_market", "ab_test").sort_values("user_id")
+
+def p_deger(s):
+    g = s.groupby("variant")["converted"].agg(["sum", "count"])
+    xa, na = g.loc["A"]; xb, nb = g.loc["B"]
+    p = (xa + xb) / (na + nb)
+    z = (xb / nb - xa / na) / np.sqrt(p * (1 - p) * (1 / na + 1 / nb))
+    return 2 * stats.norm.sf(abs(z))
+
+yol = [round(float(p_deger(ab.iloc[:k])), 3) for k in range(200, 2001, 200)]
+print(yol)
+</pre><p>Gerçekte fark olmayan (A/A) binlerce deney simüle edersen, 10 kez bakıp ilk "anlamlı" sonuçta durmak yanlış pozitif oranını yaklaşık %5'ten %15–20'ye çıkarır. Çözümler: örneklem büyüklüğünü güç analiziyle <b>önceden</b> belirleyip yalnızca sonda bakmak; ara bakış gerekiyorsa <b>sıralı test</b> (sequential testing) kullanmak. Sıralı testlerde her ara bakışa α'nın bir kısmı harcanır (alpha spending; O'Brien-Fleming sınırları ilk bakışlarda çok katı, sonda neredeyse 0.05'tir) ya da her an geçerli (always-valid) p-değerleri üreten yöntemler (mSPRT) kullanılır. Ticari deney platformlarının "erken durdurma" düğmeleri bu yöntemlere dayanır.</p><h3>4. CUPED: deney öncesi veriyle varyans azaltma</h3><p>Kullanıcıların harcaması deneyden önce de çok farklıdır; bu doğal farklılık gürültü olarak test sonucuna girer. <b>CUPED</b> (Controlled-experiment Using Pre-Experiment Data), deney öncesi metrik <code>X</code> ile sonuç <code>Y</code> arasındaki ilişkiyi kullanarak gürültüyü çıkarır: <code>θ = cov(Y, X) / var(X)</code>, <code>Y_cuped = Y − θ (X − ort(X))</code>. X deneyden önce ölçüldüğü için gruplardan bağımsızdır; bu yüzden ortalama fark değişmez (yansızdır), yalnızca varyans yaklaşık <code>ρ²</code> oranında düşer. Aynı kesinlik için daha az kullanıcı, yani daha kısa deney demektir.</p><div class="warn"><b>Veri notu</b><code>ab_test</code> tablosunda deney öncesi metrik yok. CUPED'i göstermek için aşağıda tohumlu (seed) bir simülasyon kullanıyoruz. Kendi şirketinde X genellikle deneyden önceki 2–4 haftanın aynı metriğidir (harcama, oturum sayısı).</div><pre class="py">import numpy as np
+
+def deney(seed=21, n=2000, etki=3.0):
+    rng = np.random.default_rng(seed)
+    onceki = rng.gamma(2.0, 30.0, n)          # deney öncesi 30 günlük harcama
+    grup = rng.integers(0, 2, n)              # 0 = A, 1 = B
+    sonraki = 0.8 * onceki + rng.normal(0, 20, n) + etki * grup
+    return onceki, grup, sonraki
+
+from scipy import stats
+
+x, g, y = deney()
+theta = np.cov(y, x)[0, 1] / np.var(x, ddof=1)
+y_c = y - theta * (x - x.mean())
+for ad, m in [("ham", y), ("CUPED", y_c)]:
+    fark = m[g == 1].mean() - m[g == 0].mean()
+    p = stats.ttest_ind(m[g == 1], m[g == 0], equal_var=False).pvalue
+    print(f"{ad:6} fark={fark:.2f}  varyans={m.var(ddof=1):.0f}  p={p:.4f}")
+</pre><div class="note"><b>Gerçek işte</b>Deney raporunun ilk satırı SRM sonucudur; SRM varsa rapor orada biter ve mühendislik ekibiyle kök neden aranır. Sonra birincil metrik (dönüşüm) farkı ve güven aralığı, ardından koruma metrikleri (gelir, iade, sayfa hızı) gelir. Deney süresi ve örneklem başlamadan yazılı olarak sabitlenir; ara bakış yapılacaksa sıralı test planı da önceden yazılır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Güç analizi: kaç kişi lazım?</h3>
+<p>Testin <b>gücü</b> (power), gerçek bir etki varken onu yakalama olasılığıdır (genellikle 0.8 hedeflenir). <code>statsmodels.stats.power.NormalIndPower().solve_power(effect_size=..., alpha=0.05, power=0.8)</code> grup başına gereken örneklemi verir; oranlar için etki büyüklüğü <code>proportion_effectsize(0.15, 0.12)</code> ile hesaplanır. %12'den %15'e çıkışı güvenle yakalamak için grup başına yaklaşık 2000 ziyaretçi gerekir; bin kişilik testin sınırda kalması bu yüzdendir.</p>
+<h3>Çoklu karşılaştırma ve Simpson paradoksu</h3>
+<p>Birçok segmentte ya da metrikte test yapıyorsan Bonferroni (α / test sayısı) ya da Benjamini-Hochberg (<code>statsmodels.stats.multitest.multipletests</code>) düzeltmesi uygula. Toplamda B kazanırken her şehirde A'nın kazanması mümkündür (Simpson paradoksu): grupların karışımı farklıysa kırılımlara mutlaka bak.</p>
+<h3>Varsayım yoksa: bootstrap ve permütasyon</h3>
+<p>Medyan gibi formülü zor istatistikler için <b>bootstrap</b>: veriden yerine koyarak binlerce örneklem çek, istatistiği her birinde hesapla, yüzdelik dilimlerden güven aralığı al (<code>scipy.stats.bootstrap</code>). Dağılım varsayımı olmayan iki grup karşılaştırması için permütasyon testi (<code>scipy.stats.permutation_test</code>) ya da Mann-Whitney U (<code>mannwhitneyu</code>) kullan.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/istatistik">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-mutabakat/">← Bitirme projesi: Lezzet Kurye kupon mutabakatı</a><a href="../pandas-ileri/">İleri pandas: şekil, pencere ve zincir →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

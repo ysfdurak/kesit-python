@@ -1,0 +1,264 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Komut satırı araçları: argparse, click, rich ve boru hatları | Kesit Python</title><meta name="description" content="Betiklerini gerçek komut satırı aracına dönüştürürsün: argparse ile alt komut, tür, seçenek ve grup; click ve typer ile kısa CLI; rich ile tablo;…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/cli-araclari/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Komut satırı araçları: argparse, click, rich ve boru hatları"><meta property="og:description" content="Betiklerini gerçek komut satırı aracına dönüştürürsün: argparse ile alt komut, tür, seçenek ve grup; click ve typer ile kısa CLI; rich ile tablo;…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/cli-araclari/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Komut satırı araçları: argparse, click, rich ve boru hatları","description":"Betiklerini gerçek komut satırı aracına dönüştürürsün: argparse ile alt komut, tür, seçenek ve grup; click ve typer ile kısa CLI; rich ile tablo;…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/cli-araclari/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Komut satırı araçları: argparse, click, rich ve boru hatları</h1><p class="st-l">Betiklerini gerçek komut satırı aracına dönüştürürsün: argparse ile alt komut, tür, seçenek ve grup; click ve typer ile kısa CLI; rich ile tablo; stdin/stdout, çıkış kodları ve yapılandırma önceliğiyle boru hattına uyumlu araç yazarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/cli-araclari">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in operasyon ekibi her sabah üç betik çalıştırıyor: stok uyarısı, kargo gecikme raporu, iade özeti. Betiklerin içinde sabit yazılmış dosya adları ve eşik değerleri var; bir şeyi değiştirmek için kodu açmak gerekiyor. Bir <b>komut satırı arayüzü</b> (CLI, command-line interface) ile aynı betik şöyle kullanılır: <code>stok-uyar satis.csv --esik 5 --bicim json</code>. Artık kodu açmadan farklı dosya ve eşikle çalışır, zamanlanmış görevlere (cron) ve CI hatlarına eklenir, başka araçlarla boru (pipe) ile birleşir.</p>
+<p><code>sys.argv</code> ve temel argparse'ı standart kütüphane dersinde görmüştün; paketlemedeki "entry point" kısmını ileri seviyede göreceksin. Bu ders ikisinin arasındaki boşluğu doldurur: <b>kullanıcı dostu, test edilebilir ve otomasyona uygun</b> bir CLI nasıl tasarlanır?</p>
+
+<h2>Bir komutun anatomisi</h2>
+<pre class="code">$ stok  ekle    AM-101    --adet 3   --depo izmir   -v
+  │     │       │         │          │              └─ kısa bayrak (flag)
+  │     │       │         │          └─ seçenek + değer (option)
+  │     │       │         └─ seçenek + değer
+  │     │       └─ konumsal argüman (positional)
+  │     └─ alt komut (subcommand)
+  └─ program</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>argparse</th><th>Örnek</th></tr>
+<tr><td>Konumsal argüman</td><td><code>add_argument("dosya")</code></td><td><code>rapor satis.csv</code></td></tr>
+<tr><td>Seçenek</td><td><code>add_argument("--limit", type=int, default=10)</code></td><td><code>--limit 5</code></td></tr>
+<tr><td>Bayrak</td><td><code>add_argument("--ozet", action="store_true")</code></td><td><code>--ozet</code></td></tr>
+<tr><td>Sınırlı seçim</td><td><code>choices=["csv", "json"]</code></td><td><code>--bicim json</code></td></tr>
+<tr><td>Çok değer</td><td><code>nargs="+"</code> (en az 1), <code>"*"</code> (0+), <code>"?"</code> (0/1), <code>2</code></td><td><code>--sehir İzmir Bursa</code></td></tr>
+<tr><td>Sayaç</td><td><code>action="count"</code></td><td><code>-vv</code> → 2</td></tr>
+<tr><td>Tekrarlanan</td><td><code>action="append"</code></td><td><code>--etiket a --etiket b</code></td></tr>
+</table></div>
+
+<h2>argparse ileri: türler, seçimler, varsayılanlar</h2>
+<p><code>parse_args()</code> argümansız çağrılınca <code>sys.argv[1:]</code>'i okur. Ona bir <b>liste</b> verirsen terminal olmadan test edebilirsin; bu derste hep bunu yapacağız.</p>
+<pre class="py">import argparse
+
+parser = argparse.ArgumentParser(prog="rapor", description="Anadolu Market satış raporu üretir.")
+parser.add_argument("dosya", help="Satış CSV dosyası (stdin için -)")
+parser.add_argument("--sehir", choices=["İzmir", "Ankara", "Bursa"], help="Yalnız bu şehir")
+parser.add_argument("--limit", type=int, default=10, metavar="N", help="En fazla N satır (varsayılan: %(default)s)")
+parser.add_argument("--ozet", action="store_true", help="Yalnızca toplamları göster")
+parser.add_argument("-v", "--verbose", action="count", default=0, help="Ayrıntı düzeyi (-v, -vv)")
+parser.add_argument("--etiket", nargs="*", default=[], help="Bir ya da daha çok etiket")
+
+args = parser.parse_args(["satis.csv", "--sehir", "İzmir", "--limit", "5", "-vv", "--etiket", "kampanya", "ekim"])
+print(args)
+print(args.limit + 1, args.ozet, args.verbose)
+print(vars(args)["etiket"])</pre>
+<ul>
+<li><code>type=</code> dönüşümü argparse yapar ve hatalı değerde kullanıcıya düzgün bir hata mesajı gösterir. Kendi fonksiyonunu da verebilirsin; geçersiz değerde <code>argparse.ArgumentTypeError</code> fırlatmalıdır.</li>
+<li>Seçenek adındaki tire, nitelik adında alt çizgiye döner: <code>--min-stok</code> → <code>args.min_stok</code>.</li>
+<li>Hatalı girdide argparse kullanım bilgisini <b>stderr</b>'e yazar ve <code>SystemExit(2)</code> fırlatır. <code>--help</code> ise yardım metnini basıp <code>SystemExit(0)</code> fırlatır.</li>
+</ul>
+<pre class="py">import argparse
+
+def pozitif_int(metin):
+    try:
+        n = int(metin)
+    except ValueError:
+        raise argparse.ArgumentTypeError(f"tam sayı değil: {metin!r}")
+    if n &lt;= 0:
+        raise argparse.ArgumentTypeError(f"pozitif olmalı: {n}")
+    return n
+
+p = argparse.ArgumentParser(prog="stok")
+p.add_argument("--adet", type=pozitif_int, required=True)
+grup = p.add_mutually_exclusive_group()
+grup.add_argument("--json", action="store_true")
+grup.add_argument("--csv", action="store_true")
+
+print(p.parse_args(["--adet", "3", "--json"]))
+for hatali in (["--adet", "-2"], ["--adet", "1", "--json", "--csv"]):
+    try:
+        p.parse_args(hatali)
+    except SystemExit as e:
+        print("çıkış kodu:", e.code)</pre>
+<p><b>Birbirini dışlayan grup</b> (mutually exclusive group), aynı anda verilmemesi gereken seçenekleri (<code>--json</code> ile <code>--csv</code>, <code>--sessiz</code> ile <code>--ayrinti</code>) argparse düzeyinde engeller; kendi <code>if</code> kontrollerini yazmana gerek kalmaz.</p>
+
+<h3>Alt komutlar</h3>
+<p><code>git commit</code>, <code>pip install</code> gibi araçlar alt komut kullanır. argparse'ta her alt komut kendi ayrıştırıcısına sahiptir; <code>set_defaults(func=...)</code> ile her alt komutu bir fonksiyona bağlamak en temiz kalıptır.</p>
+<pre class="py">import argparse
+
+STOK = {"AM-101": 4, "AM-102": 12}
+
+def ekle(args):
+    STOK[args.sku] = STOK.get(args.sku, 0) + args.adet
+    print(f"{args.sku}: {STOK[args.sku]}")
+    return 0
+
+def listele(args):
+    for sku, adet in sorted(STOK.items()):
+        if args.az is None or adet &lt;= args.az:
+            print(sku, adet)
+    return 0
+
+def main(argv=None):
+    parser = argparse.ArgumentParser(prog="stok")
+    alt = parser.add_subparsers(dest="komut", required=True)
+    p_ekle = alt.add_parser("ekle", help="Stoğa ürün ekle")
+    p_ekle.add_argument("sku")
+    p_ekle.add_argument("--adet", type=int, default=1)
+    p_ekle.set_defaults(func=ekle)
+    p_liste = alt.add_parser("listele", help="Stoğu listele")
+    p_liste.add_argument("--az", type=int, metavar="N", help="Adedi N ve altındakiler")
+    p_liste.set_defaults(func=listele)
+    args = parser.parse_args(argv)
+    return args.func(args)
+
+print("kod:", main(["ekle", "AM-101", "--adet", "3"]))
+print("kod:", main(["listele", "--az", "10"]))</pre>
+
+<h2>Unix felsefesi: stdin, stdout, stderr ve çıkış kodu</h2>
+<p>İyi bir CLI başka araçlarla birleşebilir. Bunun dört kuralı vardır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kanal</th><th>Ne yazılır?</th><th>Python</th></tr>
+<tr><td>stdin</td><td>Girdi verisi (dosya yerine boru ile)</td><td><code>sys.stdin</code>; dosya adı <code>-</code> ise stdin oku</td></tr>
+<tr><td>stdout</td><td>Yalnızca <b>sonuç verisi</b></td><td><code>print(...)</code></td></tr>
+<tr><td>stderr</td><td>Uyarı, ilerleme, hata, günlük</td><td><code>print(..., file=sys.stderr)</code>, <code>logging</code></td></tr>
+<tr><td>Çıkış kodu</td><td>0 başarı; 0 dışı hata</td><td><code>sys.exit(main())</code></td></tr>
+</table></div>
+<pre class="code">$ cat siparisler.csv | python stok_uyar.py - --esik 5 --bicim csv &gt; kritik.csv
+$ echo $?            # 0: kritik ürün yok, 3: kritik ürün var, 2: kullanım hatası
+$ python stok_uyar.py siparisler.csv 2&gt;hatalar.log | sort -t, -k3 -n</pre>
+<p>Günlük mesajlarını stdout'a yazarsan <code>&gt; kritik.csv</code> dosyası bozulur, bir sonraki araç "Uyarı: ..." satırını veri sanır. Çıkış kodu ise cron'un, CI'ın ve kabuk betiklerinin "başarılı mı?" sorusunu yanıtlar. Yaygın sözleşme: <code>0</code> başarı, <code>1</code> genel hata, <code>2</code> kullanım hatası (argparse'ın kullandığı), <code>130</code> Ctrl+C ile kesilme.</p>
+<pre class="py">import io
+import sys
+
+def sayilari_topla(akis, hata=sys.stderr):
+    toplam, atlanan = 0.0, 0
+    for no, satir in enumerate(akis, start=1):
+        satir = satir.strip()
+        if not satir or satir.startswith("#"):
+            continue
+        try:
+            toplam += float(satir.replace(",", "."))
+        except ValueError:
+            atlanan += 1
+            print(f"uyarı: {no}. satır sayı değil: {satir!r}", file=hata)
+    return toplam, atlanan
+
+sahte_stdin = io.StringIO("# günlük tahsilat\n120,5\n80\n\nyok\n49.5\n")
+sahte_stderr = io.StringIO()
+print(sayilari_topla(sahte_stdin, sahte_stderr))
+print("stderr'e giden:", sahte_stderr.getvalue().strip())</pre>
+<div class="tip"><b>Akışı parametre yap</b>Fonksiyonların <code>sys.stdin</code>/<code>sys.stdout</code>'a doğrudan dokunmak yerine akışı parametre olarak alsın (<code>akis=sys.stdin</code>). Böylece testte <code>io.StringIO</code> verirsin; üretimde varsayılan değer kullanılır.</div>
+<pre class="code">import sys
+
+def main(argv=None) -&gt; int:
+    ...                      # argparse, iş mantığı
+    return 0
+
+if __name__ == "__main__":
+    try:
+        sys.exit(main())
+    except KeyboardInterrupt:
+        print("iptal edildi", file=sys.stderr)
+        sys.exit(130)</pre>
+
+<h2>Yapılandırma önceliği</h2>
+<p>Gerçek araçlarda bir ayar dört yerden gelebilir. Kabul görmüş öncelik sırası: <b>komut satırı argümanı &gt; ortam değişkeni &gt; yapılandırma dosyası &gt; varsayılan</b>. En özel ve en geçici olan kazanır. <code>collections.ChainMap</code> bu katmanlamayı tek satırda yapar; ancak argparse'ın verilmemiş seçenekler için koyduğu <code>None</code> değerlerini önce süzmelisin.</p>
+<pre class="py">from collections import ChainMap
+
+varsayilan = {"esik": 5, "bicim": "tablo", "renk": True}
+dosya = {"esik": 10, "renk": False}                       # ör. ~/.stokrc (TOML/JSON)
+ortam_ham = {"STOK_BICIM": "json", "PATH": "/usr/bin"}
+ortam = {k[5:].lower(): v for k, v in ortam_ham.items() if k.startswith("STOK_")}
+argumanlar = {"esik": 3, "bicim": None}                   # argparse çıktısı (vars(args))
+argumanlar = {k: v for k, v in argumanlar.items() if v is not None}
+
+ayar = ChainMap(argumanlar, ortam, dosya, varsayilan)
+print(dict(ayar))
+print(ayar.maps.index(next(m for m in ayar.maps if "renk" in m)), "→ renk dosyadan geldi")</pre>
+<div class="warn"><b>Ortam değişkenleri hep metindir</b><code>STOK_ESIK=7</code> Python'a <code>"7"</code> olarak gelir; <code>STOK_RENK=false</code> ise boş olmayan bir metin olduğu için <code>bool("false")</code> <b>True</b> verir. Ortamdan gelen değeri varsayılanın türüne göre açıkça çevir.</div>
+
+<h2>click ve typer: daha az kodla CLI</h2>
+<p><b>click</b>, seçenekleri dekoratörlerle (decorator) tanımlar; renkli çıktı, onay soruları, dosya türleri ve en önemlisi test için <code>CliRunner</code> sunar. Tarayıcı motorunda da çalışır:</p>
+<pre class="py">import click
+from click.testing import CliRunner
+
+@click.command()
+@click.argument("sehir")
+@click.option("--esik", type=float, default=0.0, show_default=True, help="En düşük tutar")
+@click.option("--detay", is_flag=True, help="Her siparişi listele")
+def ozet(sehir, esik, detay):
+    """Bir şehrin sipariş özetini yazar."""
+    siparisler = [("AM-1", "İzmir", 1200.0), ("AM-2", "İzmir", 80.0), ("AM-3", "Bursa", 500.0)]
+    secilen = [s for s in siparisler if s[1] == sehir and s[2] &gt;= esik]
+    if detay:
+        for no, _, tutar in secilen:
+            click.echo(f"  {no}: {tutar:.2f}")
+    click.echo(f"{sehir}: {len(secilen)} sipariş, {sum(s[2] for s in secilen):.2f} TL")
+
+runner = CliRunner()
+sonuc = runner.invoke(ozet, ["İzmir", "--esik", "100", "--detay"])
+print(sonuc.exit_code)
+print(sonuc.output)
+print(runner.invoke(ozet, ["İzmir", "--esik", "yüz"]).exit_code)</pre>
+<p><b>typer</b> ise click'in üzerine kurulu ve tip ipuçlarından (type hint) CLI üretir: fonksiyon imzası arayüzün kendisidir. Tarayıcıda yüklü değildir; kendi bilgisayarında dene.</p>
+<pre class="code">import typer
+
+app = typer.Typer(help="Anadolu Market stok aracı")
+
+@app.command()
+def uyar(dosya: str, esik: int = 5, bicim: str = "tablo", ayrinti: bool = False):
+    """Stoğu eşiğin altındaki ürünleri listeler."""
+    typer.echo(f"{dosya} okunuyor, eşik={esik}, biçim={bicim}")
+
+@app.command()
+def ekle(sku: str, adet: int = typer.Option(1, min=1)):
+    typer.echo(f"{sku} +{adet}")
+
+if __name__ == "__main__":
+    app()          # python stok.py uyar satis.csv --esik 3 --ayrinti</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install typer rich</code> (click typer ile birlikte gelir). <code>python stok.py --help</code> ile otomatik yardım sayfasını gör; typer ayrıca kabuk tamamlama (shell completion) kurulumunu da sunar.</div>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>argparse</th><th>click</th><th>typer</th></tr>
+<tr><td>Kurulum</td><td>Standart kütüphane</td><td><code>pip install click</code></td><td><code>pip install typer</code></td></tr>
+<tr><td>Tanım biçimi</td><td>Ayrıştırıcı nesnesi</td><td>Dekoratörler</td><td>Tip ipuçları</td></tr>
+<tr><td>Test</td><td><code>parse_args(liste)</code></td><td><code>CliRunner</code></td><td><code>typer.testing.CliRunner</code></td></tr>
+<tr><td>Ne zaman?</td><td>Bağımlılık istemeyen betikler, kütüphaneler</td><td>Büyük, çok komutlu araçlar</td><td>Hızlı, modern, tip odaklı araçlar</td></tr>
+</table></div>
+
+<h2>rich: okunur terminal çıktısı</h2>
+<p><b>rich</b> renkli metin, tablo, ilerleme çubuğu ve güzel hata izleri üretir. <code>Console(file=io.StringIO())</code> ile çıktıyı bir metne yönlendirip test edebilirsin; terminal olmayan bir dosyaya yazarken renk kodu üretmez.</p>
+<pre class="py">import io
+from rich.console import Console
+from rich.table import Table
+
+tablo = Table(title="Kritik stok — İzmir deposu")
+tablo.add_column("SKU", style="bold")
+tablo.add_column("Ürün")
+tablo.add_column("Adet", justify="right")
+for sku, ad, adet in [("AM-101", "Çay bardağı", 2), ("AM-207", "Demlik", 0), ("AM-310", "Kupa", 4)]:
+    tablo.add_row(sku, ad, str(adet), style="red" if adet == 0 else None)
+
+konsol = Console(file=io.StringIO(), width=50)
+konsol.print(tablo)
+print(konsol.file.getvalue())</pre>
+<pre class="code">from rich.progress import track
+import time
+
+for dosya in track(["ocak.csv", "subat.csv", "mart.csv"], description="İşleniyor..."):
+    time.sleep(0.5)</pre>
+<p>İlerleme çubukları ve renkler <b>stderr</b>'e ya da yalnızca terminale gitmelidir: <code>Console(stderr=True)</code>. Çıktı bir dosyaya ya da boruya yönlendirildiğinde (<code>sys.stdout.isatty()</code> False) süslemeyi kapatıp düz CSV/JSON üretmek iyi bir CLI'ın işaretidir.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir belediyenin bilgi işlem ekibi su faturası tahakkuk betiğini <code>tahakkuk hesapla --donem 2026-10 --mahalle Konak --kuru-calistir</code> biçiminde bir CLI'a çevirdi. <code>--kuru-calistir</code> (dry-run) veritabanına yazmadan ne yapılacağını gösteriyor; çıkış kodları gece çalışan zamanlayıcıya hatayı bildiriyor; tüm ayarlar <code>TAHAKKUK_*</code> ortam değişkenlerinden de verilebildiği için aynı araç test ve canlı ortamda kod değişmeden çalışıyor.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İyi CLI tasarımı kontrol listesi</h3>
+<ul>
+<li><b>Tahmin edilebilir adlar:</b> <code>--output/-o</code>, <code>--verbose/-v</code>, <code>--quiet/-q</code>, <code>--dry-run</code>, <code>--force</code>, <code>--version</code> gibi alışılmış seçenekleri aynı anlamda kullan.</li>
+<li><b>Tehlikeli işlemde onay:</b> silme/üzerine yazma için onay iste; otomasyon için <code>--yes</code> ile atlanabilsin.</li>
+<li><b>Idempotent çalıştırma:</b> aynı komutu iki kez çalıştırmak ikinci kez zarar vermesin (aynı raporu ikinci kez eklememek gibi).</li>
+<li><b>Makine okunur çıktı:</b> insanlar için tablo, makineler için <code>--json</code>; JSON'u stdout'a, açıklamaları stderr'e yaz.</li>
+<li><b>Anlamlı hata mesajı:</b> ne oldu, neden, ne yapmalı: "satis.csv bulunamadı; yolu kontrol et ya da - ile stdin'den ver".</li>
+</ul>
+<h3>Paket olarak kurulum</h3>
+<p><code>pyproject.toml</code> içindeki <code>[project.scripts]</code> bölümüne <code>stok = "stokaraci.cli:main"</code> yazınca <code>pip install .</code> sonrası <code>stok</code> komutu her yerde çalışır. Bu bağlantıyı ileri seviyedeki paketleme dersinde kuracaksın; <code>main(argv=None) -&gt; int</code> imzası bu yüzden önemlidir.</p>
+<h3>Test stratejisi</h3>
+<p>İş mantığını saf fonksiyonlarda tut, CLI katmanı yalnızca ayrıştırsın ve çağırsın. CLI testlerinde <code>main([...])</code>'i çağır, çıkış kodunu ve <code>io.StringIO</code>'ya yönlendirilen stdout/stderr'i denetle; pytest kullanıyorsan <code>capsys</code> ve <code>monkeypatch.setenv</code> bu işi kolaylaştırır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/cli-araclari">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../yapilandirma/">← Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri</a><a href="../excel-otomasyon/">Excel otomasyonu: openpyxl, pandas ve rapor üretimi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

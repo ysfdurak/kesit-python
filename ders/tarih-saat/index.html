@@ -1,0 +1,248 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi | Kesit Python</title><meta name="description" content="date/datetime/timedelta ile tarih aritmetiği yapar, strftime/strptime ile metne çevirir, zoneinfo ile saat dilimi ekler, ay sonu ve iş günü hesaplarını…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/tarih-saat/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi"><meta property="og:description" content="date/datetime/timedelta ile tarih aritmetiği yapar, strftime/strptime ile metne çevirir, zoneinfo ile saat dilimi ekler, ay sonu ve iş günü hesaplarını…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/tarih-saat/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi","description":"date/datetime/timedelta ile tarih aritmetiği yapar, strftime/strptime ile metne çevirir, zoneinfo ile saat dilimi ekler, ay sonu ve iş günü hesaplarını…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/tarih-saat/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Tarih ve saat: datetime, timedelta, biçimleme ve saat dilimi</h1><p class="st-l">date/datetime/timedelta ile tarih aritmetiği yapar, strftime/strptime ile metne çevirir, zoneinfo ile saat dilimi ekler, ay sonu ve iş günü hesaplarını güvenle kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tarih-saat">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ta "vadesi 30 gün sonra dolan krediler", Anadolu Market'te "son 7 günün siparişleri", İK'da "deneme süresi biten çalışanlar"... Hemen her iş sorusunun içinde tarih var. Tarihler metin olarak gelir ("2026-03-15", "15.03.2026", "15 Mart 2026"), hesap yapmak için nesneye çevirmen, sonra tekrar insanın okuyacağı biçime döndürmen gerekir. Yanlış yapılan tarih hesabı sessiz hata üretir: program çökmez ama rapor yanlış çıkar. Bu ders o hataları en baştan engellemeyi öğretir.</p>
+
+<h2>Üç temel tip</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Tip</th><th>Ne tutar</th><th>Örnek</th></tr>
+<tr><td>date</td><td>Yıl, ay, gün</td><td>date(2026, 3, 15)</td></tr>
+<tr><td>datetime</td><td>Tarih + saat (+ isteğe bağlı saat dilimi)</td><td>datetime(2026, 3, 15, 14, 30)</td></tr>
+<tr><td>timedelta</td><td>Süre (gün, saniye, mikrosaniye)</td><td>timedelta(days=30, hours=2)</td></tr>
+<tr><td>time</td><td>Yalnızca saat</td><td>time(9, 0)</td></tr>
+</table></div>
+<pre class="py">from datetime import date, datetime, timedelta
+
+basvuru = date(2026, 3, 15)
+vade = basvuru + timedelta(days=30)
+print("Başvuru:", basvuru, "| Vade:", vade)
+print("Haftanın günü (0=Pzt):", vade.weekday(), "| ISO (1=Pzt):", vade.isoweekday())
+
+fark = date(2026, 12, 31) - basvuru
+print("Yıl sonuna kalan gün:", fark.days, "| tip:", type(fark).__name__)
+
+t = datetime(2026, 3, 15, 14, 30)
+print("2 saat 45 dk sonra:", t + timedelta(hours=2, minutes=45))
+print("Parçalar:", t.year, t.month, t.day, t.hour, t.minute)
+print("Yalnızca tarih:", t.date(), "| yalnızca saat:", t.time())
+print("Replace ile ayın 1'i:", t.replace(day=1).date())</pre>
+<div class="note"><b>timedelta neyi bilmez?</b>timedelta'da ay ve yıl yoktur; çünkü "1 ay" 28-31 gün arasında değişir. Ay eklemek için <code>replace()</code> ile yıl/ayı kendin hesaplarsın (aşağıda) ya da üçüncü parti <code>dateutil.relativedelta</code> kullanırsın.</div>
+
+<h2>Metne çevirme: strftime ve strptime</h2>
+<p><code>strftime</code> (string format time) nesneyi metne, <code>strptime</code> (string parse time) metni nesneye çevirir. İkisi de aynı biçim kodlarını kullanır. Ezberlemek yerine tabloya bak:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kod</th><th>Anlam</th><th>Örnek</th></tr>
+<tr><td>%Y / %y</td><td>Yıl 4 / 2 hane</td><td>2026 / 26</td></tr>
+<tr><td>%m / %d</td><td>Ay / gün (sıfır dolgulu)</td><td>03 / 05</td></tr>
+<tr><td>%H / %M / %S</td><td>Saat / dakika / saniye</td><td>14 / 05 / 09</td></tr>
+<tr><td>%B / %b</td><td>Ay adı uzun / kısa (dile bağlı)</td><td>March / Mar</td></tr>
+<tr><td>%A / %a</td><td>Gün adı uzun / kısa</td><td>Sunday / Sun</td></tr>
+<tr><td>%j</td><td>Yılın günü</td><td>074</td></tr>
+<tr><td>%z / %Z</td><td>UTC farkı / dilim adı</td><td>+0300 / +03</td></tr>
+</table></div>
+<pre class="py">from datetime import datetime
+
+t = datetime(2026, 3, 5, 9, 7)
+print(t.strftime("%d.%m.%Y %H:%M"))      # Türkiye'de alışık olunan biçim
+print(t.strftime("%Y-%m-%d"))            # ISO, sıralanabilir
+print(t.strftime("%d/%m/%y"))
+
+# Metinden nesneye: biçim metinle BİREBİR uyuşmalı
+s = "15.03.2026 14:30"
+d = datetime.strptime(s, "%d.%m.%Y %H:%M")
+print(d, type(d).__name__)
+
+# Türkçe ay adı: %B yerel dile bağlıdır, kendin eşle
+AYLAR = ["Ocak", "Şubat", "Mart", "Nisan", "Mayıs", "Haziran",
+         "Temmuz", "Ağustos", "Eylül", "Ekim", "Kasım", "Aralık"]
+print(f"{d.day} {AYLAR[d.month - 1]} {d.year}")</pre>
+<div class="warn"><b>%B ve %A dile bağlıdır</b>Sunucunun yerel ayarına (locale) göre "March" ya da "Mart" basar; çoğu sunucuda İngilizcedir. Türkçe rapor için ay/gün adlarını kendi listenden al; strptime ile Türkçe ay adı ayrıştırmaya çalışma.</div>
+
+<h2>ISO 8601: makineler arası ortak dil</h2>
+<p><code>2026-03-15T14:30:00+03:00</code> biçimi ISO 8601'dir. API'ler, JSON ve veritabanları bunu kullanır; metin olarak sıralandığında kronolojik sıra çıkar. Python'da <code>isoformat()</code> ve <code>fromisoformat()</code> bu işi görür.</p>
+<pre class="py">from datetime import datetime, date
+
+d = datetime(2026, 3, 15, 14, 30)
+print(d.isoformat())
+print(d.isoformat(sep=" ", timespec="minutes"))
+print(datetime.fromisoformat("2026-03-15T14:30:00"))
+print(datetime.fromisoformat("2026-03-15 14:30:00+03:00"))
+print(date.fromisoformat("2026-03-15"))
+
+# Metin sıralaması = kronolojik sıralama
+print(sorted(["2026-03-15", "2025-12-01", "2026-01-20"]))</pre>
+
+<h2>Saat dilimi: naive ve aware</h2>
+<p>Saat dilimi bilgisi olmayan datetime'a <b>naive</b>, olana <b>aware</b> denir. İkisini karşılaştıramaz ya da çıkaramazsın; Python <code>TypeError</code> verir. Kural: sistem içinde UTC sakla, kullanıcıya gösterirken yerel dilime çevir. <code>zoneinfo</code> (3.9+) IANA veritabanını kullanır; Türkiye için <code>"Europe/Istanbul"</code> (2016'dan beri sabit +03).</p>
+<pre class="py">from datetime import datetime, timezone, timedelta
+try:
+    from zoneinfo import ZoneInfo
+    IST = ZoneInfo("Europe/Istanbul")
+except Exception:            # bazı kısıtlı ortamlarda tz veritabanı olmayabilir
+    IST = timezone(timedelta(hours=3), "+03")
+
+utc_an = datetime(2026, 3, 15, 11, 30, tzinfo=timezone.utc)
+ist_an = utc_an.astimezone(IST)
+print("UTC   :", utc_an.isoformat())
+print("İst.  :", ist_an.isoformat())
+print("Aynı an mı?", utc_an == ist_an)
+
+# Naive'e dilim ekleme: replace (dönüştürmez, etiketler)
+yerel = datetime(2026, 3, 15, 14, 30).replace(tzinfo=IST)
+print("UTC'ye:", yerel.astimezone(timezone.utc).strftime("%H:%M %Z"))
+print("Şu an UTC:", datetime.now(timezone.utc).tzinfo)</pre>
+<div class="tip"><b>utcnow() kullanma</b><code>datetime.utcnow()</code> naive döner ve 3.12'de kullanımdan kaldırılma uyarısı verir. Doğrusu <code>datetime.now(timezone.utc)</code>; yerel saat için <code>datetime.now(IST)</code>.</div>
+
+<h2>İş hesapları: ay sonu, iş günü, yaş</h2>
+<p>Finans ve İK'da en çok şu üç hesap sorulur. Hepsini standart kütüphaneyle çözebilirsin.</p>
+<pre class="py">from datetime import date, timedelta
+import calendar
+
+def ay_sonu(d: date) -&gt; date:
+    son_gun = calendar.monthrange(d.year, d.month)[1]
+    return d.replace(day=son_gun)
+
+def ay_ekle(d: date, n: int) -&gt; date:
+    toplam = d.year * 12 + (d.month - 1) + n
+    yil, ay = divmod(toplam, 12)
+    gun = min(d.day, calendar.monthrange(yil, ay + 1)[1])   # 31 Ocak + 1 ay = 28/29 Şubat
+    return date(yil, ay + 1, gun)
+
+def is_gunu_ekle(d: date, n: int) -&gt; date:
+    while n &gt; 0:
+        d += timedelta(days=1)
+        if d.weekday() &lt; 5:        # 0-4 hafta içi
+            n -= 1
+    return d
+
+print("Şubat sonu:", ay_sonu(date(2026, 2, 10)))
+print("31 Ocak + 1 ay:", ay_ekle(date(2026, 1, 31), 1))
+print("Cuma + 3 iş günü:", is_gunu_ekle(date(2026, 3, 13), 3))
+print("Mart 2026 takvimi:", calendar.monthrange(2026, 3))   # (ilk gün, gün sayısı)
+
+dogum = date(1998, 7, 20); bugun = date(2026, 3, 15)
+yas = bugun.year - dogum.year - ((bugun.month, bugun.day) &lt; (dogum.month, dogum.day))
+print("Yaş:", yas)</pre>
+
+<h2>Pratik: son 7 gün filtresi</h2>
+<pre class="py">from datetime import date, timedelta
+
+siparisler = [
+    ("S-1", "2026-03-10", 450), ("S-2", "2026-03-14", 120),
+    ("S-3", "2026-03-01", 800), ("S-4", "2026-03-15", 60),
+]
+bugun = date(2026, 3, 15)
+esik = bugun - timedelta(days=7)
+son_hafta = [s for s in siparisler if date.fromisoformat(s[1]) &gt;= esik]
+print("Son 7 gün:", [s[0] for s in son_hafta], "toplam", sum(s[2] for s in son_hafta))
+for s in son_hafta:
+    gun_once = (bugun - date.fromisoformat(s[1])).days
+    print(f"{s[0]}: {gun_once} gün önce")</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: süreler, zaman damgaları, haftalar ve yaz saati</h2>
+<p>Tarih ayrıştırma, biçimleme, saat dilimi ve iş günü hesabını gördün. Raporlama ve bankacılık kodunda bunların yanında şu sorular da sık gelir: "Bu iş ortalama kaç saat sürüyor?", "API bana 1773570600 gönderdi, bu ne zaman?", "Bu sipariş yılın kaçıncı haftasında?", "Berlin'deki müşteriye 24 saat sonra hatırlatma gönder, ama yaz saati değişiyor." Bu bölüm bunları yanıtlıyor. pandas ile zaman serisi işlemleri "Zaman serisi analizi" dersinde.</p>
+
+<h3>1. Süre aritmetiği: timedelta'yı sayıya çevirmek</h3>
+<p><code>timedelta</code> içte yalnız gün, saniye ve mikrosaniye tutar. Toplam süreyi tek sayıya çevirmek için <code>total_seconds()</code> kullanırsın; <code>.seconds</code> niteliği ise <b>günleri saymaz</b> (yalnız gün içindeki kalan saniyeler) ve klasik bir hata kaynağıdır. İki timedelta birbirine bölünebilir: <code>/</code> ondalık oran, <code>//</code> tam kat sayısı verir. Negatif süreler "-1 day, 23:00:00" gibi görünür: Python günü negatif, saniyeyi pozitif tutar.</p>
+<pre class="py">from datetime import datetime, timedelta
+
+acilis = datetime(2026, 3, 14, 22, 40)
+kapanis = datetime(2026, 3, 16, 9, 15)
+sure = kapanis - acilis
+print(sure)
+print(sure.seconds, "&lt;- günler YOK")
+print(sure.total_seconds() / 3600, "saat")
+
+saat, kalan = divmod(int(sure.total_seconds()), 3600)
+print(f"{saat} sa {kalan // 60:02d} dk")
+
+vardiya = timedelta(hours=7, minutes=30)
+print(vardiya / timedelta(minutes=45), vardiya // timedelta(hours=2))
+print(timedelta(hours=-1), timedelta(hours=-1).total_seconds())</pre>
+
+<h3>2. Unix zaman damgası (timestamp)</h3>
+<p>Birçok API ve log sistemi zamanı "1970-01-01 00:00 UTC'den beri geçen saniye" olarak verir. <code>datetime.fromtimestamp(ts, tz=timezone.utc)</code> bunu aware datetime'a, <code>dt.timestamp()</code> geri çevirir. Tuzak: <code>tz</code> vermezsen sonuç <b>sunucunun yerel saatine</b> göre naive üretilir; naive bir datetime'ın <code>timestamp()</code>'ı da yerel saat varsayar. Aynı kod İstanbul'daki dizüstünde ve UTC'deki sunucuda 3 saat farklı sonuç verir.</p>
+<pre class="py">from datetime import datetime, timezone, timedelta
+
+ts = 1773570600
+utc = datetime.fromtimestamp(ts, tz=timezone.utc)
+print(utc.isoformat())
+print(utc.astimezone(timezone(timedelta(hours=3))).strftime("%d.%m.%Y %H:%M"))
+print(int(utc.timestamp()) == ts)
+ms = 1773570600123                       # JavaScript/Java milisaniye verir
+print(datetime.fromtimestamp(ms / 1000, tz=timezone.utc).isoformat(timespec="milliseconds"))</pre>
+
+<h3>3. Haftalar, çeyrekler ve ISO yılı</h3>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Pazartesi</th><th>Pazar</th><th>Not</th></tr>
+<tr><td><code>d.weekday()</code></td><td>0</td><td>6</td><td>Hafta içi: <code>&lt; 5</code></td></tr>
+<tr><td><code>d.isoweekday()</code></td><td>1</td><td>7</td><td>ISO standardı</td></tr>
+<tr><td><code>d.isocalendar()</code></td><td colspan="2">(ISO yılı, hafta no, gün)</td><td>Hafta Pazartesi başlar</td></tr>
+<tr><td><code>(d.month - 1) // 3 + 1</code></td><td colspan="2">Çeyrek (1-4)</td><td>Finans raporları</td></tr>
+<tr><td><code>d - timedelta(days=d.weekday())</code></td><td colspan="2">Haftanın Pazartesi'si</td><td>Haftalık kova anahtarı</td></tr>
+</table></div>
+<p>Dikkat: ISO hafta yılı takvim yılıyla her zaman aynı değildir. 30 Aralık 2024 Pazartesi, ISO'ya göre <b>2025'in 1. haftasıdır</b>; 1 Ocak 2027 ise 2026'nın 53. haftasıdır. Haftalık raporda anahtar olarak <code>d.year</code> değil <code>isocalendar().year</code> kullanmazsan yıl başındaki hafta ikiye bölünür.</p>
+<pre class="py">from datetime import date, timedelta
+
+for d in [date(2024, 12, 30), date(2026, 3, 15), date(2027, 1, 1)]:
+    y, h, g = d.isocalendar()
+    pazartesi = d - timedelta(days=d.weekday())
+    ceyrek = (d.month - 1) // 3 + 1
+    print(d, f"{y}-W{h:02d}", "gün", g, "| hafta başı", pazartesi, "| Ç" + str(ceyrek))
+print(date.fromisocalendar(2026, 11, 1))      # ISO haftadan tarihe</pre>
+
+<h3>4. Tarih aralıkları üretmek</h3>
+<p><code>range</code> tarihlerle çalışmaz; kendi küçük üretecini (generator) yazarsın. Ay ay ilerlemek için gün eklemek yerine (yıl, ay) çiftini artırırsın. Bu iki kalıp raporlama kodunun yarısında vardır: eksik günleri sıfırla doldurmak, her ay için bir satır üretmek.</p>
+<pre class="py">from datetime import date, timedelta
+
+def gunler(bas, bit, adim=1):
+    d = bas
+    while d &lt;= bit:
+        yield d
+        d += timedelta(days=adim)
+
+def aylar(bas, bit):
+    y, m = bas.year, bas.month
+    while (y, m) &lt;= (bit.year, bit.month):
+        yield f"{y}-{m:02d}"
+        y, m = (y + 1, 1) if m == 12 else (y, m + 1)
+
+satis = {date(2026, 3, 2): 120, date(2026, 3, 4): 90}
+print([satis.get(d, 0) for d in gunler(date(2026, 3, 1), date(2026, 3, 5))])
+print(list(aylar(date(2025, 11, 20), date(2026, 2, 3))))</pre>
+
+<h3>5. Yaz saati: duvar saati mi, gerçek süre mi?</h3>
+<p>Türkiye 2016'dan beri yaz saati (DST) uygulamıyor, ama Avrupa'daki müşteri, tedarikçi ya da sunucu uyguluyor. <code>zoneinfo</code> ile aware bir datetime'a <code>timedelta(days=1)</code> eklediğinde Python <b>duvar saatini</b> korur: saat değişimi gecesinde "1 gün sonra" gerçekte 23 saat sonradır. Gerçek geçen süre istiyorsan hesabı UTC'de yap, sonra yerele çevir.</p>
+<pre class="py">from datetime import datetime, timedelta, timezone
+try:
+    from zoneinfo import ZoneInfo
+    berlin = ZoneInfo("Europe/Berlin")
+    once = datetime(2026, 3, 28, 12, 0, tzinfo=berlin)       # yaz saatinden önceki gün
+    duvar = once + timedelta(days=1)                            # duvar saati: yine 12:00
+    gercek = (once.astimezone(timezone.utc) + timedelta(hours=24)).astimezone(berlin)
+    print(duvar, "| UTC farkı:", duvar.utcoffset())
+    print(gercek, "&lt;- gerçekten 24 saat sonra")
+    print(duvar.astimezone(timezone.utc) - once.astimezone(timezone.utc), "&lt;- '+1 gün' ile gerçekte geçen")
+    print(gercek - once, "&lt;- aynı dilimde çıkarma duvar saatine bakar (yanıltıcı)")
+except Exception as e:
+    print("Bu ortamda saat dilimi veritabanı yok:", type(e).__name__)</pre>
+<div class="warn"><b>Aynı dilimdeki aware datetime farkı</b>Aynı <code>tzinfo</code> nesnesine sahip iki aware datetime'ı çıkarırsan Python duvar saatlerini çıkarır, UTC farkını hesaba katmaz. DST geçişini kapsayan süre ölçümlerinde iki tarafı önce <code>astimezone(timezone.utc)</code> ile UTC'ye çevir.</div>
+<div class="tip"><b>Ay eklemenin hazır yolu</b><code>pip install python-dateutil</code> ile gelen <code>relativedelta(months=+1)</code> ay sonunu doğru kırpar (31 Ocak + 1 ay = 28/29 Şubat) ve "ayın son Cuma'sı" gibi kurallar yazdırır. Tarayıcıdaki bu ortamda da çalışır; kendi ay_ekle fonksiyonunu bakımını üstlenmek istemiyorsan tercih et.</div>
+
+<div class="note"><b>Gerçek işte</b>SLA (hizmet seviyesi) raporlarında süre "takvim saati" değil "çalışma saati" olarak ölçülür: hafta içi 09:00-18:00 dışında geçen zaman sayılmaz. Haftalık KPI tablolarında ISO hafta numarası kullanılır ve anahtar <code>2026-W11</code> biçiminde yazılır ki metin sıralaması kronolojik olsun. Dış sistemlerden gelen zaman damgalarının saniye mi milisaniye mi olduğu (10 hane / 13 hane) entegrasyonun ilk gününde doğrulanır; yanlış birim 1970 ya da 58000 yılı gibi absürt tarihler üretir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretim sistemlerinde tarih disiplini</h3>
+<p>Kurumsal kodda üç kural yerleşmiştir: (1) Veritabanı ve log'da her zaman UTC ve aware datetime sakla; (2) dönüşümü yalnızca sunum katmanında yap; (3) "bugün"ü fonksiyon içinde <code>date.today()</code> ile değil, parametre olarak al. Üçüncü kural test yazarken hayat kurtarır: <code>vade_gecti(islem, bugun=date(2026,1,1))</code> deterministik test edilir, <code>date.today()</code> içeren fonksiyon ise her gün farklı sonuç verir.</p>
+<p>Zaman damgası (timestamp) ile çalışırken <code>datetime.fromtimestamp(ts, tz=timezone.utc)</code> kullan; dilimsiz çağrı makinenin yerel saatini varsayar ve sunucu-geliştirici makinesi arasında fark çıkar. Yaz saati uygulayan dilimlerde (Avrupa, ABD) bir günün 23 ya da 25 saat olabileceğini unutma; "yarın aynı saat" hesabı için yerel dilimde <code>timedelta(days=1)</code> ekleyip tekrar <code>astimezone</code> yapmak gerekir. Türkiye 2016'dan beri sabit +03 kullandığı için bu sorun yerelde görünmez ama uluslararası müşteri verisinde görünür.</p>
+<p>Performans ipucu: milyonlarca satırda <code>strptime</code> yavaştır; biçim sabit ISO ise <code>fromisoformat</code> birkaç kat hızlıdır. pandas'a geçtiğinde <code>pd.to_datetime(..., format=...)</code> aynı mantıkla çalışır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/tarih-saat">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../collections-itertools/">← collections ve itertools: hazır veri yapıları ve yineleme araçları</a><a href="../regex/">Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

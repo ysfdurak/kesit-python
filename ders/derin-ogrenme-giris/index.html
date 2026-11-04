@@ -1,0 +1,194 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Sinir ağlarına (neural networks) giriş: numpy'dan PyTorch'a | Kesit Python</title><meta name="description" content="Nöron, katman ve aktivasyon; ileri yayılım ve kayıp; numpy ile 2 katmanlı ağda geri yayılım ve gradyan inişi; mini-batch, öğrenme oranı, eğitim eğrisi;…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/derin-ogrenme-giris/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Sinir ağlarına (neural networks) giriş: numpy'dan PyTorch'a"><meta property="og:description" content="Nöron, katman ve aktivasyon; ileri yayılım ve kayıp; numpy ile 2 katmanlı ağda geri yayılım ve gradyan inişi; mini-batch, öğrenme oranı, eğitim eğrisi;…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/derin-ogrenme-giris/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Sinir ağlarına (neural networks) giriş: numpy'dan PyTorch'a","description":"Nöron, katman ve aktivasyon; ileri yayılım ve kayıp; numpy ile 2 katmanlı ağda geri yayılım ve gradyan inişi; mini-batch, öğrenme oranı, eğitim eğrisi;…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/derin-ogrenme-giris/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Sinir ağlarına (neural networks) giriş: numpy'dan PyTorch'a</h1><p class="st-l">Nöron, katman ve aktivasyon; ileri yayılım ve kayıp; numpy ile 2 katmanlı ağda geri yayılım ve gradyan inişi; mini-batch, öğrenme oranı, eğitim eğrisi; dropout, erken durdurma ve L2; scikit-learn MLPClassifier ile tablo verisi ve gradient boosting karşılaştırması; PyTorch gösterimi; CNN, RNN, transformer ve transfer öğrenmeye bakış.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/derin-ogrenme-giris">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Sinir ağı: katman katman öğrenen bir fonksiyon</h2>
+<p>Bir el yazısı rakam görüntüsü 64 pikselden oluşur. Hangi pikselin hangi rakamı işaret ettiğini kural olarak yazamazsın; bir lojistik regresyon da pikselleri tek tek ağırlıklandırmakla sınırlı kalır. <b>Sinir ağı</b> (neural network) ise ara katmanlarda kendi özelliklerini öğrenir: ilk katman kenarları, sonraki katman kenarlardan oluşan şekilleri. Bu, görüntü, ses ve metinde derin öğrenmeyi (deep learning) vazgeçilmez yapan özelliktir.</p>
+<p>Bu derste sinir ağını önce <b>numpy ile sıfırdan</b> kuracaksın (ileri yayılım, kayıp, geri yayılım, gradyan inişi), sonra scikit-learn'ün <code>MLPClassifier</code>'ı ile Ilgaz Bank verisinde ağaç modelleriyle karşılaştıracak, en sonda PyTorch kodunu okuyacaksın. <a href="../ml-giris/">Makine öğrenmesine giriş</a> ve <a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a> derslerindeki bölme, ölçekleme ve sızıntı kuralları burada da aynen geçerli.</p>
+
+<h2>Nöron, katman, aktivasyon</h2>
+<p>Bir <b>nöron</b> girdilerin ağırlıklı toplamını alır, bir sapma (bias) ekler ve sonucu bir <b>aktivasyon fonksiyonundan</b> geçirir: <code>a = f(w·x + b)</code>. Bir <b>katman</b> aynı girdiye bakan nöronlar kümesidir ve matris çarpımıyla tek satırda hesaplanır: <code>A = f(X @ W + b)</code>. X'in şekli (örnek, girdi), W'nin (girdi, nöron), çıktınınki (örnek, nöron).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Aktivasyon</th><th>Formül</th><th>Nerede?</th></tr>
+<tr><td>ReLU</td><td>max(0, z)</td><td>Gizli katmanların varsayılanı; hızlı, gradyanı sönmez</td></tr>
+<tr><td>Sigmoid</td><td>1 / (1 + e<sup>−z</sup>)</td><td>İkili sınıflandırma çıktısı (olasılık)</td></tr>
+<tr><td>Tanh</td><td>(e<sup>z</sup> − e<sup>−z</sup>) / (e<sup>z</sup> + e<sup>−z</sup>)</td><td>−1..1 arası; RNN'lerde</td></tr>
+<tr><td>Softmax</td><td>e<sup>z<sub>i</sub></sup> / Σ e<sup>z<sub>j</sub></sup></td><td>Çok sınıflı çıktı; olasılıklar 1'e toplanır</td></tr>
+</table></div>
+<p>Aktivasyon neden şart? Doğrusal katmanları üst üste koymak yine doğrusal bir fonksiyondur: <code>(X @ W1) @ W2 = X @ (W1 @ W2)</code>. Doğrusal olmayan aktivasyon olmadan 10 katmanlı ağ tek bir lojistik regresyondan güçlü değildir.</p>
+<pre class="py">import numpy as np
+
+def relu(z):
+    return np.maximum(0, z)
+
+def sigmoid(z):
+    return 1 / (1 + np.exp(-z))
+
+def softmax(z):
+    z = z - z.max(axis=1, keepdims=True)        # taşmayı önler, sonucu değiştirmez
+    e = np.exp(z)
+    return e / e.sum(axis=1, keepdims=True)
+
+z = np.array([[-2.0, 0.0, 3.0]])
+print("relu   :", relu(z))
+print("sigmoid:", sigmoid(z).round(3))
+print("softmax:", softmax(z).round(3), "toplam", softmax(z).sum())
+</pre>
+
+<h2>İleri yayılım ve kayıp</h2>
+<p>İki katmanlı bir ağ (bir gizli katman) için <b>ileri yayılım</b> (forward pass): <code>Z1 = X @ W1 + b1</code>, <code>A1 = relu(Z1)</code>, <code>Z2 = A1 @ W2 + b2</code>, <code>p = sigmoid(Z2)</code>. Tahminin ne kadar kötü olduğunu <b>kayıp fonksiyonu</b> (loss) söyler: regresyonda ortalama kare hata (MSE), ikili sınıflandırmada <b>ikili çapraz entropi</b> (binary cross-entropy): <code>−ortalama[y·log p + (1 − y)·log(1 − p)]</code>. Doğru sınıfa düşük olasılık veren tahmin çok ağır cezalandırılır.</p>
+<pre class="py">rng = np.random.default_rng(0)
+X = rng.normal(size=(5, 3))                    # 5 örnek, 3 özellik
+W1, b1 = rng.normal(0, 0.5, (3, 4)), np.zeros(4)   # 4 gizli nöron
+W2, b2 = rng.normal(0, 0.5, (4, 1)), np.zeros(1)
+
+A1 = relu(X @ W1 + b1)
+p = sigmoid(A1 @ W2 + b2)
+print("şekiller:", X.shape, A1.shape, p.shape)
+y = np.array([[1], [0], [1], [0], [1]])
+kayip = -np.mean(y * np.log(p) + (1 - y) * np.log(1 - p))
+print("ikili çapraz entropi:", round(float(kayip), 4))
+</pre>
+
+<h2>Gradyan inişi ve geri yayılım</h2>
+<p>Öğrenme, kaybı azaltacak yönde ağırlıkları küçük adımlarla değiştirmektir: <code>W ← W − η · ∂L/∂W</code>. η <b>öğrenme oranıdır</b> (learning rate). Gradyanları her ağırlık için ayrı ayrı türevleyerek bulmak yerine <b>geri yayılım</b> (backpropagation) zincir kuralını çıktıdan girdiye doğru uygular. Sigmoid + çapraz entropi ikilisinin güzel bir özelliği var: çıktıdaki hata yalnızca <code>p − y</code>'dir.</p>
+<div class="steps-list"><ol>
+<li><code>dZ2 = (p − y) / n</code></li>
+<li><code>dW2 = A1ᵀ @ dZ2</code>, <code>db2 = dZ2.sum(axis=0)</code></li>
+<li><code>dA1 = dZ2 @ W2ᵀ</code>, ReLU'nun türevi: <code>dZ1 = dA1 · (Z1 &gt; 0)</code></li>
+<li><code>dW1 = Xᵀ @ dZ1</code>, <code>db1 = dZ1.sum(axis=0)</code></li>
+<li>Her parametreyi <code>param −= η · grad</code> ile güncelle.</li>
+</ol></div>
+<pre class="py">from sklearn.datasets import make_moons
+
+X, y = make_moons(n_samples=400, noise=0.2, random_state=0)
+y = y.reshape(-1, 1)
+rng = np.random.default_rng(1)
+W1, b1 = rng.normal(0, 1, (2, 16)), np.zeros(16)
+W2, b2 = rng.normal(0, 1, (16, 1)), np.zeros(1)
+eta, n = 0.5, len(X)
+for epoch in range(2001):
+    Z1 = X @ W1 + b1; A1 = relu(Z1); p = sigmoid(A1 @ W2 + b2)       # ileri
+    dZ2 = (p - y) / n                                                # geri
+    dW2, db2 = A1.T @ dZ2, dZ2.sum(axis=0)
+    dZ1 = (dZ2 @ W2.T) * (Z1 &gt; 0)
+    dW1, db1 = X.T @ dZ1, dZ1.sum(axis=0)
+    W1 -= eta * dW1; b1 -= eta * db1; W2 -= eta * dW2; b2 -= eta * db2
+    if epoch % 500 == 0:
+        kayip = -np.mean(y * np.log(p + 1e-12) + (1 - y) * np.log(1 - p + 1e-12))
+        print(f"epoch {epoch:4d}  kayıp {kayip:.3f}  doğruluk {((p &gt; 0.5) == y).mean():.3f}")
+</pre>
+<p>İki ay şeklindeki veri doğrusal ayrılamaz; lojistik regresyon %85 civarında takılır, gizli katmanlı ağ %95'i geçer. Gizli katman ayırıcı eğriyi kendi öğrendi.</p>
+
+<h2>Mini-batch, öğrenme oranı, epoch</h2>
+<p>Yukarıda her adımda tüm veriyi kullandık (tam yığın). Büyük veride her adımda küçük bir parça (<b>mini-batch</b>, ör. 32 ya da 256 örnek) kullanılır: adımlar ucuzlar ve gürültü yerel tuzaklardan kaçmaya yardım eder. Verinin tamamının bir kez görülmesine <b>epoch</b> denir; her epoch başında veri karıştırılır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Eğitim eğrisinde gördüğün</th><th>Olası neden</th><th>Ne yap?</th></tr>
+<tr><td>Kayıp patlıyor, nan oluyor</td><td>Öğrenme oranı çok büyük</td><td>η'yı 10'a böl; girdileri ölçekle</td></tr>
+<tr><td>Kayıp çok yavaş iniyor</td><td>η çok küçük ya da ölçeksiz girdi</td><td>η'yı artır, Adam optimizasyonu kullan</td></tr>
+<tr><td>Eğitim kaybı iniyor, doğrulama yükseliyor</td><td>Aşırı öğrenme (overfitting)</td><td>Erken durdurma, dropout, L2, daha çok veri</td></tr>
+<tr><td>İkisi de yüksek ve düz</td><td>Model çok küçük</td><td>Nöron/katman ekle, daha uzun eğit</td></tr>
+</table></div>
+
+<h2>Aşırı öğrenmeye karşı: düzenlileştirme, dropout, erken durdurma</h2>
+<ul>
+<li><b>L2 düzenlileştirme</b> (weight decay): kayba <code>λ·Σw²</code> ekler, büyük ağırlıkları cezalandırır. sklearn'de <code>alpha</code>.</li>
+<li><b>Dropout:</b> eğitimde her adımda nöronların rastgele bir kısmını (p oranında) sıfırlar; ağ tek bir nörona yaslanamaz. "Ters dropout" (inverted dropout) kalanları <code>1/(1 − p)</code> ile ölçekler ki tahmin anında hiçbir şey yapmak gerekmesin. Tahminde dropout <b>kapalıdır</b>.</li>
+<li><b>Erken durdurma</b> (early stopping): doğrulama kaybı <code>sabir</code> (patience) epoch boyunca iyileşmezse dur ve en iyi epoch'un ağırlıklarına dön.</li>
+</ul>
+<pre class="py">def dropout(A, p, rng, egitim=True):
+    if not egitim or p == 0:
+        return A
+    maske = rng.random(A.shape) &gt;= p
+    return A * maske / (1 - p)
+
+A = np.ones((2, 8))
+r = np.random.default_rng(0)
+print(dropout(A, 0.5, r))
+print("ortalama korunur mu?", dropout(np.ones((1000, 100)), 0.5, r).mean().round(2))
+</pre>
+
+<h2>scikit-learn MLPClassifier ile tablo verisi</h2>
+<p>Küçük ve orta boy tablo verisinde PyTorch'a gerek yok: <code>MLPClassifier</code> ve <code>MLPRegressor</code> Adam optimizasyonu, L2 (<code>alpha</code>), mini-batch ve erken durdurmayı hazır sunar. İki kural: girdileri <b>mutlaka ölçekle</b> (Pipeline içinde) ve <code>random_state</code> ver (başlangıç ağırlıkları rastgeledir).</p>
+<pre class="py">from sklearn.datasets import load_digits
+from sklearn.model_selection import train_test_split
+from sklearn.neural_network import MLPClassifier
+from sklearn.pipeline import make_pipeline
+from sklearn.preprocessing import StandardScaler
+
+Xd, yd = load_digits(return_X_y=True)          # 8x8 piksel, 10 rakam
+Xa, Xb, ya, yb = train_test_split(Xd, yd, test_size=0.25, random_state=0, stratify=yd)
+mlp = make_pipeline(StandardScaler(), MLPClassifier(hidden_layer_sizes=(64,), max_iter=300, random_state=0))
+mlp.fit(Xa, ya)
+print("rakam doğruluğu:", round(mlp.score(Xb, yb), 3), " epoch:", mlp[-1].n_iter_)
+</pre>
+<p>Ilgaz Bank'ın "ikinci yarıda kim çok harcayacak?" tablosunda (<a href="../ozellik-muhendisligi/">Özellik mühendisliği: ham veriden modele hazır özelliğe</a> dersindeki özellikler) ise tek gizli katmanlı MLP ile <code>HistGradientBoostingClassifier</code> neredeyse aynı AUC'yi (≈0.82) veriyor; boosting ölçekleme istemez, daha hızlı eğitilir ve ayarı daha az hassastır. Mini projede bunu kendin ölçeceksin.</p>
+
+<h2>PyTorch: tensör, nn.Module, eğitim döngüsü, DataLoader</h2>
+<p>Gerçek derin öğrenme projelerinde PyTorch kullanılır: GPU üzerinde hesap yapar ve gradyanları <b>otomatik türev</b> (autograd) ile kendisi bulur. Elle yazdığın geri yayılımı <code>loss.backward()</code> tek satırda yapar. PyTorch tarayıcıda çalışmaz; kodu oku ve kendi bilgisayarında dene.</p>
+<pre class="code">import torch
+from torch import nn
+from torch.utils.data import DataLoader, TensorDataset
+
+X_t = torch.tensor(X_egitim, dtype=torch.float32)
+y_t = torch.tensor(y_egitim, dtype=torch.float32).unsqueeze(1)
+yukleyici = DataLoader(TensorDataset(X_t, y_t), batch_size=32, shuffle=True)
+
+class HarcamaAgi(nn.Module):
+    def __init__(self, girdi):
+        super().__init__()
+        self.katmanlar = nn.Sequential(
+            nn.Linear(girdi, 16), nn.ReLU(), nn.Dropout(0.2),
+            nn.Linear(16, 1))                     # sigmoid kayıp içinde
+    def forward(self, x):
+        return self.katmanlar(x)
+
+model = HarcamaAgi(X_t.shape[1])
+kayip_fn = nn.BCEWithLogitsLoss()
+opt = torch.optim.Adam(model.parameters(), lr=1e-3, weight_decay=1e-4)
+for epoch in range(50):
+    model.train()                                 # dropout açık
+    for xb, yb in yukleyici:
+        opt.zero_grad()                           # eski gradyanları sil
+        kayip = kayip_fn(model(xb), yb)
+        kayip.backward()                          # geri yayılım
+        opt.step()                                # ağırlık güncelle
+model.eval()                                      # dropout kapalı
+with torch.no_grad():
+    olasilik = torch.sigmoid(model(torch.tensor(X_test, dtype=torch.float32)))
+</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install torch</code> (ekran kartın varsa pytorch.org'daki CUDA komutunu kullan). Döngüdeki üç satırlık ritüel (<code>zero_grad</code>, <code>backward</code>, <code>step</code>) her PyTorch projesinde aynıdır; <code>model.train()</code> ve <code>model.eval()</code> geçişini unutmak dropout'un tahminde açık kalmasına yol açar.</div>
+
+<h2>CNN, RNN, transformer ve transfer öğrenme</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Mimari</th><th>Fikir</th><th>Tipik kullanım</th></tr>
+<tr><td>CNN (evrişimli ağ)</td><td>Küçük filtreler görüntü üzerinde kayar; komşu piksellerden yerel desen öğrenir</td><td>Görüntü sınıflandırma, belge tarama, kalite kontrol</td></tr>
+<tr><td>RNN / LSTM</td><td>Diziyi adım adım okur, gizli durum taşır</td><td>Eski nesil dil ve zaman serisi modelleri</td></tr>
+<tr><td>Transformer</td><td>Dikkat (attention) ile her öğe diğer tüm öğelere bakar; paralel eğitilir</td><td>Dil modelleri (GPT, BERT), çeviri, artık görüntü de</td></tr>
+</table></div>
+<p><b>Transfer öğrenme:</b> milyonlarca görüntü ya da metinle önceden eğitilmiş bir modeli alıp son katmanlarını kendi küçük verinle ince ayarlarsın (fine-tuning). 500 etiketli fatura görüntüsüyle sıfırdan CNN eğitilmez, ama hazır bir ResNet'in son katmanı eğitilebilir. Metin tarafını <a href="../nlp-metin/">Metin işleme ve NLP: Türkçe metinden modele</a> ve <a href="../embedding-vektor-arama/">Embedding ve vektör arama: anlamsal arama ve RAG'in getirme (retrieval) katmanı</a> derslerinde göreceksin.</p>
+
+<h2>Ne zaman derin öğrenme, ne zaman gradient boosting?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th></tr>
+<tr><td>Tablo verisi (müşteri, işlem, sipariş), binlerce–milyonlarca satır</td><td>Gradient boosting (LightGBM, XGBoost, HistGradientBoosting)</td></tr>
+<tr><td>Görüntü, ses, serbest metin</td><td>Derin öğrenme (çoğu zaman önceden eğitilmiş model)</td></tr>
+<tr><td>Çok sayıda kategorik değer + metin + görüntü birlikte</td><td>Derin öğrenme (embedding katmanları)</td></tr>
+<tr><td>Az veri, açıklanabilirlik şart (kredi kararı)</td><td>Lojistik regresyon ya da sığ ağaç modelleri</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Bankalarda kredi ve churn skorlaması hâlâ büyük oranda gradient boosting ve lojistik regresyonla yapılır; açıklanabilirlik ve düzenleyici gereksinimler belirleyicidir. Derin öğrenme aynı kurumlarda belge okuma (OCR), çağrı merkezi ses analizi, dolandırıcılıkta işlem dizisi modelleri ve müşteri hizmetleri sohbet botlarında kullanılır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Başlatma ve normalizasyon</h3>
+<p>Ağırlıklar hepsi sıfırla başlatılırsa tüm nöronlar aynı şeyi öğrenir (simetri). ReLU ağlarında He başlatma (std = √(2/girdi)) yaygındır. Batch normalization ve layer normalization katman çıktılarını ölçekleyerek derin ağların kararlı eğitilmesini sağlar.</p>
+<h3>Gradyan kontrolü</h3>
+<p>Elle yazılan geri yayılımı test etmenin yolu sayısal türevdir: <code>(L(w + ε) − L(w − ε)) / 2ε</code>. Analitik ve sayısal gradyanın göreli farkı 1e-6 civarındaysa kod doğrudur. Meydan okuma alıştırmasında bunu yazacaksın.</p>
+<h3>Mülakat cümlesi</h3>
+<p>"Tablo verisinde önce gradient boosting ile güçlü bir temel çizgi kurarım; sinir ağını ancak veri yapısız ya da çok büyükse, ya da embedding gerekiyorsa denerim. Eğitim eğrisini izler, erken durdurma ve düzenlileştirme kullanır, girdileri Pipeline içinde ölçeklerim."</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/derin-ogrenme-giris">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../veri-mulakat/">← Veri rolleri mülakatı: SQL, pandas, istatistik ve vaka soruları</a><a href="../mlops-yasam-dongusu/">MLOps: deney takibi, model kaydı, servisleme ve izleme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

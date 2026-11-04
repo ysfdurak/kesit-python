@@ -1,0 +1,196 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>MLOps: deney takibi, model kaydı, servisleme ve izleme | Kesit Python</title><meta name="description" content="ML yaşam döngüsü ve olgunluk seviyeleri, mini DeneyKaydi ile deney takibi (MLflow gösterimi), model kayıt defteri ve aşamalar, hash ile veri sürümleme…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/mlops-yasam-dongusu/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="MLOps: deney takibi, model kaydı, servisleme ve izleme"><meta property="og:description" content="ML yaşam döngüsü ve olgunluk seviyeleri, mini DeneyKaydi ile deney takibi (MLflow gösterimi), model kayıt defteri ve aşamalar, hash ile veri sürümleme…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/mlops-yasam-dongusu/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"MLOps: deney takibi, model kaydı, servisleme ve izleme","description":"ML yaşam döngüsü ve olgunluk seviyeleri, mini DeneyKaydi ile deney takibi (MLflow gösterimi), model kayıt defteri ve aşamalar, hash ile veri sürümleme…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/mlops-yasam-dongusu/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>MLOps: deney takibi, model kaydı, servisleme ve izleme</h1><p class="st-l">ML yaşam döngüsü ve olgunluk seviyeleri, mini DeneyKaydi ile deney takibi (MLflow gösterimi), model kayıt defteri ve aşamalar, hash ile veri sürümleme (DVC), toplu ve çevrim içi servisleme (FastAPI + pydantic), PSI/KS ile kayma izleme, yeniden eğitim tetikleyicileri, shadow ve canary, davranış testleri ve kalite kapısı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mlops-yasam-dongusu">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Model eğitmek işin yarısı bile değil</h2>
+<p>Pedal İzmir veri ekibi Haziran verisiyle saatlik bisiklet talebini tahmin eden bir model eğitti; doğrulama MAE'si iyi, herkes memnun. Temmuz'da İzmir'i sıcak hava dalgası vuruyor. Model hiç görmediği sıcaklıklarla karşılaşıyor ve tahminleri sistematik olarak yukarı kayıyor; istasyonlara gereğinden çok bisiklet taşınıyor. Kimse fark etmiyor çünkü kimse izlemiyor. Üstelik "hangi model canlıda, hangi veriyle, hangi parametrelerle eğitildi?" sorusunun cevabı bir not defterinin 47. hücresinde.</p>
+<p><b>MLOps</b>, makine öğrenmesi modellerini tekrarlanabilir biçimde eğitmek, sürümlemek, yayına almak ve canlıda izlemek için kullanılan uygulamalar bütünüdür. Bu derste yaşam döngüsünün her adımını tarayıcıda çalışan küçük araçlarla (JSON tabanlı deney kaydı, model kayıt defteri, PSI/KS kayma testleri, pydantic şema doğrulama) kuracak, gerçek araçların (MLflow, DVC, FastAPI) kodunu da göreceksin. <a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a> dersinde modeli joblib ile kaydetmeyi, <a href="../docker-deploy/">Docker ve dağıtım: konteyner, compose, bulut</a> dersinde kapsayıcıyı gördün; burada bunları birbirine bağlıyoruz.</p>
+
+<h2>Yaşam döngüsü ve olgunluk seviyeleri</h2>
+<p>Bir ML sistemi şu döngüden geçer: problem tanımı → veri toplama ve sürümleme → özellik üretimi → deney ve eğitim → değerlendirme ve kalite kapısı → kayıt ve yayın → servisleme → izleme → (tetiklenirse) yeniden eğitim. Ekiplerin bu döngüyü ne kadar otomatik yürüttüğü <b>olgunluk seviyesi</b> olarak anılır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Seviye</th><th>Nasıl görünür?</th><th>Tipik sorun</th></tr>
+<tr><td>0: El ile</td><td>Not defterinde eğitim, model dosyası e-postayla gider, yayın elle</td><td>Kimse modeli yeniden üretemez</td></tr>
+<tr><td>1: Otomatik eğitim hattı</td><td>Eğitim bir hat (pipeline) olarak koşar, deneyler kaydedilir, model kayıt defterinde</td><td>Hattın kendisi elle test edilir</td></tr>
+<tr><td>2: CI/CD + sürekli eğitim</td><td>Kod ve veri değişince test, eğitim, kalite kapısı ve kademeli yayın otomatik</td><td>Kurulum maliyeti, disiplin ister</td></tr>
+</table></div>
+<p>Çoğu ekip için hedef seviye 1'dir: her eğitim tekrarlanabilir, her canlı modelin kökeni bellidir.</p>
+
+<h2>Deney takibi: parametre, metrik, artefakt</h2>
+<p>Her eğitim koşusu (run) üç şey üretir: <b>parametreler</b> (alpha=1.0, özellik listesi, veri sürümü), <b>metrikler</b> (doğrulama MAE'si) ve <b>artefaktlar</b> (model dosyası, grafik, özellik önemi tablosu). Bunları elle bir tabloya yazmak yerine bir izleme aracı kullanırsın. Endüstri standardı MLflow'dur:</p>
+<pre class="code">import mlflow
+from sklearn.linear_model import Ridge
+
+mlflow.set_experiment("pedal-talep")
+with mlflow.start_run(run_name="ridge-a1"):
+    mlflow.log_params({"alpha": 1.0, "veri_surumu": "a3f9c2"})
+    model = Ridge(alpha=1.0).fit(X_tr, y_tr)
+    mlflow.log_metric("mae_dogrulama", 15.27)
+    mlflow.sklearn.log_model(model, "model", input_example=X_tr.head(2))
+</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install mlflow</code> kur, kodu çalıştır, sonra terminalde <code>mlflow ui</code> yaz ve tarayıcıda <code>http://127.0.0.1:5000</code> adresini aç. Koşuları yan yana karşılaştırabilir, metrik grafiği çizebilirsin. MLflow tarayıcıda (Pyodide) çalışmaz; aşağıdaki mini sürüm aynı fikri gösterir.</div>
+<pre class="py">import json, time
+
+class DeneyKaydi:
+    def __init__(self, ad):
+        self.ad, self.kosular = ad, []
+
+    def baslat(self, params):
+        kosu = {"id": f"kosu-{len(self.kosular) + 1}", "params": dict(params), "metrikler": {}}
+        self.kosular.append(kosu)
+        return kosu["id"]
+
+    def metrik(self, kosu_id, ad, deger):
+        next(k for k in self.kosular if k["id"] == kosu_id)["metrikler"][ad] = deger
+
+    def en_iyi(self, metrik, buyuk_iyi=False):
+        adaylar = [k for k in self.kosular if metrik in k["metrikler"]]
+        return (max if buyuk_iyi else min)(adaylar, key=lambda k: k["metrikler"][metrik])
+
+kayit = DeneyKaydi("pedal-talep")
+for alpha, mae in [(0.1, 15.9), (1.0, 15.3), (10.0, 16.4)]:
+    kid = kayit.baslat({"alpha": alpha})
+    kayit.metrik(kid, "mae", mae)
+print(kayit.en_iyi("mae"))
+print(json.dumps(kayit.kosular[0], ensure_ascii=False))
+</pre>
+
+<h2>Model kayıt defteri, aşamalar ve imza</h2>
+<p>Deney takibi "ne denedik?" sorusunu, <b>model kayıt defteri</b> (model registry) "canlıda ne var?" sorusunu cevaplar. Her kayıtlı model bir ad ve artan sürüm numarası taşır; sürümlere <b>takma ad</b> (alias) verilir: canlıdaki sürüm <code>@champion</code>, deneme kuyruğundaki <code>@challenger</code>. Servis modeli <code>models:/talep@champion</code> adresinden yükler; yeni sürüme geçmek ya da geri dönmek (rollback) takma adı başka sürüme taşımaktan ibarettir, kod değişmez. Eski anlatımlarda <code>None → Staging → Production → Archived</code> aşamalarını (stages) görürsün: MLflow bunları 2.9'dan beri kullanımdan kaldırıyor, yeni projede alias kullan.</p>
+<p><b>Model imzası</b> (signature) modelin beklediği girdi sütunlarını, türlerini ve çıktısını kaydeder. Servis tarafı gelen isteği bu imzayla karşılaştırır; sütun sırası ya da türü kayarsa model sessizce yanlış tahmin üretmek yerine açık bir hata verir. Bu, <b>eğitim-servis çarpıklığına</b> (training-serving skew) karşı ilk savunma hattıdır.</p>
+
+<h2>Veri ve model sürümleme</h2>
+<p>"Bu model hangi veriyle eğitildi?" sorusunun tek güvenilir cevabı verinin <b>içerik özetidir</b> (hash). DVC (Data Version Control) büyük veri dosyalarını Git dışında (S3, disk) tutar ve Git'e yalnız dosyanın MD5 özetini içeren küçük bir <code>.dvc</code> dosyası koyar. Kod commit'i ile veri özeti birlikte bir modeli tam olarak yeniden üretmeye yeter.</p>
+<pre class="py">import hashlib
+import veri
+
+def parmak_izi(yol, n=12):
+    h = hashlib.sha256()
+    with open(yol, "rb") as f:
+        for parca in iter(lambda: f.read(65536), b""):
+            h.update(parca)
+    return h.hexdigest()[:n]
+
+for tablo in ["bk_weather", "bk_stations"]:
+    print(tablo, parmak_izi(veri.yol("pedal_izmir", tablo)))
+</pre>
+<pre class="code">dvc init
+dvc add data/bk_trips.csv          # data/bk_trips.csv.dvc oluşur (md5 + boyut)
+git add data/bk_trips.csv.dvc .gitignore
+git commit -m "veri: Haziran-Ağustos yolculukları"
+dvc push                           # dosyayı uzak depoya (S3, GCS, disk) gönderir
+</pre>
+
+<h2>Servisleme: toplu mu, çevrim içi mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Toplu (batch)</th><th>Çevrim içi (online)</th></tr>
+<tr><td>Ne zaman?</td><td>Tahmin önceden hesaplanabiliyorsa: gece tüm müşterileri skorla</td><td>Tahmin istek anında gerekiyorsa: kurye varış süresi</td></tr>
+<tr><td>Gecikme</td><td>Dakikalar-saatler, sorun değil</td><td>Milisaniyeler (p95 &lt; 100 ms gibi)</td></tr>
+<tr><td>Altyapı</td><td>Zamanlanmış iş (cron, Airflow), sonuç tabloya yazılır</td><td>API (FastAPI), kapsayıcı, ölçekleme</td></tr>
+<tr><td>Risk</td><td>Bayat tahmin</td><td>Kesinti, gecikme, şema hatası</td></tr>
+</table></div>
+<pre class="code">from fastapi import FastAPI
+from pydantic import BaseModel, Field
+import joblib, pandas as pd
+
+app = FastAPI()
+model = joblib.load("model_v3.joblib")            # süreç başında bir kez yükle
+OZELLIKLER = ["saat", "haftasonu", "temp_c", "rain_mm", "wind_kmh"]
+
+class TalepIstegi(BaseModel):
+    saat: int = Field(ge=0, le=23)
+    haftasonu: bool
+    temp_c: float = Field(ge=-15, le=50)
+    rain_mm: float = Field(ge=0)
+    wind_kmh: float = Field(ge=0)
+
+@app.post("/predict")
+def predict(istek: TalepIstegi):
+    satir = pd.DataFrame([istek.model_dump()])[OZELLIKLER]   # sıra imzadan
+    return {"talep": float(model.predict(satir)[0]), "model_surumu": "v3"}
+</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install fastapi uvicorn joblib scikit-learn</code>, dosyayı <code>servis.py</code> olarak kaydet, <code>uvicorn servis:app --reload</code> ile başlat ve <code>http://127.0.0.1:8000/docs</code> adresinden isteği dene. Şema doğrulama pydantic ile yapılır ve pydantic tarayıcıda da çalışır:</div>
+<pre class="py">from pydantic import BaseModel, Field, ValidationError
+
+class TalepIstegi(BaseModel):
+    saat: int = Field(ge=0, le=23)
+    temp_c: float = Field(ge=-15, le=50)
+
+print(TalepIstegi(saat=8, temp_c=31.5))
+try:
+    TalepIstegi(saat=26, temp_c="sıcak")
+except ValidationError as e:
+    print(e.error_count(), "hata:", [h["loc"][0] for h in e.errors()])
+</pre>
+
+<h2>İzleme: veri kayması, tahmin dağılımı, gecikmeli etiket</h2>
+<p>Canlı model üç katmanda izlenir:</p>
+<ol>
+<li><b>Girdi (veri) kayması</b> (data drift): özelliklerin dağılımı değişti mi? Ölçüler: <b>PSI</b> (Population Stability Index) ve <b>KS testi</b> (Kolmogorov-Smirnov).</li>
+<li><b>Tahmin dağılımı:</b> modelin çıktısı kaydı mı? Etiket gelmeden bile görülebilir; en erken alarmdır.</li>
+<li><b>Performans:</b> gerçek etiketler geldiğinde (bisiklette bir saat sonra, kredide aylar sonra: <b>gecikmeli etiket</b>) MAE, AUC gibi metrikleri yeniden hesapla.</li>
+</ol>
+<p>Bir de <b>kavram kayması</b> (concept drift) var: girdiler aynı kalsa bile girdi ile hedef arasındaki ilişki değişir (ör. yeni bir metro hattı açılınca aynı saatte talep düşer). Bunu yalnız performans izlemesi yakalar.</p>
+<p>PSI, referans dağılımı kovalara (genellikle referansın 10 yüzdelik dilimi) böler ve her kovada referans oranı <i>r</i> ile güncel oran <i>g</i> için <code>Σ (g − r) · ln(g / r)</code> toplar. Yaygın yorum: <b>&lt; 0.1</b> kararlı, <b>0.1–0.25</b> orta kayma (incele), <b>&gt; 0.25</b> büyük kayma (aksiyon). Boş kovada ln(0) patlamasın diye oranlar küçük bir değerle (1e-4) alttan kırpılır.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+from scipy.stats import ks_2samp
+
+hava = veri.oku("pedal_izmir", "bk_weather", parse_dates=["obs_hour"])
+haziran = hava[hava["obs_hour"].dt.month == 6]["temp_c"]
+temmuz = hava[hava["obs_hour"].dt.month == 7]["temp_c"]
+agustos = hava[hava["obs_hour"].dt.month == 8]["temp_c"]
+
+def psi(ref, guncel, kova=10):
+    sinir = np.unique(np.quantile(ref, np.linspace(0, 1, kova + 1)))
+    sinir[0], sinir[-1] = -np.inf, np.inf
+    r = np.histogram(ref, sinir)[0] / len(ref)
+    g = np.histogram(guncel, sinir)[0] / len(guncel)
+    r, g = np.clip(r, 1e-4, None), np.clip(g, 1e-4, None)
+    return float(np.sum((g - r) * np.log(g / r)))
+
+for ad, ay in [("Temmuz", temmuz), ("Ağustos", agustos)]:
+    ks = ks_2samp(haziran, ay)
+    print(f"{ad}: PSI={psi(haziran, ay):.3f}  KS={ks.statistic:.3f}  p={ks.pvalue:.4f}")
+</pre>
+<p>Temmuz'da sıcaklık PSI'ı 1.35: büyük bir kayma. Ağustos'ta hava normale döndüğü için PSI 0.02. KS istatistiği (0.24) daha ılımlı görünüyor; çünkü PSI, Haziran'ın serin gecelerine ait kovaların Temmuz'da <b>boş</b> kalmasını ağır cezalandırır (kırpılan 1e-4 oranının logu çok büyüktür). İki ölçüyü birlikte okumak bu yüzden faydalıdır. KS testi de aynı şeyi söyler; ama dikkat: binlerce satırda KS p-değeri en küçük farkta bile 0'a iner. Bu yüzden üretimde p-değerinden çok <b>etki büyüklüğüne</b> (KS istatistiği, PSI) ve iş eşiğine bakılır.</p>
+<div class="warn"><b>Kayma alarmı ≠ model bozuldu</b>Girdi kayması bir uyarıdır, kendi başına yeniden eğitim gerekçesi değildir. Mini projede göreceksin: Temmuz'daki sıcaklık kayması doğrusal modelin tahminlerini yukarı itiyor (yanlılık), ama MAE neredeyse aynı kalıyor. Karar verirken kayma + tahmin dağılımı + performans birlikte okunur.</div>
+
+<h2>Yeniden eğitim ve güvenli yayın</h2>
+<p><b>Yeniden eğitim tetikleyicileri:</b> takvim (her pazartesi), veri hacmi (son eğitimden beri 50 bin yeni etiket), kayma (PSI &gt; 0.25 üç gün üst üste) ya da performans (MAE referansın %20 üstünde iki gün). Tek günlük sıçramaya tepki vermemek için "ardışık gün" kuralı kullanılır.</p>
+<p><b>Güvenli yayın kalıpları:</b> <b>shadow</b> (gölge) modda yeni model gerçek trafiği alır, tahminini kaydeder ama kullanıcıya eski modelin cevabı döner; risksiz karşılaştırma yapılır. <b>Canary</b> (kanarya) modda kullanıcıların küçük bir yüzdesi (%5) yeni modele yönlendirilir; metrikler iyiyse oran artırılır. Kullanıcı kimliğinin hash'iyle yönlendirmek, aynı kullanıcının hep aynı modeli görmesini sağlar. <b>A/B testi</b> ise iş metriğindeki farkı istatistiksel olarak ölçer (<a href="../istatistik/">İstatistik ve hipotez testi</a> dersi).</p>
+
+<h2>ML için CI: davranış testleri ve kalite kapıları</h2>
+<p>Klasik birim testleri kodu sınar; model için ek olarak <b>davranış testleri</b> yazılır:</p>
+<ul>
+<li><b>Yön testi</b> (directional): yağış artınca talep tahmini düşmeli.</li>
+<li><b>Değişmezlik testi</b> (invariance): kullanıcının adı ya da cinsiyeti değişince kredi skoru değişmemeli.</li>
+<li><b>Minimum işlev testi:</b> bilinen basit örneklerde beklenen sonuç (sabah 8'de hafta içi talep gece 3'ten yüksek).</li>
+</ul>
+<p><b>Kalite kapısı</b> (quality gate) CI hattında yeni modeli canlıdakiyle karşılaştırır ve kurallar sağlanmazsa yayını durdurur: "aday MAE'si mevcut MAE'den en fazla %2 kötü olabilir", "p95 gecikme 50 ms altında", "model dosyası 100 MB altında".</p>
+<pre class="py">from sklearn.linear_model import Ridge
+
+hava["talep_ornek"] = 20 + 0.9 * hava["temp_c"] - 13 * hava["rain_mm"]
+model = Ridge().fit(hava[["temp_c", "rain_mm"]], hava["talep_ornek"])
+X = hava[["temp_c", "rain_mm"]].head(200)
+yagisli = X.assign(rain_mm=X["rain_mm"] + 2)
+oran = (model.predict(yagisli) &lt; model.predict(X)).mean()
+print("Yağış artınca talep düşen satır oranı:", oran)
+assert oran == 1.0, "yön testi başarısız"
+</pre>
+<div class="note"><b>Gerçek işte</b>Bankalarda bir kredi modeli canlıya çıkmadan önce model risk yönetimi birimi "model kartı", doğrulama raporu, imza ve veri özeti ister; canlıda aylık PSI raporu düzenleyici denetimin parçasıdır. E-ticaret ve teslimat şirketlerinde ise öneri ve ETA modelleri genellikle önce shadow, sonra %5 canary ile yayınlanır; geri dönüş bir kayıt defteri aşama değişikliğiyle dakikalar içinde yapılır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Özellik deposu ve çarpıklık</h3>
+<p>Eğitimde özellik SQL ile toplu, canlıda Python ile anlık hesaplanırsa iki kod zamanla ayrışır. Özellik deposu (Feast, Tecton) tek tanımdan hem çevrim dışı (eğitim) hem çevrim içi (servis) değer üretir ve "o tarihte bilinen değer" (point-in-time) birleştirmesini garanti eder.</p>
+<h3>İzleme araçları</h3>
+<p>Evidently ve NannyML kayma ve performans raporlarını hazır üretir; NannyML etiket gelmeden performansı tahmin etmeye çalışır (CBPE). Prometheus + Grafana gecikme ve hata oranını, model metrikleriyle aynı panoda gösterir (<a href="../gozlemlenebilirlik/">Gözlemlenebilirlik: log, metrik, iz ve SLO</a> dersi).</p>
+<h3>Mülakat cümlesi</h3>
+<p>"Modeli canlıya almadan önce kökenini (kod commit'i, veri özeti, parametreler) kayıt defterine yazarım, şemayı pydantic ile doğrularım, shadow ile karşılaştırır, canary ile açarım. Canlıda girdi PSI'ı, tahmin dağılımı ve gecikmeli etiketle performansı izlerim; yeniden eğitimi ardışık gün kuralıyla tetiklerim."</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mlops-yasam-dongusu">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../derin-ogrenme-giris/">← Sinir ağlarına (neural networks) giriş: numpy'dan PyTorch'a</a><a href="../ozellik-muhendisligi/">Özellik mühendisliği: ham veriden modele hazır özelliğe →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

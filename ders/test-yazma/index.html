@@ -1,0 +1,304 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Test yazma: unittest, pytest ve mock | Kesit Python</title><meta name="description" content="unittest ile TestCase yazar, assert metotlarını ve setUp/subTest kalıplarını kullanır, pytest tarzını tanır, mock ile dış bağımlılığı taklit eder ve TDD…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/test-yazma/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Test yazma: unittest, pytest ve mock"><meta property="og:description" content="unittest ile TestCase yazar, assert metotlarını ve setUp/subTest kalıplarını kullanır, pytest tarzını tanır, mock ile dış bağımlılığı taklit eder ve TDD…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/test-yazma/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Test yazma: unittest, pytest ve mock","description":"unittest ile TestCase yazar, assert metotlarını ve setUp/subTest kalıplarını kullanır, pytest tarzını tanır, mock ile dış bağımlılığı taklit eder ve TDD…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/test-yazma/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Test</span><h1>Test yazma: unittest, pytest ve mock</h1><p class="st-l">unittest ile TestCase yazar, assert metotlarını ve setUp/subTest kalıplarını kullanır, pytest tarzını tanır, mock ile dış bağımlılığı taklit eder ve TDD döngüsünü uygularsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/test-yazma">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden test yazarız?</h2>
+<p>Ilgaz Bank'ta komisyon hesaplayan fonksiyonu değiştirdin; üç ay sonra biri "EFT komisyonu yanlış çıkıyor" dedi. Test olmadan hatanın hangi değişiklikle geldiğini bulmak saatler alır. Test (test) olduğunda ise her değişiklikten sonra tek komutla "hâlâ her şey doğru mu?" sorusunun yanıtını alırsın. Test, kodun sözleşmesidir: "Bu girdiyle bu çıktıyı veririm" cümlesinin çalıştırılabilir hali. İyi test üç şey sağlar: hatayı erken yakalar, kodu korkmadan değiştirmeni (refactoring) sağlar ve fonksiyonun nasıl kullanıldığını belgeler.</p>
+
+<h2>unittest ile ilk test sınıfı</h2>
+<p>Python'ın standart test çerçevesi <code>unittest</code>'tir. Kural basit: <code>unittest.TestCase</code>'den türeyen bir sınıf yazarsın, adı <code>test_</code> ile başlayan her metot bir testtir, içinde <code>self.assert...</code> metotlarıyla beklentini belirtirsin. Normalde testleri terminalden <code>python -m unittest</code> ile koşarsın; burada tarayıcıda olduğumuz için paketi (suite) elle yükleyip <code>TextTestRunner</code> ile çalıştıracağız. Çıktıyı <code>io.StringIO</code>'ya yönlendirmek, test raporunun program çıktısına karışmasını önler.</p>
+<pre class="py">import io
+import unittest
+
+def komisyon(tutar: float, kanal: str) -&gt; float:
+    """Ilgaz Bank havale komisyonu: mobil ücretsiz, şube binde 5, en az 5 TL."""
+    if tutar &lt;= 0:
+        raise ValueError("tutar pozitif olmalı")
+    if kanal == "mobil":
+        return 0.0
+    return max(5.0, tutar * 0.005)
+
+class KomisyonTest(unittest.TestCase):
+    def test_mobil_ucretsiz(self):
+        self.assertEqual(komisyon(1000, "mobil"), 0.0)
+
+    def test_sube_binde_bes(self):
+        self.assertAlmostEqual(komisyon(10_000, "sube"), 50.0)
+
+    def test_sube_asgari_bes(self):
+        self.assertEqual(komisyon(100, "sube"), 5.0)
+
+    def test_negatif_tutar_hata(self):
+        with self.assertRaises(ValueError):
+            komisyon(-1, "mobil")
+
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(KomisyonTest)
+print("test sayısı:", suite.countTestCases())
+sonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+print("koşan:", sonuc.testsRun, "| hata:", len(sonuc.failures) + len(sonuc.errors))
+print("hepsi geçti mi?", sonuc.wasSuccessful())</pre>
+<p><code>assertAlmostEqual</code> kayan noktalı sayıları 7 basamağa kadar karşılaştırır; para hesabında <code>assertEqual(0.1 + 0.2, 0.3)</code> yazarsan test boşuna düşer. <code>assertRaises</code> bir bağlam yöneticisidir (context manager): bloğun içinde beklenen istisna çıkmazsa test başarısız olur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Metot</th><th>Ne kontrol eder</th><th>Örnek</th></tr>
+<tr><td>assertEqual(a, b)</td><td>a == b</td><td>assertEqual(topla(2, 3), 5)</td></tr>
+<tr><td>assertNotEqual(a, b)</td><td>a != b</td><td>assertNotEqual(token1, token2)</td></tr>
+<tr><td>assertTrue(x) / assertFalse(x)</td><td>bool(x)</td><td>assertTrue(gecerli_mi("TR01"))</td></tr>
+<tr><td>assertIn(a, b)</td><td>a in b</td><td>assertIn("Ankara", sehirler)</td></tr>
+<tr><td>assertIsNone(x)</td><td>x is None</td><td>assertIsNone(bul("yok"))</td></tr>
+<tr><td>assertAlmostEqual(a, b, places=2)</td><td>round(a-b, places) == 0</td><td>assertAlmostEqual(kdv, 20.0, places=2)</td></tr>
+<tr><td>assertRaises(Hata)</td><td>blok Hata fırlatır</td><td>with self.assertRaises(ValueError): ...</td></tr>
+<tr><td>assertCountEqual(a, b)</td><td>aynı elemanlar, sıra fark etmez</td><td>assertCountEqual(sonuc, [1, 2, 3])</td></tr>
+</table></div>
+
+<h2>setUp, tearDown ve subTest</h2>
+<p>Her testte aynı veriyi kurmak tekrar yaratır. <code>setUp</code> her test metodundan <b>önce</b>, <code>tearDown</code> her testten <b>sonra</b> çalışır; nesneleri <code>self</code> üzerinde paylaşırsın. <code>subTest</code> ise tek bir test metodunda birden çok girdiyi denemeni sağlar; biri düşse bile diğerleri koşmaya devam eder ve rapor hangi girdinin düştüğünü söyler. Bu, pytest'teki <code>parametrize</code>'ın unittest karşılığıdır.</p>
+<pre class="py">import io
+import unittest
+
+class Sepet:
+    def __init__(self):
+        self.urunler = []
+    def ekle(self, ad, fiyat, adet=1):
+        if adet &lt; 1:
+            raise ValueError("adet en az 1")
+        self.urunler.append((ad, fiyat, adet))
+    def toplam(self):
+        return sum(f * a for _, f, a in self.urunler)
+    def indirimli(self, oran):
+        return round(self.toplam() * (1 - oran), 2)
+
+class SepetTest(unittest.TestCase):
+    def setUp(self):
+        self.sepet = Sepet()
+        self.sepet.ekle("klavye", 450.0)
+        self.sepet.ekle("kablo", 25.0, 2)
+
+    def tearDown(self):
+        self.sepet.urunler.clear()
+
+    def test_toplam(self):
+        self.assertEqual(self.sepet.toplam(), 500.0)
+
+    def test_indirim_oranlari(self):
+        for oran, beklenen in [(0.0, 500.0), (0.1, 450.0), (0.5, 250.0)]:
+            with self.subTest(oran=oran):
+                self.assertAlmostEqual(self.sepet.indirimli(oran), beklenen)
+
+    def test_sifir_adet_hata(self):
+        with self.assertRaises(ValueError):
+            self.sepet.ekle("x", 1.0, 0)
+
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(SepetTest)
+adlar = [t.id().split(".")[-1] for t in suite]
+print("testler:", adlar)
+sonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+print("başarılı:", sonuc.wasSuccessful(), "| koşan:", sonuc.testsRun)</pre>
+<div class="warn"><b>Test adlarını run'dan ÖNCE topla</b>Suite çalıştırıldıktan sonra içi boşaltılır; <code>for t in suite</code> artık hiçbir şey vermez. Test adlarını ya da sayısını raporlayacaksan <code>run</code> çağrısından önce al. Yukarıdaki <code>adlar</code> satırının yeri bu yüzden önemli.</div>
+<div class="note"><b>Testler birbirinden bağımsız olmalı</b>unittest metotları alfabetik sırada koşturur, sen yazdığın sırada değil. Bir testin diğerinin bıraktığı veriye güvenmesi gizli hata üretir; setUp her test için temiz başlangıç sağlar.</div>
+
+<h2>pytest tarzı: düz assert ve parametrize</h2>
+<p>Sektörde çoğu proje <code>pytest</code> kullanır (pip ile kurulur; burada çalıştıramıyoruz ama tanıman gerekir). Fark biçimseldir: sınıf şart değil, <code>test_</code> ile başlayan düz fonksiyon yeter; <code>self.assertEqual</code> yerine düz <code>assert</code> yazarsın ve pytest hata mesajını kendisi zenginleştirir. Parametreli test için dekoratör (decorator) vardır:</p>
+<pre class="py"># pytest tarzı (gösterim; burada çalıştırmıyoruz)
+ornek = '''
+import pytest
+from bank import komisyon
+
+def test_mobil_ucretsiz():
+    assert komisyon(1000, "mobil") == 0.0
+
+@pytest.mark.parametrize("tutar, beklenen", [
+    (100, 5.0),
+    (10_000, 50.0),
+    (2_000, 10.0),
+])
+def test_sube(tutar, beklenen):
+    assert komisyon(tutar, "sube") == pytest.approx(beklenen)
+
+def test_negatif():
+    with pytest.raises(ValueError):
+        komisyon(-1, "mobil")
+'''
+print(ornek.strip().count("def test_"), "test fonksiyonu; parametrize 3 ayrı test üretir")
+print("komut: pytest -v    ->  test_sube[100-5.0], test_sube[10000-50.0], ...")</pre>
+<p>pytest unittest sınıflarını da koşturabilir; yani bugün unittest ile yazdığın testler pytest kurulduğunda da çalışır. Yeni projede pytest, standart kütüphaneyle sınırlı ortamda unittest seçersin; mantık ikisinde de aynı: düzenle (arrange), çalıştır (act), doğrula (assert).</p>
+
+<h2>Dış bağımlılığı taklit etmek: unittest.mock</h2>
+<p>"Gece saatinde yapılan işlem şüphelidir" kuralını test etmek istiyorsun; ama fonksiyon <code>datetime.now()</code> çağırıyor ve testin sonucu saat kaçta koştuğuna bağlı. Çözüm, gerçek bağımlılığı sahte bir nesneyle (mock) değiştirmek. <code>patch</code> bir adı geçici olarak değiştirir, <code>MagicMock</code> ise her çağrıyı kaydeden ve istediğin değeri döndüren esnek bir nesnedir. Kural: bağımlılığı <b>kullanıldığı yerde</b> yamalarsın, tanımlandığı yerde değil.</p>
+<pre class="py">import io
+import unittest
+from datetime import datetime
+from unittest.mock import MagicMock, patch
+
+class IslemKurali:
+    def saat(self) -&gt; int:
+        return datetime.now().hour          # dış bağımlılık: gerçek saat
+
+    def gece_mi(self) -&gt; bool:
+        s = self.saat()
+        return s &gt;= 23 or s &lt; 6
+
+def sms_gonder(gonderici, telefon, metin):
+    return gonderici.gonder(telefon, metin)
+
+class KuralTest(unittest.TestCase):
+    def test_gece_uc(self):
+        with patch.object(IslemKurali, "saat", return_value=3):
+            self.assertTrue(IslemKurali().gece_mi())
+
+    def test_ogle_on_iki(self):
+        with patch.object(IslemKurali, "saat", return_value=12):
+            self.assertFalse(IslemKurali().gece_mi())
+
+    def test_sms_cagrisi(self):
+        sahte = MagicMock()
+        sahte.gonder.return_value = "OK"
+        self.assertEqual(sms_gonder(sahte, "5551234567", "Kod: 1234"), "OK")
+        sahte.gonder.assert_called_once_with("5551234567", "Kod: 1234")
+
+suite = unittest.defaultTestLoader.loadTestsFromTestCase(KuralTest)
+sonuc = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(suite)
+print("başarılı:", sonuc.wasSuccessful(), "| koşan:", sonuc.testsRun)
+print("gerçek saat şu an gece mi?", IslemKurali().gece_mi())</pre>
+<p><code>patch.object(IslemKurali, "saat", return_value=3)</code> sınıfın <code>saat</code> metodunu blok boyunca sabit 3 döndüren sahte bir metotla değiştirir. Modül düzeyindeki bir fonksiyonu yamalamak için <code>patch("anadolu.kurallar.saat_ver", return_value=3)</code> gibi modül yolu yazarsın; bu derste tek dosyada çalıştığımız için sınıf üzerinden yamalıyoruz. <code>assert_called_once_with</code> ise mock'un tam olarak bu argümanlarla bir kez çağrıldığını doğrular; SMS'in gerçekten gönderilmediğinden de emin olursun.</p>
+<div class="tip"><b>Mock'u az kullan</b>Her şeyi mock'larsan testler kodun yapısına yapışır; fonksiyonu yeniden düzenlediğinde testler bozulur ama hata yoktur. Yalnızca yavaş, dışa bağımlı ya da rastgele olanı (saat, ağ, veritabanı, random) taklit et.</div>
+
+<h2>TDD döngüsü: Kırmızı, Yeşil, Düzenle</h2>
+<p>Test güdümlü geliştirme (Test-Driven Development) kodu yazmadan önce testi yazmaktır. Döngü üç adımdır ve her tur birkaç dakika sürer:</p>
+<div class="steps-list"><ol>
+<li><b>Kırmızı:</b> İstediğin davranış için küçük bir test yaz; henüz kod olmadığı için test düşer.</li>
+<li><b>Yeşil:</b> Testi geçirecek en basit kodu yaz. Güzel olması gerekmez, geçmesi gerekir.</li>
+<li><b>Düzenle (refactor):</b> Testler yeşilken kodu temizle: tekrarı kaldır, ad düzelt. Testler hâlâ yeşilse bitti; sonraki davranışa geç.</li>
+</ol></div>
+<p>TDD'nin asıl kazancı tasarımdır: fonksiyonu önce kullanan kişi olarak yazdığın için arayüzü (parametre adları, dönüş tipi) kullanıcı gözüyle seçersin. Alıştırmalarda tam bunu yapacaksın: önce test sınıfı, sonra fonksiyon.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: İyi test yazmanın araç kutusu</h2>
+<p>Test yazabiliyorsun; şimdi soru şu: testlerin <b>gerçekten hata yakalıyor mu</b>? Her zaman geçen bir test, hiç olmayan testten daha tehlikelidir çünkü sahte güven verir. Bu bölümde doğru assert metodunu seçmeyi, mock'u ayrıntılı kullanmayı (<code>side_effect</code>, çağrı doğrulama, <code>spec</code>), belge içi testleri (doctest), testleri komut satırından koşturmayı ve kapsamı (coverage) ölçmeyi görüyoruz. pytest'in fixture ve eklenti dünyası <i>pytest</i> dersinde, property-based test ve CI entegrasyonu <i>test-ileri</i> ile <i>kalite-ci</i> derslerinde.</p>
+<h3>Doğru assert, iyi hata mesajı</h3>
+<p><code>assertTrue(a == b)</code> düşerse yalnızca "False is not true" yazar; <code>assertEqual(a, b)</code> ise iki değeri ve farkı gösterir. Hata mesajı, testi yazmayan birinin sorunu anlamasını sağlamalıdır.</p>
+<div class="tbl-wrap"><table><tr><th>Durum</th><th>unittest</th><th>pytest karşılığı</th></tr><tr><td>Eşitlik (liste/sözlük farkını gösterir)</td><td><code>assertEqual(a, b)</code></td><td><code>assert a == b</code></td></tr><tr><td>Float karşılaştırma</td><td><code>assertAlmostEqual(a, b, places=2)</code></td><td><code>a == pytest.approx(b)</code></td></tr><tr><td>Sırasız aynı elemanlar</td><td><code>assertCountEqual(a, b)</code></td><td><code>Counter(a) == Counter(b)</code></td></tr><tr><td>İstisna ve mesajı</td><td><code>assertRaisesRegex(ValueError, "negatif")</code></td><td><code>pytest.raises(ValueError, match="negatif")</code></td></tr><tr><td>Üyelik, tip, None</td><td><code>assertIn</code>, <code>assertIsInstance</code>, <code>assertIsNone</code></td><td><code>assert x in y</code> ...</td></tr><tr><td>Log üretildi mi</td><td><code>assertLogs("ad", level="WARNING")</code></td><td><code>caplog</code> fixture</td></tr><tr><td>Bilerek atla / beklenen hata</td><td><code>@skip</code>, <code>@expectedFailure</code></td><td><code>@pytest.mark.skip</code>, <code>xfail</code></td></tr></table></div>
+<pre class="py">import io, unittest
+
+def iade(tutar, gun):
+    if tutar &lt; 0:
+        raise ValueError("tutar negatif olamaz")
+    return tutar if gun &lt;= 14 else round(tutar * 0.5, 2)
+
+class IadeTest(unittest.TestCase):
+    def test_mesaj_kontrolu(self):
+        with self.assertRaisesRegex(ValueError, "negatif"):
+            iade(-1, 3)
+
+    def test_istisna_nesnesi(self):
+        with self.assertRaises(ValueError) as bag:
+            iade(-5, 1)
+        self.assertIn("tutar", str(bag.exception))
+
+    def test_sirasiz(self):
+        self.assertCountEqual([iade(100, 20), iade(10, 1)], [10, 50.0])
+
+    def test_kotu_mesaj_ornegi(self):
+        self.assertTrue(iade(100, 20) == 100)     # bilerek yanlış: mesaja bak
+
+r = unittest.TextTestRunner(stream=io.StringIO(), verbosity=0).run(unittest.defaultTestLoader.loadTestsFromTestCase(IadeTest))
+print("koşan:", r.testsRun, "| düşen:", len(r.failures))
+print("assertTrue mesajı:", r.failures[0][1].strip().splitlines()[-1])</pre>
+<h3>Mock ayrıntıları: side_effect, çağrı doğrulama, spec</h3>
+<p><code>return_value</code> her çağrıda aynı değeri döndürür. <code>side_effect</code> ise üç şey olabilir: bir <b>liste</b> (her çağrıda sıradaki değer; istisna nesnesi varsa fırlatılır), bir <b>istisna</b> (her çağrıda fırlatılır) ya da bir <b>fonksiyon</b> (argümanlara göre hesaplar). Böylece "banka ilk iki denemede zaman aşımına düştü, üçüncüde başardı" senaryosunu ağa çıkmadan test edersin. Ardından mock'a ne ile, kaç kez çağrıldığını sorarsın.</p>
+<pre class="py">from unittest.mock import Mock, call
+
+class BankaHatasi(Exception):
+    pass
+
+def tahsil_et(banka, tutar, deneme=3):
+    for i in range(deneme):
+        try:
+            return banka.cek(tutar)
+        except BankaHatasi:
+            if i == deneme - 1:
+                raise
+
+banka = Mock()
+banka.cek.side_effect = [BankaHatasi("zaman aşımı"), BankaHatasi("zaman aşımı"), "ONAY-77"]
+print(tahsil_et(banka, 250))
+print("çağrı sayısı:", banka.cek.call_count)
+banka.cek.assert_called_with(250)
+print(banka.cek.call_args_list == [call(250)] * 3)
+
+sms = Mock()
+sms.gonder("0555", "Siparişiniz yolda")
+sms.gonder.assert_called_once_with("0555", "Siparişiniz yolda")
+sms.gonder.reset_mock()
+sms.gonder.assert_not_called()
+
+class SmsServisi:
+    def gonder(self, numara, metin): ...
+siki = Mock(spec=SmsServisi)
+try:
+    siki.gondr("0555", "x")             # yazım hatası: spec yakalar
+except AttributeError as e:
+    print("spec yakaladı:", e)</pre>
+<div class="warn"><b>spec kullanmayan mock her şeye evet der</b>Düz <code>Mock()</code> var olmayan bir metoda da çağrı kabul eder; gerçek sınıfta metot adı değişse bile testlerin geçmeye devam eder. <code>Mock(spec=Sinif)</code> ya da <code>patch(..., autospec=True)</code> ile mock'u gerçek arayüze bağla.</div>
+<h3>Test dublörleri ve bağımlılık enjeksiyonu</h3>
+<p>Her sahte nesne "mock" değildir. <b>Stub</b> hazır cevap verir, <b>mock</b> çağrıları doğrular, <b>fake</b> çalışan ama basit bir gerçekleme sunar (ör. sözlükle çalışan bellek içi depo). En temiz yöntem çoğu zaman yamalamak değil, bağımlılığı parametre olarak almaktır (dependency injection): fonksiyon saati, depoyu ya da istemciyi dışarıdan alırsa testte gerçeğinin yerine basit bir fake verirsin.</p>
+<pre class="py">from datetime import datetime
+
+class BellekDepo:                         # fake: gerçek veritabanının basit hâli
+    def __init__(self):
+        self.kayitlar = {}
+    def kaydet(self, no, veri):
+        self.kayitlar[no] = veri
+
+def siparis_al(depo, no, tutar, saat=datetime.now):
+    damga = saat()
+    depo.kaydet(no, {"tutar": tutar, "gece": damga.hour &lt; 6})
+    return damga
+
+depo = BellekDepo()
+sabit = lambda: datetime(2026, 3, 15, 2, 30)   # stub saat
+siparis_al(depo, "S-1", 120, saat=sabit)
+print(depo.kayitlar)</pre>
+<h3>doctest: belgedeki örnek de bir testtir</h3>
+<p>Docstring içine <code>&gt;&gt;&gt;</code> ile yazdığın örnekleri <code>doctest</code> çalıştırıp çıktıyı karşılaştırır. Belge ile kodun birbirinden kopmasını engeller; küçük saf fonksiyonlar için idealdir, karmaşık senaryolar için unittest/pytest daha uygundur.</p>
+<pre class="py">import doctest
+
+def kurus(tutar_tl):
+    """TL tutarını kuruşa çevirir.
+
+    &gt;&gt;&gt; kurus(12.5)
+    1250
+    &gt;&gt;&gt; kurus(0.1)
+    10
+    """
+    return round(tutar_tl * 100)
+
+kosucu = doctest.DocTestRunner(verbose=False)
+for t in doctest.DocTestFinder().find(kurus, "kurus", globs={"kurus": kurus}):
+    kosucu.run(t)
+print(kosucu.summarize(verbose=False))</pre>
+<h3>Komut satırında koşturmak ve kapsam ölçmek</h3>
+<p>Testler genelde <code>tests/</code> klasöründe <code>test_*.py</code> dosyalarında durur. Kendi bilgisayarında proje kökünde şu komutları kullanırsın:</p>
+<pre class="code">python -m unittest discover -s tests -v          # tüm unittest testleri
+python -m unittest tests.test_sepet.SepetTest.test_toplam   # tek test
+python -m doctest -v kurus.py                    # docstring örnekleri
+
+pip install pytest pytest-cov                    # sanal ortam etkinken
+pytest -q                                        # kısa çıktı
+pytest -k "iade and not negatif"                 # adla süz
+pytest -x --lf                                   # ilk hatada dur, son düşenleri tekrar koş
+pytest --cov=src --cov-report=term-missing       # kapsam: hangi satırlar test edilmedi</pre>
+<p>Sık karşılaşılan sorunlar: <code>Ran 0 tests</code> görüyorsan dosya adı <code>test_</code> ile başlamıyor ya da <code>tests</code> klasöründe <code>__init__.py</code> yok (unittest discover için gerekebilir). <code>ModuleNotFoundError: No module named 'src'</code> alıyorsan paketi <code>pip install -e .</code> ile kur ya da testleri proje kökünden çalıştır. Kapsam (coverage) yüzdesi hedef değil, bir el fenerdir: %100 kapsam doğru assert'ler olmadan hiçbir şey kanıtlamaz.</p>
+<div class="tip"><b>Testini test et</b>Bir testin değerli olup olmadığını anlamanın en kısa yolu: koddaki bir koşulu bilerek boz (ör. <code>&lt;=</code> yerine <code>&lt;</code>) ve testin <b>kırmızıya döndüğünü</b> gör. Buna mutasyon testi denir; <code>mutmut</code> gibi araçlar bunu otomatik yapar. Bu dersteki bazı alıştırmalar da testini bozuk bir gerçeklemeye karşı koşturarak doğrular.</div>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ta bir hata canlıya çıktığında ilk iş, hatayı yeniden üreten bir test yazmaktır (regression test); test kırmızıyken düzeltme yapılır, yeşile dönünce birleştirilir. Pull request'ler ancak tüm testler CI'da geçtiğinde ve değişen satırların kapsamı belirli bir eşiğin üzerinde olduğunda onaylanır. Dış servisler (SMS, ödeme, kur) testlerde her zaman spec'li mock ya da fake ile değiştirilir; test süitinin ağsız ve birkaç saniyede bitmesi hedeflenir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Test piramidi ve kurumsal pratik</h3>
+<p>Bir projede üç katman test bulunur. Tabanda <b>birim testleri</b> (unit): tek fonksiyon ya da sınıf, milisaniyede koşar, yüzlerce olur. Ortada <b>entegrasyon testleri</b>: veritabanı, dosya, API ile birlikte çalışır; sqlite3 <code>":memory:"</code> burada kahramandır. Tepede <b>uçtan uca</b> testler: gerçek sistemin tamamı; azdır ve yavaştır. Piramidin ters dönmesi (çok uçtan uca, az birim) testlerin yavaş ve kırılgan olmasına yol açar.</p>
+<p>Üç pratik kural: Birincisi, test adı bir cümle olsun: <code>test_sube_komisyonu_asgari_bes_lira</code>; düşen testin adı hatayı anlatır. İkincisi, her test tek bir şeyi doğrulasın; üç assert'li test düştüğünde hangisi diye bakmak zaman alır. Üçüncüsü, kapsama (coverage) yüzdesine takılma; kritik iş kuralı (para, yetki, tarih) yüzde yüz, loglama satırı sıfır olabilir. CI (sürekli entegrasyon) ortamında testler her commit'te otomatik koşar; İleri seviyede GitHub Actions ile bunu kuracaksın. O gün geldiğinde elinde zaten yeşil bir test paketi olmalı.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/test-yazma">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sqlite-python/">← sqlite3 ile Python</a><a href="../sanal-ortam-pip/">Sanal ortam ve paket yönetimi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

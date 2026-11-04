@@ -153,7 +153,7 @@ button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
 .paths{display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:14px}
 .pcard{padding:18px; display:flex; flex-direction:column; gap:10px; text-align:left; cursor:pointer; border:1px solid var(--line); background:var(--surface); border-radius:var(--r)}
 .pcard:hover{border-color:var(--muted)}
-.ic{min-width:38px; height:38px; padding:0 8px; border-radius:8px; display:grid; place-items:center; color:#fff; box-shadow:inset 0 0 0 99px var(--ic-shade); font-family:var(--f-display); font-weight:800; font-size:.9rem}
+.ic{min-width:38px; height:38px; padding:0 8px; border-radius:8px; display:grid; place-items:center; color:#000; box-shadow:inset 0 0 0 99px var(--ic-shade); font-family:var(--f-display); font-weight:800; font-size:.9rem}
 .pcard p{margin:0; color:var(--muted); font-size:.9rem}
 .pcard .foot{display:flex; justify-content:space-between; font-size:.8rem; color:var(--muted); margin-top:auto}
 
@@ -308,6 +308,9 @@ button.chip[aria-pressed="true"]{background:var(--ink); border-color:var(--ink);
 .guide .gbody p{margin:0 0 8px; max-width:80ch}
 .guide ul{margin:0; padding-left:18px; display:grid; gap:4px}
 .guide li b{margin-right:4px}
+.guide li{overflow-wrap:anywhere}
+.lnav .btn{white-space:normal; text-align:left; min-width:0}
+@media (max-width:640px){.lnav{flex-direction:column; align-items:stretch}}
 
 /* Ana sayfa seviye haritası */
 .climb6{display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:10px}
@@ -664,10 +667,13 @@ button.chip.lk{text-decoration:none; padding:2px 8px; border:1px solid var(--lin
 .olines code{white-space:pre-wrap}
 .q code{overflow-wrap:anywhere; white-space:pre-wrap}
 @media (max-width: 560px){ .hero-main .stripe{display:none} }
+
+.navgrp{color:color-mix(in srgb,var(--muted) 78%,var(--ink))}
+.ic[style*="--s6"]{color:#fff}@media (prefers-color-scheme:light){.ic[style*="--s7"]{color:#fff}}[data-theme="light"] .ic[style*="--s7"]{color:#fff}[data-theme="dark"] .ic[style*="--s7"]{color:#000}
 </style>
 </head>
 <body>
-<a class="skip" href="#main" onclick="document.getElementById('main').focus();return false;">İçeriğe geç</a>
+<noscript><p><a href="ders/">Ders metinlerini JavaScript olmadan oku</a></p></noscript><a class="skip" href="#main" onclick="document.getElementById('main').focus();return false;">İçeriğe geç</a>
 <div id="live" class="sr-only" role="status" aria-live="polite"></div>
 <div class="app">
   <aside class="side" aria-label="Ana menü">
@@ -699,9 +705,9 @@ button.chip.lk{text-decoration:none; padding:2px 8px; border:1px solid var(--lin
 <script charset="utf-8" src="n_orta.js"></script>
 <script>__b(25)</script>
 <script charset="utf-8" src="n_ileri.js"></script>
-<script>__b(51)</script>
+<script>__b(52)</script>
 <script charset="utf-8" src="x_1.js"></script>
-<script>__b(66)</script>
+<script>__b(67)</script>
 <script charset="utf-8" src="x_2.js"></script>
 <script>__b(71)</script>
 <script charset="utf-8" src="bank.js"></script>

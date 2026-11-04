@@ -1,0 +1,448 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: Anadolu Market müşteri analitiği paketi | Kesit Python</title><meta name="description" content="pandas ile RFM segmentasyonu ve kohort analizi, async ile sayfalı veri çekme, argparse CLI ve unittest içeren uçtan uca bir analitik paket kurarsın."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: Anadolu Market müşteri analitiği paketi"><meta property="og:description" content="pandas ile RFM segmentasyonu ve kohort analizi, async ile sayfalı veri çekme, argparse CLI ve unittest içeren uçtan uca bir analitik paket kurarsın."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: Anadolu Market müşteri analitiği paketi","description":"pandas ile RFM segmentasyonu ve kohort analizi, async ile sayfalı veri çekme, argparse CLI ve unittest içeren uçtan uca bir analitik paket kurarsın.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: Anadolu Market müşteri analitiği paketi</h1><p class="st-l">pandas ile RFM segmentasyonu ve kohort analizi, async ile sayfalı veri çekme, argparse CLI ve unittest içeren uçtan uca bir analitik paket kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ileri">Uygulamada aç, 32 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Proje: müşteri analitiği paketi</h2>
+<p>Anadolu Market'in pazarlama ekibi üç soru soruyor: "Hangi müşterilere kampanya gönderelim?", "Yeni gelen müşteriler ikinci ay geri dönüyor mu?", "Hangi ürün ve kategori ciroyu taşıyor?" Bu projede üç soruyu cevaplayan, komut satırından çalışan ve testli bir paket kuracaksın. Paket, önceki derslerin hepsini birleştirir: pandas (groupby, qcut, pivot), asyncio (sayfalı veri çekme), argparse (CLI), unittest (doğrulama).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Modül</th><th>Sorumluluk</th><th>Ana fonksiyonlar</th></tr>
+<tr><td>veri.py</td><td>Ham kayıtları DataFrame'e çevirmek</td><td>siparis_df</td></tr>
+<tr><td>rfm.py</td><td>RFM ölçütleri, skor, segment</td><td>rfm_hesapla, rfm_skor, segment</td></tr>
+<tr><td>kohort.py</td><td>İlk sipariş ayına göre tutundurma tablosu</td><td>kohort_tablosu</td></tr>
+<tr><td>urun.py</td><td>En çok satan ürün/kategori</td><td>en_cok_satan</td></tr>
+<tr><td>api.py</td><td>Sayfalı veri çekme (async)</td><td>api_sayfa, hepsini_cek</td></tr>
+<tr><td>cli.py</td><td>argparse ile komutlar</td><td>parse_args, main</td></tr>
+<tr><td>tests/</td><td>unittest</td><td>TestRfm, TestKohort</td></tr>
+</table></div>
+<div class="note"><b>Her kutu bağımsız</b>Bu sayfadaki her kod kutusu kendi başına çalışır; bu yüzden örnek veri ve gerekli fonksiyonlar her kutuda yeniden kurulur. Gerçek pakette hepsi ayrı modüllerde bir kez yazılır.</div>
+<div class="note"><b>Sürüm uyumu</b>Bu uygulama tarayıcıda pandas 2.2, bilgisayarında büyük olasılıkla pandas 3.x çalıştırır. İkisinde de aynı sonucu veren sade bir API kullanacağız: <code>groupby(..., observed=True)</code> belirt, <code>inplace=True</code> kullanma (kopya döndür), <code>pd.qcut</code>'tan önce <code>rank(method="first")</code> uygula, kategorik/str tür ayrıntılarına yaslanma.</div>
+
+<h2>1. Veri katmanı</h2>
+<p>Veri ders içinde küçük bir sözlük listesi; gerçek hayatta aynı yapı CSV ya da API'den gelir. İlk iş tarihi gerçek tarih türüne çevirmek ve ay sütununu çıkarmak:</p>
+<pre class="py">import pandas as pd
+
+KAYITLAR = [
+    {"musteri": "Ayşe", "tarih": "2024-01-05", "urun": "Kalem", "kategori": "Kırtasiye", "tutar": 120.0},
+    {"musteri": "Mehmet", "tarih": "2024-01-12", "urun": "Kulaklık", "kategori": "Elektronik", "tutar": 850.0},
+    {"musteri": "Ayşe", "tarih": "2024-02-03", "urun": "Defter", "kategori": "Kırtasiye", "tutar": 60.0},
+    {"musteri": "Zeynep", "tarih": "2024-02-10", "urun": "Kulaklık", "kategori": "Elektronik", "tutar": 850.0},
+    {"musteri": "Ayşe", "tarih": "2024-03-15", "urun": "Kulaklık", "kategori": "Elektronik", "tutar": 850.0},
+    {"musteri": "Mehmet", "tarih": "2024-03-20", "urun": "Kalem", "kategori": "Kırtasiye", "tutar": 120.0},
+    {"musteri": "Ali", "tarih": "2024-03-22", "urun": "Çanta", "kategori": "Aksesuar", "tutar": 400.0},
+    {"musteri": "Zeynep", "tarih": "2024-04-01", "urun": "Defter", "kategori": "Kırtasiye", "tutar": 60.0},
+    {"musteri": "Ali", "tarih": "2024-04-18", "urun": "Kalem", "kategori": "Kırtasiye", "tutar": 120.0},
+    {"musteri": "Elif", "tarih": "2024-04-25", "urun": "Çanta", "kategori": "Aksesuar", "tutar": 400.0},
+]
+
+def siparis_df(kayitlar):
+    df = pd.DataFrame(kayitlar)
+    df["tarih"] = pd.to_datetime(df["tarih"])
+    df["ay"] = df["tarih"].dt.to_period("M").astype(str)
+    return df
+
+df = siparis_df(KAYITLAR)
+print(df[["musteri", "ay", "tutar"]].head())
+print("satır:", len(df), "| müşteri:", df["musteri"].nunique())</pre>
+<p><code>to_period("M")</code> tarihi aya yuvarlar; <code>astype(str)</code> ile "2024-01" gibi karşılaştırması kolay bir metne çevirmek iki pandas sürümünde de aynı davranır.</p>
+
+<h2>2. RFM segmentasyonu</h2>
+<p>RFM üç ölçüt: <b>Recency</b> (son siparişten bu yana geçen gün; az olması iyi), <b>Frequency</b> (sipariş sayısı), <b>Monetary</b> (toplam harcama). Her müşteri için üçünü hesaplayıp her birini 1-4 arası skora çeviririz; skorların toplamı segment belirler.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["Ayşe", "Mehmet", "Ayşe", "Zeynep", "Ayşe", "Mehmet", "Ali", "Zeynep", "Ali", "Elif"],
+    "tarih": pd.to_datetime(["2024-01-05", "2024-01-12", "2024-02-03", "2024-02-10", "2024-03-15",
+                             "2024-03-20", "2024-03-22", "2024-04-01", "2024-04-18", "2024-04-25"]),
+    "urun": ["Kalem", "Kulaklık", "Defter", "Kulaklık", "Kulaklık", "Kalem", "Çanta", "Defter", "Kalem", "Çanta"],
+    "kategori": ["Kırtasiye", "Elektronik", "Kırtasiye", "Elektronik", "Elektronik", "Kırtasiye", "Aksesuar", "Kırtasiye", "Kırtasiye", "Aksesuar"],
+    "tutar": [120.0, 850.0, 60.0, 850.0, 850.0, 120.0, 400.0, 60.0, 120.0, 400.0],
+})
+
+def rfm_hesapla(df, bugun):
+    bugun = pd.Timestamp(bugun)
+    g = df.groupby("musteri", observed=True)
+    rfm = pd.DataFrame({
+        "recency": (bugun - g["tarih"].max()).dt.days,
+        "frequency": g["tarih"].count(),
+        "monetary": g["tutar"].sum(),
+    })
+    return rfm.reset_index()
+
+rfm = rfm_hesapla(df, "2024-05-01")
+print(rfm)</pre>
+<p>Skorlama için quantile (çeyreklik) kullanırız: müşterileri ölçüte göre dört eşit gruba böl, en iyi gruba 4 ver. <code>pd.qcut</code> bunu yapar; ancak aynı değere sahip çok müşteri varsa "kenarlar tekrarlı" hatası verir. Çare, önce <code>rank(method="first")</code> ile her müşteriye benzersiz bir sıra vermek. Recency'de küçük değer iyi olduğu için etiketleri ters çeviririz.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["Ayşe", "Mehmet", "Ayşe", "Zeynep", "Ayşe", "Mehmet", "Ali", "Zeynep", "Ali", "Elif"],
+    "tarih": pd.to_datetime(["2024-01-05", "2024-01-12", "2024-02-03", "2024-02-10", "2024-03-15",
+                             "2024-03-20", "2024-03-22", "2024-04-01", "2024-04-18", "2024-04-25"]),
+    "urun": ["Kalem", "Kulaklık", "Defter", "Kulaklık", "Kulaklık", "Kalem", "Çanta", "Defter", "Kalem", "Çanta"],
+    "kategori": ["Kırtasiye", "Elektronik", "Kırtasiye", "Elektronik", "Elektronik", "Kırtasiye", "Aksesuar", "Kırtasiye", "Kırtasiye", "Aksesuar"],
+    "tutar": [120.0, 850.0, 60.0, 850.0, 850.0, 120.0, 400.0, 60.0, 120.0, 400.0],
+})
+
+def rfm_hesapla(df, bugun):
+    bugun = pd.Timestamp(bugun)
+    g = df.groupby("musteri", observed=True)
+    rfm = pd.DataFrame({
+        "recency": (bugun - g["tarih"].max()).dt.days,
+        "frequency": g["tarih"].count(),
+        "monetary": g["tutar"].sum(),
+    })
+    return rfm.reset_index()
+
+def rfm_skor(rfm, q=4):
+    rfm = rfm.copy()
+    etiket = list(range(1, q + 1))
+    rfm["R"] = pd.qcut(rfm["recency"].rank(method="first"), q, labels=etiket[::-1]).astype(int)
+    rfm["F"] = pd.qcut(rfm["frequency"].rank(method="first"), q, labels=etiket).astype(int)
+    rfm["M"] = pd.qcut(rfm["monetary"].rank(method="first"), q, labels=etiket).astype(int)
+    rfm["skor"] = rfm["R"] + rfm["F"] + rfm["M"]
+    return rfm
+
+def segment(skor, q=4):
+    ust = 3 * q
+    if skor &gt;= ust - 2:
+        return "Şampiyon"
+    if skor &gt;= ust - 5:
+        return "Sadık"
+    if skor &gt;= 6:
+        return "Potansiyel"
+    return "Riskli"
+
+rfm = rfm_hesapla(df, "2024-05-01")
+skorlu = rfm_skor(rfm)
+skorlu["segment"] = skorlu["skor"].apply(segment)
+print(skorlu[["musteri", "R", "F", "M", "skor", "segment"]])</pre>
+<div class="tip"><b>Neden rank(method="first")?</b>Beş müşteriden üçünün frequency'si 2 ise qcut dört kutuya bölemez ve ValueError verir. rank(method="first") eşitleri görülme sırasına göre ayırır; kutu sınırları benzersiz olur. Üretimde eşitlik bozma kuralını (ör. son sipariş tarihi) belgele; farklı sürümlerde sıra değişmesin diye önce sırala.</div>
+
+<h2>3. Kohort analizi</h2>
+<p>Kohort (cohort), ilk siparişini aynı ayda veren müşteri grubudur. Soru: Ocak kohortundan kaç müşteri şubatta (1. ay), martta (2. ay) yine alışveriş yaptı? Hesap üç adım: her müşterinin ilk ayı, her siparişin ilk aya göre kaçıncı ayda olduğu, kohort × ay_no tablosunda benzersiz müşteri sayısı. Ay farkını sürümden bağımsız hesaplamak için yıl*12+ay tamsayısını kullanıyoruz.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["Ayşe", "Mehmet", "Ayşe", "Zeynep", "Ayşe", "Mehmet", "Ali", "Zeynep", "Ali", "Elif"],
+    "tarih": pd.to_datetime(["2024-01-05", "2024-01-12", "2024-02-03", "2024-02-10", "2024-03-15",
+                             "2024-03-20", "2024-03-22", "2024-04-01", "2024-04-18", "2024-04-25"]),
+    "urun": ["Kalem", "Kulaklık", "Defter", "Kulaklık", "Kulaklık", "Kalem", "Çanta", "Defter", "Kalem", "Çanta"],
+    "kategori": ["Kırtasiye", "Elektronik", "Kırtasiye", "Elektronik", "Elektronik", "Kırtasiye", "Aksesuar", "Kırtasiye", "Kırtasiye", "Aksesuar"],
+    "tutar": [120.0, 850.0, 60.0, 850.0, 850.0, 120.0, 400.0, 60.0, 120.0, 400.0],
+})
+
+def ay_index(seri):
+    return seri.dt.year * 12 + seri.dt.month
+
+def kohort_tablosu(df):
+    df = df.copy()
+    ilk = df.groupby("musteri", observed=True)["tarih"].min()
+    df["ilk"] = df["musteri"].map(ilk)
+    df["kohort"] = df["ilk"].dt.to_period("M").astype(str)
+    df["ay_no"] = ay_index(df["tarih"]) - ay_index(df["ilk"])
+    tablo = (df.groupby(["kohort", "ay_no"], observed=True)["musteri"]
+               .nunique().unstack(fill_value=0))
+    return tablo
+
+tablo = kohort_tablosu(df)
+print(tablo)
+print("Ocak kohortu 2. ayda:", int(tablo.loc["2024-01", 2]))</pre>
+<p>Tabloyu okuma: satır kohort, sütun ilk aydan itibaren geçen ay. 0. sütun kohort büyüklüğüdür; sonraki sütunları ona bölersen tutundurma oranını (retention rate) elde edersin. Üretimde bu tablo ısı haritasına dönüşür.</p>
+
+<h2>4. En çok satan ürün ve kategori</h2>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "musteri": ["Ayşe", "Mehmet", "Ayşe", "Zeynep", "Ayşe", "Mehmet", "Ali", "Zeynep", "Ali", "Elif"],
+    "tarih": pd.to_datetime(["2024-01-05", "2024-01-12", "2024-02-03", "2024-02-10", "2024-03-15",
+                             "2024-03-20", "2024-03-22", "2024-04-01", "2024-04-18", "2024-04-25"]),
+    "urun": ["Kalem", "Kulaklık", "Defter", "Kulaklık", "Kulaklık", "Kalem", "Çanta", "Defter", "Kalem", "Çanta"],
+    "kategori": ["Kırtasiye", "Elektronik", "Kırtasiye", "Elektronik", "Elektronik", "Kırtasiye", "Aksesuar", "Kırtasiye", "Kırtasiye", "Aksesuar"],
+    "tutar": [120.0, 850.0, 60.0, 850.0, 850.0, 120.0, 400.0, 60.0, 120.0, 400.0],
+})
+
+def en_cok_satan(df, sutun="urun", n=3):
+    g = df.groupby(sutun, observed=True)["tutar"].agg(["count", "sum"]).reset_index()
+    g.columns = [sutun, "adet", "ciro"]
+    return (g.sort_values(["ciro", sutun], ascending=[False, True])
+             .head(n).reset_index(drop=True))
+
+print(en_cok_satan(df))
+print(en_cok_satan(df, "kategori", 2))</pre>
+<p>Sıralamada ikinci anahtar olarak ürün adını eklemek, eşit ciroda sonucu deterministik yapar; testler bunu sever.</p>
+
+<h2>5. Sahte API'den sayfalı veri çekme</h2>
+<p>Gerçek sistemde siparişler bir API'den sayfa sayfa gelir: <code>?sayfa=0&amp;boyut=100</code>. Ağ erişimimiz yok, bu yüzden API'yi <code>asyncio.sleep</code> ile bekleyen bir coroutine olarak simüle ediyoruz. Yanıt, veriyi ve "son sayfa mı" bilgisini taşır; istemci son sayfaya kadar döner.</p>
+<pre class="py">import asyncio
+
+KAYITLAR = [{"id": i, "tutar": 100 + i * 10} for i in range(10)]
+
+async def api_sayfa(kayitlar, sayfa, boyut):
+    await asyncio.sleep(0.01)            # ağ gecikmesi simülasyonu
+    bas = sayfa * boyut
+    return {"veri": kayitlar[bas:bas + boyut], "son": bas + boyut &gt;= len(kayitlar)}
+
+async def hepsini_cek(kayitlar, boyut):
+    hepsi, sayfa = [], 0
+    while True:
+        yanit = await api_sayfa(kayitlar, sayfa, boyut)
+        hepsi.extend(yanit["veri"])
+        if yanit["son"]:
+            break
+        sayfa += 1
+    return hepsi, sayfa + 1
+
+loop = asyncio.new_event_loop()
+veri, sayfa_sayisi = loop.run_until_complete(hepsini_cek(KAYITLAR, 4))
+loop.close()
+print(len(veri), "kayıt,", sayfa_sayisi, "sayfa")</pre>
+<p>Sayfalar birbirine bağlı (bir sonrakini çekmek için öncekinin "son" bilgisi gerekir), bu yüzden sıralı await doğru. Toplam sayfa sayısı önceden biliniyorsa <code>gather</code> ile paralel çekmek mümkündür; alıştırmada iki yaklaşımı da göreceksin.</p>
+<div class="warn"><b>Olay döngüsü</b>Tarayıcıda ve Jupyter'da zaten bir döngü çalıştığı için <code>asyncio.run</code> hata verebilir; <code>new_event_loop().run_until_complete</code> kalıbı her ortamda çalışır.</div>
+
+<h2>6. CLI: argparse ile alt komutlar</h2>
+<p>Pazarlama ekibi kod yazmadan <code>python -m analitik rfm --bugun 2024-05-01</code> diyebilmeli. <code>parse_args</code> fonksiyonuna liste verebilmek test için kritik: <code>sys.argv</code> yerine <code>parse_args(["rfm", "--q", "3"])</code> ile her komutu testte deneyebilirsin.</p>
+<pre class="py">import argparse
+
+def parse_args(argv=None):
+    p = argparse.ArgumentParser(prog="analitik", description="Anadolu Market müşteri analitiği")
+    p.add_argument("komut", choices=["rfm", "kohort", "top"])
+    p.add_argument("--bugun", default="2024-05-01")
+    p.add_argument("--q", type=int, default=4)
+    p.add_argument("--n", type=int, default=3)
+    p.add_argument("--sutun", choices=["urun", "kategori"], default="urun")
+    return p.parse_args(argv)
+
+a = parse_args(["top", "--sutun", "kategori", "--n", "2"])
+print(a.komut, a.sutun, a.n)
+try:
+    parse_args(["sil"])
+except SystemExit as e:
+    print("geçersiz komut, çıkış kodu:", e.code)</pre>
+<p><code>main(argv)</code> fonksiyonu argümana göre ilgili fonksiyonu çağırıp sonucu yazdırır; iş mantığı CLI'dan ayrı kaldığı için testler <code>main</code>'e dokunmadan hesap fonksiyonlarını doğrular.</p>
+
+<h2>7. unittest ile doğrulama</h2>
+<pre class="code">import unittest
+
+class TestRfm(unittest.TestCase):
+    def setUp(self):
+        self.df = siparis_df(KAYITLAR)
+
+    def test_recency_ayse(self):
+        rfm = rfm_hesapla(self.df, "2024-05-01").set_index("musteri")
+        self.assertEqual(int(rfm.loc["Ayşe", "recency"]), 47)
+
+    def test_skor_araligi(self):
+        sk = rfm_skor(rfm_hesapla(self.df, "2024-05-01"))
+        self.assertTrue(sk["skor"].between(3, 12).all())
+
+if __name__ == "__main__":
+    unittest.main(argv=["x"], exit=False)</pre>
+<p><code>setUp</code> her testten önce taze veri kurar. Tarayıcıda <code>unittest.main(argv=["x"], exit=False)</code> kalıbı gerekir; aksi halde unittest tarayıcının argümanlarını okumaya çalışır ve çıkış yapar.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: projeyi "çalışıyor"dan "teslim edilebilir"e taşımak</h2>
+<p>Analitik fonksiyonların hazır: RFM, kohort, en çok satan, sayfalı API, CLI ve testler. İşe alım yapan biri ya da ekip liderin bu projeye baktığında ise başka sorular soracak: "Ayarları nereden okuyor? Bozuk bir kayıt gelirse ne oluyor? API bir kez hata verirse tüm gece işi mi çöküyor? Aynı komutu iki kez çalıştırırsam rapor iki kat mı oluyor? Ne olduğunu loglardan anlayabilir miyim?" Bu bölüm bu beş soruyu cevaplayan katmanları ekliyor. Paketleme ayrıntıları "Paketleme ve dağıtım", CI kurulumu "Kalite ve CI" derslerinde; burada projeye nasıl bağlandıklarını görüyorsun.</p>
+
+<h3>1. Proje iskeleti</h3>
+<pre class="code">anadolu-analitik/
+├── pyproject.toml          # bağımlılıklar, [project.scripts] analitik = "analitik.cli:main"
+├── README.md               # ne yapar, nasıl kurulur, örnek komut, örnek çıktı
+├── analitik.toml           # varsayılan ayarlar (gizli bilgi YOK)
+├── .env.example            # gereken ortam değişkenlerinin listesi
+├── src/analitik/
+│   ├── __init__.py  __main__.py  cli.py
+│   ├── ayar.py             # Ayar dataclass + yükleyici
+│   ├── veri.py  dogrula.py # okuma ve doğrulama
+│   ├── rfm.py  kohort.py  urun.py
+│   ├── api.py              # yeniden deneme + sayfalama
+│   └── rapor.py            # Markdown/CSV çıktı
+├── tests/                  # pytest; her modüle bir test dosyası
+└── .github/workflows/ci.yml</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Katman</th><th>Araç</th></tr>
+<tr><td>Ayarlar nereden geliyor?</td><td>Yapılandırma</td><td><code>tomllib</code> + ortam değişkenleri + <code>dataclass</code></td></tr>
+<tr><td>Bozuk kayıt gelirse?</td><td>Doğrulama</td><td>Kayıt bazlı kontrol, hatalı satırları ayrı raporla (pydantic de olur)</td></tr>
+<tr><td>API geçici hata verirse?</td><td>Dayanıklılık</td><td>Üstel geri çekilmeli yeniden deneme (exponential backoff)</td></tr>
+<tr><td>İki kez çalışırsa?</td><td>İdempotent çıktı</td><td><code>"w"</code> kipi, geçici dosya + <code>os.replace</code></td></tr>
+<tr><td>Ne oldu, nerede?</td><td>Gözlemlenebilirlik</td><td><code>logging</code>, özet metrikler</td></tr>
+</table></div>
+
+<h3>2. Yapılandırma: varsayılan → dosya → ortam</h3>
+<p>Öncelik sırası geleneği şöyledir: koddaki varsayılanlar en zayıf, ayar dosyası onları ezer, ortam değişkenleri (environment variables) ve CLI argümanları en güçlüdür. Böylece aynı paket geliştirici bilgisayarında, CI'da ve sunucuda farklı ayarla, kod değişmeden çalışır. Parola ve token yalnız ortam değişkeninden gelir, dosyaya yazılmaz.</p>
+<pre class="py">import tomllib
+from dataclasses import dataclass, fields
+
+@dataclass(frozen=True)
+class Ayar:
+    bugun: str = "2024-05-01"
+    q: int = 4
+    cikti: str = "rapor.md"
+    sayfa_boyutu: int = 100
+
+def ayar_yukle(toml_metin, ortam):
+    degerler = {}
+    tablo = tomllib.loads(toml_metin).get("analitik", {})
+    gecerli = {f.name: f.type for f in fields(Ayar)}
+    for k, v in tablo.items():
+        if k not in gecerli:
+            raise ValueError(f"bilinmeyen ayar: {k}")
+        degerler[k] = v
+    for k, tur in gecerli.items():             # ANALITIK_Q=5 gibi
+        anahtar = "ANALITIK_" + k.upper()
+        if anahtar in ortam:
+            degerler[k] = int(ortam[anahtar]) if tur is int else ortam[anahtar]
+    return Ayar(**degerler)
+
+dosya = '[analitik]\nq = 5\ncikti = "aylik.md"\n'
+print(ayar_yukle(dosya, {}))
+print(ayar_yukle(dosya, {"ANALITIK_Q": "3", "PATH": "/usr/bin"}))</pre>
+<p><code>from __future__ import annotations</code> kullanan modüllerde <code>f.type</code> metin olarak gelir (<code>"int"</code>); o durumda <code>typing.get_type_hints(Ayar)</code> ile gerçek türleri al.</p>
+
+<h3>3. Loglama ve dayanıklılık</h3>
+<p>Kütüphane modülleri yalnız <code>logger = logging.getLogger(__name__)</code> der; yapılandırmayı (seviye, biçim, hedef) tek bir yerde, <code>main</code> içinde yaparsın. Ağ çağrılarında geçici hatalar (zaman aşımı, 503) normaldir: birkaç kez, giderek uzayan aralıklarla yeniden dene. Kalıcı hatalarda (400, 404, doğrulama) yeniden deneme anlamsızdır; hemen hata ver.</p>
+<pre class="py">import logging, sys, random
+
+def log_kur(seviye="INFO"):
+    log = logging.getLogger("analitik")
+    log.handlers.clear()
+    h = logging.StreamHandler(sys.stdout)
+    h.setFormatter(logging.Formatter("%(levelname)-7s %(name)s: %(message)s"))
+    log.addHandler(h)
+    log.setLevel(seviye)
+    log.propagate = False
+    return log
+
+log = log_kur()
+
+def yeniden_dene(fonk, deneme=4, taban=0.5, tavan=8.0, uyu=lambda s: None):
+    for i in range(deneme):
+        try:
+            return fonk()
+        except ConnectionError as e:
+            if i == deneme - 1:
+                log.error("vazgeçildi: %s", e)
+                raise
+            bekle = min(tavan, taban * 2 ** i) * random.uniform(0.8, 1.2)   # jitter
+            log.warning("deneme %d başarısız (%s), %.2f sn sonra", i + 1, e, bekle)
+            uyu(bekle)
+
+random.seed(1)
+cagri = {"n": 0}
+def kararsiz_api():
+    cagri["n"] += 1
+    if cagri["n"] &lt; 3:
+        raise ConnectionError("503 Service Unavailable")
+    return {"veri": [1, 2, 3], "son": True}
+
+print(yeniden_dene(kararsiz_api))
+log.debug("bu satır görünmez: seviye INFO")</pre>
+<div class="tip"><b>Neden jitter?</b>Yüz istemci aynı anda hata alıp hepsi tam 1, 2, 4 saniye sonra yeniden denerse sunucuya dalgalar halinde yüklenir (thundering herd). Bekleme süresine küçük bir rastgelelik eklemek istekleri zamana yayar. Gerçek projede <code>tenacity</code> kütüphanesi (<code>pip install tenacity</code>) bunu dekoratörle (decorator) verir.</div>
+
+<h3>4. İdempotent rapor ve uçtan uca akış</h3>
+<p>İdempotent (idempotent) iş, kaç kez çalıştırılırsa çalıştırılsın aynı sonucu bırakır. Gece işi yarıda kesilip yeniden başlatıldığında raporun iki kopya satır içermemesi, yarım yazılmış dosyanın da okunmaması gerekir. Çözüm: önce geçici dosyaya yaz, sonra <code>os.replace</code> ile tek hamlede yerine koy; bu işlem aynı disk üzerinde atomiktir.</p>
+<pre class="py">import os, tempfile
+
+def markdown_tablo(satirlar, sutunlar):
+    bas = "| " + " | ".join(sutunlar) + " |"
+    ayr = "|" + "|".join("---:" if isinstance(satirlar[0][s], (int, float)) else "---" for s in sutunlar) + "|"
+    govde = ["| " + " | ".join(f"{r[s]:,.0f}" if isinstance(r[s], float) else str(r[s]) for s in sutunlar) + " |" for r in satirlar]
+    return "\n".join([bas, ayr, *govde])
+
+def atomik_yaz(yol, metin):
+    klasor = os.path.dirname(os.path.abspath(yol))
+    fd, gecici = tempfile.mkstemp(dir=klasor, suffix=".tmp")
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(metin)
+    os.replace(gecici, yol)
+
+satirlar = [{"urun": "Kulaklık", "adet": 3, "ciro": 2550.0}, {"urun": "Çanta", "adet": 2, "ciro": 800.0}]
+rapor = "# Aylık satış raporu\n\n" + markdown_tablo(satirlar, ["urun", "adet", "ciro"]) + "\n"
+for _ in range(2):                         # iki kez çalıştır: sonuç değişmez
+    atomik_yaz("rapor.md", rapor)
+print(open("rapor.md", encoding="utf-8").read())</pre>
+<p>Uçtan uca <code>main</code> artık şu sırayı izler: ayarları yükle → log kur → veriyi çek (yeniden denemeli) → doğrula, hatalıları say ve logla → hesapla → raporu atomik yaz → özet satırı logla ("812 kayıt, 3 geçersiz, 4 segment, rapor.md") → çıkış kodu döndür (geçersiz oranı eşiği aşarsa 1).</p>
+<div class="warn"><b>Sessiz veri kaybı</b>Bozuk kayıtları <code>try/except: continue</code> ile atlamak en tehlikeli kalıptır: rapor "doğru görünür" ama eksiktir. Atladığın her kaydı sebebiyle say, logla ve oran eşiği aşarsa işi başarısız say.</div>
+<div class="note"><b>Gerçek işte</b>Portföy projeni değerlendiren kişi önce README'ye bakar: tek komutla kurulum (<code>pip install -e ".[dev]"</code>), örnek komut ve örnek çıktı, mimari çizim ya da modül tablosu, "bilinen sınırlar" bölümü. Ardından testlerin ve CI rozetinin yeşil olup olmadığına, commit geçmişinin anlamlı olup olmadığına ("fix", "update" değil "rfm: eşit frequency için rank(first) eklendi") bakar. Bu bölümdeki katmanlar, projeyi bir ödevden bir iş örneğine dönüştüren farktır.</div></section><section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: projeyi gerçek veriye bağlamak</h2><p>Projenin ilk hâlinde RFM ve kohort fonksiyonlarını satır içi küçük verilerle kurdun. Bir portföy projesini gerçek kılan şey, aynı fonksiyonların <b>gerçek tablolarla</b> çalışması ve sonuçların başka bir sistemle <b>mutabakatının</b> (reconciliation) yapılmasıdır. Bu bölümde paketi <code>anadolu_market</code> setinin 910 sipariş ve 1.620 kalemine bağlayacak, sonuçları Kesit Power BI'daki Power BI modeliyle (<code>kesit_bi</code>) karşılaştıracaksın. Aynı şirketin iki sistemi aynı soruya farklı cevap veriyorsa bunun nedenini bulmak, kıdemli analistin en değerli işidir.</p><div class="tbl-wrap"><table><tr><th>Kavram</th><th>Python paketi (anadolu_market)</th><th>Power BI modeli (kesit_bi)</th></tr><tr><td>Sipariş satırı</td><td><code>order_items</code> + <code>orders</code></td><td><code>Satislar</code> olgu tablosu (tanecik: kalem)</td></tr><tr><td>Durum</td><td>delivered / shipped / returned / cancelled</td><td>Teslim Edildi / Kargoda / İade / İptal</td></tr><tr><td>Kohort</td><td>senin tanımın</td><td><code>Musteriler.KohortAy</code>, <code>Satislar.KohortAyFarki</code></td></tr><tr><td>RFM segmentleri</td><td>senin kuralların</td><td><code>RFMSegmentleri</code> (7 segment, açıklama ve eylem)</td></tr></table></div><h3>1. Veri katmanı: tek giriş noktası</h3><p>Bütün analizler sipariş düzeyinde bir tabloyla başlar. Bunu tek bir fonksiyona koyarsan veri kaynağı değiştiğinde (CSV yerine veri ambarı) yalnızca bu fonksiyonu değiştirirsin.</p><pre class="py">import veri
+import pandas as pd
+
+def siparis_tablosu():
+    o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+    oi = veri.oku("anadolu_market", "order_items")
+    oi["tutar"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+    return o.join(oi.groupby("order_id")["tutar"].sum(), on="order_id")
+
+s = siparis_tablosu()
+print(len(s), "sipariş, toplam", round(s["tutar"].sum(), 2), "TL")
+print(s.groupby("status")["tutar"].sum().round(0).to_dict())
+</pre><h3>2. RFM: puanlar ve Kesit Power BI segmentleri</h3><p>Her boyutu 1–5 arası puanla (beşte birlik dilimler, <code>pd.qcut</code>). Eşit değerler dilim sınırlarını çakıştırmasın diye önce <code>rank(method="first")</code> uygulanır. Recency'de küçük değer iyidir, bu yüzden puan ters çevrilir. Segment adlarını kendin uydurmak yerine şirketin Power BI modelinde zaten tanımlı olan listeyi kullan: <code>kesit_bi.RFMSegmentleri</code> yedi segmenti, sırası, açıklaması ve önerilen eylemiyle birlikte tutar. Böylece Python raporu ile pano aynı dili konuşur.</p><pre class="py">import veri
+
+print(veri.oku("kesit_bi", "RFMSegmentleri")[["Sira", "Segment", "Eylem"]].to_string(index=False))
+</pre><p>Segment kuralları R ve F puanlarından oluşan klasik ızgaraya dayanır (M, segment içinde değer sıralaması için kullanılır):</p><div class="tbl-wrap"><table><tr><th></th><th>F 1</th><th>F 2–3</th><th>F 4–5</th></tr><tr><td><b>R 4–5</b></td><td>Yeni</td><td>Potansiyel sadık</td><td>Şampiyon</td></tr><tr><td><b>R 3</b></td><td colspan="2">Dikkat gerektiren</td><td>Sadık</td></tr><tr><td><b>R 1–2</b></td><td>Kaybedilmiş (F ≤ 2)</td><td>F = 2: Kaybedilmiş, F = 3: Risk altında</td><td>Risk altında</td></tr></table></div><pre class="py">import veri
+import pandas as pd
+
+def siparis_tablosu():
+    o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+    oi = veri.oku("anadolu_market", "order_items")
+    oi["tutar"] = oi["quantity"] * oi["unit_price"] * (1 - oi["discount"])
+    return o.join(oi.groupby("order_id")["tutar"].sum(), on="order_id")
+
+def rfm_hesapla(s, bugun="2025-01-01"):
+    d = s[s["status"] == "delivered"]
+    r = d.groupby("customer_id").agg(son=("order_date", "max"), F=("order_id", "size"), M=("tutar", "sum"))
+    r["R"] = (pd.Timestamp(bugun) - r["son"]).dt.days
+    return r[["R", "F", "M"]]
+
+def _puan(seri, q=5, ters=False):
+    p = pd.qcut(seri.rank(method="first"), q, labels=False) + 1
+    return (q + 1 - p) if ters else p
+
+def rfm_skorla(r, q=5):
+    r = r.copy()
+    r["r"] = _puan(r["R"], q, ters=True)
+    r["f"] = _puan(r["F"], q)
+    r["m"] = _puan(r["M"], q)
+    return r
+
+def segment_ata(r, f):
+    if r &gt;= 4 and f &gt;= 4:
+        return "Şampiyon"
+    if r == 3 and f &gt;= 4:
+        return "Sadık"
+    if r &gt;= 4 and f &gt;= 2:
+        return "Potansiyel sadık"
+    if r &gt;= 4:
+        return "Yeni"
+    if r == 3:
+        return "Dikkat gerektiren"
+    if f &gt;= 3:
+        return "Risk altında"
+    return "Kaybedilmiş"
+
+r = rfm_skorla(rfm_hesapla(siparis_tablosu()))
+r["Segment"] = [segment_ata(a, b) for a, b in zip(r["r"], r["f"])]
+ozet = r.groupby("Segment").agg(musteri=("M", "size"), ciro=("M", "sum")).reset_index()
+tablo = veri.oku("kesit_bi", "RFMSegmentleri").merge(ozet, on="Segment", how="left").sort_values("Sira")
+tablo["pay"] = (tablo["ciro"] / tablo["ciro"].sum() * 100).round(1)
+print(tablo[["Segment", "musteri", "pay"]].to_string(index=False))
+</pre><p>30 Şampiyon müşteri cironun %45'ini getiriyor; 26 "Risk altında" müşteri ise geçmişte cironun %21'ini getirmiş ama uzun süredir alışveriş yapmıyor. Geri kazanım kampanyasının hedef listesi budur.</p><h3>3. Kohort tanımında mutabakat</h3><p>Kohort "müşterinin ilk sipariş ayı"dır. Ama hangi sipariş? Power BI modelindeki <code>Musteriler.IlkSiparis</code> ile kendi hesabını karşılaştırınca 136 müşterinin 13'ünde fark çıkar. Nedeni tanımdır: Power BI modeli <b>iptal edilen siparişleri saymaz</b>. 2 numaralı müşteri ilk siparişini 14 Ocak'ta vermiş ama iptal etmiş; Power BI ona göre müşteri 24 Şubat'ta kazanılmıştır. İki tanım da savunulabilir; önemli olan aynı şirkette tek tanımın kullanılması ve bunun yazılı olmasıdır.</p><pre class="py">import veri
+
+o = veri.oku("anadolu_market", "orders", parse_dates=["order_date"])
+bi = veri.oku("kesit_bi", "Musteriler").set_index("MusteriNo")["IlkSiparis"].dropna()
+for ad, kume in [("tüm siparişler", o), ("iptal hariç", o[o["status"] != "cancelled"])]:
+    ilk = kume.groupby("customer_id")["order_date"].min().dt.strftime("%Y-%m-%d")
+    print(ad, "eşleşen:", int((bi == ilk.reindex(bi.index)).sum()), "/", len(bi))
+</pre><div class="warn"><b>Anlık görüntü (snapshot) farkı</b>Ciroyu durumlara göre karşılaştırınca toplam tutar kuruşu kuruşuna aynıdır, ama "teslim edildi" cirosu iki sistemde yaklaşık 10.600 TL farklıdır. Fark, Aralık'ın son dört gününe ait 5 siparişten gelir: Power BI modeli onları "Kargoda" görür, operasyon veritabanı "delivered". Model bu siparişler teslim edilmeden önce yenilenmiş. Raporlarına her zaman verinin hangi tarihte çekildiğini yaz.</div><div class="note"><b>Gerçek işte</b>Yeni bir analiz yayına girmeden önce sonuçları şirketin mevcut panosuyla karşılaştırırsın. "Sizin rakamınız panodan farklı" itirazı ilk toplantıda gelir; farkın nedenini (tanım, zaman, filtre) önceden bilmek güven kazandırır. Bu projenin README dosyasına "Power BI modeliyle mutabakat" başlıklı kısa bir bölüm eklemek, portföyünde seni diğer adaylardan ayırır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üretime taşırken</h3>
+<p>Gerçek paket şu farklarla büyür: veri CSV/parquet ya da veritabanından okunur (<code>pd.read_sql</code>), API çağrıları httpx ile yapılır ve yeniden deneme (retry) + zaman aşımı eklenir, çıktı parquet ya da bir BI aracına yazılır, iş akışı zamanlayıcıyla (cron, Airflow) her gece koşar. RFM eşikleri sabit kodlanmaz, yapılandırma dosyasından okunur.</p>
+<h3>Sürüm uyumunu test etmek</h3>
+<p>pandas 2.2 ve 3.x farkları (varsayılan str türü, Copy-on-Write, groupby observed varsayılanı) için CI matrisinde iki sürümü de koştur. <code>inplace</code>'ten kaçınmak, <code>observed=True</code> yazmak ve zincirleme atama yapmamak uyumun yüzde doksanıdır.</p>
+<h3>RFM'in ötesi</h3>
+<p>RFM basit ve açıklanabilir olduğu için hâlâ yaygın; ama müşteri yaşam boyu değeri (CLV) tahmini, kayıp (churn) olasılığı ve ürün öneri sistemleri bir sonraki adımdır. Hepsi aynı veri katmanının üstüne kurulur; bu projedeki <code>siparis_df</code> temel kalır.</p>
+<h3>Performans</h3>
+<p>Milyonlarca satırda <code>apply(segment)</code> yavaşlar; <code>pd.cut</code> ile vektörel segmentleme ya da <code>np.select</code> kullan. Kohort tablosu için <code>pivot_table</code> ve kategorik türler belleği düşürür.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-ileri">Alıştırmalara geç (32)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../mulakat-hazirlik/">← Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama</a><a href="../fonksiyon-iskeleti/">Fonksiyon iskeleti: boşluğu doldur →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

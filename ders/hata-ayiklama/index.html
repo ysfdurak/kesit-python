@@ -1,0 +1,185 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hata ayıklama (debugging) | Kesit Python</title><meta name="description" content="Traceback'i alttan yukarı okur, print ve f&quot;{x=}&quot; ile izler, assert ile varsayımları denetler, pdb ve VS Code ile adım adım ilerler, sorunu küçültüp doğru…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/hata-ayiklama/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Hata ayıklama (debugging)"><meta property="og:description" content="Traceback'i alttan yukarı okur, print ve f&quot;{x=}&quot; ile izler, assert ile varsayımları denetler, pdb ve VS Code ile adım adım ilerler, sorunu küçültüp doğru…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/hata-ayiklama/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Hata ayıklama (debugging)","description":"Traceback'i alttan yukarı okur, print ve f\"{x=}\" ile izler, assert ile varsayımları denetler, pdb ve VS Code ile adım adım ilerler, sorunu küçültüp doğru…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/hata-ayiklama/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Dosya ve hata</span><h1>Hata ayıklama (debugging)</h1><p class="st-l">Traceback'i alttan yukarı okur, print ve f"{x=}" ile izler, assert ile varsayımları denetler, pdb ve VS Code ile adım adım ilerler, sorunu küçültüp doğru soruyu sorarak hatayı yöntemle bulursun.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-ayiklama">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in gece çalışan ciro raporu bu sabah İzmir için 0 TL gösterdi. Program hata vermedi, sadece yanlış sonuç üretti. Ekipte biri "dün çalışıyordu" dedi, bir başkası kodu baştan yazmayı önerdi. Deneyimli geliştirici ise şunu yaptı: hatayı tekrar üretti, veriyi küçülttü, iki <code>print</code> ekledi ve on dakikada sorunun bir sözlük anahtarındaki tek harf olduğunu buldu. Hata ayıklama (debugging), yazılımcının günlük işinin belki de yarısıdır ve şansa değil <b>yönteme</b> dayanır. Bu derste o yöntemi öğreneceksin.</p>
+<p><code>try/except</code> ile hatayı yakalamayı ve kendi hatanı fırlatmayı "Hatalar ve istisnalar" dersinde gördün. Burada amaç farklı: hatanın <b>nedenini</b> bulmak ve düzeltmek.</p>
+
+<h2>Üç hata ailesi</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Aile</th><th>Ne zaman ortaya çıkar?</th><th>Örnek</th><th>Belirti</th></tr>
+<tr><td>Sözdizimi hatası (syntax error)</td><td>Kod daha çalışmadan, derlenirken</td><td>Kapanmamış parantez, eksik iki nokta, yanlış girinti</td><td>Program hiç başlamaz; <code>SyntaxError</code>, <code>IndentationError</code></td></tr>
+<tr><td>Çalışma zamanı hatası (runtime error, exception)</td><td>Kod çalışırken, o satıra gelince</td><td>Sıfıra bölme, olmayan anahtar, yanlış tür</td><td>Traceback ile durur: <code>ZeroDivisionError</code>, <code>KeyError</code>, <code>TypeError</code></td></tr>
+<tr><td>Mantık hatası (logic error)</td><td>Hiçbir zaman "patlamaz"</td><td>Yanlış aralık, yanlış koşul, yanlış formül</td><td>Program sessizce <b>yanlış sonuç</b> verir</td></tr>
+</table></div>
+<p>En tehlikelisi sonuncusudur: kimse fark etmezse yanlış rakam yönetim raporuna kadar gider. Sözdizimi ve çalışma zamanı hataları ise aslında dosttur; sana tam olarak nerede durduklarını söylerler.</p>
+
+<h2>Traceback'i alttan yukarı oku</h2>
+<p>Python bir istisna fırlattığında geriye dönük iz (traceback) yazdırır. Yeni başlayanlar en üstten okumaya başlar ve kaybolur. Doğru sıra tam tersidir:</p>
+<pre class="out">Traceback (most recent call last):
+  File "gunluk_rapor.py", line 12, in &lt;module&gt;
+    print(sehir_ozeti(siparisler))
+  File "gunluk_rapor.py", line 7, in sehir_ozeti
+    toplam[s["sehir"]] += s["tutar"]
+KeyError: 'İzmir'</pre>
+<div class="steps-list"><ol>
+<li><b>En alt satır:</b> hata türü ve mesajı. <code>KeyError: 'İzmir'</code> → sözlükte "İzmir" anahtarı yok.</li>
+<li><b>Hemen üstündeki File satırı:</b> hatanın gerçekleştiği yer. 7. satır, <code>sehir_ozeti</code> fonksiyonu.</li>
+<li><b>Kod satırı:</b> <code>toplam[s["sehir"]] += s["tutar"]</code>. <code>+=</code> önce okur; anahtar ilk kez geliyorsa okuma başarısız olur.</li>
+<li><b>Yukarı çık:</b> bu fonksiyonu kim çağırdı? 12. satır. Üst satırlar "buraya nasıl gelindi" hikâyesidir.</li>
+</ol></div>
+<p>"most recent call last" ifadesi zaten ipucunu verir: en son çağrı en alttadır. Kütüphane kodunun içinde biten bir traceback'te, alttan yukarı çıkarken <b>kendi dosyanın</b> ilk satırını ara; hata çoğunlukla oraya senin verdiğin bir değerden kaynaklanır.</p>
+<pre class="py">siparisler = [
+    {"sehir": "İzmir", "tutar": 300},
+    {"sehir": "Ankara", "tutar": 150},
+    {"sehir": "İzmir", "tutar": 120},
+]
+
+def sehir_ozeti(siparisler):
+    toplam = {}
+    for s in siparisler:
+        # Hatalı hâli: toplam[s["sehir"]] += s["tutar"]
+        toplam[s["sehir"]] = toplam.get(s["sehir"], 0) + s["tutar"]
+    return toplam
+
+print(sehir_ozeti(siparisler))</pre>
+
+<h2>Hata türüne göre ilk bakılacak yer</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Hata</th><th>Genelde ne demek?</th><th>İlk bakacağın yer</th></tr>
+<tr><td><code>SyntaxError</code></td><td>Python cümleyi anlayamadı</td><td>Gösterilen satır <b>ve bir üstü</b>: kapanmamış parantez/tırnak, eksik <code>:</code></td></tr>
+<tr><td><code>IndentationError</code></td><td>Girinti tutarsız</td><td>Sekme/boşluk karışımı, blok sonrası boş gövde</td></tr>
+<tr><td><code>NameError</code></td><td>Bu ad tanımlı değil</td><td>Yazım hatası, tanımdan önce kullanım, yanlış kapsam</td></tr>
+<tr><td><code>TypeError</code></td><td>Bu türle bu işlem olmaz</td><td><code>input()</code>'tan gelen metin, <code>None</code> dönen fonksiyon, eksik argüman</td></tr>
+<tr><td><code>ValueError</code></td><td>Tür doğru, değer uygunsuz</td><td><code>int("12,5")</code> gibi dönüşümler, veri temizliği</td></tr>
+<tr><td><code>KeyError</code></td><td>Sözlükte bu anahtar yok</td><td>Anahtarın yazımı, büyük-küçük harf, Türkçe karakter</td></tr>
+<tr><td><code>IndexError</code></td><td>Liste bu kadar uzun değil</td><td><code>range</code> sınırları, boş liste, off-by-one</td></tr>
+<tr><td><code>AttributeError</code></td><td>Bu nesnede bu nitelik yok</td><td>Değişken beklediğin türde değil (çoğu zaman <code>None</code>)</td></tr>
+<tr><td><code>ZeroDivisionError</code></td><td>Sıfıra bölme</td><td>Boş listede ortalama, sıfır adet</td></tr>
+</table></div>
+
+<h2>print ile izleme ve f"{x=}" kalıbı</h2>
+<p>En eski ve hâlâ en hızlı araç: şüphelendiğin yere değerleri yazdırmak. Python 3.8'den beri f-string içinde <code>=</code> kullanırsan hem ifadeyi hem değerini yazar; etiketi elle yazma derdi biter.</p>
+<pre class="py">def kargo_ucreti(agirlik_kg, sehir):
+    taban = 40
+    ek = (agirlik_kg - 1) * 12 if agirlik_kg &gt; 1 else 0
+    uzak = sehir in ("Van", "Hakkari")
+    print(f"{agirlik_kg=} {ek=} {uzak=}")      # geçici izleme satırı
+    ucret = taban + ek + (25 if uzak else 0)
+    print(f"{ucret=}  {ucret / agirlik_kg=:.2f}")
+    return ucret
+
+kargo_ucreti(3, "Van")
+kargo_ucreti(0.5, "İzmir")</pre>
+<div class="tip"><b>İzleme satırını işaretle</b>Geçici <code>print</code> satırlarının sonuna <code># DEBUG</code> yaz; iş bitince hepsini tek aramayla bul ve sil. Kalıcı izleme gerekiyorsa <code>print</code> değil <code>logging</code> kullanılır (orta seviyede göreceksin).</div>
+
+<h2>assert ile varsayım kontrolü</h2>
+<p>Her kodun içinde söylenmemiş varsayımlar vardır: "liste boş olmaz", "indirim oranı 0 ile 1 arasındadır". <code>assert koşul, "mesaj"</code> bu varsayımı yazıya döker; koşul yanlışsa <code>AssertionError</code> fırlatır. Böylece hata, yanlış değerin <b>doğduğu yerde</b> yakalanır, üç fonksiyon sonra değil.</p>
+<pre class="py">def indirim_uygula(fiyat, oran):
+    assert 0 &lt;= oran &lt;= 1, f"oran 0-1 arasında olmalı, gelen: {oran}"
+    yeni = fiyat * (1 - oran)
+    assert yeni &lt;= fiyat, "indirimli fiyat eskisinden büyük olamaz"
+    return round(yeni, 2)
+
+print(indirim_uygula(200, 0.15))
+try:
+    print(indirim_uygula(200, 15))      # yüzde yerine 15 verildi
+except AssertionError as hata:
+    print("Yakalandı:", hata)</pre>
+<div class="warn"><b>assert kullanıcı girdisi için değildir</b>Python <code>-O</code> seçeneğiyle çalıştırılınca tüm assert satırları atlanır. Kullanıcıdan ya da dosyadan gelen veriyi doğrulamak için <code>if</code> + <code>raise ValueError</code> kullan; assert yalnızca "bu asla olmamalı" dediğin programcı varsayımları içindir.</div>
+
+<h2>breakpoint() ve pdb</h2>
+<p>print'in yetmediği yerde hata ayıklayıcı (debugger) devreye girer: programı bir satırda durdurur, değişkenlere bakmanı ve satır satır ilerlemeni sağlar. Kodun içine <code>breakpoint()</code> yazman yeterli; Python yerleşik <code>pdb</code> ayıklayıcısını açar.</p>
+<pre class="code">def faiz_hesapla(anapara, yillik_oran, ay):
+    aylik = yillik_oran / 12
+    breakpoint()                 # program burada durur, (Pdb) istemi açılır
+    return anapara * (1 + aylik) ** ay
+
+faiz_hesapla(10_000, 0.42, 12)</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Açılımı</th><th>Ne yapar?</th></tr>
+<tr><td><code>n</code></td><td>next</td><td>Sonraki satıra geç; fonksiyon çağrısının içine girmez</td></tr>
+<tr><td><code>s</code></td><td>step</td><td>Satırda bir fonksiyon çağrısı varsa içine gir</td></tr>
+<tr><td><code>c</code></td><td>continue</td><td>Bir sonraki durma noktasına kadar çalış</td></tr>
+<tr><td><code>p ifade</code></td><td>print</td><td>Değeri göster: <code>p aylik</code>, <code>p anapara * 2</code></td></tr>
+<tr><td><code>l</code></td><td>list</td><td>Bulunduğun yerin çevresindeki kodu göster</td></tr>
+<tr><td><code>w</code></td><td>where</td><td>Çağrı yığınını göster (canlı traceback)</td></tr>
+<tr><td><code>q</code></td><td>quit</td><td>Ayıklayıcıdan ve programdan çık</td></tr>
+</table></div>
+<div class="note"><b>Kendi bilgisayarında dene</b>Tarayıcıdaki çalıştırıcı etkileşimli konsol açmadığı için <code>breakpoint()</code>'i burada değil, terminalde dene: <code>python faiz.py</code>. Program çökmüşse <code>python -m pdb faiz.py</code> ile başlatıp hata anında otomatik durdurabilirsin (post-mortem).</div>
+
+<h2>VS Code hata ayıklayıcısı</h2>
+<p>Aynı işi fareyle yapmak istersen VS Code'un Python eklentisi yeterli:</p>
+<div class="steps-list"><ol>
+<li>Satır numarasının soluna tıkla (ya da <b>F9</b>): kırmızı nokta, yani kesme noktası (breakpoint).</li>
+<li><b>F5</b> → "Python File". Program kırmızı noktada durur.</li>
+<li>Sol panelde <b>Variables</b> tüm yerel değişkenleri gösterir; <b>Watch</b>'a ifade ekleyip izleyebilirsin.</li>
+<li><b>F10</b> step over (n), <b>F11</b> step into (s), <b>Shift+F11</b> fonksiyondan çık, <b>F5</b> devam (c).</li>
+<li>Kesme noktasına sağ tıklayıp <b>koşullu</b> yapabilirsin: <code>s["sehir"] == "İzmir"</code>. Bin kayıtlık döngüde yalnızca ilgilendiğin kayıtta durur.</li>
+<li><b>Debug Console</b>'da durduğun andaki değişkenlerle Python ifadesi çalıştırabilirsin.</li>
+</ol></div>
+
+<h2>Sorunu küçült: minimal örnek</h2>
+<p>Elinde 50 bin satırlık sipariş dosyası ve bir yerde patlayan bir rapor var. Gözle aramak yerine sorunu üreten en küçük girdiyi bul. Önce hatayı üreten kaydı otomatik yakala, sonra yalnızca o kayıtla çalış:</p>
+<pre class="py">kayitlar = [
+    {"no": "AM-1", "tutar": "120.5"},
+    {"no": "AM-2", "tutar": "89"},
+    {"no": "AM-3", "tutar": "1.250,00"},     # Türkçe biçim: float'a çevrilmez
+    {"no": "AM-4", "tutar": "40"},
+]
+
+for i, k in enumerate(kayitlar):
+    try:
+        float(k["tutar"])
+    except ValueError as hata:
+        print(f"{i=} {k['no']=} -&gt; {hata}")
+        break</pre>
+<p>Artık sorun "rapor çalışmıyor" değil, "<code>float("1.250,00")</code> ValueError veriyor". Bu cümleyle düzeltme yapmak, aramak ve soru sormak çok kolaydır. Minimal örneğin kuralları: hatayı hâlâ üretsin, bunun dışında her şey silinsin, başkası kopyalayıp çalıştırabilsin.</p>
+
+<h2>Rubber duck: sesli anlat</h2>
+<p>Masaya bir lastik ördek koy ve kodunu ona satır satır anlat: "Burada listeyi geziyorum, burada toplamı artırıyorum, burada döndürüyorum..." Çoğu zaman cümlenin ortasında "dur, return döngünün içinde" dersin. Yöntemin adı komik ama işe yarar, çünkü sesli anlatmak seni varsaydığın şeyi değil, <b>kodun gerçekten yaptığını</b> okumaya zorlar.</p>
+
+<h2>Hata mesajını aramak ve yapay zekâya sormak</h2>
+<p>Hata mesajının <b>genel kısmını</b> ara, sana özel kısmını çıkar: <code>"TypeError: unsupported operand type(s) for +: 'int' and 'str'"</code> iyi bir aramadır; dosya adların ve değişken adların değildir. Yapay zekâya ya da bir foruma sorarken şu beşini ver:</p>
+<ol>
+<li><b>Ne yapmaya çalışıyorsun?</b> (bir cümle iş hedefi)</li>
+<li><b>Minimal kod</b> (çalıştırılabilir, gizli bilgi ve müşteri verisi içermeyen)</li>
+<li><b>Tam hata mesajı</b> (traceback'in tamamı, ekran görüntüsü değil metin)</li>
+<li><b>Beklenen ve gelen sonuç</b></li>
+<li><b>Denediklerin</b> ve Python sürümün</li>
+</ol>
+<div class="warn"><b>Yapıştırmadan önce düşün</b>Şirket kodu, müşteri adları, IBAN, şifre ve API anahtarları dış bir hizmete gönderilmez. Minimal örnek hazırlamanın bir faydası da budur: gerçek veriyi kurgusal küçük veriyle değiştirirsin. Gelen cevabı da körü körüne yapıştırma; neden çalıştığını anlamadığın düzeltme bir sonraki hatanın tohumudur.</div>
+
+<h2>Klasik böcekler kataloğu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Böcek</th><th>Belirti</th><th>Düzeltme</th></tr>
+<tr><td>Off-by-one</td><td>Son ya da ilk eleman eksik</td><td><code>range</code> bitişinin hariç olduğunu hatırla</td></tr>
+<tr><td>Döngü içinde <code>return</code></td><td>Yalnızca ilk eleman işlenir</td><td><code>return</code>'ü döngü hizasından çıkar</td></tr>
+<tr><td><code>==</code> yerine <code>=</code> ya da tersi</td><td>Değer güncellenmez</td><td>Atama <code>=</code>, karşılaştırma <code>==</code></td></tr>
+<tr><td>Tamsayı bölme</td><td>Kuruşlar kaybolur</td><td><code>//</code> yerine <code>/</code></td></tr>
+<tr><td>Değişebilir varsayılan</td><td>Çağrılar arasında veri sızar</td><td><code>None</code> varsayılanı + içeride yeni liste</td></tr>
+<tr><td>Gölgeleme (shadowing)</td><td><code>'int' object is not callable</code></td><td><code>sum</code>, <code>list</code>, <code>max</code> adlarını değişkene verme</td></tr>
+<tr><td>Yanlış anahtar</td><td><code>KeyError</code> ya da <code>.get</code> ile sessiz 0</td><td>Anahtarı veriden kopyala</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Profesyonel ekiplerde bir hata bildirimi (bug report) "çalışmıyor" diye açılmaz: adımlar, beklenen, gelen, ortam ve log eklenir. Düzeltmeden önce hatayı yeniden üreten bir test yazılır; test kırmızıyken düzeltilir, yeşile dönünce kod incelemesine (code review) gönderilir. Böylece aynı hata bir daha geri gelirse test hemen yakalar. Mülakatlarda da sık sorulur: "Son zamanlarda ayıkladığın zor bir hatayı anlat." İyi cevap, yöntemi anlatan cevaptır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Bilimsel yöntem olarak hata ayıklama</h3>
+<p>Gözlem → hipotez → deney → sonuç. "Sanırım tutar metin olarak geliyor" bir hipotezdir; <code>print(f"{type(tutar)=}")</code> onun deneyidir. Hipotezleri tek tek ele, aynı anda üç şeyi değiştirme; yoksa hangisinin düzelttiğini bilemezsin.</p>
+<h3>İkiye bölerek arama</h3>
+<p>Kod dün çalışıyordu, bugün çalışmıyorsa aradaki değişikliklerin ortasını dene, sonra kalan yarının ortasını... Git bunu <code>git bisect</code> komutuyla otomatik yapar: yüz commit arasından bozan commit'i yaklaşık yedi denemede bulursun. Aynı fikir veri için de geçerlidir: dosyanın yarısıyla dene, hata hangi yarıdaysa onu böl.</p>
+<h3>Heisenbug ve ortam farkları</h3>
+<p>Bazı hatalar gözlemlediğinde kaybolur (zamanlama, rastgelelik, önbellek (cache)). Rastgelelikte <code>random.seed</code> ile tekrarlanabilir hâle getir; ortam farkında <code>python --version</code>, <code>pip freeze</code> ve işletim sistemini karşılaştır. "Bende çalışıyor" cümlesi bir sonuç değil, bir ipucudur: iki ortam arasında bir fark var demektir.</p>
+<h3>Post-mortem</h3>
+<p>Uzun süren bir iş gecenin üçünde çöktüyse, interaktif konsolda <code>import pdb; pdb.pm()</code> son istisnanın yığınına girip o anki değişkenleri gösterir. Üretimde ise log ve hata izleme servisleri (Sentry gibi) traceback'i değişken değerleriyle birlikte saklar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hata-ayiklama">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ozyineleme/">← Özyineleme (recursion)</a><a href="../kod-stili/">Temiz kod ve PEP 8 →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

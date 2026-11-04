@@ -1,0 +1,273 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS | Kesit Python</title><meta name="description" content="Big-O sezgisi kurar; doğrusal ve ikili aramayı (bisect), beş klasik sıralamayı ve Timsort'u, iki işaretçi, kayan pencere, önek toplamı, açgözlü yaklaşım,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/algoritmalar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS"><meta property="og:description" content="Big-O sezgisi kurar; doğrusal ve ikili aramayı (bisect), beş klasik sıralamayı ve Timsort'u, iki işaretçi, kayan pencere, önek toplamı, açgözlü yaklaşım,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/algoritmalar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS","description":"Big-O sezgisi kurar; doğrusal ve ikili aramayı (bisect), beş klasik sıralamayı ve Timsort'u, iki işaretçi, kayan pencere, önek toplamı, açgözlü yaklaşım,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/algoritmalar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Veri yapıları ve algoritmalar</span><h1>Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS</h1><p class="st-l">Big-O sezgisi kurar; doğrusal ve ikili aramayı (bisect), beş klasik sıralamayı ve Timsort'u, iki işaretçi, kayan pencere, önek toplamı, açgözlü yaklaşım, dinamik programlama ve BFS/DFS kalıplarını iş problemleri üzerinde adım sayarak öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/algoritmalar">Uygulamada aç, 19 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in "aynı müşteri, aynı gün, aynı tutar" şüpheli sipariş kontrolü test ortamında 1.000 siparişle bir saniyede çalışıyordu. Canlıya çıkınca günde 2 milyon sipariş geldi ve iş saatlerce sürdü. Kod yanlış değildi; <b>algoritma</b> ölçeklenmiyordu: her siparişi diğer her siparişle karşılaştırıyordu. 1.000 sipariş için 1 milyon karşılaştırma, 2 milyon sipariş için 4 trilyon.</p>
+<p>Bu derste algoritmanın maliyetini <b>Big-O</b> ile konuşmayı, klasik arama ve sıralama algoritmalarını ve iş hayatında en çok karşına çıkacak çözüm kalıplarını öğreneceksin. Veri yapılarını bir önceki <b>Veri yapıları</b> dersinde gördün; profil alma ve ölçümü <b>Profil ve optimizasyon</b>, mülakat kalıplarını <b>Mülakat hazırlığı</b> dersinde derinleştireceksin.</p>
+
+<h2>Big-O sezgisi</h2>
+<p>Big-O, girdi büyüdükçe adım sayısının <b>nasıl büyüdüğünü</b> anlatır; saniye değil, büyüme hızıdır. Sabitler ve küçük terimler atılır: 3n + 5 adım O(n)'dir. Bellek için de aynı dil kullanılır: ek bir liste kuran algoritma O(n) bellek (space) kullanır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Sınıf</th><th>Örnek</th><th>n = 1.000</th><th>n = 1.000.000</th></tr>
+<tr><td>O(1)</td><td>dict'te anahtar, listede indeks</td><td>1</td><td>1</td></tr>
+<tr><td>O(log n)</td><td>ikili arama</td><td>~10</td><td>~20</td></tr>
+<tr><td>O(n)</td><td>listede tek geçiş, <code>in</code> ile liste araması</td><td>1.000</td><td>1.000.000</td></tr>
+<tr><td>O(n log n)</td><td><code>sorted</code>, birleştirme sıralaması</td><td>~10.000</td><td>~20.000.000</td></tr>
+<tr><td>O(n²)</td><td>iç içe döngü, kabarcık sıralaması</td><td>1.000.000</td><td>10<sup>12</sup> (pratikte imkânsız)</td></tr>
+<tr><td>O(2<sup>n</sup>)</td><td>tüm alt kümeleri denemek</td><td>astronomik</td><td>astronomik</td></tr>
+</table></div>
+<p>Sezgiyi kurmanın en iyi yolu <b>adım saymaktır</b>:</p>
+<pre class="py">def adim_say(n):
+    tek = cift = 0
+    for i in range(n):          # tek döngü
+        tek += 1
+    for i in range(n):          # iç içe döngü
+        for j in range(n):
+            cift += 1
+    return tek, cift
+
+for n in [10, 100, 1000]:
+    print(n, adim_say(n))</pre>
+<p>n on katına çıkınca tek döngü on kat, iç içe döngü yüz kat büyür. Şüpheli sipariş problemindeki çözüm de buradan gelir: siparişleri (müşteri, gün, tutar) anahtarıyla bir sözlükte toplamak tek geçiştir, O(n).</p>
+
+<h2>Doğrusal arama ve ikili arama</h2>
+<p><b>Doğrusal arama</b> (linear search) baştan sona bakar: O(n). Veri <b>sıralıysa</b> <b>ikili arama</b> (binary search) ortadaki elemana bakar ve aramayı her adımda yarıya indirir: O(log n). 1 milyon elemanda en fazla 20 adım. Python'da hazır hâli <code>bisect</code> modülüdür.</p>
+<pre class="py">import bisect
+fiyatlar = [49, 75, 120, 120, 120, 300, 999]
+print(bisect.bisect_left(fiyatlar, 120))    # 120'nin ilk konumu (sola yerleştirme)
+print(bisect.bisect_right(fiyatlar, 120))   # son 120'nin bir sağı
+print(bisect.bisect_right(fiyatlar, 120) - bisect.bisect_left(fiyatlar, 120), "adet 120 TL")
+bisect.insort(fiyatlar, 150)                # sırayı bozmadan ekle
+print(fiyatlar)
+
+def var_mi(sirali, x):
+    i = bisect.bisect_left(sirali, x)
+    return i &lt; len(sirali) and sirali[i] == x
+print(var_mi(fiyatlar, 300), var_mi(fiyatlar, 301))</pre>
+<p><code>bisect</code>'in en güçlü kullanımı <b>dilim tablolarıdır</b>: vergi dilimi, kargo ücreti, not aralığı, risk skoru. Uzun bir <code>if/elif</code> zinciri yerine sınırları bir listeye koyar, hangi aralıkta olduğunu bisect ile bulursun:</p>
+<pre class="py">import bisect
+SINIRLAR = [1000, 5000, 20000]          # TL
+PUAN = ["düşük", "orta", "yüksek", "çok yüksek"]
+def risk(tutar):
+    return PUAN[bisect.bisect_right(SINIRLAR, tutar)]
+for t in [500, 1000, 4999, 5000, 75000]:
+    print(t, risk(t))</pre>
+<div class="warn"><b>İkili arama yalnızca sıralı veride çalışır</b>Sırasız listede bisect hata vermez, sessizce yanlış cevap verir. Bir kez sıralamak O(n log n)'dir; bu yalnızca çok sayıda arama yapacaksan kârlıdır. Tek bir arama için doğrusal arama daha ucuzdur.</div>
+
+<h2>Sıralama algoritmaları</h2>
+<p>Python'da her gün <code>sorted</code> kullanırsın; ama klasik algoritmaları bilmek hem mülakatlarda sorulur hem de "neden bazı çözümler yavaş" sorusunu cevaplar. Üç basit algoritma O(n²)'dir:</p>
+<ul><li><b>Kabarcık</b> (bubble): komşuları karşılaştırıp yer değiştirir; her turda en büyük sona "kabarır".</li>
+<li><b>Seçmeli</b> (selection): kalanların en küçüğünü bulup başa koyar; az yer değiştirme yapar.</li>
+<li><b>Eklemeli</b> (insertion): her elemanı solundaki sıralı kısımda yerine kaydırır; neredeyse sıralı veride O(n)'e yaklaşır.</li></ul>
+<pre class="py">def kabarcik(a):
+    a, k = list(a), 0
+    for son in range(len(a) - 1, 0, -1):
+        degisti = False
+        for i in range(son):
+            k += 1
+            if a[i] &gt; a[i + 1]:
+                a[i], a[i + 1] = a[i + 1], a[i]
+                degisti = True
+        if not degisti:              # hiç değişmediyse liste sıralı
+            break
+    return a, k
+
+def secmeli(a):
+    a, k = list(a), 0
+    for i in range(len(a)):
+        en_kucuk = i
+        for j in range(i + 1, len(a)):
+            k += 1
+            if a[j] &lt; a[en_kucuk]:
+                en_kucuk = j
+        a[i], a[en_kucuk] = a[en_kucuk], a[i]
+    return a, k
+
+veri = [42, 7, 19, 3, 88, 21, 5, 64]
+print(kabarcik(veri), secmeli(veri))
+print("sıralı girdi:", kabarcik(sorted(veri))[1], "karşılaştırma (kabarcık),", secmeli(sorted(veri))[1], "(seçmeli)")</pre>
+<p>Sıralı girdide kabarcık erken çıkışla n-1 karşılaştırmada biter; seçmeli ise her durumda n(n-1)/2 karşılaştırma yapar. Aynı Big-O sınıfındaki algoritmalar bile girdiye göre çok farklı davranabilir.</p>
+<p><b>Böl ve fethet</b> (divide and conquer) algoritmaları O(n log n)'e iner. <b>Birleştirme sıralaması</b> (merge sort) listeyi ikiye böler, her yarıyı sıralar ve iki sıralı listeyi tek geçişte birleştirir. <b>Hızlı sıralama</b> (quick sort) bir pivot seçer, küçükleri sola büyükleri sağa ayırır ve her parçayı sıralar.</p>
+<pre class="py">def birlestirme(a):
+    if len(a) &lt;= 1:
+        return list(a)
+    orta = len(a) // 2
+    sol, sag = birlestirme(a[:orta]), birlestirme(a[orta:])
+    sonuc, i, j = [], 0, 0
+    while i &lt; len(sol) and j &lt; len(sag):
+        if sol[i] &lt;= sag[j]:          # &lt;= kararlılığı korur
+            sonuc.append(sol[i]); i += 1
+        else:
+            sonuc.append(sag[j]); j += 1
+    return sonuc + sol[i:] + sag[j:]
+
+def hizli(a):
+    if len(a) &lt;= 1:
+        return list(a)
+    pivot = a[len(a) // 2]
+    return (hizli([x for x in a if x &lt; pivot]) + [x for x in a if x == pivot]
+            + hizli([x for x in a if x &gt; pivot]))
+
+veri = [42, 7, 19, 3, 88, 21, 5, 64, 19]
+print(birlestirme(veri))
+print(hizli(veri))</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Algoritma</th><th>En iyi</th><th>Ortalama</th><th>En kötü</th><th>Ek bellek</th><th>Kararlı mı?</th></tr>
+<tr><td>Kabarcık</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Evet</td></tr>
+<tr><td>Seçmeli</td><td>O(n²)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Hayır</td></tr>
+<tr><td>Eklemeli</td><td>O(n)</td><td>O(n²)</td><td>O(n²)</td><td>O(1)</td><td>Evet</td></tr>
+<tr><td>Birleştirme</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Evet</td></tr>
+<tr><td>Hızlı</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n²)</td><td>O(log n)</td><td>Genelde hayır</td></tr>
+<tr><td>Timsort (Python)</td><td>O(n)</td><td>O(n log n)</td><td>O(n log n)</td><td>O(n)</td><td>Evet</td></tr>
+</table></div>
+<p><b>Timsort</b>, Python'ın <code>sorted</code> ve <code>list.sort</code> algoritmasıdır: birleştirme ve eklemeli sıralamanın melezidir, verideki hazır sıralı parçaları (run) bulur ve gerçek hayattaki "kısmen sıralı" veride çok hızlıdır. En önemli özelliği <b>kararlı</b> (stable) olmasıdır: anahtarı eşit olan elemanlar orijinal sıralarını korur. Bu sayede çok anahtarlı sıralamayı iki adımda yapabilirsin:</p>
+<pre class="py">siparisler = [("Ankara", 250), ("İzmir", 975), ("Ankara", 975), ("Bursa", 250), ("İzmir", 120)]
+# Hedef: tutara göre azalan, eşit tutarda şehre göre artan
+adim1 = sorted(siparisler, key=lambda s: s[0])                 # önce İKİNCİL anahtar
+adim2 = sorted(adim1, key=lambda s: s[1], reverse=True)        # sonra birincil
+print(adim2)
+print(sorted(siparisler, key=lambda s: (-s[1], s[0])) == adim2)   # tek adımlı karşılığı</pre>
+<div class="tip"><b>Kendi sıralamanı yazma, key'i iyi yaz</b>Üretim kodunda kendi sıralama algoritmanı neredeyse hiç yazmazsın; Timsort C ile yazılmıştır ve senin Python döngünden onlarca kat hızlıdır. Asıl beceri doğru <code>key</code> fonksiyonunu kurmaktır.</div>
+
+<h2>İki işaretçi ve kayan pencere</h2>
+<p><b>İki işaretçi</b> (two pointers) kalıbında sıralı bir dizide iki indeks birbirine doğru ya da aynı yönde ilerler; iç içe döngü gerektiren birçok soru tek geçişe iner. <b>Kayan pencere</b> (sliding window) ise ardışık bir aralığı genişletip daraltarak "en kısa/en uzun ardışık dönem" sorularını O(n) çözer: sağ uç her adımda ilerler, koşul sağlandıkça sol uç daralır.</p>
+<pre class="py">def hedef_ciro_donemi(gunluk, hedef):
+    """Toplamı hedefe ulaşan en kısa ardışık gün sayısı (değerler pozitif)."""
+    sol, toplam, en_kisa = 0, 0, None
+    for sag, deger in enumerate(gunluk):
+        toplam += deger                         # pencereyi sağa genişlet
+        while toplam &gt;= hedef:                  # koşul sağlanıyor: soldan daralt
+            uzunluk = sag - sol + 1
+            en_kisa = uzunluk if en_kisa is None else min(en_kisa, uzunluk)
+            toplam -= gunluk[sol]
+            sol += 1
+    return en_kisa
+
+ciro = [120, 80, 400, 90, 300, 50, 600]
+print(hedef_ciro_donemi(ciro, 650), hedef_ciro_donemi(ciro, 5000))</pre>
+<p>Her eleman pencereye bir kez girer, bir kez çıkar: toplam O(n). Aynı soruyu tüm (başlangıç, bitiş) çiftlerini deneyerek çözmek O(n²) olurdu.</p>
+
+<h2>Önek toplamı</h2>
+<p>"3. günden 10. güne kadar ciro ne?" sorusu günde binlerce kez soruluyorsa her seferinde toplamak O(n)'dir. <b>Önek toplamı</b> (prefix sum) dizisini bir kez kurarsın; sonra her aralık toplamı tek çıkarma işlemidir, O(1).</p>
+<pre class="py">from itertools import accumulate
+ciro = [120, 80, 400, 90, 300, 50, 600]
+onek = [0, *accumulate(ciro)]           # onek[i] = ilk i günün toplamı
+print(onek)
+def aralik(i, j):                        # i..j günleri dahil (0 tabanlı)
+    return onek[j + 1] - onek[i]
+print(aralik(2, 4), sum(ciro[2:5]))
+print(aralik(0, 6) == sum(ciro))</pre>
+<p>Değerler negatif değilse önek dizisi sıralıdır; "kümülatif ciro ilk hangi gün 1000'i geçti?" sorusunu <code>bisect</code> ile O(log n) cevaplarsın. Bu, iki tekniği birleştirmenin güzel bir örneğidir.</p>
+
+<h2>Açgözlü yaklaşım ve dinamik programlama</h2>
+<p><b>Açgözlü</b> (greedy) algoritma her adımda o an en iyi görünen seçimi yapar ve geri dönmez. Türk lirası küpürleriyle para üstü vermek için "her seferinde sığan en büyük küpürü ver" doğru sonucu verir. Ama küpürler değişince açgözlü yaklaşım yanılabilir:</p>
+<pre class="py">def acgozlu(tutar, kupurler):
+    sonuc = []
+    for k in sorted(kupurler, reverse=True):
+        while tutar &gt;= k:
+            sonuc.append(k)
+            tutar -= k
+    return sonuc
+
+print(acgozlu(185, [200, 100, 50, 20, 10, 5, 1]))
+print(acgozlu(6, [1, 3, 4]))     # 4+1+1 = 3 adet, ama 3+3 = 2 adet!
+
+def en_az_kupur(tutar, kupurler):
+    en_az = [0] + [float("inf")] * tutar        # en_az[t]: t için en az küpür
+    for t in range(1, tutar + 1):
+        for k in kupurler:
+            if k &lt;= t and en_az[t - k] + 1 &lt; en_az[t]:
+                en_az[t] = en_az[t - k] + 1
+    return en_az[tutar]
+print(en_az_kupur(6, [1, 3, 4]))</pre>
+<p>İkinci fonksiyon <b>dinamik programlama</b>dır (dynamic programming, DP): büyük problemi örtüşen küçük alt problemlere böler, her alt problemi <b>bir kez</b> çözüp tabloya yazar. DP'ye iki yoldan gidilir: yukarıdan aşağı özyineleme (recursion) + önbellek (memoization, <code>functools.cache</code>) ya da aşağıdan yukarı tablo doldurma (tabulation).</p>
+<p>Klasik ısınma problemi <b>merdiven</b>: n basamaklı merdiveni birer ya da ikişer basamak çıkarak kaç farklı yolla çıkarsın? Son adım ya 1 ya 2 basamaktır, öyleyse yol(n) = yol(n-1) + yol(n-2).</p>
+<pre class="py">from functools import cache
+cagri = 0
+def saf(n):
+    global cagri
+    cagri += 1
+    return 1 if n &lt;= 1 else saf(n - 1) + saf(n - 2)
+
+@cache
+def hatirlayan(n):
+    return 1 if n &lt;= 1 else hatirlayan(n - 1) + hatirlayan(n - 2)
+
+def tablo(n):
+    once, simdi = 1, 1                  # yol(0), yol(1)
+    for _ in range(n - 1):
+        once, simdi = simdi, once + simdi
+    return simdi
+
+print(saf(25), "çağrı sayısı:", cagri)
+print(hatirlayan(25), tablo(25), tablo(90))</pre>
+<p>Saf özyineleme aynı alt problemleri tekrar tekrar çözer ve üstel büyür; önbellekli ve tablolu sürümler O(n)'dir. Tablolu sürüm yalnızca son iki değeri tuttuğu için O(1) bellek kullanır.</p>
+<p>İş hayatındaki DP örneği: <b>en uzun ortak alt dizi</b> (longest common subsequence, LCS). İki metindeki karakterlerin sırası bozulmadan seçilebilecek en uzun ortak dizi; <code>diff</code> araçları, yazım düzeltme ve kayıt eşleştirme bunun üstüne kurulur.</p>
+<pre class="py">def lcs_uzunluk(a, b):
+    T = [[0] * (len(b) + 1) for _ in range(len(a) + 1)]
+    for i in range(1, len(a) + 1):
+        for j in range(1, len(b) + 1):
+            if a[i - 1] == b[j - 1]:
+                T[i][j] = T[i - 1][j - 1] + 1          # karakterler eşleşti
+            else:
+                T[i][j] = max(T[i - 1][j], T[i][j - 1])  # birini atla
+    return T[-1][-1]
+print(lcs_uzunluk("ATATÜRK CAD", "ATATURK CADDESI"))
+print(lcs_uzunluk("KIZILAY", "KIZILCAHAMAM"))</pre>
+
+<h2>BFS ve DFS: grafı gezmek</h2>
+<p>Grafı gezmenin iki temel yolu vardır. <b>BFS</b> (genişlik öncelikli arama, breadth-first search) bir kuyrukla katman katman ilerler; ağırlıksız grafta <b>en kısa yolu</b> bulur. <b>DFS</b> (derinlik öncelikli arama, depth-first search) bir yığınla (ya da özyinelemeyle) bir dalın sonuna kadar gider; bağlı bileşenleri, döngüleri ve erişilebilirliği bulmakta kullanılır. İkisi de O(düğüm + kenar) çalışır.</p>
+<pre class="py">from collections import deque
+yollar = {"Gebze": ["İstanbul", "Bursa", "Kocaeli"], "İstanbul": ["Gebze", "Tekirdağ"],
+          "Bursa": ["Gebze", "İzmir", "Eskişehir"], "Eskişehir": ["Bursa", "Ankara"],
+          "Ankara": ["Eskişehir"], "İzmir": ["Bursa"], "Kocaeli": ["Gebze"], "Tekirdağ": ["İstanbul"]}
+
+def bfs_yol(graf, bas, hedef):
+    onceki = {bas: None}
+    kuyruk = deque([bas])
+    while kuyruk:
+        d = kuyruk.popleft()
+        if d == hedef:
+            yol = []
+            while d is not None:
+                yol.append(d); d = onceki[d]
+            return yol[::-1]
+        for k in graf.get(d, []):
+            if k not in onceki:          # ziyaret edildi mi? (set gibi O(1))
+                onceki[k] = d
+                kuyruk.append(k)
+    return None
+
+def dfs_erisilen(graf, bas):
+    gorulen, yigin = set(), [bas]
+    while yigin:
+        d = yigin.pop()
+        if d not in gorulen:
+            gorulen.add(d)
+            yigin.extend(graf.get(d, []))
+    return gorulen
+
+print(" -&gt; ".join(bfs_yol(yollar, "Tekirdağ", "Ankara")))
+print(len(dfs_erisilen(yollar, "İzmir")), "depoya ulaşılabilir")</pre>
+<p>BFS ile DFS arasındaki tek fark kuyruk mu yığın mı kullandığındır; veri yapısı seçimi algoritmanın davranışını belirler. Ağırlıklı grafta (yolların km'si farklıysa) en kısa yol için BFS yerine <code>heapq</code> kullanan Dijkstra algoritması gerekir.</p>
+<div class="note"><b>Gerçek işte</b>Algoritma bilgisi günlük işte çoğunlukla "doğru kalıbı tanımak" olarak karşına çıkar: iki listeyi eşleştirirken iç içe döngü yerine sözlük, tarih aralığı sorgusunda bisect, raporlarda kümülatif toplam, kampanya bütçesinde açgözlü yaklaşımın tuzağı, organizasyon şemasında ya da kategori ağacında DFS. Kod incelemesinde (code review) "bu döngü 10 milyon kayıtta ne yapar?" sorusunu sormak, canlıda yaşanacak yavaşlıkların çoğunu daha yazılırken yakalar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Zaman-bellek takası</h3>
+<p>Önek toplamı, önbellek ve indeks aynı fikrin farklı yüzleridir: biraz bellek harcayıp sonraki sorguları ucuzlatmak. Hangisinin kârlı olduğu sorgu/güncelleme oranına bağlıdır: veri sık değişiyorsa önek dizisini her seferinde yeniden kurmak pahalılaşır; o zaman Fenwick ağacı gibi yapılar devreye girer.</p>
+<h3>Sınır analizi: girdi boyutundan algoritmayı tahmin et</h3>
+<p>Python saniyede kabaca 10 milyon basit işlem yapar. n ≤ 20 ise üstel (alt küme denemek), n ≤ 3.000 ise O(n²), n ≤ 10<sup>6</sup> ise O(n log n) ya da O(n) gerekir. Bu kaba hesap, kodu yazmadan önce yaklaşımın işe yarayıp yaramayacağını söyler.</p>
+<h3>NP-zor problemler</h3>
+<p>Sırt çantası (knapsack), gezgin satıcı (TSP) ve araç rotalama gibi problemlerin büyük girdiler için bilinen hızlı ve kesin çözümü yoktur. Lojistikte bu problemlerle sezgisel yöntemler (heuristic), yaklaşık algoritmalar ya da OR-Tools gibi çözücülerle uğraşılır; "en iyi" yerine "yeterince iyi ve hızlı" hedeflenir.</p>
+<h3>Ölç, sonra karar ver</h3>
+<p>Big-O büyüme hızını söyler, sabitleri söylemez. Küçük n'de O(n²) bir C fonksiyonu, O(n log n) bir Python döngüsünden hızlı olabilir. Karar vermeden önce <code>timeit</code> ve <code>cProfile</code> ile ölç; bunu Profil ve optimizasyon dersinde göreceksin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/algoritmalar">Alıştırmalara geç (19)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../logging/">← logging: profesyonel kayıt tutma</a><a href="../dosya-ileri/">İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

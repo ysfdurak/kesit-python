@@ -1,0 +1,194 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>macOS ve Linux'ta Python kurulumu | Kesit Python</title><meta name="description" content="Sistem Python'ına dokunmadan Homebrew, apt, pyenv, deadsnakes ve uv ile Python kurar; PEP 668 hatasını venv ve pipx ile çözer, doğru yolu seçmeyi…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kurulum-macos-linux/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="macOS ve Linux'ta Python kurulumu"><meta property="og:description" content="Sistem Python'ına dokunmadan Homebrew, apt, pyenv, deadsnakes ve uv ile Python kurar; PEP 668 hatasını venv ve pipx ile çözer, doğru yolu seçmeyi…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kurulum-macos-linux/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"macOS ve Linux'ta Python kurulumu","description":"Sistem Python'ına dokunmadan Homebrew, apt, pyenv, deadsnakes ve uv ile Python kurar; PEP 668 hatasını venv ve pipx ile çözer, doğru yolu seçmeyi…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/kurulum-macos-linux/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Bilgisayarına geç</span><h1>macOS ve Linux'ta Python kurulumu</h1><p class="st-l">Sistem Python'ına dokunmadan Homebrew, apt, pyenv, deadsnakes ve uv ile Python kurar; PEP 668 hatasını venv ve pipx ile çözer, doğru yolu seçmeyi öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kurulum-macos-linux">Uygulamada aç, 8 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<div class="note"><b>Hangi sürüm?</b>Kasım 2026'da öneri Python 3.14. Bu dersteki komutlarda 3.12 geçen yerlere kurduğun sürümü yaz. Tarayıcıdaki motorun 3.12 olması seçimini bağlamaz.</div>
+<h2>Unix dünyasında Python zaten var... ya da var gibi görünür</h2>
+<p>Windows dersinde Python'ın sıfırdan kurulduğunu gördün. macOS ve Linux'ta durum farklıdır: işletim sistemi kendi işleri için bir Python'a sahiptir ya da ona benzeyen bir yer tutucu koyar. Bu ders, <b>sistemin Python'ına dokunmadan</b> kendi Python'ını nasıl kuracağını, birden çok sürümü nasıl yöneteceğini ve Linux'ta bir gün mutlaka göreceğin <code>externally-managed-environment</code> hatasını anlatır. Kurulumun kısa hâlini <b>Kurulum ve araçlar</b> dersinde, sanal ortamın (virtual environment) ayrıntısını <b>Sanal ortam ve paket yönetimi</b> dersinde bulursun; burada işletim sistemine özgü kısımlara odaklanıyoruz.</p>
+<p>Altın kural: <b>sistem Python'ı işletim sistemine aittir</b>. Ubuntu'nun paket yöneticisi, ağ araçları ve masaüstü bileşenleri <code>/usr/bin/python3</code>'e güvenir. Oraya <code>sudo pip install</code> ile paket eklemek ya da <code>/usr/bin/python3</code> bağlantısını başka sürüme çevirmek sistemi bozabilir. Senin projelerin her zaman ya ayrı bir kurulumda ya da bir sanal ortamda yaşar.</p>
+
+<h2>macOS</h2>
+<h3>Sistem python3 ve Xcode Command Line Tools</h3>
+<p>Yeni bir Mac'te Terminal'e <code>python3</code> yazınca çoğu zaman bir pencere açılır: "python3 komutu geliştirici araçlarını gerektiriyor". <code>/usr/bin/python3</code> aslında bir yer tutucudur; gerçek Python, Apple'ın <b>Xcode Command Line Tools</b> (CLT) paketiyle gelir ve genellikle eski bir sürümdür. CLT yine de gereklidir: derleyici, <code>git</code> ve Homebrew bunlara ihtiyaç duyar.</p>
+<pre class="code">xcode-select --install        # Command Line Tools'u kurar
+xcode-select -p               # kurulu mu? /Library/Developer/CommandLineTools
+python3 --version             # sistem python3 (eski olabilir)
+which -a python3              # PATH'te bulunan tüm python3'ler, sırayla</pre>
+<p>macOS 12.3'ten beri <code>python</code> (sürümsüz) komutu yoktur; yalnız <code>python3</code> vardır. Bir eğitimde <code>python</code> yazıyorsa sen <code>python3</code> yaz. Sanal ortam etkinken ise <code>python</code> komutu da çalışır, çünkü venv kendi <code>bin/python</code> bağlantısını getirir.</p>
+
+<h3>Homebrew ile kurulum</h3>
+<p><b>Homebrew</b>, macOS'un fiilî paket yöneticisidir. brew.sh'deki tek satırlık betikle kurulur. Kurulum sonunda ekrana yazılan "Next steps" komutlarını mutlaka çalıştır; yoksa <code>brew: command not found</code> alırsın.</p>
+<pre class="code">/bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/HEAD/install.sh)"
+echo 'eval "$(/opt/homebrew/bin/brew shellenv)"' &gt;&gt; ~/.zprofile
+eval "$(/opt/homebrew/bin/brew shellenv)"
+brew install python@3.12
+python3.12 --version
+python3.12 -m venv .venv &amp;&amp; source .venv/bin/activate</pre>
+<p>Apple Silicon (M serisi) Mac'lerde Homebrew <code>/opt/homebrew</code>'a, Intel Mac'lerde <code>/usr/local</code>'a kurulur. <code>brew install python@3.12</code> sana <code>python3.12</code> komutunu verir; sürümsüz <code>python3</code> ise Homebrew'un o anki varsayılan Python'ını gösterebilir. Projelerde sürümlü komutu kullanmak sürprizleri önler. Homebrew'un Python'ı da "dışarıdan yönetilen" olarak işaretlidir; global <code>pip install</code> yerine venv kullanman beklenir.</p>
+<pre class="py">import posixpath
+
+def homebrew_onegi(makine):
+    return "/opt/homebrew" if makine == "arm64" else "/usr/local"
+
+for makine in ["arm64", "x86_64"]:
+    onek = homebrew_onegi(makine)
+    print(f"{makine:7} -&gt; {posixpath.join(onek, 'bin', 'python3.12')}")</pre>
+<p>Gerçek bilgisayarda <code>platform.machine()</code> bu değeri verir. python.org'un macOS yükleyicisini tercih edersen, kurulumdan sonra <code>/Applications/Python 3.12/</code> klasöründeki <b>Install Certificates.command</b> dosyasına çift tıkla; yoksa ilk <code>pip install</code> denemende SSL sertifika hatası alabilirsin.</p>
+
+<h3>pyenv: sürüm yönetimi</h3>
+<p>Bir projen 3.11, diğeri 3.12 istiyorsa <b>pyenv</b> her sürümü kaynak koddan derleyip kullanıcı klasörüne kurar ve klasöre göre otomatik geçiş yapar. Bunu PATH'in başına koyduğu <b>shim</b> adlı küçük betiklerle yapar: <code>python</code> yazınca önce shim çalışır, hangi sürümün istendiğine bakar ve onu başlatır.</p>
+<pre class="code">brew install pyenv                          # Linux'ta: curl https://pyenv.run | bash
+echo 'export PYENV_ROOT="$HOME/.pyenv"' &gt;&gt; ~/.zshrc
+echo '[[ -d $PYENV_ROOT/bin ]] &amp;&amp; export PATH="$PYENV_ROOT/bin:$PATH"' &gt;&gt; ~/.zshrc
+echo 'eval "$(pyenv init - zsh)"' &gt;&gt; ~/.zshrc
+exec "$SHELL"                               # kabuğu yeniden başlat
+pyenv install 3.12.4
+pyenv global 3.12.4                         # varsayılan sürüm (~/.pyenv/version)
+cd anadolu-rapor &amp;&amp; pyenv local 3.11.9     # bu klasöre özel (.python-version dosyası)
+pyenv versions</pre>
+<p>pyenv sürümü şu sırayla seçer: <code>PYENV_VERSION</code> ortam değişkeni → bulunduğun klasörde (ya da üst klasörlerde) <code>.python-version</code> dosyası → <code>~/.pyenv/version</code> (global) → sistem Python'ı. Bu sıra bir "ilk dolu olan kazanır" zinciridir:</p>
+<pre class="py">def pyenv_secimi(ortam_degiskeni, yerel_dosya, global_dosya):
+    adaylar = [
+        ("PYENV_VERSION", ortam_degiskeni),
+        (".python-version", yerel_dosya),
+        ("global", global_dosya),
+    ]
+    for kaynak, deger in adaylar:
+        if deger and deger.strip():
+            return deger.strip(), kaynak
+    return "system", "sistem"
+
+print(pyenv_secimi(None, "3.11.9\n", "3.12.4"))
+print(pyenv_secimi("3.13.0", "3.11.9", "3.12.4"))
+print(pyenv_secimi("", None, None))</pre>
+
+<h2>Linux</h2>
+<h3>Ubuntu / Debian</h3>
+<p>Ubuntu'da <code>python3</code> hemen her zaman kuruludur (Ubuntu 24.04'te 3.12). Ama sanal ortam ve pip modülleri <b>ayrı paketlerdir</b>; bu yüzden ilk iş:</p>
+<pre class="code">sudo apt update
+sudo apt install python3 python3-venv python3-pip
+python3 --version
+python3 -m venv .venv
+source .venv/bin/activate
+python -m pip install -r requirements.txt</pre>
+<p><code>python3-venv</code> kurulu değilse <code>python3 -m venv</code> "ensurepip is not available" hatası verir. <code>python</code> komutunu istersen <code>sudo apt install python-is-python3</code> paketi bir bağlantı ekler.</p>
+<h3>Fedora / RHEL</h3>
+<pre class="code">sudo dnf install python3 python3-pip       # venv modülü python3 ile gelir
+python3 -m venv .venv &amp;&amp; source .venv/bin/activate</pre>
+
+<h3>externally-managed-environment (PEP 668)</h3>
+<p>Ubuntu 23.04, Debian 12 ve sonrasında (ayrıca Arch ve Homebrew'da) sistem Python'ına <code>pip install</code> yapınca şu hatayı görürsün:</p>
+<pre class="out">error: externally-managed-environment
+
+× This environment is externally managed
+╰─&gt; To install Python packages system-wide, try apt install
+    python3-xyz, where xyz is the package you are trying to install.</pre>
+<p>Bu bir hata değil, bir korumadır. <b>PEP 668</b> ile dağıtımlar, Python'ın standart kütüphane klasörüne <code>EXTERNALLY-MANAGED</code> adında bir işaret dosyası koyar; pip bu dosyayı görünce global kurulumu reddeder. Böylece pip ile apt aynı dosyaların üzerine yazıp birbirini bozmaz. Doğru çözümler:</p>
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyacın</th><th>Çözüm</th><th>Komut</th></tr>
+<tr><td>Bir proje için kütüphane</td><td>Sanal ortam</td><td><code>python3 -m venv .venv; source .venv/bin/activate; pip install pandas</code></td></tr>
+<tr><td>Her yerden çalışan bir komut satırı aracı (ruff, black, httpie)</td><td>pipx: her aracı kendi gizli venv'ine kurar</td><td><code>sudo apt install pipx; pipx ensurepath; pipx install ruff</code></td></tr>
+<tr><td>Dağıtımın paketlediği bir kütüphane</td><td>apt</td><td><code>sudo apt install python3-requests</code></td></tr>
+<tr><td>"Ne olursa olsun kur"</td><td><code>--break-system-packages</code></td><td>Kullanma: adındaki uyarı gerçektir</td></tr>
+</table></div>
+<pre class="py">import sysconfig, pathlib, sys
+
+stdlib = pathlib.Path(sysconfig.get_path("stdlib"))
+isaret = stdlib / "EXTERNALLY-MANAGED"
+print("Standart kütüphane:", stdlib)
+print("PEP 668 işareti var mı:", isaret.exists())
+print("Sanal ortam mı:", sys.prefix != sys.base_prefix)
+if sys.prefix != sys.base_prefix:
+    print("venv içinde pip serbest; işaret dosyası venv'e uygulanmaz.")</pre>
+
+<h3>deadsnakes PPA: Ubuntu'da daha yeni Python</h3>
+<p>Ubuntu LTS sürümleri Python'ı sabit tutar (22.04'te 3.10). Daha yenisi gerekiyorsa topluluğun <b>deadsnakes</b> deposu ek sürümleri <b>yan yana</b> kurar:</p>
+<pre class="code">sudo add-apt-repository ppa:deadsnakes/ppa
+sudo apt update
+sudo apt install python3.13 python3.13-venv
+python3.13 -m venv .venv</pre>
+<div class="warn"><b>/usr/bin/python3'ü değiştirme</b>update-alternatives ya da elle bağlantıyla <code>python3</code>'ü yeni sürüme çevirmek apt, ağ yöneticisi ve terminal gibi sistem araçlarını bozabilir. Yeni sürümü her zaman sürümlü adıyla (<code>python3.13</code>) ve bir venv içinde kullan.</div>
+
+<h2>uv: tek araçla Python ve ortam</h2>
+<p><b>uv</b>, Rust ile yazılmış, çok hızlı bir Python paket ve proje yöneticisidir. Python'ın kendisini de indirip kurabildiği için pyenv, venv, pip ve pipx'in işini tek araçta toplar ve üç işletim sisteminde aynı komutlarla çalışır.</p>
+<pre class="code">curl -LsSf https://astral.sh/uv/install.sh | sh     # macOS/Linux (ya da: brew install uv)
+uv python install 3.12                               # Python 3.12'yi indir
+uv python list                                       # bilinen/kurulu sürümler
+uv venv --python 3.12                                # .venv oluştur
+source .venv/bin/activate
+uv pip install pandas                                # pip ile aynı arayüz, çok daha hızlı
+uv tool install ruff                                 # pipx benzeri global araç
+uv run betik.py                                      # ortamı hazırlayıp betiği çalıştır</pre>
+
+<h2>Hangi yolu ne zaman seçmeli?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Önerilen yol</th><th>Neden</th></tr>
+<tr><td>Mac'te öğrenmeye başlıyorum</td><td>python.org yükleyicisi ya da Homebrew</td><td>Basit, belgelenmiş</td></tr>
+<tr><td>Mac/Linux'ta birden çok sürümle çalışıyorum</td><td>uv ya da pyenv</td><td>Klasöre göre sürüm, sisteme dokunmaz</td></tr>
+<tr><td>Ubuntu sunucuda üretim servisi</td><td>apt'nin python3'ü + venv</td><td>Güvenlik güncellemelerini dağıtım yapar</td></tr>
+<tr><td>Ubuntu LTS'de daha yeni sürüm lazım</td><td>deadsnakes ya da uv</td><td>Sistem Python'ı yerinde kalır</td></tr>
+<tr><td>ruff, black gibi araçları her yerde kullanmak</td><td>pipx ya da <code>uv tool</code></td><td>Her araç izole, PEP 668 ile uyumlu</td></tr>
+<tr><td>Ekip hızlı ve tekrarlanabilir kurulum istiyor</td><td>uv (+ uv.lock)</td><td>Tek komut, kilit dosyası</td></tr>
+<tr><td>Uygulamayı konteynerde çalıştıracağım</td><td>Resmî <code>python:3.12-slim</code> imajı</td><td>Ortam imajla birlikte gelir</td></tr>
+</table></div>
+
+<h2>Hangi python3 çalışıyor?</h2>
+<p>Unix'te PATH klasörleri <b>iki nokta</b> (<code>:</code>) ile ayrılır ve kabuk, Windows'taki gibi soldan sağa ilk eşleşmeyi çalıştırır. <code>which -a python3</code> hepsini, <code>type python3</code> çalışacak olanı gösterir. Kabuk bulduğu yolu önbelleğe (cache) alır; PATH'i değiştirdikten sonra garip davranış görürsen <code>hash -r</code> önbelleği temizler.</p>
+<pre class="py">import posixpath
+
+path_metni = "/home/ayse/.pyenv/shims:/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin"
+diskte = {"/opt/homebrew/bin/python3", "/usr/bin/python3", "/home/ayse/.pyenv/shims/python3"}
+
+eslesmeler = [posixpath.join(k, "python3") for k in path_metni.split(":")
+              if posixpath.join(k, "python3") in diskte]
+print("which -a python3:")
+for yol in eslesmeler:
+    print("  ", yol)
+print("Çalışacak olan:", eslesmeler[0])</pre>
+
+<h2>Belirti → neden → çözüm</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr>
+<tr><td><code>python: command not found</code></td><td>Sistemde yalnız <code>python3</code> var</td><td><code>python3</code> yaz; Ubuntu'da <code>python-is-python3</code>; venv içinde <code>python</code> zaten var</td></tr>
+<tr><td><code>error: externally-managed-environment</code></td><td>PEP 668 koruması</td><td>venv; araçlar için pipx / <code>uv tool</code></td></tr>
+<tr><td><code>ensurepip is not available</code></td><td><code>python3-venv</code> paketi eksik</td><td><code>sudo apt install python3-venv</code> (ya da <code>python3.12-venv</code>)</td></tr>
+<tr><td><code>No module named pip</code></td><td>pip paketi kurulmamış</td><td><code>sudo apt install python3-pip</code> ya da venv içinde çalış</td></tr>
+<tr><td><code>xcrun: error: invalid active developer path</code></td><td>macOS güncellemesi sonrası CLT kayıp</td><td><code>xcode-select --install</code></td></tr>
+<tr><td><code>brew: command not found</code> (kurulumdan hemen sonra)</td><td>"Next steps" adımı atlandı; <code>/opt/homebrew/bin</code> PATH'te yok</td><td><code>brew shellenv</code> satırını <code>~/.zprofile</code>'a ekle</td></tr>
+<tr><td>macOS'ta <code>SSL: CERTIFICATE_VERIFY_FAILED</code></td><td>python.org kurulumunun sertifika adımı yapılmadı</td><td><code>Install Certificates.command</code> çalıştır</td></tr>
+<tr><td><code>pyenv install</code> sonrası <code>No module named '_ssl'</code> ya da <code>'_sqlite3'</code></td><td>Derleme bağımlılıkları eksikti</td><td>libssl-dev, libsqlite3-dev, zlib1g-dev, libffi-dev vb. kur, sürümü yeniden derle</td></tr>
+<tr><td><code>pyenv local</code> çalışmıyor, eski sürüm geliyor</td><td>Kabuk başlangıç dosyasına <code>pyenv init</code> eklenmemiş</td><td><code>~/.zshrc</code>/<code>~/.bashrc</code> satırlarını ekle, <code>exec "$SHELL"</code></td></tr>
+<tr><td><code>Permission denied</code> (pip install)</td><td>Sistem klasörüne yazmaya çalışıyorsun</td><td>sudo kullanma; venv içinde kur</td></tr>
+<tr><td><code>./betik.py: Permission denied</code></td><td>Dosya çalıştırılabilir değil</td><td><code>chmod +x betik.py</code> ve ilk satıra <code>#!/usr/bin/env python3</code></td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Anadolu Lojistik'in rota raporu her gece bir Ubuntu sunucuda çalışıyor. Ekip sunucuya <code>apt</code> ile <code>python3</code> ve <code>python3-venv</code> kurmuş, uygulamayı <code>/opt/rota-rapor/.venv</code> içine yerleştirmiş ve systemd servisinde <code>ExecStart=/opt/rota-rapor/.venv/bin/python -m rota_rapor</code> yazmış. Venv'in Python'ını tam yoluyla çağırmak, etkinleştirmeye (<code>source</code>) gerek bırakmaz ve "sunucuda hangi Python çalışıyor" sorusunu ortadan kaldırır. Geliştiriciler ise Mac'lerinde aynı sürümü <code>uv python install 3.12</code> ile kuruyor.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Shebang ve çalıştırılabilir betikler</h3>
+<p>Unix'te bir betiğin ilk satırı <code>#!</code> ile başlıyorsa (<b>shebang</b>), çekirdek o satırdaki programı yorumlayıcı olarak kullanır. <code>#!/usr/bin/env python3</code>, PATH'teki ilk <code>python3</code>'ü bulur; etkin venv'e ve pyenv'e uyum sağlar. <code>#!/usr/bin/python3</code> ise hep sistem Python'ını çağırır. Venv içindeki bir betik için en sağlamı venv'in Python'ını tam yoluyla yazmaktır.</p>
+<pre class="py">import shlex, posixpath
+
+def yorumlayici(ilk_satir):
+    if not ilk_satir.startswith("#!"):
+        return None
+    parcalar = shlex.split(ilk_satir[2:])
+    if posixpath.basename(parcalar[0]) == "env":
+        return next(p for p in parcalar[1:] if not p.startswith("-"))
+    return parcalar[0]
+
+for satir in ["#!/usr/bin/env python3", "#!/usr/bin/python3.12 -u", "#!/usr/bin/env -S python3 -X utf8", "print('merhaba')"]:
+    print(f"{satir!r:40} -&gt; {yorumlayici(satir)}")</pre>
+<h3>Kabuk başlangıç dosyaları</h3>
+<p>macOS varsayılan olarak <b>zsh</b> kullanır: oturum açılışında <code>~/.zprofile</code>, her yeni terminalde <code>~/.zshrc</code> okunur. Ubuntu <b>bash</b> kullanır: <code>~/.bashrc</code>. PATH'e eklediğin satırı yanlış dosyaya yazarsan "bir terminalde çalışıyor, ötekinde çalışmıyor" durumu oluşur. Değişiklikten sonra <code>source ~/.zshrc</code> ya da yeni terminal.</p>
+<h3>pip3 mü, python3 -m pip mi?</h3>
+<p><code>pip3</code>, PATH'te ilk bulunan pip'tir ve başka bir Python'a ait olabilir; Homebrew, pyenv ve sistem Python'ı bir arada olduğunda bu sık olur. <code>python3.12 -m pip</code> ise paketin hangi yorumlayıcıya gideceğini kesinleştirir. Venv etkinken <code>pip</code> güvenlidir çünkü venv'in <code>bin</code> klasörü PATH'in en başına eklenmiştir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kurulum-macos-linux">Alıştırmalara geç (8)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../jupyter-colab/">← Jupyter, Colab ve conda</a><a href="../kurulum-windows/">Windows'ta Python kurulumu →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

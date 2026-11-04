@@ -1,0 +1,248 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Web kazıma: HTML, BeautifulSoup ve etik | Kesit Python</title><meta name="description" content="HTML'in ağaç yapısını okur; BeautifulSoup ile find, find_all ve CSS seçicilerle veri çıkarır, tablo ve sayfalamayı kazır, robots.txt, KVKK ve nezaket…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/web-scraping/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Web kazıma: HTML, BeautifulSoup ve etik"><meta property="og:description" content="HTML'in ağaç yapısını okur; BeautifulSoup ile find, find_all ve CSS seçicilerle veri çıkarır, tablo ve sayfalamayı kazır, robots.txt, KVKK ve nezaket…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/web-scraping/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Web kazıma: HTML, BeautifulSoup ve etik","description":"HTML'in ağaç yapısını okur; BeautifulSoup ile find, find_all ve CSS seçicilerle veri çıkarır, tablo ve sayfalamayı kazır, robots.txt, KVKK ve nezaket…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/web-scraping/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Web kazıma: HTML, BeautifulSoup ve etik</h1><p class="st-l">HTML'in ağaç yapısını okur; BeautifulSoup ile find, find_all ve CSS seçicilerle veri çıkarır, tablo ve sayfalamayı kazır, robots.txt, KVKK ve nezaket kurallarına uyan bir kazıyıcı kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/web-scraping">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in fiyatlama ekibi, kendi ürünlerinin tedarikçi kataloglarındaki liste fiyatlarını her sabah kontrol etmek istiyor. Tedarikçinin API'si yok; yalnızca herkese açık bir ürün kataloğu sayfası var. Bir çalışanın 300 ürünü tek tek açıp Excel'e yazması yarım gün sürer. Web kazıma (web scraping), bir web sayfasının HTML'ini programla okuyup içindeki yapılandırılmış veriyi (ürün adı, fiyat, stok) çıkarmaktır.</p>
+<p>Kazıma güçlü ama hassas bir araçtır: başkasının sunucusuna yük bindirir, telif ve kişisel veri konularına dokunur. Bu yüzden derste teknik kadar <b>kural</b> da öğreneceksin. Altın kural: resmi bir API ya da veri dosyası varsa önce onu kullan; kazıma son çaredir.</p>
+
+<h2>HTML'in yapısı: etiket, öznitelik, ağaç</h2>
+<p>HTML, iç içe geçmiş <b>etiketlerden</b> (tag) oluşur. Her etiketin adı (<code>div</code>, <code>span</code>, <code>a</code>), <b>öznitelikleri</b> (attribute: <code>class</code>, <code>id</code>, <code>href</code>, <code>data-sku</code>) ve içeriği vardır. Tarayıcı bu metni bir ağaca, <b>DOM</b>'a (Document Object Model) çevirir: her etiket bir düğümdür, içindeki etiketler çocuklarıdır.</p>
+<pre class="code">&lt;div class="urun" data-sku="AM-101"&gt;          ← ebeveyn düğüm, iki özniteliği var
+  &lt;h3 class="ad"&gt;Çay Bardağı 6'lı&lt;/h3&gt;          ← çocuk: ürün adı
+  &lt;span class="fiyat"&gt;149,90 TL&lt;/span&gt;          ← çocuk: fiyat metni
+  &lt;a href="/urun/101"&gt;İncele&lt;/a&gt;             ← göreli bağlantı
+&lt;/div&gt;</pre>
+<p>Kazımanın ilk adımı tarayıcıda sayfaya sağ tıklayıp <b>İncele</b> (Inspect) demek ve aradığın verinin hangi etiket ve sınıfta durduğunu görmektir. Kararlı bir "yol" ararsın: <code>id</code> ve <code>data-*</code> öznitelikleri genelde tasarım değişikliklerinden en az etkilenenlerdir.</p>
+
+<h2>Sayfayı çekmek: requests</h2>
+<p>Gerçek kazıyıcıda HTML'i <code>requests</code> ile indirirsin. Tarayıcı motorunda ağ olmadığı için bu kodu kendi bilgisayarında dene; derste HTML'i metin olarak vereceğiz.</p>
+<pre class="code">import requests
+
+BASLIK = {"User-Agent": "AnadoluMarketFiyatBot/1.0 (veri@anadolumarket.example)"}
+yanit = requests.get("https://tedarikci.example/katalog?sayfa=1", headers=BASLIK, timeout=10)
+yanit.raise_for_status()                 # 4xx/5xx ise hata fırlat
+yanit.encoding = yanit.apparent_encoding # Türkçe karakter sorunu varsa
+html = yanit.text</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install requests beautifulsoup4 lxml</code>. BeautifulSoup ve lxml tarayıcıda da çalışır; requests ile gerçek ağ isteği yalnızca kendi bilgisayarında çalışır. HTTP ayrıntılarını bir sonraki "HTTP ve REST API" dersinde göreceksin.</div>
+
+<h2>BeautifulSoup: HTML'i ağaç olarak gezmek</h2>
+<p><code>BeautifulSoup(html, "html.parser")</code> metni gezilebilir bir nesneye çevirir. İkinci argüman ayrıştırıcıdır (parser): <code>"html.parser"</code> Python ile gelir; <code>"lxml"</code> daha hızlıdır ve kurulum ister.</p>
+<pre class="py">from bs4 import BeautifulSoup
+
+html = """
+&lt;div id="katalog"&gt;
+  &lt;div class="urun" data-sku="AM-101"&gt;&lt;h3 class="ad"&gt; Çay Bardağı &lt;/h3&gt;&lt;span class="fiyat"&gt;149,90 TL&lt;/span&gt;&lt;/div&gt;
+  &lt;div class="urun indirim" data-sku="AM-102"&gt;&lt;h3 class="ad"&gt;Demlik&lt;/h3&gt;&lt;span class="fiyat"&gt;1.299,00 TL&lt;/span&gt;&lt;/div&gt;
+  &lt;div class="urun" data-sku="AM-103"&gt;&lt;h3 class="ad"&gt;Kupa&lt;/h3&gt;&lt;span class="tukendi"&gt;Stokta yok&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;
+"""
+soup = BeautifulSoup(html, "html.parser")
+ilk = soup.find("div", class_="urun")          # ilk eşleşme ya da None
+print(ilk["data-sku"], ilk.h3.get_text(strip=True))
+kartlar = soup.find_all("div", class_="urun")  # tüm eşleşmeler (liste)
+print(len(kartlar))
+for kart in kartlar:
+    fiyat = kart.find("span", class_="fiyat")
+    print(kart.get("data-sku"), fiyat.get_text() if fiyat else "-")</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne döndürür</th><th>Bulamazsa</th></tr>
+<tr><td><code>find(ad, class_=..., attrs={...})</code></td><td>İlk eşleşen etiket</td><td><code>None</code></td></tr>
+<tr><td><code>find_all(ad, ..., limit=n)</code></td><td>Tüm eşleşmeler (liste)</td><td><code>[]</code></td></tr>
+<tr><td><code>select("css")</code> / <code>select_one("css")</code></td><td>CSS seçiciye uyan liste / ilk eleman</td><td><code>[]</code> / <code>None</code></td></tr>
+<tr><td><code>etiket.get_text(strip=True)</code></td><td>İçteki tüm metin, kenar boşlukları atılmış</td><td>Boş metin</td></tr>
+<tr><td><code>etiket["href"]</code> / <code>etiket.get("href")</code></td><td>Öznitelik değeri</td><td><code>KeyError</code> / <code>None</code></td></tr>
+<tr><td><code>etiket.attrs</code></td><td>Tüm öznitelikler sözlüğü</td><td><code>{}</code></td></tr>
+</table></div>
+<div class="warn"><b>class bir Python anahtar sözcüğüdür</b><code>find("span", class="fiyat")</code> sözdizimi hatası verir; BeautifulSoup bu yüzden <code>class_</code> adını kullanır. Ayrıca <code>class</code> çok değerli bir özniteliktir: <code>kart["class"]</code> metin değil liste döner (<code>["urun", "indirim"]</code>).</div>
+
+<h3>CSS seçiciler</h3>
+<p><code>select</code> tarayıcıdaki CSS seçicilerini kullanır; karmaşık yolları tek satırda yazmanı sağlar.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Seçici</th><th>Anlamı</th></tr>
+<tr><td><code>div.urun</code></td><td>class'ı urun olan div</td></tr>
+<tr><td><code>#katalog</code></td><td>id'si katalog olan etiket</td></tr>
+<tr><td><code>div.urun.indirim</code></td><td>hem urun hem indirim sınıfı olan div</td></tr>
+<tr><td><code>#katalog span.fiyat</code></td><td>katalog içindeki (her derinlikte) fiyat span'leri</td></tr>
+<tr><td><code>div.urun &gt; h3</code></td><td>urun div'inin doğrudan çocuğu olan h3</td></tr>
+<tr><td><code>a[href]</code>, <code>[data-sku="AM-102"]</code></td><td>özniteliği olan / değeri eşleşen etiket</td></tr>
+<tr><td><code>a[href^="https"]</code>, <code>a[href$=".pdf"]</code></td><td>ile başlayan / ile biten değer</td></tr>
+<tr><td><code>tr:nth-of-type(2)</code></td><td>türünün ikinci elemanı</td></tr>
+</table></div>
+<pre class="py">from bs4 import BeautifulSoup
+
+html = """&lt;ul id="liste"&gt;
+&lt;li class="urun" data-sku="AM-1"&gt;&lt;a href="/u/1"&gt;Kalem&lt;/a&gt; &lt;b&gt;12,50&lt;/b&gt;&lt;/li&gt;
+&lt;li class="urun indirim" data-sku="AM-2"&gt;&lt;a href="/u/2"&gt;Defter&lt;/a&gt; &lt;b&gt;40,00&lt;/b&gt;&lt;/li&gt;
+&lt;/ul&gt;"""
+soup = BeautifulSoup(html, "html.parser")
+print([a.get_text() for a in soup.select("#liste li.urun &gt; a")])
+print(soup.select_one("li.indirim")["data-sku"])
+print(soup.select_one('[data-sku="AM-1"] b').get_text())
+li = soup.select_one("li.urun")
+print(li.find_next_sibling("li")["data-sku"], li.parent["id"])</pre>
+<p>Ağaçta gezinme için <code>.parent</code>, <code>.children</code>, <code>.find_next_sibling()</code>, <code>.find_parent()</code> kullanılır. Örneğin "Fiyat:" yazan bir etiketin hemen yanındaki değeri bulmak için önce etiketi bulur, sonra kardeşine geçersin.</p>
+
+<h2>Tablo kazımak</h2>
+<p>Belediye duyuruları, kur tabloları, sınav sonuçları gibi veriler çoğu zaman <code>&lt;table&gt;</code> içindedir. Kalıp hep aynıdır: başlıkları <code>th</code>'lerden al, her <code>tr</code> için <code>td</code> metinlerini topla, ikisini <code>zip</code> ile sözlüğe çevir.</p>
+<pre class="py">from bs4 import BeautifulSoup
+
+html = """&lt;table id="nobet"&gt;
+&lt;tr&gt;&lt;th&gt;Eczane&lt;/th&gt;&lt;th&gt;İlçe&lt;/th&gt;&lt;th&gt;Telefon&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Şifa&lt;/td&gt;&lt;td&gt;Konak&lt;/td&gt;&lt;td&gt;0232 000 00 01&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Hayat&lt;/td&gt;&lt;td&gt;Bornova&lt;/td&gt;&lt;td&gt;0232 000 00 02&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;"""
+soup = BeautifulSoup(html, "html.parser")
+tablo = soup.find("table", id="nobet")
+basliklar = [th.get_text(strip=True) for th in tablo.find_all("th")]
+kayitlar = []
+for tr in tablo.find_all("tr")[1:]:
+    hucreler = [td.get_text(strip=True) for td in tr.find_all("td")]
+    kayitlar.append(dict(zip(basliklar, hucreler)))
+print(kayitlar)</pre>
+<p>Basit tablolar için <code>pandas.read_html(html)</code> tüm tabloları DataFrame listesi olarak tek satırda verir (arka planda lxml kullanır). Birleştirilmiş hücreli, iç içe karmaşık tablolarda ise elle ayrıştırma daha güvenilirdir.</p>
+
+<h2>Bağlantılar ve sayfalama: urllib.parse</h2>
+<p>Sayfadaki bağlantılar çoğu zaman <b>göreli</b>dir: <code>/urun/42</code>, <code>?sayfa=2</code>, <code>../kampanya</code>. İsteği atmak için bunları mevcut sayfanın adresiyle birleştirip <b>mutlak</b> adrese çevirmen gerekir. Bunu asla metin birleştirmeyle yapma; <code>urljoin</code> tüm kuralları bilir.</p>
+<pre class="py">from urllib.parse import urljoin, urlparse, parse_qs, urlencode, urldefrag
+
+sayfa = "https://tedarikci.example/katalog/mutfak/?sayfa=1"
+for href in ["/urun/42", "?sayfa=2", "../banyo/", "detay.html#yorumlar", "https://baska.example/x"]:
+    print(href, "→", urljoin(sayfa, href))
+
+parca = urlparse("https://tedarikci.example/ara?q=çay+bardağı&amp;sayfa=3")
+print(parca.netloc, parca.path, parse_qs(parca.query))
+print(urlencode({"q": "çay bardağı", "sayfa": 4}))
+print(urldefrag("https://tedarikci.example/u/1#yorum").url)</pre>
+<p>Sayfalama (pagination) için iki yaygın yol vardır: "Sonraki" bağlantısını izlemek (<code>a[rel~=next]</code> ya da <code>a.sonraki</code>) veya sayfa numarasını sorgu parametresinde artırmak. Her iki durumda da <b>ziyaret edilenler kümesi</b> tut; aksi halde döngüye giren bir site seni sonsuza kadar meşgul eder. Bir de üst sınır koy: "en fazla 50 sayfa".</p>
+
+<h2>lxml ve XPath</h2>
+<p>lxml hem BeautifulSoup için hızlı bir ayrıştırıcıdır (<code>BeautifulSoup(html, "lxml")</code>) hem de kendi başına XPath sorgu dili sunar. Büyük sayfalarda belirgin hız farkı yaratır.</p>
+<pre class="py">from lxml import html as lh
+
+agac = lh.fromstring('&lt;div&gt;&lt;p class="fiyat"&gt;149,90&lt;/p&gt;&lt;p class="fiyat"&gt;89,00&lt;/p&gt;&lt;a href="/x"&gt;X&lt;/a&gt;&lt;/div&gt;')
+print(agac.xpath('//p[@class="fiyat"]/text()'))
+print(agac.xpath("//a/@href"))</pre>
+
+<h2>Kurallar: robots.txt, kullanım koşulları, KVKK</h2>
+<p>Teknik olarak kazıyabilmen, kazıyabileceğin anlamına gelmez. Bir kazıyıcıyı canlıya almadan önce şu soruları cevapla:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Konu</th><th>Ne yapmalısın?</th></tr>
+<tr><td>robots.txt</td><td>Sitenin kökündeki <code>/robots.txt</code> dosyasında senin kullanıcı ajanına kapalı (<code>Disallow</code>) yolları kazıma; <code>Crawl-delay</code> varsa uy.</td></tr>
+<tr><td>Kullanım koşulları</td><td>Site otomatik erişimi yasaklıyorsa ya da veriyi ticari kullanıma kapatıyorsa hukuk ekibine danış; çoğu zaman izin ya da lisans gerekir.</td></tr>
+<tr><td>Kişisel veri (KVKK)</td><td>Ad, telefon, e-posta, yorum yazarı gibi kişisel verileri toplama. Gerekliyse hukuki dayanak, aydınlatma ve saklama süresi şarttır; "herkese açık" olması serbestçe işlenebileceği anlamına gelmez.</td></tr>
+<tr><td>Telif ve veri tabanı hakkı</td><td>Metin, görsel ve derlenmiş veri tabanları korunabilir; içeriği kopyalayıp yayımlamak yerine yalnızca gereken olgusal alanları (fiyat, stok) al.</td></tr>
+<tr><td>Giriş gerektiren alanlar</td><td>Oturum açarak, CAPTCHA aşarak ya da erişim engelini dolanarak kazıma; bu hem sözleşme hem ceza hukuku riski taşır.</td></tr>
+</table></div>
+<p>Python, robots.txt'yi okumak için hazır bir modülle gelir. Dosyayı ağdan çekmek yerine metin olarak da verebilirsin:</p>
+<pre class="py">from urllib.robotparser import RobotFileParser
+
+robots = """User-agent: *
+Disallow: /sepet/
+Disallow: /hesap/
+Crawl-delay: 2
+"""
+rp = RobotFileParser()
+rp.parse(robots.splitlines())
+for yol in ["/katalog?sayfa=1", "/sepet/ekle", "/hesap/siparisler"]:
+    print(yol, rp.can_fetch("AnadoluBot", "https://tedarikci.example" + yol))
+print("bekleme:", rp.crawl_delay("AnadoluBot"))</pre>
+
+<h3>Nezaket kuralları</h3>
+<ul>
+<li><b>Yavaş ol:</b> istekler arasında en az 1–2 saniye bekle (<code>time.sleep</code>); <code>Crawl-delay</code> varsa daha uzun. Paralel istekle siteyi boğma.</li>
+<li><b>Kendini tanıt:</b> açıklayıcı bir <code>User-Agent</code> ve iletişim adresi gönder; tarayıcı taklidi yapma.</li>
+<li><b>Önbellekle (cache):</b> aynı sayfayı gün içinde tekrar indirme; HTML'i diske kaydet, ayrıştırmayı oradan tekrarla.</li>
+<li><b>Hataya saygı:</b> 429 ya da 503 alırsan dur, <code>Retry-After</code> kadar bekle; ısrar etme.</li>
+<li><b>Gece çalış:</b> sitenin yoğun olmadığı saatlerde, gerektiği kadar sık.</li>
+</ul>
+
+<h2>Dinamik sayfalar: Playwright ve Selenium</h2>
+<p>Bazı sitelerde HTML ilk geldiğinde ürünler yoktur; JavaScript sonradan bir API'den çekip sayfaya yerleştirir. <code>requests</code> JavaScript çalıştırmadığı için boş liste görürsün. İki seçenek vardır: tarayıcının <b>Ağ</b> (Network) sekmesinde sayfanın çağırdığı JSON adresini bulup onu kullanmak (çoğu zaman daha temiz ve hızlı), ya da gerçek bir tarayıcıyı programla sürmek.</p>
+<pre class="code">from playwright.sync_api import sync_playwright
+
+with sync_playwright() as p:
+    tarayici = p.chromium.launch(headless=True)
+    sayfa = tarayici.new_page(user_agent="AnadoluMarketFiyatBot/1.0")
+    sayfa.goto("https://tedarikci.example/katalog", timeout=15000)
+    sayfa.wait_for_selector("div.urun")          # JavaScript ürünleri yükleyene kadar bekle
+    html = sayfa.content()                        # sonra BeautifulSoup'a ver
+    tarayici.close()</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install playwright</code> ve ardından <code>playwright install chromium</code>. Selenium alternatifi için <code>pip install selenium</code>. Tarayıcı sürmek yavaş ve kaynak yiyicidir; yalnızca gerçekten gerektiğinde kullan.</div>
+
+<div class="note"><b>Gerçek işte</b>Bir perakende şirketinde fiyat izleme kazıyıcısı genelde şu biçimdedir: gece 03:00'te çalışan bir zamanlanmış görev, izin verilen tedarikçi sayfalarını robots.txt'yi denetleyerek ve 2 saniye arayla indirir, ham HTML'i tarihli klasöre kaydeder, ayrıştırıcı yalnızca SKU ve fiyatı çıkarır, önceki günle karşılaştırıp yalnızca değişenleri kategori yöneticisine raporlar. Ayrıştırıcı kaydedilmiş HTML örnekleriyle test edilir; site tasarımı değişip testler kırılınca ekip haberdar olur.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Derste Playwright'ı tek bir örnekle tanıdın: sayfayı aç, içeriği al. Gerçek otomasyon işlerinde ise asıl zorluklar başka yerdedir: sayfanın ne zaman "hazır" olduğunu bilmek, her çalıştırmada yeniden giriş yapmamak, sayfanın arkasındaki JSON API'yi bulmak ve dosya indirmek. Bu bölüm bu dört kalıbı gösteriyor; alıştırmalar ise tarayıcıda çalışan BeautifulSoup ve JSON üzerinde.</p>
+<h2>Bekleme stratejileri</h2>
+<p>Dinamik sayfada içerik JavaScript ile sonradan gelir. En kötü çözüm <code>time.sleep(5)</code>'tir: yavaş ağda yetmez, hızlı ağda boşa bekletir. Playwright'ın <b>locator</b> API'si eylemlerden önce elemanın görünür, etkin ve sabit olmasını kendiliğinden bekler (auto-wait); sen yalnız <b>neyi</b> beklediğini söylersin.</p>
+<pre class="code">from playwright.sync_api import sync_playwright, expect
+
+with sync_playwright() as p:
+    tarayici = p.chromium.launch(headless=True)
+    sayfa = tarayici.new_page()
+    sayfa.goto("https://portal.example.com/siparisler", wait_until="domcontentloaded")
+
+    satirlar = sayfa.locator("table#siparis tbody tr")
+    expect(satirlar.first).to_be_visible(timeout=10_000)       # ilk satır gelene kadar
+    sayfa.get_by_role("button", name="Daha fazla").click()      # tıklamadan önce kendisi bekler
+    expect(satirlar).to_have_count(40)                          # 40 satır olana kadar
+    sayfa.wait_for_load_state("networkidle")                    # son çare: ağ susana kadar
+    print(satirlar.all_inner_texts()[:3])</pre>
+<div class="tbl-wrap"><table><tr><th>Bekleme</th><th>Ne zaman?</th></tr>
+<tr><td><code>expect(locator).to_be_visible()</code></td><td>Belirli bir eleman görünene kadar (en sağlam)</td></tr>
+<tr><td><code>page.wait_for_response(lambda r: "/api/siparis" in r.url)</code></td><td>Belirli bir API çağrısı bitene kadar</td></tr>
+<tr><td><code>wait_for_load_state("networkidle")</code></td><td>Ağda 500 ms hiçbir istek olmayana kadar; sürekli yoklama yapan sayfalarda hiç gelmeyebilir</td></tr>
+<tr><td><code>time.sleep</code></td><td>Hiçbir zaman (hata ayıklarken bile <code>page.pause()</code> daha iyidir)</td></tr></table></div>
+<h2>Giriş yapılan portalda oturumu saklamak</h2>
+<p>Her çalıştırmada kullanıcı adı ve parola girmek yavaştır, iki aşamalı doğrulamaya takılır ve hesabı kilitletebilir. Playwright tarayıcı bağlamının çerezlerini ve localStorage'ını bir JSON dosyasına (<code>storage_state</code>) yazar; sonraki çalıştırmalar bu dosyayla giriş yapmış olarak başlar.</p>
+<pre class="code">import os
+DURUM = "oturum.json"           # .gitignore'a ekle: içinde oturum çerezleri var!
+
+def baglam_ac(tarayici):
+    if os.path.exists(DURUM):
+        return tarayici.new_context(storage_state=DURUM)
+    baglam = tarayici.new_context()
+    s = baglam.new_page()
+    s.goto("https://portal.example.com/giris")
+    s.get_by_label("Kullanıcı adı").fill(os.environ["PORTAL_KULLANICI"])
+    s.get_by_label("Parola").fill(os.environ["PORTAL_PAROLA"])
+    s.get_by_role("button", name="Giriş").click()
+    s.wait_for_url("**/panel")
+    baglam.storage_state(path=DURUM)
+    return baglam</pre>
+<p>Oturum süresi dolunca (portal giriş sayfasına yönlendirince) dosyayı silip yeniden giriş yap. Çerezlerin süresini dosyadan okuyabilirsin: her çerezin <code>expires</code> alanı Unix zamanıdır (<code>-1</code>: tarayıcı kapanınca biten oturum çerezi).</p>
+<h2>Ağ yanıtını yakalayıp gizli API'yi kullanmak</h2>
+<p>Çoğu dinamik sayfa veriyi bir JSON uç noktasından çeker ve HTML'i tarayıcıda üretir. O JSON'u doğrudan almak, HTML'i kazımaktan çok daha sağlam ve hızlıdır: seçiciler kırılmaz, sayılar biçimlenmemiş gelir. Tarayıcının geliştirici araçlarında Ağ (Network) sekmesinde Fetch/XHR süzgeciyle bu çağrıyı bulabilir ya da Playwright ile yakalayabilirsin:</p>
+<pre class="code">with sayfa.expect_response(lambda r: "/api/v1/siparisler" in r.url and r.status == 200) as bilgi:
+    sayfa.get_by_role("button", name="Listele").click()
+veri = bilgi.value.json()                    # {"items": [...], "next_cursor": "..."}
+
+# Uç noktayı öğrendikten sonra aynı oturum çerezleriyle doğrudan çağır:
+yanit = baglam.request.get("https://portal.example.com/api/v1/siparisler", params={"cursor": veri["next_cursor"]})</pre>
+<div class="warn"><b>Gizli API de kurallara tabidir</b>Belgelenmemiş bir uç noktayı kullanmak sitenin kullanım koşullarına aykırı olabilir ve haber vermeden değişebilir. Derste gördüğün robots.txt, hız sınırı ve KVKK kuralları burada da geçerli. Resmî bir API varsa onu tercih et.</div>
+<h2>Dosya indirmek</h2>
+<p>Rapor dışa aktarma düğmeleri çoğunlukla bir indirme başlatır. Playwright indirmeyi bir olay olarak yakalar; dosyayı geçici bir yerden kendi klasörüne sen taşırsın. Dosya adını tarihle zenginleştir ve önce geçici ada yazıp sonra yeniden adlandır ki yarım dosya bir sonraki adımda okunmasın.</p>
+<pre class="code">with sayfa.expect_download() as indirme:
+    sayfa.get_by_role("link", name="Excel'e aktar").click()
+dosya = indirme.value
+hedef = f"indirilenler/{dosya.suggested_filename}"
+dosya.save_as(hedef)</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install playwright</code> ve <code>playwright install chromium</code>. <code>playwright codegen https://site</code> komutu tarayıcıda yaptığın tıklamaları koda çevirir; seçicileri bulmak için harika bir başlangıçtır. Tarayıcı içinde Playwright çalışmaz; aşağıdaki alıştırmalar kazınan HTML ve yakalanan JSON üzerinde çalışır.</div>
+<div class="note"><b>Gerçek işte</b>Otomasyon ekiplerinde tipik iş, tedarikçi ya da kamu portalından her sabah rapor indirmektir. Sağlam bir çözümün işaretleri: sleep yok, oturum dosyası saklanıyor ve süresi denetleniyor, veri mümkünse JSON'dan alınıyor, dosya adları tarihle ve atomik olarak kaydediliyor, her adım loglanıyor.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kırılgan seçicilerden kaçın</h3>
+<p><code>div &gt; div:nth-of-type(3) &gt; span</code> gibi konuma bağlı seçiciler ilk tasarım değişikliğinde kırılır. Sırasıyla tercih et: <code>id</code> ve <code>data-*</code> öznitelikleri, anlamlı sınıf adları, metin etiketleri ("Fiyat:" yazan hücrenin kardeşi). Seçicileri dosyanın başında sabit olarak topla; değişiklik tek yerde yapılır.</p>
+<h3>Gizli yapılandırılmış veri: JSON-LD</h3>
+<p>Birçok e-ticaret sayfası arama motorları için ürün bilgisini <code>&lt;script type="application/ld+json"&gt;</code> içinde JSON olarak verir. Bu veri görsel HTML'den çok daha kararlıdır: <code>json.loads(soup.find("script", type="application/ld+json").string)</code> ile ad, fiyat ve para birimini doğrudan alırsın.</p>
+<h3>Test edilebilir kazıyıcı</h3>
+<p>Ağ katmanını (indir) ve ayrıştırma katmanını (çöz) ayır. Ayrıştırıcı yalnızca HTML metni alan saf bir fonksiyon olsun; testlerde kaydedilmiş örnek sayfaları kullan. Bu derste alıştırmaların hepsi bu kalıpla kurulu: HTML metni girer, sözlük çıkar.</p>
+<h3>Ölçek</h3>
+<p>Yüzlerce siteyi düzenli kazıyacaksan Scrapy çerçevesi; istek kuyruğu, gecikme, yeniden deneme, robots.txt ve dışa aktarma işlerini hazır verir. Ama kurallar aynı kalır: izin, nezaket, minimum veri.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/web-scraping">Alıştırmalara geç (27)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../http-api/">← HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler</a><a href="../ofis-otomasyon/">Ofis ve iş akışı otomasyonu →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,248 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP | Kesit Python</title><meta name="description" content="Bağlı listede ters çevirme, Floyd ve birleştirme; ağaçta DFS/BFS, BST doğrulama ve LCA; trie ile otomatik tamamlama; Dijkstra, topolojik sıralama ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/mulakat-kaliplari-2/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP"><meta property="og:description" content="Bağlı listede ters çevirme, Floyd ve birleştirme; ağaçta DFS/BFS, BST doğrulama ve LCA; trie ile otomatik tamamlama; Dijkstra, topolojik sıralama ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/mulakat-kaliplari-2/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP","description":"Bağlı listede ters çevirme, Floyd ve birleştirme; ağaçta DFS/BFS, BST doğrulama ve LCA; trie ile otomatik tamamlama; Dijkstra, topolojik sıralama ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/mulakat-kaliplari-2/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mülakat</span><h1>Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP</h1><p class="st-l">Bağlı listede ters çevirme, Floyd ve birleştirme; ağaçta DFS/BFS, BST doğrulama ve LCA; trie ile otomatik tamamlama; Dijkstra, topolojik sıralama ve union-find; aralık ekleme ve sweep line; düzenleme mesafesi ve ızgara DP'si; bit maskeleri ve kalıp tanıma tablosu. Örnekler Kanat Havayolları rotaları, Pusula İK hiyerarşisi ve Lezzet Kurye teslimatları üzerinde çalışır.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mulakat-kaliplari-2">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden ikinci bir kalıp dersi?</h2>
+<p><code>algoritmalar</code> ve <a href="../mulakat-hazirlik/">Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama</a> derslerinde dizi, sözlük, iki işaretçi, kayan pencere, ikili arama, BFS ve tek boyutlu dinamik programlama kalıplarını gördün. Teknik mülakatların ikinci yarısı genellikle <b>işaretçi tabanlı yapılar</b> (bağlı liste, ağaç, trie), <b>ileri graf</b> (ağırlıklı en kısa yol, bağımlılık sırası, bağlı bileşenler), <b>aralıklar</b> ve <b>iki boyutlu DP</b> üzerinedir. Bu kalıplar iş hayatında da karşına çıkar: Kanat Havayolları'nda en kısa aktarma rotası, Pusula İK'da organizasyon ağacı, Lezzet Kurye'de aynı anda yoldaki kurye sayısı, arama kutusunda otomatik tamamlama.</p>
+<p>Bu derste her kalıbın <b>tanıma ipucunu</b>, Python iskeletini ve karmaşıklığını öğreneceksin; örneklerin çoğu gerçek veri setleri üzerinde çalışır.</p>
+
+<h2>1. Bağlı liste problemleri</h2>
+<p><a href="../veri-yapilari/">Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf</a> dersinde düğümlerden bağlı liste kurdun. Mülakat soruları genelde üç işaretçi hilesine dayanır: <b>ters çevirme</b> (önceki/şimdiki/sonraki), <b>hızlı-yavaş işaretçi</b> (Floyd: döngü tespiti, ortadaki eleman) ve <b>sahte baş düğüm</b> (dummy head: birleştirme, silme).</p>
+<pre class="py">class Dugum:
+    def __init__(self, deger, sonraki=None):
+        self.deger = deger
+        self.sonraki = sonraki
+
+def listeden(degerler):
+    bas = None
+    for d in reversed(degerler):
+        bas = Dugum(d, bas)
+    return bas
+
+def listeye(bas, sinir=100):
+    sonuc = []
+    while bas and len(sonuc) &lt; sinir:
+        sonuc.append(bas.deger)
+        bas = bas.sonraki
+    return sonuc
+
+
+def ters_cevir(bas):
+    onceki = None
+    while bas:
+        bas.sonraki, onceki, bas = onceki, bas, bas.sonraki
+    return onceki
+
+def dongu_var_mi(bas):
+    yavas = hizli = bas
+    while hizli and hizli.sonraki:
+        yavas, hizli = yavas.sonraki, hizli.sonraki.sonraki
+        if yavas is hizli:
+            return True
+    return False
+
+rota = listeden(["Depo", "Konak", "Alsancak", "Bornova"])
+print(listeye(ters_cevir(rota)))
+dongulu = listeden([1, 2, 3, 4])
+dongulu.sonraki.sonraki.sonraki.sonraki = dongulu.sonraki   # 4 → 2
+print(dongu_var_mi(dongulu), dongu_var_mi(listeden([1, 2, 3])))</pre>
+<div class="tip"><b>Floyd'un ikinci aşaması</b>Hızlı ve yavaş işaretçi buluştuktan sonra birini başa al, ikisini de birer adım ilerlet: tekrar buluştukları düğüm döngünün <b>başlangıcıdır</b>. Ek bellek O(1), süre O(n).</div>
+
+<h2>2. Ağaçlar: gezinme, derinlik, BST, LCA</h2>
+<p>Ağaç sorularının çoğu tek bir özyinelemeli fikre indirgenir: "sol alt ağaç için cevabı bil, sağ alt ağaç için cevabı bil, ikisini birleştir". <b>Derinlik öncelikli</b> (DFS) gezinmenin üç sırası vardır: <b>pre-order</b> (kök, sol, sağ: ağacı kopyalamak), <b>in-order</b> (sol, kök, sağ: BST'de sıralı çıktı), <b>post-order</b> (sol, sağ, kök: alt ağaç boyutu, silme). <b>Genişlik öncelikli</b> (BFS) gezinme ise kuyrukla seviye seviye ilerler.</p>
+<pre class="py">class Agac:
+    def __init__(self, deger, sol=None, sag=None):
+        self.deger = deger
+        self.sol = sol
+        self.sag = sag
+
+from collections import deque
+
+kok = Agac(8, Agac(3, Agac(1), Agac(6)), Agac(10, None, Agac(14)))
+
+def inorder(d):
+    return inorder(d.sol) + [d.deger] + inorder(d.sag) if d else []
+
+def derinlik(d):
+    return 1 + max(derinlik(d.sol), derinlik(d.sag)) if d else 0
+
+def seviyeler(kok):
+    sonuc, q = [], deque([kok] if kok else [])
+    while q:
+        sonuc.append([d.deger for d in q])
+        q = deque(c for d in q for c in (d.sol, d.sag) if c)
+    return sonuc
+
+print("in-order:", inorder(kok), "derinlik:", derinlik(kok))
+print("seviyeler:", seviyeler(kok))</pre>
+<p><b>BST doğrulama</b>da sık yapılan hata yalnız çocuklarla karşılaştırmaktır; doğru yöntem her düğüme izin verilen <b>(alt, üst) aralığını</b> aşağı taşımaktır. <b>En yakın ortak ata</b> (Lowest Common Ancestor, LCA) ise organizasyon ağacında "iki çalışanın ortak yöneticisi" sorusudur: ebeveyn işaretçisi varsa birinin atalarını kümeye koyup diğerinden yukarı çıkarsın.</p>
+
+<h2>3. Trie: önek ağacı ve otomatik tamamlama</h2>
+<p><b>Trie</b>, her kenarı bir karakter olan bir ağaçtır; aynı öneki paylaşan kelimeler aynı yolu paylaşır. "Bu önekle başlayan kelime var mı?" sorusu kelime sayısından bağımsız, yalnız önek uzunluğu kadar (O(L)) sürer. Anadolu Market arama kutusundaki ürün önerisi tipik kullanımdır:</p>
+<pre class="py">import veri
+
+class Trie:
+    def __init__(self):
+        self.kok = {}
+
+    def ekle(self, kelime):
+        dugum = self.kok
+        for harf in kelime:
+            dugum = dugum.setdefault(harf, {})
+        dugum["$"] = True                       # kelime sonu işareti
+
+    def tamamla(self, onek, k=5):
+        dugum = self.kok
+        for harf in onek:
+            if harf not in dugum:
+                return []
+            dugum = dugum[harf]
+        sonuc, yigin = [], [(dugum, onek)]
+        while yigin and len(sonuc) &lt; k:
+            d, yol = yigin.pop()
+            if "$" in d:
+                sonuc.append(yol)
+            for harf in sorted((h for h in d if h != "$"), reverse=True):
+                yigin.append((d[harf], yol + harf))
+        return sonuc
+
+t = Trie()
+for urun in veri.kayitlar("anadolu_market", "products"):
+    t.ekle(urun["name"].replace("İ", "i").replace("I", "ı").lower())
+print(t.tamamla("k", 4))
+print(t.tamamla("su"), t.tamamla("xyz"))</pre>
+
+<h2>4. İleri graf: Dijkstra, topolojik sıralama, union-find</h2>
+<p><b>Dijkstra</b>, kenar ağırlıkları negatif olmayan grafta tek kaynaktan en kısa yolları bulur: bir öncelik kuyruğundan (heapq) her seferinde en yakın düğümü çıkar, komşuların mesafesini gevşet (relax). Kuyruktan eski (stale) bir kayıt çıkarsa atla. Karmaşıklık O((V + E) log V). Kanat Havayolları'nın gerçek rota tablosunda Berlin'den Ankara'ya en kısa yol:</p>
+<pre class="py">import heapq
+from collections import defaultdict
+
+graf = defaultdict(list)
+for r in veri.kayitlar("kanat_havayollari", "hv_routes"):
+    graf[r["origin"]].append((r["dest"], r["distance_km"]))
+
+def dijkstra(bas, hedef):
+    mesafe, onceki = {bas: 0}, {}
+    kuyruk = [(0, bas)]
+    while kuyruk:
+        d, u = heapq.heappop(kuyruk)
+        if u == hedef:
+            yol = [u]
+            while yol[-1] != bas:
+                yol.append(onceki[yol[-1]])
+            return d, yol[::-1]
+        if d &gt; mesafe[u]:
+            continue                            # eski kayıt
+        for v, w in graf[u]:
+            if d + w &lt; mesafe.get(v, float("inf")):
+                mesafe[v], onceki[v] = d + w, u
+                heapq.heappush(kuyruk, (d + w, v))
+    return None
+
+print(dijkstra("BER", "ESB"))
+print(dijkstra("FRA", "BER"))</pre>
+<p>BER→ESB için en az aktarmalı yollar iki tane (SAW-ADB ve SAW-AYT üzerinden, ikisi de 3 uçuş); BFS hangisini önce bulursa onu verir, Dijkstra ise kilometreye bakarak AYT üzerinden olanı (2618 km) seçer. <b>Negatif ağırlık</b> varsa Dijkstra yanlış sonuç verir; Bellman-Ford gerekir.</p>
+<p><b>Topolojik sıralama</b>, yönlü döngüsüz grafta (DAG) her kenarın (a → b) a'yı b'den önce koyan sıralamadır: derleme sırası, veri hattı görevleri, ön koşullu dersler, departman hiyerarşisi. Kahn algoritması giriş derecesi 0 olanlardan başlar; tüm düğümler çıkarılamıyorsa döngü vardır. <b>Union-find</b> (ayrık küme, disjoint set) ise "bu iki öğe aynı grupta mı?" sorusunu neredeyse O(1)'de cevaplar; yol sıkıştırma (path compression) ve boyuta göre birleştirme ile.</p>
+<pre class="py">departman = veri.kayitlar("pusula_ik", "ik_departments")
+ad = {d["dept_id"]: d["name"] for d in departman}
+giris = {d["name"]: 0 for d in departman}
+cocuk = defaultdict(list)
+for d in departman:
+    if d["parent_id"] is not None:
+        cocuk[ad[d["parent_id"]]].append(d["name"])
+        giris[d["name"]] += 1
+hazir = sorted(n for n, g in giris.items() if g == 0)
+sira = []
+while hazir:
+    u = hazir.pop(0)
+    sira.append(u)
+    for v in cocuk[u]:
+        giris[v] -= 1
+        if giris[v] == 0:
+            hazir.append(v)
+print(sira[:6], "...", len(sira) == len(giris))
+
+ebeveyn = {}
+def bul(x):
+    ebeveyn.setdefault(x, x)
+    while ebeveyn[x] != x:
+        ebeveyn[x] = ebeveyn[ebeveyn[x]]        # yol sıkıştırma (yarılama)
+        x = ebeveyn[x]
+    return x
+for a, b in [("ali", "ayse"), ("veli", "can"), ("ayse", "can")]:
+    ebeveyn[bul(a)] = bul(b)
+print(bul("ali") == bul("veli"), bul("ali") == bul("zeynep"))</pre>
+
+<h2>5. Aralıklar ve sweep line</h2>
+<p>Aralık problemlerinin anahtarı <b>başlangıca göre sıralamaktır</b>. Birleştirme (merge), ekleme (insert) ve çakışma kontrolü bu sıralamadan sonra tek geçişle çözülür. "Aynı anda en çok kaç ...?" sorusu ise <b>sweep line</b> (süpürme çizgisi) ile çözülür: her aralığı (+1 başlangıç, −1 bitiş) olaylarına çevir, zamana göre sırala, sayacı gez. Aynı anda biten ve başlayan olayda bitişi önce işlemek, yarı açık [başlangıç, bitiş) aralığı anlamına gelir.</p>
+<pre class="py">olaylar = []
+for s in veri.kayitlar("lezzet_kurye", "lk_orders"):
+    if s["picked_at"] and s["delivered_at"]:
+        olaylar += [(s["picked_at"], 1), (s["delivered_at"], -1)]
+olaylar.sort()                                  # aynı saniyede -1, +1'den önce gelir
+yolda = en_cok = 0
+for zaman, degisim in olaylar:
+    yolda += degisim
+    if yolda &gt; en_cok:
+        en_cok, an = yolda, zaman
+print(f"{len(olaylar) // 2} teslimat; aynı anda en çok {en_cok} kurye yolda ({an})")</pre>
+
+<h2>6. İki boyutlu dinamik programlama</h2>
+<p>İki dizi ya da bir ızgara üzerinde "en uzun / en az / kaç yol" soruları genelde <b>2B DP</b>'dir: <code>dp[i][j]</code> = ilk dizinin ilk i, ikincinin ilk j elemanı için cevap. <a href="../algoritmalar/">Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS</a> dersinde LCS'yi gördün. <b>Düzenleme mesafesi</b> (edit distance, Levenshtein) bir metni diğerine çeviren en az ekleme/silme/değiştirme sayısıdır; adres ve şehir adlarındaki yazım hatalarını eşleştirmede kullanılır. Her satır yalnız bir önceki satıra baktığı için tabloyu iki satıra indirip belleği O(n·m)'den O(m)'ye düşürebilirsin.</p>
+<pre class="py">def duzenleme(a, b):
+    onceki = list(range(len(b) + 1))           # boş a → b'nin ilk j harfi: j ekleme
+    for i in range(1, len(a) + 1):
+        simdiki = [i] + [0] * len(b)
+        for j in range(1, len(b) + 1):
+            if a[i - 1] == b[j - 1]:
+                simdiki[j] = onceki[j - 1]
+            else:
+                simdiki[j] = 1 + min(onceki[j], simdiki[j - 1], onceki[j - 1])
+        onceki = simdiki
+    return onceki[-1]
+
+for yazilan in ["Eskisehir", "Kayseeri", "Ankra", "İzmir"]:
+    print(yazilan, "→", min(["Eskişehir", "Kayseri", "Ankara", "İzmir"], key=lambda s: duzenleme(yazilan, s)))</pre>
+
+<h2>7. Bit manipülasyonu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Anlamı</th><th>Kullanım</th></tr>
+<tr><td><code>x &amp; 1</code></td><td>Son bit</td><td>Tek mi çift mi</td></tr>
+<tr><td><code>x &amp; (x - 1)</code></td><td>En sağdaki 1 bitini siler</td><td>Bit sayma (Kernighan), 2'nin kuvveti mi?</td></tr>
+<tr><td><code>a ^ a == 0</code>, <code>a ^ 0 == a</code></td><td>XOR kendini götürür</td><td>Çiftler arasında tek kalanı bulma</td></tr>
+<tr><td><code>maske | BAYRAK</code>, <code>maske &amp; ~BAYRAK</code></td><td>Bayrak aç / kapat</td><td>Yetki maskeleri</td></tr>
+<tr><td><code>x.bit_count()</code></td><td>1 bitlerinin sayısı (Python 3.10+)</td><td>Hazır ve hızlı</td></tr>
+</table></div>
+
+<h2>8. Kalıp tanıma tablosu</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Soruda ne görüyorsun?</th><th>Kalıp (NeetCode kategorisi)</th><th>Karmaşıklık</th></tr>
+<tr><td>Düğüm, "sonraki", döngü, ortadaki eleman</td><td>Linked List: hızlı-yavaş işaretçi, dummy head</td><td>O(n), O(1) bellek</td></tr>
+<tr><td>Hiyerarşi, "alt ağaç", "seviye"</td><td>Trees: DFS özyineleme / BFS kuyruk</td><td>O(n)</td></tr>
+<tr><td>Önek, otomatik tamamlama, sözlükte kelime arama</td><td>Tries</td><td>O(L) sorgu</td></tr>
+<tr><td>Ağırlıklı en kısa yol, negatif ağırlık yok</td><td>Advanced Graphs: Dijkstra</td><td>O((V+E) log V)</td></tr>
+<tr><td>Bağımlılık, ön koşul, "hangi sırayla"</td><td>Graphs: topolojik sıralama</td><td>O(V+E)</td></tr>
+<tr><td>"Aynı grupta mı", dinamik bağlantı</td><td>Graphs: union-find</td><td>~O(α(n))</td></tr>
+<tr><td>Zaman aralıkları, çakışma, "aynı anda en çok"</td><td>Intervals: sırala + tara, sweep line</td><td>O(n log n)</td></tr>
+<tr><td>İki dizi/ızgara, "en az işlem", "kaç yol"</td><td>2-D DP</td><td>O(n·m)</td></tr>
+<tr><td>"Ekstra bellek kullanmadan", tek kalan, bayraklar</td><td>Bit Manipulation</td><td>O(n), O(1)</td></tr>
+</table></div>
+<div class="warn"><b>Özyineleme derinliği</b>Python'ın varsayılan özyineleme sınırı yaklaşık 1000'dir. Çok derin (ör. tek kollu, 10 000 düğümlü) ağaçlarda özyinelemeli DFS <code>RecursionError</code> verir; mülakatta bunu söylemek ve yığınla yinelemeli sürümü önermek artı puandır.</div>
+<div class="note"><b>Gerçek işte</b>Bu yapılar günlük kodda genelde kütüphaneler içinde saklıdır: Dijkstra rota servislerinde ve <code>networkx</code>'te, topolojik sıralama Airflow ve dbt'nin görev planlayıcısında, trie arama motorlarının öneri katmanında, düzenleme mesafesi veri temizleme ve kayıt eşleştirmede (<code>rapidfuzz</code>), sweep line kapasite planlamasında. Mülakattaki değer, doğru yapıyı tanıyıp karmaşıklığını konuşabilmektir; işte ise önce hazır ve test edilmiş kütüphaneyi seçersin.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>A* ve iki yönlü arama</h3>
+<p>Hedef biliniyorsa Dijkstra'yı bir sezgisel tahminle (heuristic, ör. kuş uçuşu mesafe: <code>hv_airports</code> enlem-boylamından) yönlendiren A* çok daha az düğüm açar. Sezgisel gerçek mesafeyi asla aşmamalıdır (admissible).</p>
+<h3>Segment ağacı ve Fenwick ağacı</h3>
+<p>Aralık toplamı sorgusu ve tek eleman güncellemesi birlikte gerekiyorsa önek toplamı yetmez (güncelleme O(n)); segment ağacı ya da Fenwick ağacı ikisini de O(log n)'de yapar.</p>
+<h3>DP'de durum tasarımı</h3>
+<p>2B DP'nin zor kısmı formül değil durum tanımıdır: "dp[i][j] neyi temsil ediyor?" cümlesini yüksek sesle kur, taban durumlarını (boş dizi, ilk satır) ayrıca yaz, sonra geçişi çıkar. Belleği azaltmak için hangi önceki hücrelere bakıldığını tabloda işaretle.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/mulakat-kaliplari-2">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-oyunlar/">← Mini projeler: oyunlar ve araçlar</a><a href="../entegrasyon-saas/">İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

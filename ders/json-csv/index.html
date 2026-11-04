@@ -1,0 +1,268 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>JSON ve CSV: veri alışverişinin iki ortak dili | Kesit Python</title><meta name="description" content="json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/json-csv/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="JSON ve CSV: veri alışverişinin iki ortak dili"><meta property="og:description" content="json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/json-csv/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"JSON ve CSV: veri alışverişinin iki ortak dili","description":"json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/json-csv/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>JSON ve CSV: veri alışverişinin iki ortak dili</h1><p class="st-l">json ile dumps/loads, Türkçe karakter ve tarih gibi özel tipleri yönetir; csv ile reader/DictReader/DictWriter kullanır; iç içe veriyi düz tabloya çevirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in sipariş API'si JSON döner; muhasebe ekibi ise Excel'de açacağı CSV ister. Ilgaz Bank'ın eski sistemi CSV üretir, yeni mikroservisler JSON konuşur. Bir veri analisti ya da geliştirici olarak işinin önemli bir kısmı bu iki biçim arasında güvenle dönüşüm yapmaktır. İkisi de "düz metin" olduğu için basit görünür; ama Türkçe karakter, tarih, ondalık sayı ve iç içe yapılar en çok hatanın çıktığı yerlerdir.</p>
+
+<h2>JSON (JavaScript Object Notation)</h2>
+<p>JSON'da altı tip vardır: nesne (object, Python'da dict), dizi (array, list), metin (str), sayı (int/float), boolean (true/false) ve null (None). Demet, küme, tarih ve Decimal gibi tipler JSON'da <b>yoktur</b>; onları sen dönüştürürsün.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Python</th><th>JSON</th><th>Geri dönüşte</th></tr>
+<tr><td>dict</td><td>object { }</td><td>dict</td></tr>
+<tr><td>list, tuple</td><td>array [ ]</td><td>list (demet listeye döner!)</td></tr>
+<tr><td>str</td><td>string</td><td>str</td></tr>
+<tr><td>int, float</td><td>number</td><td>int / float</td></tr>
+<tr><td>True / False / None</td><td>true / false / null</td><td>True / False / None</td></tr>
+<tr><td>datetime, Decimal, set, dataclass</td><td>desteklenmez</td><td>default= ile çevir</td></tr>
+</table></div>
+
+<h3>dumps ve loads</h3>
+<p><code>dumps</code> (dump string) nesneyi JSON metnine, <code>loads</code> metni nesneye çevirir. Dosyayla çalışırken <code>dump(obj, f)</code> ve <code>load(f)</code> kullanılır.</p>
+<pre class="py">import json
+
+siparis = {
+    "no": "S-1001", "musteri": "Ayşe Yılmaz", "sehir": "İzmir",
+    "kalemler": [{"urun": "laptop", "adet": 1, "fiyat": 25999.9}, {"urun": "mouse", "adet": 2, "fiyat": 349.0}],
+    "odendi": True, "kupon": None,
+}
+print(json.dumps(siparis))                      # Türkçe harfler \u ile kaçırıldı
+print(json.dumps(siparis, ensure_ascii=False))  # okunur Türkçe
+print(json.dumps({"b": 1, "a": 2}, indent=2, sort_keys=True))
+
+geri = json.loads('{"no": "S-1", "tutar": 120.5, "etiketler": ["hızlı", "kargo"], "iptal": null}')
+print(geri["tutar"] + 1, geri["iptal"], type(geri["etiketler"]).__name__)</pre>
+<div class="tip"><b>ensure_ascii=False</b>Varsayılan <code>ensure_ascii=True</code>, "İzmir"i <code>"\u0130zmir"</code> yapar. Geçerli JSON'dur ama insan okuyamaz ve dosya büyür. Türkçe veri yazarken hep <code>ensure_ascii=False</code> ve dosyayı <code>encoding="utf-8"</code> ile aç.</div>
+
+<h3>default: desteklenmeyen tipleri çevirmek</h3>
+<p><code>json.dumps</code> tanımadığı bir nesneyle karşılaşınca <code>TypeError</code> verir. <code>default=fonksiyon</code> parametresi bu durumda çağrılır; sen tipi JSON'un bildiği bir şeye çevirirsin.</p>
+<pre class="py">import json
+from datetime import date, datetime
+from decimal import Decimal
+from dataclasses import dataclass, asdict
+
+@dataclass
+class Islem:
+    hesap: str
+    tutar: Decimal
+    tarih: date
+
+def json_uyumlu(o):
+    if isinstance(o, (date, datetime)):
+        return o.isoformat()
+    if isinstance(o, Decimal):
+        return str(o)            # para için float'a çevirme, hassasiyet kaybolur
+    if isinstance(o, set):
+        return sorted(o)
+    if hasattr(o, "__dataclass_fields__"):
+        return asdict(o)
+    raise TypeError(f"JSON'a çevrilemiyor: {type(o).__name__}")
+
+kayit = {"islem": Islem("TR01", Decimal("1250.75"), date(2026, 3, 15)), "etiketler": {"eft", "acil"}}
+print(json.dumps(kayit, default=json_uyumlu, ensure_ascii=False, indent=2))
+
+try:
+    json.dumps({"t": date.today()})
+except TypeError as e:
+    print("default olmadan:", e)</pre>
+
+<h3>Okurken hata yakalama</h3>
+<pre class="py">import json
+
+ham = ['{"a": 1}', "{'a': 1}", '{"a": 1,}', '']
+for h in ham:
+    try:
+        print(repr(h), "→", json.loads(h))
+    except json.JSONDecodeError as e:
+        print(repr(h), "→ HATA:", e.msg, "konum", e.pos)</pre>
+<div class="warn"><b>JSON Python değildir</b>Tek tırnak, sondaki virgül, yorum satırı ve <code>True</code> (büyük T) JSON'da geçersizdir. Elle JSON yazma; <code>json.dumps</code> ürettirsin.</div>
+
+<h2>CSV (Comma-Separated Values)</h2>
+<p>CSV, her satırın bir kayıt ve alanların virgülle (Türkiye'de Excel çoğu zaman noktalı virgülle) ayrıldığı düz metindir. <code>"İstanbul, Avrupa"</code> gibi virgül içeren değer tırnak içine alınır; bu yüzden <code>split(",")</code> ile ayrıştırmak <b>yanlıştır</b>, <code>csv</code> modülü tırnak kurallarını bilir.</p>
+<p>Derste dosya yerine <code>io.StringIO</code> kullanıyoruz: bellekte bir "dosya gibi" nesne. Gerçek dosyada tek fark <code>open("x.csv", newline="", encoding="utf-8")</code> yazmaktır.</p>
+<pre class="py">import csv, io
+
+ham = """no,musteri,sehir,tutar
+S-1,Ayşe Yılmaz,İzmir,1250.50
+S-2,"Mehmet, Ali",Ankara,80
+S-3,Zeynep Kaya,"İstanbul, Avrupa",349.90
+"""
+# reader: liste listesi
+for satir in csv.reader(io.StringIO(ham)):
+    print(satir)
+
+# DictReader: başlıkları anahtar yapar
+toplam = 0.0
+for kayit in csv.DictReader(io.StringIO(ham)):
+    toplam += float(kayit["tutar"])    # CSV'de her şey metindir!
+    print(kayit["musteri"], "-", kayit["sehir"])
+print("Toplam:", round(toplam, 2))
+
+print("Yanlış yol:", 'S-2,"Mehmet, Ali",Ankara,80'.split(","))</pre>
+
+<h3>Yazma: writer ve DictWriter</h3>
+<pre class="py">import csv, io
+
+kayitlar = [
+    {"hesap": "TR01", "tutar": 1250.5, "aciklama": "Kira, Mart"},
+    {"hesap": "TR02", "tutar": -80, "aciklama": "Kart ödemesi"},
+]
+cikti = io.StringIO()
+yazici = csv.DictWriter(cikti, fieldnames=["hesap", "tutar", "aciklama"], delimiter=";")
+yazici.writeheader()
+yazici.writerows(kayitlar)
+print(cikti.getvalue())
+
+# Noktalı virgüllü Türkçe Excel CSV'sini geri okuma
+for k in csv.DictReader(io.StringIO(cikti.getvalue()), delimiter=";"):
+    print(k)
+
+# Satır listesi için writer
+c2 = io.StringIO()
+w = csv.writer(c2)
+w.writerow(["ad", "not"])
+w.writerow(["Ali", 'Dedi ki: "tamam"'])      # tırnak otomatik kaçırılır
+print(c2.getvalue())</pre>
+<div class="note"><b>newline="" neden?</b>Gerçek dosya açarken <code>open(..., newline="")</code> ver; aksi halde Windows'ta her kayıt arasına boş satır girer. Excel'in Türkçe ayarları için <code>delimiter=";"</code> ve ondalık virgül gerekebilir; dosya başına BOM için <code>encoding="utf-8-sig"</code> kullanılır.</div>
+
+<h2>İç içe veriyi düzleştirme</h2>
+<p>JSON doğal olarak iç içedir (sipariş → kalemler → ürün). CSV ise düzdür. Dönüşüm için iki yaygın strateji var: (1) iç sözlükleri <code>"adres.sehir"</code> gibi noktalı anahtarlara aç; (2) listeleri her eleman bir satır olacak şekilde "patlat" (explode). İkisini birlikte gösterelim.</p>
+<pre class="py">import csv, io, json
+
+ham = json.loads("""[
+  {"no": "S-1", "musteri": {"ad": "Ayşe", "sehir": "İzmir"},
+   "kalemler": [{"urun": "laptop", "adet": 1}, {"urun": "mouse", "adet": 2}]},
+  {"no": "S-2", "musteri": {"ad": "Ali", "sehir": "Ankara"},
+   "kalemler": [{"urun": "çanta", "adet": 1}]}
+]""")
+
+def duzlestir(d,):
+    """İç içe sözlüğü noktalı anahtarlarla tek seviyeye indir (listeleri olduğu gibi bırak)."""
+    duz = {}
+    for k, v in d.items():
+        ad = f"{onek}{k}"
+        if isinstance(v, dict):
+            duz.update(duzlestir(v, ad + "."))
+        else:
+            duz[ad] = v
+    return duz
+
+satirlar = []
+for s in ham:
+    temel = duzlestir({k: v for k, v in s.items() if k != "kalemler"})
+    for kalem in s["kalemler"]:            # her kalem ayrı satır
+        satirlar.append({**temel, **kalem})
+
+print(satirlar[0])
+cikti = io.StringIO()
+w = csv.DictWriter(cikti, fieldnames=list(satirlar[0].keys()))
+w.writeheader(); w.writerows(satirlar)
+print(cikti.getvalue())</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: JSON ve CSV'nin ince ayarları</h2>
+<p>Temel okuma-yazmayı öğrendin. Gerçek işte ise farklar ayrıntıda çıkar: muhasebe ondalık virgüllü CSV gönderir, API para tutarını float olarak yollar, log sistemi her satıra bir JSON yazar, Excel bir hücreyi formül sanıp çalıştırır. Bu bölümde <code>json</code> ve <code>csv</code> modüllerinin az bilinen ama işte çok kullanılan parametrelerini görüyoruz.</p>
+<h3>Okurken tip kontrolü: parse_float ve object_hook</h3>
+<p><code>json.loads</code> varsayılan olarak her ondalıklı sayıyı <code>float</code> yapar. Para için bu kabul edilemez; <code>parse_float=Decimal</code> verirsen sayı metni doğrudan <code>Decimal</code>'e çevrilir, hiç float'a uğramaz. <code>object_hook</code> ise her JSON nesnesi (sözlük) oluştuğunda çağrılır; tarih alanlarını <code>date</code>'e çevirmek ya da sözlüğü bir dataclass'a dönüştürmek için idealdir.</p>
+<pre class="py">import json
+from decimal import Decimal
+from datetime import date
+
+ham = '{"hesap": "TR01", "tutar": 0.1, "islem_tarih": "2026-03-15", "detay": {"ucret": 0.2}}'
+
+print(json.loads(ham)["tutar"] + 0.2)          # float hatası
+d = json.loads(ham, parse_float=Decimal)
+print(d["tutar"] + d["detay"]["ucret"])         # tam 0.3
+
+def tarih_coz(nesne):
+    for k, v in nesne.items():
+        if k.endswith("_tarih") and isinstance(v, str):
+            nesne[k] = date.fromisoformat(v)
+    return nesne
+
+k = json.loads(ham, object_hook=tarih_coz)
+print(type(k["islem_tarih"]).__name__, k["islem_tarih"].strftime("%d.%m.%Y"))</pre>
+<h3>Yazarken boyut ve kararlılık: separators, sort_keys, allow_nan</h3>
+<p>API'ye gönderilen JSON'da her bayt önemliyse <code>separators=(",", ":")</code> boşlukları siler. <code>sort_keys=True</code> aynı veriden her zaman aynı metni üretir; imza (hash) hesaplarken ve git farklarında şarttır. <code>float("nan")</code> standart JSON değildir ama Python onu varsayılan olarak <code>NaN</code> diye yazar; karşı taraftaki JavaScript ya da Java ayrıştırıcısı patlar. <code>allow_nan=False</code> bu durumu kaynağında yakalar.</p>
+<pre class="py">import json, hashlib
+
+veri = {"tutar": 120.5, "no": "S-1", "etiket": ["hızlı"]}
+kompakt = json.dumps(veri, separators=(",", ":"), sort_keys=True, ensure_ascii=False)
+print(kompakt)
+print("imza:", hashlib.sha256(kompakt.encode("utf-8")).hexdigest()[:16])
+
+print(json.dumps({1: "bir", 2: "iki"}))         # int anahtarlar metne döner!
+try:
+    json.dumps({"oran": float("nan")}, allow_nan=False)
+except ValueError as e:
+    print("Yakalandı:", e)</pre>
+<div class="tbl-wrap"><table><tr><th>Parametre</th><th>Nerede</th><th>Ne işe yarar</th></tr><tr><td><code>ensure_ascii=False</code></td><td>dumps</td><td>Türkçe karakterleri olduğu gibi yazar</td></tr><tr><td><code>indent=2</code>, <code>sort_keys=True</code></td><td>dumps</td><td>Okunur ve kararlı çıktı (git, imza)</td></tr><tr><td><code>separators=(",", ":")</code></td><td>dumps</td><td>En küçük çıktı (ağ, önbellek (cache) anahtarı)</td></tr><tr><td><code>allow_nan=False</code></td><td>dumps</td><td>NaN/Infinity yazmaya çalışınca ValueError</td></tr><tr><td><code>default=fonk</code></td><td>dumps</td><td>Desteklenmeyen tipi çevirir (date, Decimal)</td></tr><tr><td><code>parse_float=Decimal</code></td><td>loads</td><td>Ondalıkları kayıpsız okur</td></tr><tr><td><code>object_hook=fonk</code></td><td>loads</td><td>Her sözlüğü dönüştürür (tarih, dataclass)</td></tr><tr><td><code>delimiter=";"</code>, <code>quotechar</code></td><td>csv</td><td>Türk Excel'i ve özel biçimler</td></tr><tr><td><code>quoting=csv.QUOTE_ALL</code></td><td>csv yazma</td><td>Her hücreyi tırnağa alır</td></tr><tr><td><code>extrasaction="ignore"</code>, <code>restval=""</code></td><td>DictWriter</td><td>Fazla anahtarı atla, eksik alanı doldur</td></tr><tr><td><code>restkey</code>, <code>restval</code></td><td>DictReader</td><td>Fazla/eksik hücreli satırları yönet</td></tr></table></div>
+<h3>JSON Lines: satır başına bir kayıt</h3>
+<p>Log ve veri hattı dosyaları genelde <code>.jsonl</code> biçimindedir. Avantajı: dosyanın tamamını belleğe almadan satır satır işlersin ve bozuk tek satır tüm dosyayı çöpe atmaz. Bozuk satırı atlayıp numarasını raporlamak iyi pratiktir.</p>
+<pre class="py">import json
+
+jsonl = """{"no": "S-1", "tutar": 120}
+{"no": "S-2", "tutar": 80}
+{"no": "S-3", "tutar":
+{"no": "S-4", "tutar": 40}
+"""
+toplam, bozuk = 0, []
+for no, satir in enumerate(jsonl.splitlines(), start=1):
+    if not satir.strip():
+        continue
+    try:
+        toplam += json.loads(satir)["tutar"]
+    except json.JSONDecodeError:
+        bozuk.append(no)
+print("toplam:", toplam, "bozuk satırlar:", bozuk)
+
+# Yazmak da kolay: her kayda bir dumps + "\n"
+print("".join(json.dumps(k, ensure_ascii=False) + "\n" for k in [{"şehir": "İzmir"}, {"şehir": "Van"}]), end="")</pre>
+<h3>CSV'nin kenar durumları</h3>
+<p>Gerçek CSV'ler temiz gelmez: bazı satırlarda hücre eksik, bazılarında fazla; ayırıcı bilinmiyor; sayılar <code>1.250,50</code> biçiminde. <code>csv.Sniffer</code> bir örnekten ayırıcıyı tahmin eder; <code>DictReader</code> eksik hücreye <code>restval</code> (varsayılan None), fazla hücrelere <code>restkey</code> anahtarını verir.</p>
+<pre class="py">import csv, io
+from decimal import Decimal
+
+ham = "no;sube;tutar\nS-1;Kadıköy;1.250,50\nS-2;Çankaya\nS-3;Konak;80,00;FAZLA\n"
+
+lehce = csv.Sniffer().sniff(ham.splitlines()[0] + "\n" + ham.splitlines()[1])
+print("ayırıcı:", repr(lehce.delimiter))
+
+def tr_sayi(metin):
+    return Decimal(metin.replace(".", "").replace(",", "."))
+
+for k in csv.DictReader(io.StringIO(ham), delimiter=lehce.delimiter, restval="0", restkey="ekstra"):
+    print(k["no"], k["sube"], tr_sayi(k["tutar"]), k.get("ekstra"))</pre>
+<div class="warn"><b>Sniffer bir tahmindir</b>Ayırıcıyı bildiğin her durumda açıkça <code>delimiter</code> ver. Sniffer yalnızca kullanıcıların farklı biçimde dosya yüklediği arayüzlerde (ör. "CSV yükle" düğmesi) işe yarar; tahmin başarısız olursa <code>csv.Error</code> fırlatır, onu yakala.</div>
+<h3>DictWriter: fazla ve eksik anahtarlar</h3>
+<p>Kayıt sözlüğünde <code>fieldnames</code>'te olmayan bir anahtar varsa <code>DictWriter</code> varsayılan olarak <code>ValueError</code> fırlatır. Bu bilinçli bir güvenliktir: yanlışlıkla gizli alanı (ör. parola özeti) dışa aktarmazsın. İstediğin sütunları seçiyorsan <code>extrasaction="ignore"</code>, eksik alanları boş yazmak için <code>restval=""</code> ver.</p>
+<pre class="py">import csv, io
+
+musteriler = [
+    {"ad": "Ayşe", "sehir": "İzmir", "parola_ozeti": "a1b2"},
+    {"ad": "Can", "telefon": "0555"},
+]
+c = io.StringIO()
+w = csv.DictWriter(c, fieldnames=["ad", "sehir", "telefon"], extrasaction="ignore", restval="-", quoting=csv.QUOTE_ALL)
+w.writeheader()
+w.writerows(musteriler)
+print(c.getvalue())</pre>
+<div class="tip"><b>Büyük tablo işi pandas'ta</b>Sütun tipi çıkarımı, eksik değer ve milyonlarca satırlık CSV için <code>pandas.read_csv</code> daha uygundur; bunu <i>pandas-giris</i> dersinde göreceksin. Dosya kodlaması ve atomik yazma için <i>dosya-ileri</i>, ayar dosyaları için <i>yapilandirma</i> dersine bak. <code>csv</code> modülü ise bağımlılıksız, akış hâlinde ve tam kontrollü olduğu için betiklerde hâlâ ilk tercihtir.</div>
+<p>Komut satırında JSON'u güzelleştirmek için Python yeterli: <code>python -m json.tool siparis.json</code> girintili yazdırır, geçersiz JSON'da satır ve sütun numarasıyla hata verir. Büyük dosyada <code>--compact</code> ve <code>--sort-keys</code> seçenekleri de vardır.</p>
+<pre class="code">python -m json.tool siparis.json            # girintili göster, geçersizse hata konumu
+python -m json.tool --sort-keys a.json &gt; b.json
+python -m json.tool --json-lines log.jsonl  # her satırı ayrı doğrula</pre>
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın entegrasyon ekibi dış kurumlardan gelen CSV'leri önce bir "giriş kontrolü" fonksiyonundan geçirir: ayırıcı ve başlık doğru mu, zorunlu sütunlar var mı, tutarlar Decimal'e çevrilebiliyor mu? Geçemeyen satırlar ayrı bir hata dosyasına satır numarasıyla yazılır, geçenler işlenir. Dışa verilen CSV'lerde ise formül enjeksiyonuna karşı <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücreler kaçırılır ve JSON çıktılar <code>sort_keys=True</code> ile imzalanır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Büyük dosyalar, şema ve güvenlik</h3>
+<p><code>json.load</code> tüm dosyayı belleğe alır; yüz megabaytlık bir dışa aktarımda bu sorun olabilir. Çözüm genellikle <b>JSON Lines</b> (her satırda bir JSON nesnesi, .jsonl) biçimidir: satır satır okur, her satıra <code>json.loads</code> uygularsın; log sistemleri ve veri hatları bu biçimi sever. CSV'de ise <code>csv.reader</code> zaten tembeldir; dosyayı satır satır tüketir.</p>
+<p>Şema (schema): CSV'de her alan metindir; "tutar" sütununun sayı olduğunu sen bilirsin. Üretim kodunda okuduğun her satırı bir <code>dataclass</code>'a ya da <code>pydantic</code> modeline geçirip tip dönüşümünü tek yerde yapmak, hataları (boş hücre, "1.250,50" gibi Türk biçimi) erkenden yakalar. Para için <code>float</code> yerine <code>Decimal</code> kullan; JSON'a yazarken <code>str</code> olarak çık.</p>
+<p>Güvenlik: <code>json.loads</code> güvenlidir (kod çalıştırmaz) ama <code>pickle</code> ve <code>eval</code> değildir; dış kaynaktan veri alırken asla kullanma. CSV'de "CSV enjeksiyonu" diye bir şey var: <code>=HYPERLINK(...)</code> ile başlayan hücre Excel'de formül olarak çalışır. Kullanıcı girdisini CSV'ye yazarken <code>=</code>, <code>+</code>, <code>-</code>, <code>@</code> ile başlayan hücrelerin önüne tek tırnak koymak yaygın önlemdir. Son olarak, iki sistem arasında veri taşırken <code>sort_keys=True</code> ve sabit <code>indent</code> ile üretilen JSON, git farklarını okunur tutar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/json-csv">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../regex/">← Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma</a><a href="../standart-kutuphane/">Standart kütüphane turu →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

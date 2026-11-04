@@ -1,0 +1,320 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İş akışı orkestrasyonu: cron, DAG ve Airflow | Kesit Python</title><meta name="description" content="Zamanlanmış işleri cron sözdizimiyle tanımlar, görevleri DAG olarak modeller, graphlib ile sıralar ve döngü yakalarsın; Airflow'un DAG, operator, &gt;&gt;,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/orkestrasyon/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İş akışı orkestrasyonu: cron, DAG ve Airflow"><meta property="og:description" content="Zamanlanmış işleri cron sözdizimiyle tanımlar, görevleri DAG olarak modeller, graphlib ile sıralar ve döngü yakalarsın; Airflow'un DAG, operator, &gt;&gt;,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/orkestrasyon/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İş akışı orkestrasyonu: cron, DAG ve Airflow","description":"Zamanlanmış işleri cron sözdizimiyle tanımlar, görevleri DAG olarak modeller, graphlib ile sıralar ve döngü yakalarsın; Airflow'un DAG, operator, >>,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/orkestrasyon/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>İş akışı orkestrasyonu: cron, DAG ve Airflow</h1><p class="st-l">Zamanlanmış işleri cron sözdizimiyle tanımlar, görevleri DAG olarak modeller, graphlib ile sıralar ve döngü yakalarsın; Airflow'un DAG, operator, >>, retries ve XCom kavramlarını tanır, idempotent ve yeniden çalıştırılabilir işler, yeniden deneme, bildirim ve gözlemlenebilirlikle üretim kalitesinde akışlar kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/orkestrasyon">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Veri boru hattı (pipeline) dersinde tek bir ETL betiği yazdın. Gerçek kurumda ise onlarca iş birbirine bağlıdır: Anadolu Market'te her gece 02:00'de siparişler çekilir, temizlenir, stok tablosu güncellenir, şehir raporu üretilir, yöneticilere e-posta gider. Ilgaz Bank'ta gün sonu mutabakatı, tüm şubelerin işlem dosyaları gelmeden başlayamaz. Bu işleri "doğru sırada, doğru zamanda, hata olursa yeniden deneyerek ve kimse bakmasa da haber vererek" çalıştırma işine <b>orkestrasyon</b> (orchestration) denir. Bu derste önce temelleri (cron, DAG, idempotentlik) saf Python ile kuracak, sonra Airflow ve benzeri araçların bunları nasıl paketlediğini göreceksin.</p>
+
+<h2>Cron: ne zaman çalışsın?</h2>
+<p>Cron, Unix sistemlerinin zamanlayıcısıdır; sözdizimi Airflow, Kubernetes CronJob, GitHub Actions ve bulut zamanlayıcılarında da kullanılır. Bir ifade beş alandan oluşur:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Alan</th><th>Aralık</th><th>Örnek</th><th>Anlamı</th></tr>
+<tr><td>Dakika</td><td>0-59</td><td><code>*/15</code></td><td>Her 15 dakikada (0, 15, 30, 45)</td></tr>
+<tr><td>Saat</td><td>0-23</td><td><code>2</code></td><td>Saat 02</td></tr>
+<tr><td>Ayın günü</td><td>1-31</td><td><code>1,15</code></td><td>Ayın 1'i ve 15'i</td></tr>
+<tr><td>Ay</td><td>1-12</td><td><code>*</code></td><td>Her ay</td></tr>
+<tr><td>Haftanın günü</td><td>0-6 (0 = Pazar)</td><td><code>1-5</code></td><td>Pazartesi-Cuma</td></tr>
+</table></div>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Anlamı</th></tr>
+<tr><td><code>0 2 * * *</code></td><td>Her gün 02:00</td></tr>
+<tr><td><code>30 8 * * 1-5</code></td><td>Hafta içi her gün 08:30</td></tr>
+<tr><td><code>*/10 9-18 * * *</code></td><td>09:00-18:50 arası her 10 dakikada</td></tr>
+<tr><td><code>0 0 1 * *</code></td><td>Her ayın 1'i gece yarısı</td></tr>
+<tr><td><code>0 6 * * 0</code></td><td>Her Pazar 06:00</td></tr>
+</table></div>
+<pre class="code"># Linux / macOS: crontab -e
+0 2 * * *  cd /opt/anadolu &amp;&amp; .venv/bin/python -m etl.gunluk &gt;&gt; /var/log/etl.log 2&gt;&amp;1
+# Windows'ta Görev Zamanlayıcı (Task Scheduler) ya da schtasks:
+schtasks /create /tn "AnadoluETL" /tr "C:\anadolu\.venv\Scripts\python.exe -m etl.gunluk" /sc daily /st 02:00</pre>
+<p>Bir alan nasıl açılır? <code>*/15</code> "0'dan başlayıp 15'er adım", <code>1-5</code> "aralık", <code>1,3,5</code> "liste" demektir; <code>10-30/10</code> ise aralık içinde adım. Aşağıdaki kutu bir alanı değer kümesine çeviriyor; alıştırmalarda bunun üzerine "bir sonraki çalışma zamanı" hesaplayıcısı kuracaksın.</p>
+<pre class="py">def alan_ac(alan, alt, ust):
+    degerler = set()
+    for parca in alan.split(","):
+        aralik, _, adim = parca.partition("/")
+        if aralik == "*":
+            bas, son = alt, ust
+        elif "-" in aralik:
+            bas, son = map(int, aralik.split("-"))
+        else:
+            bas = son = int(aralik)
+        degerler.update(range(bas, son + 1, int(adim) if adim else 1))
+    return sorted(degerler)
+
+print(alan_ac("*/15", 0, 59))
+print(alan_ac("1-5", 0, 6))
+print(alan_ac("8,12,18", 0, 23))
+print(alan_ac("10-30/10", 0, 59))</pre>
+<p>Python içinden zamanlama gerekiyorsa iki popüler paket vardır (tarayıcıda çalışmaz, kendi bilgisayarında dene):</p>
+<pre class="code"># pip install schedule apscheduler
+import schedule, time
+schedule.every().day.at("02:00").do(gunluk_etl)
+schedule.every(15).minutes.do(stok_kontrol)
+while True:
+    schedule.run_pending()
+    time.sleep(30)
+
+from apscheduler.schedulers.blocking import BlockingScheduler
+from apscheduler.triggers.cron import CronTrigger
+zamanlayici = BlockingScheduler(timezone="Europe/Istanbul")
+zamanlayici.add_job(gunluk_etl, CronTrigger.from_crontab("0 2 * * *"), max_instances=1)
+zamanlayici.start()</pre>
+<div class="warn"><b>Saat dilimi</b>Sunucular çoğunlukla UTC çalışır. "02:00" yazdığında hangi saat dilimini kastettiğini her zaman açıkça belirt (Airflow'da <code>pendulum.timezone("Europe/Istanbul")</code>, APScheduler'da <code>timezone=</code>). Aksi halde işin Türkiye saatiyle 05:00'te çalıştığını sonradan fark edersin.</div>
+
+<h2>DAG: hangi sırayla çalışsın?</h2>
+<p>Cron "ne zaman" sorusunu çözer, ama "temizlik bitmeden rapor başlamasın" diyemez. Görevler ve aralarındaki bağımlılıklar bir <b>yönlü döngüsüz çizge</b> (Directed Acyclic Graph, DAG) oluşturur: oklar "önce bu, sonra şu" der, döngü olamaz (A, B'yi; B de A'yı bekliyorsa hiçbiri başlayamaz). Bir DAG'ı geçerli bir sıraya dizmeye <b>topolojik sıralama</b> denir ve Python'da standart kütüphanede hazırdır: <code>graphlib.TopologicalSorter</code>.</p>
+<pre class="py">from graphlib import TopologicalSorter, CycleError
+
+# görev: {önce bitmesi gerekenler}
+akis = {
+    "siparis_cek": set(),
+    "musteri_cek": set(),
+    "temizle": {"siparis_cek", "musteri_cek"},
+    "stok_guncelle": {"temizle"},
+    "sehir_raporu": {"temizle"},
+    "eposta_gonder": {"sehir_raporu", "stok_guncelle"},
+}
+print(list(TopologicalSorter(akis).static_order()))
+
+# paralel katmanlar: aynı anda çalışabilecek görevler
+ts = TopologicalSorter(akis)
+ts.prepare()
+katman = 1
+while ts.is_active():
+    hazir = sorted(ts.get_ready())
+    print(f"Katman {katman}:", hazir)
+    ts.done(*hazir)
+    katman += 1
+
+try:
+    list(TopologicalSorter({"a": {"b"}, "b": {"c"}, "c": {"a"}}).static_order())
+except CycleError as e:
+    print("Döngü:", e.args[1])</pre>
+<p><code>get_ready()</code> bağımlılıkları bitmiş görevleri verir; <code>done()</code> ile bitenleri bildirdikçe yenileri açılır. Orkestratörlerin çalıştırıcıları (executor) özünde bu döngüyü işçi havuzuyla çalıştırır.</p>
+
+<h2>Airflow: endüstri standardı</h2>
+<p>Apache Airflow, DAG'ları Python koduyla tanımladığın, zamanlayan, çalıştıran, yeniden deneyen ve web arayüzünde izleyen açık kaynak bir platformdur. Temel kavramlar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>Ne?</th></tr>
+<tr><td>DAG</td><td>Görevler ve bağımlılıklarının bütünü; <code>schedule</code>, <code>start_date</code>, <code>catchup</code> ayarlarını taşır</td></tr>
+<tr><td>Operator</td><td>Görev türü: <code>PythonOperator</code>, <code>BashOperator</code>, <code>SQLExecuteQueryOperator</code>, sensörler</td></tr>
+<tr><td>Task</td><td>Operator'ün DAG içindeki örneği; her çalışmada bir "task instance" olur</td></tr>
+<tr><td><code>a &gt;&gt; b</code></td><td>b, a'dan sonra çalışır (<code>a.set_downstream(b)</code>)</td></tr>
+<tr><td>retries / retry_delay</td><td>Başarısız görevin kaç kez, ne aralıkla yeniden deneneceği</td></tr>
+<tr><td>XCom</td><td>Görevler arasında <b>küçük</b> veri (dosya yolu, satır sayısı) aktarımı; büyük veri değil</td></tr>
+<tr><td>Data interval / logical date</td><td>Çalışmanın işlediği zaman dilimi; backfill bununla yapılır</td></tr>
+</table></div>
+<pre class="code"># pip install apache-airflow  (yerelde: airflow standalone)
+from datetime import datetime, timedelta
+from airflow.decorators import dag, task
+from airflow.operators.bash import BashOperator
+
+varsayilan = {"retries": 3, "retry_delay": timedelta(minutes=5),
+              "retry_exponential_backoff": True, "email_on_failure": True}
+
+@dag(schedule="0 2 * * *", start_date=datetime(2025, 1, 1), catchup=False,
+     default_args=varsayilan, tags=["anadolu-market"])
+def gunluk_satis():
+    @task
+    def siparis_cek(ds=None) -&gt; str:          # ds: işlenen gün (YYYY-MM-DD)
+        yol = f"/data/ham/siparis_{ds}.csv"
+        # ... API'den çek, dosyaya yaz ...
+        return yol                            # XCom ile sonraki göreve gider
+
+    @task
+    def temizle(yol: str) -&gt; int:
+        # ... oku, doğrula, temiz tabloya yaz ...
+        return 1250                           # satır sayısı
+
+    @task
+    def rapor(satir: int):
+        print(f"{satir} satır işlendi")
+
+    yedek = BashOperator(task_id="yedekle", bash_command="pg_dump anadolu &gt; /yedek/{{ ds }}.sql")
+    satir = temizle(siparis_cek())
+    satir &gt;&gt; [rapor(satir), yedek]
+
+gunluk_satis()</pre>
+<p>TaskFlow API'de (<code>@task</code>) bir görevin dönüş değerini diğerine argüman olarak vermek hem bağımlılığı hem XCom aktarımını kendiliğinden kurar. <code>{{ ds }}</code> Jinja şablonudur; Airflow onu çalışmanın tarihiyle doldurur. <code>catchup=True</code> olsaydı start_date'ten bugüne kadar kaçırılan tüm günler tek tek çalıştırılırdı (backfill).</p>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Yaklaşım</th><th>Ne zaman?</th></tr>
+<tr><td>cron + betik</td><td>Zaman tabanlı, bağımlılık yok</td><td>Birkaç bağımsız iş</td></tr>
+<tr><td>Airflow</td><td>Görev odaklı DAG, zengin operator ekosistemi</td><td>Kurumsal, çok ekipli veri platformu</td></tr>
+<tr><td>Prefect</td><td>Sıradan Python fonksiyonlarına <code>@flow</code>/<code>@task</code>; dinamik akış kolay</td><td>Python ağırlıklı ekip, hızlı başlangıç</td></tr>
+<tr><td>Dagster</td><td>Varlık (asset) odaklı: "hangi tablo hangi tablodan üretilir"</td><td>Veri soy ağacı ve kalite önemliyse</td></tr>
+<tr><td>Celery / RQ</td><td>Görev kuyruğu (zamanlayıcı değil)</td><td>Web uygulamasından arka plan işi</td></tr>
+</table></div>
+
+<h2>İdempotentlik ve yeniden çalıştırma</h2>
+<p>Orkestrasyonun altın kuralı: <b>bir görevi aynı girdiyle iki kez çalıştırmak, bir kez çalıştırmakla aynı sonucu vermelidir</b> (idempotent). Çünkü görevler yeniden denenir, elle yeniden başlatılır, backfill edilir. "Satırları tabloya ekle" idempotent değildir: ikinci çalışmada her satır iki kez olur. "Bu günün bölümünü (partition) sil, sonra yaz" ya da "anahtar varsa güncelle" (upsert) idempotenttir.</p>
+<pre class="py">import sqlite3
+db = sqlite3.connect(":memory:")
+db.execute("CREATE TABLE gunluk_satis (tarih TEXT, sehir TEXT, ciro REAL)")
+
+def yukle(tarih, satirlar):
+    with db:   # işlem (transaction): ya hepsi ya hiçbiri
+        db.execute("DELETE FROM gunluk_satis WHERE tarih = ?", (tarih,))
+        db.executemany("INSERT INTO gunluk_satis VALUES (?, ?, ?)",
+                       [(tarih, s, c) for s, c in satirlar])
+
+veri = [("İzmir", 1500.0), ("Ankara", 900.0)]
+yukle("2025-03-01", veri)
+yukle("2025-03-01", veri)          # yeniden deneme: kopya oluşmaz
+yukle("2025-03-02", [("İzmir", 700.0)])
+print(db.execute("SELECT tarih, COUNT(*), SUM(ciro) FROM gunluk_satis GROUP BY tarih").fetchall())</pre>
+<p>Diğer ilkeler: görev <b>işlediği zaman dilimini parametre olarak alsın</b> (<code>datetime.now()</code> değil; yoksa dünün işini bugün yeniden çalıştıramazsın), çıktı dosyaları tarihli olsun, yan etkiler (e-posta, ödeme) tekrar gönderimi önleyen bir anahtarla korunsun.</p>
+
+<h2>Yeniden deneme, hata bildirimi ve gözlemlenebilirlik</h2>
+<p>Ağ kopması, kilitli tablo, geçici 503 gibi <b>geçici</b> hatalar yeniden denenir; bekleme süresi her denemede katlanır (üstel geri çekilme, exponential backoff) ki zaten zorlanan sisteme yük bindirilmesin. Kalıcı hatalar (bozuk veri, yanlış parola) yeniden denenmez; hemen başarısız olup haber verilir.</p>
+<pre class="py">import functools
+
+def yeniden_dene(deneme=3, ilk_bekleme=1.0, gecici=(ConnectionError, TimeoutError), uyu=None):
+    def dekorator(f):
+        @functools.wraps(f)
+        def sarmal(*args, **kwargs):
+            bekleme = ilk_bekleme
+            for i in range(1, deneme + 1):
+                try:
+                    return f(*args, **kwargs)
+                except gecici as e:
+                    if i == deneme:
+                        raise
+                    print(f"  {f.__name__} deneme {i} başarısız ({e}); {bekleme} sn sonra tekrar")
+                    (uyu or (lambda s: None))(bekleme)
+                    bekleme *= 2
+        return sarmal
+    return dekorator
+
+sayac = {"n": 0}
+
+@yeniden_dene(deneme=4)
+def siparis_cek():
+    sayac["n"] += 1
+    if sayac["n"] &lt; 3:
+        raise ConnectionError("API yanıt vermedi")
+    return 120
+
+print("Çekilen satır:", siparis_cek())</pre>
+<p>Haber verme katmanları: görev başarısız olduğunda (Airflow'da <code>on_failure_callback</code>) Slack/Teams/e-posta mesajı; iş hiç başlamazsa sessiz kalmamak için "ölü adam anahtarı" (dead man's switch: iş her başarıyla bittiğinde bir izleme servisine sinyal gönderir, sinyal gelmezse alarm çalar); SLA ("rapor 07:00'ye kadar hazır olmalı") ihlalinde uyarı.</p>
+<p>Gözlemlenebilirlik (observability) için her görev en azından şunları yapılandırılmış log (JSON satırı) olarak yazmalı: görev adı, çalışma kimliği, işlenen tarih, başlangıç-bitiş, süre, okunan/yazılan satır sayısı, sonuç. Bu sayılar metrik sistemine (Prometheus, Datadog, CloudWatch) gider; "dün 1250 satır geldi, bugün 3" gibi sessiz veri sorunları ancak böyle yakalanır.</p>
+<pre class="py">import json, time
+
+def calistir_ve_logla(ad, f, tarih):
+    bas = time.perf_counter()
+    kayit = {"gorev": ad, "tarih": tarih}
+    try:
+        kayit["satir"] = f(tarih)
+        kayit["durum"] = "basarili"
+    except Exception as e:
+        kayit.update(durum="basarisiz", hata=f"{type(e).__name__}: {e}")
+    kayit["sure_ms"] = round((time.perf_counter() - bas) * 1000)
+    print(json.dumps({k: v for k, v in kayit.items() if k != "sure_ms"}, ensure_ascii=False))
+    return kayit
+
+calistir_ve_logla("temizle", lambda t: 1250, "2025-03-01")
+calistir_ve_logla("rapor", lambda t: 1 / 0, "2025-03-01")</pre>
+<div class="tip"><b>Küçük başla</b>İki üç işin varsa cron + iyi loglanan, idempotent betikler yeter. Bağımlılıklar, yeniden denemeler ve izleme ihtiyacı arttıkça bir orkestratöre geç. Araç değişse de bu dersteki ilkeler (DAG, idempotentlik, geçici/kalıcı hata ayrımı, gözlemlenebilirlik) aynı kalır.</div>
+<div class="note"><b>Gerçek işte</b>Veri mühendisliği ekiplerinde en çok zaman alan iş yeni akış yazmak değil, gece 03:00'te düşen akışı anlamaktır. Bu yüzden kod incelemesinde (code review) şu sorular sorulur: Bu görev iki kez çalışırsa ne olur? Dünün verisini yeniden işleyebilir miyim? Hata olunca kime, hangi bilgiyle haber gidiyor? Görev ne kadar sürüyor, kaç satır işliyor ve bunu nereden görüyorum? Bu sorulara cevabı olan bir akış, "çalışıyor" olandan çok daha değerlidir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Derste TaskFlow'a kısa bir örnekle girdin ve backfill'in ne olduğunu gördün. Bu bölüm Airflow'un en çok kafa karıştıran üç konusunu açıyor: bir çalışmanın <b>hangi zaman dilimini</b> işlediği (data interval), <b>catchup</b> ile <b>backfill</b> arasındaki fark ve saat yerine <b>veri güncellenince</b> tetiklenen zamanlama. Sonunda aynı akışı Prefect ve Dagster'da da göreceksin.</p>
+<h2>Data interval: çalışma, dilimin sonunda başlar</h2>
+<p>Airflow'da günlük bir DAG, "1 Ekim" verisini 1 Ekim'de değil, gün <b>bittikten sonra</b> (2 Ekim 00:00'dan sonra) işler; çünkü ancak o zaman günün verisi tamamdır. Her çalışma bir zaman dilimi taşır: <code>data_interval_start</code> (ve onun eşi <code>logical_date</code>, şablonda <code>{{ ds }}</code>) ile <code>data_interval_end</code>. Görevlerin "şimdi"ye değil bu dilime bakması, backfill'in ve yeniden çalıştırmanın doğru sonuç vermesinin tek yoludur.</p>
+<div class="tbl-wrap"><table><tr><th>Çalışma</th><th>data_interval_start (ds)</th><th>data_interval_end</th><th>Gerçekte başladığı an</th></tr>
+<tr><td>Günlük, 1. çalışma</td><td>2024-10-01 00:00</td><td>2024-10-02 00:00</td><td>2024-10-02 00:00 sonrası</td></tr>
+<tr><td>Günlük, 2. çalışma</td><td>2024-10-02 00:00</td><td>2024-10-03 00:00</td><td>2024-10-03 00:00 sonrası</td></tr></table></div>
+<p>Dilim <b>yarı açıktır</b>: başlangıç dahil, bitiş hariç. SQL'de bunun karşılığı <code>zaman &gt;= :bas AND zaman &lt; :bit</code>'tir; <code>BETWEEN</code> iki ucu da dahil eder ve gece yarısındaki kayıtları iki güne birden yazar.</p>
+<pre class="py">import veri
+from datetime import date, timedelta
+conn = veri.baglan("lezzet_kurye", tablolar=["lk_orders"])
+
+def gunluk_siparis(ds: date) -&gt; int:           # görev: yalnız kendi dilimine bakar
+    bas, bit = ds.isoformat(), (ds + timedelta(days=1)).isoformat()
+    return conn.execute("SELECT COUNT(*) FROM lk_orders WHERE placed_at &gt;= ? AND placed_at &lt; ?",
+                        (bas, bit)).fetchone()[0]
+
+ds = date(2024, 10, 1)                         # backfill: 1-7 Ekim
+while ds &lt;= date(2024, 10, 7):
+    print(ds, gunluk_siparis(ds))
+    ds += timedelta(days=1)</pre>
+<h2>TaskFlow derinlemesine</h2>
+<pre class="code">from airflow.decorators import dag, task      # Airflow 3: from airflow.sdk import dag, task
+from datetime import datetime
+
+@dag(schedule="@daily", start_date=datetime(2024, 10, 1), catchup=False,
+     max_active_runs=1, default_args={"retries": 2})
+def lezzet_gunluk():
+    @task
+    def subeler() -&gt; list[str]:
+        return ["izmir", "ankara", "istanbul"]
+
+    @task
+    def cek(sube: str, data_interval_start=None) -&gt; str:   # bağlam argümanı adla enjekte edilir
+        ds = data_interval_start.strftime("%Y-%m-%d")
+        return f"s3://ham/{sube}/{ds}.parquet"              # XCom'a veri değil YOL koy
+
+    @task(multiple_outputs=True)
+    def ozet(yollar: list[str]) -&gt; dict:
+        return {"dosya": len(yollar), "durum": "tamam"}
+
+    yollar = cek.expand(sube=subeler())       # dinamik eşleme: her şube için bir görev örneği
+    ozet(yollar)
+
+lezzet_gunluk()</pre>
+<p><code>.expand()</code> dinamik görev eşlemesidir (dynamic task mapping): şube sayısı çalışma anında belirlenir ve her biri ayrı, ayrı yeniden denenebilen bir görev olur. <code>multiple_outputs=True</code> sözlüğün her anahtarını ayrı XCom yapar. <code>max_active_runs=1</code> aynı DAG'ın iki gününün aynı anda çalışmasını engeller.</p>
+<h2>catchup mı, backfill mi?</h2>
+<div class="tbl-wrap"><table><tr><th></th><th>catchup=True</th><th>Backfill</th></tr>
+<tr><td>Kim başlatır?</td><td>Zamanlayıcı, kendiliğinden</td><td>Sen, komutla</td></tr>
+<tr><td>Hangi dilimler?</td><td><code>start_date</code>'ten bugüne kadar çalışmamış <b>tüm</b> dilimler</td><td>Verdiğin aralık (<code>-s</code> ile <code>-e</code>)</td></tr>
+<tr><td>Ne zaman tehlikeli?</td><td>Eski start_date ile yeni DAG açınca yüzlerce çalışma kuyruğa girer</td><td>Görev idempotent değilse veri ikilenir</td></tr></table></div>
+<pre class="code">airflow dags backfill lezzet_gunluk -s 2024-10-01 -e 2024-10-07       # Airflow 2
+airflow backfill create --dag-id lezzet_gunluk \
+    --from-date 2024-10-01 --to-date 2024-10-07 --max-active-runs 2   # Airflow 3</pre>
+<p>Pratik kural: yeni DAG'ları <code>catchup=False</code> ile aç, geçmişi gerekiyorsa bilinçli bir backfill komutuyla ve <code>max_active_runs</code> sınırıyla doldur. <code>depends_on_past=True</code> bir günün görevi, bir önceki günün aynı görevi başarılı olmadan başlamasın der; kümülatif tablolarda (dünkü bakiye + bugünkü hareket) gereklidir.</p>
+<h2>Veri farkındalıklı zamanlama: dataset ve asset</h2>
+<p>"Her gün 02:00'de çalış" yerine "<code>siparisler</code> tablosu güncellenince çalış" demek, üreticisi gecikince tüketicinin boş veriyle çalışmasını önler. Airflow 2.4+ bunu <code>Dataset</code>, Airflow 3 <code>Asset</code> adıyla yapar: üretici görev <code>outlets</code> ile neyi güncellediğini bildirir, tüketici DAG <code>schedule=[...]</code> ile bekler. Listedeki <b>tüm</b> varlıklar son çalışmadan beri güncellenince tetiklenir.</p>
+<pre class="code">from airflow.sdk import Asset, dag, task
+siparisler = Asset("s3://ambar/siparisler")
+kuryeler = Asset("s3://ambar/kuryeler")
+
+@dag(schedule="@hourly")
+def uretici():
+    @task(outlets=[siparisler])
+    def yaz(): ...
+    yaz()
+
+@dag(schedule=[siparisler, kuryeler])        # ikisi de güncellenince
+def kurye_performans():
+    ...</pre>
+<h2>Aynı akış Prefect ve Dagster'da</h2>
+<pre class="code"># Prefect: sıradan Python, @flow ve @task
+from prefect import flow, task
+@task(retries=2)
+def cek(sube: str, gun: str) -&gt; str: ...
+@flow
+def lezzet_gunluk(gun: str):
+    yollar = cek.map(["izmir", "ankara"], gun)
+
+# Dagster: varlık (asset) odaklı; "hangi tablo neyden üretilir"
+from dagster import asset, DailyPartitionsDefinition
+gunluk = DailyPartitionsDefinition(start_date="2024-10-01")
+@asset(partitions_def=gunluk)
+def ham_siparis(context): ...
+@asset(partitions_def=gunluk)
+def gunluk_ozet(ham_siparis): ...           # bağımlılık parametre adından çıkar</pre>
+<p>Prefect'te zamanlama ve dağıtım akıştan ayrıdır, dinamik akışlar doğaldır. Dagster'da birincil kavram görev değil <b>tablo</b>dur; bölümler (partitions) backfill'i "şu günlerin bölümlerini yeniden üret" düğmesine indirir ve soy ağacı (lineage) kendiliğinden çizilir.</p>
+<div class="note"><b>Gerçek işte</b>Orkestrasyon hatalarının çoğu araçtan değil zaman kavramından çıkar: "şimdi"ye bakan görev, <code>BETWEEN</code> ile çift sayılan gece yarısı, saat dilimi olmayan <code>start_date</code>, idempotent olmayan yükleme. Mülakatta "Dünün işini yeniden çalıştırırsan ne olur?" sorusuna net cevap verebilmek, Airflow'un bütün menülerini bilmekten değerlidir.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sensörler ve olay tabanlı tetikleme</h3>
+<p>Her şey saatle başlamaz. "Şube dosyaları S3'e düşünce başla" gibi durumlar için sensörler (FileSensor, S3KeySensor) ya da Airflow'un veri kümesi (dataset/asset) tabanlı zamanlaması kullanılır: üretici DAG bir tabloyu güncellediğinde tüketici DAG kendiliğinden tetiklenir. Sensörleri "reschedule" modunda çalıştır ki beklerken işçi yuvası (worker slot) işgal etmesin.</p>
+<h3>Eşzamanlılık ve kaynak yönetimi</h3>
+<p><code>max_active_runs</code> aynı DAG'ın üst üste binmesini, havuzlar (pools) aynı veritabanına aynı anda bağlanan görev sayısını sınırlar. Uzun işlerin üst üste binmesi (bir önceki çalışma bitmeden yenisinin başlaması) idempotent olmayan işlerde veri bozulmasının en sık nedenidir; APScheduler'da <code>max_instances=1</code> bunun karşılığıdır.</p>
+<h3>Veri sözleşmeleri ve kalite kapıları</h3>
+<p>Akışın ortasına kalite kapısı koy: satır sayısı beklenen aralıkta mı, zorunlu sütunlarda boş değer var mı, toplam ciro dünkünden %90 düşük mü? Kapı başarısızsa akış durur ve kötü veri raporlara ulaşmaz. Great Expectations, Soda ya da dbt testleri bu iş için kullanılır.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/orkestrasyon">Alıştırmalara geç (29)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../django-giris/">← Django'ya giriş: MVT, ORM, admin ve DRF</a><a href="../web-guvenlik/">Güvenli Python ve web güvenliği →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

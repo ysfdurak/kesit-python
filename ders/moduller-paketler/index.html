@@ -1,0 +1,211 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Modüller ve paketler: import sisteminin içi | Kesit Python</title><meta name="description" content="Tüm import biçimlerini, sys.path ve modül arama sırasını, __name__, __pycache__ ve .pyc dosyalarını, paket ve __init__.py yapısını, göreli import ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/moduller-paketler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Modüller ve paketler: import sisteminin içi"><meta property="og:description" content="Tüm import biçimlerini, sys.path ve modül arama sırasını, __name__, __pycache__ ve .pyc dosyalarını, paket ve __init__.py yapısını, göreli import ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/moduller-paketler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Modüller ve paketler: import sisteminin içi","description":"Tüm import biçimlerini, sys.path ve modül arama sırasını, __name__, __pycache__ ve .pyc dosyalarını, paket ve __init__.py yapısını, göreli import ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/moduller-paketler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Modüller, paketler ve Git</span><h1>Modüller ve paketler: import sisteminin içi</h1><p class="st-l">Tüm import biçimlerini, sys.path ve modül arama sırasını, __name__, __pycache__ ve .pyc dosyalarını, paket ve __init__.py yapısını, göreli import ve __all__ kurallarını, importlib.reload ile platform, math ve random modüllerini PCAP düzeyinde öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/moduller-paketler">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in kodu tek bir dosyada başladı: 200 satır. İki yıl sonra fiyatlama, kargo, raporlama ve kampanya kodu 15 000 satıra çıktı ve tek dosya kimsenin açmak istemediği bir canavara dönüştü. Çözüm, kodu anlamlı parçalara bölmektir: her dosya bir <b>modül</b> (module), ilgili modülleri toplayan klasör bir <b>paket</b> (package). Kapsam ve modüller dersinde <code>import math</code> yazmayı ve <code>if __name__ == "__main__"</code> kalıbını gördün. Bu derste import sisteminin içine giriyoruz: Python modülü nerede arar, neden bir kez yükler, paketi nasıl tanır, göreli import neden bazen patlar. Bu konular PCAP sınavının ilk bölümüdür ve gerçek projede en sık karşılaşılan "ModuleNotFoundError" sorunlarının kaynağıdır.</p>
+<div class="note"><b>Tarayıcıda çoklu dosya</b>Bu uygulamada tek bir kod kutun var. Modül ve paket alıştırmalarında dosyaları kodla yazacağız (<code>open(...).write(...)</code>) ya da modülü doğrudan bellekte oluşturacağız (<code>types.ModuleType</code>). Arkada çalışan mekanizma kendi bilgisayarındakinin aynısıdır.</div>
+
+<h2>Dört import biçimi</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>Ad alanına ne girer?</th><th>Kullanım</th></tr>
+<tr><td><code>import math</code></td><td>Yalnızca <code>math</code></td><td><code>math.sqrt(16)</code></td></tr>
+<tr><td><code>import statistics as st</code></td><td>Yalnızca <code>st</code> (takma ad)</td><td><code>st.mean(x)</code></td></tr>
+<tr><td><code>from math import ceil, floor</code></td><td><code>ceil</code> ve <code>floor</code>; <code>math</code> adı GİRMEZ</td><td><code>ceil(2.1)</code></td></tr>
+<tr><td><code>from math import sqrt as kok</code></td><td>Yalnızca <code>kok</code></td><td><code>kok(9)</code></td></tr>
+<tr><td><code>from math import *</code></td><td><code>__all__</code> varsa onun listesi, yoksa <code>_</code> ile başlamayan tüm adlar</td><td>Etkileşimli denemede; iş kodunda kaçın</td></tr>
+</table></div>
+<pre class="py">import math
+import statistics as st
+from math import ceil, floor
+from math import sqrt as kok
+
+print(math.pi, st.mean([10, 20, 30]))
+print(ceil(2.1), floor(2.9), kok(81))
+print("math" in dir(), "sqrt" in dir(), "kok" in dir())</pre>
+<p><code>dir()</code> parametresiz çağrılınca o anki ad alanındaki adları, <code>dir(modul)</code> ise modülün içindeki adları listeler. Bir modülün ne sunduğunu keşfetmenin en hızlı yoludur; <code>help(math.hypot)</code> ise belge metnini (docstring) gösterir. Aynı metin <code>math.hypot.__doc__</code> içinde de durur.</p>
+<div class="warn"><b>Yıldızlı import sessizce ezer</b><code>e = 1.4</code> (fiyat esnekliği) tanımlayıp sonra <code>from math import *</code> yazarsan senin <code>e</code>'n Euler sayısıyla (2.718...) değiştirilir ve hiçbir uyarı almazsın. Ekip kodunda <code>import math</code> ya da açık adlı <code>from math import ceil</code> kullan.</div>
+
+<h2>Python modülü nerede arar?</h2>
+<p><code>import kargo</code> satırında Python şu sırayı izler:</p>
+<div class="steps-list"><ol>
+<li><b>sys.modules</b>: Daha önce yüklendiyse hazır nesneyi verir, dosyaya hiç bakmaz.</li>
+<li><b>Yerleşik modüller</b>: Yorumlayıcıya gömülü modüller (<code>sys.builtin_module_names</code>, ör. <code>sys</code>).</li>
+<li><b>sys.path</b> listesi baştan sona: çalıştırılan betiğin klasörü, <code>PYTHONPATH</code> ortam değişkenindeki klasörler, standart kütüphane, <code>site-packages</code> (pip ile kurulanlar).</li>
+<li>Hiçbirinde yoksa <b>ModuleNotFoundError</b>.</li>
+</ol></div>
+<pre class="py">import sys
+print(type(sys.path), len(sys.path) &gt; 0)
+for yol in sys.path[:4]:
+    print(" -", yol)
+print("sys" in sys.builtin_module_names)
+print("json" in sys.modules)       # henüz yüklenmedi mi?
+import json
+print("json" in sys.modules)       # artık önbellekte</pre>
+<div class="tip"><b>Dosyana standart modül adı verme</b>Proje klasörüne <code>random.py</code> ya da <code>json.py</code> koyarsan, betiğin klasörü <code>sys.path</code>'te önce geldiği için Python seninkini yükler ve "module has no attribute" hatası alırsın. Bu, yeni başlayanların en sık yaşadığı gizemli hatadır.</div>
+
+<h2>Kendi modülünü yazmak</h2>
+<p>Her <code>.py</code> dosyası bir modüldür; adı dosya adıdır. Tarayıcıda dosyayı kodla yazıp mevcut klasörü <code>sys.path</code>'e ekleyelim:</p>
+<pre class="py">import sys, importlib
+
+kaynak = '''"""Anadolu Market fiyat araçları."""
+KDV = 0.20
+_IC_SAYAC = 0                  # alt çizgi: iç kullanım
+
+def kdv_ekle(tutar):
+    """Tutara KDV ekler, 2 ondalığa yuvarlar."""
+    return round(tutar * (1 + KDV), 2)
+
+print("am_fiyat yüklendi, __name__ =", __name__)
+'''
+with open("am_fiyat.py", "w", encoding="utf-8") as f:
+    f.write(kaynak)
+
+if "." not in sys.path:
+    sys.path.insert(0, ".")
+importlib.invalidate_caches()      # yeni dosyayı bulucuların görmesi için
+sys.modules.pop("am_fiyat", None)  # kutuyu yeniden çalıştırırsan diye
+
+import am_fiyat
+import am_fiyat                    # ikinci import: hiçbir şey yazdırmaz
+print(am_fiyat.kdv_ekle(100), am_fiyat.__doc__)
+print(am_fiyat.__file__.endswith("am_fiyat.py"))</pre>
+<p>Dikkat: modülün içindeki <code>print</code> yalnızca <b>bir kez</b> çalıştı. Modül ilk importta yukarıdan aşağı çalıştırılır, oluşan nesne <code>sys.modules</code>'e konur; sonraki importlar aynı nesneyi döndürür. Modül içinde <code>__name__</code> modülün adıdır (<code>"am_fiyat"</code>); dosya doğrudan çalıştırıldığında ise <code>"__main__"</code> olur.</p>
+
+<h3>Dosyasız modül: types.ModuleType</h3>
+<p>Modül aslında sıradan bir nesnedir. Dosya olmadan da oluşturup <code>sys.modules</code>'e kaydedebilirsin; testlerde sahte modül hazırlamak için bu yöntem kullanılır.</p>
+<pre class="py">import sys, types
+
+ayar = types.ModuleType("am_ayar", "Kampanya ayarları")
+ayar.ESIK = 500
+ayar.ORAN = 0.10
+sys.modules["am_ayar"] = ayar
+
+from am_ayar import ESIK, ORAN
+print(ESIK, ORAN, ayar.__name__, ayar.__doc__)</pre>
+
+<h2>__pycache__, .pyc ve reload</h2>
+<p>Python bir modülü ilk yüklediğinde kaynağı bayt koduna (bytecode) derler ve <code>__pycache__/ad.cpython-312.pyc</code> dosyasına yazar. Sonraki çalıştırmada kaynak değişmemişse (değiştirme zamanı ve boyutu aynıysa) derlemeyi atlar. <code>.pyc</code> dosyaları depoya konmaz; <code>.gitignore</code>'a <code>__pycache__/</code> eklenir.</p>
+<p>Modül dosyasını değiştirdin ve yeni hâlini aynı oturumda görmek istiyorsun: <code>import</code> işe yaramaz, çünkü önbellekteki nesneyi döndürür. <code>importlib.reload(modul)</code> modül kodunu <b>aynı nesnenin</b> içinde yeniden çalıştırır.</p>
+<pre class="py">import sys, os, importlib, importlib.util
+
+def yaz(metin):
+    with open("am_kur.py", "w", encoding="utf-8") as f:
+        f.write(metin)
+
+if "." not in sys.path:
+    sys.path.insert(0, ".")
+yaz("USD = 32.5\n")
+importlib.invalidate_caches()
+sys.modules.pop("am_kur", None)
+import am_kur
+print("ilk:", am_kur.USD)
+
+yaz("USD = 33.1\n")                               # aynı boyut, aynı saniye!
+pyc = importlib.util.cache_from_source("am_kur.py")
+print("önbellek dosyası:", pyc)
+if os.path.exists(pyc):
+    os.remove(pyc)                                # bayat .pyc'yi sil
+importlib.reload(am_kur)
+print("reload sonrası:", am_kur.USD)</pre>
+<div class="warn"><b>reload'un iki tuzağı</b>(1) <code>from am_kur import USD</code> ile aldığın ad eski değeri göstermeye devam eder; reload yalnızca modül nesnesini günceller. (2) Dosyayı aynı saniyede ve aynı boyutla yeniden yazarsan Python <code>.pyc</code>'yi hâlâ geçerli sanabilir; yukarıdaki gibi önbellek dosyasını sil ya da <code>sys.dont_write_bytecode = True</code> kullan.</div>
+
+<h2>Paketler: modül klasörü</h2>
+<p>Paket, içinde <code>__init__.py</code> bulunan bir klasördür. <code>__init__.py</code> paket ilk import edildiğinde çalışır; boş olabilir, paket düzeyi ayarları ve dışa açılan adları içerebilir. Paketin içinde başka paketler (alt paketler) olabilir:</p>
+<pre class="out">anadolu/
+    __init__.py          # SURUM, __all__
+    fiyat.py             # kdv_ekle
+    rapor/
+        __init__.py
+        ozet.py          # from ..fiyat import kdv_ekle</pre>
+<pre class="py">import os, sys, importlib, shutil
+
+dosyalar = {
+    "am_anadolu/__init__.py": 'SURUM = "1.2.0"\n__all__ = ["fiyat"]\n',
+    "am_anadolu/fiyat.py": "def kdv_ekle(t):\n    return round(t * 1.2, 2)\n",
+    "am_anadolu/rapor/__init__.py": "",
+    "am_anadolu/rapor/ozet.py": (
+        "from ..fiyat import kdv_ekle\n"
+        "from . import __name__ as paket_adi\n"
+        "def satir(urun, tutar):\n"
+        "    return f'{urun}: {kdv_ekle(tutar)} TL'\n"
+    ),
+}
+for yol, icerik in dosyalar.items():
+    os.makedirs(os.path.dirname(yol), exist_ok=True)
+    with open(yol, "w", encoding="utf-8") as f:
+        f.write(icerik)
+if "." not in sys.path:
+    sys.path.insert(0, ".")
+importlib.invalidate_caches()
+
+import am_anadolu
+from am_anadolu.rapor import ozet
+print(am_anadolu.SURUM, am_anadolu.__path__ is not None)
+print(ozet.satir("Çay", 50), "|", ozet.paket_adi, "|", ozet.__name__)
+shutil.rmtree("am_anadolu")</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Anlamı</th></tr>
+<tr><td><code>from . import fiyat</code></td><td>Aynı paketteki <code>fiyat</code> modülü</td></tr>
+<tr><td><code>from .fiyat import kdv_ekle</code></td><td>Aynı paketin fiyat modülünden bir ad</td></tr>
+<tr><td><code>from ..fiyat import kdv_ekle</code></td><td>Bir üst paketin fiyat modülünden</td></tr>
+<tr><td><code>import am_anadolu.rapor.ozet</code></td><td>Mutlak import; üç modül de yüklenir, ad alanına <code>am_anadolu</code> girer</td></tr>
+</table></div>
+<p>Göreli import (relative import) yalnızca <b>paketin içindeki</b> modüllerde çalışır. Bir dosyayı doğrudan <code>python ozet.py</code> ile çalıştırırsan <code>__name__</code> <code>"__main__"</code> olur, paket bilgisi kaybolur ve "attempted relative import with no known parent package" hatası alırsın. Çözüm: kök klasörden <code>python -m am_anadolu.rapor.ozet</code>.</p>
+
+<h3>__all__ ve _ad: dışa ne açılır?</h3>
+<p>Python'da gerçek "private" yoktur, <b>anlaşma</b> vardır. Alt çizgiyle başlayan ad (<code>_IC_SAYAC</code>) "iç kullanım, dokunma" demektir ve yıldızlı importa girmez. <code>__all__</code> listesi tanımlıysa yıldızlı import yalnızca o adları getirir; listede alt modül adı varsa o alt modül de yüklenir. Açık importla (<code>from m import _IC_SAYAC</code>) iki kural da aşılabilir; yani koruma değil, belgelemedir.</p>
+
+<h2>PCAP'ın sevdiği üç modül</h2>
+<h3>platform: kod nerede çalışıyor?</h3>
+<pre class="py">import platform
+print(platform.system())                  # Linux, Windows, Darwin; tarayıcıda Emscripten
+print(platform.python_version())           # '3.12.x' gibi metin
+surum = platform.python_version_tuple()    # METİN demeti: ('3', '12', '1')
+print(surum, type(surum[1]))
+print(tuple(int(p) for p in surum[:2]) &gt;= (3, 10))
+print(platform.python_implementation(), platform.machine())</pre>
+<p><code>python_version_tuple()</code> elemanları <b>metin</b> döndürür; <code>"9" &gt; "10"</code> True olduğundan karşılaştırmadan önce <code>int</code>'e çevir. <code>platform.platform()</code> tek satırlık özet verir.</p>
+<h3>math: yuvarlama ailesi ve geometri</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Fonksiyon</th><th>2.7</th><th>-2.7</th><th>Not</th></tr>
+<tr><td><code>math.ceil</code></td><td>3</td><td>-2</td><td>Yukarı (artı sonsuza)</td></tr>
+<tr><td><code>math.floor</code></td><td>2</td><td>-3</td><td>Aşağı (eksi sonsuza)</td></tr>
+<tr><td><code>math.trunc</code></td><td>2</td><td>-2</td><td>Ondalığı at (sıfıra doğru), <code>int()</code> gibi</td></tr>
+<tr><td><code>round</code></td><td>3</td><td>-3</td><td>Yerleşik; .5'te çifte yuvarlar: <code>round(2.5) == 2</code></td></tr>
+</table></div>
+<pre class="py">import math
+print(math.ceil(-2.7), math.floor(-2.7), math.trunc(-2.7), round(-2.7))
+print(math.factorial(5))                   # 5 teslimat noktası: 120 farklı sıra
+print(math.hypot(3, 4), math.sqrt(25))      # depo-müşteri kuş uçuşu mesafe
+print(math.ceil(1250 / 400), "koli")       # 1250 ürün, koli başına 400</pre>
+<h3>random: tekrarlanabilir rastgelelik</h3>
+<pre class="py">import random
+musteriler = ["Ayşe", "Mehmet", "Zeynep", "Can", "Elif"]
+random.seed(2024)                          # aynı tohum = aynı sonuç
+print(random.random() &lt; 1, random.randint(1, 6), random.randrange(0, 10, 2))
+print(random.choice(musteriler))           # tek seçim
+print(random.sample(musteriler, 2))        # tekrarsız k seçim, yeni liste
+kopya = musteriler[:]
+print(random.shuffle(kopya), kopya)        # yerinde karıştırır, None döndürür
+print(musteriler)                          # orijinal aynı</pre>
+<p><code>sample</code> tekrarsız seçer ve yeni liste döndürür; <code>choices(liste, k=3)</code> ise tekrar edebilir. <code>shuffle</code> listeyi yerinde değiştirir ve <code>None</code> döndürür; demet ya da metin gibi değişmez dizilerde çalışmaz.</p>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal projelerde kod genelde <code>src/sirket_adi/</code> altında bir pakettir; testler ayrı <code>tests/</code> klasöründedir ve paketi mutlak importla kullanır. Kod incelemesinde (code review) en sık yorumlar: "yıldızlı import kaldır", "döngüsel import var, ortak kodu ayrı modüle taşı", "modül import edilince yan etki (veritabanı bağlantısı, print) yapmasın, main()'e al". Jupyter'de modülü düzenleyip değişikliği göremiyorsan sebep <code>sys.modules</code> önbelleğidir; <code>importlib.reload</code> ya da <code>%autoreload</code> kullanılır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Döngüsel import</h3>
+<p><code>siparis.py</code> <code>musteri.py</code>'yi, o da <code>siparis.py</code>'yi import ederse ikinci import yarım yüklenmiş modülü alır ve "cannot import name" ya da "partially initialized module" hatası çıkar. Çözümler: ortak kodu üçüncü bir modüle taşımak, importu fonksiyonun içine almak ya da tasarımı sadeleştirmek. Alıştırmalarda bağımlılık grafiğinde döngü bulan bir fonksiyon yazacaksın.</p>
+<h3>Ad alanı paketleri ve importlib</h3>
+<p>Python 3.3'ten beri <code>__init__.py</code> olmayan klasörler de <b>ad alanı paketi</b> (namespace package) olarak import edilebilir; büyük kuruluşlar tek bir ad altında ayrı ayrı dağıtılan paketler için kullanır. Yine de normal projede <code>__init__.py</code> koy: niyeti belli eder ve araçların (pytest, mypy) kafası karışmaz. Adı çalışma anında belli olan modüller için <code>importlib.import_module("am_eklenti." + ad)</code>, var olup olmadığını yüklemeden öğrenmek için <code>importlib.util.find_spec(ad)</code> kullanılır; eklenti sistemleri böyle kurulur.</p>
+<h3>Modül bir tekil nesnedir</h3>
+<p>Modül yalnızca bir kez yüklendiği için modül düzeyindeki bir sözlük tüm uygulamada paylaşılır. Bu, yapılandırma için kullanışlıdır ama testlerde gizli bağımlılık yaratır; ayarları fonksiyon parametresiyle geçirmek daha test edilebilirdir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/moduller-paketler">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kutuphane-turu/">← Python kütüphane haritası: hangi iş için hangi paket?</a><a href="../pytest/">pytest ile test: fixture, parametrize ve gerçek proje düzeni →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

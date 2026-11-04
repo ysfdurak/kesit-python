@@ -1,0 +1,196 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Akış işleme ve mesaj kuyrukları: Kafka kavramları | Kesit Python</title><meta name="description" content="Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/akis-isleme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Akış işleme ve mesaj kuyrukları: Kafka kavramları"><meta property="og:description" content="Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/akis-isleme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Akış işleme ve mesaj kuyrukları: Kafka kavramları","description":"Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/akis-isleme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>Akış işleme ve mesaj kuyrukları: Kafka kavramları</h1><p class="st-l">Toplu ile akış işlemeyi, olay ve işlem zamanını, Kafka'nın topic, partition, offset ve tüketici grubu modelini, teslim garantilerini, idempotent tüketiciyi, tumbling/sliding/session pencereleri, watermark'ı, şema evrimini ve CDC'yi bellek içi log ve asyncio.Queue ile kurar; Ilgaz Bank işlem akışında dakikalık şüpheli işlem sayacı yazarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/akis-isleme">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli? Gece 02:09'daki 80 bin liralık harcama</h2>
+<p>Ilgaz Bank'ın işlem tablosunda (<code>bank_txns</code>) gece yarısından sonra internetten yapılmış, 45 ile 94 bin lira arasında kart harcamaları var. Bunları ertesi sabah toplu (batch) raporda görmek, dolandırıcılık ekibi için "çok geç" demektir: kart çoktan boşalmıştır. Bu derste olaylar <b>geldiği anda</b> işlenir: işlem gerçekleşir, mesaj bir kuyruğa yazılır, saniyeler içinde bir tüketici onu okur, kuralı uygular, dakikalık sayacı günceller ve gerekirse alarm üretir. Bu dünyanın merkezinde Apache Kafka vardır; bankacılık, e-ticaret, lojistik ve oyun şirketlerinin çoğu olay akışlarını Kafka ya da benzeri bir sistemle taşır.</p>
+<p>Kafka bir küme ve ağ ister, tarayıcıda çalışmaz. Gerçek kodu gri kutularda göreceksin; kavramları ise <b>bellek içi bir log</b> ve <code>asyncio.Queue</code> ile kendin kuracaksın: topic, partition, offset, tüketici grubu, teslim garantileri, pencereleme ve watermark. <a href="../orkestrasyon/">İş akışı orkestrasyonu: cron, DAG ve Airflow</a> dersinde zamanlanmış toplu işleri, <a href="../async/">asyncio: eşzamansız kod, coroutine, await ve gather</a> dersinde kuyruk ve işçi havuzunu gördün; burada ikisini birleştirip sürekli akan veriye geçiyoruz.</p>
+
+<h2>Toplu, mikro-toplu ve akış; olay zamanı ile işlem zamanı</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Model</th><th>Gecikme</th><th>Örnek araç</th><th>Tipik iş</th></tr>
+<tr><td>Toplu (batch)</td><td>Saatler</td><td>Airflow + Spark, dbt</td><td>Gece muhasebe kapanışı, aylık rapor</td></tr>
+<tr><td>Mikro-toplu (micro-batch)</td><td>Saniyeler – dakikalar</td><td>Spark Structured Streaming</td><td>5 dakikalık satış panosu</td></tr>
+<tr><td>Akış (streaming)</td><td>Milisaniyeler – saniyeler</td><td>Kafka Streams, Flink, Faust/Bytewax</td><td>Dolandırıcılık skoru, stok rezervasyonu</td></tr>
+</table></div>
+<p>Akışta iki saat vardır. <b>Olay zamanı</b> (event time) işlemin gerçekten olduğu andır (<code>txn_time</code>). <b>İşlem zamanı</b> (processing time) mesajın senin kodunla karşılaştığı andır. Mobil uygulama çevrimdışıyken yapılan bir ödeme 3 dakika sonra gelebilir; "dakikalık işlem sayısı" gibi iş ölçüleri olay zamanına göre hesaplanmalıdır, yoksa geciken olaylar yanlış dakikaya yazılır.</p>
+
+<h2>Kafka'nın temel parçaları</h2>
+<p><b>Topic</b> (konu) bir olay türünün adıdır: <code>bank.txns</code>. Her topic birden çok <b>partition</b>'a bölünür; partition, yalnız sonuna ekleme yapılan, değişmez bir <b>log</b>'dur. Her mesajın partition içindeki sıra numarasına <b>offset</b> denir. Mesaj anahtarı (ör. hesap numarası) partition'ı belirler: aynı hesabın işlemleri hep aynı partition'a gider ve <b>o partition içinde sırası korunur</b>. Partition'lar arasında ise genel bir sıra yoktur.</p>
+<pre class="py">import veri
+
+txns = veri.kayitlar("ilgaz_bank", "bank_txns")
+
+
+class Konu:
+    """Kafka topic'inin bellek içi benzetimi: her partition bir liste (log)."""
+    def __init__(self, ad, n_partition):
+        self.ad = ad
+        self.partitionlar = [[] for _ in range(n_partition)]
+
+    def yaz(self, anahtar, deger):
+        p = anahtar % len(self.partitionlar)
+        self.partitionlar[p].append(deger)
+        return p, len(self.partitionlar[p]) - 1        # (partition, offset)
+
+    def oku(self, p, offset, maks=3):
+        return list(enumerate(self.partitionlar[p][offset:offset + maks], start=offset))
+
+
+konu = Konu("bank.txns", 3)
+for t in txns[:12]:
+    konu.yaz(t["account_id"], t)
+
+print([len(p) for p in konu.partitionlar])
+for offset, t in konu.oku(1, 0):
+    print(offset, t["account_id"], t["txn_time"], t["amount"])</pre>
+<p><b>Saklama süresi</b> (retention) mesajların ne kadar tutulacağını belirler (ör. 7 gün ya da 500 GB). Mesaj okundu diye silinmez; bu, bir kuyruktan (RabbitMQ) en büyük farkıdır. Yeni bir ekip aynı topic'i baştan okuyabilir, hata düzeltildikten sonra dünkü offset'e dönüp yeniden işleyebilirsin (replay).</p>
+<p><b>Tüketici grubu</b> (consumer group) aynı işi paylaşan tüketicilerdir. Kafka her partition'ı gruptaki <b>tek</b> tüketiciye atar; böylece bir partition'ın sırası korunur. 6 partition ve 3 tüketici varsa her biri 2 partition okur; 8 tüketici varsa 2'si boşta bekler. Paralelliğin üst sınırı partition sayısıdır. Grup, her partition için okuduğu son konumu <b>commit</b> eder (<code>__consumer_offsets</code> topic'ine yazılır). Tüketici çöküp yeniden başlarsa commit edilen offset'ten devam eder. Bir tüketici gruba girip çıktığında atamaların yeniden dağıtılmasına <b>rebalance</b> denir.</p>
+<pre class="code"># pip install confluent-kafka      (Kafka'yı yerelde: docker run -p 9092:9092 apache/kafka:3.8.0)
+from confluent_kafka import Producer, Consumer
+import json
+
+uretici = Producer({"bootstrap.servers": "localhost:9092", "enable.idempotence": True, "acks": "all"})
+uretici.produce("bank.txns", key=str(t["account_id"]), value=json.dumps(t))
+uretici.flush()
+
+tuketici = Consumer({
+    "bootstrap.servers": "localhost:9092",
+    "group.id": "dolandiricilik-v1",
+    "auto.offset.reset": "earliest",
+    "enable.auto.commit": False,          # commit'i biz yapacağız
+})
+tuketici.subscribe(["bank.txns"])
+while True:
+    msg = tuketici.poll(1.0)
+    if msg is None or msg.error():
+        continue
+    isle(json.loads(msg.value()))          # önce işle
+    tuketici.commit(msg, asynchronous=False)   # sonra commit: en az bir kez</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Docker kuruluysa <code>docker run -d --name kafka -p 9092:9092 apache/kafka:3.8.0</code> tek düğümlü bir Kafka başlatır. Python istemcisi için <code>pip install confluent-kafka</code> (ya da saf Python <code>kafka-python</code>). Topic oluşturmak için: <code>docker exec kafka /opt/kafka/bin/kafka-topics.sh --create --topic bank.txns --partitions 3 --bootstrap-server localhost:9092</code>. Bulutta Confluent Cloud, AWS MSK ve Azure Event Hubs (Kafka uyumlu) yönetilen seçeneklerdir.</div>
+
+<h2>Teslim garantileri ve idempotent tüketici</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Garanti</th><th>Nasıl olur?</th><th>Risk</th></tr>
+<tr><td>En çok bir kez (at-most-once)</td><td>Önce commit, sonra işle</td><td>Çökme olursa mesaj <b>kaybolur</b></td></tr>
+<tr><td>En az bir kez (at-least-once)</td><td>Önce işle, sonra commit</td><td>Çökme olursa mesaj <b>iki kez</b> işlenir</td></tr>
+<tr><td>Tam bir kez (exactly-once)</td><td>Kafka işlemleri (transactions) + idempotent üretici, ya da en az bir kez + idempotent tüketici</td><td>Karmaşık; dış sistemlere yazarken ancak idempotentlikle sağlanır</td></tr>
+</table></div>
+<p>Pratikte en sık seçilen yol "en az bir kez + <b>idempotent tüketici</b>"dir: aynı mesaj iki kez gelse de sonuç değişmez. Bunun için her olayın benzersiz bir kimliği (<code>txn_id</code>) olur ve tüketici işlediği kimlikleri hatırlar ya da hedef tabloya <code>INSERT ... ON CONFLICT DO NOTHING</code> ile yazar.</p>
+<pre class="py"># Ağ hatası yüzünden bazı mesajlar iki kez teslim edildi
+teslimat = txns[:5] + txns[2:4] + txns[5:8]
+islenen = set()
+toplam = 0.0
+for t in teslimat:
+    if t["txn_id"] in islenen:        # idempotentlik: gördüysen atla
+        continue
+    islenen.add(t["txn_id"])
+    toplam += t["amount"]
+print(len(teslimat), "teslimat,", len(islenen), "benzersiz işlem, toplam:", round(toplam, 2))</pre>
+<h2>asyncio.Queue ile üretici ve tüketiciler</h2>
+<p>Tek süreç içinde Kafka'nın üretici-tüketici ilişkisini <code>asyncio.Queue</code> ile kurabilirsin. Kuyruk dolarsa <code>put</code> bekler (geri basınç, backpressure); boşsa <code>get</code> bekler. Bitişi haber vermek için her tüketiciye bir "zehirli hap" (sentinel, ör. <code>None</code>) gönderilir. Bu derste olay döngüsünü <code>new_event_loop().run_until_complete</code> ile çalıştırıyoruz; betikte <code>asyncio.run(main())</code> aynı işi yapar.</p>
+<pre class="py">import asyncio
+
+
+async def uretici(kuyruk, olaylar, n_tuketici):
+    for o in olaylar:
+        await kuyruk.put(o)
+    for _ in range(n_tuketici):
+        await kuyruk.put(None)                   # bitti sinyali
+
+
+async def tuketici(ad, kuyruk, sayac):
+    while (o := await kuyruk.get()) is not None:
+        sayac[ad] = sayac.get(ad, 0) + 1
+        await asyncio.sleep(0)                   # sırayı başkasına ver
+
+
+async def main():
+    kuyruk = asyncio.Queue(maxsize=10)
+    sayac = {}
+    await asyncio.gather(uretici(kuyruk, txns[:100], 3),
+                         *(tuketici(f"t{i}", kuyruk, sayac) for i in range(3)))
+    return sayac
+
+
+loop = asyncio.new_event_loop()
+sonuc = loop.run_until_complete(main())
+loop.close()
+print(sorted(sonuc.items()), sum(sonuc.values()))</pre>
+<h2>Pencereleme: tumbling, sliding, session</h2>
+<p>Sonsuz bir akışta "toplam" anlamsızdır; bunun yerine zamanı <b>pencerelere</b> (window) bölersin.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Pencere</th><th>Tanım</th><th>Örnek</th></tr>
+<tr><td>Tumbling (devrik)</td><td>Sabit boyutlu, çakışmayan, ardışık</td><td>Her dakikanın şüpheli işlem sayısı</td></tr>
+<tr><td>Sliding / hopping (kayan)</td><td>Sabit boyutlu, belirli adımla kayan, çakışan</td><td>Son 60 dakika, her 30 dakikada bir</td></tr>
+<tr><td>Session (oturum)</td><td>Etkinlik arası boşluk eşiği aşılınca kapanır; boyutu değişken</td><td>Bir müşterinin mobil oturumu</td></tr>
+</table></div>
+<p>Tumbling pencerede bir olayın penceresi, zamanın pencere boyutuna göre aşağı yuvarlanmasıyla bulunur. Dakikalık pencere için ISO tarih metninin ilk 16 karakteri yeter:</p>
+<pre class="py">from collections import Counter
+
+gun = [t for t in txns if t["txn_time"].startswith("2024-03-15")]
+dakika = Counter(t["txn_time"][:16] for t in gun)
+print(len(gun), "işlem,", len(dakika), "dolu dakika")
+print("en yoğun dakikalar:", dakika.most_common(2))</pre>
+<h2>Geç gelen veri ve watermark</h2>
+<p>Olaylar sırasız gelebilir. Dakikalık pencereyi ne zaman "kapandı" sayıp sonucu yayınlayacaksın? Sonsuza kadar beklersen sonuç hiç çıkmaz; hemen yayınlarsan geç gelenler kaybolur. <b>Watermark</b> bu ikilemin uzlaşmasıdır: "şimdiye kadar gördüğüm en büyük olay zamanı eksi izin verilen gecikme". Watermark bir pencerenin bitişini geçince pencere kapanır ve yayınlanır; o pencereye sonradan gelen olay <b>geç</b> sayılır (atılır, ayrı bir yan çıkışa yazılır ya da düzeltme olarak gönderilir).</p>
+<pre class="py">olaylar = [("10:00:05", "a"), ("10:00:40", "b"), ("10:01:10", "c"),
+           ("10:00:50", "d"), ("10:02:30", "e"), ("10:00:59", "f")]
+
+def sn(s):
+    h, m, x = map(int, s.split(":"))
+    return h * 3600 + m * 60 + x
+
+gecikme = 30
+en_buyuk = 0
+for zaman, ad in olaylar:
+    en_buyuk = max(en_buyuk, sn(zaman))
+    watermark = en_buyuk - gecikme
+    pencere_sonu = sn(zaman) // 60 * 60 + 60
+    durum = "GEÇ" if pencere_sonu &lt;= watermark else "zamanında"
+    print(ad, zaman, "watermark =", watermark - sn("10:00:00"), "sn -&gt;", durum)</pre>
+<p>"d" olayı sırasız gelmesine rağmen 30 saniyelik tolerans içinde kaldı; "f" ise 10:02:30 görüldükten sonra 10:00 penceresine düştüğü için geç sayıldı. Gecikme toleransı büyüdükçe doğruluk artar ama sonuç gecikir: bu, akış işlemenin temel takasıdır.</p>
+
+<h2>Şema evrimi: Avro ve şema kayıt defteri</h2>
+<p>Üretici mesaja yeni bir alan eklediğinde eski tüketiciler kırılmamalıdır. Bu yüzden kurumsal Kafka kurulumlarında mesajlar JSON yerine şemalı bir biçimle (<b>Avro</b>, Protobuf) yazılır ve şemalar bir <b>şema kayıt defterinde</b> (Schema Registry) sürümlenir. Kayıt defteri yeni şemayı kaydetmeden önce uyumluluğu denetler: <b>geriye uyumlu</b> (backward) değişiklikte yeni şemayla eski veri okunabilir; bunun için eklenen her alanın varsayılan değeri olmalıdır.</p>
+<pre class="code">{"type": "record", "name": "Txn", "namespace": "ilgazbank",
+ "fields": [
+   {"name": "txn_id", "type": "long"},
+   {"name": "account_id", "type": "long"},
+   {"name": "amount", "type": "double"},
+   {"name": "channel", "type": "string"},
+   {"name": "risk_skoru", "type": ["null", "double"], "default": null}   // v2: varsayılanlı yeni alan
+ ]}</pre>
+<h2>RabbitMQ, Redis Streams ve Kafka</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Kafka</th><th>RabbitMQ</th><th>Redis Streams</th></tr>
+<tr><td>Model</td><td>Dağıtık, kalıcı log</td><td>Mesaj aracısı (kuyruk, exchange)</td><td>Bellek içi log veri yapısı</td></tr>
+<tr><td>Okununca silinir mi?</td><td>Hayır, saklama süresine göre</td><td>Evet, onaylanınca (ack)</td><td>Hayır, <code>XTRIM</code> ile kırpılır</td></tr>
+<tr><td>Yeniden okuma (replay)</td><td>Offset'e dönerek kolay</td><td>Yok (ayrı kurgu gerekir)</td><td>ID'ye göre mümkün</td></tr>
+<tr><td>İşlem hacmi</td><td>Çok yüksek (saniyede milyonlar)</td><td>Orta-yüksek</td><td>Yüksek, bellekle sınırlı</td></tr>
+<tr><td>Tipik kullanım</td><td>Olay akışı, CDC, analitik boru hattı (pipeline)</td><td>Görev kuyruğu, yönlendirme, RPC</td><td>Hafif akış, zaten Redis olan sistemler</td></tr>
+</table></div>
+
+<h2>CDC: veritabanından ambara akış</h2>
+<p><b>Change Data Capture</b> (değişiklik yakalama), veritabanının işlem günlüğünü (PostgreSQL WAL, MySQL binlog) okuyup her INSERT, UPDATE ve DELETE'i bir olaya çevirir. <b>Debezium</b> bunu Kafka Connect üzerinde yapar; olaylar Kafka'ya, oradan ambara (Snowflake, BigQuery) ya da göle akar. Gece toplu kopyalama yerine dakikalar içinde güncel bir ambar elde edilir ve kaynak veritabanına sorgu yükü binmez.</p>
+<pre class="code">{"op": "u", "ts_ms": 1718000000000, "source": {"table": "bank_accounts", "lsn": 2451},
+ "before": {"account_id": 100019, "status": "aktif", "credit_limit": 20000},
+ "after":  {"account_id": 100019, "status": "aktif", "credit_limit": 35000}}</pre>
+<div class="tip"><b>Tüketici gecikmesi (lag) izlenir</b>Bir akış sisteminin en önemli sağlık ölçüsü <b>consumer lag</b>'dir: her partition için son offset ile grubun commit ettiği offset arasındaki fark. Lag sürekli büyüyorsa tüketiciler yetişemiyordur: partition ve tüketici sayısını artır ya da işlemeyi hızlandır. Burrow, Kafka UI ve Prometheus exporter'ları bu ölçüyü panoya taşır.</div>
+<div class="warn"><b>Sıra yalnız partition içinde garanti</b>Bir hesabın "para yatır" ve "para çek" olayları farklı partition'lara düşerse tüketici onları ters sırada görebilir. Sıranın önemli olduğu varlık (hesap, sipariş) mesaj <b>anahtarı</b> yapılmalıdır. Partition sayısını sonradan artırmak anahtar-partition eşlemesini değiştirir; bu yüzden baştan cömert seçilir.</div>
+<div class="note"><b>Gerçek işte</b>Bankacılıkta dolandırıcılık tespiti, e-ticarette stok ve fiyat güncellemesi, lojistikte araç konumu ve veri ekiplerinde CDC ile ambar besleme tipik Kafka kullanımlarıdır. Veri mühendisi mülakatlarında "tam bir kez neden zor?", "geç gelen veriyi nasıl ele alırsın?", "tüketici grubunda partition sayısından fazla tüketici olursa ne olur?" soruları neredeyse her zaman sorulur. Cevabın omurgası bu derste kurduğun kavramlardır.</div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Durumlu akış işleme</h3>
+<p>Pencere sayaçları, oturumlar ve "bu hesabın son 10 işlemi" gibi bilgiler tüketicinin <b>durumu</b>dur (state). Flink ve Kafka Streams bu durumu yerel diskte (RocksDB) tutar, düzenli aralıklarla <b>checkpoint</b> alır ve çökmede offset ile durumu birlikte geri yükler; tam bir kez garantisi bu eşzamanlı geri yüklemeye dayanır.</p>
+<h3>Outbox kalıbı</h3>
+<p>Uygulama hem veritabanına yazıp hem Kafka'ya mesaj gönderiyorsa ikisinden biri başarısız olabilir. <b>Transactional outbox</b>: mesajı aynı veritabanı işleminde bir <code>outbox</code> tablosuna yaz, Debezium o tabloyu Kafka'ya taşısın. Böylece "veritabanında var ama olay yok" tutarsızlığı ortadan kalkar.</p>
+<h3>Python'da akış araçları</h3>
+<p>confluent-kafka (istemci), Faust (Kafka Streams benzeri), Bytewax (Rust çekirdekli dataflow), PyFlink ve Spark Structured Streaming (PySpark). Basit tüketiciler için istemci + idempotent yazma çoğu zaman yeterlidir; pencere ve durum karmaşıklaşınca bir akış çatısına geçilir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/akis-isleme">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sistem-tasarimi/">← Sistem tasarımı temelleri: ölçekleme, tutarlılık ve tasarım mülakatı</a><a href="../spark-dagitik/">PySpark ile dağıtık veri işleme: partition, shuffle ve Spark SQL →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,241 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Terminal ve komut satırı | Kesit Python</title><meta name="description" content="Çalışma dizini, göreli/mutlak yol, python betik.py ve -m, sys.argv ile argüman, sys.exit ile çıkış kodu, stdout/stderr, yönlendirme ve ortam…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/terminal-temelleri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Terminal ve komut satırı"><meta property="og:description" content="Çalışma dizini, göreli/mutlak yol, python betik.py ve -m, sys.argv ile argüman, sys.exit ile çıkış kodu, stdout/stderr, yönlendirme ve ortam…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/terminal-temelleri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Terminal ve komut satırı","description":"Çalışma dizini, göreli/mutlak yol, python betik.py ve -m, sys.argv ile argüman, sys.exit ile çıkış kodu, stdout/stderr, yönlendirme ve ortam…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/terminal-temelleri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Bilgisayarına geç</span><h1>Terminal ve komut satırı</h1><p class="st-l">Çalışma dizini, göreli/mutlak yol, python betik.py ve -m, sys.argv ile argüman, sys.exit ile çıkış kodu, stdout/stderr, yönlendirme ve ortam değişkenleriyle betiklerini terminalden profesyonelce çalıştırırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/terminal-temelleri">Uygulamada aç, 11 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden terminal?</h2>
+<p>Anadolu Market'in gece 02.00'de çalışan stok raporu bir sunucuda, kimsenin ekranına bakmadığı bir makinede koşar. Orada VS Code yok, "Çalıştır" düğmesi yok; yalnızca <b>terminal</b> (terminal, komut satırı, shell) var. Veri ekipleri betiklerini terminalden çalıştırır, zamanlayıcılar (cron, Windows Görev Zamanlayıcı) betiği terminal komutuyla başlatır, CI sistemleri testleri terminalde koşturur. Terminali rahat kullanmak, "kendi bilgisayarımda çalışıyor" ile "şirkette her gece çalışıyor" arasındaki köprüdür.</p>
+<p>Bu derste terminalin dört temel fikrini öğreneceksin: <b>neredesin</b> (çalışma dizini), <b>neyi çalıştırıyorsun</b> (komut ve argümanlar), <b>sonuç ne oldu</b> (çıkış kodu) ve <b>veri nereye akıyor</b> (standart girdi/çıktı/hata). Python tarafında bunların karşılığı <code>os.getcwd()</code>, <code>sys.argv</code>, <code>sys.exit()</code>, <code>sys.stdin/stdout/stderr</code> ve <code>os.environ</code>'dur. Kurulum dersinde terminali açıp <code>python --version</code> yazmıştın; şimdi derine iniyoruz.</p>
+
+<h2>Neredesin? Çalışma dizini</h2>
+<p>Terminal her an bir klasörün "içinde" durur; buna <b>çalışma dizini</b> (working directory, cwd) denir. Yazdığın göreli dosya adları bu klasöre göre çözülür. Nerede olduğunu <code>pwd</code> (macOS/Linux) ya da <code>cd</code> (Windows'ta tek başına) söyler; başka klasöre <code>cd klasor</code> ile geçersin.</p>
+<pre class="code">$ pwd
+/home/ayse
+$ mkdir anadolu-rapor
+$ cd anadolu-rapor
+$ ls
+$ cd ..
+$ pwd
+/home/ayse</pre>
+<p>Python içinden çalışma dizinini <code>os.getcwd()</code> ya da <code>pathlib.Path.cwd()</code> verir. Tarayıcıdaki Python da sanal bir dosya sisteminde çalışır; aşağıdaki kodu çalıştırıp kendi "konumunu" gör:</p>
+<pre class="py">import os
+from pathlib import Path
+
+print("Çalışma dizini:", os.getcwd())
+print("Path ile:", Path.cwd())
+os.makedirs("rapor_deneme", exist_ok=True)   # mkdir'in Python karşılığı
+os.chdir("rapor_deneme")                     # cd'nin Python karşılığı
+print("Şimdi:", os.getcwd())
+os.chdir("..")
+print("Geri döndük:", os.getcwd())</pre>
+
+<h2>Windows ve macOS/Linux komutları</h2>
+<p>macOS ve Linux aynı aileden (Unix) gelir, komutları neredeyse aynıdır. Windows'ta iki terminal vardır: eski <b>cmd</b> ve modern <b>PowerShell</b>. PowerShell, <code>ls</code>, <code>pwd</code>, <code>cat</code> gibi Unix adlarını da takma ad (alias) olarak tanır; bu yüzden yeni başlayanlara PowerShell'i öneririz.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Ne yapar</th><th>macOS / Linux</th><th>Windows cmd</th><th>PowerShell</th></tr>
+<tr><td>Bulunduğun klasör</td><td><code>pwd</code></td><td><code>cd</code></td><td><code>pwd</code> / <code>Get-Location</code></td></tr>
+<tr><td>Klasör içeriği</td><td><code>ls</code>, <code>ls -la</code></td><td><code>dir</code></td><td><code>ls</code> / <code>dir</code></td></tr>
+<tr><td>Klasöre gir / üst klasör</td><td><code>cd veri</code> / <code>cd ..</code></td><td><code>cd veri</code> / <code>cd ..</code></td><td>aynı</td></tr>
+<tr><td>Klasör oluştur</td><td><code>mkdir rapor</code></td><td><code>mkdir rapor</code></td><td><code>mkdir rapor</code></td></tr>
+<tr><td>Dosya içeriğini göster</td><td><code>cat satis.csv</code></td><td><code>type satis.csv</code></td><td><code>cat</code> / <code>Get-Content</code></td></tr>
+<tr><td>Kopyala / taşı / sil</td><td><code>cp</code> / <code>mv</code> / <code>rm</code></td><td><code>copy</code> / <code>move</code> / <code>del</code></td><td><code>cp</code> / <code>mv</code> / <code>rm</code></td></tr>
+<tr><td>Ekranı temizle</td><td><code>clear</code></td><td><code>cls</code></td><td><code>cls</code> / <code>clear</code></td></tr>
+<tr><td>Metin içinde ara</td><td><code>grep HATA log.txt</code></td><td><code>findstr HATA log.txt</code></td><td><code>Select-String HATA log.txt</code></td></tr>
+<tr><td>Python'ı çağır</td><td><code>python3</code></td><td><code>py</code> ya da <code>python</code></td><td><code>py</code> ya da <code>python</code></td></tr>
+<tr><td>Ortam değişkeni oku</td><td><code>echo $HOME</code></td><td><code>echo %USERPROFILE%</code></td><td><code>$env:USERPROFILE</code></td></tr>
+<tr><td>Son çıkış kodu</td><td><code>echo $?</code></td><td><code>echo %ERRORLEVEL%</code></td><td><code>$LASTEXITCODE</code></td></tr>
+</table></div>
+<div class="tip"><b>Tab tuşu senin dostun</b>Klasör ya da dosya adının ilk birkaç harfini yazıp Tab'a bas; terminal gerisini tamamlar. Yukarı ok tuşu önceki komutu geri getirir. Bu iki alışkanlık yazım hatalarının çoğunu önler.</div>
+
+<h2>Göreli ve mutlak yol</h2>
+<p><b>Mutlak yol</b> (absolute path) kökten başlar: <code>/home/ayse/veri/satis.csv</code> ya da <code>C:\Users\ayse\veri\satis.csv</code>. Nerede olursan ol aynı dosyayı gösterir. <b>Göreli yol</b> (relative path) çalışma dizinine göre yorumlanır: <code>veri/satis.csv</code>, <code>./satis.csv</code> (bu klasör), <code>../arsiv/eski.csv</code> (bir üst klasör). <code>~</code> ise macOS/Linux'ta ev klasörünün kısaltmasıdır.</p>
+<pre class="py">import posixpath
+from pathlib import PurePosixPath
+
+cwd = PurePosixPath("/home/ayse/anadolu-rapor")
+goreli = "../veri/./satis.csv"
+
+birlesik = cwd / goreli
+print("Birleştirilmiş:", birlesik)
+print("Sadeleştirilmiş:", posixpath.normpath(str(birlesik)))
+print("Mutlak mı?", PurePosixPath(goreli).is_absolute(), PurePosixPath("/etc/hosts").is_absolute())
+print("Dosya adı:", birlesik.name, "| uzantı:", birlesik.suffix, "| gövde:", birlesik.stem)</pre>
+<p><code>PurePosixPath</code> diske dokunmadan yalnızca yol metniyle çalışır; bu yüzden her bilgisayarda aynı sonucu verir ve test yazmak için idealdir. <code>/</code> operatörü yolları birleştirir. <code>..</code> parçalarını sadeleştirmek için <code>posixpath.normpath</code> kullanılır (gerçek diskte <code>Path.resolve()</code> aynı işi yapar).</p>
+<div class="warn"><b>Betik nerede, sen neredesin?</b>Betiğin <code>open("veri/satis.csv")</code> diyorsa dosya, betiğin klasörüne göre değil, <b>terminalin bulunduğu klasöre</b> göre aranır. <code>cd</code> yapmadan başka yerden çalıştırırsan FileNotFoundError alırsın. Sağlam çözüm: <code>Path(__file__).parent / "veri" / "satis.csv"</code>.</div>
+
+<h2>Python'ı terminalden çalıştırmak</h2>
+<pre class="code">python rapor.py               # betiği çalıştır (macOS/Linux'ta çoğu zaman python3)
+py rapor.py                   # Windows'ta Python başlatıcısı
+python -m pip install rich    # pip'i "bu Python'ın" modülü olarak çalıştır
+python -m venv .venv          # sanal ortam oluştur
+python -m json.tool veri.json # JSON'u güzel biçimde yazdır
+python -c "print(2 ** 10)"    # tek satırlık kod</pre>
+<p><code>python betik.py</code> bir dosyayı, <code>python -m modul</code> ise Python'ın bulduğu bir <b>modülü</b> betik gibi çalıştırır. <code>pip</code> yerine <code>python -m pip</code> yazmak, paketin tam olarak o Python'a kurulmasını garanti eder; bilgisayarda birden fazla Python varken en sık karışıklığı böyle önlersin.</p>
+
+<h2>Betiğe argüman vermek: sys.argv</h2>
+<p>Terminalde betik adından sonra yazdığın her kelime <b>argüman</b> (argument) olur ve <code>sys.argv</code> listesine metin (str) olarak düşer. İlk eleman (<code>sys.argv[0]</code>) her zaman betiğin adıdır.</p>
+<pre class="code">$ python rapor.py İzmir 7 --detay
+# sys.argv == ["rapor.py", "İzmir", "7", "--detay"]</pre>
+<p>Tarayıcıda terminal olmadığı için aynı mantığı bir liste ile taklit ediyoruz. Profesyonel kodda da yaygın kalıp budur: argümanları <code>main(argv)</code> fonksiyonuna parametre olarak vermek; böylece fonksiyonu test edebilirsin.</p>
+<pre class="py">def main(argv):
+    if len(argv) &lt; 2:
+        print("Kullanım: python rapor.py &lt;şehir&gt; [gün]")
+        return 2
+    sehir = argv[1]
+    gun = int(argv[2]) if len(argv) &gt; 2 else 7     # argümanlar hep str!
+    print(f"{sehir} için son {gun} günün raporu hazırlanıyor")
+    return 0
+
+print("Kod:", main(["rapor.py", "İzmir", "30"]))
+print("Kod:", main(["rapor.py", "Ankara"]))
+print("Kod:", main(["rapor.py"]))</pre>
+<div class="note"><b>Argümanlar her zaman metindir</b><code>"7"</code> ile <code>7</code> farklıdır. Sayı bekliyorsan <code>int()</code> ile dönüştür. Çok seçenekli araçlar için standart kütüphanedeki <code>argparse</code> modülünü orta seviyede göreceksin; sys.argv onun altında yatan temeldir.</div>
+
+<h2>Çıkış kodu: işin sonucu bir sayı</h2>
+<p>Her program bittiğinde işletim sistemine bir <b>çıkış kodu</b> (exit code) bırakır. Kural basittir: <b>0 başarı</b>, 0 dışındaki her şey hata. Gelenek olarak 1 genel hata, 2 hatalı kullanım (eksik/yanlış argüman) demektir. Zamanlayıcılar ve CI sistemleri ekrana değil bu sayıya bakar: kod 0 değilse alarm üretir.</p>
+<p>Python'da <code>sys.exit(kod)</code> çağırınca <code>SystemExit</code> istisnası fırlatılır ve program o kodla biter. Hiç çağırmazsan ve hata da olmazsa kod 0'dır; yakalanmamış bir istisnada kod 1 olur.</p>
+<pre class="py">import sys
+
+def kontrol(satir_sayisi):
+    if satir_sayisi == 0:
+        print("Rapor boş, çıkılıyor", file=sys.stderr)
+        sys.exit(1)
+    print("Rapor tamam:", satir_sayisi, "satır")
+
+for n in [120, 0]:
+    try:
+        kontrol(n)
+    except SystemExit as e:
+        print("Program şu kodla bitecekti:", e.code)</pre>
+
+<h2>Standart girdi, çıktı ve hata</h2>
+<p>Her program üç "boru" ile doğar: <b>standart girdi</b> (stdin, klavyeden ya da başka programdan gelen veri), <b>standart çıktı</b> (stdout, asıl sonuç) ve <b>standart hata</b> (stderr, uyarı ve hata mesajları). <code>print()</code> varsayılan olarak stdout'a yazar; <code>print(..., file=sys.stderr)</code> ise stderr'e. İkisi ekranda aynı görünür ama ayrı borulardır ve ayrı yönlendirilebilir.</p>
+<pre class="py">import sys, io
+
+def ozetle(tutarlar, out=sys.stdout, err=sys.stderr):
+    gecerli = []
+    for t in tutarlar:
+        if t &lt; 0:
+            print(f"UYARI: negatif tutar atlandı: {t}", file=err)
+        else:
+            gecerli.append(t)
+    print(f"toplam={sum(gecerli)}", file=out)
+
+hata_kutusu = io.StringIO()          # stderr'i bir metin kutusunda yakala
+ozetle([250, -40, 1200], err=hata_kutusu)
+print("Yakalanan uyarılar:", hata_kutusu.getvalue().strip())</pre>
+<p>Akışı parametre yapmak (<code>out</code>, <code>err</code>) fonksiyonu test edilebilir kılar: testte <code>io.StringIO</code> verirsin, gerçekte <code>sys.stdout</code>. Kullanıcıdan girdi almayı (<code>input()</code>) "Kullanıcı girdisi ve tür dönüşümü" dersinde derinlemesine göreceksin.</p>
+
+<h2>Yönlendirme ve boru hattı</h2>
+<pre class="code">python rapor.py İzmir &gt; rapor.txt        # stdout'u dosyaya yaz (üzerine)
+python rapor.py Bursa &gt;&gt; rapor.txt       # dosyanın sonuna ekle
+python rapor.py İzmir 2&gt; hatalar.log      # yalnız stderr'i dosyaya
+python rapor.py İzmir &gt; out.txt 2&gt;&amp;1     # ikisini aynı dosyaya
+cat stok.log | grep HATA | wc -l        # boru: birinin çıktısı diğerinin girdisi
+type stok.log | findstr HATA            # Windows cmd karşılığı
+python temizle.py &lt; ham.csv &gt; temiz.csv  # stdin'i dosyadan oku</pre>
+<p><code>|</code> (boru, pipe) Unix felsefesinin kalbidir: her araç tek işi iyi yapar, borularla birleşir. Senin betiğin de iyi bir boru vatandaşı olsun: <b>veriyi stdout'a, mesajları stderr'e</b> yaz. Böylece <code>&gt; sonuc.csv</code> yapan kişi dosyasında uyarı satırı bulmaz.</p>
+
+<h2>Ortam değişkenleri</h2>
+<p><b>Ortam değişkenleri</b> (environment variables), işletim sisteminin programa verdiği anahtar-değer ayarlarıdır: <code>PATH</code>, <code>HOME</code>, veritabanı adresi, ortam adı (geliştirme/canlı). Python'da <code>os.environ</code> bir sözlük gibi davranır. Değer her zaman metindir ve olmayabilir; bu yüzden <code>.get(ad, varsayilan)</code> kullan.</p>
+<pre class="code">export ANADOLU_ORTAM=canli        # macOS/Linux (bu oturum için)
+set ANADOLU_ORTAM=canli           # Windows cmd
+$env:ANADOLU_ORTAM = "canli"      # PowerShell</pre>
+<pre class="py">import os
+
+ortam = os.environ.get("ANADOLU_ORTAM", "gelistirme")
+zaman_asimi = int(os.environ.get("ZAMAN_ASIMI", "30"))
+print("Ortam:", ortam, "| zaman aşımı:", zaman_asimi, "sn")
+print("PATH tanımlı mı?", "PATH" in os.environ)
+
+os.environ["ANADOLU_ORTAM"] = "test"     # yalnız bu süreç ve alt süreçleri görür
+print("Yeni değer:", os.environ["ANADOLU_ORTAM"])</pre>
+<div class="warn"><b>Parolayı koda yazma</b>Veritabanı parolası, API anahtarı gibi sırlar kod dosyasına değil ortam değişkenine (ya da gizli kasa/vault aracına) konur. Kod Git'e gider; ortam değişkeni gitmez. <code>os.environ["SIFRE"]</code> değişken yoksa KeyError verir, <code>.get()</code> ise None ya da varsayılanı döndürür.</div>
+
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın gün sonu mutabakat betiği şöyle çağrılır: <code>python -m mutabakat 2026-10-27 --sube 0412 &gt; mutabakat.csv 2&gt; mutabakat.log</code>. Zamanlayıcı her gece bu komutu koşturur; veritabanı adresi <code>BANKA_DB_URL</code> ortam değişkeninden gelir. Betik çıkış kodu 0 dönerse CSV muhasebeye gider; 1 dönerse nöbetçi geliştiriciye otomatik bildirim düşer ve log dosyası incelenir. Hiç kimse ekrana bakmaz; her şeyi çıkış kodu, stdout ve stderr anlatır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Bu bölüm, bir sunucuya bağlandığında ya da büyük bir log dosyasıyla karşılaştığında işini görecek Linux kabuk (shell) araçlarını tanıtıyor. Amaç her bayrağı ezberlemek değil; hangi aracın hangi işe yaradığını bilip gerektiğinde <code>man grep</code> ya da <code>grep --help</code> ile ayrıntıya bakabilmek. Her aracın yanında Python karşılığını da göreceksin: ikisini birlikte bilmek, ne zaman tek satırlık komutun ne zaman betiğin daha uygun olduğunu seçmeni sağlar. Windows'ta bu komutları WSL (Windows Subsystem for Linux) ya da Git Bash ile kullanabilirsin.</p>
+<h2>Metin araçları: grep, sed, awk, jq</h2>
+<div class="tbl-wrap"><table><tr><th>Komut</th><th>Ne yapar?</th><th>Python karşılığı</th></tr>
+<tr><td><code>grep -i "hata" app.log</code></td><td>Deseni içeren satırları yazar (<code>-i</code> büyük/küçük harf duyarsız, <code>-v</code> tersini, <code>-c</code> sayısını, <code>-r</code> klasörde özyinelemeli)</td><td><code>[s for s in satirlar if "hata" in s.lower()]</code></td></tr>
+<tr><td><code>sed 's/eski/yeni/g' dosya</code></td><td>Satır satır bul-değiştir (<code>g</code> olmadan satırdaki yalnız ilk eşleşme)</td><td><code>re.sub("eski", "yeni", satir)</code></td></tr>
+<tr><td><code>awk -F, '{t+=$10} END {print t}'</code></td><td>Satırları sütunlara böler (<code>$1</code>, <code>$2</code>... 1'den başlar), hesap yapar</td><td><code>sum(float(s.split(",")[9]) ...)</code></td></tr>
+<tr><td><code>jq '.items[].fiyat' veri.json</code></td><td>JSON içinden alan seçer, süzer</td><td><code>[x["fiyat"] for x in d["items"]]</code></td></tr>
+<tr><td><code>sort | uniq -c | sort -rn</code></td><td>Sırala, ardışık tekrarları say, sayıya göre azalan diz</td><td><code>Counter(...).most_common()</code></td></tr>
+<tr><td><code>cut -d, -f2</code>, <code>head</code>, <code>tail -f</code>, <code>wc -l</code></td><td>Sütun kes, ilk/son satırlar, canlı izle, satır say</td><td><code>split</code>, dilim, <code>len</code></td></tr></table></div>
+<pre class="code"># En çok 404 alan 5 yol (erişim logunda 7. alan yol, 9. alan durum kodu)
+awk '$9 == 404 {print $7}' access.log | sort | uniq -c | sort -rn | head -5
+# Son 1 saatteki hataları canlı izle
+tail -f app.log | grep --line-buffered ERROR
+# Lezzet Kurye siparişlerinde duruma göre teslimat ücreti toplamı
+awk -F, 'NR &gt; 1 {t[$8] += $10} END {for (k in t) print k, t[k]}' lk_orders.csv
+# API yanıtından yalnız adlar
+curl -s https://api.example.com/urunler | jq -r '.[] | select(.stok == 0) | .ad'</pre>
+<p>Aynı awk satırının Python karşılığı aşağıda; gerçek <code>lk_orders</code> dosyasında çalışıyor. Kısa ve tek seferlik sorularda kabuk daha hızlıdır; mantık büyüyünce, test gerekince ya da Windows'ta da çalışması gerekince Python kazanır.</p>
+<pre class="py">import veri
+yol = veri.yol("lezzet_kurye", "lk_orders")
+toplam = {}
+with open(yol, encoding="utf-8") as f:
+    next(f)                                   # NR &gt; 1: başlığı atla
+    for satir in f:
+        alan = satir.rstrip("\n").split(",")  # -F,
+        toplam[alan[7]] = toplam.get(alan[7], 0) + float(alan[9])   # $8, $10
+for durum, tutar in sorted(toplam.items()):
+    print(durum, round(tutar, 2))</pre>
+<h2>Dosya bulmak ve toplu işlem: find ve xargs</h2>
+<pre class="code">find . -name "*.py" -mtime -1              # son 1 günde değişen .py dosyaları
+find /var/log -name "*.log" -size +100M    # 100 MB'tan büyük loglar
+find . -name "__pycache__" -type d -prune -exec rm -rf {} +
+grep -rl "TODO" src/ | xargs wc -l         # TODO içeren dosyaların satır sayısı
+find . -name "*.csv" -print0 | xargs -0 -n 1 python temizle.py   # boşluklu adlara dayanıklı</pre>
+<p><code>xargs</code>, girdideki her satırı bir komutun argümanına çevirir. Dosya adlarında boşluk olabileceği için <code>-print0</code> ve <code>-0</code> çiftini alışkanlık edin. Python'da karşılığı <code>Path(".").rglob("*.py")</code> ve döngüdür.</p>
+<h2>İzinler ve chmod</h2>
+<p><code>ls -l</code> çıktısındaki <code>-rwxr-x---</code> üç gruba ayrılır: sahip (user), grup (group), diğerleri (other). Her grupta okuma (r=4), yazma (w=2), çalıştırma (x=1) vardır; toplamları sayısal izni verir: <code>rwx</code>=7, <code>r-x</code>=5, <code>---</code>=0 → <b>750</b>.</p>
+<pre class="py">import stat
+for izin in (0o755, 0o644, 0o600, 0o750):
+    print(oct(izin)[2:], stat.filemode(stat.S_IFREG | izin))</pre>
+<pre class="code">chmod 755 deploy.sh        # sahibi her şey, diğerleri oku+çalıştır
+chmod u+x betik.py         # sembolik: sahibine çalıştırma ekle
+chmod 600 ~/.ssh/id_ed25519   # özel anahtar yalnız sahibine açık olmalı
+chown app:app /srv/market -R</pre>
+<div class="warn"><b>chmod 777 çözüm değildir</b>"Permission denied" alınca 777 vermek herkese yazma izni açar. Önce dosyanın sahibini (<code>ls -l</code>) ve hangi kullanıcıyla çalıştığını (<code>whoami</code>) kontrol et; gerekeni ver. SSH özel anahtarının izni geniş olursa ssh onu kullanmayı reddeder.</div>
+<h2>Süreçler, uzak sunucu ve tmux</h2>
+<div class="tbl-wrap"><table><tr><th>Komut</th><th>İş</th></tr>
+<tr><td><code>ps aux | grep gunicorn</code>, <code>top</code> / <code>htop</code></td><td>Çalışan süreçleri, CPU ve bellek kullanımını gör</td></tr>
+<tr><td><code>kill 4321</code> / <code>kill -9 4321</code></td><td>SIGTERM: "düzgün kapan" ricası; SIGKILL: anında öldür (temizlik yapılamaz, son çare)</td></tr>
+<tr><td><code>ssh-keygen -t ed25519</code>, <code>ssh-copy-id kul@sunucu</code></td><td>Anahtar çifti üret, açık anahtarı sunucuya koy; parolasız ve güvenli giriş</td></tr>
+<tr><td><code>ssh kul@sunucu</code>, <code>scp rapor.csv kul@sunucu:/srv/veri/</code></td><td>Uzak kabuk; dosya kopyala (büyük ve tekrarlı kopyada <code>rsync -avz</code>)</td></tr>
+<tr><td><code>tmux new -s etl</code>, <code>Ctrl+b d</code>, <code>tmux attach -t etl</code></td><td>Oturum aç, ayrıl (bağlantı kopsa da iş sürer), geri bağlan</td></tr></table></div>
+<p>Uzun süren bir eğitim ya da ETL işini SSH üzerinden başlatıp bağlantın koparsa iş ölür; tmux (ya da screen) içinde başlatırsan oturum sunucuda yaşamaya devam eder. Python tarafında SIGTERM'i yakalayıp yarım işi kaydetmek docker-deploy dersindeki "düzgün kapanma" konusudur.</p>
+<div class="note"><b>Gerçek işte</b>Üretimde bir sorun çıktığında ilk dakikalar genellikle şöyle geçer: <code>ssh</code> ile bağlan, <code>df -h</code> ile disk, <code>free -m</code> ile bellek, <code>ps</code>/<code>top</code> ile süreçlere bak, <code>tail -n 200 app.log | grep -i error</code> ile son hataları oku. Bu akışı rahat yapabilmek mühendis, backend ve ML rollerinde mülakatlarda da sorulur.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Test edilebilir komut satırı kalıbı</h3>
+<p>Profesyonel Python betiklerinin neredeyse hepsi aynı iskeleti kullanır: tüm iş <code>main(argv)</code> içinde yapılır, fonksiyon çıkış kodunu <b>döndürür</b>, <code>sys.exit</code> yalnızca en dışta bir kez çağrılır.</p>
+<pre class="py">import sys
+
+def main(argv, env=None, out=sys.stdout, err=sys.stderr):
+    env = env if env is not None else {}
+    if len(argv) != 2:
+        print("Kullanım: stok.py &lt;depo&gt;", file=err)
+        return 2
+    esik = int(env.get("STOK_ESIK", "10"))
+    print(f"{argv[1]} deposu, eşik {esik}", file=out)
+    return 0
+
+kod = main(["stok.py", "Gebze"], env={"STOK_ESIK": "25"})
+print("Çıkış kodu:", kod)
+# Gerçek betikte en altta:
+# if __name__ == "__main__":
+#     sys.exit(main(sys.argv, dict(os.environ)))</pre>
+<p>Bu kalıbın üç faydası var: testte argv, ortam ve akışları istediğin gibi verirsin; çıkış kodu tek yerden yönetilir; modül içe aktarıldığında (<code>import</code>) hiçbir şey kendiliğinden çalışmaz.</p>
+<h3>Tırnaklar ve boşluklu argümanlar</h3>
+<p>Terminal argümanları boşluktan böler: <code>python rapor.py Kahraman Maraş</code> iki argüman verir. Tek argüman için tırnak kullan: <code>"Kahraman Maraş"</code>. Python'da bir komut satırını terminal gibi bölmek için <code>shlex.split('rapor.py "Kahraman Maraş" 7')</code> kullanılır. Alt süreç (subprocess) çalıştırırken komutu tek metin yerine liste olarak vermek de aynı nedenle güvenlidir.</p>
+<h3>Çıkış kodu sözleşmesi</h3>
+<p>Ekibinle bir tablo üzerinde anlaş: 0 başarı, 1 iş hatası (veri bozuk), 2 kullanım hatası, 3 dış sistem erişilemiyor gibi. Zamanlayıcı kuralları ("kod 3 ise 10 dakika sonra yeniden dene") bu sözleşmeye dayanır. Unix'te 126-255 arası kodlar kabuğa ayrılmıştır; kendi kodlarını küçük tut.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/terminal-temelleri">Alıştırmalara geç (11)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../operatorler/">← Operatörler derinlemesine</a><a href="../unicode-metin/">Karakterler, Unicode ve Türkçe →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

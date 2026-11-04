@@ -1,0 +1,245 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dosya işlemleri | Kesit Python</title><meta name="description" content="Veri programdan uzun yaşar: open ve with, okuma-yazma modları, satır satır okuma, CSV metnini elle ayrıştırma ve pathlib ile modern dosya yolu."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dosya-islemleri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Dosya işlemleri"><meta property="og:description" content="Veri programdan uzun yaşar: open ve with, okuma-yazma modları, satır satır okuma, CSV metnini elle ayrıştırma ve pathlib ile modern dosya yolu."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dosya-islemleri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Dosya işlemleri","description":"Veri programdan uzun yaşar: open ve with, okuma-yazma modları, satır satır okuma, CSV metnini elle ayrıştırma ve pathlib ile modern dosya yolu.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/dosya-islemleri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Dosya ve hata</span><h1>Dosya işlemleri</h1><p class="st-l">Veri programdan uzun yaşar: open ve with, okuma-yazma modları, satır satır okuma, CSV metnini elle ayrıştırma ve pathlib ile modern dosya yolu.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-islemleri">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Program kapanınca değişkenler silinir. Anadolu Market'in sipariş listesi, Ilgaz Bank'ın günlük işlem dökümü ise kalıcı olmalı: diske yazılır, yarın yeniden okunur, başka programlara verilir. İş hayatında verinin büyük bölümü hâlâ düz metin ve CSV dosyalarında dolaşır. Bu derste önce bellekte küçük dosyalar oluşturup okuyacağız; aynı kod bilgisayarındaki gerçek dosyalarda da çalışır.</p>
+<div class="note"><b>Tarayıcıdaki dosyalar</b>Bu uygulama tarayıcıda çalıştığı için yazdığın dosyalar bellek içi bir dosya sisteminde oluşur; sayfayı yenileyince silinir. Kendi bilgisayarında aynı kod gerçek dosyalar üretir. Alıştırmalarda önce dosyayı kodla yazıp sonra okuyacağız.</div>
+
+<h2>open ve with: aç, kullan, kesin kapat</h2>
+<p><code>open(yol, mod, encoding="utf-8")</code> bir dosya nesnesi döndürür. <code>with</code> bloğu bittiğinde dosya, hata olsa bile <b>otomatik kapanır</b>. Kapanmayan dosya veri kaybına ve "dosya kullanımda" hatalarına yol açar; bu yüzden hep <code>with</code> kullan.</p>
+<pre class="py">with open("notlar.txt", "w", encoding="utf-8") as f:
+    f.write("Anadolu Market günlük notlar\n")
+    f.write("Kulaklık stoğu kritik\n")
+
+with open("notlar.txt", "r", encoding="utf-8") as f:
+    icerik = f.read()
+
+print(icerik)
+print("Karakter sayısı:", len(icerik))</pre>
+<div class="tip"><b>encoding="utf-8" yazmayı unutma</b>Türkçe karakterler (ş, ğ, İ) için şart. Windows'ta varsayılan kodlama farklı olabilir ve "ş" yerine bozuk karakterler görürsün. Her open çağrısına ekle.</div>
+
+<h2>Dosya modları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Mod</th><th>Adı</th><th>Dosya varsa</th><th>Dosya yoksa</th></tr>
+<tr><td><code>"r"</code></td><td>okuma (read)</td><td>baştan okur</td><td>FileNotFoundError</td></tr>
+<tr><td><code>"w"</code></td><td>yazma (write)</td><td><b>içeriği siler</b>, baştan yazar</td><td>oluşturur</td></tr>
+<tr><td><code>"a"</code></td><td>ekleme (append)</td><td>sonuna ekler</td><td>oluşturur</td></tr>
+<tr><td><code>"x"</code></td><td>yeni oluştur</td><td>FileExistsError</td><td>oluşturur</td></tr>
+<tr><td><code>"rb"</code> / <code>"wb"</code></td><td>ikili (binary)</td><td colspan="2">resim, PDF gibi metin olmayan dosyalar; encoding verilmez</td></tr>
+</table></div>
+<div class="warn"><b>"w" acımasızdır</b>Var olan dosyayı "w" ile açtığın anda içeriği silinir, henüz hiçbir şey yazmamış olsan bile. Günlük (log) tutuyorsan "a" kullan.</div>
+<pre class="py">with open("islem.log", "w", encoding="utf-8") as f:
+    f.write("09:00 sistem açıldı\n")
+
+with open("islem.log", "a", encoding="utf-8") as f:
+    f.write("09:15 sipariş 1001 alındı\n")
+    f.write("09:20 sipariş 1002 alındı\n")
+
+with open("islem.log", encoding="utf-8") as f:   # mod verilmezse "r"
+    print(f.read())</pre>
+
+<h2>Satır satır okuma</h2>
+<p><code>read()</code> tüm dosyayı tek metin olarak belleğe alır; milyonlarca satırlık bir log için uygun değildir. Dosya nesnesi üzerinde doğrudan <code>for</code> ile dönersen Python satırları teker teker okur. Her satırın sonunda <code>\n</code> gelir; <code>strip()</code> ile temizle.</p>
+<pre class="py">with open("islem.log", encoding="utf-8") as f:
+    for numara, satir in enumerate(f, start=1):
+        satir = satir.strip()
+        if "sipariş" in satir:
+            print(f"{numara}: {satir}")
+
+# Tüm satırları liste olarak almak
+with open("islem.log", encoding="utf-8") as f:
+    satirlar = f.readlines()
+print(len(satirlar), "satır")
+print(satirlar[0].rstrip())</pre>
+
+<h2>CSV'yi elle ayrıştırma</h2>
+<p>CSV (comma-separated values), her satırın bir kayıt, virgülle ayrılmış her parçanın bir alan olduğu düz metin dosyasıdır; Excel açar, her sistem üretir. İlk satır genelde başlık. Dosyadan okunan her şey metindir; sayısal alanları <code>int</code>/<code>float</code> ile dönüştürmeyi unutma.</p>
+<pre class="py">csv_metni = """id,musteri,sehir,tutar
+1001,Ayşe,Ankara,900.0
+1002,Mehmet,İzmir,820.0
+1003,Elif,Ankara,930.0
+1004,Can,İstanbul,450.0
+"""
+with open("siparisler.csv", "w", encoding="utf-8") as f:
+    f.write(csv_metni)
+
+siparisler = []
+with open("siparisler.csv", encoding="utf-8") as f:
+    basliklar = f.readline().strip().split(",")
+    for satir in f:
+        satir = satir.strip()
+        if not satir:            # boş satırı atla
+            continue
+        alanlar = satir.split(",")
+        kayit = dict(zip(basliklar, alanlar))
+        kayit["id"] = int(kayit["id"])
+        kayit["tutar"] = float(kayit["tutar"])
+        siparisler.append(kayit)
+
+print(basliklar)
+print(siparisler[0])
+print("Toplam:", sum(s["tutar"] for s in siparisler))</pre>
+<p><code>dict(zip(basliklar, alanlar))</code> hilesi başlıkla değeri eşleştirip sözlük üretir; sütun sırası değişse bile kod bozulmaz. Alan içinde virgül ya da tırnak varsa (adres gibi) elle split yetmez; o zaman standart <code>csv</code> modülünü kullanırsın, orta seviyede göreceğiz.</p>
+
+<h2>Dosyaya rapor yazma</h2>
+<p>Önceki derste ürettiğin rapor metnini dosyaya yazmak tek satır: <code>f.write(rapor)</code>. Birden çok satırı tek seferde yazmak için <code>writelines</code> var ama satır sonlarını kendin eklemelisin; en temizi <code>"\n".join(...)</code> ile metni hazırlayıp yazmaktır.</p>
+<pre class="py">satirlar = [f"{'Şehir':&lt;10}{'Ciro':&gt;10}", "-" * 20]
+for sehir, ciro in [("Ankara", 1830.0), ("İzmir", 820.0), ("İstanbul", 450.0)]:
+    satirlar.append(f"{sehir:&lt;10}{ciro:&gt;10,.2f}")
+
+with open("rapor.txt", "w", encoding="utf-8") as f:
+    f.write("\n".join(satirlar) + "\n")
+
+with open("rapor.txt", encoding="utf-8") as f:
+    print(f.read())</pre>
+
+<h2>pathlib: dosya yolu bir nesnedir</h2>
+<p><code>os.path</code> ile metin birleştirmek yerine <code>pathlib.Path</code> yolu bir nesne olarak taşır; <code>/</code> operatörüyle parçalar birleşir, işletim sistemi farkı (Windows'ta ters bölü) kendiliğinden çözülür. Küçük dosyalar için <code>read_text</code> ve <code>write_text</code> kısayolları <code>with open</code> yazmaktan da kısadır.</p>
+<pre class="py">from pathlib import Path
+
+klasor = Path("raporlar")
+klasor.mkdir(exist_ok=True)          # varsa hata verme
+dosya = klasor / "ciro_2024_03.txt"  # yol birleştirme
+
+dosya.write_text("Ankara;1830.00\nİzmir;820.00\n", encoding="utf-8")
+print(dosya.exists(), dosya.name, dosya.suffix, dosya.parent)
+print(dosya.read_text(encoding="utf-8"))
+
+for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
+    print("bulundu:", p)</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: dosyalarla günlük iş</h2>
+<p>Temeli kurdun: <code>open</code>, <code>with</code>, modlar, satır satır okuma, <code>pathlib</code>. Bu bölümde iş hayatında her hafta karşına çıkacak işleri ele alıyoruz: "dosya bulunamadı" hatasının asıl nedeni, yolu parçalarına ayırmak, aynı anda iki dosyayla çalışmak, şubelerden gelen dosyaları birleştirmek ve Excel'den gelen bozuk görünen CSV'ler. İkili (binary) mod, <code>seek</code>, arşivler ve atomik yazmanın ayrıntısı orta seviyedeki <b>İleri dosya işlemleri</b> dersinde; <code>csv</code> ve <code>json</code> modülleri de <b>JSON ve CSV</b> dersinde.</p>
+
+<h3>Çalışma klasörü: göreli yol nereden başlar?</h3>
+<p><code>open("siparisler.csv")</code> yazdığında Python dosyayı betiğin yanında değil, <b>çalışma klasöründe</b> (current working directory) arar. Terminalde hangi klasördeyken <code>python</code> komutunu verdiysen orasıdır. VS Code'da "Çalıştır" düğmesi çoğu zaman proje kökünü kullanır; bu yüzden "bende çalışıyordu" hatalarının yarısı buradan çıkar.</p>
+<pre class="py">from pathlib import Path
+import os
+
+print("Çalışma klasörü:", Path.cwd())
+print("Aynı bilgi os ile:", os.getcwd())
+
+yol = Path("olmayan_rapor.csv")
+print("Göreli yol:", yol)
+print("Python aslında burada arayacak:", yol.resolve())
+print("Var mı?", yol.exists())
+</pre>
+<div class="tip"><b>FileNotFoundError aldığında üç soru</b>1) <code>Path.cwd()</code> nerede? 2) <code>Path(yol).resolve()</code> tam olarak neyi gösteriyor? 3) Dosya adında gizli uzantı var mı (Windows "rapor.csv.txt" diye kaydetmiş olabilir)? Bu üçünü yazdırmak tahmin yürütmekten hızlıdır.</div>
+
+<h3>Yolu parçalarına ayır: Path'in sorgu araçları</h3>
+<p>Dosya adlarıyla metin işlemi (<code>split(".")</code>, <code>replace</code>) yapmak kırılgandır: "rapor.v2.csv" gibi adlar seni şaşırtır. <code>Path</code> nesnesi her parçayı ayrı özellik olarak verir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>"veri/2026/satis_ekim.csv" için sonuç</th><th>Ne işe yarar?</th></tr>
+<tr><td><code>p.name</code></td><td>satis_ekim.csv</td><td>Klasörsüz tam dosya adı</td></tr>
+<tr><td><code>p.stem</code></td><td>satis_ekim</td><td>Uzantısız ad; rapor başlığı, sözlük anahtarı</td></tr>
+<tr><td><code>p.suffix</code></td><td>.csv</td><td>Uzantı (noktasıyla)</td></tr>
+<tr><td><code>p.parent</code></td><td>veri/2026</td><td>Bulunduğu klasör</td></tr>
+<tr><td><code>p.with_suffix(".json")</code></td><td>veri/2026/satis_ekim.json</td><td>Aynı yerde farklı uzantılı çıktı</td></tr>
+<tr><td><code>p.with_name("ozet.txt")</code></td><td>veri/2026/ozet.txt</td><td>Aynı klasörde başka dosya</td></tr>
+<tr><td><code>p.is_file()</code> / <code>p.is_dir()</code></td><td>True / False</td><td>Var mı ve türü ne?</td></tr>
+<tr><td><code>p.stat().st_size</code></td><td>bayt cinsinden boyut</td><td>Boş dosyayı atlamak</td></tr>
+<tr><td><code>p.unlink(missing_ok=True)</code></td><td>dosyayı siler</td><td>Yoksa hata vermeden</td></tr>
+<tr><td><code>klasor.iterdir()</code> / <code>klasor.rglob("*.csv")</code></td><td>içerik / alt klasörler dahil arama</td><td>Toplu işleme</td></tr>
+</table></div>
+<pre class="py">from pathlib import Path
+
+klasor = Path("veri") / "2026"
+klasor.mkdir(parents=True, exist_ok=True)     # ara klasörleri de oluştur
+p = klasor / "satis_ekim.csv"
+p.write_text("id,tutar\n1,250\n2,400\n", encoding="utf-8")
+
+print(p.name, "|", p.stem, "|", p.suffix)
+print("Klasör:", p.parent.as_posix())
+print("JSON çıktısı:", p.with_suffix(".json").as_posix())
+print("Boyut:", p.stat().st_size, "bayt")
+
+for dosya in sorted(Path("veri").rglob("*.csv")):
+    print("CSV bulundu:", dosya.as_posix())
+</pre>
+<p><code>mkdir(parents=True, exist_ok=True)</code> ikilisini ezberle: "ara klasörler de yoksa oluştur, varsa sessiz kal". <code>as_posix()</code> yolu her işletim sisteminde eğik çizgiyle (/) yazar; rapor ve log çıktısında tutarlı görünür.</p>
+
+<h3>Aynı anda iki dosya: oku, süz, yaz</h3>
+<p>Tek bir <code>with</code> satırında birden çok dosya açabilirsin. Kaynaktan satır satır okuyup hedefe yazmak, bellekte tüm dosyayı tutmadan "filtre" kurmanın standart yoludur. <code>print(..., file=f)</code> da dosyaya yazar ve satır sonunu kendisi ekler; <code>write</code> ise yalnız metin (str) alır ve <code>\n</code> eklemez.</p>
+<pre class="py">with open("banka_islem.log", "w", encoding="utf-8") as f:
+    f.write("09:01 OK havale 1500\n09:04 HATA zaman aşımı\n09:10 OK eft 320\n09:12 HATA limit aşıldı\n")
+
+hata_sayisi = 0
+with open("banka_islem.log", encoding="utf-8") as kaynak, \
+     open("hatalar.log", "w", encoding="utf-8") as hedef:
+    for satir in kaynak:
+        if " HATA " in satir:
+            hedef.write(satir)          # satırın kendi \n'i var
+            hata_sayisi += 1
+    print(f"Toplam {hata_sayisi} hata", file=hedef)   # print satır sonunu ekler
+
+print(open("hatalar.log", encoding="utf-8").read())
+n = open("deneme.txt", "w", encoding="utf-8").write("Ankara\n")
+print("write dönen değer (yazılan karakter):", n)
+</pre>
+<div class="warn"><b>write sayı kabul etmez</b><code>f.write(1500)</code> → <code>TypeError: write() argument must be str, not int</code>. Önce <code>str()</code> ya da f-string kullan: <code>f.write(f"{ciro:.2f}\n")</code>. Ayrıca son örnekteki gibi <code>with</code> kullanmadan açılan dosya kapanmayabilir; o satır yalnızca dönen değeri göstermek için.</div>
+
+<h3>Şubelerden gelen dosyaları birleştirmek</h3>
+<p>Anadolu Market'in her şubesi günlük satışını ayrı CSV olarak gönderiyor; hepsinin başlığı aynı. Birleştirirken başlığı yalnız bir kez yaz, boş satırları atla, kaynak dosyanın adını yeni bir sütun olarak ekle ki sonradan "bu satır hangi şubeden geldi?" sorusu cevaplanabilsin.</p>
+<pre class="py">from pathlib import Path
+
+gelen = Path("gelen_subeler")
+gelen.mkdir(exist_ok=True)
+(gelen / "kadikoy.csv").write_text("urun,adet\nkulaklik,3\nkablo,10\n", encoding="utf-8")
+(gelen / "cankaya.csv").write_text("urun,adet\nkulaklik,5\n\n", encoding="utf-8")
+
+cikti = ["sube,urun,adet"]
+for dosya in sorted(gelen.glob("*.csv")):
+    satirlar = dosya.read_text(encoding="utf-8").splitlines()
+    for satir in satirlar[1:]:              # başlığı atla
+        if satir.strip():
+            cikti.append(f"{dosya.stem},{satir}")
+
+Path("tum_subeler.csv").write_text("\n".join(cikti) + "\n", encoding="utf-8")
+print(Path("tum_subeler.csv").read_text(encoding="utf-8"))
+</pre>
+
+<h3>Excel'den gelen CSV: BOM ve noktalı virgül</h3>
+<p>Türkçe Excel "CSV (UTF-8)" olarak kaydettiğinde iki sürpriz yapar: ayırıcı virgül değil <b>noktalı virgüldür</b> (çünkü ondalık ayırıcı virgüldür: <code>1250,50</code>), ve dosyanın başına görünmez bir <b>BOM</b> (byte order mark, <code>\ufeff</code>) karakteri koyar. Sonuç: ilk sütunun adı <code>"id"</code> değil <code>"\ufeffid"</code> olur ve <code>kayit["id"]</code> KeyError verir.</p>
+<pre class="py">with open("excel_cikti.csv", "w", encoding="utf-8-sig") as f:   # Excel gibi BOM'lu yaz
+    f.write("id;musteri;tutar\n1;Ayşe;1250,50\n")
+
+with open("excel_cikti.csv", encoding="utf-8") as f:
+    print("utf-8 ile ilk başlık:", repr(f.readline().split(";")[0]))
+
+with open("excel_cikti.csv", encoding="utf-8-sig") as f:
+    basliklar = f.readline().strip().split(";")
+    alanlar = f.readline().strip().split(";")
+kayit = dict(zip(basliklar, alanlar))
+kayit["tutar"] = float(kayit["tutar"].replace(".", "").replace(",", "."))
+print("utf-8-sig ile:", kayit)
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr>
+<tr><td>İlk sütun adı <code>\ufeffid</code></td><td>BOM</td><td><code>encoding="utf-8-sig"</code></td></tr>
+<tr><td>Her satır tek alan</td><td>Ayırıcı <code>;</code></td><td><code>split(";")</code> ya da csv modülünde <code>delimiter=";"</code></td></tr>
+<tr><td><code>float("1.250,50")</code> ValueError</td><td>Türkçe sayı biçimi</td><td>Önce binlik noktayı sil, sonra virgülü noktaya çevir</td></tr>
+<tr><td>"ÅŸ" gibi bozuk harfler</td><td>Dosya cp1254/latin ile yazılmış</td><td><code>encoding="cp1254"</code> dene</td></tr>
+<tr><td>Satırlar arası boş satır (Windows)</td><td>Çift satır sonu</td><td>csv modülüyle yazarken <code>newline=""</code></td></tr>
+</table></div>
+
+<h3>Basit ayar dosyası okumak</h3>
+<p>Küçük betikler ayarlarını çoğu zaman <code>anahtar=değer</code> satırlarından oluşan bir dosyada tutar. <code>#</code> ile başlayan satırlar yorumdur. Satırı yalnızca <b>ilk</b> eşittir işaretinden bölmek önemlidir; değerin içinde de <code>=</code> olabilir (<code>split("=", 1)</code>). Daha zengin biçimler (INI, TOML, .env) <b>Yapılandırma</b> dersinde.</p>
+
+<div class="note"><b>Gerçek işte</b>Muhasebe ekibi her sabah bankadan gelen ekstre dosyalarını bir klasöre bırakır; senin betiğin klasörü tarar (<code>glob</code>), yeni dosyaları birleştirir, hatalı satırları ayrı bir dosyaya yazar ve işlenen dosyayı "islenmis" klasörüne taşır (<code>rename</code>). Bu iş akışının her parçasını bu derste gördün. İki altın kural: girdiyi asla yerinde değiştirme (yeni dosya üret) ve her çıktı dosyasının adına tarih koy (<code>rapor_2026-10-28.txt</code>), böylece dünkü rapor üzerine yazılmaz.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Büyük dosyada bellek</h3>
+<p>Satır satır okuma, dosya ne kadar büyük olursa olsun bellekte yalnız bir satır tutar. Bir gigabaytlık log'u <code>read()</code> ile açmak programı çökertebilir; <code>for satir in f</code> ile dakikalar sürse de biter. Orta seviyedeki üreteçler (generator) bu fikri genelleştirir.</p>
+<h3>Yolu sabit yazma</h3>
+<p><code>"C:/Users/ayse/rapor.txt"</code> gibi mutlak yollar başka bilgisayarda çalışmaz. Betiğin bulunduğu klasöre göreli yol kur: <code>Path(__file__).parent / "veri" / "siparisler.csv"</code>. Ayarları ortam değişkeninden okumak da yaygındır.</p>
+<h3>Atomik yazma</h3>
+<p>Rapor yazılırken elektrik kesilirse yarım dosya kalır. Kurumsal betikler önce geçici dosyaya yazar, sonra <code>Path.replace</code> ile asıl adına taşır; taşıma işlemi ya tamamen olur ya hiç olmaz. Veri kaybının ucuz çözümü budur.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-islemleri">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../string-bicimleme/">← Metin biçimlendirme ve rapor üretme</a><a href="../hatalar/">Hatalar ve istisnalar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,218 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri | Kesit Python</title><meta name="description" content="Ayarları koddan ayırır; JSON, YAML, TOML, INI ve .env dosyalarını okur, dev/test/prod ortamlarını katmanlı birleştirir, şemayı doğrular ve sırları koda…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/yapilandirma/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri"><meta property="og:description" content="Ayarları koddan ayırır; JSON, YAML, TOML, INI ve .env dosyalarını okur, dev/test/prod ortamlarını katmanlı birleştirir, şemayı doğrular ve sırları koda…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/yapilandirma/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri","description":"Ayarları koddan ayırır; JSON, YAML, TOML, INI ve .env dosyalarını okur, dev/test/prod ortamlarını katmanlı birleştirir, şemayı doğrular ve sırları koda…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/yapilandirma/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>Yapılandırma dosyaları: JSON, YAML, TOML, INI ve ortam değişkenleri</h1><p class="st-l">Ayarları koddan ayırır; JSON, YAML, TOML, INI ve .env dosyalarını okur, dev/test/prod ortamlarını katmanlı birleştirir, şemayı doğrular ve sırları koda gömmeden 12-factor ilkeleriyle yönetirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yapilandirma">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın kredi başvuru servisi üç yerde çalışıyor: geliştiricinin bilgisayarında (dev), test sunucusunda (test) ve gerçek müşterilere hizmet veren canlı ortamda (prod). Kod aynı; değişen şeyler veritabanı adresi, günlük kredi limiti, log seviyesi, e-posta gönderilip gönderilmeyeceği ve API anahtarları. Bunları kodun içine yazarsan her ortam için kodu değiştirmen, yeniden paketlemen gerekir; daha kötüsü, prod parolası bir gün GitHub'a gider.</p>
+<p><b>Yapılandırma</b> (configuration, kısaca config), kod değişmeden programın davranışını değiştiren her şeydir. Bu derste yaygın beş biçimi okumayı, ortamları katmanlı birleştirmeyi, ayarı doğrulamayı ve sırları güvenle yönetmeyi öğreneceksin. JSON'un temelini <b>JSON ve CSV</b> dersinde, <code>tomllib</code>'e ilk bakışı <b>Sanal ortam (virtual environment) ve paket yönetimi</b> dersinde gördün; burada hepsini yapılandırma gözüyle birleştiriyoruz.</p>
+
+<h2>Biçimleri tanı</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>Okuma</th><th>Yorum</th><th>Tipler</th><th>Nerede görürsün?</th></tr>
+<tr><td>JSON</td><td><code>json</code> (standart)</td><td>Yok</td><td>str, sayı, bool, null, liste, nesne</td><td>API'ler, frontend ayarları</td></tr>
+<tr><td>YAML</td><td><code>yaml.safe_load</code> (pyyaml)</td><td><code>#</code></td><td>JSON + tarih, çok satırlı metin, referans</td><td>Docker Compose, Kubernetes, GitHub Actions</td></tr>
+<tr><td>TOML</td><td><code>tomllib</code> (3.11+, yalnız okuma)</td><td><code>#</code></td><td>Açık tipler, tarih-saat</td><td><code>pyproject.toml</code>, Rust/Cargo</td></tr>
+<tr><td>INI</td><td><code>configparser</code> (standart)</td><td><code>#</code> <code>;</code></td><td>Hepsi metin; getint/getboolean ile çevirirsin</td><td>Eski uygulamalar, <code>setup.cfg</code>, Windows</td></tr>
+<tr><td>.env</td><td><code>os.environ</code> + python-dotenv</td><td><code>#</code></td><td>Hepsi metin</td><td>Sırlar, ortama özel değerler</td></tr>
+</table></div>
+<p>Kural: insanın düzenleyeceği ayar dosyası için TOML ya da YAML, makinelerin alışverişi için JSON, sırlar ve ortama özgü küçük değerler için ortam değişkeni (environment variable).</p>
+
+<h2>YAML: okunaklı ama tuzaklı</h2>
+<p>YAML girinti ile yapı kurar, yorum destekler ve çok okunaklıdır. Python'da üçüncü parti <code>pyyaml</code> ile okursun (<code>pip install pyyaml</code>; bu uygulamada hazır). Her zaman <code>yaml.safe_load</code> kullan: <code>yaml.load</code> uygun olmayan bir yükleyiciyle dosyadaki etiketlerden (tag) Python nesnesi oluşturabilir, bu da güvenilmeyen dosyada kod çalıştırma açığı demektir.</p>
+<pre class="py">import yaml
+metin = """
+uygulama: kredi-servisi
+surum: "1.4"
+veritabani:
+  host: db.ilgazbank.local
+  port: 5432
+subeler: [Ankara, İzmir, Bursa]
+eposta_gonder: true
+"""
+ayar = yaml.safe_load(metin)
+print(ayar["veritabani"]["port"] + 1, type(ayar["eposta_gonder"]).__name__)
+print(ayar["subeler"][1])
+print(yaml.dump(ayar, allow_unicode=True, sort_keys=False))</pre>
+<p>YAML 1.1 kuralları (pyyaml bunları uygular) bazı değerleri sessizce başka tipe çevirir. Bu tuzaklar gerçek projelerde hataya yol açar:</p>
+<pre class="py">import yaml
+print(yaml.safe_load("ulke: NO\naktif: no\nevet: yes"))   # NO ve no -&gt; False!
+print(yaml.safe_load("surum: 3.10"))                       # 3.1 (float)
+print(yaml.safe_load("saat: 12:30"))                       # 750 (60'lık taban!)
+print(yaml.safe_load("kod: 010"))                          # 8 (sekizlik taban)
+print(yaml.safe_load('surum: "3.10"\nkod: "010"'))         # tırnakla metin kalır</pre>
+<div class="warn"><b>Şüpheli her değeri tırnakla</b>Ülke kodu, sürüm numarası, başında sıfır olan kodlar, saat ve "yes/no/on/off" gibi kelimeler YAML'da tırnak içine yazılmalı. Bu sorun o kadar yaygındır ki adı bile vardır: "Norveç problemi" (Norway problem).</div>
+
+<h2>TOML: açık tipler</h2>
+<p>TOML, Python 3.11'den beri standart kütüphanededir (<code>tomllib</code>). Tipleri açıktır: metin her zaman tırnaklıdır, sayı ve tarih kendi tipindedir; YAML'daki sürprizler yoktur. <code>tomllib</code> yalnızca <b>okur</b>; yazmak için <code>tomli-w</code> paketi gerekir. Dosyadan okurken <code>tomllib.load</code> ikili modda açılmış dosya ister.</p>
+<pre class="py">import tomllib
+metin = """
+[uygulama]
+ad = "kredi-servisi"
+baslangic = 2026-01-15
+
+[veritabani]
+host = "db.ilgazbank.local"
+port = 5432
+
+[[sube]]
+ad = "Kızılay"
+sehir = "Ankara"
+
+[[sube]]
+ad = "Alsancak"
+sehir = "İzmir"
+"""
+ayar = tomllib.loads(metin)
+print(ayar["uygulama"]["baslangic"].year, ayar["veritabani"]["port"])
+print([s["ad"] for s in ayar["sube"]])
+try:
+    tomllib.loads("port = 5432\nport = 5433")
+except tomllib.TOMLDecodeError as e:
+    print("Hatalı TOML:", e)</pre>
+<p><code>[[sube]]</code> bir <b>tablo dizisi</b> (array of tables) tanımlar; her blok listeye bir sözlük ekler. Aynı anahtarın iki kez yazılması TOML'da hatadır; YAML ise sessizce sonuncuyu alır.</p>
+
+<h2>INI: configparser</h2>
+<p>INI dosyası bölümlerden (<code>[bolum]</code>) ve <code>anahtar = değer</code> satırlarından oluşur. <code>configparser</code> her değeri <b>metin</b> olarak saklar; tipi sen istersin: <code>getint</code>, <code>getfloat</code>, <code>getboolean</code>. <code>getboolean</code> 1/yes/true/on ve 0/no/false/off değerlerini tanır. <code>[DEFAULT]</code> bölümündeki anahtarlar her bölüme miras kalır; anahtar adları büyük-küçük harf duyarsızdır.</p>
+<pre class="py">import configparser
+metin = """
+[DEFAULT]
+zaman_asimi = 30
+
+[veritabani]
+Host = localhost
+port = 5432
+debug = yes
+
+[odeme_api]
+url = https://odeme.example/v1
+zaman_asimi = 5
+"""
+c = configparser.ConfigParser()
+c.read_string(metin)
+db = c["veritabani"]
+print(db["host"], type(db["port"]).__name__, db.getint("port"))
+print(db.getboolean("debug"), db.getint("zaman_asimi"))
+print(c.getint("odeme_api", "zaman_asimi"), c.getint("odeme_api", "tekrar", fallback=3))
+print(c.sections())</pre>
+<p><code>fallback</code> eksik anahtar için varsayılan değer verir; vermezsen <code>c.getint(bolum, anahtar)</code> <code>NoOptionError</code> verir. <code>[DEFAULT]</code> bölümü <code>sections()</code> listesinde görünmez.</p>
+<div class="tip"><b>Bölüm nesnesi ile parser farkı</b><code>c["veritabani"].getint("yok")</code> eksik anahtarda hata vermez, sessizce <code>None</code> döndürür. Zorunlu bir alanı bu yolla okursan hata ancak <code>None + 1</code> gibi bir işlemde, çok sonra çıkar. Zorunlu alanlar için <code>c.getint("veritabani", "port")</code> ya da <code>c["veritabani"]["port"]</code> (KeyError verir) kullan.</div>
+
+<h2>Ortam değişkenleri ve .env</h2>
+<p>İşletim sistemi her sürece bir ortam değişkenleri sözlüğü verir; Python'da <code>os.environ</code>'dur. Değerler <b>her zaman metindir</b>. Okurken <code>os.environ["AD"]</code> eksikse KeyError verir (zorunlu ayar için doğrusu bu), <code>os.environ.get("AD", varsayilan)</code> ise varsayılana düşer.</p>
+<pre class="py">import os
+os.environ["ANADOLU_PORT"] = "8080"
+os.environ["ANADOLU_DEBUG"] = "false"
+port = int(os.environ.get("ANADOLU_PORT", "8000"))
+yanlis_debug = bool(os.environ["ANADOLU_DEBUG"])          # boş olmayan metin -&gt; True!
+dogru_debug = os.environ["ANADOLU_DEBUG"].lower() in {"1", "true", "yes", "on", "evet"}
+print(port + 1, yanlis_debug, dogru_debug)
+print(os.environ.get("ANADOLU_YOK", "varsayılan"))
+try:
+    os.environ["ANADOLU_DB_PAROLA"]
+except KeyError as e:
+    print("Zorunlu ayar eksik:", e)</pre>
+<p>Geliştirme sırasında onlarca değişkeni elle tanımlamak yerine proje kökünde bir <code>.env</code> dosyası tutulur ve <code>python-dotenv</code> paketi onu <code>os.environ</code>'a yükler:</p>
+<pre class="code"># .env  (DEPOYA GİRMEZ, .gitignore'da)
+APP_ENV=dev
+ANADOLU_DB_URL=postgresql://localhost:5432/kredi
+ANADOLU_DB_PAROLA="gizli parola"
+
+# uygulama.py
+from dotenv import load_dotenv
+import os
+load_dotenv()                      # .env'i okur, var olan değişkenleri EZMEZ
+print(os.environ["APP_ENV"])</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>python-dotenv tarayıcıda yüklü değildir: <code>pip install python-dotenv</code>. Mantığı basittir; alıştırmalarda kendi .env ayrıştırıcını yazacaksın. <code>load_dotenv</code> varsayılan olarak var olan ortam değişkenini değiştirmez; böylece sunucuda tanımlanan gerçek değer, unutulmuş bir .env dosyasından üstün gelir.</div>
+
+<h2>Ortama göre ayar: katmanlı birleştirme</h2>
+<p>Ölçeklenen projelerde ayar katmanlardan oluşur; sonraki katman öncekinin üzerine yazar:</p>
+<div class="steps-list"><ol>
+<li>Koddaki güvenli <b>varsayılanlar</b> (her ortamda ortak).</li>
+<li>Ortak ayar dosyası (<code>ayar.yaml</code>).</li>
+<li>Ortama özel bölüm ya da dosya (<code>ayar.prod.yaml</code>), <code>APP_ENV</code> değişkeniyle seçilir.</li>
+<li>Ortam değişkenleri (sırlar ve son dakika değişiklikleri).</li>
+<li>Gerekirse komut satırı argümanları.</li>
+</ol></div>
+<p>Sözlükleri <code>{**a, **b}</code> ya da <code>a | b</code> ile birleştirmek <b>yüzeyseldir</b> (shallow): iç içe bir sözlük komple değiştirilir. Prod dosyası yalnız <code>veritabani.host</code> değerini verdiyse <code>port</code> kaybolur. Bu yüzden iç içe (deep) birleştirme yazılır:</p>
+<pre class="py">import copy
+def birlestir(temel, ust):
+    sonuc = copy.deepcopy(temel)
+    for anahtar, deger in ust.items():
+        if isinstance(deger, dict) and isinstance(sonuc.get(anahtar), dict):
+            sonuc[anahtar] = birlestir(sonuc[anahtar], deger)
+        else:
+            sonuc[anahtar] = copy.deepcopy(deger)
+    return sonuc
+
+varsayilan = {"veritabani": {"host": "localhost", "port": 5432}, "log": "DEBUG", "limit": 50_000}
+ortamlar = {
+    "test": {"veritabani": {"host": "test-db"}},
+    "prod": {"veritabani": {"host": "prod-db"}, "log": "WARNING"},
+}
+print(varsayilan | ortamlar["prod"])          # yüzeysel: port kayboldu
+for ad in ["dev", "test", "prod"]:
+    print(ad, birlestir(varsayilan, ortamlar.get(ad, {})))
+print(varsayilan["veritabani"]["host"])         # varsayılan bozulmadı</pre>
+
+<h2>Şema doğrulama: hızlı ve yüksek sesle hata ver</h2>
+<p>Yanlış yazılmış bir ayar (port yerine "5432a", limit yerine eksi sayı) programın başlangıcında yakalanmalı; gece 3'te ilk kredi başvurusunda değil. Bu ilkeye <b>hızlı hata</b> (fail fast) denir. Büyük projelerde <code>pydantic</code> ya da JSON Schema kullanılır; mantığı anlamak için elle yazmak öğreticidir. İyi bir doğrulayıcı ilk hatada durmaz, <b>tüm hataları</b> toplayıp birlikte söyler.</p>
+<pre class="py">SEMA = {"host": str, "port": int, "debug": bool, "limit": float}
+
+def dogrula(ayar):
+    hatalar = []
+    for anahtar, tur in SEMA.items():
+        if anahtar not in ayar:
+            hatalar.append(f"eksik: {anahtar}")
+            continue
+        deger = ayar[anahtar]
+        if tur is float and isinstance(deger, int) and not isinstance(deger, bool):
+            deger = float(deger)                     # 50000 da float sayılır
+        if not isinstance(deger, tur) or (tur is int and isinstance(deger, bool)):
+            hatalar.append(f"tür: {anahtar} {tur.__name__} olmalı")
+    if isinstance(ayar.get("port"), int) and not 1 &lt;= ayar["port"] &lt;= 65535:
+        hatalar.append("aralık: port 1-65535 olmalı")
+    return hatalar
+
+print(dogrula({"host": "db", "port": 5432, "debug": False, "limit": 50000}))
+print(dogrula({"host": "db", "port": True, "limit": "çok"}))
+print(dogrula({"host": "db", "port": 70000, "debug": True, "limit": 1.5}))</pre>
+<p><code>bool</code>, <code>int</code>'in alt sınıfıdır: <code>isinstance(True, int)</code> True döner. Port için <code>True</code> kabul etmemek adına bu durumu ayrıca eledik. Doğrulanan ayarı bir <code>@dataclass(frozen=True)</code> nesnesine çevirirsen program çalışırken kimse yanlışlıkla ayarı değiştiremez ve editörün otomatik tamamlama yapar.</p>
+
+<h2>Sırlar ve 12-factor</h2>
+<p>Parola, API anahtarı, token gibi <b>sırlar</b> (secrets) asla koda, depoya giren bir dosyaya ya da loga yazılmaz. Depoya yalnızca değerleri boş bir <code>.env.example</code> girer; gerçek <code>.env</code> <code>.gitignore</code>'dadır. Canlı ortamda sırlar bir sır yöneticisinden (Vault, AWS Secrets Manager, Azure Key Vault) ya da dağıtım platformunun ortam değişkenlerinden gelir. Bir sır bir kez depoya girdiyse, silmek yetmez: geçmişte durur; o sırrı <b>değiştirmen</b> (rotate) gerekir.</p>
+<p><b>12-factor app</b>, bulutta çalışan uygulamalar için yaygın kabul görmüş bir ilkeler listesidir. Yapılandırmayla ilgili olanlar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>İlke</th><th>Ne der?</th><th>Pratikte</th></tr>
+<tr><td>III. Config</td><td>Ortama göre değişen her şey ortamda tutulur, kodda değil</td><td><code>os.environ</code>; kod depoyu açık kaynak yapsan bile sır sızmaz</td></tr>
+<tr><td>IV. Backing services</td><td>Veritabanı, kuyruk gibi servisler adresle bağlanan kaynaklardır</td><td><code>DATABASE_URL</code> değiştirerek kod değişmeden başka veritabanına geçersin</td></tr>
+<tr><td>V. Build, release, run</td><td>Derleme çıktısı + config = sürüm</td><td>Aynı paket dev, test ve prod'a gider; yalnız config değişir</td></tr>
+<tr><td>X. Dev/prod parity</td><td>Ortamlar birbirine benzesin</td><td>Dev'de SQLite, prod'da PostgreSQL farkı sürpriz hata doğurur</td></tr>
+</table></div>
+<pre class="py">def maskele(deger, gorunur=4):
+    deger = str(deger)
+    return "*" * max(len(deger) - gorunur, 3) + deger[-gorunur:] if len(deger) &gt; gorunur else "***"
+
+ayar = {"db_url": "postgresql://kredi@prod-db/kredi", "api_token": "tok_9f8e7d6c5b4a", "parola": "123"}
+for anahtar, deger in ayar.items():
+    gizli = any(k in anahtar for k in ("token", "parola", "secret", "key"))
+    print(anahtar, "=", maskele(deger) if gizli else deger)</pre>
+<div class="note"><b>Gerçek işte</b>Ekiplerde en sık görülen olay raporlarından biri, bir geliştiricinin test için koda yazdığı anahtarın açık depoya itilmesidir; otomatik tarayıcı botlar dakikalar içinde bulur. Bu yüzden şirketler depoya <code>gitleaks</code>, <code>detect-secrets</code> gibi tarayıcılar ve pre-commit kancaları ekler. Kod incelemesinde (code review) "bu değer nereden geliyor, prod'da ne olacak?" sorusu standarttır; başlangıçta ayarı doğrulayan ve eksik değişkenin adını açıkça söyleyen bir yükleyici, dağıtım gecesini kurtarır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>İç içe ayarlar için ortam değişkeni adlandırma</h3>
+<p>Ortam değişkenleri düzdür; iç içe yapıyı ad içinde kodlarsın: <code>ANADOLU_VERITABANI__HOST=prod-db</code>. Önek (<code>ANADOLU_</code>) başka uygulamaların değişkenleriyle çakışmayı, çift alt çizgi (<code>__</code>) iç içe anahtarı gösterir. pydantic-settings ve Dynaconf bu kuralı hazır uygular; Meydan okuma alıştırmasında kendin yazacaksın.</p>
+<h3>Tipi varsayılandan çıkarmak</h3>
+<p>Ortamdan gelen her şey metin olduğu için, değeri varsayılan ayardaki tipe göre çevirmek pratik bir yoldur: varsayılan int ise <code>int(...)</code>, bool ise evet/hayır tablosu. Bilinmeyen bir anahtar gelirse sessizce yok saymak yerine hata vermek, <code>ANADOLU_VERITABNI__HOST</code> gibi yazım hatalarını yakalar.</p>
+<h3>Değişmez ayar nesnesi</h3>
+<p><code>types.MappingProxyType(sozluk)</code> salt okunur bir sözlük görünümü verir; <code>@dataclass(frozen=True)</code> ise alan atamasını engeller. Ayarı tek bir yerde yükleyip uygulamaya değişmez nesne olarak dağıtmak, "bu değeri kim değiştirdi" sorusunu ortadan kaldırır.</p>
+<h3>Özellik bayrakları</h3>
+<p>Yeni bir özelliği kodla birlikte kapalı yayına alıp yapılandırmayla açmak (feature flag), riskli değişiklikleri geri almayı kolaylaştırır. Bayrakların ömrü kısa tutulmalı; açıldıktan sonra kod temizlenmezse yapılandırma dosyası zamanla anlaşılmaz hâle gelir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/yapilandirma">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../veri-yapilari/">← Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf</a><a href="../cli-araclari/">Komut satırı araçları: argparse, click, rich ve boru hatları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

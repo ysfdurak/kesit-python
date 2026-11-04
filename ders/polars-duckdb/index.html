@@ -1,0 +1,253 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>polars, DuckDB ve Parquet: büyük veriye tek makinede | Kesit Python</title><meta name="description" content="pandas'ın bellek ve tek çekirdek sınırını aşarsın: chunksize ile parçalı okuma, polars ifadeleri ve lazy API, DuckDB ile DataFrame'e SQL, Arrow/Parquet ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/polars-duckdb/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="polars, DuckDB ve Parquet: büyük veriye tek makinede"><meta property="og:description" content="pandas'ın bellek ve tek çekirdek sınırını aşarsın: chunksize ile parçalı okuma, polars ifadeleri ve lazy API, DuckDB ile DataFrame'e SQL, Arrow/Parquet ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/polars-duckdb/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"polars, DuckDB ve Parquet: büyük veriye tek makinede","description":"pandas'ın bellek ve tek çekirdek sınırını aşarsın: chunksize ile parçalı okuma, polars ifadeleri ve lazy API, DuckDB ile DataFrame'e SQL, Arrow/Parquet ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/polars-duckdb/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>polars, DuckDB ve Parquet: büyük veriye tek makinede</h1><p class="st-l">pandas'ın bellek ve tek çekirdek sınırını aşarsın: chunksize ile parçalı okuma, polars ifadeleri ve lazy API, DuckDB ile DataFrame'e SQL, Arrow/Parquet ve PySpark'a giriş; veri boyutuna göre araç seçersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/polars-duckdb">Uygulamada aç, 27 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>pandas yetmediğinde</h2>
+<p>Anadolu Market'in sipariş tablosu ilk yıl 200 bin satırdı; pandas ile saniyeler içinde gruplayıp raporladın (bunu <i>pandas-groupby</i> dersinde gördün). Üç yıl sonra tablo 400 milyon satır, CSV dosyası 60 GB. Dizüstü bilgisayarında 16 GB bellek var. <code>pd.read_csv</code> birkaç dakika diskle boğuştuktan sonra <b>MemoryError</b> verir ya da makine kilitlenir. Sorun senin kodunda değil, aracın tasarımında: pandas veriyi <b>tamamen belleğe</b> (eager, in-memory) yükler, çoğu işlemi <b>tek çekirdekte</b> çalıştırır ve ara sonuçlar için sık sık kopya üretir. Kabaca söylersek pandas'ın rahat çalıştığı sınır, verinin bellekte kapladığı alanın RAM'in beşte biri ile üçte biri arasında olmasıdır.</p>
+<p>Bu derste o sınırı aşmanın dört yolunu öğreneceksin: veriyi <b>parça parça okumak</b> (chunksize), çok çekirdekli ve tembel çalışan <b>polars</b>, DataFrame'leri doğrudan SQL ile sorgulayan gömülü veritabanı <b>DuckDB</b> ve hepsinin ortak dili olan <b>Apache Arrow / Parquet</b>. Son olarak veri tek makineye sığmadığında devreye giren <b>PySpark</b>'ı tanıyacak ve "hangi boyutta hangi araç" kararını vereceksin.</p>
+
+<h2>1. Parça parça okuma: chunksize</h2>
+<p>En basit çözüm pandas'tan çıkmadan dosyayı dilimlerle okumaktır. <code>chunksize</code> verdiğinde <code>read_csv</code> tek bir DataFrame yerine bir <b>yineleyici</b> (iterator) döndürür; her adımda yalnızca o parça bellektedir. Toplam, sayım, en büyük gibi "birleştirilebilir" (associative) hesaplar için idealdir: her parçanın sonucunu bir sözlükte biriktirirsin.</p>
+<pre class="py">import io
+import pandas as pd
+
+csv_metni = """siparis_id,sehir,tutar
+1,İzmir,1500
+2,Ankara,250
+3,İzmir,90
+4,Bursa,3200
+5,Ankara,610
+"""
+ciro = {}
+parca_sayisi = 0
+for parca in pd.read_csv(io.StringIO(csv_metni), chunksize=2):
+    parca_sayisi += 1
+    for sehir, toplam in parca.groupby("sehir")["tutar"].sum().items():
+        ciro[sehir] = ciro.get(sehir, 0) + int(toplam)
+print("parça:", parca_sayisi)
+print(dict(sorted(ciro.items())))
+</pre>
+<p>Gerçek hayatta <code>io.StringIO</code> yerine dosya yolu verirsin ve <code>chunksize=1_000_000</code> gibi bir değer seçersin. Ayrıca yalnızca gereken sütunları <code>usecols=["sehir", "tutar"]</code> ile, uygun türlerle (<code>dtype={"sehir": "category"}</code>) okumak belleği yarı yarıya düşürebilir.</p>
+<div class="warn"><b>Parçalı okuma her hesabı kurtarmaz</b>Ortalama doğrudan birleştirilemez: parça ortalamalarının ortalaması yanlış sonuç verir. Bunun yerine toplam ve adet biriktirip en sonda böl. Medyan, benzersiz sayısı ya da sıralama gibi tüm veriyi görmesi gereken işlemler için parçalama (chunking) zorlaşır; o noktada polars veya DuckDB'ye geç.</div>
+
+<h2>2. polars: hızlı ve tembel DataFrame</h2>
+<p><b>polars</b>, Rust ile yazılmış, Apache Arrow bellek düzenini kullanan bir DataFrame kütüphanesidir. pandas'tan üç büyük farkı var: işlemleri <b>tüm çekirdeklere</b> dağıtır, <b>indeks</b> (index) kavramı yoktur ve en önemlisi <b>ifade</b> (expression) tabanlı bir dili vardır. <code>pl.col("tutar")</code> bir sütunu değil, "tutar sütunu üzerinde yapılacak hesabın tarifini" temsil eder; bu tarifleri <code>select</code>, <code>with_columns</code>, <code>filter</code> ve <code>agg</code> içinde kullanırsın.</p>
+<pre class="py">import polars as pl
+
+siparisler = pl.DataFrame({
+    "siparis_id": [1, 2, 3, 4, 5, 6],
+    "sehir": ["İzmir", "Ankara", "İzmir", "Bursa", "Ankara", "İzmir"],
+    "tutar": [1500, 250, 90, 3200, 610, 720],
+})
+print(siparisler.shape, siparisler.columns)
+
+buyukler = siparisler.filter(pl.col("tutar") &gt;= 500)
+print(buyukler["siparis_id"].to_list())
+
+kdvli = siparisler.with_columns(
+    (pl.col("tutar") * 1.2).round(2).alias("kdvli"),
+    (pl.col("tutar") &gt;= 1000).alias("buyuk_siparis"),
+)
+print(kdvli.columns)
+
+ozet = (
+    siparisler.group_by("sehir")
+    .agg(pl.col("tutar").sum().alias("ciro"), pl.len().alias("adet"))
+    .sort("ciro", descending=True)
+)
+print(ozet.rows())
+</pre>
+<p>Okurken şuna dikkat et: hiçbir yerde <code>df["yeni"] = ...</code> gibi yerinde atama yok. polars'ta her işlem <b>yeni bir DataFrame</b> döndürür; zincirleme yazarsın. <code>with_columns</code> sütun ekler ya da değiştirir, <code>select</code> yalnızca istediğin sütunları bırakır, <code>alias</code> sonucun adını verir. <code>group_by</code> çıktısının satır sırası garanti değildir; raporda her zaman <code>sort</code> ekle.</p>
+
+<div class="tbl-wrap"><table>
+<tr><th>İş</th><th>pandas</th><th>polars</th></tr>
+<tr><td>Satır süzme</td><td><code>df[df["tutar"] &gt; 500]</code></td><td><code>df.filter(pl.col("tutar") &gt; 500)</code></td></tr>
+<tr><td>Sütun ekleme</td><td><code>df["kdvli"] = df["tutar"] * 1.2</code></td><td><code>df.with_columns((pl.col("tutar") * 1.2).alias("kdvli"))</code></td></tr>
+<tr><td>Sütun seçme</td><td><code>df[["sehir", "tutar"]]</code></td><td><code>df.select("sehir", "tutar")</code></td></tr>
+<tr><td>Gruplama</td><td><code>df.groupby("sehir")["tutar"].sum()</code></td><td><code>df.group_by("sehir").agg(pl.col("tutar").sum())</code></td></tr>
+<tr><td>Birleştirme</td><td><code>df.merge(m, on="id", how="left")</code></td><td><code>df.join(m, on="id", how="left")</code></td></tr>
+<tr><td>Grup içi hesap</td><td><code>groupby(...).transform("mean")</code></td><td><code>pl.col("tutar").mean().over("sehir")</code></td></tr>
+<tr><td>Tek değer alma</td><td><code>df["tutar"].sum()</code></td><td><code>df.select(pl.col("tutar").sum()).item()</code></td></tr>
+</table></div>
+
+<h3>Lazy API: önce plan, sonra çalıştır</h3>
+<p>polars'ın asıl gücü <b>tembel</b> (lazy) moddur. <code>df.lazy()</code> ya da doğrudan dosyadan <code>pl.scan_csv(...)</code> / <code>pl.scan_parquet(...)</code> bir <b>LazyFrame</b> döndürür. Üzerine yazdığın filter, group_by, select hemen çalışmaz; polars bir <b>sorgu planı</b> (query plan) kurar. <code>collect()</code> dediğinde planı <b>optimize eder</b>: süzmeyi okumanın içine iter (predicate pushdown), kullanılmayan sütunları hiç okumaz (projection pushdown) ve gerekiyorsa veriyi akış hâlinde (streaming) işler. Sonuç: 60 GB'lık dosyanın yalnızca iki sütununu ve ilgili satırlarını okursun.</p>
+<p class="muted"><small>Tarayıcıdaki polars derlemesi dosyadan tembel okumayı (<code>scan_csv</code>, <code>scan_parquet</code>) ve polars'ın kendi Parquet okuyucusunu desteklemiyor. Bu sayfadaki çalışan örnekler aynı planı <code>pl.read_csv(...).lazy()</code> ile kuruyor; kendi bilgisayarında <code>pl.scan_csv(...)</code> yazman yeterli, gerisi aynı.</small></p>
+<pre class="py">import polars as pl
+
+with open("siparisler.csv", "w", encoding="utf-8") as f:
+    f.write("gun,sehir,tutar,iade\n")
+    f.write("2025-03-01,İzmir,1500,0\n2025-03-01,Ankara,250,1\n")
+    f.write("2025-03-02,İzmir,90,0\n2025-03-02,Bursa,3200,0\n")
+
+plan = (
+    pl.read_csv("siparisler.csv").lazy()   # bilgisayarında: pl.scan_csv("siparisler.csv")
+    .filter(pl.col("iade") == 0)
+    .group_by("gun")
+    .agg(pl.col("tutar").sum().alias("ciro"))
+    .sort("gun")
+)
+print(type(plan).__name__)          # henüz hiçbir şey okunmadı
+print(plan.collect().rows())        # şimdi çalıştı
+</pre>
+<div class="tip"><b>Kural: dosyadan okuyorsan scan ile başla</b><code>read_csv</code> her şeyi okur, <code>scan_csv</code> yalnızca gerekeni. Etkileşimli keşifte eager mod rahattır; üretimdeki rapor betiklerinde lazy zinciri kur, en sonda bir kez <code>collect()</code> çağır. <code>plan.explain()</code> optimize edilmiş planı metin olarak gösterir.</div>
+
+<h2>3. DuckDB: DataFrame'e SQL</h2>
+<p>Ekipte herkes SQL biliyorsa (Kesit SQL'den hatırlarsın) <b>DuckDB</b> en kısa yoldur. Kurulum gerektirmeyen, süreç içinde çalışan (in-process) bir analitik veritabanıdır; SQLite'ın analitik kardeşi gibi düşün. En sevilen özelliği: Python değişkenindeki bir pandas ya da polars DataFrame'ini <b>tablo adıymış gibi</b> sorgulayabilirsin. Sonucu <code>.fetchall()</code> ile demet listesi, <code>.df()</code> ile pandas, <code>.pl()</code> ile polars olarak alırsın.</p>
+<pre class="py">import duckdb
+import polars as pl
+
+siparisler = pl.DataFrame({
+    "musteri": ["Ayşe", "Mert", "Ayşe", "Zeynep", "Mert", "Ayşe"],
+    "sehir": ["İzmir", "Ankara", "İzmir", "Bursa", "Ankara", "İzmir"],
+    "tutar": [1500, 250, 90, 3200, 610, 720],
+})
+sorgu = """
+    SELECT musteri, SUM(tutar) AS toplam, COUNT(*) AS adet
+    FROM siparisler
+    WHERE sehir &lt;&gt; 'Bursa'
+    GROUP BY musteri
+    ORDER BY toplam DESC
+"""
+print(duckdb.sql(sorgu).fetchall())
+pdf = duckdb.sql(sorgu).df()          # pandas DataFrame
+print(list(pdf.columns), len(pdf))
+</pre>
+<p>DuckDB de sütun tabanlıdır, tüm çekirdekleri kullanır ve bellekten büyük veride diske taşarak çalışabilir. Üstelik dosyaları doğrudan sorgular: <code>SELECT * FROM 'satislar/*.parquet'</code> yazman yeterli; yükleme adımı yok.</p>
+<div class="warn"><b>SQL'de metin tek tırnakla yazılır</b>DuckDB'de <code>"İzmir"</code> bir <b>sütun adı</b> sayılır ve "Referenced column İzmir not found" hatası alırsın. Metin sabitleri için <code>'İzmir'</code> kullan. Kullanıcıdan gelen değeri f-string ile sorguya gömme; <code>duckdb.execute("... WHERE sehir = ?", [sehir])</code> ile parametre geçir (SQL enjeksiyonunu önler).</div>
+
+<h2>4. Arrow ve Parquet: ortak dil</h2>
+<p><b>Apache Arrow</b>, sütun tabanlı bir bellek biçimidir; polars, DuckDB ve pandas 2+ bu biçimi konuşur, böylece araçlar arasında veri <b>kopyalanmadan</b> el değiştirir. <b>Parquet</b> ise Arrow'un diskteki karşılığı gibidir: sütun tabanlı, şemalı (her sütunun türü dosyada yazar) ve sıkıştırılmış bir dosya biçimi. CSV'ye göre genellikle birkaç kat küçük ve okuması çok daha hızlıdır; çünkü yalnızca istenen sütunlar okunur ve her blokta min/max istatistikleri sayesinde ilgisiz bloklar atlanır.</p>
+<pre class="py">import pyarrow as pa
+import pyarrow.parquet as pq
+import polars as pl
+import duckdb
+
+tablo = pa.table({
+    "musteri_id": [101, 102, 103, 104],
+    "segment": ["Bireysel", "KOBİ", "Bireysel", "Kurumsal"],
+    "bakiye": [12500.0, 98000.5, 430.0, 1250000.0],
+})
+pq.write_table(tablo, "musteriler.parquet")
+
+sadece_iki = pq.read_table("musteriler.parquet", columns=["musteri_id", "bakiye"])
+print(sadece_iki.column_names, sadece_iki.num_rows)
+print(pq.read_schema("musteriler.parquet").field("bakiye").type)
+
+df = pl.from_arrow(pq.read_table("musteriler.parquet"))   # bilgisayarında: pl.read_parquet(...)
+print(df.filter(pl.col("segment") == "Bireysel")["musteri_id"].to_list())
+print(duckdb.sql("SELECT segment, COUNT(*) FROM 'musteriler.parquet' GROUP BY segment ORDER BY segment").fetchall())
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>CSV</th><th>Parquet</th></tr>
+<tr><td>Düzen</td><td>Satır tabanlı metin</td><td>Sütun tabanlı ikili</td></tr>
+<tr><td>Tür bilgisi</td><td>Yok, her okumada tahmin</td><td>Şemada saklı</td></tr>
+<tr><td>Boyut</td><td>Büyük</td><td>Sıkıştırılmış, genelde birkaç kat küçük</td></tr>
+<tr><td>Birkaç sütun okumak</td><td>Yine tüm dosya taranır</td><td>Yalnızca o sütunlar</td></tr>
+<tr><td>İnsan okuyabilir mi</td><td>Evet</td><td>Hayır, araç gerekir</td></tr>
+</table></div>
+
+<h2>5. PySpark: veri tek makineye sığmadığında</h2>
+<p>Veri terabaytlar seviyesine çıktığında ya da sürekli büyüyen bir veri gölünde (data lake) onlarca ekip aynı veriye eriştiğinde tek makine yetmez. <b>Apache Spark</b> işi bir <b>küme</b> (cluster) üzerindeki birçok makineye dağıtır; <b>PySpark</b> bunun Python arayüzüdür. API'si polars'a benzer: tembel DataFrame, ifadeler ve sonuç için bir eylem (action).</p>
+<pre class="code">from pyspark.sql import SparkSession
+from pyspark.sql import functions as F
+
+spark = SparkSession.builder.appName("anadolu-market").getOrCreate()
+df = spark.read.parquet("s3://anadolu-market/siparisler/")   # yüzlerce dosya
+ozet = (
+    df.filter(F.col("iade") == 0)
+      .groupBy("sehir")
+      .agg(F.sum("tutar").alias("ciro"), F.count("*").alias("adet"))
+      .orderBy(F.desc("ciro"))
+)
+ozet.show(10)          # eylem: plan burada kümede çalışır
+spark.stop()
+</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>PySpark tarayıcıda çalışmaz; Java gerektirir. Kurulum: <code>pip install pyspark</code> (ayrıca Java 17). Küçük denemeler için tek makinede <code>local[*]</code> modunda çalışır ama 10 GB altı veride polars veya DuckDB'den genellikle <b>daha yavaştır</b>: küme koordinasyonunun sabit bir maliyeti vardır. Spark'ı "veri gerçekten dağıtık" olduğunda seç.</div>
+
+<h2>Hangi boyutta hangi araç?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Veri boyutu (kabaca)</th><th>Önerilen araç</th><th>Neden</th></tr>
+<tr><td>RAM'in beşte birinden az (ör. 16 GB'ta ~3 GB)</td><td>pandas</td><td>Ekosistem en geniş, ekip biliyor, yeterince hızlı</td></tr>
+<tr><td>RAM'e yakın ya da birkaç katı, tek makine</td><td>polars (lazy/streaming) veya DuckDB</td><td>Çok çekirdek, sütun okuma, bellekten taşınca diske döker</td></tr>
+<tr><td>Yüzlerce GB - TB, çok dosya, paylaşılan veri gölü</td><td>PySpark (ya da bulut veri ambarı)</td><td>Dağıtık işlem, hata toleransı</td></tr>
+<tr><td>Ekip SQL konuşuyor, hızlı ad-hoc analiz</td><td>DuckDB</td><td>Sıfır kurulum, dosyayı doğrudan sorgular</td></tr>
+</table></div>
+<p>Bu sınırlar kesin değildir; verinin bellekte kapladığı alan sütun türlerine göre CSV boyutundan büyük ya da küçük olabilir. Pratik yol: önce küçük bir örnekle ölç (<i>performans</i> dersindeki gibi), sonra karar ver.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir e-ticaret şirketinde günlük sipariş dökümleri genellikle bulut depolamada tarihe göre bölümlenmiş (partitioned) Parquet dosyaları olarak durur: <code>siparisler/yil=2025/ay=03/gun=01/part-0.parquet</code>. Analist sabah raporunu DuckDB ile doğrudan bu klasörlerden sorgular, veri mühendisi gece çalışan dönüşümleri polars ile yazar, aylık tüm geçmişi tarayan modeller ise Spark kümesinde koşar. Aynı Parquet dosyalarını üç araç da okuyabildiği için kimse veriyi kopyalamaz.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Tek bir büyük Parquet dosyası bir noktadan sonra yetmez: her sorgu bütün dosyayı tarar, yeni gün eklemek için dosyayı baştan yazman gerekir. Veri gölleri (data lake) bu yüzden veriyi <b>bölümlere</b> (partition) ayrılmış klasörlerde tutar. Bu bölümde Pedal İzmir'in 116 bin yolculuğunu ay ay bölümlenmiş bir Parquet gölüne yazacak, DuckDB ile sorgulayacak, bölüm budamayı (partition pruning) ölçecek ve küçük dosya sorununu tanıyacaksın. pyarrow, DuckDB ve polars hem yerelde hem tarayıcıda çalışır.</p>
+<h2>Hive bölümleme: klasör adı = sütun değeri</h2>
+<p>Hive düzeninde (Hive-style partitioning) bölüm sütunu klasör adına <code>sutun=deger</code> biçiminde yazılır ve dosyanın içinden çıkarılır:</p>
+<pre class="out">gol/
+├── ay=2024-06/data_0.parquet
+├── ay=2024-07/data_0.parquet
+└── ay=2024-08/data_0.parquet</pre>
+<p>Okuyucu (DuckDB, polars, Spark, Athena, BigQuery) klasör adlarından <code>ay</code> sütununu geri kurar. Asıl kazanç şudur: <code>WHERE ay = '2024-07'</code> filtresi geldiğinde motor diğer klasörlere hiç girmez. Buna <b>bölüm budama</b> denir ve dosya içindeki satır grubu istatistiklerine dayalı atlamadan (predicate pushdown) da önce gelir.</p>
+<pre class="py">import veri, duckdb, pathlib, shutil
+yol = veri.yol("pedal_izmir", "bk_trips")
+shutil.rmtree("gol", ignore_errors=True)
+duckdb.sql(f"""
+    COPY (SELECT *, strftime(started_at::TIMESTAMP, '%Y-%m') AS ay FROM read_csv_auto('{yol}'))
+    TO 'gol' (FORMAT parquet, PARTITION_BY (ay))
+""")
+print(sorted(str(p) for p in pathlib.Path("gol").rglob("*.parquet")))
+print(duckdb.sql("""
+    SELECT ay, COUNT(*) AS yolculuk, ROUND(SUM(fare), 2) AS ciro
+    FROM read_parquet('gol/**/*.parquet', hive_partitioning = true)
+    GROUP BY ay ORDER BY ay
+""").fetchall())</pre>
+<p>Aynı gölü başka araçlarla da yazabilirsin; üçü de aynı klasör yapısını üretir ve birbirinin yazdığını okur:</p>
+<pre class="code">import pyarrow.parquet as pq
+pq.write_to_dataset(tablo, root_path="gol", partition_cols=["ay"])      # pyarrow
+
+df.write_parquet("gol", partition_by="ay")                              # polars (yeni sürümler)
+pl.scan_parquet("gol/**/*.parquet", hive_partitioning=True).filter(pl.col("ay") == "2024-07")</pre>
+<h2>Budamayı ölçmek</h2>
+<p>Budamanın gerçekten çalıştığını tahmin etme, ölç. DuckDB'de <code>EXPLAIN ANALYZE</code> taranan dosya sayısını gösterir (çıktının biçimi sürüme göre değişir):</p>
+<pre class="code">EXPLAIN ANALYZE
+SELECT COUNT(*) FROM read_parquet('gol/**/*.parquet', hive_partitioning = true)
+WHERE ay = '2024-07';</pre>
+<pre class="out">│ File Filters: ay = '2024-07'    │
+│ Scanning Files: 1/3             │
+│ Total Files Read: 1             │</pre>
+<p>Budamayı bozan üç klasik hata var. Bir: filtreyi bölüm sütununa değil türetilmiş bir ifadeye yazmak (<code>WHERE strftime(started_at, '%Y-%m') = '2024-07'</code> tüm dosyaları açar; <code>WHERE ay = '2024-07'</code> açmaz). İki: tür uyuşmazlığı; <code>yil=2024</code> klasörü sayıya, <code>ay=07</code> metne çevrilebilir, karşılaştırmayı aynı türle yap. Üç: filtreyi bir alt sorgunun sonucuna bağlamak; değer sorgu planlanırken bilinmediği için budama yapılamayabilir.</p>
+<h2>Bölüm sütunu nasıl seçilir? Küçük dosya sorunu</h2>
+<div class="tbl-wrap"><table><tr><th>Seçim</th><th>Sonuç</th></tr>
+<tr><td>Sorgularda hep filtrelenen, düşük kardinaliteli sütun (gün, ay, ülke)</td><td>İyi: az klasör, büyük dosyalar, güçlü budama</td></tr>
+<tr><td>Yüksek kardinaliteli sütun (<code>user_id</code>, <code>trip_id</code>)</td><td>Kötü: binlerce klasör, her birinde birkaç KB'lık dosya</td></tr>
+<tr><td>Çok seviye (<code>gun/istasyon/saat</code>)</td><td>Kötü: bölüm sayısı çarpılarak büyür</td></tr></table></div>
+<p>Küçük dosya sorunu (small files problem) şudur: her dosyanın açılması, üst verisinin (footer) okunması ve bulut depolamada ayrı bir istek gerektirmesi sabit bir maliyettir. 6.000 kullanıcıya bölünmüş bir göl, 3 aylık bir gölden yüzlerce kat yavaş sorgulanabilir. Kaba kural: dosya başına 100 MB ile 1 GB arası hedefle; günlük artımlı yazımlar küçük dosyalar üretiyorsa düzenli olarak <b>sıkıştır</b> (compaction): bir bölümdeki küçük dosyaları okuyup birkaç büyük dosya olarak yeniden yaz. Delta Lake ve Apache Iceberg gibi tablo biçimleri bunu (<code>OPTIMIZE</code>) ve atomik yazmayı hazır sunar.</p>
+<div class="warn"><b>Bölümleme her derde deva değil</b>116 bin satırlık bir tabloyu bölümlemek ölçülebilir bir kazanç getirmez; tek Parquet dosyası zaten saniyenin altında okunur. Bölümleme gigabaytlar ve sürekli eklenen veri için düşünülür.</div>
+<div class="note"><b>Gerçek işte</b>Veri mühendisliği mülakatlarında "S3'teki olay verisini nasıl düzenlersin?" sorusu çok sık gelir. Beklenen cevap: Parquet, tarihe göre Hive bölümleme, dosya boyutu hedefi, sıkıştırma işi ve sorgu motorunun budamayı kullandığını EXPLAIN ile doğrulamak.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Grup içi hesap: over</h3>
+<p>polars'ta <code>pl.col("tutar").mean().over("sehir")</code> her satıra kendi şehrinin ortalamasını yazar; SQL'deki pencere fonksiyonunun (window function) karşılığıdır. "Şehir ortalamasının iki katından büyük siparişleri işaretle" gibi anomali kuralları tek satıra iner. DuckDB'de aynı iş <code>AVG(tutar) OVER (PARTITION BY sehir)</code> ile yapılır.</p>
+<pre class="py">import polars as pl
+
+df = pl.DataFrame({
+    "siparis_id": [1, 2, 3, 4, 5, 6],
+    "sehir": ["İzmir", "İzmir", "İzmir", "Ankara", "Ankara", "Bursa"],
+    "tutar": [100, 120, 900, 300, 320, 50],
+})
+isaretli = df.with_columns(
+    pl.col("tutar").mean().over("sehir").round(1).alias("sehir_ort")
+).with_columns(
+    (pl.col("tutar") &gt; 2 * pl.col("sehir_ort")).alias("supheli")
+)
+print(isaretli.filter(pl.col("supheli"))["siparis_id"].to_list())
+print(isaretli["sehir_ort"].to_list())
+</pre>
+<h3>Araçlar arasında sıfır kopya</h3>
+<p><code>pl.from_pandas(pdf)</code>, <code>df.to_pandas()</code>, <code>df.to_arrow()</code> ve <code>duckdb.sql(...).pl()</code> Arrow sayesinde çoğu zaman veriyi kopyalamadan dönüştürür. Bu yüzden "tek araç seç" zorunluluğu yok: ağır birleştirmeyi DuckDB'de, sütun mühendisliğini polars'ta yapıp sonucu görselleştirme için pandas'a verebilirsin.</p>
+<h3>Bellek ölçümü</h3>
+<p>Karar vermeden önce ölç: pandas'ta <code>df.memory_usage(deep=True).sum()</code>, polars'ta <code>df.estimated_size("mb")</code>. Metin sütunlarını kategoriye çevirmek ve 64 bit sayıları 32 bite indirmek (<code>pl.Int32</code>, <code>pl.Float32</code>) belleği ciddi azaltır; ancak para tutarlarında hassasiyet kaybını göze almadan float32 kullanma.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/polars-duckdb">Alıştırmalara geç (27)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ml-regresyon-siniflandirma/">← Regresyon ve sınıflandırma modelleri</a><a href="../llm-api/">LLM API'leriyle çalışmak: istemci, JSON ve araç çağrısı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

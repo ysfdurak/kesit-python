@@ -1,0 +1,237 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Veri doğrulama ve pydantic v2 | Kesit Python</title><meta name="description" content="Dışarıdan gelen veriyi pydantic BaseModel ile doğrular ve dönüştürür; Field kısıtları, field/model validator'lar, iç içe modeller, Enum ve Optional ile…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pydantic-dogrulama/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Veri doğrulama ve pydantic v2"><meta property="og:description" content="Dışarıdan gelen veriyi pydantic BaseModel ile doğrular ve dönüştürür; Field kısıtları, field/model validator'lar, iç içe modeller, Enum ve Optional ile…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pydantic-dogrulama/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Veri doğrulama ve pydantic v2","description":"Dışarıdan gelen veriyi pydantic BaseModel ile doğrular ve dönüştürür; Field kısıtları, field/model validator'lar, iç içe modeller, Enum ve Optional ile…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/pydantic-dogrulama/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Veri doğrulama ve pydantic v2</h1><p class="st-l">Dışarıdan gelen veriyi pydantic BaseModel ile doğrular ve dönüştürür; Field kısıtları, field/model validator'lar, iç içe modeller, Enum ve Optional ile kurallarını yazar, ValidationError'ı okur, model_dump ve model_validate ile JSON'a gidip gelirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pydantic-dogrulama">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Anadolu Market'in web formundan, mobil uygulamasından ve tedarikçilerin gönderdiği CSV dosyalarından her gün binlerce kayıt gelir. Bunların bir kısmında fiyat <code>"12,50"</code> diye virgüllü, adet <code>"üç"</code> diye yazıyla, e-posta <code>"ayse@"</code> diye yarım gelir. Bu veriyi doğrulamadan veritabanına yazarsan hata günler sonra raporda "toplam ciro: NaN" olarak ortaya çıkar ve kaynağını bulmak saatler sürer. Kural basit: <b>dışarıdan gelen her veri, sisteme girdiği kapıda doğrulanır</b>.</p>
+<p><i>dataclass ve tip ipuçları (type hint)</i> dersinde gördüğün gibi Python tip ipuçlarını çalışma zamanında denetlemez: <code>adet: int</code> yazan bir dataclass'a <code>"üç"</code> verirsen sessizce kabul eder. <b>pydantic</b> tam bu boşluğu doldurur: tip ipuçlarını okuyup veriyi <b>doğrular</b> (validation), gerekirse <b>dönüştürür</b> (coercion/parsing) ve sorunları okunur bir hata listesiyle bildirir. FastAPI, LangChain, Prefect gibi popüler araçların veri katmanı pydantic'tir; Python iş ilanlarında en çok aranan paketlerden biridir. Bu derste pydantic <b>v2</b> kullanıyoruz (kurulum: <code>pip install pydantic</code>; tarayıcıdaki motor da hazır yükler).</p>
+
+<h2>İlk model: BaseModel</h2>
+<p>Bir modeli sınıf olarak tanımlarsın; alanlar tip ipuçlarıyla yazılır. Nesne oluşturulurken tüm alanlar denetlenir.</p>
+<pre class="py">from pydantic import BaseModel
+
+class Urun(BaseModel):
+    ad: str
+    fiyat: float
+    stok: int = 0          # varsayılanı olan alan zorunlu değildir
+
+u = Urun(ad="Türk kahvesi", fiyat="89.90", stok="12")
+print(u)
+print(u.fiyat + 10, type(u.stok).__name__)
+print(Urun(ad="Çay", fiyat=45))</pre>
+<p><code>"89.90"</code> metni <code>float</code>'a, <code>"12"</code> metni <code>int</code>'e çevrildi. Buna <b>tip zorlama</b> (type coercion) denir ve pydantic'in varsayılan "esnek" (lax) modudur: form ve CSV'den gelen her şey metin olduğu için çok işe yarar. Ama dönüşüm anlamlı olmalıdır: <code>"on iki"</code> ya da <code>12.5</code> (kesirli) bir <code>int</code> alana girmez.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Alan tipi</th><th>Kabul edilen girdi</th><th>Reddedilen girdi</th></tr>
+<tr><td><code>int</code></td><td><code>5</code>, <code>"5"</code>, <code>5.0</code></td><td><code>"5,0"</code>, <code>5.5</code>, <code>"beş"</code></td></tr>
+<tr><td><code>float</code></td><td><code>12.5</code>, <code>"12.5"</code>, <code>12</code></td><td><code>"12,5"</code> (virgül), <code>"abc"</code></td></tr>
+<tr><td><code>bool</code></td><td><code>True</code>, <code>"true"</code>, <code>"yes"</code>, <code>1</code>, <code>"0"</code></td><td><code>"evet"</code>, <code>2</code></td></tr>
+<tr><td><code>date</code></td><td><code>"2026-10-26"</code>, <code>date(...)</code></td><td><code>"26.10.2026"</code></td></tr>
+<tr><td><code>str</code></td><td><code>"metin"</code></td><td><code>123</code> (v2 sayıyı metne çevirmez)</td></tr>
+</table></div>
+<div class="tip"><b>Katı mod</b>Dönüşüm istemediğin yerde <code>model_config = ConfigDict(strict=True)</code> ya da tek alan için <code>Field(strict=True)</code> kullan. Örneğin para transferi API'sinde <code>"100"</code> metnini sayı saymak istemeyebilirsin.</div>
+
+<h2>ValidationError'ı okumak</h2>
+<p>Doğrulama başarısız olursa pydantic <b>ilk hatada durmaz</b>; tüm alanları dener ve hepsini tek bir <code>ValidationError</code> içinde toplar. <code>e.errors()</code> her hata için bir sözlük verir: <code>loc</code> (hatanın yeri, demet), <code>type</code> (makine için kısa kod), <code>msg</code> (insan için açıklama), <code>input</code> (gelen değer).</p>
+<pre class="py">from pydantic import BaseModel, Field, ValidationError
+
+class Urun(BaseModel):
+    ad: str = Field(min_length=2)
+    fiyat: float = Field(gt=0)
+    stok: int = 0
+
+try:
+    Urun(ad="X", fiyat=-5, stok="çok")
+except ValidationError as e:
+    print("hata sayısı:", e.error_count())
+    for hata in e.errors():
+        alan = ".".join(str(p) for p in hata["loc"])
+        print(f"{alan:6} | {hata['type']:18} | girdi={hata['input']!r}")</pre>
+<p>Programın içinde karar verirken <code>type</code> alanını kullan (sürümler arasında sabittir); kullanıcıya gösterirken <code>msg</code>'yi kendi Türkçe metninle eşleştir. Sık görülen tipler: <code>missing</code> (alan yok), <code>int_parsing</code>, <code>float_parsing</code>, <code>greater_than</code>, <code>less_than_equal</code>, <code>string_too_short</code>, <code>string_too_long</code>, <code>string_pattern_mismatch</code>, <code>extra_forbidden</code>, <code>value_error</code> (senin validator'ının fırlattığı hata).</p>
+
+<h2>Field: kısıtlar, varsayılanlar, takma adlar</h2>
+<p><code>Field</code> bir alana tipten fazlasını söyler. En sık kullanılanlar:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Parametre</th><th>Anlamı</th><th>Örnek</th></tr>
+<tr><td><code>gt, ge, lt, le</code></td><td>Sayı sınırları (büyük, büyük-eşit...)</td><td><code>Field(gt=0, le=100_000)</code></td></tr>
+<tr><td><code>min_length, max_length</code></td><td>Metin ya da liste uzunluğu</td><td><code>Field(max_length=50)</code></td></tr>
+<tr><td><code>pattern</code></td><td>Düzenli ifade (regex)</td><td><code>Field(pattern=r"^AM-\d{4}$")</code></td></tr>
+<tr><td><code>default, default_factory</code></td><td>Varsayılan değer / üretici</td><td><code>Field(default_factory=list)</code></td></tr>
+<tr><td><code>alias</code></td><td>Dış dünyadaki ad farklıysa</td><td><code>Field(alias="musteriNo")</code></td></tr>
+<tr><td><code>description</code></td><td>Belge ve JSON şeması için açıklama</td><td><code>Field(description="TL")</code></td></tr>
+</table></div>
+<pre class="py">from pydantic import BaseModel, Field, ConfigDict
+
+class Musteri(BaseModel):
+    model_config = ConfigDict(str_strip_whitespace=True, extra="forbid")
+    musteri_no: int = Field(alias="musteriNo", gt=0)
+    ad: str = Field(min_length=2, max_length=50)
+    email: str = Field(pattern=r"^[\w.+-]+@[\w-]+\.[\w.]+$")
+    etiketler: list[str] = Field(default_factory=list)
+
+m = Musteri.model_validate({"musteriNo": "1042", "ad": "  Ayşe Kaya ", "email": "ayse@ornek.com"})
+print(m)
+print(m.model_dump(by_alias=True))</pre>
+<p><code>ConfigDict</code> model genelinde ayar yapar: <code>str_strip_whitespace=True</code> metinlerin baş/son boşluğunu kırpar, <code>extra="forbid"</code> modelde olmayan bir alan gelirse hata verir (yazım hatalı alan adlarını yakalar; varsayılan <code>"ignore"</code> sessizce atar).</p>
+
+<h2>Optional ve varsayılanlar: ince fark</h2>
+<p>v2'de "None olabilir" ile "verilmeyebilir" iki ayrı şeydir:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yazım</th><th>Alan verilmezse</th><th>None verilirse</th></tr>
+<tr><td><code>kupon: str</code></td><td>Hata (missing)</td><td>Hata</td></tr>
+<tr><td><code>kupon: str | None</code></td><td>Hata (missing): zorunlu ama None olabilir</td><td>Kabul</td></tr>
+<tr><td><code>kupon: str | None = None</code></td><td>None olur</td><td>Kabul</td></tr>
+<tr><td><code>kupon: str = "YOK"</code></td><td>"YOK" olur</td><td>Hata</td></tr>
+</table></div>
+<div class="warn"><b>Varsayılan değer doğrulanmaz</b><code>fiyat: float = Field(0, gt=0)</code> yazarsan fiyat verilmediğinde 0 olur ve <code>gt=0</code> kuralı <b>uygulanmaz</b>; pydantic varsayılanları güvenilir kabul eder. Zorunlu bir alana "yanlışlıkla" varsayılan vermek, eksik veriyi sessizce sisteme sokmanın en yaygın yoludur.</div>
+
+<h2>Enum, Literal ve iç içe modeller</h2>
+<p>Bir alan sabit bir küme içinden değer alıyorsa <code>Enum</code> ya da <code>Literal</code> kullan. Gerçek veri neredeyse hiç düz değildir: siparişin içinde kalemler, kalemin içinde ürün vardır. Bir modeli başka modelin alan tipi olarak kullanırsın; hatanın <code>loc</code>'u tam yolu gösterir. Dikkat: <code>Literal</code> tip zorlama yapmaz; <code>Literal[12, 24]</code> alanına <code>"12"</code> metni girmez, Enum ise değeri eşleşen metni üyeye çevirir.</p>
+<pre class="py">from enum import Enum
+from typing import Literal
+from pydantic import BaseModel, Field, ValidationError
+
+class Durum(str, Enum):
+    HAZIRLANIYOR = "hazirlaniyor"
+    KARGODA = "kargoda"
+    TESLIM = "teslim"
+
+class Kalem(BaseModel):
+    urun: str
+    adet: int = Field(gt=0)
+    birim_fiyat: float = Field(gt=0)
+
+class Siparis(BaseModel):
+    no: str
+    durum: Durum = Durum.HAZIRLANIYOR
+    kargo: Literal["standart", "hizli"] = "standart"
+    kalemler: list[Kalem] = Field(min_length=1)
+
+s = Siparis(no="AM-1001", durum="kargoda",
+            kalemler=[{"urun": "Çay", "adet": 2, "birim_fiyat": 45}])
+print(s.durum, s.durum is Durum.KARGODA, s.kalemler[0].adet)
+try:
+    Siparis(no="AM-1002", kargo="uçak",
+            kalemler=[{"urun": "Çay", "adet": 1, "birim_fiyat": 45},
+                      {"urun": "Kahve", "adet": 0, "birim_fiyat": 90}])
+except ValidationError as e:
+    for h in e.errors():
+        print(h["loc"], h["type"])</pre>
+
+<h2>Validator'lar: kendi kuralların</h2>
+<p>Tip ve <code>Field</code> kısıtları yetmediğinde kendi kuralını yazarsın. İki tür vardır:</p>
+<ul>
+<li><b><code>@field_validator("alan")</code></b>: tek bir alanı denetler ya da dönüştürür. <code>mode="after"</code> (varsayılan) tip dönüşümünden sonra çalışır, değer artık doğru tiptedir. <code>mode="before"</code> ham girdiyi alır; "12,50" gibi metni sayıya çevirmeden önce düzeltmek için idealdir.</li>
+<li><b><code>@model_validator(mode="after")</code></b>: tüm alanlar doğrulandıktan sonra çalışır, alanlar arası kuralları (başlangıç &lt; bitiş, taksit &lt;= gelir) denetler; <code>self</code> döndürmelidir.</li>
+</ul>
+<pre class="py">from datetime import date
+from pydantic import BaseModel, field_validator, model_validator, ValidationError
+
+class KampanyaFiyati(BaseModel):
+    urun: str
+    fiyat: float
+    baslangic: date
+    bitis: date
+
+    @field_validator("fiyat", mode="before")
+    @classmethod
+    def virgulu_noktaya_cevir(cls, v):
+        if isinstance(v, str):
+            v = v.replace(".", "").replace(",", ".")   # "1.249,90" -&gt; "1249.90"
+        return v
+
+    @field_validator("urun")
+    @classmethod
+    def urun_bos_olamaz(cls, v):
+        if not v.strip():
+            raise ValueError("ürün adı boş olamaz")
+        return v.strip()          # DÖNDÜRMEYİ UNUTMA
+
+    @model_validator(mode="after")
+    def tarih_sirasi(self):
+        if self.bitis &lt; self.baslangic:
+            raise ValueError("bitiş başlangıçtan önce olamaz")
+        return self
+
+k = KampanyaFiyati(urun=" Filtre kahve ", fiyat="1.249,90", baslangic="2026-11-01", bitis="2026-11-30")
+print(k.urun, k.fiyat)
+try:
+    KampanyaFiyati(urun="Çay", fiyat="45", baslangic="2026-11-30", bitis="2026-11-01")
+except ValidationError as e:
+    print(e.errors()[0]["type"], "|", e.errors()[0]["msg"])</pre>
+<p>Validator içinde <code>ValueError</code> fırlatırsan pydantic onu <code>value_error</code> tipinde bir hataya çevirir ve mesajın başına "Value error, " ekler. Validator'ın döndürdüğü değer alanın yeni değeridir; <code>return</code> unutulursa alan <code>None</code> olur.</p>
+
+<h2>Serileştirme: model_dump, model_dump_json, model_validate</h2>
+<p>Doğrulanmış modeli dış dünyaya geri vermek de önemlidir: JSON API cevabı, veritabanı satırı, log kaydı.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Metot</th><th>Ne yapar</th></tr>
+<tr><td><code>Model.model_validate(sozluk)</code></td><td>Sözlükten model (v1: <code>parse_obj</code>)</td></tr>
+<tr><td><code>Model.model_validate_json(metin)</code></td><td>JSON metninden doğrudan model; tek adımda ayrıştırır ve doğrular</td></tr>
+<tr><td><code>m.model_dump()</code></td><td>Python sözlüğü (v1: <code>dict()</code>); Enum ve date nesne kalır</td></tr>
+<tr><td><code>m.model_dump(mode="json")</code></td><td>JSON uyumlu sözlük: Enum değere, date metne döner</td></tr>
+<tr><td><code>m.model_dump_json()</code></td><td>JSON metni (v1: <code>json()</code>)</td></tr>
+<tr><td><code>include / exclude / exclude_none / by_alias</code></td><td>Çıktıya hangi alanların gireceğini seçer</td></tr>
+<tr><td><code>m.model_copy(update={...})</code></td><td>Kopya; <b>update doğrulanmaz</b></td></tr>
+</table></div>
+<pre class="py">from datetime import date
+from pydantic import BaseModel
+
+class Hesap(BaseModel):
+    iban: str
+    sahip: str
+    bakiye: float
+    acilis: date
+    not_: str | None = None
+
+h = Hesap.model_validate_json('{"iban": "TR120006200000000123456789", "sahip": "Ali Er", "bakiye": "1500.5", "acilis": "2024-03-01"}')
+print(h.acilis.year, h.bakiye)
+print(h.model_dump(exclude={"iban"}))
+print(h.model_dump(mode="json", exclude_none=True))
+print(h.model_dump_json(include={"sahip", "bakiye"}))</pre>
+
+<h2>Ayarlar: pydantic-settings</h2>
+<p>Uygulama ayarlarını (SMTP sunucusu, port, dry-run bayrağı) koda gömmek yerine ortam değişkenlerinden ve <code>.env</code> dosyasından okumak standarttır. <code>pydantic-settings</code> bunu model gibi yapar: tipler zorlanır, eksik zorunlu ayar program başlarken hata verir. Bu paket tarayıcı motorunda yok; kendi bilgisayarında <code>pip install pydantic-settings</code> ile kur.</p>
+<pre class="code">from pydantic import Field, SecretStr
+from pydantic_settings import BaseSettings, SettingsConfigDict
+
+class Ayarlar(BaseSettings):
+    model_config = SettingsConfigDict(env_prefix="AM_", env_file=".env")
+    smtp_host: str = "localhost"
+    smtp_port: int = 587
+    smtp_sifre: SecretStr               # zorunlu; print edilince ********** görünür
+    dry_run: bool = True
+    alicilar: list[str] = Field(default_factory=list)   # ortamda JSON: '["a@x.com"]'
+
+ayar = Ayarlar()          # AM_SMTP_PORT=465, AM_DRY_RUN=false ... okunur
+print(ayar.smtp_port, ayar.dry_run, ayar.smtp_sifre)</pre>
+<p><code>SecretStr</code> değeri loglara ve ekrana yanlışlıkla basılmasını engeller; gerçek değere <code>.get_secret_value()</code> ile bilerek erişirsin.</p>
+
+<h2>dataclass mı, pydantic mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>dataclass</th><th>pydantic BaseModel</th></tr>
+<tr><td>Çalışma zamanında tip denetimi</td><td>Yok</td><td>Var, dönüştürerek</td></tr>
+<tr><td>Hız</td><td>Çok hızlı (sıradan sınıf)</td><td>Hızlı (çekirdek Rust ile yazılmış) ama ek maliyetli</td></tr>
+<tr><td>Bağımlılık</td><td>Standart kütüphane</td><td>Ek paket</td></tr>
+<tr><td>JSON'a/JSON'dan</td><td>Elle (<code>asdict</code> + json)</td><td>Hazır, iç içe modellerle</td></tr>
+<tr><td>Ne zaman?</td><td>Programın içinde dolaşan, zaten güvenilir veri</td><td>Sistemin sınırı: API, form, dosya, ayar</td></tr>
+</table></div>
+<p>Ara yol: <code>from pydantic.dataclasses import dataclass</code> dataclass sözdizimiyle doğrulama yapar; <code>TypeAdapter(list[int]).validate_python(veri)</code> ise model tanımlamadan herhangi bir tipi doğrular.</p>
+
+<div class="note"><b>Gerçek işte</b>Bir bankanın kredi başvuru servisinde başvuru formu önce pydantic modeline girer; model_validator taksit/gelir oranını, field_validator TC kimlik numarası algoritmasını denetler. Hata listesi olduğu gibi 422 cevabına dönüştürülür ve ön yüz her hatayı ilgili form kutusunun altında gösterir (<code>loc</code> bu yüzden önemlidir). Aynı model, gece çalışan toplu içe aktarma betiğinde de kullanılır: tek bir kural, tek bir yerde.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>v1'den v2'ye geçiş</h3>
+<p>İnternetteki örneklerin çoğu hâlâ v1 sözdizimi kullanır. Eşleştirme: <code>@validator</code> → <code>@field_validator</code>, <code>@root_validator</code> → <code>@model_validator</code>, <code>.dict()</code> → <code>.model_dump()</code>, <code>.json()</code> → <code>.model_dump_json()</code>, <code>parse_obj</code> → <code>model_validate</code>, <code>parse_raw</code> → <code>model_validate_json</code>, <code>class Config:</code> → <code>model_config = ConfigDict(...)</code>, <code>regex=</code> → <code>pattern=</code>. Eski adlar çoğunlukla uyarıyla çalışır ama yeni kodda kullanma.</p>
+<h3>Hesaplanan alanlar ve değişmezlik</h3>
+<p><code>@computed_field</code> ile işaretlenen bir <code>@property</code> (ör. sipariş toplamı) <code>model_dump</code> çıktısına da girer. <code>ConfigDict(frozen=True)</code> modeli değiştirilemez ve hash'lenebilir yapar. <code>validate_assignment=True</code> ise nesne oluştuktan sonraki atamaları da doğrular.</p>
+<h3>JSON şeması ve sözleşme</h3>
+<p><code>Model.model_json_schema()</code> modelden JSON Schema üretir. FastAPI'nin otomatik API belgesi buradan gelir; ön yüz ekibiyle "veri sözleşmesi" paylaşmanın en temiz yoludur.</p>
+<h3>Performans</h3>
+<p>pydantic v2'nin çekirdeği (pydantic-core) Rust ile yazılmıştır; v1'e göre kat kat hızlıdır. Yine de milyonlarca satırda satır satır model oluşturmak yavaştır: toplu veride önce pandas/polars ile vektörel denetim, yalnızca şüpheli satırlarda model kullanmak ya da <code>TypeAdapter(list[Model])</code> ile tek çağrıda doğrulamak tercih edilir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pydantic-dogrulama">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-orta-otomasyon/">← Bitirme projesi: haftalık satış raporu otomasyonu</a><a href="../sablon-rapor/">Şablonla rapor üretme: string.Template ve Jinja2 →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

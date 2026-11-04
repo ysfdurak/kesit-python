@@ -1,0 +1,226 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma | Kesit Python</title><meta name="description" content="Metin ve ikili modu ayırır; bytes/bytearray, seek/tell, OSError alt sınıfları, standart akışlar, pathlib glob, shutil, zipfile/tarfile, tempfile ve atomik…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dosya-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma"><meta property="og:description" content="Metin ve ikili modu ayırır; bytes/bytearray, seek/tell, OSError alt sınıfları, standart akışlar, pathlib glob, shutil, zipfile/tarfile, tempfile ve atomik…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dosya-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma","description":"Metin ve ikili modu ayırır; bytes/bytearray, seek/tell, OSError alt sınıfları, standart akışlar, pathlib glob, shutil, zipfile/tarfile, tempfile ve atomik…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/dosya-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Standart kütüphane</span><h1>İleri dosya işlemleri: ikili mod, akışlar, arşiv ve atomik yazma</h1><p class="st-l">Metin ve ikili modu ayırır; bytes/bytearray, seek/tell, OSError alt sınıfları, standart akışlar, pathlib glob, shutil, zipfile/tarfile, tempfile ve atomik yazmayla gerçek dosya işlerini sağlam yaparsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-ileri">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market'in gece çalışan işlerini düşün: her mağaza kasası günün satışlarını bir CSV dosyası olarak <code>gelen/2026-10-27/</code> klasörüne bırakıyor, ödeme sistemi ikili (binary) bir dekont arşivi gönderiyor, muhasebe sabah 08.00'de <code>rapor.json</code> dosyasını okuyor. Bu işte üç şey ters gidebilir: yanlış modda açılan dosya Türkçe karakterleri bozar, bir klasördeki 500 dosyadan biri bozuk olduğu için tüm iş durur, ya da program rapor yazarken çöker ve muhasebe yarım bir JSON okur.</p>
+<p>Temel düzeydeki <b>Dosya işlemleri</b> dersinde <code>open</code>, <code>with</code>, okuma-yazma modlarını ve pathlib'in ilk adımlarını gördün. Bu ders o temelin üstüne kurumsal düzeyi koyar: bayt düzeyinde çalışma, dosya içinde gezinme, hata türlerini ayırma, standart akışlar, klasörleri toplu işleme, arşivler ve hiçbir zaman yarım kalmayan yazma.</p>
+
+<h2>Metin modu ve ikili mod</h2>
+<p>Diskte her şey bayttır (byte). <b>Metin modu</b> (<code>"r"</code>, <code>"w"</code>) baytları senin için bir kodlamayla (encoding) çözer ve <code>str</code> verir; satır sonlarını da işletim sistemine göre çevirir. <b>İkili mod</b> (<code>"rb"</code>, <code>"wb"</code>) hiçbir çeviri yapmaz, ham <code>bytes</code> verir. Resim, PDF, zip, şifreli dosya ya da özet (hash) hesabı için her zaman ikili mod kullanırsın.</p>
+<pre class="py">import tempfile, os
+with tempfile.TemporaryDirectory() as d:
+    yol = os.path.join(d, "sehir.txt")
+    with open(yol, "w", encoding="utf-8") as f:
+        yazilan = f.write("İzmir\nÇorum\n")
+    print("yazılan karakter:", yazilan)
+    with open(yol, "rb") as f:
+        ham = f.read()
+    print(type(ham).__name__, len(ham), "bayt")
+    print(ham)
+    print(ham.decode("utf-8").splitlines())</pre>
+<p>12 karakter yazdın ama dosya 14 bayt: UTF-8'de <code>İ</code> ve <code>Ç</code> ikişer bayt tutar. Metin modunda <code>write</code> yazılan <b>karakter</b> sayısını, ikili modda <b>bayt</b> sayısını döndürür.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Mod</th><th>Anlamı</th><th>Dosya yoksa</th><th>Dosya varsa</th></tr>
+<tr><td><code>r</code> / <code>rb</code></td><td>Oku</td><td>FileNotFoundError</td><td>Baştan okur</td></tr>
+<tr><td><code>w</code> / <code>wb</code></td><td>Yaz</td><td>Oluşturur</td><td>İçeriği SİLER</td></tr>
+<tr><td><code>a</code> / <code>ab</code></td><td>Sona ekle</td><td>Oluşturur</td><td>Sona yazar</td></tr>
+<tr><td><code>x</code> / <code>xb</code></td><td>Yalnız yeni dosya</td><td>Oluşturur</td><td>FileExistsError</td></tr>
+<tr><td><code>r+</code> / <code>r+b</code></td><td>Oku ve yaz</td><td>FileNotFoundError</td><td>Silmeden, imlecin olduğu yere yazar</td></tr>
+</table></div>
+<div class="warn"><b>encoding'i hep açıkça yaz</b>Metin modunda <code>encoding</code> vermezsen Python işletim sisteminin varsayılanını kullanır; Windows'ta bu hâlâ cp1254 olabilir. Kendi makinende çalışan betik sunucuda Türkçe karakterleri bozar. Excel'in ürettiği CSV'lerin başındaki BOM işaretini atmak için <code>encoding="utf-8-sig"</code> kullan.</div>
+
+<h2>bytes ve bytearray: tampon olarak baytlar</h2>
+<p><code>bytes</code> değişmez (immutable) bir bayt dizisidir; <code>bytearray</code> ise değiştirilebilir (mutable) kardeşidir. Bir ağ paketini, sabit genişlikli bir banka kaydını ya da parça parça gelen veriyi biriktirirken <code>bytearray</code> bir <b>tampon</b> (buffer) gibi kullanılır: her eklemede yeni nesne üretmez.</p>
+<pre class="py">imza = b"PK"           # zip dosyalarının ilk 4 baytı
+print(imza[0], imza[:2], len(imza))   # indeks tek bayt -> int verir
+
+tampon = bytearray()
+for parca in [b"AB", b"-", b"2026"]:
+    tampon.extend(parca)              # yerinde büyür
+tampon[0] = ord("X")                  # yerinde değiştir
+print(tampon, bytes(tampon))
+print("2026".encode("ascii") in tampon)
+print(bytes([72, 105]).decode())       # sayılardan bayt</pre>
+<p>Dikkat: <code>imza[0]</code> bir <b>tam sayı</b> (80) verir, <code>imza[:2]</code> ise <code>bytes</code>. <code>str</code> ile <code>bytes</code> asla karışmaz: <code>b"abc" == "abc"</code> False'tur, <code>b"abc" + "d"</code> TypeError verir. Geçiş her zaman <code>encode</code> (str → bytes) ve <code>decode</code> (bytes → str) ile yapılır.</p>
+
+<h2>İmleç: read, readline, seek, tell</h2>
+<p>Açık bir dosyanın bir <b>imleci</b> (file pointer) vardır. Her okuma imleci ileri taşır. <code>tell()</code> imlecin konumunu, <code>seek(konum, nereden)</code> imleci taşımayı sağlar: <code>nereden</code> 0 = baştan, 1 = bulunduğun yerden, 2 = sondan. İkili modda bunlar bayt cinsindendir; metin modunda <code>seek</code> yalnızca <code>tell</code>'den aldığın değerlerle güvenlidir.</p>
+<pre class="py">import io
+f = io.BytesIO(b"ID;TUTAR\n101;250\n102;975\n")   # bellek içi ikili dosya
+print(f.readline())          # ilk satır (başlık)
+print(f.tell())              # 9 bayt okundu
+print(f.read(3))             # sonraki 3 bayt
+f.seek(0)                    # başa dön
+print(len(f.readlines()), "satır")
+f.seek(-4, 2)                # sondan 4 bayt geri
+print(f.read())</pre>
+<p><code>io.BytesIO</code> ve <code>io.StringIO</code> diskte dosya açmadan aynı arayüzü verir; testlerde ve küçük denemelerde çok işine yarar. <code>readlines()</code> tüm dosyayı listeye yükler; büyük dosyada bunun yerine <code>for satir in f</code> kullan.</p>
+
+<h2>Büyük dosyayı parça parça okumak</h2>
+<p>5 GB'lık bir işlem arşivinin özetini (hash) hesaplamak ya da satırlarını saymak için dosyayı belleğe almazsın; sabit boyutlu parçalar (chunk) hâlinde okursun. Walrus operatörü (<code>:=</code>) bu döngüyü çok temiz yazar.</p>
+<pre class="py">import hashlib, io
+dosya = io.BytesIO(b"islem;" * 10_000)
+ozet = hashlib.sha256()
+parca_sayisi = 0
+while parca := dosya.read(8192):     # boş bytes gelince döngü biter
+    ozet.update(parca)
+    parca_sayisi += 1
+print(parca_sayisi, "parça")
+print(ozet.hexdigest()[:16])
+print(ozet.hexdigest() == hashlib.sha256(b"islem;" * 10_000).hexdigest())</pre>
+<p>Bellek kullanımı dosya boyutundan bağımsızdır: hep en fazla 8 KB. Parça sınırına denk gelen bir satır sonu ya da çok baytlı bir harf ikiye bölünebilir; bu yüzden satır mantığı gerekiyorsa son parçayı bir sonrakine taşırsın ya da doğrudan <code>for satir in f</code> kullanırsın (o da içeride tamponlu okur).</p>
+
+<h2>Hata türleri: OSError ailesi ve errno</h2>
+<p>Dosya ve işletim sistemiyle ilgili tüm hatalar <code>OSError</code>'dan türer. Her birinin bir <b>errno</b> kodu (işletim sisteminin hata numarası), bir <code>strerror</code> açıklaması ve çoğunlukla bir <code>filename</code> alanı vardır. Python, errno koduna bakarak doğru alt sınıfı kendisi seçer.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Alt sınıf</th><th>errno</th><th>Ne zaman?</th></tr>
+<tr><td><code>FileNotFoundError</code></td><td>ENOENT</td><td>Dosya ya da klasör yok</td></tr>
+<tr><td><code>FileExistsError</code></td><td>EEXIST</td><td><code>"x"</code> modu, <code>mkdir</code> var olan klasörde</td></tr>
+<tr><td><code>PermissionError</code></td><td>EACCES, EPERM</td><td>Okuma/yazma izni yok, dosya başka programda kilitli (Windows)</td></tr>
+<tr><td><code>IsADirectoryError</code></td><td>EISDIR</td><td>Klasörü dosya gibi açmaya çalıştın</td></tr>
+<tr><td><code>NotADirectoryError</code></td><td>ENOTDIR</td><td>Dosyayı klasör gibi kullandın</td></tr>
+</table></div>
+<pre class="py">import errno, tempfile
+try:
+    open("/yok/boyle/bir/dosya.csv", encoding="utf-8")
+except FileNotFoundError as e:
+    print(type(e).__name__, e.errno == errno.ENOENT, e.filename)
+
+with tempfile.TemporaryDirectory() as d:
+    try:
+        open(d, encoding="utf-8")
+    except IsADirectoryError as e:
+        print("Klasör açılamaz:", e.strerror)
+    except PermissionError as e:          # bazı sistemler klasör için bunu verir
+        print("İzin hatası:", e.strerror)
+
+hata = OSError(errno.EACCES, "Erişim reddedildi")
+print(type(hata).__name__, isinstance(hata, OSError))</pre>
+<p>Son satır önemli: <code>OSError(errno.EACCES, ...)</code> yazdığında Python sana doğrudan <code>PermissionError</code> verir. Bu yüzden ya alt sınıfları yakalarsın (okunur), ya da <code>OSError</code> yakalayıp <code>e.errno</code> ile ayırırsın (daha ayrıntılı). Özelden genele sırala: önce <code>FileNotFoundError</code>, en sonda <code>OSError</code>.</p>
+
+<h2>Standart akışlar: stdin, stdout, stderr</h2>
+<p>Her programın üç hazır akışı vardır: <code>sys.stdin</code> (girdi), <code>sys.stdout</code> (normal çıktı) ve <code>sys.stderr</code> (hata ve uyarı çıktısı). Bunlar da dosya nesnesidir; <code>write</code>, <code>readline</code>, <code>for satir in sys.stdin</code> ile kullanılır. Kural basit: <b>sonuç stdout'a, gürültü stderr'e</b>. Böylece <code>python rapor.py &gt; rapor.csv</code> diye yönlendiren biri dosyasına uyarı mesajı karışmadan yalnız veriyi alır.</p>
+<pre class="py">import sys, io, contextlib
+kayitlar = ["Ankara;250", "Bursa;abc", "İzmir;975"]
+cikti, hatalar = io.StringIO(), io.StringIO()
+with contextlib.redirect_stdout(cikti), contextlib.redirect_stderr(hatalar):
+    for k in kayitlar:
+        sehir, tutar = k.split(";")
+        if tutar.isdigit():
+            print(f"{sehir},{tutar}")
+        else:
+            print(f"UYARI: geçersiz tutar -&gt; {k}", file=sys.stderr)
+print("stdout:", cikti.getvalue().splitlines())
+print("stderr:", hatalar.getvalue().strip())</pre>
+<p><code>redirect_stdout</code>/<code>redirect_stderr</code> akışı geçici olarak başka bir dosya nesnesine çevirir; test yazarken programın ne yazdırdığını yakalamanın standart yolu budur. Gerçek bir komut satırı aracında ise <code>for satir in sys.stdin:</code> ile boru hattından (pipe) gelen veriyi satır satır okursun: <code>cat siparis.csv | python temizle.py</code>.</p>
+
+<h2>pathlib ileri: klasörü sorgulamak</h2>
+<pre class="py">from pathlib import Path
+import tempfile
+with tempfile.TemporaryDirectory() as d:
+    kok = Path(d)
+    (kok / "2026" / "10").mkdir(parents=True, exist_ok=True)   # ara klasörler de
+    for ad in ["2026/10/ankara.csv", "2026/10/izmir.csv", "2026/notlar.txt", "ozet.csv"]:
+        (kok / ad).write_text("tarih,tutar\n", encoding="utf-8")
+    print(sorted(p.name for p in kok.iterdir()))          # yalnız bir seviye
+    print(sorted(p.name for p in kok.glob("*.csv")))      # bu klasörde
+    print(sorted(p.relative_to(kok).as_posix() for p in kok.rglob("*.csv")))  # tüm alt klasörler
+    p = kok / "2026/10/ankara.csv"
+    print(p.stem, p.suffix, p.with_suffix(".json").name, p.parent.name)
+    print(p.stat().st_size, "bayt", p.exists(), p.is_file())</pre>
+<p><code>glob("*.csv")</code> yalnızca o klasöre, <code>rglob("*.csv")</code> tüm alt ağaca bakar (<code>glob("**/*.csv")</code> ile aynı). <code>iterdir()</code> ve <code>glob</code> sırası işletim sistemine göre değişir; raporda tekrarlanabilir sonuç için <b>her zaman sırala</b>. <code>stem</code> son uzantı hariç ad, <code>suffix</code> son uzantı, <code>suffixes</code> tüm uzantılardır (<code>.tar.gz</code> için iki tane).</p>
+
+<h2>shutil, tempfile, zipfile ve tarfile</h2>
+<p><code>shutil</code> dosya düzeyinde üst işlemleri yapar: <code>copy</code> (içerik + izinler), <code>copy2</code> (tarihler de), <code>copytree</code> (klasör ağacı), <code>move</code> (taşı/yeniden adlandır), <code>rmtree</code> (klasörü içiyle sil, geri dönüşü yok). <code>tempfile</code> güvenli geçici dosya ve klasör verir; <code>TemporaryDirectory</code> blok bitince her şeyi temizler.</p>
+<pre class="py">import shutil, tempfile, zipfile, tarfile
+from pathlib import Path
+with tempfile.TemporaryDirectory() as d:
+    kok = Path(d)
+    kaynak = kok / "rapor"
+    kaynak.mkdir()
+    (kaynak / "ciro.csv").write_text("sehir,tutar\nAnkara,250\n", encoding="utf-8")
+    (kaynak / "not.txt").write_text("gece işi tamam", encoding="utf-8")
+    shutil.copy(kaynak / "ciro.csv", kaynak / "ciro_yedek.csv")
+
+    zip_yolu = kok / "rapor.zip"
+    with zipfile.ZipFile(zip_yolu, "w", compression=zipfile.ZIP_DEFLATED) as z:
+        for p in sorted(kaynak.rglob("*")):
+            z.write(p, arcname=p.relative_to(kaynak).as_posix())
+    with zipfile.ZipFile(zip_yolu) as z:
+        print(z.namelist())
+        print(z.read("ciro.csv").decode("utf-8").splitlines()[1])
+
+    with tarfile.open(kok / "rapor.tar.gz", "w:gz") as t:
+        t.add(kaynak, arcname="rapor")
+    with tarfile.open(kok / "rapor.tar.gz") as t:
+        print(sorted(m.name for m in t.getmembers() if m.isfile()))
+    shutil.rmtree(kaynak)
+    print(kaynak.exists())</pre>
+<div class="warn"><b>Güvenmediğin arşivi körü körüne açma</b>Bir zip/tar içindeki <code>../../etc/passwd</code> gibi adlar hedef klasörün dışına yazabilir (path traversal). <code>tarfile</code> için Python 3.12'de <code>t.extractall(hedef, filter="data")</code> kullan; zip'te her adın <code>Path(hedef, ad).resolve()</code> sonucunun hedefin içinde kaldığını kontrol et.</div>
+
+<h2>Atomik yazma ve dosya kilidi</h2>
+<p>Program <code>open("rapor.json", "w")</code> ile dosyayı açtığı anda eski içerik silinir. Yazma sürerken elektrik kesilirse ya da program çökerse geride yarım bir dosya kalır. Çözüm: önce <b>aynı klasörde</b> geçici bir dosyaya yaz, kapat, sonra <code>os.replace</code> ile asıl adın üzerine taşı. <code>os.replace</code> aynı dosya sisteminde <b>atomiktir</b>: okuyan kişi ya eski dosyanın tamamını ya yeni dosyanın tamamını görür, arası yoktur.</p>
+<pre class="py">import os, json, tempfile
+def atomik_json_yaz(yol, veri):
+    klasor = os.path.dirname(os.path.abspath(yol))
+    fd, gecici = tempfile.mkstemp(dir=klasor, suffix=".tmp")
+    try:
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            json.dump(veri, f, ensure_ascii=False)
+            f.flush()
+            os.fsync(f.fileno())        # diske gerçekten yazıldığından emin ol
+        os.replace(gecici, yol)          # tek hamlede yer değiştir
+    except BaseException:
+        os.unlink(gecici)                # hata olursa çöp bırakma
+        raise
+
+with tempfile.TemporaryDirectory() as d:
+    hedef = os.path.join(d, "rapor.json")
+    atomik_json_yaz(hedef, {"sehir": "Ankara", "ciro": 1250})
+    atomik_json_yaz(hedef, {"sehir": "İzmir", "ciro": 975})
+    print(open(hedef, encoding="utf-8").read(), os.listdir(d))</pre>
+<p>Geçici dosyanın hedefle <b>aynı klasörde</b> olması şarttır; <code>/tmp</code> başka bir disk bölümündeyse <code>os.replace</code> atomik olamaz ya da hata verir.</p>
+<p>İki süreç aynı dosyaya aynı anda yazıyorsa <b>kilit</b> (lock) gerekir. En taşınabilir basit yöntem bir kilit dosyasıdır: <code>open("is.lock", "x")</code> dosya zaten varsa <code>FileExistsError</code> verir, yani kilidi yalnızca bir süreç alabilir; iş bitince <code>os.remove</code> ile bırakırsın. İşletim sistemi düzeyinde kilit için Linux/macOS'ta <code>fcntl.flock</code>, Windows'ta <code>msvcrt.locking</code>, ikisini birden saran üçüncü parti <code>filelock</code> paketi vardır.</p>
+<div class="tip"><b>Kilit dosyası çökmeye dayanıklı olmalı</b>Program kilidi aldıktan sonra çökerse kilit dosyası kalır ve sonraki çalışma sonsuza dek bekler. Kilidi <code>try/finally</code> içinde bırak, kilit dosyasına süreç numarası (PID) ve zaman yaz ki eski kilitleri tanıyabilesin.</div>
+
+<h2>Klasörü toplu işlemek</h2>
+<p>Gerçek işlerin çoğu şu kalıptır: bir klasördeki dosyaları bul, her birini oku, bozuk olanı atla ama kaydını tut, sonucu tek bir rapora atomik yaz.</p>
+<pre class="py">import csv, tempfile
+from pathlib import Path
+with tempfile.TemporaryDirectory() as d:
+    kok = Path(d)
+    (kok / "ankara.csv").write_text("sehir,tutar\nAnkara,250\nAnkara,100\n", encoding="utf-8")
+    (kok / "izmir.csv").write_text("sehir,tutar\nİzmir,975\nİzmir,yok\n", encoding="utf-8")
+    toplam, hatali = {}, []
+    for yol in sorted(kok.glob("*.csv")):
+        with yol.open(encoding="utf-8", newline="") as f:
+            for no, satir in enumerate(csv.DictReader(f), start=2):
+                try:
+                    tutar = float(satir["tutar"])
+                except ValueError:
+                    hatali.append(f"{yol.name}:{no}")
+                    continue
+                toplam[satir["sehir"]] = toplam.get(satir["sehir"], 0) + tutar
+    print(toplam)
+    print("hatalı satırlar:", hatali)</pre>
+<div class="note"><b>Gerçek işte</b>Bankalarda ve e-ticarette "gece işi" (batch job) dediğin şey çoğunlukla budur: SFTP'ye düşen dosyaları bulmak, işlemek, işleneni <code>arsiv/</code> klasörüne <code>shutil.move</code> ile taşımak, hatalıyı <code>hatali/</code> klasörüne ayırmak ve sonucu atomik yazmak. Hatalı satırın dosya adı ve satır numarasıyla loglanması, sabah gelen "rakam tutmuyor" e-postasını beş dakikada çözmeni sağlar. Aynı dosyanın iki kez işlenmemesi için işlenmiş dosyaların özetini (sha256) bir listede tutmak da yaygın bir pratiktir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Arabellek, flush ve fsync</h3>
+<p><code>write</code> veriyi önce Python'un arabelleğine (buffer), sonra işletim sisteminin önbelleğine (cache) yazar; diske ne zaman gideceğine işletim sistemi karar verir. <code>f.flush()</code> Python arabelleğini boşaltır, <code>os.fsync(f.fileno())</code> işletim sisteminden diske yazmasını ister. Para ve sipariş gibi kaybı kabul edilemeyen veride ikisini birlikte kullanırsın; her satırda yapmak ise çok yavaştır, toplu yaparsın.</p>
+<h3>os.scandir ve büyük klasörler</h3>
+<p>Yüz binlerce dosyalı klasörde <code>os.scandir</code>, dosya türü ve boyut bilgisini tek sistem çağrısıyla getirdiği için <code>os.listdir</code> + <code>os.stat</code>'tan belirgin hızlıdır; pathlib'in <code>iterdir</code>'i de içeride benzer çalışır.</p>
+<h3>mmap ve readinto</h3>
+<p><code>mmap</code> modülü dosyayı belleğe eşler; çok büyük ikili dosyada rastgele konumlara <code>seek</code> etmeden dilimle erişirsin. <code>f.readinto(bytearray(n))</code> ise var olan bir tampona okur, her okumada yeni nesne üretmez; yüksek hacimli ikili protokollerde kullanılır.</p>
+<h3>Kodlama hataları</h3>
+<p>Kaynağını bilmediğin metin dosyasında <code>errors="replace"</code> bozuk baytları yerine koyma karakteriyle değiştirir, <code>errors="strict"</code> (varsayılan) hata verir. Veri kaybını görmezden gelmek yerine önce hatayı yakalayıp hangi dosyada olduğunu loglamak daha güvenlidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dosya-ileri">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../algoritmalar/">← Algoritmalar ve Big-O: arama, sıralama, iki işaretçi, dinamik programlama, BFS/DFS</a><a href="../veri-yapilari/">Veri yapıları: yığın, kuyruk, öncelik kuyruğu, bağlı liste, hash, ağaç ve graf →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

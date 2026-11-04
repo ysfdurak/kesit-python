@@ -1,0 +1,224 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Döngü kalıpları ve temel algoritmalar | Kesit Python</title><meta name="description" content="Sayaç, biriktirici, en büyük/en küçük, doğrusal arama ve bayrak, komşu karşılaştırma, frekans, iç içe döngü, erken çıkış ve while ile hedefe kadar tekrar…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dongu-kaliplari/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Döngü kalıpları ve temel algoritmalar"><meta property="og:description" content="Sayaç, biriktirici, en büyük/en küçük, doğrusal arama ve bayrak, komşu karşılaştırma, frekans, iç içe döngü, erken çıkış ve while ile hedefe kadar tekrar…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dongu-kaliplari/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Döngü kalıpları ve temel algoritmalar","description":"Sayaç, biriktirici, en büyük/en küçük, doğrusal arama ve bayrak, komşu karşılaştırma, frekans, iç içe döngü, erken çıkış ve while ile hedefe kadar tekrar…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/dongu-kaliplari/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Akış kontrolü</span><h1>Döngü kalıpları ve temel algoritmalar</h1><p class="st-l">Sayaç, biriktirici, en büyük/en küçük, doğrusal arama ve bayrak, komşu karşılaştırma, frekans, iç içe döngü, erken çıkış ve while ile hedefe kadar tekrar kalıplarını tanır; her yeni problemi bu kalıplarla çözmeyi öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dongu-kaliplari">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Döngü yazmak, kalıp tanımaktır</h2>
+<p>Döngüler dersinde <code>for</code>, <code>while</code>, <code>range</code>, <code>enumerate</code>, <code>zip</code>, <code>break</code> ve <code>continue</code>'yu öğrendin. Bu ders bir adım geri çekilip şu soruyu soruyor: deneyimli bir geliştirici yeni bir problemi gördüğünde döngüyü nasıl bu kadar hızlı yazıyor? Cevap: yazdığı döngülerin büyük çoğunluğu bir avuç <b>kalıbın</b> (pattern) tekrarıdır. "Kaç tane?" sorusu sayaçtır, "toplam ne?" biriktiricidir, "en pahalısı hangisi?" en iyi değer kalıbıdır, "var mı?" aramadır.</p>
+<p>Her kalıbın üç parçası vardır: döngüden <b>önce</b> başlangıç değeri, döngünün <b>içinde</b> güncelleme kuralı, döngüden <b>sonra</b> sonucu kullanma. Hataların çoğu bu üçünden birinde yapılır; özellikle başlangıç değerinde.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Kalıp</th><th>Başlangıç</th><th>Güncelleme</th></tr>
+<tr><td>Kaç tane?</td><td>Sayaç</td><td><code>sayac = 0</code></td><td><code>sayac += 1</code> (koşullu)</td></tr>
+<tr><td>Toplam/çarpım ne?</td><td>Biriktirici</td><td><code>0</code> ya da <code>1</code>, <code>""</code>, <code>[]</code></td><td><code>toplam += x</code></td></tr>
+<tr><td>En büyüğü hangisi?</td><td>En iyi değer</td><td>İlk eleman</td><td>Daha iyisi gelince değiştir</td></tr>
+<tr><td>Var mı, nerede?</td><td>Doğrusal arama</td><td><code>bulundu = False</code></td><td>Bulunca bayrak + <code>break</code></td></tr>
+<tr><td>Hepsi mi uyuyor?</td><td>Doğrulama</td><td><code>hepsi = True</code></td><td>Uymayan gelince False + <code>break</code></td></tr>
+<tr><td>Önceki güne göre?</td><td>Komşu karşılaştırma</td><td>İlk eleman ya da indeks 1</td><td><code>x</code> ile <code>onceki</code></td></tr>
+<tr><td>Her değerden kaç tane?</td><td>Frekans</td><td><code>{}</code></td><td><code>d[x] = d.get(x, 0) + 1</code></td></tr>
+<tr><td>Hedefe kaç adımda?</td><td>Koşula kadar tekrar</td><td>Durum + adım sayacı</td><td><code>while</code> koşulu</td></tr>
+</table></div>
+
+<h2>Sayaç ve biriktirici: tek geçişte birden fazla sonuç</h2>
+<p>Bu ikisini zaten biliyorsun. Burada kazanman gereken alışkanlık: aynı veriyi birkaç kez gezmek yerine <b>tek geçişte</b> birden fazla sayaç ve biriktirici tutmak.</p>
+<pre class="py">islemler = [1200, -350, 4800, -90, -1500, 600, 0, 75]   # Ilgaz Bank hesap hareketleri
+
+giris_toplam = 0
+cikis_toplam = 0
+cikis_sayisi = 0
+buyuk_islem = 0                      # |tutar| &gt;= 1000
+for t in islemler:
+    if t &gt; 0:
+        giris_toplam += t
+    elif t &lt; 0:
+        cikis_toplam += -t
+        cikis_sayisi += 1
+    if abs(t) &gt;= 1000:
+        buyuk_islem += 1
+
+print("Giriş:", giris_toplam, "Çıkış:", cikis_toplam)
+print("Çıkış adedi:", cikis_sayisi, "Büyük işlem:", buyuk_islem)
+print("Net:", giris_toplam - cikis_toplam)</pre>
+<p>Biriktiricinin başlangıç değeri işleme göre değişir: toplamada 0, çarpmada 1 (0 ile başlarsan sonuç hep 0 olur), metin birleştirmede <code>""</code>, liste toplamada <code>[]</code>.</p>
+
+<h2>En büyük ve en küçük: max kullanmadan</h2>
+<p>Gerçek kodda <code>max</code> ve <code>min</code> kullanırsın; ama kalıbı bilmek iki sebeple önemli. Birincisi, çoğu zaman yalnız değeri değil <b>kaydın kendisini</b> ya da konumunu istersin. İkincisi, "en iyi" tanımı karmaşıklaşabilir: en yüksek tutarlı ama iptal edilmemiş sipariş, eşitlikte en eski olan gibi.</p>
+<pre class="py">bakiyeler = [-250.0, -1200.5, -40.0, -980.0]      # hepsi negatif!
+
+# YANLIŞ başlangıç: 0 hiçbir negatif değerden küçük değil
+en_buyuk_yanlis = 0
+for b in bakiyeler:
+    if b &gt; en_buyuk_yanlis:
+        en_buyuk_yanlis = b
+print("Yanlış sonuç:", en_buyuk_yanlis)
+
+# DOĞRU: ilk elemanla başla, konumu da tut
+en_kucuk = bakiyeler[0]
+en_kucuk_i = 0
+for i, b in enumerate(bakiyeler):
+    if b &lt; en_kucuk:
+        en_kucuk = b
+        en_kucuk_i = i
+print("En düşük bakiye:", en_kucuk, "konum:", en_kucuk_i)</pre>
+<div class="warn"><b>Başlangıç değeri tuzağı</b>En büyüğü bulurken 0 ile başlamak, tüm değerler negatifse yanlış sonuç verir; en küçüğü bulurken 0 ile başlamak, tüm değerler pozitifse yanlış sonuç verir. Güvenli seçenekler: listenin ilk elemanı ya da <code>float("-inf")</code> / <code>float("inf")</code>. Boş liste ihtimali varsa önce onu kontrol et: <code>if not bakiyeler: return None</code>.</div>
+<p>Eşitlik durumunda hangi kaydın seçileceği karşılaştırma operatörüne bağlıdır: <code>&lt;</code> ilk görüleni, <code>&lt;=</code> son görüleni tutar. Bu küçük fark, raporlarda "neden bu müşteri çıktı" sorusunun cevabıdır.</p>
+
+<h2>Doğrusal arama ve bayrak değişkeni</h2>
+<p>"Bu listede şu koşulu sağlayan var mı, varsa ilki hangisi?" Elemanları baştan sona tek tek kontrol etmeye <b>doğrusal arama</b> (linear search) denir. Sonucu tutmak için bir <b>bayrak</b> (flag) değişkeni kullanırsın; aradığını bulunca da <code>break</code> ile çıkarsın, çünkü geri kalanı kontrol etmek boşa iştir.</p>
+<pre class="py">siparisler = [("AM-1", 120), ("AM-2", 4500), ("AM-3", 80), ("AM-4", 9000)]
+esik = 4000
+
+bulundu = False
+for no, tutar in siparisler:
+    if tutar &gt; esik:
+        bulundu = True
+        ilk_buyuk = no
+        break
+if bulundu:
+    print("İlk büyük sipariş:", ilk_buyuk)
+else:
+    print("Büyük sipariş yok")
+
+# Aynı iş for-else ile: else, döngü break OLMADAN biterse çalışır
+for no, tutar in siparisler:
+    if tutar &gt; 10000:
+        print("Çok büyük sipariş:", no)
+        break
+else:
+    print("10000 üstü sipariş yok")</pre>
+<p>Bayrağın tersi <b>doğrulama</b> kalıbıdır: "hepsi uyuyor mu?" sorusunda <code>hepsi = True</code> ile başlar, uymayan ilk elemanda False yapıp çıkarsın. Bu iki kalıbın hazır karşılıkları <code>any()</code> ve <code>all()</code>'dur; ama hangi elemanın uyduğunu ya da uymadığını öğrenmen gerekiyorsa döngü yazarsın.</p>
+<div class="tip"><b>Fonksiyon içinde daha kısa</b>Arama bir fonksiyonun içindeyse bayrağa gerek kalmaz: bulduğun anda <code>return</code> et, döngü bitince "bulunamadı" değerini (<code>None</code> ya da <code>-1</code>) döndür. Erken dönüş (early return), bayrak ve break'in en okunur hâlidir.</div>
+
+<h2>Komşu elemanları karşılaştırmak</h2>
+<p>Zaman serilerinde (günlük satış, aylık bakiye, saatlik sıcaklık) asıl soru çoğu zaman bir değerin <b>bir öncekine göre</b> ne olduğudur: arttı mı, azaldı mı, kaç gün üst üste arttı? Bunun için her adımda iki elemana birden bakarsın.</p>
+<pre class="py">satislar = [120, 135, 135, 150, 90, 110, 130, 160]   # günlük satış adedi
+
+# Yöntem 1: indeksle, 1'den başla
+artis = 0
+for i in range(1, len(satislar)):
+    if satislar[i] &gt; satislar[i - 1]:
+        artis += 1
+print("Artış günü:", artis)
+
+# Yöntem 2: zip ile (önceki, şimdiki) çiftleri
+for onceki, simdi in zip(satislar, satislar[1:]):
+    if simdi &lt; onceki:
+        print(f"Düşüş: {onceki} → {simdi} ({simdi - onceki})")
+
+# Seri (streak): en uzun üst üste artış
+seri = en_uzun = 0
+for onceki, simdi in zip(satislar, satislar[1:]):
+    if simdi &gt; onceki:
+        seri += 1
+        en_uzun = max(en_uzun, seri)
+    else:
+        seri = 0
+print("En uzun artış serisi:", en_uzun, "gün")</pre>
+<p><code>zip(satislar, satislar[1:])</code> güzel bir hiledir: listeyi bir kaydırılmış kopyasıyla eşler ve <code>n</code> elemandan <code>n-1</code> komşu çifti verir. Döngünün ilk elemandan değil ikinciden başladığına dikkat et; ilk günün "önceki günü" yoktur. İndeks yönteminde <code>range(len(satislar))</code> yazıp <code>satislar[i - 1]</code> kullanırsan ilk turda <code>satislar[-1]</code>, yani <b>son</b> eleman okunur ve hata vermeden yanlış sonuç alırsın.</p>
+
+<h2>Frekans ve gruplama</h2>
+<p>Sözlükler dersinde sayım kalıbını, İç içe veri yapıları dersinde gruplamayı gördün. Kalıp olarak hatırla: frekans, anahtar başına bir <b>sayaç</b>; gruplama, anahtar başına bir <b>liste biriktiricisi</b>. İkisi birleşince "en sık" sorusu iki adımlı olur: önce say, sonra en iyi değer kalıbıyla en büyüğü bul.</p>
+<pre class="py">satilan = ["çay", "kahve", "çay", "şeker", "kahve", "çay", "su"]
+frekans = {}
+for urun in satilan:
+    frekans[urun] = frekans.get(urun, 0) + 1
+
+en_cok, en_cok_adet = None, 0
+for urun, adet in frekans.items():
+    if adet &gt; en_cok_adet:
+        en_cok, en_cok_adet = urun, adet
+print(frekans)
+print("En çok satan:", en_cok, en_cok_adet)</pre>
+
+<h2>İç içe döngü: tablolar ve çiftler</h2>
+<p>Dış döngünün her turunda iç döngü baştan sona çalışır. İki tipik kullanım: satır-sütun tablosu üretmek ve bir listedeki tüm <b>çiftleri</b> denemek. Çiftlerde aynı çifti iki kez (a-b ve b-a) ve elemanı kendisiyle eşlememek için iç döngü <code>i + 1</code>'den başlar.</p>
+<pre class="py">for i in range(1, 4):
+    satir = ""
+    for j in range(1, 6):
+        satir += f"{i * j:4}"
+    print(satir)
+
+fiyatlar = [150, 350, 200, 50]
+butce = 400
+for i in range(len(fiyatlar)):
+    for j in range(i + 1, len(fiyatlar)):
+        if fiyatlar[i] + fiyatlar[j] == butce:
+            print("Bütçeye tam uyan ikili:", fiyatlar[i], fiyatlar[j])</pre>
+<p>İç içe döngüde iş sayısı çarpılır: 1000 elemanlı listede tüm çiftler yaklaşık yarım milyon karşılaştırmadır. Bu, Uzmanlaş bölümündeki karmaşıklık konusunun girişidir.</p>
+
+<h2>while: koşula kadar tekrar</h2>
+<p>Kaç tur süreceğini <b>önceden bilmediğin</b> durumlarda <code>while</code> kullanırsın. Ilgaz Bank'ın klasik müşteri sorusu: "Hesabımda 10.000 TL var, aylık %3 faiz alırsam 15.000 TL'ye kaç ayda ulaşırım?"</p>
+<pre class="py">bakiye = 10_000
+aylik_faiz = 0.03
+hedef = 15_000
+
+ay = 0
+while bakiye &lt; hedef:
+    bakiye *= 1 + aylik_faiz
+    ay += 1
+print(f"{ay} ayda hedefe ulaşılır, bakiye: {bakiye:.2f} TL")
+
+# Güvenlik sınırı: faiz 0 olursa döngü sonsuza gider
+bakiye, ay = 10_000, 0
+while bakiye &lt; hedef and ay &lt; 600:
+    bakiye *= 1 + 0.0
+    ay += 1
+if bakiye &lt; hedef:
+    print("Hedefe ulaşılamadı, döngü", ay, "ayda durduruldu")</pre>
+<p>while döngüsünün üç sorusunu her zaman cevapla: koşul ne, döngü içinde koşulu hedefe yaklaştıran satır hangisi, ve hedefe asla ulaşılamazsa ne olur? Son soru için bir üst sınır (en fazla 600 ay gibi) koymak, üretim kodunda hayat kurtarır.</p>
+
+<h2>Döngüde liste değiştirme tuzağı</h2>
+<p>Gezdiğin listeden eleman silmek, Python'daki en sinsi hatalardan biridir: hata vermez, sessizce eleman atlar. Sebep: for döngüsü içeride bir indeks sayacı tutar; sen bir elemanı silince sonrakiler bir sola kayar ve sayaç bir sonrakini atlar.</p>
+<pre class="py">siparisler = ["iptal", "iptal", "aktif", "iptal", "aktif"]
+for s in siparisler:
+    if s == "iptal":
+        siparisler.remove(s)
+print("Yanlış:", siparisler)        # bir iptal kaldı!
+
+siparisler = ["iptal", "iptal", "aktif", "iptal", "aktif"]
+temiz = []
+for s in siparisler:
+    if s != "iptal":
+        temiz.append(s)
+print("Doğru (yeni liste):", temiz)
+
+siparisler = ["iptal", "iptal", "aktif", "iptal", "aktif"]
+for s in siparisler[:]:             # kopya üzerinde gez, orijinalden sil
+    if s == "iptal":
+        siparisler.remove(s)
+print("Doğru (kopya üzerinde):", siparisler)</pre>
+<p>En temiz yol, istediğin elemanlarla <b>yeni bir liste</b> kurmaktır (Orta seviyede bunu tek satırlık comprehension ile yapacaksın). Orijinal listeyi mutlaka yerinde değiştirmen gerekiyorsa kopyası üzerinde gez ya da listeyi sondan başa doğru gez. Aynı kural sözlükler için daha da serttir: gezerken sözlüğe anahtar ekleyip silmek <code>RuntimeError</code> verir.</p>
+
+<div class="note"><b>Gerçek işte</b>Raporlama betiklerinin büyük kısmı bu kalıpların birleşimidir: gün sonu raporunda tek geçişte ciro, iade sayısı ve en büyük sipariş hesaplanır; dolandırıcılık izleme kuralı "aynı karttan 10 dakika içinde art arda 3 işlem" gibi komşu karşılaştırmasıdır; stok uyarısı doğrulama kalıbıdır; kredi simülatörü while döngüsüdür. Kod incelemesinde (code review) kıdemli bir geliştirici "burada en büyüğü 0 ile başlatmışsın, iade tutarları negatif" dediğinde konuştuğu şey bu dersin kendisidir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Döngü değişmezi (loop invariant)</h3>
+<p>Doğru döngü yazmanın en güçlü düşünme aracı, her turun sonunda doğru kalan cümledir. En büyük bulma kalıbında değişmez şudur: "<code>en_buyuk</code>, şimdiye kadar görülen elemanların en büyüğüdür." Başlangıçta doğru olmalı (ilk elemanla başlatmanın sebebi), her tur korumalı ve döngü bitince sonucu vermeli. Hata ayıklarken "bu cümle hangi turda bozuldu?" diye sormak, rastgele print eklemekten çok daha hızlıdır.</p>
+<h3>Karmaşıklık: kaç adım?</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Kalıp</th><th>Adım sayısı</th><th>1 milyon eleman</th></tr>
+<tr><td>Tek geçiş (sayaç, toplam, en büyük, arama)</td><td>n</td><td>Göz açıp kapayıncaya kadar</td></tr>
+<tr><td>Erken çıkışlı arama</td><td>En iyi 1, en kötü n</td><td>Bulunacak yere bağlı</td></tr>
+<tr><td>Tüm çiftler (iç içe döngü)</td><td>n × n / 2</td><td>Yarım trilyon: kullanılamaz</td></tr>
+<tr><td>Sözlük/küme ile eşleme</td><td>n</td><td>Hızlı</td></tr>
+</table></div>
+<p>"Toplamı bütçeye eşit iki ürün" problemini iç içe döngü yerine tek geçişte çözebilirsin: gördüğün fiyatları bir kümede tut, her yeni fiyatta <code>butce - fiyat</code> kümede var mı diye bak. Bu, mülakatların en klasik sorusudur (two sum) ve kalıp birleştirmenin gücünü gösterir.</p>
+<pre class="py">def butce_ikilisi(fiyatlar, butce):
+    gorulen = set()
+    for f in fiyatlar:
+        if butce - f in gorulen:
+            return (butce - f, f)
+        gorulen.add(f)
+    return None
+
+print(butce_ikilisi([150, 350, 200, 50], 400))
+print(butce_ikilisi([10, 20], 100))</pre>
+<h3>Kalıptan yerleşik fonksiyona</h3>
+<p>Kalıbı tanıdıktan sonra kısaltmasını kullanmak profesyonel koddur: sayaç → <code>sum(1 for x in v if ...)</code>, biriktirici → <code>sum</code>, en iyi → <code>max(v, key=...)</code>, arama → <code>next((x for x in v if ...), None)</code>, doğrulama → <code>all</code>, frekans → <code>collections.Counter</code>, komşu çiftleri → <code>itertools.pairwise</code>. Bunların çoğunu Orta seviyede göreceksin. Ama kısaltma çalışmadığında ya da kural karmaşıklaştığında açık döngüye dönebilmek, kalıbı bilmekle mümkün.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dongu-kaliplari">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../unicode-metin/">← Karakterler, Unicode ve Türkçe</a><a href="../ic-ice-veri/">İç içe veri yapıları →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

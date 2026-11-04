@@ -1,0 +1,263 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Excel otomasyonu: openpyxl, pandas ve rapor üretimi | Kesit Python</title><meta name="description" content="Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/excel-otomasyon/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Excel otomasyonu: openpyxl, pandas ve rapor üretimi"><meta property="og:description" content="Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/excel-otomasyon/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Excel otomasyonu: openpyxl, pandas ve rapor üretimi","description":"Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/excel-otomasyon/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>Excel otomasyonu: openpyxl, pandas ve rapor üretimi</h1><p class="st-l">Excel dosyasını kod gözüyle tanır; openpyxl ile hücre, formül, stil ve grafik yazar, pandas ile çok sayfalı rapor üretir, Türkçe sayı ve tarih biçimlerini doğru çevirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Anadolu Market finans ekibinde her pazartesi aynı iş yapılıyor: satış sisteminden CSV indirilir, Excel'de açılır, şehirlere göre özet tablo hazırlanır, toplam satırına formül yazılır, başlık kalın yapılır, sütunlar genişletilir, bir grafik eklenir ve dosya yöneticilere gönderilir. Bu iş her hafta 1–2 saat sürer ve her seferinde küçük bir kopyala-yapıştır hatası riski taşır. Python ile aynı rapor birkaç saniyede, her hafta aynı biçimde ve hatasız üretilir.</p>
+<p>Şirketlerin büyük kısmında veri hâlâ Excel'de yaşar: bütçe tabloları, stok sayımları, İK puantajları, belediye tahsilat listeleri. Excel'i okuyup yazabilen bir Python geliştiricisi, "veri ekibi" ile "iş birimi" arasındaki köprü olur. Bu derste iki ana aracı öğreneceksin: hücre düzeyinde kontrol için <b>openpyxl</b>, tablo düzeyinde hızlı iş için <b>pandas</b>.</p>
+
+<h2>Excel dosyasının yapısı</h2>
+<p>Bir <code>.xlsx</code> dosyası aslında içinde XML dosyaları olan bir ZIP arşividir. Kod gözüyle bakınca üç katman vardır:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kavram</th><th>İngilizcesi</th><th>openpyxl</th><th>pandas</th></tr>
+<tr><td>Çalışma kitabı</td><td>workbook</td><td><code>Workbook()</code>, <code>load_workbook()</code></td><td><code>pd.ExcelFile</code>, <code>ExcelWriter</code></td></tr>
+<tr><td>Sayfa</td><td>worksheet</td><td><code>wb["Özet"]</code>, <code>wb.active</code></td><td><code>sheet_name="Özet"</code></td></tr>
+<tr><td>Hücre</td><td>cell</td><td><code>ws["B2"]</code>, <code>ws.cell(row=2, column=2)</code></td><td><code>df.iloc[0, 1]</code></td></tr>
+<tr><td>Aralık</td><td>range</td><td><code>ws["A1:C10"]</code>, <code>iter_rows()</code></td><td><code>usecols="A:C"</code>, <code>nrows=10</code></td></tr>
+</table></div>
+<p>Hücre adresi (cell address) harf + sayıdır: <code>B2</code> 2. satır, 2. sütun demektir. Sütun harfleri 26 tabanlı ama sıfırsız bir sayma sistemidir: A=1 … Z=26, AA=27, AZ=52, BA=53. Bu yüzden "harfi sayıya çevir" işlemi klasik bir mülakat sorusudur ve Excel otomasyonunda sürekli lazım olur.</p>
+<pre class="py">def sutun_no(harfler):
+    no = 0
+    for ch in harfler.upper():
+        no = no * 26 + (ord(ch) - ord("A") + 1)
+    return no
+
+for h in ["A", "Z", "AA", "AZ", "BA", "XFD"]:
+    print(h, "→", sutun_no(h))</pre>
+<p>Son satırdaki <code>XFD</code> Excel'in en son sütunudur (16.384). Bir sayfada en fazla 1.048.576 satır bulunur; daha büyük veri için Excel doğru araç değildir.</p>
+
+<h2>openpyxl ile rapor yazmak</h2>
+<p>openpyxl tarayıcı motorunda çalışmaz; aşağıdaki kodu kendi bilgisayarında dene. Mantığını ise birazdan tarayıcıda çalışan alıştırmalarla kuracaksın.</p>
+<pre class="code">from openpyxl import Workbook
+from openpyxl.styles import Font, PatternFill, Alignment
+from openpyxl.chart import BarChart, Reference
+
+wb = Workbook()
+ws = wb.active
+ws.title = "Şehir Özeti"
+
+ws["A1"] = "Anadolu Market — Haftalık Ciro"
+ws.merge_cells("A1:C1")                       # başlığı üç sütuna yay
+ws["A1"].font = Font(size=14, bold=True)
+ws["A1"].alignment = Alignment(horizontal="center")
+
+ws.append(["Şehir", "Sipariş", "Ciro"])       # 2. satır: başlıklar
+for satir in [["İzmir", 42, 18250.5], ["Ankara", 35, 15100.0], ["Bursa", 18, 7420.75]]:
+    ws.append(satir)
+
+ws["A6"] = "TOPLAM"
+ws["B6"] = "=SUM(B3:B5)"                      # formül metin olarak yazılır
+ws["C6"] = "=SUM(C3:C5)"
+
+baslik = PatternFill("solid", fgColor="DDEBF7")
+for hucre in ws[2]:                            # 2. satırın tüm hücreleri
+    hucre.font = Font(bold=True)
+    hucre.fill = baslik
+for satir in ws.iter_rows(min_row=3, min_col=3, max_col=3):
+    satir[0].number_format = "#,##0.00"        # binlik ayraç + 2 ondalık
+
+ws.column_dimensions["A"].width = 16
+ws.freeze_panes = "A3"                        # başlıklar kaydırınca sabit kalsın
+
+grafik = BarChart()
+grafik.title = "Şehre göre ciro"
+veri = Reference(ws, min_col=3, min_row=2, max_row=5)
+etiket = Reference(ws, min_col=1, min_row=3, max_row=5)
+grafik.add_data(veri, titles_from_data=True)
+grafik.set_categories(etiket)
+ws.add_chart(grafik, "E2")
+
+wb.save("haftalik_rapor.xlsx")</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install openpyxl</code> (pandas ile Excel yazmak için de gerekir). Dosyayı Excel ya da LibreOffice ile açıp sonucu gör. Tarayıcıdaki motorda openpyxl bulunmaz.</div>
+<p>Okumak için <code>load_workbook</code> kullanılır. <code>iter_rows(values_only=True)</code> hücre nesneleri yerine doğrudan değerleri demet (tuple) olarak verir; veriyi işlemenin en pratik yoludur:</p>
+<pre class="code">from openpyxl import load_workbook
+
+wb = load_workbook("stok.xlsx", data_only=True)   # formül yerine son hesaplanan değer
+ws = wb["Depo"]
+print(ws.max_row, ws.max_column)
+for urun, adet, fiyat in ws.iter_rows(min_row=2, values_only=True):
+    if adet is None:          # boş hücre None gelir
+        continue
+    print(urun, adet * fiyat)</pre>
+<div class="warn"><b>openpyxl formül hesaplamaz</b><code>ws["B6"] = "=SUM(B3:B5)"</code> yazdığında dosyaya yalnızca formül metni gider; değeri Excel dosyayı açınca hesaplar. <code>data_only=True</code> ile okuduğunda ise Excel'in en son kaydettiği değeri görürsün. Dosyayı hiç Excel'de açılmamış (yalnız Python'la üretilmiş) bir formül hücresi <code>None</code> döner. Değere kodda ihtiyacın varsa toplamı Python'da hesapla.</div>
+
+<h3>Hücreleri kod içinde modellemek</h3>
+<p>openpyxl'in yaptığı iş özünde "adres → değer" eşlemesidir. Bunu bir sözlükle taklit edersen hem mantığı kavrar hem de raporu test edilebilir hale getirirsin: önce sözlüğü üret ve test et, en son tek bir fonksiyonla Excel'e dök.</p>
+<pre class="py">def harf(n):
+    s = ""
+    while n &gt; 0:
+        n, kalan = divmod(n - 1, 26)
+        s = chr(65 + kalan) + s
+    return s
+
+satirlar = [["Şehir", "Ciro"], ["İzmir", 18250.5], ["Ankara", 15100.0]]
+sayfa = {}
+for r, satir in enumerate(satirlar, start=1):
+    for c, deger in enumerate(satir, start=1):
+        sayfa[f"{harf(c)}{r}"] = deger
+son = len(satirlar)
+sayfa[f"A{son + 1}"] = "TOPLAM"
+sayfa[f"B{son + 1}"] = f"=SUM(B2:B{son})"
+for adres, deger in sayfa.items():
+    print(adres, deger)</pre>
+
+<h2>Formüller: İngilizce ad, virgül ayraç</h2>
+<p>Türkçe Excel'de <code>=TOPLA(B2;B10)</code> görürsün ama dosyanın içinde formüller her zaman <b>İngilizce ad</b> ve <b>virgül ayraç</b> ile saklanır. Excel açılırken arayüz diline çevirir. Bu yüzden openpyxl ile Türkçe formül yazarsan Excel <code>#AD?</code> (#NAME?) hatası gösterir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Türkçe arayüz</th><th>Dosyaya yazılacak</th><th>Örnek</th></tr>
+<tr><td>TOPLA</td><td>SUM</td><td><code>=SUM(C2:C50)</code></td></tr>
+<tr><td>ORTALAMA</td><td>AVERAGE</td><td><code>=AVERAGE(C2:C50)</code></td></tr>
+<tr><td>EĞER</td><td>IF</td><td><code>=IF(C2&gt;1000,"Büyük","Küçük")</code></td></tr>
+<tr><td>ETOPLA</td><td>SUMIF</td><td><code>=SUMIF(A:A,"İzmir",C:C)</code></td></tr>
+<tr><td>EĞERSAY</td><td>COUNTIF</td><td><code>=COUNTIF(A:A,"Ankara")</code></td></tr>
+<tr><td>DÜŞEYARA</td><td>VLOOKUP</td><td><code>=VLOOKUP(A2,Fiyat!A:B,2,FALSE)</code></td></tr>
+</table></div>
+<pre class="py">TR_EN = {"TOPLA": "SUM", "ORTALAMA": "AVERAGE", "EĞERSAY": "COUNTIF"}
+
+def formul(islev, sutun, ilk, son):
+    ad = TR_EN.get(islev.upper(), islev.upper())
+    return f"={ad}({sutun}{ilk}:{sutun}{son})"
+
+print(formul("TOPLA", "C", 2, 41))
+print(formul("average", "D", 2, 41))</pre>
+
+<h2>pandas ile Excel: tablo düzeyinde iş</h2>
+<p>Hücre biçimiyle değil, veriyle ilgileniyorsan pandas çok daha kısadır. pandas'ı ileri seviyede derinlemesine göreceksin; burada Excel'e özgü kısımlar yeterli.</p>
+<pre class="code">import pandas as pd
+
+df = pd.read_excel("satislar.xlsx", sheet_name="Ekim", usecols="A:D", dtype={"musteri_no": str})
+tum = pd.read_excel("satislar.xlsx", sheet_name=None)   # {sayfa_adı: DataFrame} sözlüğü
+birlesik = pd.concat(tum.values(), keys=tum.keys(), names=["ay", None]).reset_index(level=0)
+
+ozet = df.pivot_table(index="sehir", columns="kategori", values="tutar", aggfunc="sum", fill_value=0)
+
+with pd.ExcelWriter("rapor.xlsx", engine="openpyxl") as yazici:
+    df.to_excel(yazici, sheet_name="Ham Veri", index=False)
+    ozet.to_excel(yazici, sheet_name="Özet")
+    yazici.sheets["Özet"].column_dimensions["A"].width = 18   # openpyxl sayfasına erişim</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pandas openpyxl</code>. pandas <code>.xlsx</code> okumak ve yazmak için arka planda openpyxl kullanır; eski <code>.xls</code> için <code>xlrd</code> gerekir.</div>
+<p>Tarayıcıda Excel dosyası yazamayız ama aynı pivot mantığını CSV ile çalıştırabiliriz. Rapor üretiminin "hesap" kısmı her iki durumda da aynıdır:</p>
+<pre class="py">import io
+import pandas as pd
+
+csv_metni = """sehir,ay,tutar
+İzmir,Eylül,1200
+İzmir,Ekim,1500
+Ankara,Ekim,900
+Ankara,Ekim,300
+Bursa,Eylül,450
+"""
+df = pd.read_csv(io.StringIO(csv_metni))
+ozet = df.pivot_table(index="sehir", columns="ay", values="tutar", aggfunc="sum", fill_value=0)
+print(ozet)
+print(ozet.reset_index().to_csv(index=False))</pre>
+
+<h2>openpyxl mi, xlsxwriter mı, CSV mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Okur</th><th>Yazar</th><th>Güçlü yanı</th><th>Zayıf yanı</th></tr>
+<tr><td>openpyxl</td><td>Evet</td><td>Evet</td><td>Var olan dosyayı açıp değiştirme, şablon doldurma</td><td>Büyük dosyada yavaş, formül hesaplamaz</td></tr>
+<tr><td>xlsxwriter</td><td>Hayır</td><td>Evet</td><td>Hızlı, zengin grafik ve koşullu biçim</td><td>Yalnız yeni dosya; var olanı düzenleyemez</td></tr>
+<tr><td>pandas</td><td>Evet</td><td>Evet</td><td>Tablo dönüştürme, pivot, çok sayfa</td><td>Hücre stili için alttaki motora inmen gerekir</td></tr>
+<tr><td>CSV</td><td>Evet</td><td>Evet</td><td>Evrensel, hızlı, satır satır akış</td><td>Tek sayfa, stil/formül/tip yok</td></tr>
+</table></div>
+<p>Kural: sistemden sisteme veri taşıyorsan <b>CSV</b> (ya da Parquet); insanların okuyacağı biçimli bir rapor üretiyorsan <b>XLSX</b>. Şirket şablonunu doldurmak gerekiyorsa openpyxl, sıfırdan büyük ve grafikli rapor için xlsxwriter (<code>pip install xlsxwriter</code>, <code>pd.ExcelWriter(..., engine="xlsxwriter")</code>).</p>
+
+<h2>Türkçe sayı ve tarih biçimleri</h2>
+<p>Excel bir sayıyı içeride her zaman sayı olarak tutar; <code>1.234,56</code> yalnızca <b>görünüştür</b> (number format). Sorun, birileri Türkçe Excel'den CSV aldığında ya da hücreye sayıyı metin olarak yapıştırdığında başlar: <code>"1.234,56"</code> metni <code>float()</code> ile çevrilemez. Doğru sıra önemlidir: önce binlik noktalarını sil, sonra ondalık virgülünü noktaya çevir.</p>
+<pre class="py">def tr_coz(metin):
+    temiz = metin.strip().replace("TL", "").strip()
+    return float(temiz.replace(".", "").replace(",", "."))
+
+def tr_yaz(sayi):
+    s = f"{sayi:,.2f}"                       # 1,234,567.89
+    return s.replace(",", "_").replace(".", ",").replace("_", ".")
+
+print(tr_coz("1.234,56"), tr_coz("  -12,5 TL"))
+print(tr_yaz(1234567.891), tr_yaz(0.5))</pre>
+<p>pandas'ta aynı iş parametreyle yapılır: <code>pd.read_csv(yol, sep=";", decimal=",", thousands=".", encoding="utf-8-sig")</code>. Türkçe Excel CSV'yi noktalı virgülle ayırır, çünkü virgül ondalık işaretidir. <code>utf-8-sig</code> ise Excel'in dosya başına koyduğu BOM işaretini temizler; bunu json-csv dersinde de görmüştün.</p>
+<p>Tarihler ise Excel'de <b>seri numarası</b> olarak saklanır: 1899-12-30'dan bu yana geçen gün sayısı. Bazen tarih sütunu <code>45000</code> gibi sayılarla gelir; bunu şöyle çevirirsin:</p>
+<pre class="py">from datetime import date, timedelta, datetime
+
+def excel_tarih(seri):
+    return date(1899, 12, 30) + timedelta(days=int(seri))
+
+print(excel_tarih(45000), excel_tarih(46323))
+print(datetime.strptime("28.10.2026", "%d.%m.%Y").date())
+print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
+<div class="tip"><b>Biçim ve değer ayrı tutulur</b>openpyxl'de hücreye <code>date</code> nesnesi yaz ve <code>number_format = "DD.MM.YYYY"</code> ver; tarihi metin olarak yazma. Böylece Excel'de sıralama, filtre ve tarih formülleri çalışır.</div>
+
+<h2>Büyük dosyalar</h2>
+<p>openpyxl normal modda tüm dosyayı belleğe alır; 200 bin satırlık bir dosyada yüzlerce MB bellek kullanabilir. İki özel mod vardır:</p>
+<ul>
+<li><code>load_workbook(yol, read_only=True)</code>: satırları akış halinde okur; yalnızca <code>iter_rows</code> ile gezinirsin, hücre yazamazsın. İş bitince <code>wb.close()</code>.</li>
+<li><code>Workbook(write_only=True)</code>: yalnızca <code>ws.append()</code> ile sona satır eklersin; çok hızlı ve az bellekli yazım.</li>
+</ul>
+<p>pandas <code>read_excel</code> parça parça (chunk) okumayı desteklemez. Düzenli gelen büyük Excel dosyalarını bir kez CSV ya da Parquet'e çevirmek, sonraki işleri çok hızlandırır.</p>
+
+<h2>Rapor otomasyonunun adımları</h2>
+<div class="steps-list"><ol>
+<li><b>Girdiyi doğrula:</b> beklenen sayfa ve sütunlar var mı, tipler doğru mu? Eksikse anlaşılır bir hata ver.</li>
+<li><b>Temizle:</b> boş satırları at, Türkçe sayı/tarih metinlerini çevir, şehir adlarını standartlaştır.</li>
+<li><b>Hesapla:</b> özetleri Python/pandas ile hesapla ve test et; Excel formülüne güvenme.</li>
+<li><b>Yerleştir:</b> sonucu hücre sözlüğüne ya da DataFrame'e koy; toplam satırına okuyan kişi için formül de ekleyebilirsin.</li>
+<li><b>Biçimlendir:</b> başlık stili, sayı biçimi, sütun genişliği, dondurulmuş bölmeler, grafik.</li>
+<li><b>Kaydet ve dağıt:</b> tarihli dosya adı (<code>rapor_2026-10-26.xlsx</code>), arşiv klasörü, e-posta ya da paylaşım klasörü.</li>
+</ol></div>
+<div class="note"><b>Gerçek işte</b>Bir lojistik firmasının bölge müdürleri her sabah "dünkü teslimat başarısı" Excel'ini bekler. İyi kurulmuş otomasyon şablon dosyayı (<code>sablon.xlsx</code>) openpyxl ile açar, yalnızca veri hücrelerini doldurur, logoyu ve biçimleri olduğu gibi bırakır, dosyayı tarihli adla kaydeder. İş birimi tanıdığı görünümden vazgeçmek zorunda kalmaz, sen de biçimle uğraşmazsın.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: Power BI ve Excel köprüsü</h2><p>Çoğu kurumda Python tek başına rapor aracı değildir; sonuçlar Excel'e ya da Power BI panolarına gider. Python'un bu dünyaya üç kapısı var: Power BI içinde <b>Python betik kaynağı</b> ve <b>Python görseli</b>, Excel içinde <b>=PY</b> formülü ve en sağlamı, Python'un temizleyip Power BI'a hazır <b>yıldız şemalı dosyalar</b> (CSV/Parquet) üretmesi. Bu bölümde Kesit Power BI'ın kullandığı <code>kesit_bi</code> modelini ve Kesit SQL'in <code>anadolu_market</code> tablolarını kullanacaksın; ikisi aynı kurgusal şirketin iki görünümü.</p><h3>Power BI'da Python: betik kaynağı ve görsel</h3><p><b>Veri al → Diğer → Python betiği</b> ile yazdığın betik çalışır ve betik bittiğinde ad alanındaki <b>her pandas DataFrame</b> ayrı bir tablo olarak seçime sunulur. Power BI Desktop, bilgisayarındaki Python yorumlayıcısını kullanır (Seçenekler → Python betiği oluşturma); pandas ve matplotlib orada kurulu olmalıdır. <b>Python görseli</b> ise rapor sayfasında çalışır: seçtiğin alanlar <code>dataset</code> adlı DataFrame olarak gelir, sen matplotlib ile çizersin.</p><pre class="code"># Power BI → Veri al → Python betiği
+import pandas as pd
+satis = pd.read_csv(r"C:\veri\kesit_bi\Satislar.csv")
+satis = satis[satis["Durum"] != "İptal"]          # yalnız DataFrame'ler tablo olur
+ozet = satis.groupby("Kanal", as_index=False)["Tutar"].sum()
+
+# Python görseli (rapor sayfasında): Power BI "dataset" DataFrame'ini verir
+import matplotlib.pyplot as plt
+dataset.groupby("Kategori")["Tutar"].sum().sort_values().plot.barh()
+plt.show()</pre><div class="warn"><b>İki tuzak</b>1) Python görseline gelen <code>dataset</code> içinde <b>tekrarlanan satırlar silinir</b>; aynı ürün ve tutarlı iki satış tek satıra iner ve toplam yanlış çıkar. Alanlara benzersiz bir sütun (SatirNo) ekle. 2) Python kaynakları Power BI Hizmeti'nde (bulut) yenilenirken kişisel ağ geçidi ister; kurumsal yenilemelerde Python adımını Power BI dışına (zamanlanmış betik) taşımak daha sağlamdır.</div><h3>Excel'de Python: =PY</h3><p>Microsoft 365 Excel'de bir hücreye <code>=PY(</code> yazınca Python düzenleyicisi açılır. Kod Microsoft bulutunda (Anaconda dağıtımıyla) çalışır; yerel dosyalara ve internete erişemez. Hücre aralığı <code>xl("A1:D100", headers=True)</code> ile DataFrame olarak gelir; sonuç hücreye değer ya da Excel tablosu olarak dökülür.</p><pre class="code">=PY(
+df = xl("Satislar[#All]", headers=True)
+df.groupby("Kanal")["Tutar"].sum()
+)</pre><h3>Yıldız şeması: Power BI'ın sevdiği biçim</h3><p>Power BI modeli en iyi <b>yıldız şemasıyla</b> çalışır: ortada olayları (satış satırları) tutan uzun ve dar bir <b>olgu tablosu</b> (fact), çevresinde tanımlayıcı bilgileri tutan <b>boyut tabloları</b> (dimension: Ürünler, Müşteriler, Tarih). Olgu tablosunda yalnız anahtarlar ve ölçülebilir sayılar (Adet, Tutar) bulunur; boyutlarda her anahtar <b>bir kez</b> geçer. Tek dev düz tablo yerine yıldız şeması: dosya küçülür, DAX ölçüleri doğru filtrelenir ve aynı boyut birden çok olguya bağlanabilir.</p><pre class="py">import veri
+
+satis = veri.oku("kesit_bi", "Satislar")
+urun = veri.oku("kesit_bi", "Urunler")
+musteri = veri.oku("kesit_bi", "Musteriler")
+print("olgu:", satis.shape, "| ürün:", urun.shape, "| müşteri:", musteri.shape)
+
+# boyut anahtarları tekil mi? olgudaki her anahtarın boyutta karşılığı var mı?
+print(urun["UrunNo"].is_unique, musteri["MusteriNo"].is_unique)
+print(satis["UrunNo"].isin(urun["UrunNo"]).all(), satis["MusteriNo"].isin(musteri["MusteriNo"]).all())
+
+tablo = satis.merge(urun[["UrunNo", "Kategori"]], on="UrunNo", validate="many_to_one")
+print(tablo.groupby("Kategori")["Tutar"].sum().round(0).sort_values(ascending=False).head(3))</pre><p><code>validate="many_to_one"</code> birleştirmede boyut anahtarının tekil olduğunu denetler; tekil değilse hata verir. Bu tek parametre, raporda tutarların sessizce ikiye katlanmasını önler.</p><h3>Düz tablodan yıldız şemasına</h3><p>Kaynak sistemden çoğu zaman tek bir düz (denormalize) dışa aktarım gelir. Python'un işi: boyutları ayırmak (<code>drop_duplicates</code>), anahtarları denetlemek, bir <b>tarih boyutu</b> üretmek ve dosyaları Power BI'ın sorunsuz okuyacağı biçimde yazmaktır. Anadolu Market'in SQL tablolarını birleştirip yeniden ayıralım:</p><pre class="py">kalem = veri.oku("anadolu_market", "order_items")
+siparis = veri.oku("anadolu_market", "orders")
+urunler = veri.oku("anadolu_market", "products")
+duz = (kalem.merge(siparis, on="order_id")
+            .merge(urunler[["product_id", "name", "category"]], on="product_id"))
+print(duz.shape)
+
+dim_urun = duz[["product_id", "name", "category"]].drop_duplicates().sort_values("product_id")
+olgu = duz[["item_id", "order_id", "order_date", "product_id", "quantity", "unit_price", "discount"]].copy()
+olgu["TarihKey"] = olgu["order_date"].str.replace("-", "").astype(int)   # 20240131 biçimi
+olgu["tutar"] = (olgu["quantity"] * olgu["unit_price"] * (1 - olgu["discount"])).round(2)
+print(dim_urun.shape, olgu.shape)
+print(olgu[["TarihKey", "tutar"]].head(3))</pre><div class="tbl-wrap"><table><tr><th>Biçim</th><th>Artısı</th><th>Dikkat</th></tr><tr><td>CSV (UTF-8)</td><td>Her yerde açılır, okunabilir</td><td>Tür bilgisi yok; tarih ISO (YYYY-AA-GG), ondalık nokta, <code>index=False</code>. Excel'de açılacaksa <code>encoding="utf-8-sig"</code>.</td></tr><tr><td>Parquet</td><td>Tür bilgisi, sıkıştırma, hızlı; Power BI doğrudan okur</td><td><code>df.to_parquet("olgu.parquet")</code> için pyarrow gerekir</td></tr><tr><td>Excel (.xlsx)</td><td>İş kullanıcısı için tanıdık</td><td>1.048.576 satır sınırı; büyük olgu tablosu için uygun değil</td></tr></table></div><div class="note"><b>Gerçek işte</b>Analist ekiplerinin yaygın düzeni: Python (zamanlanmış betik ya da boru hattı (pipeline)) kaynakları çeker ve temizler, yıldız şemalı Parquet/CSV dosyalarını paylaşılan klasöre ya da veri ambarına yazar; Power BI bu dosyalara bağlanır ve yalnız modelleme ile DAX işini yapar. Böylece ağır dönüşümler sürüm kontrolündeki Python kodunda kalır. Modelleme, ilişkiler ve DAX ölçülerinin devamı Kesit Power BI'da; bu tablolar orada da aynı adlarla seni bekliyor.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Hesap Python'da, sunum Excel'de</h3>
+<p>Olgun otomasyonlarda hesap mantığı saf Python fonksiyonlarındadır (test edilebilir), Excel katmanı ince bir "yazıcı"dır. Bu derste hücre sözlüğü kurmanın nedeni budur: <code>{"B7": "=SUM(B2:B6)"}</code> sözlüğünü birim testle doğrularsın, openpyxl'e döken 5 satırlık fonksiyon nadiren hata yapar.</p>
+<h3>Formülleri yeniden hesaplatmak</h3>
+<p>Formül değerlerine Python'dan ihtiyacın varsa ya değeri kendin hesaplarsın ya da dosyayı hesaplayan bir programdan geçirirsin: LibreOffice'in başsız (headless) modu ya da Windows'ta Excel'i süren <code>xlwings</code>. Sunucu ortamında Excel kurulu olmadığı için genelde ilk yol seçilir.</p>
+<h3>Güvenlik ve sürdürülebilirlik</h3>
+<ul>
+<li><code>.xlsm</code> dosyaları makro içerir; openpyxl makroları çalıştırmaz, <code>keep_vba=True</code> ile yalnızca korur.</li>
+<li>Kullanıcıdan gelen metinler <code>=</code> ile başlıyorsa Excel onu formül sanar (CSV/formula injection). Dışa aktarırken başına <code>'</code> eklemek ya da metin tipini zorlamak yaygın önlemdir.</li>
+<li>Aynı girdi aynı dosyayı üretmeli (idempotent): sabit sıralama, sabit sayfa sırası, tarih <code>datetime.now()</code> yerine parametre.</li>
+</ul>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/excel-otomasyon">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../cli-araclari/">← Komut satırı araçları: argparse, click, rich ve boru hatları</a><a href="../http-api/">HTTP ve REST API istemcisi: requests, httpx ve dayanıklı istekler →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

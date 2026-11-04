@@ -1,0 +1,212 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İç içe veri yapıları | Kesit Python</title><meta name="description" content="Liste içinde sözlük, sözlük içinde liste ve JSON benzeri derin yapılarda gezinir; güvenli erişim, güncelleme, gruplama, düzleştirme, tablo gibi yazdırma…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ic-ice-veri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İç içe veri yapıları"><meta property="og:description" content="Liste içinde sözlük, sözlük içinde liste ve JSON benzeri derin yapılarda gezinir; güvenli erişim, güncelleme, gruplama, düzleştirme, tablo gibi yazdırma…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ic-ice-veri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İç içe veri yapıları","description":"Liste içinde sözlük, sözlük içinde liste ve JSON benzeri derin yapılarda gezinir; güvenli erişim, güncelleme, gruplama, düzleştirme, tablo gibi yazdırma…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/ic-ice-veri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>İç içe veri yapıları</h1><p class="st-l">Liste içinde sözlük, sözlük içinde liste ve JSON benzeri derin yapılarda gezinir; güvenli erişim, güncelleme, gruplama, düzleştirme, tablo gibi yazdırma ve sığ/derin kopya tuzağını Anadolu Market verisiyle öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ic-ice-veri">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Gerçek veri düz değildir</h2>
+<p>Şimdiye kadar tek bir liste ya da tek bir sözlükle çalıştın. Gerçek işte veri neredeyse hiç böyle gelmez. Anadolu Market'in sipariş sisteminden gelen bir kayıt düşün: siparişin bir müşterisi var, müşterinin bir adresi var, siparişin içinde birden fazla ürün kalemi var, her kalemin adedi ve fiyatı var. Bu bilgi doğal olarak <b>iç içe</b> (nested) bir yapıdır: sözlüğün içinde sözlük, onun içinde liste, listenin içinde yine sözlük.</p>
+<p>Web servislerinden (API) gelen JSON yanıtları, yapılandırma dosyaları, e-ticaret sepetleri, banka hesap hareketleri; hepsi bu biçimdedir. Bu derste iç içe yapıları okumayı, güvenle erişmeyi, değiştirmeyi ve analiz için düzleştirmeyi öğreneceksin. Listeler ve Sözlükler derslerinde gördüğün her şey burada birleşiyor.</p>
+
+<h2>Kayıt listesi: liste içinde sözlük</h2>
+<p>En yaygın yapı budur: her eleman bir kayıt (satır), her kayıt bir sözlük (sütun adı → değer). Bir Excel tablosunun Python karşılığı diye düşünebilirsin.</p>
+<pre class="py">siparisler = [
+    {"no": "AM-101", "musteri": "Ayşe", "sehir": "İzmir", "tutar": 1499.9},
+    {"no": "AM-102", "musteri": "Mehmet", "sehir": "Ankara", "tutar": 250.0},
+    {"no": "AM-103", "musteri": "Zeynep", "sehir": "İzmir", "tutar": 89.5},
+]
+print(len(siparisler), "sipariş")
+print(siparisler[0]["musteri"])          # ilk kaydın müşterisi
+for s in siparisler:
+    if s["sehir"] == "İzmir":
+        print(s["no"], s["tutar"])
+toplam = 0
+for s in siparisler:
+    toplam += s["tutar"]
+print("Toplam:", round(toplam, 2))</pre>
+<p>Okuma kuralı basit: önce köşeli parantezle <b>hangi kayıt</b> (indeks), sonra <b>hangi alan</b> (anahtar). <code>siparisler[0]["musteri"]</code> "0. kaydın musteri alanı" demektir. Döngüde ise <code>s</code> zaten tek bir sözlüktür; doğrudan <code>s["tutar"]</code> yazarsın.</p>
+
+<h2>Sözlük içinde liste</h2>
+<p>Ters yön de çok kullanılır: bir anahtarın altında birden fazla değer tutmak. Bir müşterinin sipariş numaraları, bir şehrin şube listesi, bir ürünün etiketleri.</p>
+<pre class="py">musteri = {
+    "no": "M-101",
+    "ad": "Ayşe Yılmaz",
+    "siparisler": ["AM-101", "AM-117"],
+    "etiketler": ["sadık", "kampanya"],
+}
+musteri["siparisler"].append("AM-130")     # iç listeye ekle
+print(musteri["siparisler"])
+print(len(musteri["siparisler"]), "sipariş")
+print("sadık" in musteri["etiketler"])
+print(musteri["siparisler"][-1])           # son sipariş</pre>
+<p><code>musteri["siparisler"]</code> bir liste döndürür; ona <code>.append</code>, <code>len</code>, <code>in</code>, dilim gibi tüm liste işlemlerini uygulayabilirsin. İç listeyi değiştirdiğinde sözlüğün içindeki liste değişir, çünkü ikisi aynı nesnedir.</p>
+
+<h2>Derin yapılarda gezinme: yolu adım adım yaz</h2>
+<p>Gerçek bir sipariş kaydı daha derindir. Aşağıdaki yapı, bir API'den gelen JSON yanıtının tipik görünümüdür.</p>
+<pre class="py">siparis = {
+    "no": "AM-205",
+    "musteri": {
+        "ad": "Ayşe Yılmaz",
+        "adres": {"sehir": "İzmir", "ilce": "Konak"},
+    },
+    "kalemler": [
+        {"urun": "Kahve makinesi", "adet": 1, "fiyat": 1499.9},
+        {"urun": "Filtre kağıdı", "adet": 3, "fiyat": 45.0},
+    ],
+}
+print(siparis["musteri"]["adres"]["sehir"])
+print(siparis["kalemler"][1]["urun"])
+print(type(siparis["kalemler"]), type(siparis["kalemler"][0]))
+toplam = 0
+for k in siparis["kalemler"]:
+    toplam += k["adet"] * k["fiyat"]
+print("Sipariş toplamı:", round(toplam, 2))</pre>
+<p>Derin bir değere ulaşmak için yolu soldan sağa okursun: <code>siparis</code> → <code>["musteri"]</code> (sözlük) → <code>["adres"]</code> (sözlük) → <code>["sehir"]</code> (metin). Her adımda elindeki şeyin türünü bil: sözlükse anahtar, listeyse indeks kullanırsın. Kaybolduğunda bir ara adımı <code>print(type(...))</code> ile yazdır; bu, deneyimli geliştiricilerin de en çok kullandığı yöntemdir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Elindeki şey</th><th>Sonraki adım</th></tr>
+<tr><td><code>siparis</code></td><td>sözlük</td><td>anahtar: <code>["kalemler"]</code></td></tr>
+<tr><td><code>siparis["kalemler"]</code></td><td>liste</td><td>indeks: <code>[1]</code> ya da <code>for</code></td></tr>
+<tr><td><code>siparis["kalemler"][1]</code></td><td>sözlük</td><td>anahtar: <code>["urun"]</code></td></tr>
+<tr><td><code>siparis["kalemler"][1]["urun"]</code></td><td>metin</td><td>metin işlemleri</td></tr>
+</table></div>
+
+<h2>Güvenli erişim: .get zinciri</h2>
+<p>Gerçek veride alanlar eksik olabilir: bazı müşterilerin adresi girilmemiştir, bazı siparişlerde indirim alanı yoktur. Köşeli parantez eksik anahtarda <code>KeyError</code> verir ve tüm rapor durur. Sözlükler dersinde <code>get</code> ile varsayılan değeri gördün; iç içe yapıda bunu <b>zincirlersin</b>.</p>
+<pre class="py">musteriler = [
+    {"ad": "Ayşe", "adres": {"sehir": "İzmir"}},
+    {"ad": "Mehmet"},                       # adres yok
+    {"ad": "Zeynep", "adres": {}},          # adres var, şehir yok
+]
+for m in musteriler:
+    sehir = m.get("adres", {}).get("sehir", "Bilinmiyor")
+    print(m["ad"], "→", sehir)</pre>
+<p>Püf noktası ara adımdaki varsayılan: <code>m.get("adres", {})</code>. Adres yoksa boş sözlük döner ve ikinci <code>.get</code> onun üzerinde güvenle çalışır. Varsayılanı yazmazsan <code>None</code> döner ve <code>None.get(...)</code> <code>AttributeError</code> verir. Listede eksik olabilecek bir indeks için de benzer bir kontrol yaparsın: <code>kalemler[0] if kalemler else None</code>.</p>
+<div class="warn"><b>get zinciri her şeyi çözmez</b>Zincirin ara adımı bazen anahtar eksikliği değil <b>None</b> değeri olarak gelir: <code>{"adres": None}</code>. Bu durumda <code>.get("adres", {})</code> yine None döndürür, çünkü anahtar vardır. Kirli veride <code>(m.get("adres") or {}).get("sehir")</code> yazmak daha dayanıklıdır: <code>or</code>, None'ı da boş sözlükle değiştirir.</div>
+<p>Çok derin yollar için küçük bir yardımcı fonksiyon yazmak işini kolaylaştırır. Yolu bir liste olarak verirsin; fonksiyon her adımda bir sonraki katmana iner, bir adım bulunamazsa varsayılanı döndürür.</p>
+<pre class="py">def derin_al(veri, yol, varsayilan=None):
+    for adim in yol:
+        try:
+            veri = veri[adim]
+        except (KeyError, IndexError, TypeError):
+            return varsayilan
+    return veri
+
+siparis = {"musteri": {"adres": {"sehir": "İzmir"}}, "kalemler": [{"urun": "Çay"}]}
+print(derin_al(siparis, ["musteri", "adres", "sehir"]))
+print(derin_al(siparis, ["kalemler", 0, "urun"]))
+print(derin_al(siparis, ["kalemler", 5, "urun"], "yok"))
+print(derin_al(siparis, ["musteri", "telefon"], "yok"))</pre>
+<p>Buradaki <code>try/except</code> yapısını Hatalar dersinde ayrıntılı göreceksin; şimdilik "bu adım patlarsa varsayılanı döndür" diye oku.</p>
+
+<h2>İç içe yapıyı güncellemek</h2>
+<p>Okuduğun yolun aynısıyla yazabilirsin. Son adıma atama yaparsan değer değişir; iç listeye <code>append</code> yaparsan eleman eklenir.</p>
+<pre class="py">siparis = {
+    "no": "AM-205",
+    "durum": "hazırlanıyor",
+    "musteri": {"ad": "Ayşe", "adres": {"sehir": "İzmir"}},
+    "kalemler": [{"urun": "Çay", "adet": 2, "fiyat": 120.0}],
+}
+siparis["durum"] = "kargoda"
+siparis["musteri"]["adres"]["ilce"] = "Bornova"          # yeni alan
+siparis["kalemler"][0]["adet"] += 1                       # adet 3 oldu
+siparis["kalemler"].append({"urun": "Bardak", "adet": 6, "fiyat": 25.0})
+siparis.setdefault("notlar", []).append("Kapıya bırak")   # liste yoksa oluştur
+print(siparis["musteri"]["adres"])
+print(len(siparis["kalemler"]), siparis["kalemler"][0]["adet"])
+print(siparis["notlar"])</pre>
+<p><code>setdefault(anahtar, [])</code> çok kullanışlıdır: anahtar yoksa boş liste koyup onu döndürür, varsa mevcut listeyi döndürür. Böylece "liste var mı yok mu" kontrolünü tek satırda geçersin.</p>
+
+<h2>Gruplama: şehre göre sipariş listesi</h2>
+<p>Sözlükler dersinde sayım kalıbını gördün: her şehirde kaç sipariş var. Gruplama bir adım ötesidir: her şehrin <b>siparişlerinin kendisini</b> bir listede toplarsın. Sonuç sözlük içinde liste yapısıdır.</p>
+<pre class="py">siparisler = [
+    {"no": "AM-101", "sehir": "İzmir", "tutar": 1499.9},
+    {"no": "AM-102", "sehir": "Ankara", "tutar": 250.0},
+    {"no": "AM-103", "sehir": "İzmir", "tutar": 89.5},
+    {"no": "AM-104", "sehir": "Bursa", "tutar": 3200.0},
+]
+gruplar = {}
+for s in siparisler:
+    gruplar.setdefault(s["sehir"], []).append(s["no"])
+print(gruplar)
+for sehir, nolar in gruplar.items():
+    print(sehir, len(nolar), nolar)</pre>
+<p>Aynı işi <code>if s["sehir"] not in gruplar: gruplar[s["sehir"]] = []</code> diye iki satırla da yazabilirsin; <code>setdefault</code> bunun kısaltmasıdır. Orta seviyede <code>collections.defaultdict(list)</code> ile daha da kısalacak. Sık yapılan hata, <code>gruplar[sehir] = [no]</code> yazıp her seferinde listeyi sıfırlamaktır.</p>
+
+<h2>Düzleştirme: iç içe veriyi tabloya çevirmek</h2>
+<p>Analiz ve raporlama için çoğu zaman <b>düz</b> (flat) bir tablo istersin: her satır bir kalem, her sütun bir alan. Bu, pandas'a ya da Excel'e aktarmanın da ön adımıdır. İç içe döngüyle dış kaydın bilgisini her iç satıra taşırsın.</p>
+<pre class="py">siparisler = [
+    {"no": "AM-101", "sehir": "İzmir",
+     "kalemler": [{"urun": "Çay", "adet": 2, "fiyat": 120.0},
+                  {"urun": "Bardak", "adet": 6, "fiyat": 25.0}]},
+    {"no": "AM-102", "sehir": "Ankara",
+     "kalemler": [{"urun": "Kahve", "adet": 1, "fiyat": 350.0}]},
+]
+satirlar = []
+for s in siparisler:
+    for k in s["kalemler"]:
+        satirlar.append({
+            "no": s["no"], "sehir": s["sehir"], "urun": k["urun"],
+            "tutar": k["adet"] * k["fiyat"],
+        })
+print(len(satirlar), "satır")
+for r in satirlar:
+    print(r)</pre>
+
+<h2>Tablo gibi yazdırmak</h2>
+<p>Düz satırları ekranda okunur göstermek için f-string hizalaması kullan: <code>:&lt;12</code> sola, <code>:&gt;10</code> sağa yaslar, <code>:.2f</code> iki ondalık verir. Metinler sola, sayılar sağa hizalanır; muhasebe raporlarının da kuralı budur.</p>
+<pre class="py">satirlar = [
+    {"no": "AM-101", "urun": "Çay", "tutar": 240.0},
+    {"no": "AM-101", "urun": "Bardak", "tutar": 150.0},
+    {"no": "AM-102", "urun": "Kahve", "tutar": 350.0},
+]
+print(f"{'Sipariş':&lt;8} {'Ürün':&lt;10} {'Tutar':&gt;8}")
+print("-" * 28)
+for r in satirlar:
+    print(f"{r['no']:&lt;8} {r['urun']:&lt;10} {r['tutar']:&gt;8.2f}")
+print("-" * 28)
+print(f"{'TOPLAM':&lt;19} {sum(r['tutar'] for r in satirlar):&gt;8.2f}")</pre>
+<div class="tip"><b>Tırnak karışıklığı</b>f-string içinde sözlük anahtarı yazarken dıştaki tırnakla aynı tırnağı kullanma: <code>f"{r['no']}"</code> doğru, eski sürümlerde <code>f"{r["no"]}"</code> SyntaxError verir. Python 3.12 bunu kabul etse de karışık tırnak alışkanlığı her sürümde çalışır. Biçimlendirmenin tüm ayrıntısını String biçimleme dersinde göreceksin.</div>
+<p>Bir yapının içini hızlıca görmek için iki araç daha var: <code>pprint.pprint(veri)</code> iç içe yapıyı girintili yazdırır, <code>json.dumps(veri, indent=2, ensure_ascii=False)</code> JSON görünümü verir. Hata ayıklarken ikisi de hayat kurtarır.</p>
+
+<h2>Sığ kopya, derin kopya tuzağı</h2>
+<p>Listeler dersinde atamanın kopya olmadığını gördün. İç içe yapıda bir adım daha var: <code>.copy()</code> yalnızca <b>en dış katmanı</b> kopyalar. Bu sığ kopyadır (shallow copy); içteki listeler ve sözlükler hâlâ paylaşılır.</p>
+<pre class="py">import copy
+
+katalog = {"Çay": {"fiyat": 120.0, "etiket": ["içecek"]}}
+sig = katalog.copy()
+derin = copy.deepcopy(katalog)
+
+sig["Çay"]["fiyat"] = 99.0           # iç sözlük paylaşılıyor!
+derin["Çay"]["etiket"].append("kampanya")
+
+print(katalog["Çay"]["fiyat"])        # orijinal de değişti: 99.0
+print(katalog["Çay"]["etiket"])       # orijinal etkilenmedi
+print(sig["Çay"] is katalog["Çay"], derin["Çay"] is katalog["Çay"])</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Yöntem</th><th>Dış katman</th><th>İç katmanlar</th><th>Ne zaman</th></tr>
+<tr><td><code>b = a</code></td><td>Paylaşılır</td><td>Paylaşılır</td><td>Kopya istemiyorsan, aynı nesneye ikinci ad</td></tr>
+<tr><td><code>a.copy()</code>, <code>list(a)</code>, <code>a[:]</code></td><td>Yeni</td><td>Paylaşılır</td><td>Yapı düzse (sayı, metin elemanlar)</td></tr>
+<tr><td><code>copy.deepcopy(a)</code></td><td>Yeni</td><td>Yeni</td><td>İç içe yapıyı bağımsız değiştireceksen</td></tr>
+</table></div>
+<p>Aynı tuzak <code>[[0] * 3] * 3</code> ile tablo kurarken de karşına çıkar: üç satır aynı iç listedir, birini değiştirince hepsi değişir. Doğrusu her satırı ayrı oluşturmaktır: <code>[[0] * 3 for _ in range(3)]</code>.</p>
+<div class="note"><b>Gerçek işte</b>Bir veri analisti ya da backend geliştiricisi gününün önemli kısmını iç içe JSON'la geçirir: ödeme sağlayıcısının webhook mesajı, kargo firmasının takip yanıtı, CRM'den gelen müşteri kaydı. Tipik iş akışı hep aynıdır: yanıtı al, <code>.get</code> zinciriyle eksik alanlara dayanıklı oku, ihtiyacın olan alanları düz satırlara çevir, sonra raporla ya da veritabanına yaz. Kampanya fiyatı hesaplarken orijinal kataloğu sığ kopyayla bozmak ise canlı sistemde yaşanan klasik hatalardandır; fiyat ekranı birden yanlış göstermeye başlar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Ne kadar iç içe olmalı?</h3>
+<p>İç içelik veriyi doğal gösterir ama her katman okumayı zorlaştırır. Üç-dört katmandan derin yapılar genellikle tasarım kokusudur. Veritabanı mantığında veriyi <b>normalize</b> edersin: müşterileri ayrı bir sözlükte (<code>{"M-101": {...}}</code>), siparişleri ayrı bir listede tutar, siparişte yalnızca <code>"musteri_no"</code> saklarsın. Gerektiğinde sözlükten anında bulursun. Bu, SQL'deki JOIN'in Python karşılığıdır ve aynı müşteri bilgisinin yüz siparişte kopyalanmasını önler.</p>
+<pre class="py">musteriler = {"M-1": {"ad": "Ayşe", "sehir": "İzmir"}, "M-2": {"ad": "Mehmet", "sehir": "Ankara"}}
+siparisler = [{"no": "AM-1", "musteri_no": "M-1", "tutar": 300}, {"no": "AM-2", "musteri_no": "M-2", "tutar": 120}]
+for s in siparisler:
+    m = musteriler.get(s["musteri_no"], {})
+    print(s["no"], m.get("ad", "?"), m.get("sehir", "?"), s["tutar"])</pre>
+<h3>Sözlükten sınıfa</h3>
+<p><code>s["musteri"]["adres"]["sehir"]</code> yazarken anahtarı yanlış yazarsan hata ancak çalışırken ortaya çıkar. Orta seviyede <code>dataclass</code> ile kayıtları sınıfa çevirip <code>s.musteri.adres.sehir</code> yazacak, editörün otomatik tamamlamasından ve tip denetiminden yararlanacaksın. Dış dünyadan gelen JSON'u sınıflara çevirmek için de pydantic gibi kütüphaneler kullanılır.</p>
+<h3>Bilinmeyen derinlik</h3>
+<p>Bazen yapının kaç katman olduğunu bilmezsin: klasör ağacı, kategori ağacı, organizasyon şeması. Bunları gezmek için ya bir yığın (stack) ile döngü kurarsın ya da fonksiyonun kendini çağırdığı özyinelemeyi (recursion) kullanırsın. Özyineleme dersinde iç içe listenin toplamını ve klasör ağacını tam bu tekniklerle gezeceksin.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ic-ice-veri">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../dongu-kaliplari/">← Döngü kalıpları ve temel algoritmalar</a><a href="../match-case/">match-case: yapısal desen eşleme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

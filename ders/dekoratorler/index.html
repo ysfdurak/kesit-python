@@ -1,0 +1,394 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Dekoratörler (decorators) ve bağlam yöneticileri (context managers) | Kesit Python</title><meta name="description" content="Fonksiyonu saran fonksiyon fikrinden dekoratöre, functools.wraps ve parametreli dekoratöre geçer; zamanlama, loglama, yeniden deneme ve lru_cache yazar;…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dekoratorler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Dekoratörler (decorators) ve bağlam yöneticileri (context managers)"><meta property="og:description" content="Fonksiyonu saran fonksiyon fikrinden dekoratöre, functools.wraps ve parametreli dekoratöre geçer; zamanlama, loglama, yeniden deneme ve lru_cache yazar;…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dekoratorler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Dekoratörler (decorators) ve bağlam yöneticileri (context managers)","description":"Fonksiyonu saran fonksiyon fikrinden dekoratöre, functools.wraps ve parametreli dekoratöre geçer; zamanlama, loglama, yeniden deneme ve lru_cache yazar;…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/dekoratorler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Dekoratörler (decorators) ve bağlam yöneticileri (context managers)</h1><p class="st-l">Fonksiyonu saran fonksiyon fikrinden dekoratöre, functools.wraps ve parametreli dekoratöre geçer; zamanlama, loglama, yeniden deneme ve lru_cache yazar; with, contextlib.contextmanager ve sınıf tabanlı bağlam yöneticisi kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dekoratorler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın işlem servisinde on farklı fonksiyon var: para transferi, bakiye sorgusu, kredi başvurusu... Hepsinde aynı üç şey isteniyor: çağrı loglansın, süresi ölçülsün, geçici hata olursa yeniden denensin. Bu üç davranışı on fonksiyona tek tek kopyalamak hem tekrar hem bakım kâbusudur. Dekoratör (decorator), bir fonksiyonu alıp etrafına davranış ekleyen ve yeni fonksiyon döndüren bir araçtır; <code>@zamanla</code> yazarsın, iş biter. Bağlam yöneticisi (context manager) ise aynı fikrin "bir blok öncesi ve sonrası" sürümüdür: dosyayı aç ve ne olursa olsun kapat, bağlantıyı kur ve bırak, işlemi başlat ve hata olursa geri al. İkisi de önceki dersteki closure ve "fonksiyon bir değerdir" fikrinin üstüne kuruludur.</p>
+
+<h2>Fonksiyonu saran fonksiyon</h2>
+<p>Dekoratör mekanizmasını önce elle kur. Bir fonksiyon alan, içinde onu çağıran yeni bir fonksiyon tanımlayan ve bu yeni fonksiyonu döndüren bir fonksiyon yaz.</p>
+<pre class="py">def logla(fonk):
+    def sarici(*args, **kwargs):
+        print(f"-&gt; {fonk.__name__} çağrıldı, args={args}")
+        sonuc = fonk(*args, **kwargs)
+        print(f"&lt;- {fonk.__name__} bitti, sonuç={sonuc}")
+        return sonuc
+    return sarici
+
+def transfer(kaynak, hedef, tutar):
+    return f"{kaynak}-&gt;{hedef}: {tutar}"
+
+transfer = logla(transfer)      # elle sarmalama
+print(transfer("TR1", "TR2", 500))</pre>
+<p>Üç parça: <code>sarici</code> her türlü argümanı kabul etsin diye <code>*args, **kwargs</code> alır; asıl fonksiyonu çağırıp sonucunu <b>döndürür</b> (unutulursa dekore edilen fonksiyon None vermeye başlar); <code>logla</code> sarıcıyı döndürür. <code>transfer = logla(transfer)</code> satırı, ismi yeni fonksiyona bağlar. Python bu satırı yazmanın kısa yolunu sunar:</p>
+<pre class="py">def logla(fonk):
+    def sarici(*args, **kwargs):
+        print(f"-&gt; {fonk.__name__}")
+        return fonk(*args, **kwargs)
+    return sarici
+
+@logla
+def bakiye_sorgu(hesap):
+    return 12500
+
+print(bakiye_sorgu("TR1"))
+print(bakiye_sorgu.__name__)   # sarici! asıl adı kayboldu</pre>
+<p><code>@logla</code>, tam olarak <code>bakiye_sorgu = logla(bakiye_sorgu)</code> demektir; <code>def</code> biter bitmez uygulanır. Son satır bir sorunu gösteriyor: dekore edilen fonksiyonun adı ve docstring'i sarıcınınkiyle değişti. Hata izlerinde, yardım metinlerinde ve testlerde bu kafa karıştırır.</p>
+
+<h2>functools.wraps: kimliği koru</h2>
+<pre class="py">from functools import wraps
+
+def logla(fonk):
+    @wraps(fonk)
+    def sarici(*args, **kwargs):
+        print(f"-&gt; {fonk.__name__}")
+        return fonk(*args, **kwargs)
+    return sarici
+
+@logla
+def bakiye_sorgu(hesap):
+    """Hesabın güncel bakiyesini döndürür."""
+    return 12500
+
+print(bakiye_sorgu.__name__)
+print(bakiye_sorgu.__doc__)
+print(bakiye_sorgu.__wrapped__("TR1"))   # dekoratörsüz asıl fonksiyon</pre>
+<div class="tip"><b>Kural</b>Her dekoratörün sarıcısına <code>@wraps(fonk)</code> koy. İstisnası yoktur; unutmak kod incelemesinde (code review) kesin bir not getirir.</div>
+
+<h2>Parametreli dekoratör: üç katman</h2>
+<p>"3 kez yeniden dene" gibi ayar alan dekoratör için bir katman daha gerekir: dıştaki fonksiyon ayarı alır ve asıl dekoratörü döndürür. <code>@yeniden_dene(3)</code> önce <code>yeniden_dene(3)</code>'ü çağırır, dönen dekoratör fonksiyona uygulanır.</p>
+<pre class="py">from functools import wraps
+
+def yeniden_dene(deneme):
+    def dekorator(fonk):
+        @wraps(fonk)
+        def sarici(*args, **kwargs):
+            son_hata = None
+            for i in range(1, deneme + 1):
+                try:
+                    return fonk(*args, **kwargs)
+                except ConnectionError as e:
+                    son_hata = e
+                    print(f"  deneme {i} başarısız: {e}")
+            raise son_hata
+        return sarici
+    return dekorator
+
+sayac = {"cagri": 0}
+
+@yeniden_dene(3)
+def banka_servisi():
+    sayac["cagri"] += 1
+    if sayac["cagri"] &lt; 3:
+        raise ConnectionError("zaman aşımı")
+    return "OK"
+
+print(banka_servisi())
+print("toplam çağrı:", sayac["cagri"])</pre>
+<p>Katmanları ezberleme, oku: ayar → dekoratör → sarıcı. Sarıcı asıl işi yapar; dekoratör sarıcıyı üretir; en dıştaki katman ayarı closure'a hapseder. Gerçek sistemlerde denemeler arasına <code>time.sleep</code> ile artan bekleme konur; burada çıktıyı sade tutmak için atlandı.</p>
+
+<h2>İş hayatından dört dekoratör</h2>
+<h3>Zamanlama</h3>
+<pre class="py">import time
+from functools import wraps
+
+def zamanla(fonk):
+    @wraps(fonk)
+    def sarici(*args, **kwargs):
+        t0 = time.perf_counter()
+        try:
+            return fonk(*args, **kwargs)
+        finally:
+            sure = time.perf_counter() - t0
+            print(f"{fonk.__name__}: {sure:.4f} sn")
+    return sarici
+
+@zamanla
+def toplam_ciro(siparisler):
+    return sum(s["tutar"] for s in siparisler)
+
+veri = [{"tutar": i % 500} for i in range(200_000)]
+print(toplam_ciro(veri))</pre>
+<p>Ölçülen süre her çalıştırmada farklı çıkar; bu doğaldır. <code>finally</code> sayesinde fonksiyon hata fırlatsa da süre basılır. <code>time.perf_counter</code>, süre ölçümü için <code>time.time</code>'dan daha hassastır.</p>
+
+<h3>Önbellek: functools.lru_cache</h3>
+<p>Aynı argümanla tekrar tekrar çağrılan pahalı bir fonksiyonun sonucunu hatırlamak için dekoratör yazmana gerek yok; standart kütüphanede hazır.</p>
+<pre class="py">from functools import lru_cache
+
+hesap_sayisi = {"n": 0}
+
+@lru_cache(maxsize=128)
+def kur_sorgula(para_birimi):
+    hesap_sayisi["n"] += 1       # "pahalı" servis çağrısını temsil eder
+    return {"USD": 32.5, "EUR": 35.1}[para_birimi]
+
+for pb in ["USD", "EUR", "USD", "USD", "EUR"]:
+    kur_sorgula(pb)
+print("gerçek hesap:", hesap_sayisi["n"])
+print(kur_sorgula.cache_info())
+kur_sorgula.cache_clear()
+
+@lru_cache(maxsize=None)
+def fib(n):
+    return n if n &lt; 2 else fib(n - 1) + fib(n - 2)
+print(fib(80))</pre>
+<div class="warn"><b>lru_cache'in sınırları</b>Argümanlar hashlenebilir olmalı: liste ya da sözlük geçiremezsin (demet ya da frozenset kullan). Sonuç zamanla değişiyorsa (kur, stok) önbellek bayatlar; süreli önbellek için ayrı çözüm gerekir. Ve <code>maxsize=None</code> sınırsız bellek demektir; uzun süren süreçlerde sınır koy.</div>
+
+<h3>Loglama ve yetki kontrolü</h3>
+<p>Dekoratörler üst üste konabilir; en yakındaki önce uygulanır. Aşağıda <code>yetki_gerekli</code> önce <code>transfer</code>'i sarar, sonra <code>logla</code> o sarılmış hali sarar.</p>
+<pre class="py">from functools import wraps
+
+def logla(fonk):
+    @wraps(fonk)
+    def sarici(*args, **kwargs):
+        print(f"[LOG] {fonk.__name__} {kwargs}")
+        return fonk(*args, **kwargs)
+    return sarici
+
+def yetki_gerekli(fonk):
+    @wraps(fonk)
+    def sarici(*args, kullanici, **kwargs):
+        if kullanici.get("rol") != "yonetici":
+            raise PermissionError(f"{kullanici['ad']} yetkisiz")
+        return fonk(*args, kullanici=kullanici, **kwargs)
+    return sarici
+
+@logla
+@yetki_gerekli
+def transfer(tutar, *, kullanici):
+    return f"{tutar} TL gönderildi"
+
+print(transfer(500, kullanici={"ad": "Ayşe", "rol": "yonetici"}))
+try:
+    transfer(500, kullanici={"ad": "Ali", "rol": "stajyer"})
+except PermissionError as e:
+    print("Hata:", e)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyaç</th><th>Araç</th><th>Not</th></tr>
+<tr><td>Çağrıları kaydet</td><td>Kendi <code>logla</code> dekoratörün</td><td>Gerçekte <code>logging</code> modülüne yazar</td></tr>
+<tr><td>Süre ölç</td><td><code>zamanla</code> + <code>perf_counter</code></td><td>finally ile hata durumunda da ölç</td></tr>
+<tr><td>Geçici hatada tekrar</td><td><code>yeniden_dene(n)</code></td><td>Yalnız geçici hataları yakala; mantık hatasını tekrarlama</td></tr>
+<tr><td>Sonucu hatırla</td><td><code>functools.lru_cache</code></td><td>Hashlenebilir argüman; bayatlama riski</td></tr>
+<tr><td>Kimlik koru</td><td><code>functools.wraps</code></td><td>Her sarıcıda zorunlu</td></tr>
+<tr><td>Blok öncesi/sonrası</td><td>Bağlam yöneticisi</td><td>Kaynak aç/kapat, işlem başlat/bitir</td></tr>
+</table></div>
+
+<h2>with ve bağlam yöneticileri</h2>
+<p><code>with open(...) as f:</code> yazdığında Python iki şey garanti eder: bloğa girerken <code>__enter__</code> çağrılır (dosya açılır, dönen değer <code>f</code> olur), bloktan çıkarken, hata olsa bile, <code>__exit__</code> çağrılır (dosya kapanır). Bu "kur-kullan-temizle" kalıbı dosyadan çok daha geniş: veritabanı işlemi, kilit, geçici ayar, zaman ölçümü.</p>
+
+<h3>contextlib.contextmanager: üreteçten bağlam yöneticisi</h3>
+<p>En kısa yol, tek <code>yield</code> içeren bir üreteç (generator) fonksiyonunu <code>@contextmanager</code> ile süslemek. <code>yield</code>'den öncesi girişte, sonrası çıkışta çalışır; <code>yield</code> ettiğin değer <code>as</code> ile alınır.</p>
+<pre class="py">from contextlib import contextmanager
+
+@contextmanager
+def banka_islemi(hesap):
+    print("işlem başladı, bakiye:", hesap["bakiye"])
+    yedek = hesap["bakiye"]
+    try:
+        yield hesap
+        print("işlem onaylandı, bakiye:", hesap["bakiye"])
+    except Exception as e:
+        hesap["bakiye"] = yedek
+        print(f"hata ({e}); geri alındı, bakiye: {hesap['bakiye']}")
+
+hesap = {"bakiye": 1000}
+
+with banka_islemi(hesap) as h:
+    h["bakiye"] -= 300
+
+with banka_islemi(hesap) as h:
+    h["bakiye"] -= 900
+    if h["bakiye"] &lt; 0:
+        raise ValueError("yetersiz bakiye")
+
+print("son bakiye:", hesap["bakiye"])</pre>
+<p><code>try/except</code> <code>yield</code>'i sarar; blok içinde fırlayan hata, üreteçte tam <code>yield</code> satırında ortaya çıkar. Burada hatayı yutup geri alma yaptık; hatanın yukarı devam etmesini istiyorsan <code>except</code> bloğunun sonunda <code>raise</code> yaz ya da <code>try/finally</code> kullan.</p>
+
+<h3>Sınıf tabanlı bağlam yöneticisi</h3>
+<p>Durum karmaşıksa ya da nesnenin başka metotları da olacaksa <code>__enter__</code> ve <code>__exit__</code> metotlu bir sınıf yazarsın. <code>__exit__</code> üç argüman alır (hata türü, hata nesnesi, iz); hata yoksa üçü de None'dır. <code>True</code> döndürürse hata bastırılır.</p>
+<pre class="py">import time
+
+class Kronometre:
+    def __init__(self, etiket):
+        self.etiket = etiket
+        self.sure = None
+
+    def __enter__(self):
+        self.t0 = time.perf_counter()
+        return self
+
+    def __exit__(self, hata_turu, hata, iz):
+        self.sure = time.perf_counter() - self.t0
+        durum = "hata ile" if hata_turu else "başarıyla"
+        print(f"{self.etiket} {durum} bitti")
+        return False   # hatayı bastırma
+
+with Kronometre("rapor") as k:
+    toplam = sum(range(300_000))
+print("süre ölçüldü mü:", k.sure is not None, "| toplam:", toplam)
+
+try:
+    with Kronometre("hatalı iş"):
+        raise ValueError("beklenmedik")
+except ValueError as e:
+    print("dışarıda yakalandı:", e)</pre>
+<div class="note"><b>Birden çok bağlam</b><code>with A() as a, B() as b:</code> ikisini sırayla açar ve ters sırayla kapatır. Python 3.10 ve sonrasında parantezle çok satıra bölebilirsin. <code>contextlib</code>'de ayrıca <code>suppress(FileNotFoundError)</code> (hatayı sessizce yut), <code>redirect_stdout</code> ve <code>ExitStack</code> gibi hazır yöneticiler vardır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: dekoratör ve bağlam yöneticisinin ince işleri</h2>
+<p>Sarıcı fonksiyonu, <code>functools.wraps</code>'u, parametreli dekoratörü, <code>lru_cache</code>'i ve bağlam yöneticilerini gördün. Bu bölüm, çerçevelerin (Flask, pytest, Click) içinde her gün karşılaştığın ama nadiren açıklanan noktaları topluyor: dekoratörün <b>ne zaman</b> çalıştığı, kayıt (registry) dekoratörleri, üst üste dekoratörlerin çalışma sırası, hem parantezli hem parantezsiz kullanılabilen dekoratörler, önbelleği yönetmek ve <code>contextlib</code>'in az bilinen araçları. Sınıfın içindeki <code>@property</code>, <code>@staticmethod</code> gibi yerleşik dekoratörler <b>Kapsülleme ve özellikler</b> dersinde, metasınıflar ve sınıf dekoratörlerinin derini <b>Metaprogramlama</b> dersinde.</p>
+
+<h3>Dekoratör tanım anında çalışır</h3>
+<p><code>@dekorator</code> satırı fonksiyon <b>tanımlanırken</b>, yani modül yüklenirken (import anında) bir kez çalışır; sarıcı ise her çağrıda çalışır. Bu fark sayesinde "kayıt dekoratörü" yazabilirsin: fonksiyonu hiç sarmadan bir sözlüğe ekler ve aynen geri döndürür. Flask'ın <code>@app.route("/")</code>'u ve pytest'in fikstürleri bu kalıbı kullanır.</p>
+<pre class="py">RAPORLAR = {}
+
+def rapor(ad):
+    def kaydet(fonk):
+        print(f"kayıt: {ad} → {fonk.__name__}")
+        RAPORLAR[ad] = fonk
+        return fonk                 # sarmadan aynen döndür
+    return kaydet
+
+@rapor("ciro")
+def ciro_raporu(veri):
+    return sum(veri)
+
+@rapor("adet")
+def adet_raporu(veri):
+    return len(veri)
+
+print("Program başladı, kayıtlı raporlar:", list(RAPORLAR))
+for ad in ["adet", "ciro"]:
+    print(ad, "=", RAPORLAR[ad]([120, 80, 300]))
+</pre>
+<div class="tip"><b>if/elif yerine kayıt</b>Yeni bir rapor eklemek için ana programa dokunmazsın; yeni fonksiyonu yazar, üstüne <code>@rapor("yeni")</code> koyarsın. Ana program yalnız <code>RAPORLAR</code> sözlüğünü dolaşır.</div>
+
+<h3>Üst üste dekoratörler: içten dışa sarar, dıştan içe çalışır</h3>
+<p><code>@a</code> üstte, <code>@b</code> altta ise sonuç <code>a(b(f))</code> olur: önce b sarar, sonra a onu sarar. Çağrı geldiğinde ise en dıştaki (a) sarıcı ilk çalışır. Bu yüzden sıra anlamlıdır: yetki kontrolü önbellekten <b>önce</b> (daha dışta) olmalı, yoksa yetkisiz kullanıcı önbellekteki sonucu alır.</p>
+<pre class="py">from functools import wraps
+
+def etiket(ad):
+    def dekorator(fonk):
+        @wraps(fonk)
+        def sarici(*args, **kwargs):
+            print(f"{ad} girdi")
+            sonuc = fonk(*args, **kwargs)
+            print(f"{ad} çıktı")
+            return sonuc
+        return sarici
+    return dekorator
+
+@etiket("DIŞ")
+@etiket("İÇ")
+def hesapla():
+    print("  asıl iş")
+    return 42
+
+print(hesapla())
+</pre>
+
+<h3>Parantezli de parantezsiz de çalışan dekoratör</h3>
+<p>Parametreli dekoratörde <code>@logla</code> yazıp parantezi unutmak sık hatadır. Bazı kütüphaneler iki kullanımı da kabul eder: <code>@logla</code> ve <code>@logla(onek="BANKA")</code>. Hile: ilk parametre fonksiyon olarak gelirse doğrudan sar, gelmezse (yalnız anahtar sözcüklü argümanlar) dekoratör döndür. Ayarların <code>*</code> sonrasında yalnız anahtar sözcükle verilmesi bu ayrımı güvenli kılar.</p>
+<pre class="py">from functools import wraps
+
+def logla(fonk=None, *,):
+    def dekorator(f):
+        @wraps(f)
+        def sarici(*args, **kwargs):
+            print(f"[{onek}] {f.__name__}{args}")
+            return f(*args, **kwargs)
+        return sarici
+    if fonk is None:            # @logla(onek=...) biçimi
+        return dekorator
+    return dekorator(fonk)      # @logla biçimi
+
+@logla
+def topla(a, b):
+    return a + b
+
+@logla(onek="BANKA")
+def faiz(anapara, oran):
+    return round(anapara * oran, 2)
+
+print(topla(2, 3), faiz(10000, 0.035))
+</pre>
+
+<h3>Önbelleği yönetmek</h3>
+<p><code>@lru_cache(maxsize=128)</code> sınırlı sayıda sonuç tutar ve en uzun süredir kullanılmayanı atar; <code>@functools.cache</code> (3.9+) sınırsız sürümdür. Dekore edilen fonksiyona iki metot eklenir: <code>cache_info()</code> isabet (hit) ve ıska (miss) sayılarını verir, <code>cache_clear()</code> önbelleği boşaltır. Kur tablosu gibi zamanla değişen veride önbelleği gün başında temizlemek gerekir.</p>
+<pre class="py">from functools import lru_cache
+
+@lru_cache(maxsize=2)
+def kur(birim):
+    print("  servisten çekildi:", birim)
+    return {"USD": 34.2, "EUR": 37.1, "GBP": 44.0}[birim]
+
+for b in ["USD", "USD", "EUR", "GBP", "USD"]:
+    kur(b)
+print(kur.cache_info())
+kur.cache_clear()
+print("Temizlendi:", kur.cache_info().currsize)
+</pre>
+<div class="warn"><b>Önbellek ve değiştirilebilir sonuç</b>Önbellekli fonksiyon liste ya da sözlük döndürüyorsa her çağrı <b>aynı nesneyi</b> verir. Çağıranlardan biri onu değiştirirse sonraki herkes bozuk veriyi alır. Değiştirilemez tür (tuple, frozenset) döndür ya da çağıran taraf kopya alsın. Argümanların da hashlenebilir olması gerekir: liste değil demet ver.</div>
+
+<h3>contextlib araç kutusu</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne yapar?</th><th>Örnek kullanım</th></tr>
+<tr><td><code>@contextmanager</code></td><td>Üreteçten bağlam yöneticisi</td><td>Geçici ayar, zamanlama</td></tr>
+<tr><td><code>suppress(*hatalar)</code></td><td>Belirtilen hataları sessizce yutar</td><td><code>with suppress(FileNotFoundError): os.remove(y)</code></td></tr>
+<tr><td><code>ExitStack</code></td><td>Sayısı çalışma anında belli olan bağlamları tek yerde toplar</td><td>Klasördeki tüm dosyaları aynı anda açmak</td></tr>
+<tr><td><code>redirect_stdout(f)</code></td><td>print çıktısını başka akışa yönlendirir</td><td>Eski fonksiyonun çıktısını yakalamak</td></tr>
+<tr><td><code>closing(nesne)</code></td><td>Çıkışta <code>nesne.close()</code> çağırır</td><td>with desteklemeyen eski bağlantılar</td></tr>
+<tr><td><code>nullcontext()</code></td><td>Hiçbir şey yapmayan bağlam</td><td>Koşullu kilit/işlem</td></tr>
+</table></div>
+<p>Sınıf tabanlı bağlam yöneticisinde <code>__exit__</code>'in <b>dönüş değeri</b> önemlidir: <code>True</code> döndürürse bloktaki hata yutulur, <code>False</code>/<code>None</code> ise hata yukarı çıkar. <code>suppress</code> tam olarak bunu yapar.</p>
+<pre class="py">import io
+from contextlib import suppress, ExitStack, redirect_stdout
+
+class HataSay:
+    def __init__(self, *turler):
+        self.turler, self.sayi = turler, 0
+    def __enter__(self):
+        return self
+    def __exit__(self, tur, deger, iz):
+        if tur is not None and issubclass(tur, self.turler):
+            self.sayi += 1
+            return True           # hatayı yut
+        return False
+
+sayac = HataSay(ValueError)
+for ham in ["10", "x", "7", "?"]:
+    with sayac:
+        print("geçerli:", int(ham))
+print("yutulan hata:", sayac.sayi)
+
+with suppress(KeyError):
+    {}["yok"]
+print("suppress sonrası devam")
+
+with ExitStack() as yigin:
+    dosyalar = [yigin.enter_context(io.StringIO(f"şube {i}")) for i in range(3)]
+    print([f.read() for f in dosyalar])
+
+tampon = io.StringIO()
+with redirect_stdout(tampon):
+    print("bu ekrana değil tampona")
+print("yakalandı:", tampon.getvalue().strip())
+</pre>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal kodda dekoratörler çoğu zaman sen yazmadan önce oradadır: web çerçevesinde <code>@app.route</code> ve <code>@login_required</code>, testte <code>@pytest.fixture</code> ve <code>@pytest.mark.parametrize</code>, komut satırında <code>@click.command</code>, veri hatlarında <code>@task</code>. Bu kalıpların hepsi bu bölümdeki iki fikre dayanır: kayıt dekoratörü (tanım anında listeye ekle) ve sarıcı (her çağrıda önce/sonra iş yap). Kendi yazacağın dekoratörler genelde üç türdür: tekrar deneme, zamanlama/loglama ve yetki kontrolü. Her birine <code>@wraps</code> eklemeyi unutursan loglarda bütün fonksiyonların adı "sarici" görünür ve hata ayıklamak zorlaşır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sınıf tabanlı dekoratör ve metot dekoratörleri</h3>
+<p>Dekoratör, çağrılabilir herhangi bir şey olabilir; <code>__call__</code> metodu olan bir sınıf da. Çağrı sayısı gibi durumu tutmak için bu yol closure'dan daha açıktır. Sınıf metotlarını dekore ederken <code>self</code> sarıcının <code>*args</code>'ının ilk öğesi olarak gelir; bu yüzden <code>*args, **kwargs</code> kalıbı metotlarda da sorunsuz çalışır. <code>@property</code>, <code>@staticmethod</code>, <code>@classmethod</code> ve <code>@dataclass</code> zaten her gün kullandığın yerleşik dekoratörlerdir; OOP derslerinde ayrıntıya gireceksin.</p>
+<h3>Dekoratörün gizli maliyeti</h3>
+<p>Her dekoratör bir katman ekler; çok katmanlı dekoratör yığınlarında hata izleri uzar ve davranış "sihirli" görünmeye başlar. Ekip kuralı genellikle şudur: dekoratör yalnız fonksiyonun <b>işinden bağımsız</b> çapraz kaygıları (logging, cache, retry, yetki, ölçüm) taşısın; iş mantığı dekoratöre sızmasın. Test ederken <code>fonk.__wrapped__</code> ile dekoratörsüz hale erişebilmen için <code>wraps</code> şarttır.</p>
+<h3>İş hayatında nasıl görünür?</h3>
+<p>Web çerçevelerinde <code>@app.get("/siparis")</code> bir fonksiyonu URL'ye bağlar; pytest'te <code>@pytest.fixture</code> ve <code>@pytest.mark.parametrize</code> test davranışını şekillendirir; <code>tenacity</code> gibi paketler burada yazdığın yeniden deneme dekoratörünün üretim sürümüdür. Bağlam yöneticisi tarafında veritabanı kütüphanelerinin <code>with conn:</code> (otomatik commit/rollback), <code>threading.Lock</code>'un <code>with kilit:</code> kullanımı ve <code>tempfile.TemporaryDirectory</code> aynı kalıptır. Bir kaynağı açıp kapatan her kodu gördüğünde "bu bir bağlam yöneticisi olmalı" refleksi, Python'da olgunluğun işaretidir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dekoratorler">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../fonksiyonel/">← Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure)</a><a href="../siniflar-oop/">Sınıflar: veri ve davranışı bir arada tutmak →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

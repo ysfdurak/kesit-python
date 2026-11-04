@@ -1,0 +1,255 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Hatalar ve istisnalar | Kesit Python</title><meta name="description" content="Program çökmesin, anlamlı mesaj versin: hata türleri, traceback okuma, try/except/else/finally, raise ile kendi hatanı fırlatma ve savunmacı kod."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/hatalar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Hatalar ve istisnalar"><meta property="og:description" content="Program çökmesin, anlamlı mesaj versin: hata türleri, traceback okuma, try/except/else/finally, raise ile kendi hatanı fırlatma ve savunmacı kod."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/hatalar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Hatalar ve istisnalar","description":"Program çökmesin, anlamlı mesaj versin: hata türleri, traceback okuma, try/except/else/finally, raise ile kendi hatanı fırlatma ve savunmacı kod.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/hatalar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Dosya ve hata</span><h1>Hatalar ve istisnalar</h1><p class="st-l">Program çökmesin, anlamlı mesaj versin: hata türleri, traceback okuma, try/except/else/finally, raise ile kendi hatanı fırlatma ve savunmacı kod.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hatalar">Uygulamada aç, 22 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın gece çalışan rapor betiği, bir satırda tutar yerine "yok" yazdığı için saat 03:00'te çöktü ve sabah hiç rapor yoktu. Oysa o satırı atlayıp loga yazsa, kalan binlerce satır işlenirdi. Hata (error) kaçınılmazdır; mesele programın hatayı <b>nasıl karşıladığı</b>dır. Python'da hatalar <b>istisna</b> (exception) adlı nesnelerle temsil edilir ve yakalanabilir.</p>
+
+<h2>Hata mesajı (traceback) okuma</h2>
+<pre class="py">def ortalama(liste):
+    return sum(liste) / len(liste)
+
+try:
+    ortalama([])
+except Exception as e:
+    print(type(e).__name__, "->", e)</pre>
+<p>Bu kodu yakalamasaydık Python şöyle bir <b>traceback</b> basardı:</p>
+<pre class="out">Traceback (most recent call last):
+  File "rapor.py", line 5, in &lt;module&gt;
+    ortalama([])
+  File "rapor.py", line 2, in ortalama
+    return sum(liste) / len(liste)
+ZeroDivisionError: division by zero</pre>
+<p>Okuma sırası: <b>en alt satır</b> hatanın türü ve mesajıdır; hemen üstü hatanın oluştuğu satır; yukarı doğru çıktıkça oraya hangi çağrılarla gelindiğini görürsün. Önce en alta bak, sonra kendi dosyandaki ilk satırı bul.</p>
+
+<h2>Sık karşılaşılan hata türleri</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Hata</th><th>Ne zaman</th><th>Örnek</th></tr>
+<tr><td><code>SyntaxError</code></td><td>Kod daha çalışmadan: yazım hatası</td><td>eksik iki nokta, kapanmayan parantez</td></tr>
+<tr><td><code>NameError</code></td><td>Tanımsız ad</td><td><code>print(toplm)</code></td></tr>
+<tr><td><code>TypeError</code></td><td>Yanlış tür</td><td><code>"5" + 3</code></td></tr>
+<tr><td><code>ValueError</code></td><td>Tür doğru, değer uygunsuz</td><td><code>int("abc")</code></td></tr>
+<tr><td><code>KeyError</code></td><td>Sözlükte olmayan anahtar</td><td><code>musteri["telefon"]</code></td></tr>
+<tr><td><code>IndexError</code></td><td>Listede olmayan indeks</td><td><code>liste[10]</code></td></tr>
+<tr><td><code>ZeroDivisionError</code></td><td>Sıfıra bölme</td><td><code>toplam / 0</code></td></tr>
+<tr><td><code>FileNotFoundError</code></td><td>Dosya yok</td><td><code>open("yok.txt")</code></td></tr>
+<tr><td><code>AttributeError</code></td><td>Nesnede olmayan öznitelik</td><td><code>"abc".push("d")</code></td></tr>
+</table></div>
+
+<h2>try / except: hatayı yakala</h2>
+<p>Hata çıkabilecek kodu <code>try</code> bloğuna, hata olursa yapılacak işi <code>except</code> bloğuna yaz. Yakalayacağın hata türünü <b>açıkça</b> belirt; birden fazla tür için demet ya da ayrı except blokları kullan.</p>
+<pre class="py">ham_tutarlar = ["900.0", "820.5", "yok", "930", "", "45,50"]
+toplam = 0.0
+hatali = []
+
+for ham in ham_tutarlar:
+    try:
+        toplam += float(ham)
+    except ValueError:
+        hatali.append(ham)
+
+print("Toplam:", toplam)
+print("Atlanan değerler:", hatali)</pre>
+<pre class="py">musteri = {"ad": "Ayşe", "sehir": "Ankara"}
+alanlar = ["ad", "telefon", "sehir"]
+
+for alan in alanlar:
+    try:
+        print(alan, "=", musteri[alan])
+    except KeyError as e:
+        print("eksik alan:", e)
+
+try:
+    sonuc = 100 / int("0")
+except (ZeroDivisionError, ValueError) as e:
+    print("hesap yapılamadı:", type(e).__name__)</pre>
+<div class="warn"><b>Çıplak except yazma</b><code>except:</code> ya da <code>except Exception:</code> her şeyi yutar: yazım hatasını, yanlış değişken adını, kullanıcının Ctrl+C'sini bile. Hata gizlenir, program yanlış sonuçla sessizce devam eder. Hangi hatayı beklediğini biliyorsan onu yaz; bilmiyorsan muhtemelen yakalamamalısın.</div>
+
+<h2>else ve finally</h2>
+<ul>
+  <li><b>else</b>: try bloğu <b>hatasız</b> biterse çalışır. "Hata çıkabilecek kısım" ile "başarılıysa yapılacak kısım" ayrılır.</li>
+  <li><b>finally</b>: hata olsa da olmasa da, hatta except içinde return olsa bile <b>her zaman</b> çalışır. Kaynak kapatma, geçici dosya silme, "işlem bitti" logu için.</li>
+</ul>
+<pre class="py">def dosya_toplami(yol):
+    try:
+        f = open(yol, encoding="utf-8")
+    except FileNotFoundError:
+        print("dosya yok:", yol)
+        return 0
+    else:
+        toplam = sum(float(s) for s in f if s.strip())
+        print("okundu:", yol)
+        return toplam
+    finally:
+        print("işlem tamamlandı:", yol)
+
+with open("tutarlar.txt", "w", encoding="utf-8") as f:
+    f.write("100\n250.5\n\n49.5\n")
+
+print(dosya_toplami("tutarlar.txt"))
+print(dosya_toplami("olmayan.txt"))</pre>
+<p>Sıra sabittir: <code>try</code> → <code>except</code> (bir ya da daha çok) → <code>else</code> → <code>finally</code>. Gerçek kodda dosya için <code>with</code> kullanırsın; finally'nin yaptığı kapatma işini with zaten yapar.</p>
+
+<h2>raise: kendi hatanı fırlat</h2>
+<p>Fonksiyonun geçersiz girdi aldığında sessizce yanlış sonuç üretmesi, hata vermesinden kötüdür. <code>raise</code> ile uygun bir istisna fırlat; mesajı açıklayıcı yaz. Girdiyi fonksiyonun başında kontrol etmeye <b>savunmacı kod</b> (defensive programming) denir.</p>
+<pre class="py">def para_cek(bakiye, tutar):
+    if tutar &lt;= 0:
+        raise ValueError(f"tutar pozitif olmalı, gelen: {tutar}")
+    if tutar &gt; bakiye:
+        raise ValueError(f"yetersiz bakiye: {bakiye} &lt; {tutar}")
+    return bakiye - tutar
+
+print(para_cek(1000, 300))
+for deneme in (-5, 5000):
+    try:
+        para_cek(1000, deneme)
+    except ValueError as e:
+        print("RED:", e)</pre>
+<p>Hangi tür? Değer uygunsuzsa <code>ValueError</code>, tür yanlışsa <code>TypeError</code>, bir şey bulunamadıysa <code>KeyError</code>/<code>LookupError</code>. Orta seviyede kendi hata sınıflarını (<code>class YetersizBakiye(Exception)</code>) tanımlayacaksın.</p>
+<div class="tip"><b>Yakala ya da bırak</b>Bir hatayı yalnızca onunla ilgili <b>anlamlı bir şey yapabiliyorsan</b> yakala: atla, varsayılan kullan, kullanıcıya düzgün mesaj ver. Yapamıyorsan bırak yukarı çıksın; çağıran fonksiyon ya da ana program karar versin. except bloğunda yalnızca <code>raise</code> yazarak hatayı loglayıp yeniden fırlatabilirsin.</div>
+
+<h2>Savunmacı kod: EAFP ve LBYL</h2>
+<p>İki yaklaşım var. <b>LBYL</b> (look before you leap): önce kontrol et, sonra yap: <code>if "tutar" in kayit:</code>. <b>EAFP</b> (easier to ask forgiveness than permission): yap, hata çıkarsa yakala: <code>try: kayit["tutar"] except KeyError:</code>. Python topluluğu çoğunlukla EAFP'yi tercih eder; özellikle kontrol ile kullanım arasında durum değişebiliyorsa (dosya, ağ). Ama girdinin geçerliliğini fonksiyon başında <code>raise</code> ile doğrulamak her zaman iyidir.</p>
+<pre class="py">kayit = {"id": 1001, "tutar": "900.0"}
+
+# LBYL
+if "tutar" in kayit and kayit["tutar"].replace(".", "").isdigit():
+    print("LBYL:", float(kayit["tutar"]))
+
+# EAFP
+try:
+    print("EAFP:", float(kayit["tutar"]))
+except (KeyError, ValueError) as e:
+    print("geçersiz kayıt:", e)
+
+# dict.get ile varsayılan: en kısa yol
+print(kayit.get("sehir", "bilinmiyor"))</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: istisnaların aile ağacı ve sağlam hata akışı</h2>
+<p>try/except/else/finally ve raise'ı öğrendin. Şimdi PCEP/PCAP sınavlarının ve iş görüşmelerinin sevdiği, gerçek projelerde de sık hataya yol açan ayrıntılara bakıyoruz: istisnaların hiyerarşisi (hierarchy), except bloklarının sırası, istisna nesnesinin içi, yeniden fırlatma ve "tekrar dene" kalıbı. Kendi istisna sınıf ağacını kurmak, <code>raise ... from</code> ve logging ayrıntıları orta seviyedeki <b>Hata tasarımı</b> dersinde; traceback okuma teknikleri ise <b>Hata ayıklama (debugging)</b> dersinde.</p>
+
+<h3>İstisnalar bir aile ağacıdır</h3>
+<p>Her istisna bir sınıftır ve sınıflar birbirinden türer. <code>except X</code> yazdığında X'in kendisini <b>ve tüm alt türlerini</b> yakalarsın. Bu yüzden <code>except LookupError</code> hem KeyError'ı hem IndexError'ı yakalar; <code>except OSError</code> FileNotFoundError'ı da, PermissionError'ı da.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Üst sınıf</th><th>Alt sınıflardan bazıları</th><th>Ne zaman yakalanır?</th></tr>
+<tr><td><code>BaseException</code></td><td>SystemExit, KeyboardInterrupt, Exception</td><td>Neredeyse hiç; Ctrl+C ve sys.exit buradadır</td></tr>
+<tr><td><code>Exception</code></td><td>aşağıdakilerin hepsi</td><td>En üst seviyede "beklenmeyen hata" logu için</td></tr>
+<tr><td><code>ArithmeticError</code></td><td>ZeroDivisionError, OverflowError</td><td>Hesaplama hataları</td></tr>
+<tr><td><code>LookupError</code></td><td>KeyError, IndexError</td><td>"Aranan yok" durumları</td></tr>
+<tr><td><code>ValueError</code></td><td>UnicodeDecodeError</td><td>Tür doğru, değer uygunsuz</td></tr>
+<tr><td><code>OSError</code></td><td>FileNotFoundError, PermissionError, FileExistsError</td><td>Dosya ve işletim sistemi</td></tr>
+</table></div>
+<pre class="py">print(issubclass(KeyError, LookupError))          # True
+print(issubclass(FileNotFoundError, OSError))     # True
+print(issubclass(KeyboardInterrupt, Exception))   # False!
+print(KeyError.__mro__)                           # soy ağacı, alttan yukarı
+
+veriler = [{"ad": "Ayşe"}, [10, 20]]
+for veri, anahtar in [(veriler[0], "telefon"), (veriler[1], 5)]:
+    try:
+        print(veri[anahtar])
+    except LookupError as e:
+        print("Bulunamadı:", type(e).__name__, e)
+</pre>
+<div class="tip"><b>except Exception neden Ctrl+C'yi yakalamaz?</b>KeyboardInterrupt ve SystemExit bilerek Exception'ın dışında, doğrudan BaseException'ın altındadır. Böylece <code>except Exception</code> yazsan bile kullanıcı programı durdurabilir. Çıplak <code>except:</code> ise BaseException'ı da yakalar; bu yüzden tehlikelidir.</div>
+
+<h3>except sırası: özelden genele</h3>
+<p>Python except bloklarını <b>yukarıdan aşağıya</b> dener ve <b>ilk uyan</b> bloğu çalıştırır; diğerlerine bakmaz. Genel bir tür (Exception, LookupError) özel olandan önce gelirse özel blok asla çalışmaz. Python bu durumda uyarı vermez; hata sessizce yanlış mesajla sonuçlanır.</p>
+<pre class="py">def tutar_oku(kayit):
+    try:
+        return float(kayit["tutar"])
+    except KeyError:
+        return "tutar alanı yok"
+    except ValueError:
+        return "tutar sayı değil"
+    except Exception as e:                 # en sona: beklenmeyenler
+        return f"beklenmeyen: {type(e).__name__}"
+
+print(tutar_oku({"tutar": "250.5"}))
+print(tutar_oku({}))
+print(tutar_oku({"tutar": "yok"}))
+print(tutar_oku({"tutar": None}))         # float(None) → TypeError
+</pre>
+
+<h3>İstisna nesnesinin içi</h3>
+<p><code>except ValueError as e</code> ile aldığın <code>e</code> sıradan bir nesnedir: <code>type(e).__name__</code> hata adını, <code>str(e)</code> mesajı, <code>e.args</code> fırlatılırken verilen argümanları verir. Raporlama için ad + mesaj ikilisini kullan. Dikkat: <code>e</code> adı except bloğu bitince <b>silinir</b>; sonra lazımsa başka bir değişkene ata.</p>
+<pre class="py">son_hata = None
+try:
+    int("12,5")
+except ValueError as e:
+    print("Ad:", type(e).__name__)
+    print("Mesaj:", e)
+    print("args:", e.args)
+    son_hata = e                    # e blok sonunda silinecek, sakla
+
+print("Blok dışında:", repr(son_hata))
+print("'e' hâlâ var mı?", "e" in dir())
+</pre>
+
+<h3>Yeniden fırlatma ve kendi küçük istisnan</h3>
+<p>Bazen hatayı yakalayıp bir şey yapmak (log yazmak, sayaç artırmak) ama sonra yine de yukarı iletmek istersin. except içinde tek başına <code>raise</code> yazmak, yakalanan istisnayı traceback'iyle birlikte aynen yeniden fırlatır. İş kuralları için tek satırlık bir sınıf yeter: <code>class StokYetersiz(Exception): pass</code>. Çağıran taraf ValueError'larla karışmadan yalnızca bu durumu yakalayabilir.</p>
+<pre class="py">class StokYetersiz(Exception):
+    pass
+
+stok = {"kulaklık": 3, "kablo": 40}
+hata_sayaci = 0
+
+def satis_yap(urun, adet):
+    global hata_sayaci
+    try:
+        if stok[urun] &lt; adet:
+            raise StokYetersiz(f"{urun}: stok {stok[urun]}, istenen {adet}")
+        stok[urun] -= adet
+    except StokYetersiz:
+        hata_sayaci += 1
+        raise                       # say ve aynen yukarı ilet
+
+for urun, adet in [("kablo", 5), ("kulaklık", 10)]:
+    try:
+        satis_yap(urun, adet)
+        print("Satıldı:", urun)
+    except StokYetersiz as e:
+        print("Satış reddedildi →", e)
+print("Hata sayacı:", hata_sayaci, "| Stok:", stok)
+</pre>
+
+<h3>Tekrar dene (retry) kalıbı</h3>
+<p>Ağ, veritabanı ya da kilitli dosya gibi <b>geçici</b> hatalarda ikinci deneme çoğu zaman başarır. Kalıp: sınırlı sayıda dene, her başarısızlığı not et, son denemede de olmazsa hatayı yukarı ilet. Kalıcı hatalarda (ValueError gibi) tekrar denemek boşunadır; yalnız geçici olduğunu bildiğin türü yakala.</p>
+<pre class="py">cevaplar = iter([ConnectionError("zaman aşımı"), ConnectionError("bağlantı koptu"), "kur=34.2"])
+
+def kur_getir():                       # sahte servis: önce iki kez hata verir
+    c = next(cevaplar)
+    if isinstance(c, Exception):
+        raise c
+    return c
+
+for deneme in range(1, 4):
+    try:
+        sonuc = kur_getir()
+    except ConnectionError as e:
+        print(f"Deneme {deneme} başarısız: {e}")
+        if deneme == 3:
+            raise
+    else:
+        print(f"Deneme {deneme} başarılı: {sonuc}")
+        break
+</pre>
+<div class="warn"><b>finally içinde return yazma</b>finally bloğundaki <code>return</code>, try'da fırlayan istisnayı da, try'daki return değerini de <b>yutar</b>. Hata sessizce kaybolur. finally'yi yalnız temizlik için kullan (Python 3.14 bu kullanım için uyarı verir).</div>
+
+<div class="note"><b>Gerçek işte</b>Kurumsal bir veri betiğinde hata yönetimi üç katmanlıdır: (1) satır seviyesinde bozuk kaydı yakala, hatalılar listesine yaz ve devam et; (2) geçici dış hataları (bağlantı) sınırlı sayıda tekrar dene; (3) en üstte, ana fonksiyonda <code>except Exception</code> ile beklenmeyen her şeyi logla ve programı sıfırdan farklı bir çıkış koduyla bitir ki zamanlayıcı (cron, Airflow) işin başarısız olduğunu anlasın. Ortada kalan kod hatayı yakalamaz; yukarı akmasına izin verir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Hata bir mesajdır, gürültü değil</h3>
+<p>İyi bir hata mesajı ne beklendiğini, ne geldiğini ve mümkünse hangi kaydı söyler: <code>ValueError("satır 42: tutar sayı olmalı, gelen 'yok'")</code>. Gece çalışan betiğin loguna bakan kişi sorunu dakikalar içinde bulur.</p>
+<h3>Hata zinciri</h3>
+<p>Düşük seviye hatayı yakalayıp daha anlamlı bir hata fırlatırken <code>raise YeniHata(...) from e</code> yaz; traceback her iki hatayı da gösterir, asıl neden kaybolmaz.</p>
+<h3>Hataları say, sonra karar ver</h3>
+<p>Toplu veri işlerken ilk hatada durmak yerine hataları bir listede topla; iş bitince "1000 satırdan 3'ü atlandı" diye raporla. Kabul edilebilir hata oranı iş birimine göre değişir: kampanya e-postası için yüzde 1 sorun değil, banka mutabakatı için tek satır bile kabul edilmez. Bu kararı kodun değil, iş kuralının vermesi gerekir; sen sayıyı ölçülebilir hale getir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/hatalar">Alıştırmalara geç (22)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../dosya-islemleri/">← Dosya işlemleri</a><a href="../proje-temel/">Bitirme projesi: Anadolu Market sipariş raporu →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

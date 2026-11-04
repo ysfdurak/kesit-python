@@ -1,0 +1,232 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Mini projeler: oyunlar ve araçlar | Kesit Python</title><meta name="description" content="Sayı tahmin, adam asmaca, taş-kağıt-makas, şifre üretici, Sezar şifresi, hesap bölüşme ve ATM menüsünü gereksinimden tasarıma, adım adım inşadan teste…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-oyunlar/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Mini projeler: oyunlar ve araçlar"><meta property="og:description" content="Sayı tahmin, adam asmaca, taş-kağıt-makas, şifre üretici, Sezar şifresi, hesap bölüşme ve ATM menüsünü gereksinimden tasarıma, adım adım inşadan teste…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-oyunlar/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Mini projeler: oyunlar ve araçlar","description":"Sayı tahmin, adam asmaca, taş-kağıt-makas, şifre üretici, Sezar şifresi, hesap bölüşme ve ATM menüsünü gereksinimden tasarıma, adım adım inşadan teste…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/proje-oyunlar/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Bitirme</span><h1>Mini projeler: oyunlar ve araçlar</h1><p class="st-l">Sayı tahmin, adam asmaca, taş-kağıt-makas, şifre üretici, Sezar şifresi, hesap bölüşme ve ATM menüsünü gereksinimden tasarıma, adım adım inşadan teste kadar kurarak temel kavramları gerçek programlarda birleştirirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oyunlar">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden mini projeler?</h2>
+<p>Değişken, koşul, döngü, fonksiyon, liste ve sözlüğü tek tek öğrendin. Gerçek program ise bunların <b>birlikte</b> çalışmasıdır ve asıl beceri boş bir dosyaya bakıp "nereden başlayacağım?" sorusunu yanıtlayabilmektir. Bu derste yedi küçük, eğlenceli ama ciddi biçimde tasarlanmış proje yapacağız. Her biri aynı dört adımı izler:</p>
+<div class="steps-list"><ol>
+<li><b>Gereksinimler:</b> program tam olarak ne yapmalı? Kenar durumlar neler?</li>
+<li><b>Tasarım:</b> işi hangi fonksiyonlara bölerim? Hangisi hesap yapar, hangisi kullanıcıyla konuşur?</li>
+<li><b>Adım adım inşa:</b> en küçük çalışan parçayı yaz, dene, sonra büyüt.</li>
+<li><b>Test:</b> fonksiyonları tek tek, oyun döngüsünü hazır girdilerle dene.</li>
+</ol></div>
+<div class="tbl-wrap"><table>
+<tr><th>Proje</th><th>Birleştirdiği kavramlar</th></tr>
+<tr><td>Sayı tahmin oyunu</td><td>random + seed, while, int dönüşümü, try/except</td></tr>
+<tr><td>Adam asmaca</td><td>küme, metin birleştirme, oyun durumu</td></tr>
+<tr><td>Taş-kağıt-makas</td><td>sözlükle kural tablosu, random.choice, skor</td></tr>
+<tr><td>Şifre üretici</td><td>string modülü, random.Random, kurallı üretim</td></tr>
+<tr><td>Sezar şifreleme</td><td>ord/chr, mod aritmetiği, metin dönüştürme</td></tr>
+<tr><td>Bahşiş ve hesap bölüşme</td><td>kayan nokta, yuvarlama, doğrulama</td></tr>
+<tr><td>ATM menüsü</td><td>while True, match, durum (bakiye) yönetimi</td></tr>
+</table></div>
+
+<h2>Tasarımın altın kuralı: mantığı girdi/çıktıdan ayır</h2>
+<p>Yeni başlayan biri sayı tahmin oyununu tek bir <code>while</code> içinde, <code>input</code> ve <code>print</code> arasına gömülmüş <code>if</code>'lerle yazar. Çalışır ama test edilemez: her denemede klavyeden sayı girmen gerekir. Profesyonel yol iki katmandır:</p>
+<ul>
+<li><b>Saf fonksiyonlar</b> (mantık): girdi alır, değer döndürür, ekrana dokunmaz. <code>tahmin_degerlendir(50, 37)</code> → <code>"küçük"</code>.</li>
+<li><b>Döngü fonksiyonu</b> (arayüz): kullanıcıyla konuşur, mantık fonksiyonlarını çağırır. Girdiyi <code>girdi=input</code> parametresiyle alır.</li>
+</ul>
+<p>Son madde küçük ama güçlü bir hiledir: fonksiyon varsayılan olarak gerçek <code>input</code>'u kullanır, testte ise ona hazır cevaplar veren bir fonksiyon verirsin. Buna bağımlılık enjeksiyonu (dependency injection) denir.</p>
+<pre class="py">def selamla(girdi=input):
+    ad = girdi("Adın? ")
+    return f"Merhaba {ad}!"
+
+cevaplar = iter(["Ayşe"])
+print(selamla(lambda istem: next(cevaplar)))   # klavye beklemeden test</pre>
+
+<h2>Proje 1: Sayı tahmin oyunu</h2>
+<p><b>Gereksinimler:</b> bilgisayar 1-100 arasında sayı tutar; oyuncunun 7 hakkı var; her tahminde "daha büyük/küçük" ipucu verilir; sayı olmayan ya da aralık dışı girdi hak yemez; bilinirse kaç denemede bilindiği, bilinemezse sayı söylenir.</p>
+<p><b>Tasarım:</b> <code>tahmini_oku(metin)</code> → int ya da None; <code>tahmin_degerlendir(tahmin, hedef)</code> → "büyük" / "küçük" / "doğru"; <code>oyna(hedef, hak, girdi)</code> → döngü.</p>
+<div class="steps-list"><ol>
+<li>Önce <code>tahmin_degerlendir</code>'i yaz ve üç durumla dene; en kolay ve en önemli parça budur.</li>
+<li><code>tahmini_oku</code>: <code>int()</code>'i try içine al, aralığı denetle.</li>
+<li>Döngü: hak bitene kadar sor; geçersiz girdide <code>continue</code>.</li>
+<li>Rastgele hedefi en dışta üret ve <code>random.seed</code> ile sabitlenebilir bırak: test ederken hep aynı sayı gelsin.</li>
+</ol></div>
+<pre class="py">import random
+
+def tahmini_oku(metin, alt=1, ust=100):
+    try:
+        sayi = int(metin)
+    except ValueError:
+        return None
+    return sayi if alt &lt;= sayi &lt;= ust else None
+
+def tahmin_degerlendir(tahmin, hedef):
+    if tahmin &lt; hedef:
+        return "büyük"
+    if tahmin &gt; hedef:
+        return "küçük"
+    return "doğru"
+
+def oyna(hedef, hak=7, girdi=input):
+    deneme = 0
+    while deneme &lt; hak:
+        tahmin = tahmini_oku(girdi("Tahmin: "))
+        if tahmin is None:
+            print("1-100 arası bir sayı gir.")
+            continue
+        deneme += 1
+        sonuc = tahmin_degerlendir(tahmin, hedef)
+        if sonuc == "doğru":
+            print(f"Bildin! {deneme} denemede.")
+            return deneme
+        print(f"Daha {sonuc} bir sayı dene.")
+    print(f"Hakkın bitti, sayı {hedef} idi.")
+    return None
+
+random.seed(42)
+hedef = random.randint(1, 100)
+cevaplar = iter(["50", "on", "25", str(hedef)])
+oyna(hedef, girdi=lambda istem: next(cevaplar))</pre>
+<p>Kendi bilgisayarında gerçek oyun için son satırı <code>oyna(random.randint(1, 100))</code> yapman yeter. İkili arama (binary search) stratejisiyle (hep aralığın ortasını söyle) 1-100 arası her sayı en fazla 7 denemede bulunur; hak sayısının 7 olmasının nedeni budur.</p>
+
+<h2>Proje 2: Adam asmaca</h2>
+<p><b>Gereksinimler:</b> gizli kelime harf harf tahmin edilir; bilinen harfler açılır, bilinmeyenler <code>_</code>; 6 yanlışta oyun biter; aynı harfi tekrar söylemek hak yemez.</p>
+<p><b>Tasarım:</b> oyun durumunu iki kümede tut: <code>dogru</code> ve <code>yanlis</code> harfler. Ekranda görünen her şey bu iki kümeden <b>hesaplanır</b>; ayrı sayaçlar tutmazsın, böylece tutarsızlık da olmaz.</p>
+<pre class="py">MAX_HATA = 6
+
+def maske(kelime, tahminler):
+    return " ".join(h if h in tahminler else "_" for h in kelime)
+
+def kazandi_mi(kelime, tahminler):
+    return set(kelime) &lt;= tahminler
+
+def adam_asmaca(kelime, girdi=input):
+    dogru, yanlis = set(), set()
+    while len(yanlis) &lt; MAX_HATA and not kazandi_mi(kelime, dogru):
+        harf = girdi(f"{maske(kelime, dogru)}  Harf: ").strip().lower()
+        if harf in dogru | yanlis:
+            print("Bunu zaten söyledin.")
+        elif harf in kelime:
+            dogru.add(harf)
+        else:
+            yanlis.add(harf)
+            print(f"Yok! Kalan hak: {MAX_HATA - len(yanlis)}")
+    print("Kazandın!" if kazandi_mi(kelime, dogru) else f"Kaybettin, kelime: {kelime}")
+
+cevaplar = iter(["a", "e", "k", "a", "n", "r"])
+adam_asmaca("ankara", lambda istem: (print(istem), next(cevaplar))[1])</pre>
+<p><code>set(kelime) &lt;= tahminler</code> "kelimedeki tüm harfler tahmin edildi mi?" sorusunu tek ifadede yanıtlar (alt küme). Son satırdaki lambda, testte istemi (prompt) de ekrana yazar ki oyunun akışını görebilesin.</p>
+
+<h2>Proje 3: Taş-kağıt-makas</h2>
+<p><b>Tasarım:</b> kuralı <code>if</code> merdiveniyle değil, <b>veriyle</b> anlat: "kim kimi yener" bir sözlüktür. Yeni bir seçenek (kertenkele, Spock) eklemek kod değil veri değişikliği olur.</p>
+<pre class="py">import random
+
+YENER = {"taş": "makas", "makas": "kağıt", "kağıt": "taş"}
+
+def kazanan(oyuncu, bilgisayar):
+    if oyuncu not in YENER or bilgisayar not in YENER:
+        raise ValueError("geçersiz seçim")
+    if oyuncu == bilgisayar:
+        return "berabere"
+    return "oyuncu" if YENER[oyuncu] == bilgisayar else "bilgisayar"
+
+rng = random.Random(7)                 # kendi tohumlu üreteci
+skor = {"oyuncu": 0, "bilgisayar": 0, "berabere": 0}
+for secim in ["taş", "kağıt", "makas", "taş"]:
+    pc = rng.choice(list(YENER))
+    sonuc = kazanan(secim, pc)
+    skor[sonuc] += 1
+    print(f"{secim:6} - {pc:6} → {sonuc}")
+print(skor)</pre>
+<p><code>random.Random(7)</code> programın geri kalanını etkilemeyen, kendine ait bir rastgele üreteç (generator) oluşturur; testte global <code>random.seed</code> yerine bunu tercih etmek daha temizdir.</p>
+
+<h2>Proje 4: Şifre üretici</h2>
+<p><b>Gereksinimler:</b> en az 8 karakter; en az bir küçük harf, bir büyük harf, bir rakam ve bir sembol. <b>Tasarım:</b> önce her gruptan birer karakter seç (kuralı garanti et), kalan uzunluğu tüm havuzdan doldur, sonra karıştır (yoksa ilk dört karakter hep aynı düzende olur).</p>
+<pre class="py">import random
+import string
+
+SEMBOLLER = "!@#%&amp;*?"
+
+def sifre_uret(uzunluk=12, rng=random):
+    if uzunluk &lt; 8:
+        raise ValueError("en az 8 karakter")
+    gruplar = [string.ascii_lowercase, string.ascii_uppercase, string.digits, SEMBOLLER]
+    karakterler = [rng.choice(g) for g in gruplar]
+    havuz = "".join(gruplar)
+    karakterler += [rng.choice(havuz) for _ in range(uzunluk - len(gruplar))]
+    rng.shuffle(karakterler)
+    return "".join(karakterler)
+
+print(sifre_uret(12, random.Random(1)))
+print(sifre_uret(12, random.Random(1)))   # aynı tohum → aynı şifre</pre>
+<div class="warn"><b>Gerçek şifre için random değil secrets</b><code>random</code> modülü tahmin edilebilir bir üreteç kullanır; oyun ve simülasyon içindir. Gerçek şifre, token ya da doğrulama kodu üretirken <code>secrets</code> modülünü kullan: <code>secrets.choice(havuz)</code>. Bu derste tohumla test edebilmek için <code>random</code> kullanıyoruz.</div>
+
+<h2>Proje 5: Sezar şifreleme</h2>
+<p>Her harfi alfabede k adım kaydır: k=3 için A→D, Z→C. Sona gelince başa dönmek mod aritmetiğidir: <code>(konum + k) % 26</code>. Çözmek, ters yönde kaydırmaktır: <code>sezar(metin, -k)</code>. Ayrı bir çözme algoritması yazmana gerek yok.</p>
+<pre class="py">def sezar(metin, k):
+    sonuc = []
+    for h in metin:
+        if "A" &lt;= h &lt;= "Z":
+            sonuc.append(chr((ord(h) - ord("A") + k) % 26 + ord("A")))
+        elif "a" &lt;= h &lt;= "z":
+            sonuc.append(chr((ord(h) - ord("a") + k) % 26 + ord("a")))
+        else:
+            sonuc.append(h)
+    return "".join(sonuc)
+
+gizli = sezar("Toplanti Cuma 14:00", 3)
+print(gizli)
+print(sezar(gizli, -3))
+for k in range(1, 4):                      # kaba kuvvetle kırma
+    print(k, sezar(gizli, -k))</pre>
+<p>Yalnızca 25 olası anahtar olduğu için Sezar şifresi bir döngüyle kırılır; tarihsel bir oyuncaktır, gerçek güvenlik değildir. Türkçe alfabeyle (29 harf) çalışan sürümünü Meydan okuma aşamasında yazacaksın.</p>
+
+<h2>Proje 6: Bahşiş ve hesap bölüşme</h2>
+<p><b>Gereksinimler:</b> hesap tutarı, bahşiş yüzdesi ve kişi sayısı alınır; bahşiş, toplam ve kişi başı tutar 2 ondalıkla verilir; kişi sayısı en az 1, tutar negatif olamaz.</p>
+<pre class="py">def hesap_bolustur(hesap, bahsis_yuzde, kisi):
+    if kisi &lt; 1 or hesap &lt; 0 or bahsis_yuzde &lt; 0:
+        raise ValueError("geçersiz değer")
+    bahsis = hesap * bahsis_yuzde / 100
+    toplam = hesap + bahsis
+    return round(bahsis, 2), round(toplam, 2), round(toplam / kisi, 2)
+
+bahsis, toplam, kisi_basi = hesap_bolustur(1240, 12.5, 3)
+print(f"Bahşiş: {bahsis:.2f} TL | Toplam: {toplam:.2f} TL | Kişi başı: {kisi_basi:.2f} TL")</pre>
+<p>Kuruş farkına dikkat: 1395 TL'yi 3 kişiye bölünce 465.00 çıkar ama 1000 TL'yi 3'e bölünce 333.33 × 3 = 999.99 olur. Gerçek bir uygulamada son kişiye kalan kuruş eklenir ya da para birimi kuruş cinsinden tamsayıyla tutulur.</p>
+
+<h2>Proje 7: ATM menüsü</h2>
+<p><b>Tasarım:</b> sonsuz döngü (<code>while True</code>) menüyü gösterir, <code>match</code> seçime göre dallanır, <code>return</code> ya da <code>break</code> çıkışı sağlar. Bakiye döngü boyunca yaşayan <b>durumdur</b> (state).</p>
+<pre class="py">def atm(bakiye, girdi=input):
+    while True:
+        secim = girdi("1) Bakiye 2) Yatır 3) Çek 4) Çıkış: ").strip()
+        match secim:
+            case "1":
+                print(f"Bakiye: {bakiye:.2f} TL")
+            case "2" | "3":
+                tutar = float(girdi("Tutar: "))
+                if secim == "3" and tutar &gt; bakiye:
+                    print("Yetersiz bakiye")
+                    continue
+                bakiye += tutar if secim == "2" else -tutar
+                print(f"Yeni bakiye: {bakiye:.2f} TL")
+            case "4":
+                print("İyi günler!")
+                return bakiye
+            case _:
+                print("Geçersiz seçim")
+
+cevaplar = iter(["1", "2", "250", "3", "5000", "9", "4"])
+print(atm(1000, lambda istem: next(cevaplar)))</pre>
+<p>Bu sürümde <code>float("abc")</code> programı çökertir; alıştırmalarda tutarı doğrulayan ve PIN denetimi ekleyen sağlam sürümü yazacaksın.</p>
+
+<div class="note"><b>Gerçek işte</b>Bu projeler oyuncak gibi görünse de aynı kalıplar her yerdedir: ATM menüsü bir komut satırı aracının ya da sohbet botunun ana döngüsüdür; taş-kağıt-makas sözlüğü bir iş kuralı tablosudur (kampanya kuralları, onay matrisleri); şifre üretici kurallı veri üretimidir (test verisi, kupon kodları). "Mantığı arayüzden ayır" ilkesi de web uygulamalarında aynen geçerlidir: hesap fonksiyonları Flask'tan da, mobil uygulamadan da, testten de çağrılabilir. Mülakatlarda istenen ev ödevleri de çoğunlukla bu büyüklüktedir ve değerlendirmede çalışmasından çok tasarımına ve testlerine bakılır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Durum makinesi olarak oyun</h3>
+<p>Her oyun bir durum makinesidir (state machine): adam asmacada durum (doğru, yanlış harfler), olay (yeni tahmin), geçiş (kümeye ekle), bitiş koşulu (kazandı ya da 6 hata). Durumu tek bir yapıda tutup "durum + olay → yeni durum" fonksiyonu yazarsan, oyunun her anını test edebilir, kaydedip geri yükleyebilir, hatta geri al (undo) özelliği ekleyebilirsin.</p>
+<h3>Tekrarlanabilir rastgelelik</h3>
+<p>Rastgelelik içeren kodu test etmenin iki yolu var: tohumu sabitlemek (<code>random.Random(42)</code>) ya da sonucun <b>özelliklerini</b> test etmek (şifrenin uzunluğu, içerdiği karakter grupları). İyi test ikisini birlikte kullanır. Üreteci parametre olarak almak (<code>rng=random</code>) ise testte sabit tohumlu, gerçekte <code>secrets.SystemRandom()</code> gibi güvenli bir üreteç vermeni sağlar.</p>
+<h3>Sonraki adım: arayüz</h3>
+<p>Mantık ayrı olduğu için aynı fonksiyonlarla terminal yerine bir grafik arayüz (tkinter), web sayfası (Flask) ya da Discord botu yazabilirsin; yalnızca döngü katmanı değişir. Orta seviyede bu projeleri sınıflarla (<code>class AdamAsmaca</code>) ve testlerle yeniden kuracaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oyunlar">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kod-stili/">← Temiz kod ve PEP 8</a><a href="../mulakat-kaliplari-2/">Mülakat kalıpları: bağlı liste, ağaç, trie, graf, aralık ve 2B DP →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

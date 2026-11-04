@@ -1,0 +1,418 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions | Kesit Python</title><meta name="description" content="Kod kalitesini otomatik araçlarla korumayı, test ve kapsam ölçmeyi, pre-commit ve GitHub Actions ile her commit'te kontrol çalıştırmayı öğrenirsin."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kalite-ci/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions"><meta property="og:description" content="Kod kalitesini otomatik araçlarla korumayı, test ve kapsam ölçmeyi, pre-commit ve GitHub Actions ile her commit'te kontrol çalıştırmayı öğrenirsin."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kalite-ci/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions","description":"Kod kalitesini otomatik araçlarla korumayı, test ve kapsam ölçmeyi, pre-commit ve GitHub Actions ile her commit'te kontrol çalıştırmayı öğrenirsin.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/kalite-ci/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Üretime hazırlık</span><h1>Kod kalitesi ve CI: ruff, mypy, pre-commit, pytest, GitHub Actions</h1><p class="st-l">Kod kalitesini otomatik araçlarla korumayı, test ve kapsam ölçmeyi, pre-commit ve GitHub Actions ile her commit'te kontrol çalıştırmayı öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalite-ci">Uygulamada aç, 32 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden kalite otomasyonu?</h2>
+<p>Ilgaz Bank'ın kredi skorlama paketini üç kişi geliştiriyor. Biri sekmeyle, diğeri boşlukla girinti yapıyor; birinin bıraktığı <code>print</code> çağrısı üretim logunu dolduruyor; <code>None</code> dönebilen bir fonksiyon başka bir yerde <code>.upper()</code> ile çağrılıyor ve gece yarısı çöküyor. Bunların hiçbiri "dikkat etmekle" çözülmez; insan dikkati tükenir, araçlar tükenmez. Kalite otomasyonu (quality automation), bu kontrolleri makineye devretmek ve her commit'te, her pull request'te aynı standardı uygulamaktır.</p>
+<p>Üretime hazır bir Python projesinde kalite zinciri dört halkadan oluşur: biçimlendirici (formatter) kodu tek stile getirir, linter şüpheli kalıpları yakalar, tip denetleyici (type checker) sözleşmeleri doğrular, test koşucusu davranışı kanıtlar. pre-commit bu zinciri yerelde, CI (continuous integration, sürekli tümleştirme) sunucuda çalıştırır.</p>
+
+<h2>Biçim ve lint: ruff, black, isort</h2>
+<p><b>black</b> "uzlaşmaz biçimlendirici"dir: tırnak, satır kırma, boşluk gibi tartışmaları tek stile bağlar; tartışma biter. <b>isort</b> import satırlarını gruplar ve alfabetik sıralar (standart kütüphane, üçüncü parti, proje). <b>ruff</b> ise Rust ile yazılmış, çok hızlı bir linter; flake8, isort ve pyflakes kurallarının büyük kısmını tek araçta toplar ve <code>ruff format</code> komutuyla black'in yerini de alabilir. Yeni projelerde yaygın tercih yalnızca ruff'tır; eski projelerde üçlüyü birlikte görürsün.</p>
+<p>Ayarlar <code>pyproject.toml</code> içinde yaşar:</p>
+<pre class="code">[tool.ruff]
+line-length = 88
+target-version = "py312"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP"]   # pycodestyle, pyflakes, isort, bugbear, pyupgrade
+ignore = ["E501"]                     # satır uzunluğunu format halleder
+
+[tool.mypy]
+python_version = "3.12"
+strict = true</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Ne yapar</th><th>Komut</th><th>Yakaladığı örnek</th></tr>
+<tr><td>ruff check</td><td>Lint: hatalı/şüpheli kalıp</td><td>ruff check .</td><td>Kullanılmayan import, tanımsız ad, mutable default</td></tr>
+<tr><td>ruff format / black</td><td>Biçimlendirme</td><td>ruff format .</td><td>Girinti, tırnak, satır kırma</td></tr>
+<tr><td>isort</td><td>Import sıralama</td><td>isort .</td><td>Karışık import grupları</td></tr>
+<tr><td>mypy</td><td>Statik tip denetimi</td><td>mypy src/</td><td>str | None değere .upper() çağırmak</td></tr>
+<tr><td>pytest --cov</td><td>Test ve kapsam</td><td>pytest --cov=paket</td><td>Hiç test edilmeyen dal</td></tr>
+</table></div>
+
+<h2>Kendi lint kuralını yazmak: ast</h2>
+<p>Linter'ların sihri yok: kaynak kodu <code>ast</code> (abstract syntax tree, soyut sözdizimi ağacı) ile ayrıştırır ve ağaçta dolaşırlar. Aynı şeyi sen de yapabilirsin. Aşağıdaki örnek, bir kod parçasında unutulmuş <code>print</code> çağrılarını bulur:</p>
+<pre class="py">import ast
+
+KOD = '''
+import os
+import json
+
+def skor_hesapla(gelir, borc):
+    print("debug:", gelir)
+    oran = borc / gelir
+    return json.dumps({"oran": oran})
+'''
+
+agac = ast.parse(KOD)
+for dugum in ast.walk(agac):
+    if isinstance(dugum, ast.Call) and isinstance(dugum.func, ast.Name):
+        if dugum.func.id == "print":
+            print(f"satır {dugum.lineno}: print bırakılmış")</pre>
+<p><code>ast.walk</code> ağaçtaki her düğümü gezer; <code>ast.Call</code> bir fonksiyon çağrısı, <code>ast.Name</code> basit bir addır. Aynı yaklaşımla kullanılmayan import'ları bulmak da kolay: import edilen adları topla, kodda <code>ast.Name</code> olarak geçenleri topla, farkı al. Yukarıdaki kodda <code>os</code> import edilmiş ama hiç kullanılmamış; ruff bunu F401 koduyla bildirir. Alıştırmalarda bu kuralı kendin yazacaksın.</p>
+<div class="tip"><b>ast.Attribute</b><code>json.dumps</code> gibi çağrılarda modül adı <code>ast.Attribute</code> düğümünün <code>value</code> kısmındaki <code>ast.Name</code> olarak görünür. <code>ast.walk</code> tüm alt düğümleri de gezdiği için yalnızca <code>ast.Name</code> toplamak yeterlidir.</div>
+
+<h2>mypy ile tip sözleşmesi</h2>
+<p>Tip ipuçları (type hints) belge gibidir; mypy onları sözleşmeye dönüştürür. Şu fonksiyonu düşün:</p>
+<pre class="py">def musteri_bul(idler: dict[int, str], mid: int) -&gt; str | None:
+    return idler.get(mid)
+
+ad = musteri_bul({1: "Ayşe"}, 2)
+# mypy: Item "None" of "str | None" has no attribute "upper"
+# print(ad.upper())
+if ad is not None:
+    print(ad.upper())
+else:
+    print("müşteri yok")</pre>
+<p>Yorum satırındaki çağrı mypy'de hata verir, çünkü dönüş tipi <code>None</code> olabilir. Bu uyarı, gece yarısı çökmesini kod yazılırken yakalar. <code>strict = true</code> ile her fonksiyonun tip açıklaması zorunlu olur; yeni projede baştan açmak kolay, eski projede modül modül açmak gerçekçidir.</p>
+
+<h2>pytest fixture ve coverage</h2>
+<p>Testlerin çoğu aynı hazırlığı tekrarlar: örnek sipariş listesi, geçici dizin, sahte veritabanı. <b>fixture</b>, bu hazırlığı bir fonksiyona koyup testlere parametre olarak enjekte eder. pytest, test fonksiyonunun parametre adına bakarak aynı adlı fixture'ı bulur ve çağırır:</p>
+<pre class="code">import pytest
+
+@pytest.fixture
+def siparisler():
+    return [{"id": 1, "tutar": 250}, {"id": 2, "tutar": 90}]
+
+@pytest.fixture
+def gecici_db(tmp_path):            # fixture başka fixture kullanabilir
+    yol = tmp_path / "test.db"
+    baglanti = sqlite3.connect(yol)
+    yield baglanti                  # test burada çalışır
+    baglanti.close()                # temizlik (teardown)
+
+def test_toplam(siparisler):
+    assert toplam_tutar(siparisler) == 340</pre>
+<p>Fixture gövdesindeki <code>yield</code>, kurulum ile temizliği ayırır: yield'den öncesi kurulum, sonrası temizlik. Test hata verse bile temizlik çalışır. Bu, bağlam yöneticisiyle (context manager) aynı mantıktır; aşağıdaki örnekte pytest olmadan aynı deseni kendi elinle kuruyorsun:</p>
+<pre class="py">from contextlib import contextmanager
+
+gunluk = []
+
+@contextmanager
+def ornek_hesaplar():
+    gunluk.append("kurulum")
+    hesaplar = {"TR1": 1000, "TR2": 250}
+    try:
+        yield hesaplar
+    finally:
+        gunluk.append("temizlik")
+
+with ornek_hesaplar() as h:
+    h["TR1"] -= 100
+    print("bakiye:", h["TR1"])
+
+try:
+    with ornek_hesaplar() as h:
+        raise ValueError("test patladı")
+except ValueError:
+    pass
+print(gunluk)</pre>
+<p><b>coverage</b> (kapsam) ise testlerin kodun yüzde kaçını çalıştırdığını ölçer: <code>pytest --cov=anadolu --cov-report=term-missing</code> komutu her dosya için yüzde ve test edilmeyen satır numaralarını listeler. Yüzde yüz hedef değil, işaret fenerdir: hiç dokunulmayan bir hata dalı (<code>except</code> bloğu gibi) genelde en çok çökmeye yol açan yerdir.</p>
+<div class="warn"><b>Kapsam yüzdesi kaliteyi garanti etmez</b>Satırın çalışmış olması doğru çalıştığı anlamına gelmez; assert içermeyen bir test yüzde yüz kapsam verir ama hiçbir şey kanıtlamaz. Kapsamı düşük dalları bulmak için kullan, hedef sayı için değil.</div>
+
+<h2>pre-commit: hatayı commit anında yakala</h2>
+<p><b>pre-commit</b>, git'in commit kancasına (hook) bağlanan bir araçtır. Her <code>git commit</code> öncesinde tanımlı araçları yalnızca değişen dosyalarda çalıştırır; biri başarısız olursa commit yapılmaz. Yapılandırma <code>.pre-commit-config.yaml</code> dosyasındadır:</p>
+<pre class="code">repos:
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.6.9
+    hooks:
+      - id: ruff
+        args: [--fix]
+      - id: ruff-format
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.11.2
+    hooks:
+      - id: mypy</pre>
+<p>Kurulum iki komut: <code>pip install pre-commit</code> ve <code>pre-commit install</code>. İlk kez tüm projede çalıştırmak için <code>pre-commit run --all-files</code>. Ekip için anlamı şu: biçim tartışması pull request'e hiç gelmez, inceleme (review) mantığa odaklanır.</p>
+
+<h2>GitHub Actions ile CI</h2>
+<p>Yerel kanca kişisel bir güvencedir; birisi <code>--no-verify</code> ile atlayabilir. CI, aynı kontrolleri sunucuda, herkes için, her push'ta çalıştırır. GitHub Actions iş akışı (workflow) <code>.github/workflows/ci.yml</code> içinde YAML olarak tanımlanır:</p>
+<pre class="code">name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  kalite:
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        python: ["3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: $&#123;&#123; matrix.python &#125;&#125;
+      - run: pip install -e ".[dev]"
+      - run: ruff check .
+      - run: ruff format --check .
+      - run: mypy src/
+      - run: pytest --cov=anadolu --cov-fail-under=80</pre>
+<p>Yapı üç katmanlıdır: <b>on</b> ne zaman tetikleneceğini, <b>jobs</b> hangi işlerin çalışacağını, her işteki <b>steps</b> sıralı adımları belirtir. Bir adım ya hazır bir eylem kullanır (<code>uses</code>) ya da bir kabuk komutu çalıştırır (<code>run</code>). <code>matrix</code> aynı işi birden fazla Python sürümünde koşturur. Son satırdaki <code>--cov-fail-under=80</code>, kapsam eşiğin altına düşerse işi kırmızıya boyar.</p>
+<p>YAML yazarken yapıyı kafanda bir Python sözlüğü gibi tut: iş akışı bir dict, <code>jobs</code> bir dict, <code>steps</code> bir dict listesi. Aşağıdaki örnek, aynı yapıyı Python sözlüğü olarak kuruyor ve kurallara uyup uymadığını denetliyor; alıştırmada bunu tam bir doğrulayıcıya çevireceksin:</p>
+<pre class="py">akis = {
+    "name": "CI",
+    "on": ["push", "pull_request"],
+    "jobs": {
+        "kalite": {
+            "runs-on": "ubuntu-latest",
+            "steps": [
+                {"uses": "actions/checkout@v4"},
+                {"run": "pip install -e ."},
+                {"run": "pytest"},
+            ],
+        }
+    },
+}
+
+for ad, is_ in akis["jobs"].items():
+    adimlar = is_.get("steps", [])
+    print(f"{ad}: {len(adimlar)} adım, runs-on={is_.get('runs-on')}")
+    for i, adim in enumerate(adimlar, 1):
+        tur = "uses" if "uses" in adim else "run"
+        print(f"  {i}. {tur}: {adim[tur]}")</pre>
+<div class="note"><b>Gizli bilgiler</b>API anahtarı ve parolayı YAML'a yazma; depo ayarlarındaki Secrets bölümüne koy ve <code>$&#123;&#123; secrets.DB_PASSWORD &#125;&#125;</code> ile oku. Loglarda otomatik maskelenir.</div>
+
+<h2>Kod inceleme listesi</h2>
+<p>Araçlar biçimi ve tipi denetler; mantığı insan denetler. Pull request incelerken şu listeyi sırayla geç:</p>
+<div class="steps-list"><ol>
+<li><b>Amaç:</b> PR açıklaması ne yapıldığını ve neden yapıldığını söylüyor mu? Tek bir konuya mı odaklanmış?</li>
+<li><b>Test:</b> Yeni davranışın testi var mı? Hata senaryosu (boş liste, None, negatif tutar) test edilmiş mi?</li>
+<li><b>Adlandırma:</b> Fonksiyon adı ne yaptığını söylüyor mu? <code>veri2</code>, <code>tmp</code>, <code>islem_yap</code> gibi adlar var mı?</li>
+<li><b>Hata yönetimi:</b> Çıplak <code>except:</code> var mı? Hata yutuluyor mu, loglanıyor mu?</li>
+<li><b>Yan etki:</b> Fonksiyon parametresini (listeyi, sözlüğü) yerinde değiştiriyor mu? Global durum var mı?</li>
+<li><b>Gereksiz karmaşıklık:</b> Aynı iş daha az kodla, standart kütüphaneyle yapılabilir mi?</li>
+<li><b>Güvenlik:</b> Kullanıcı girdisi SQL'e, kabuk komutuna, dosya yoluna doğrudan gidiyor mu? Gizli bilgi kodda mı?</li>
+</ol></div>
+<p>Yorumlarda ton önemli: "Bu yanlış" yerine "Burada tutar None gelirse ne olur?" diye sor. İyi inceleme, yazarın öğrenmesini sağlar; kötü inceleme bir sonraki PR'ı geciktirir.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: kalite hattını üretim düzeyine taşımak</h2>
+<p>ruff, mypy, pre-commit ve temel bir GitHub Actions iş akışı kurmayı gördün. Gerçek bir ekipte bunların üstüne dört konu daha eklenir: <b>karmaşıklık ölçümü</b> (kodun ne kadar dallandığı), <b>bilinçli istisnalar</b> (<code>noqa</code>, dosya bazlı kural kapatma), <b>güvenlik taraması</b> (bandit, pip-audit) ve <b>ileri CI</b> (işler arası bağımlılık, önbellek, matris, eşzamanlılık). Parametrize testler ve mock ayrıntıları "İleri test" dersinde; paket yayımlama adımları "Paketleme ve dağıtım" dersinde.</p>
+
+<h3>1. Döngüsel karmaşıklık (cyclomatic complexity)</h3>
+<p>Bir fonksiyondaki bağımsız yol sayısıdır: 1'den başlar, her <code>if</code>, <code>elif</code>, <code>for</code>, <code>while</code>, <code>except</code>, üçlü ifade ve her ek <code>and</code>/<code>or</code> koşulu bir ekler. 10'u geçen fonksiyonu test etmek zorlaşır, çünkü her yol için ayrı test gerekir. ruff'ta <code>C901</code> kuralı ve <code>max-complexity</code> ayarı bunu denetler; <code>radon cc -s src/</code> ise harf notu (A–F) verir. Hesap ast ile birkaç satırdır:</p>
+<pre class="py">import ast
+
+KOD = """
+def kredi_karari(skor, gelir, kara_liste):
+    if kara_liste:
+        return "red"
+    elif skor &gt;= 700 and gelir &gt; 30000:
+        return "onay"
+    elif skor &gt;= 600 or gelir &gt; 80000:
+        return "inceleme"
+    return "red"
+
+def kdv(tutar):
+    return round(tutar * 1.2, 2)
+"""
+
+DALLAR = (ast.If, ast.For, ast.While, ast.IfExp, ast.ExceptHandler)
+
+for f in ast.parse(KOD).body:
+    k = 1
+    for d in ast.walk(f):
+        if isinstance(d, DALLAR):
+            k += 1
+        elif isinstance(d, ast.BoolOp):
+            k += len(d.values) - 1
+    print(f"{f.name}: {k}")</pre>
+<p><code>elif</code> ast'te ayrı bir düğüm değildir; önceki <code>if</code>'in <code>orelse</code> listesinde iç içe bir <code>ast.If</code> olarak durur. Bu yüzden saymak doğru sonucu verir: <code>kredi_karari</code> için 1 + 3 if + 2 BoolOp = 6.</p>
+
+<h3>2. Bilinçli istisnalar: noqa ve per-file-ignores</h3>
+<p>Her kural her yerde doğru değildir. <code>__init__.py</code> içindeki yeniden dışa aktarımlar (re-export) "kullanılmayan import" (F401) gibi görünür; testlerde <code>assert</code> kullanımı bandit'in S101 kuralına takılır. Kuralı bütün projede kapatmak yerine dar kapsamda kapat:</p>
+<pre class="code">[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "C90", "S"]
+
+[tool.ruff.lint.mccabe]
+max-complexity = 10
+
+[tool.ruff.lint.per-file-ignores]
+"__init__.py" = ["F401"]        # yeniden dışa aktarım
+"tests/**" = ["S101"]           # testte assert serbest</pre>
+<p>Tek satırlık istisna için satır sonuna <code># noqa: F401</code> yazılır. Kural kodu olmadan çıplak <code># noqa</code> o satırdaki <b>her</b> uyarıyı susturur; bu yüzden ruff'ın <code>PGH004</code> kuralı çıplak noqa'yı yasaklar. <code>ruff check --statistics</code> hangi kuralın kaç kez tetiklendiğini özetler; yeni bir kuralı açmadan önce bu sayıya bakarsın.</p>
+<pre class="py">import re
+
+KAYNAK = """import os  # noqa: F401
+import sys  # noqa
+eval(girdi)  # noqa: S307, E501
+x=1"""
+
+RX = re.compile(r"#s*noqa(?::s*([A-Z]+[0-9]+(?:s*,s*[A-Z]+[0-9]+)*))?", re.I)
+for no, satir in enumerate(KAYNAK.splitlines(), 1):
+    m = RX.search(satir)
+    if not m:
+        print(no, "istisna yok")
+    elif m[1] is None:
+        print(no, "TÜM kurallar susturuldu (tehlikeli)")
+    else:
+        print(no, "susturulan:", [k.strip().upper() for k in m[1].split(",")])</pre>
+
+<h3>3. Güvenlik taraması</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Kurulum ve komut</th><th>Ne bulur?</th></tr>
+<tr><td>bandit</td><td><code>pip install bandit</code> → <code>bandit -r src -ll</code></td><td>Kod kalıpları: <code>eval</code>, <code>shell=True</code>, sabit parola, <code>pickle.loads</code>, SQL birleştirme</td></tr>
+<tr><td>ruff S kuralları</td><td><code>select = ["S"]</code></td><td>bandit kurallarının ruff içindeki karşılığı, çok daha hızlı</td></tr>
+<tr><td>pip-audit</td><td><code>pip install pip-audit</code> → <code>pip-audit -r requirements.txt</code></td><td>Bilinen zafiyetli bağımlılık sürümleri (CVE)</td></tr>
+<tr><td>detect-secrets / gitleaks</td><td>pre-commit kancası olarak</td><td>Depoya giren token ve anahtarlar</td></tr>
+</table></div>
+<p>Sık bulgular: <b>B602</b> <code>subprocess.run(komut, shell=True)</code> (kabuk enjeksiyonu; liste argüman kullan), <b>B105</b> <code>parola = "1234"</code> (gizli bilgiyi ortam değişkeninden oku), <b>B608</b> f-string ile kurulmuş SQL (parametreli sorgu kullan), <b>B307</b> <code>eval</code>. Bir bulgu yanlış alarmsa <code># nosec B602</code> ile gerekçesini yazarak kapatırsın.</p>
+<div class="warn"><b>Yerelde geçti, CI'da patladı</b>Çoğu zaman sebep sürüm farkıdır: yerelde ruff 0.4, CI'da en yeni sürüm kurulur ve yeni kurallar devreye girer. Araç sürümlerini <code>pyproject.toml</code> dev bağımlılıklarında ve <code>.pre-commit-config.yaml</code>'daki <code>rev</code> alanında sabitle; <code>pre-commit autoupdate</code> ile bilinçli olarak yükselt.</div>
+
+<h3>4. İleri GitHub Actions</h3>
+<pre class="code">name: CI
+on:
+  push: { branches: [main] }
+  pull_request:
+  workflow_dispatch:                 # elle tetikleme düğmesi
+
+concurrency:                         # aynı PR'a yeni push gelince eskisini iptal et
+  group: ci-$&#123;&#123; github.ref &#125;&#125;
+  cancel-in-progress: true
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "3.12", cache: pip }
+      - run: pip install ruff mypy && ruff check . && mypy src/
+  test:
+    needs: lint                      # lint geçmeden test başlamaz
+    timeout-minutes: 15
+    strategy:
+      fail-fast: false               # bir kombinasyon düşse de diğerleri sürsün
+      matrix:
+        os: [ubuntu-latest, windows-latest]
+        python: ["3.11", "3.12"]
+        exclude:
+          - { os: windows-latest, python: "3.11" }
+    runs-on: $&#123;&#123; matrix.os &#125;&#125;
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with: { python-version: "$&#123;&#123; matrix.python &#125;&#125;", cache: pip }
+      - run: pip install -e ".[dev]" && pytest --cov --cov-report=xml
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with: { name: "kapsam-$&#123;&#123; matrix.os &#125;&#125;-$&#123;&#123; matrix.python &#125;&#125;", path: coverage.xml }</pre>
+<p>Matrisi kafanda genişletebilmelisin: <code>os × python</code> 4 kombinasyon, <code>exclude</code> birini çıkarır, 3 iş koşar. Aynı mantık Python'da:</p>
+<pre class="py">from itertools import product
+
+matris = {"os": ["ubuntu-latest", "windows-latest"], "python": ["3.11", "3.12"]}
+haric = [{"os": "windows-latest", "python": "3.11"}]
+
+anahtarlar = list(matris)
+isler = []
+for degerler in product(*matris.values()):
+    kombin = dict(zip(anahtarlar, degerler))
+    if any(all(kombin[k] == v for k, v in h.items()) for h in haric):
+        continue
+    isler.append(kombin)
+for i in isler:
+    print(i["os"], i["python"])
+print("toplam iş:", len(isler))</pre>
+<p>Yerelde birden fazla Python sürümünde aynı kontrolü koşmak için <b>nox</b> (ya da tox) kullanılır: <code>pip install nox</code>, kökte <code>noxfile.py</code> ve <code>nox -s testler</code>. CI dosyası da yalnızca <code>nox</code> çağırır; böylece "CI'da ne çalışıyorsa yerelde de o çalışır".</p>
+<pre class="code">import nox
+
+@nox.session(python=["3.11", "3.12"])
+def testler(session):
+    session.install("-e", ".[dev]")
+    session.run("pytest", "--cov")
+
+@nox.session
+def lint(session):
+    session.install("ruff")
+    session.run("ruff", "check", ".")</pre>
+<div class="note"><b>Gerçek işte</b>Yeni katıldığın bir ekipte ilk haftanın tipik görevi: CI'ın neden 20 dakika sürdüğünü bulmak ya da "flaky" (bazen geçen bazen düşen) bir testi ayıklamak. İlk bakacağın yerler: pip önbelleği açık mı, lint ve test ayrı işlerde paralel mi, <code>concurrency</code> ile eski koşular iptal ediliyor mu, yavaş entegrasyon testleri <code>-m "not slow"</code> ile PR'dan ayrılmış mı. Bir de PR açıklamasına "CI yeşil, kapsam %82 → %84" yazmak, inceleyenin işini ciddi biçimde kolaylaştırır.</div></section><section class="more"><span class="eyebrow">Derinleş</span><p>CI "kod sağlam mı?" sorusunu yanıtlar. Sürekli dağıtım (continuous delivery/deployment, CD) ise bir sonraki soruyu: "Sağlam kod kullanıcıya nasıl, güvenle ve geri alınabilir biçimde ulaşır?" Bu bölüm imaj üretmeyi, ortamları, sürüm etiketlerini, geri almayı ve ML projelerinde model kalite kapısını anlatıyor.</p>
+<h2>Teslim mi, dağıtım mı?</h2>
+<div class="tbl-wrap"><table><tr><th>Kavram</th><th>Ne olur?</th></tr>
+<tr><td>Sürekli entegrasyon (CI)</td><td>Her push'ta lint, tip, test; ana dal hep yeşil</td></tr>
+<tr><td>Sürekli teslim (continuous delivery)</td><td>Her yeşil commit yayına <b>hazır</b> bir paket (imaj) üretir; prod'a çıkış bir onay ya da etiketle olur</td></tr>
+<tr><td>Sürekli dağıtım (continuous deployment)</td><td>Yeşil commit insan onayı olmadan prod'a çıkar</td></tr></table></div>
+<p>Çoğu ekip ortadakini kullanır: <code>main</code>'e her birleşme staging'e otomatik gider; prod'a çıkış bir sürüm etiketi (<code>v1.4.2</code>) ve onayla olur.</p>
+<h2>İmajı bir kez inşa et, her yere aynısını taşı</h2>
+<p>CD'nin altın kuralı: staging'de test ettiğin <b>aynı imaj</b> prod'a gider; prod için yeniden inşa edilmez. Ortamlar arasında yalnız yapılandırma (ortam değişkenleri, sırlar) değişir. İmaj, kayıt defterine (registry: GitHub Container Registry, Docker Hub, ECR) <b>değiştirilemez</b> bir etiketle gönderilir: commit SHA'sı ya da sürüm numarası. <code>latest</code> yalnız kolaylık etiketidir, dağıtımda kullanılmaz.</p>
+<pre class="code"># .github/workflows/cd.yml
+name: cd
+on:
+  push:
+    branches: [main]
+    tags: ["v*.*.*"]
+jobs:
+  imaj:
+    runs-on: ubuntu-latest
+    permissions: {contents: read, packages: write}
+    outputs: {etiket: ${{ steps.meta.outputs.version }}}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/login-action@v3
+        with: {registry: ghcr.io, username: ${{ github.actor }}, password: ${{ secrets.GITHUB_TOKEN }}}
+      - id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ghcr.io/anadolu/market-api
+          tags: |
+            type=sha
+            type=semver,pattern={{version}}
+      - uses: docker/build-push-action@v6
+        with: {push: true, tags: ${{ steps.meta.outputs.tags }}}
+  staging:
+    needs: imaj
+    environment: staging
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./deploy.sh staging ${{ needs.imaj.outputs.etiket }}
+      - run: ./smoke_test.sh https://staging.market.example.com
+  prod:
+    needs: staging
+    if: startsWith(github.ref, 'refs/tags/v')
+    environment: production          # GitHub'da "required reviewers" ile onay ister
+    runs-on: ubuntu-latest
+    steps:
+      - run: ./deploy.sh prod ${{ needs.imaj.outputs.etiket }}</pre>
+<p><code>environment:</code> anahtarı GitHub'da ortam başına ayrı sırlar ve koruma kuralları (onaylayıcı, bekleme süresi, yalnız etiketlerden dağıtım) tanımlamanı sağlar. <b>Duman testi</b> (smoke test), dağıtımdan hemen sonra birkaç kritik uç noktayı (<code>/health</code>, giriş, sepet) çağıran kısa bir denetimdir; başarısızsa hat durur.</p>
+<h2>Sürüm numarası: anlamsal sürümleme</h2>
+<p>Anlamsal sürümleme (semantic versioning) <code>MAJOR.MINOR.PATCH</code> biçimindedir: geriye uyumsuz değişiklik major'ı, yeni özellik minor'ı, hata düzeltmesi patch'i artırır. Commit mesajlarını <i>Conventional Commits</i> kuralıyla (<code>feat:</code>, <code>fix:</code>, <code>feat!:</code>) yazarsan bir sonraki sürümü araçlar (release-please, semantic-release) otomatik hesaplar ve değişiklik günlüğünü (CHANGELOG) üretir.</p>
+<h2>Geri alma (rollback)</h2>
+<p>Her dağıtım bir gün geri alınacakmış gibi yapılır. Değiştirilemez etiketler sayesinde geri almak, bir önceki <b>başarılı</b> imaj etiketini yeniden dağıtmaktır (<code>kubectl rollout undo</code>, Render/Fly panelinde "redeploy previous"). Geri almayı zorlaştıran tek şey veritabanıdır: yeni sürümün migration'ı eski kodu bozuyorsa geri dönüş de bozulur. Bu yüzden sqlalchemy-orm dersindeki genişlet-daralt kalıbı CD'nin ön koşuludur. Riskli özellikleri <b>özellik bayrağı</b> (feature flag) arkasında yayınlamak, kodu geri almadan özelliği kapatmayı sağlar. Kanarya (canary) dağıtımda yeni sürüm önce trafiğin küçük bir yüzdesine açılır, hata oranı izlenir, sorun yoksa genişletilir.</p>
+<div class="warn"><b>"İleri düzelt" her zaman seçenek değildir</b>Prod bozukken hızlı bir düzeltme commit'i yazıp yeniden dağıtmak (fix forward) cazip gelir ama CI süresi kadar kesinti demektir. Önce geri al, kullanıcıyı kurtar, sonra sakin kafayla düzelt.</div>
+<h2>ML projelerinde model kalite kapısı</h2>
+<p>Model de bir yapıt (artifact) gibi sürümlenir ve dağıtılır; ama "testler geçti" yetmez, yeni model eskisinden <b>kötü</b> olabilir. Kalite kapısı, aday modeli üretimdeki (temel) modelle aynı sabit doğrulama kümesinde karşılaştırır ve kurallardan biri bozulursa dağıtımı durdurur: ana metrik en az temel kadar olmalı, gecikme ve model boyutu sınırı aşmamalı, hiçbir müşteri segmentinde performans belirgin düşmemeli.</p>
+<pre class="py">from sklearn.datasets import make_classification
+from sklearn.linear_model import LogisticRegression
+from sklearn.tree import DecisionTreeClassifier
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+
+X, y = make_classification(n_samples=1500, n_features=8, random_state=7)
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.3, random_state=7)
+
+temel = LogisticRegression(max_iter=1000).fit(X_tr, y_tr)
+aday = DecisionTreeClassifier(max_depth=3, random_state=7).fit(X_tr, y_tr)
+auc_t = roc_auc_score(y_te, temel.predict_proba(X_te)[:, 1])
+auc_a = roc_auc_score(y_te, aday.predict_proba(X_te)[:, 1])
+
+TOLERANS = 0.005          # gürültü payı
+gecti = auc_a &gt;= auc_t - TOLERANS
+print(f"temel AUC={auc_t:.3f}  aday AUC={auc_a:.3f}  kapı: {'GEÇTİ' if gecti else 'REDDEDİLDİ'}")</pre>
+<p>Bu betik CI'da çalışır ve reddedince <code>sys.exit(1)</code> ile hattı durdurur. Doğrulama kümesi sabit tutulur (sürümlenir); her eğitimde değişirse karşılaştırma anlamsızlaşır. MLflow model kayıt defterinde "Staging → Production" geçişi de bu kapının arkasına konur.</p>
+<div class="note"><b>Gerçek işte</b>Olgun ekiplerde prod'a çıkış sıkıcı bir olaydır: günde birkaç kez, küçük değişikliklerle, otomatik duman testi ve tek tıkla geri almayla. Dağıtım sıklığı, değişiklik başarısızlık oranı, geri dönüş süresi ve değişikliğin prod'a ulaşma süresi (DORA metrikleri) bu olgunluğun ölçüsüdür.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kalite kapıları (quality gates)</h3>
+<p>Kurumsal ekiplerde ana dala birleştirme (merge) için koşullar tanımlanır: CI yeşil, en az bir onay, kapsam düşmemiş, tip hatası sıfır. GitHub'da "branch protection" ile bu kapılar zorunlu kılınır. Kapıları kademeli sıkılaştır; ilk gün yüzde doksan kapsam istemek ekibi küstürür.</p>
+<h3>Hızlı CI</h3>
+<p>Yavaş CI, atlanan CI'dır. Üç pratik: bağımlılıkları önbelleğe al (<code>actions/setup-python</code> içindeki <code>cache: pip</code>), yalnızca değişen testleri önce koş (<code>pytest --lf</code>), yavaş entegrasyon testlerini ayrı işe taşı ve yalnızca ana dalda çalıştır.</p>
+<h3>ruff kural seçimi</h3>
+<p>Tüm kuralları açmak gürültü yaratır. Başlangıç seti <code>E, F, I</code>; olgun projede <code>B</code> (bugbear: mutable default, gereksiz lambda), <code>UP</code> (pyupgrade: eski sözdizimi), <code>SIM</code> (sadeleştirme) eklenir. Her kuralı kapatırken <code>ignore</code> listesine yorum yaz: altı ay sonra neden kapattığını hatırlamazsın.</p>
+<h3>Tip denetimini kademeli açmak</h3>
+<p>Eski kod tabanında mypy önce yüzlerce hata verir. Çözüm: <code>[[tool.mypy.overrides]]</code> ile eski modüllere <code>ignore_errors = true</code>, yeni modüllere <code>strict = true</code>. Her dokunulan modül sıkı moda taşınır; birkaç ayda tüm taban temizlenir.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalite-ci">Alıştırmalara geç (32)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../paketleme-dagitim/">← Paketleme ve dağıtım: pyproject, CLI, sürümleme ve wheel</a><a href="../mulakat-hazirlik/">Mülakat hazırlığı: Python soruları, algoritmalar, canlı kodlama →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

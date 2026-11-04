@@ -1,0 +1,202 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>PDF ve Word belgeleriyle otomasyon | Kesit Python</title><meta name="description" content="PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pdf-word-otomasyon/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="PDF ve Word belgeleriyle otomasyon"><meta property="og:description" content="PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pdf-word-otomasyon/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"PDF ve Word belgeleriyle otomasyon","description":"PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/pdf-word-otomasyon/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Otomasyon, web ve araçlar</span><h1>PDF ve Word belgeleriyle otomasyon</h1><p class="st-l">PDF'in metin katmanı ile taranmış görüntü farkını, pypdf ile birleştirme, bölme ve filigranı, pdfplumber ile tablo ve metin çıkarmayı, regex ile fatura ve ekstre alanı ayıklamayı, string.Template, Jinja2 ve docxtpl ile şablon doldurmayı, toplu işlemde hata dayanıklılığını ve KVKK maskelemeyi Lezzet Kurye ve Ilgaz Bank verisiyle öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pdf-word-otomasyon">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli? Her ay 200 PDF, bir Excel</h2>
+<p>Lezzet Kurye'nin finans ekibi her ay sonunda 30 restorana komisyon faturası keser, bankadan gelen ekstreleri muhasebe sistemine işler ve tedarikçi faturalarındaki tutarları kontrol eder. Bunların hepsi PDF ve Word belgesidir. Bir çalışan bu işi elle yaparsa günler sürer ve kopyala-yapıştır hataları kaçınılmazdır. Python ile belge otomasyonu üç işten oluşur: <b>okumak</b> (PDF'ten metin ve tablo çıkarmak), <b>anlamlandırmak</b> (regex ile alan ayıklamak, doğrulamak) ve <b>üretmek</b> (şablonu doldurup fatura, sözleşme, teklif yazmak). Hepsinin üstünde de kişisel veri (KVKK) sorumluluğu durur.</p>
+<p><a href="../ofis-otomasyon/">Ofis ve iş akışı otomasyonu</a> dersinde PDF ve Word'e kısaca dokundun, <a href="../regex/">Düzenli ifadeler (regex): metinde kalıp arama ve çıkarma</a> dersinde kalıpları, <a href="../sablon-rapor/">Şablonla rapor üretme: string.Template ve Jinja2</a> dersinde Jinja2'yi öğrendin. Burada bunları belge hattında birleştiriyoruz. pypdf, pdfplumber ve python-docx tarayıcıda çalışmaz; kodlarını gri kutularda göreceksin. Alıştırmalarda ise bu kütüphanelerin <b>döndürdüğü metinle</b> çalışacaksın: gerçek hayatta da işin zor kısmı PDF'i açmak değil, çıkan metni doğru ayıklamaktır.</p>
+
+<h2>PDF'in yapısı: metin katmanı mı, taranmış görüntü mü?</h2>
+<p>PDF bir "sayfa tarifi"dir: harflerin koordinatlarını, yazı tiplerini ve görüntüleri tutar; paragraf, satır ya da tablo kavramı yoktur. Bu yüzden iki tür PDF ile karşılaşırsın:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Tür</th><th>Nasıl oluşur?</th><th>Nasıl okunur?</th><th>İpucu</th></tr>
+<tr><td>Dijital (metin katmanlı)</td><td>Yazılımdan "PDF olarak kaydet", e-Fatura, banka ekstresi</td><td>pypdf, pdfplumber, PyMuPDF</td><td>Metni fareyle seçebiliyorsun</td></tr>
+<tr><td>Taranmış (görüntü)</td><td>Tarayıcı, telefon fotoğrafı, faks</td><td>OCR: Tesseract (pytesseract), bulut OCR servisleri</td><td><code>extract_text()</code> boş döner</td></tr>
+<tr><td>Karma</td><td>Taranmış belgeye sonradan OCR katmanı eklenmiş</td><td>Önce metni dene, kalite kötüyse OCR</td><td>Rakamlarda O/0, l/1 karışıklığı</td></tr>
+</table></div>
+
+<h2>pypdf ile okuma, birleştirme, bölme, döndürme, filigran</h2>
+<pre class="code"># pip install pypdf
+from pypdf import PdfReader, PdfWriter
+
+okuyucu = PdfReader("faturalar/LK-2024-10-0001.pdf")
+print(len(okuyucu.pages), okuyucu.metadata.title)
+metin = okuyucu.pages[0].extract_text()
+
+# Birleştirme: klasördeki tüm faturalar tek dosyada
+yazici = PdfWriter()
+for yol in sorted(Path("faturalar").glob("*.pdf")):
+    for sayfa in PdfReader(yol).pages:
+        yazici.add_page(sayfa)
+yazici.write("ekim_faturalari.pdf")
+
+# Bölme ve döndürme: 1-3. sayfalar ayrı dosyaya, 2. sayfa 90 derece
+parca = PdfWriter()
+for i in (0, 1, 2):
+    sayfa = okuyucu.pages[i]
+    if i == 1:
+        sayfa.rotate(90)
+    parca.add_page(sayfa)
+parca.write("ilk_uc.pdf")
+
+# Filigran: her sayfaya "TASLAK" PDF'ini bindir
+damga = PdfReader("taslak_damga.pdf").pages[0]
+for sayfa in yazici.pages:
+    sayfa.merge_page(damga)</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pypdf pdfplumber python-docx docxtpl</code>. pypdf saf Python'dur, ek kurulum istemez. OCR için Tesseract programını ayrıca kurman gerekir (Windows'ta UB-Mannheim kurulum paketi, macOS'ta <code>brew install tesseract tesseract-lang</code>, Linux'ta <code>apt install tesseract-ocr tesseract-ocr-tur</code>) ve <code>pip install pytesseract pdf2image</code>.</div>
+
+<h2>pdfplumber ile tablo, regex ile alan</h2>
+<p>pdfplumber harflerin koordinatlarını kullanarak satırları ve tabloları yeniden kurar. <code>page.extract_text()</code> okuma sırasına dizilmiş metni, <code>page.extract_tables()</code> hücre listelerini verir. Fatura gibi "etiket: değer" yapısındaki belgelerde ise en sağlam yol metni alıp <b>regex</b> ile alanları ayıklamaktır.</p>
+<pre class="code"># pip install pdfplumber
+import pdfplumber
+
+with pdfplumber.open("ekstre_2024_03.pdf") as pdf:
+    metin = "\n".join(s.extract_text() or "" for s in pdf.pages)
+    tablolar = [t for s in pdf.pages for t in s.extract_tables()]
+print(tablolar[0][:3])     # [['Tarih', 'Açıklama', 'Tutar'], ['03.03.2024', 'HAVALE', '3.300,00'], ...]</pre>
+<p>Aşağıda <code>extract_text()</code> çıktısı gibi bir fatura metni var (Lezzet Kurye'nin Ekim 2024 verisinden: Köşe Dönercisi'nin teslim edilen siparişlerinin brüt tutarı 44.005 TL, komisyon %15). Her alan için ayrı, satır başına çapalı (<code>^</code> ve <code>re.M</code>) bir kalıp yazıyoruz:</p>
+<pre class="py">import re
+
+fatura = """LEZZET KURYE TEKNOLOJİ A.Ş.
+KOMİSYON FATURASI
+Fatura No: LK-2024-10-0001
+Fatura Tarihi: 31.10.2024
+Alıcı: Köşe Dönercisi
+VKN: 4810527396
+Brüt satış: 44.005,00 TL
+Komisyon oranı: %15
+Ara Toplam: 6.600,75 TL
+KDV (%20): 1.320,15 TL
+Genel Toplam: 7.920,90 TL
+"""
+
+
+def tr_sayi(metin):
+    """'44.005,00' -&gt; 44005.0  (binlik nokta, ondalık virgül)"""
+    return float(metin.replace(".", "").replace(",", "."))
+
+
+alanlar = {
+    "no": re.search(r"^Fatura No:\s*(\S+)", fatura, re.M).group(1),
+    "tarih": re.search(r"^Fatura Tarihi:\s*(\d{2}\.\d{2}\.\d{4})", fatura, re.M).group(1),
+    "vkn": re.search(r"^VKN:\s*(\d{10})$", fatura, re.M).group(1),
+    "toplam": tr_sayi(re.search(r"^Genel Toplam:\s*([\d.,]+)", fatura, re.M).group(1)),
+}
+print(alanlar)</pre>
+<div class="warn"><b>Türkçe sayı biçimi ve ilk eşleşme tuzağı</b><code>float("44.005,00")</code> hata verir; daha kötüsü <code>float("1.430")</code> sessizce 1,43 olur. Önce binlik noktaları sil, sonra virgülü noktaya çevir. İkinci tuzak: <code>re.search(r"Toplam:")</code> metindeki <b>ilk</b> eşleşmeyi alır, yani "Ara Toplam"ı. Kalıbı satır başına çapala ve etiketi tam yaz.</div>
+
+<h2>Şablon doldurma: string.Template, Jinja2 ve python-docx</h2>
+<p>Sözleşme, teklif ve fatura metinleri sabit bir iskelet ile değişen alanlardan oluşur. Hukuk biriminden gelen ve kod bilmeyen birinin düzenleyeceği basit metinler için <code>string.Template</code> idealdir: <code>$ad</code> ve <code>&#36;{tutar}</code> yer tutucuları dışında hiçbir şey çalıştırmaz. <code>substitute</code> eksik alanda <code>KeyError</code> verir, <code>safe_substitute</code> yer tutucuyu olduğu gibi bırakır; bu yüzden ikincisini kullanıp geriye kalan <code>$</code> alanlarını denetlemek iyi bir kalıptır.</p>
+<pre class="py">from string import Template
+import re
+
+sablon = Template("""KREDİ KARTI LİMİT ARTIŞ BİLDİRİMİ
+Sayın $ad_soyad,
+$hesap numaralı kartınızın limiti &#36;{yeni_limit} TL olarak güncellenmiştir.
+Geçerlilik tarihi: $tarih""")
+
+alanlar = {"ad_soyad": "İrem Çelik", "hesap": "100019", "yeni_limit": "35.000,00"}
+metin = sablon.safe_substitute(alanlar)
+eksik = sorted(set(re.findall(r"\$\{?(\w+)\}?", metin)))
+print(metin)
+print("Eksik alanlar:", eksik)</pre>
+<p>Döngü, koşul ve biçimlendirme gereken belgelerde Jinja2 kullan (<a href="../sablon-rapor/">Şablonla rapor üretme: string.Template ve Jinja2</a> dersinde ayrıntısıyla gördün). Kendi <code>tl</code> filtrenle Türkçe para biçimi kurabilirsin:</p>
+<pre class="py">from jinja2 import Environment, StrictUndefined
+
+def tr_para(x):
+    return f"{x:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+
+
+env = Environment(undefined=StrictUndefined, trim_blocks=True, lstrip_blocks=True)
+env.filters["tl"] = tr_para
+sablon = env.from_string("""Fatura: {{ no }}
+{% for s in satirlar %}
+{{ "%-20s"|format(s.ad) }} {{ s.adet }} x {{ s.fiyat|tl }} = {{ (s.adet * s.fiyat)|tl }} TL
+{% endfor %}
+Toplam: {{ satirlar|sum(attribute="tutar")|tl }} TL""")
+
+satirlar = [{"ad": "Tavuk Döner Dürüm", "adet": 3, "fiyat": 140.0},
+            {"ad": "Patates Kızartması", "adet": 1, "fiyat": 65.0},
+            {"ad": "Et Döner Porsiyon", "adet": 1, "fiyat": 245.0}]
+for s in satirlar:
+    s["tutar"] = s["adet"] * s["fiyat"]
+print(sablon.render(no="SIP-2", satirlar=satirlar))</pre>
+<p>Word belgesi için <b>python-docx</b> paragrafları ve tabloları düzenler; ama bir yer tutucu Word içinde birkaç "run"a bölünmüş olabileceği için düz <code>replace</code> çoğu zaman işe yaramaz. Bu yüzden şablon doldurmada Jinja2 sözdizimini Word içinde kullanan <b>docxtpl</b> tercih edilir:</p>
+<pre class="code"># pip install python-docx docxtpl
+from docx import Document
+from docxtpl import DocxTemplate
+
+belge = Document("teklif.docx")
+for p in belge.paragraphs:
+    print(p.style.name, p.text)
+tablo = belge.tables[0]
+tablo.add_row().cells[0].text = "Kurulum hizmeti"
+belge.save("teklif_guncel.docx")
+
+# Şablonda: "Sayın {{ musteri }}, {% for k in kalemler %}{{ k.ad }} ... {% endfor %}"
+sablon = DocxTemplate("sozlesme_sablonu.docx")
+sablon.render({"musteri": "Köşe Dönercisi", "oran": "%15", "kalemler": kalemler})
+sablon.save("sozlesmeler/kose_donercisi.docx")</pre>
+<h2>HTML'den PDF ve OCR</h2>
+<p>Biçimli PDF üretmenin en rahat yolu önce Jinja2 ile HTML üretip <b>WeasyPrint</b> ile PDF'e çevirmektir: CSS ile sayfa düzeni, logo ve tablo biçimi tasarımcının bildiği dilde kalır. Taranmış belgede ise önce OCR gerekir; OCR çıktısı hatalı olabileceği için ayıkladığın alanları mutlaka <b>doğrula</b> (toplam = ara toplam + KDV mi? VKN 10 hane mi?).</p>
+<pre class="code"># pip install weasyprint pytesseract pdf2image
+from weasyprint import HTML
+HTML(string=html_fatura).write_pdf("LK-2024-10-0001.pdf")
+
+from pdf2image import convert_from_path
+import pytesseract
+sayfalar = convert_from_path("taranmis_fatura.pdf", dpi=300)
+metin = "\n".join(pytesseract.image_to_string(s, lang="tur") for s in sayfalar)</pre>
+<h2>Toplu işlem ve hata dayanıklılığı</h2>
+<p>Gerçek klasörde 200 dosyanın birkaçı mutlaka bozuktur: şifreli PDF, eksik alan, farklı şablon. Tek bir dosya yüzünden bütün işin düşmesi kabul edilemez. Her dosyayı <code>try/except</code> içinde işle, başarılıları özet tabloya, başarısızları sebebiyle birlikte hata listesine yaz; iş bitince ikisini de raporla. Aşağıdaki kod geçici bir klasöre faturalar yazıp toplu okuyor:</p>
+<pre class="py">import tempfile
+from pathlib import Path
+
+klasor = Path(tempfile.mkdtemp())
+(klasor / "LK-0001.txt").write_text(fatura, encoding="utf-8")
+(klasor / "LK-0002.txt").write_text(fatura.replace("LK-2024-10-0001", "LK-2024-10-0002").replace("7.920,90", "5.104,12"), encoding="utf-8")
+(klasor / "LK-0003.txt").write_text("Bu dosya bozuk", encoding="utf-8")
+
+ozet, hatalar = [], []
+for yol in sorted(klasor.glob("*.txt")):
+    try:
+        metin = yol.read_text(encoding="utf-8")
+        no = re.search(r"^Fatura No:\s*(\S+)", metin, re.M).group(1)
+        toplam = tr_sayi(re.search(r"^Genel Toplam:\s*([\d.,]+)", metin, re.M).group(1))
+        ozet.append((no, toplam))
+    except AttributeError:
+        hatalar.append((yol.name, "alan bulunamadı"))
+print(ozet)
+print(hatalar)</pre>
+<h2>Kişisel veri (KVKK) maskeleme</h2>
+<p>Ekstre, sözleşme ve başvuru belgeleri ad soyad, T.C. kimlik numarası, IBAN, telefon ve e-posta içerir. Bu belgeleri test ortamına, bir yapay zekâ servisine ya da başka bir ekibe göndermeden önce <b>maskelemen</b> gerekir. Maskeleme ile anonimleştirme aynı şey değildir: maskelenmiş veri başka kaynaklarla birleştirilerek kişiye bağlanabiliyorsa hâlâ kişisel veridir. Yalnız gereken alanı paylaş (veri minimizasyonu), maskelemeyi <b>kaynağa en yakın</b> adımda yap ve log'lara ham veri yazma.</p>
+<pre class="py">import re
+
+def isim_maskele(ad_soyad):
+    return " ".join(k[0] + "*" * (len(k) - 1) for k in ad_soyad.split())
+
+def kvkk_maskele(metin):
+    metin = re.sub(r"\b(\w)[\w.]*@", r"\1***@", metin)                     # e-posta
+    metin = re.sub(r"\b0?5\d{2}[ ]?\d{3}[ ]?\d{2}[ ]?(\d{2})\b", r"05** *** ** \1", metin)   # cep tel.
+    metin = re.sub(r"\bTR\d{2}(?:[ ]?\d{4}){5}[ ]?(\d{2})\b", r"TR** **** **** **** **** **\1", metin)  # IBAN
+    return metin
+
+print(isim_maskele("İrem Çelik"))
+print(kvkk_maskele("İletişim: irem.celik@ornek.com, 0532 123 45 67, IBAN TR33 0006 1005 1978 6457 8413 26"))</pre>
+<div class="tip"><b>Doğrula, sonra güven</b>Ayıklanan her belgeye bir tutarlılık kontrolü ekle: ara toplam + KDV = genel toplam, satır tutarları toplamı = ara toplam, tarih dönemin içinde, VKN 10 hane, T.C. kimlik numarası sağlama algoritmasını geçiyor. Kontrolden geçmeyen belge otomatik işlenmez, insan onayı kuyruğuna düşer. Bu, "otomasyon yanlış tutarı muhasebeye işledi" vakalarının çoğunu önler.</div>
+<div class="note"><b>Gerçek işte</b>Muhasebe, satın alma ve İK ekiplerinde en çok talep gören otomasyonlar şunlardır: tedarikçi faturalarından tutar ve vade çekip Excel'e dökmek, banka ekstrelerini muhasebe kodlarıyla eşleştirmek, yüzlerce kişiye kişiselleştirilmiş sözleşme ya da bordro PDF'i üretmek, bir klasördeki belgeleri birleştirip arşivlemek. RPA araçları (UiPath, Power Automate) da bu işlerde arka planda çoğu zaman bir Python adımı çalıştırır.</div>
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Şablona göre ayrıştırıcı seçmek</h3>
+<p>Farklı tedarikçilerin faturaları farklı düzendedir. Her şablon için bir ayrıştırıcı fonksiyon yaz ve metindeki imza ifadeye (ör. "LEZZET KURYE" ya da VKN) göre doğru fonksiyonu seçen bir <b>yönlendirici</b> kur. Yeni tedarikçi geldiğinde yalnız bir fonksiyon eklersin; tanınmayan şablon hata kuyruğuna gider.</p>
+<h3>Koordinatlı ayıklama</h3>
+<p>Etiketsiz alanlarda (ör. sağ üst köşedeki tarih) pdfplumber'ın <code>page.within_bbox((x0, top, x1, bottom))</code> ile belirli bir dikdörtgenin metnini alırsın. Bu yöntem şablona çok bağlıdır; şablon değişince kırılır, bu yüzden testlerle korunmalıdır.</p>
+<h3>Belge yapay zekâsı</h3>
+<p>Çok çeşitli ve dağınık belgelerde (el yazısı, karışık düzen) bulut belge servisleri (Azure Document Intelligence, Google Document AI, AWS Textract) ya da çok kipli dil modelleri alanları JSON olarak çıkarabilir. Yine de çıktıyı aynı doğrulama kurallarından geçirmek ve kişisel veriyi göndermeden önce maskelemek gerekir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pdf-word-otomasyon">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../entegrasyon-saas/">← İş uygulamalarıyla entegrasyon: Google Sheets, e-posta, Teams, Slack ve webhook</a><a href="../prompt-muhendisligi/">Prompt mühendisliği ve yapılandırılmış çıktı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

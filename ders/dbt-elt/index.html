@@ -1,0 +1,192 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler | Kesit Python</title><meta name="description" content="ETL'den ELT'ye geçişi, dbt'nin sources-staging-intermediate-marts katmanlarını, ref() ve bağımlılık grafiğini, materializasyonları, testleri, köken,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/dbt-elt/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler"><meta property="og:description" content="ETL'den ELT'ye geçişi, dbt'nin sources-staging-intermediate-marts katmanlarını, ref() ve bağımlılık grafiğini, materializasyonları, testleri, köken,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/dbt-elt/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler","description":"ETL'den ELT'ye geçişi, dbt'nin sources-staging-intermediate-marts katmanlarını, ref() ve bağımlılık grafiğini, materializasyonları, testleri, köken,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/dbt-elt/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri mühendisliği</span><h1>ELT ve dbt mantığı: katmanlı SQL dönüşümleri ve testler</h1><p class="st-l">ETL'den ELT'ye geçişi, dbt'nin sources-staging-intermediate-marts katmanlarını, ref() ve bağımlılık grafiğini, materializasyonları, testleri, köken, snapshot ve seed'i öğrenir; DuckDB ve jinja2 ile kendi mini-dbt'ni yazıp kanat_havayollari için katmanlı bir proje kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dbt-elt">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>ETL'den ELT'ye</h2>
+<p><i>veri-boru-hatti</i> dersinde veriyi Python'da çıkarıp dönüştürdün, sonra veritabanına yükledin (ETL: extract, transform, load). Bulut ambarları (BigQuery, Snowflake, Redshift) ve DuckDB gibi hızlı analitik motorlar çıkınca sıra değişti: ham veri önce olduğu gibi ambara <b>yüklenir</b>, dönüşüm ambarın içinde <b>SQL ile</b> yapılır. Buna <b>ELT</b> denir. Avantajı: ham veri her zaman elindedir (yeniden hesaplanabilir), dönüşüm ambarın paralel gücüyle çalışır ve iş mantığı analistlerin de okuyabildiği SQL'dedir.</p>
+<p>ELT'de yüzlerce SQL dosyası birikir. Hangisi hangisinden önce çalışmalı? Hangi tablo hangi kaynaktan geliyor? Bir sütunu değiştirince ne bozulur? <b>dbt</b> (data build tool) bu soruları çözen açık kaynak araçtır: SQL dosyalarını <b>model</b> olarak düzenler, Jinja şablonlarıyla modüler hale getirir, aralarındaki bağımlılıklardan bir grafik çıkarır, doğru sırada çalıştırır, test eder ve belgeler. Bu derste dbt'nin mantığını öğrenip <b>DuckDB + jinja2</b> ile kendi "mini-dbt"ni yazacak, sonunda <code>kanat_havayollari</code> için katmanlı bir proje kuracaksın.</p>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>ETL</th><th>ELT</th></tr>
+<tr><td>Dönüşüm nerede?</td><td>Ambar dışında (Python, Spark, araç)</td><td>Ambarın içinde (SQL)</td></tr>
+<tr><td>Ham veri</td><td>Çoğu zaman saklanmaz</td><td>Ambarda <code>ham</code>/<code>raw</code> şemasında durur</td></tr>
+<tr><td>Kim yazar?</td><td>Veri mühendisi</td><td>Analitik mühendisi, analist, mühendis</td></tr>
+<tr><td>Araçlar</td><td>Python, Airflow, Spark</td><td>Fivetran/Airbyte (yükleme) + dbt (dönüşüm)</td></tr>
+</table></div>
+<div class="note"><b>Kendi bilgisayarında dene</b>dbt bir komut satırı aracıdır ve bu sayfadaki motorda çalışmaz. Gri kutulardaki dbt dosyalarını kendi bilgisayarında dene: <code>pip install dbt-duckdb</code>, sonra <code>dbt init kanat</code>. Yeşil kutular ve alıştırmalar aynı mantığı <b>jinja2</b> ve <b>DuckDB</b> ile burada çalıştırır.</div>
+
+<h2>dbt proje yapısı ve katmanlar</h2>
+<pre class="code">kanat/
+├── dbt_project.yml          # proje adı, varsayılan materializasyonlar
+├── models/
+│   ├── staging/             # kaynakla 1-1: yeniden adlandır, tür dönüştür, temizle
+│   │   ├── _sources.yml     # ham tablolar (source) tanımı
+│   │   ├── stg_ucuslar.sql
+│   │   └── stg_gecikmeler.sql
+│   ├── intermediate/        # iş mantığı ara adımları (birleştir, taneciğe indir)
+│   │   └── int_ucus_gecikme.sql
+│   └── marts/               # son kullanıcıya hazır olgu ve boyutlar
+│       ├── mart_rota_performans.sql
+│       └── _marts.yml       # testler ve belgeler
+├── seeds/                   # küçük sabit CSV'ler (kod tabloları)
+├── snapshots/               # SCD2 anlık görüntüleri
+└── tests/                   # özel (singular) SQL testleri</pre>
+<ul>
+<li><b>sources</b>: yükleme aracının ambara bıraktığı ham tablolar. Modeller ham tabloya adıyla değil <code>{{ source('kanat', 'hv_flights') }}</code> ile erişir.</li>
+<li><b>staging</b> (<code>stg_</code>): her kaynak tablo için bir model. Sütunları yeniden adlandırır, türleri dönüştürür, birimleri düzeltir. JOIN yok, iş mantığı yok.</li>
+<li><b>intermediate</b> (<code>int_</code>): staging modellerini birleştirir, taneciği değiştirir (ör. gecikme nedenlerini uçuş düzeyine toplar).</li>
+<li><b>marts</b> (<code>mart_</code>, <code>fct_</code>, <code>dim_</code>): panolara ve analistlere açılan son tablolar; <i>veri-modelleme</i> dersindeki yıldız şema burada kurulur.</li>
+</ul>
+<pre class="code">-- models/staging/stg_ucuslar.sql
+select
+    flight_id,
+    flight_no                                as ucus_no,
+    route_id,
+    status                                   as durum,
+    cast(sched_dep as timestamp)             as plan_kalkis,
+    date_diff('minute', cast(sched_dep as timestamp), cast(actual_dep as timestamp)) as kalkis_gecikme_dk
+from {{ source('kanat', 'hv_flights') }}
+
+-- models/marts/mart_rota_performans.sql
+{{ config(materialized='table') }}
+select r.rota, count(*) as ucus,
+       avg(case when u.kalkis_gecikme_dk &lt;= 15 then 1 else 0 end) as zamaninda_oran
+from {{ ref('stg_ucuslar') }} u
+join {{ ref('stg_rotalar') }} r using (route_id)
+where u.durum &lt;&gt; 'cancelled'
+group by 1</pre>
+
+<h2>ref() ve bağımlılık grafiği</h2>
+<p>dbt'nin kalbi <code>ref()</code> fonksiyonudur. Model içinde <code>{{ ref('stg_ucuslar') }}</code> yazdığında iki şey olur: (1) şablon derlenirken bu ifade gerçek tablo adına (<code>analytics.stg_ucuslar</code>) dönüşür; (2) dbt "bu model stg_ucuslar'a bağımlı" diye not alır. Tüm modellerin notlarından yönlü, döngüsüz bir grafik (DAG: directed acyclic graph) çıkar; dbt modelleri bu grafiğin <b>topolojik sırasıyla</b> çalıştırır. Tablo adını elle yazarsan bağımlılık kaybolur ve sıra bozulur. Bunu jinja2 ile kendin kurabilirsin:</p>
+<pre class="py">from jinja2 import Template
+
+def derle(sablon, sema="analytics"):
+    bagimliliklar = []
+    def ref(ad):
+        bagimliliklar.append(ad)      # derlerken bağımlılığı kaydet
+        return f"{sema}.{ad}"
+    sql = Template(sablon).render(ref=ref)
+    return sql, bagimliliklar
+
+sablon = "select * from {{ ref('stg_ucuslar') }} u join {{ ref('stg_rotalar') }} r using (route_id)"
+sql, bag = derle(sablon)
+print(sql)
+print(bag)</pre>
+<p>Python'un standart kütüphanesindeki <code>graphlib.TopologicalSorter</code> bağımlılık grafiğini sıralar ve döngü varsa <code>CycleError</code> verir:</p>
+<pre class="py">from graphlib import TopologicalSorter
+
+graf = {                              # model: [bağımlı olduğu modeller]
+    "stg_ucuslar": [],
+    "stg_rotalar": [],
+    "stg_gecikmeler": [],
+    "int_ucus_gecikme": ["stg_gecikmeler"],
+    "mart_rota_performans": ["stg_ucuslar", "stg_rotalar", "int_ucus_gecikme"],
+}
+print(list(TopologicalSorter(graf).static_order()))</pre>
+
+<h2>Jinja ile modüler SQL: makrolar</h2>
+<p>Jinja; değişken (<code>{{ }}</code>), kontrol yapısı (<code>{% for %}</code>, <code>{% if %}</code>) ve makro (<code>{% macro %}</code>) sağlar. Tekrar eden SQL'i (ör. kuruşu liraya çevirmek, para birimi sütunları) bir makroya alırsın; dbt paketleri (<code>dbt_utils</code>) yüzlerce hazır makro sunar.</p>
+<pre class="py">from jinja2 import Template
+
+sablon = """
+{%- macro dk_to_saat(sutun) -%} round({{ sutun }} / 60.0, 2) {%- endmacro -%}
+select
+{%- for s in sutunlar %}
+    {{ dk_to_saat(s) }} as {{ s }}_saat{{ "," if not loop.last }}
+{%- endfor %}
+from ucuslar
+"""
+print(Template(sablon).render(sutunlar=["blok_dk", "gecikme_dk"]))</pre>
+
+<h2>Materializasyon: view, table, incremental</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Tür</th><th>Ne üretir?</th><th>Ne zaman?</th></tr>
+<tr><td><code>view</code></td><td><code>CREATE VIEW</code>; her sorguda yeniden hesaplanır</td><td>Staging, hafif modeller (varsayılan)</td></tr>
+<tr><td><code>table</code></td><td><code>CREATE TABLE AS</code>; her çalışmada baştan</td><td>Panoların okuduğu martlar</td></tr>
+<tr><td><code>incremental</code></td><td>İlk çalışmada tablo; sonra yalnız yeni satırları ekler</td><td>Milyonlarca satırlık olay/işlem tabloları</td></tr>
+<tr><td><code>ephemeral</code></td><td>Tablo üretmez; kullanan modele CTE olarak gömülür</td><td>Küçük ara adımlar</td></tr>
+</table></div>
+<pre class="code">-- models/marts/fct_rezervasyon.sql
+{{ config(materialized='incremental', unique_key='booking_id') }}
+select * from {{ ref('stg_rezervasyonlar') }}
+{% if is_incremental() %}
+  -- yalnız hedefte olan en yeni kayıttan sonrakiler (watermark)
+  where rezervasyon_zamani &gt; (select max(rezervasyon_zamani) from {{ this }})
+{% endif %}</pre>
+<p>Artımlı modelin üç riski vardır: geç gelen kayıtlar (watermark'tan eski zaman damgasıyla gelir, kaçırılır), güncellenen kayıtlar (<code>unique_key</code> ile upsert gerekir) ve şema değişikliği. Çözüm: watermark'a küçük bir geri bakma payı (lookback) eklemek, <code>unique_key</code> vermek ve ara sıra <code>dbt run --full-refresh</code> çalıştırmak.</p>
+
+<h2>Testler</h2>
+<p>dbt'de test, <b>hatalı satırları döndüren</b> bir SQL sorgusudur: 0 satır dönerse test geçer. Dört yerleşik genel (generic) test YAML'da tanımlanır:</p>
+<pre class="code"># models/marts/_marts.yml
+models:
+  - name: stg_ucuslar
+    description: "Her satır bir planlı uçuş."
+    columns:
+      - name: flight_id
+        tests: [unique, not_null]
+      - name: durum
+        tests:
+          - accepted_values: {values: ['landed', 'cancelled', 'diverted']}
+      - name: route_id
+        tests:
+          - relationships: {to: ref('stg_rotalar'), field: route_id}</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Test</th><th>Hatalı satırı bulan SQL</th></tr>
+<tr><td>unique</td><td><code>select k from t group by k having count(*) &gt; 1</code></td></tr>
+<tr><td>not_null</td><td><code>select * from t where k is null</code></td></tr>
+<tr><td>accepted_values</td><td><code>select * from t where k not in ('a', 'b')</code></td></tr>
+<tr><td>relationships</td><td><code>select c.* from cocuk c left join ebeveyn p on c.k = p.k where c.k is not null and p.k is null</code></td></tr>
+</table></div>
+<pre class="py">import duckdb
+import veri
+
+con = duckdb.connect()
+con.execute(f"CREATE VIEW ucus AS SELECT * FROM read_csv('{veri.yol('kanat_havayollari', 'hv_flights')}')")
+TESTLER = {
+    "unique": "select {s} from {t} group by {s} having count(*) &gt; 1",
+    "not_null": "select * from {t} where {s} is null",
+}
+for tur, sablon in TESTLER.items():
+    for sutun in ["flight_id", "actual_dep"]:
+        hatali = con.execute(f"select count(*) from ({sablon.format(t='ucus', s=sutun)})").fetchone()[0]
+        print(f"{tur:9} {sutun:11} -&gt; {'GEÇTİ' if hatali == 0 else f'KALDI ({hatali})'}")</pre>
+<p><code>actual_dep</code> üzerindeki <code>not_null</code> testi 62 iptal uçuş yüzünden kalır. Bu bir veri hatası değil, kuralın eksikliğidir: test <code>where: "status &lt;&gt; 'cancelled'"</code> koşuluyla yazılmalıdır. Testler, iş kuralını açıkça yazmaya zorlar. Özel (singular) testler <code>tests/</code> klasöründe tek bir SQL dosyasıdır, ör. "iniş zamanı kalkıştan önce olamaz".</p>
+
+<h2>Belgeleme ve köken (lineage)</h2>
+<p><code>dbt docs generate</code> YAML'daki açıklamalardan ve bağımlılık grafiğinden bir web sitesi üretir: her modelin sütunları, testleri ve köken grafiği. Köken grafiği iki soruyu yanıtlar: "Bu sayı nereden geliyor?" (yukarı akış, upstream) ve "Bu tabloyu değiştirirsem ne bozulur?" (aşağı akış, downstream: etki analizi). Seçici sözdizimi de bu grafiğe dayanır: <code>dbt run --select +mart_rota_performans</code> modeli ve tüm atalarını, <code>stg_ucuslar+</code> modeli ve tüm torunlarını çalıştırır.</p>
+
+<h2>Snapshot ve seed</h2>
+<p><b>Snapshot</b>, kaynak tablodaki değişiklikleri SCD tip 2 olarak saklar (<i>veri-modelleme</i> dersi). dbt her çalışmada izlenen sütunları karşılaştırır, değişen satırın eski sürümüne <code>dbt_valid_to</code> yazar ve yeni sürüm ekler. <b>Seed</b> ise depoda tutulan küçük CSV dosyalarıdır (gecikme neden kodları, ülke-bölge eşlemesi); <code>dbt seed</code> onları tabloya yükler ve modeller <code>ref()</code> ile kullanır.</p>
+<pre class="code">-- snapshots/yolcu_snapshot.sql
+{% snapshot yolcu_snapshot %}
+{{ config(target_schema='snapshots', unique_key='passenger_id',
+          strategy='check', check_cols=['tier', 'city']) }}
+select * from {{ source('kanat', 'hv_passengers') }}
+{% endsnapshot %}</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Komut</th><th>Ne yapar?</th></tr>
+<tr><td><code>dbt run</code></td><td>Modelleri DAG sırasıyla çalıştırır</td></tr>
+<tr><td><code>dbt test</code></td><td>Tüm testleri çalıştırır</td></tr>
+<tr><td><code>dbt build</code></td><td>Seed, run, snapshot ve test'i DAG sırasında birlikte yapar; testi kalan modelin torunlarını atlar</td></tr>
+<tr><td><code>dbt run --select +mart_x</code></td><td>Model ve ataları</td></tr>
+<tr><td><code>dbt docs generate &amp;&amp; dbt docs serve</code></td><td>Belge sitesi ve köken grafiği</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Analitik mühendisliği ekiplerinde her model bir çekme isteğiyle (pull request) gelir; CI hattı yalnız değişen modelleri ve torunlarını derleyip test eder (<code>--select state:modified+</code>). Testsiz mart, açıklamasız sütun ve <code>ref</code> yerine elle yazılmış tablo adı kod incelemesinde (code review) geri çevrilir. Pazartesi sabahı "pano neden boş?" sorusunun cevabı çoğunlukla bir kaynak tablonun gecikmesidir; bu yüzden kaynaklara tazelik (freshness) testi de eklenir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Model sözleşmeleri ve sürümleme</h3>
+<p>dbt 1.5 ile gelen <b>contract</b> özelliği bir martın sütun adlarını ve türlerini sabitler; model bu sözleşmeye uymazsa derleme başarısız olur. Panolara ve diğer ekiplere açılan modeller için kırılmaz bir API gibi davranır; büyük değişikliklerde model sürümleri (<code>v2</code>) yayınlanır.</p>
+<h3>İdempotentlik ve yeniden çalıştırma</h3>
+<p>Her model, aynı girdiyle tekrar çalıştırıldığında aynı sonucu vermelidir. <code>table</code> ve <code>view</code> bunu kendiliğinden sağlar; <code>incremental</code> modellerde <code>unique_key</code> ve doğru watermark karşılaştırması (<code>&gt;</code> ile <code>&gt;=</code> farkı) kritik hale gelir.</p>
+<h3>Orkestrasyonla ilişki</h3>
+<p>dbt yalnızca dönüşümü yapar; ne zaman çalışacağını Airflow, Dagster ya da Prefect belirler (<i>orkestrasyon</i> dersi). Dagster ve Astronomer Cosmos, dbt grafiğini her model ayrı görev olacak şekilde orkestratöre taşır.</p>
+<h3>Semantik katman</h3>
+<p>Aynı "aktif müşteri" tanımının her panoda farklı hesaplanmasını önlemek için ölçüler (metrics) dbt'nin semantik katmanında bir kez tanımlanır; BI araçları bu tanımı sorgular. Power BI'daki ölçü tabloları ile aynı fikirdir.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/dbt-elt">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../bulut-temelleri/">← Bulut temelleri: nesne depolama, IAM, serverless ve maliyet</a><a href="../postgresql-python/">PostgreSQL ile Python: psycopg, transaction, indeks ve toplu yükleme →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

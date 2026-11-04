@@ -1,0 +1,244 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metin işleme ve NLP: Türkçe metinden modele | Kesit Python</title><meta name="description" content="Türkçe metni doğru temizler, tokenler ve n-gram'lara ayırır; CountVectorizer ve TF-IDF ile vektöre çevirip benzer şikayet bulur, yorumlarda duygu analizi…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/nlp-metin/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Metin işleme ve NLP: Türkçe metinden modele"><meta property="og:description" content="Türkçe metni doğru temizler, tokenler ve n-gram'lara ayırır; CountVectorizer ve TF-IDF ile vektöre çevirip benzer şikayet bulur, yorumlarda duygu analizi…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/nlp-metin/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Metin işleme ve NLP: Türkçe metinden modele","description":"Türkçe metni doğru temizler, tokenler ve n-gram'lara ayırır; CountVectorizer ve TF-IDF ile vektöre çevirip benzer şikayet bulur, yorumlarda duygu analizi…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/nlp-metin/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Metin işleme ve NLP: Türkçe metinden modele</h1><p class="st-l">Türkçe metni doğru temizler, tokenler ve n-gram'lara ayırır; CountVectorizer ve TF-IDF ile vektöre çevirip benzer şikayet bulur, yorumlarda duygu analizi yapar ve embedding/transformer dünyasına kavramsal olarak bakarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/nlp-metin">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Metin de veridir</h2>
+<p>Anadolu Market'e her gün yüzlerce ürün yorumu, Ilgaz Bank'ın çağrı merkezine yüzlerce şikayet kaydı geliyor. Bunlar sayı değil metin; ama "hangi konuda en çok şikayet var", "bu yorum olumlu mu", "bu şikayete benzeyen eski kayıtlar hangileri" soruları tamamen sayısal işlemlerle cevaplanır. Doğal dil işleme (Natural Language Processing, NLP) metni modelin anlayacağı sayılara çevirme ve sonra o sayılarla çalışma sanatıdır.</p>
+<p>Bu dersin akışı tipik bir NLP projesinin akışıdır: <b>temizle → parçala → say → vektöre çevir → benzerlik/sınıflandırma</b>. Sonunda modern yaklaşıma (embeddings ve transformer'lar) kavramsal bir bakış atacağız.</p>
+
+<h2>Türkçe metni temizlemek: küçük harf tuzağı</h2>
+<p><a href="../unicode-metin/">Karakterler, Unicode ve Türkçe</a> dersinde gördüğün tuzak burada can yakar. Python'un <code>lower()</code> metodu dilden bağımsızdır: "I" harfini "i" yapar (Türkçede "ı" olmalı), "İ" harfini ise "i" + birleşen nokta (U+0307) olarak iki karaktere çevirir. Sonuç: "İADE" küçültüldüğünde "iade" ile eşleşmez ve sayımların sessizce yanlış çıkar.</p>
+<pre class="py">metin = "İADE talebim var, IŞIK modeli ARIZALI"
+print(metin.lower())
+print("İADE".lower() == "iade", len("İADE".lower()))
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+print(tr_kucuk(metin))
+print(tr_kucuk("İADE") == "iade")</pre>
+<div class="warn"><b>casefold da çözmez</b><code>casefold()</code> büyük-küçük harf duyarsız karşılaştırma için daha agresiftir ama yine Türkçe kurallarını bilmez. Türkçe metinde kendi <code>tr_kucuk</code> fonksiyonunu ilk adım yap ve tüm hattında (eğitimde ve tahminde) aynı fonksiyonu kullan.</div>
+<p>Sonraki adım noktalama ve rakamlar. <code>string.punctuation</code> yalnızca ASCII işaretleri içerir; Türkçe metinlerdeki tırnaklar (“ ” ‘ ’) ve üç nokta (…) kaçar. Regex ile "harf olmayan her şeyi boşluğa çevir" demek daha güvenlidir. Python 3'te <code>\w</code> Unicode harflerini (ç, ğ, ı, ö, ş, ü) zaten tanır.</p>
+
+<h2>Tokenizasyon, durak kelimeler ve n-gram</h2>
+<p><b>Tokenizasyon</b> (tokenization) metni anlamlı parçalara (token) bölmektir. Basit ama sağlam yol <code>re.findall</code> ile harf dizilerini yakalamaktır. <b>Durak kelimeler</b> (stop words) "ve, bir, bu, da, için" gibi her metinde geçen ve tek başına bilgi taşımayan kelimelerdir; sayımlarda listenin tepesini kaplamasınlar diye çıkarılır. Türkçe için hazır listeler vardır ama küçük ve elle yazılmış bir liste neyi attığını bilmeni sağlar.</p>
+<pre class="py">import re
+from collections import Counter
+
+DURAKLAR = {"ve", "bir", "bu", "da", "de", "çok", "ile", "için", "ama", "mi", "gibi", "daha", "en"}
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+def tokenle(metin, duraklar=DURAKLAR):
+    kelimeler = re.findall(r"[a-zçğıöşü]+", tr_kucuk(metin))
+    return [k for k in kelimeler if k not in duraklar and len(k) &gt; 1]
+
+yorumlar = [
+    "Kargo ÇOK geç geldi, ürün de kırık!",
+    "Ürün güzel ama kargo geç geldi.",
+    "İade süreci çok hızlıydı, teşekkürler.",
+    "Kargo hızlı, ürün güzel.",
+]
+tum = [t for y in yorumlar for t in tokenle(y)]
+print(tokenle(yorumlar[0]))
+print(Counter(tum).most_common(4))
+
+# n-gram: ardışık n kelime
+t = tokenle(yorumlar[1])
+ikili = [" ".join(p) for p in zip(t, t[1:])]
+print(ikili)</pre>
+<p><b>n-gram</b>, ardışık n token'dır: "kargo geç" bir ikili (bigram). Tek kelimeler "geç" ile "geldi"yi ayrı sayar; ikili ise "kargo geç" ifadesini bir kavram olarak yakalar. <code>zip(t, t[1:])</code> ikilileri, <code>zip(t, t[1:], t[2:])</code> üçlüleri üretir.</p>
+<div class="warn"><b>"değil" bir durak kelime değildir</b>Hazır İngilizce listelerde "not" bazen durak kelime sayılır. Türkçede "değil", "yok", "hiç" kelimelerini atarsan "memnun değilim" ile "memnunum" aynı görünür ve duygu analizi çöker. Durak listeni göreve göre seç.</div>
+
+<h2>Metni vektöre çevirmek: CountVectorizer ve TF-IDF</h2>
+<p>Modeller sayı ister. <b>Kelime çantası</b> (bag of words) modelinde her belge, sözlükteki her kelimenin kaç kez geçtiğini tutan bir satırdır. scikit-learn'de bunu <code>CountVectorizer</code> yapar. <b>TF-IDF</b> (term frequency - inverse document frequency) ise sayımı, kelimenin kaç belgede geçtiğine göre ağırlıklandırır: her yorumda geçen "ürün" düşük, yalnızca birkaç yorumda geçen "kırık" yüksek ağırlık alır.</p>
+<pre class="py">from sklearn.feature_extraction.text import CountVectorizer, TfidfVectorizer
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+belgeler = ["kargo geç geldi", "ürün kırık geldi", "kargo hızlı ürün güzel"]
+
+cv = CountVectorizer(preprocessor=tr_kucuk)
+X = cv.fit_transform(belgeler)
+print(cv.get_feature_names_out().tolist())
+print(X.toarray())
+
+tf = TfidfVectorizer(preprocessor=tr_kucuk)
+T = tf.fit_transform(belgeler)
+agirlik = dict(zip(tf.get_feature_names_out(), T.toarray()[1].round(2).tolist()))
+print({k: v for k, v in agirlik.items() if v &gt; 0})</pre>
+<p>İkinci belgede "kırık" (yalnız bu belgede var) "geldi"den (iki belgede var) daha yüksek ağırlık aldı. Sonuç seyrek matristir (sparse matrix): çoğu hücre 0 olduğu için yalnızca dolu hücreler saklanır; <code>toarray()</code> yalnızca küçük örneklerde göstermek içindir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Parametre</th><th>Ne işe yarar</th><th>Örnek</th></tr>
+<tr><td><code>preprocessor</code></td><td>Tokenizasyondan önce metne uygulanır</td><td><code>preprocessor=tr_kucuk</code></td></tr>
+<tr><td><code>stop_words</code></td><td>Atılacak kelimeler (Türkçe hazır yok, liste ver)</td><td><code>stop_words=list(DURAKLAR)</code></td></tr>
+<tr><td><code>ngram_range</code></td><td>Tekli, ikili... birlikte</td><td><code>(1, 2)</code></td></tr>
+<tr><td><code>min_df</code> / <code>max_df</code></td><td>Çok nadir / çok yaygın kelimeleri at</td><td><code>min_df=2</code>, <code>max_df=0.9</code></td></tr>
+<tr><td><code>analyzer="char_wb"</code></td><td>Kelime yerine karakter n-gram</td><td>Türkçe ekler için güçlü</td></tr>
+<tr><td><code>token_pattern</code></td><td>Token regex'i (varsayılan 2+ harf)</td><td><code>r"(?u)\b\w+\b"</code></td></tr>
+</table></div>
+
+<h2>Kosinüs benzerliği: benzer şikayeti bulmak</h2>
+<p>Ilgaz Bank'ta yeni bir şikayet geldiğinde temsilci "bunun benzeri daha önce nasıl çözülmüştü" diye bakmak ister. İki TF-IDF vektörü arasındaki <b>kosinüs benzerliği</b> (cosine similarity) aralarındaki açının kosinüsüdür: 1 aynı yön (çok benzer), 0 hiç ortak kelime yok.</p>
+<pre class="py">from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.metrics.pairwise import cosine_similarity
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+sikayetler = [
+    "Kartım ATM'de yutuldu, yeni kart istiyorum",
+    "Mobil uygulamaya giriş yapamıyorum, şifre hatası veriyor",
+    "Hesabımdan bilgim dışında para çekilmiş",
+    "Kredi kartı ekstremde tanımadığım bir harcama var",
+    "Uygulama açılmıyor, sürekli şifre hatası alıyorum",
+]
+vec = TfidfVectorizer(preprocessor=tr_kucuk)
+X = vec.fit_transform(sikayetler)
+
+yeni = "Uygulamaya giremiyorum, şifre hatası veriyor"
+skor = cosine_similarity(vec.transform([yeni]), X).ravel()
+for i in skor.argsort()[::-1][:2]:
+    print(round(skor[i], 2), sikayetler[i])</pre>
+<p>Dikkat: yeni metin <code>transform</code> ile vektöre çevrilir, <code>fit_transform</code> ile değil. Sözlük eğitim verisinden öğrenilir ve sabit kalır; yeni metindeki bilinmeyen kelimeler ("giremiyorum") yok sayılır. Bu da kelime temelli yöntemlerin zayıflığını gösterir: "giremiyorum" ile "giriş" aynı kökten ama farklı token.</p>
+
+<h2>Metin sınıflandırma: yorum duygu analizi</h2>
+<p><a href="../ml-pipeline-degerlendirme/">Ön işleme, pipeline ve model değerlendirme</a> dersinde kurduğun Pipeline mantığı metinde de aynıdır: vektörleştirici + sınıflandırıcı. Metin için iki klasik model: <b>MultinomialNB</b> (Naive Bayes; kelime sayımlarıyla çok hızlı, küçük veride şaşırtıcı iyi) ve <b>LogisticRegression</b> (genelde biraz daha isabetli, katsayıları yorumlanabilir).</p>
+<pre class="py">yorumlar = [
+    ("Kargo çok hızlı geldi, ürün harika", "olumlu"),
+    ("Ürün tam anlatıldığı gibi, çok memnunum", "olumlu"),
+    ("Paketleme özenliydi, teşekkürler", "olumlu"),
+    ("Fiyatına göre kalitesi süper", "olumlu"),
+    ("Hızlı teslimat, güzel ürün, tavsiye ederim", "olumlu"),
+    ("Müşteri hizmetleri çok ilgiliydi, memnunum", "olumlu"),
+    ("Ürün kırık geldi, çok kötü", "olumsuz"),
+    ("Kargo geç geldi, bir daha almam", "olumsuz"),
+    ("Anlatıldığı gibi değil, iade etmek istiyorum", "olumsuz"),
+    ("Kalitesi berbat, param boşa gitti", "olumsuz"),
+    ("Müşteri hizmetlerine ulaşamadım, kötü deneyim", "olumsuz"),
+    ("Paket ezik ve ürün eksik geldi", "olumsuz"),
+]
+from sklearn.pipeline import make_pipeline
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.naive_bayes import MultinomialNB
+from sklearn.linear_model import LogisticRegression
+
+def tr_kucuk(s):
+    return s.replace("I", "ı").replace("İ", "i").lower()
+
+metinler = [m for m, _ in yorumlar]
+etiketler = [e for _, e in yorumlar]
+
+nb = make_pipeline(TfidfVectorizer(preprocessor=tr_kucuk), MultinomialNB()).fit(metinler, etiketler)
+lr = make_pipeline(TfidfVectorizer(preprocessor=tr_kucuk), LogisticRegression(C=10)).fit(metinler, etiketler)
+
+yeni = ["Ürün harika, kargo hızlı", "Ürün kırık geldi, iade istiyorum", "Kargo geç geldi ama ürün güzel"]
+for m, a, b in zip(yeni, nb.predict(yeni), lr.predict(yeni)):
+    print(f"{a:8} {b:8} {m}")
+print(lr.classes_.tolist(), lr.predict_proba(yeni[2:]).round(2).tolist())</pre>
+<p>Üçüncü yorum karışık: hem olumsuz ("geç") hem olumlu ("güzel") sinyal var. 12 örnekle eğitilmiş model "olumsuz" dese de olasılıklar 0.44 / 0.56 ile neredeyse yazı turadır; gerçek projelerde binlerce etiketli yorum, "nötr" sınıfı ve <code>cross_val_score</code> ile değerlendirme gerekir. <code>predict_proba</code> olasılıkları, düşük güvenli tahminleri insana yönlendirmek için kullanılır.</p>
+<div class="tip"><b>Sızıntıya dikkat</b>Vektörleştiriciyi tüm veriye fit edip sonra train/test ayırmak IDF değerlerine test bilgisini sızdırır. Pipeline kullanırsan <code>cross_val_score</code> her katmanda vektörleştiriciyi yalnızca eğitim kısmına fit eder.</div>
+
+<h2>Embeddings ve transformer'lar: kavramsal bakış</h2>
+<p>TF-IDF kelimeleri bağımsız sayar: "kredi kartı" ile "kart borcu" ortak token taşımıyorsa benzerlikleri 0'dır. <b>Gömme</b> (embedding) yaklaşımında her metin, anlamını yakalayan yoğun bir vektöre (ör. 384 ya da 768 sayı) çevrilir; anlamca yakın cümleler, farklı kelimeler kullansa bile yakın vektörler alır. Bu vektörleri <b>transformer</b> mimarisindeki dil modelleri üretir. Hugging Face, bu modellerin ve hazır araçların paylaşıldığı merkezdir.</p>
+<pre class="code"># pip install sentence-transformers
+from sentence_transformers import SentenceTransformer, util
+
+# Çok dilli bir model seç (Hugging Face'te "multilingual" modelleri ara)
+model = SentenceTransformer("paraphrase-multilingual-MiniLM-L12-v2")
+cumleler = ["Kartım ATM'de kaldı", "Banka makinesi kartımı yuttu", "Kredi faizi ne kadar?"]
+emb = model.encode(cumleler)
+print(util.cos_sim(emb[0], emb[1:]))   # ilk ikisi yüksek, üçüncü düşük çıkar</pre>
+<pre class="code"># pip install transformers torch
+from transformers import pipeline
+
+# Türkçe duygu analizi için Hugging Face'te "turkish sentiment" araması yap,
+# model kartında lisansı ve eğitim verisini oku.
+siniflandirici = pipeline("sentiment-analysis", model="&lt;seçtiğin-türkçe-model&gt;")
+print(siniflandirici("Kargo çok geç geldi, hiç memnun değilim"))</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>Bu iki örnek tarayıcıda çalışmaz: modeller yüzlerce MB indirir ve torch gerektirir. Bilgisayarında sanal ortam (virtual environment) açıp <code>pip install sentence-transformers</code> ile deneyebilirsin. İlk çalıştırma modeli indirir; sonraki çalıştırmalar önbellekten (cache) gelir.</div>
+<p><b>Türkçe için araçlar:</b> Türkçe eklemeli (agglutinative) bir dildir; "giremiyorum", "girişimizde", "girdi" aynı kökten çıkar. <b>Zemberek</b> Türkçe için kök bulma (stemming), biçimbirim çözümleme ve yazım denetimi yapan köklü bir açık kaynak kütüphanedir (Java tabanlı; Python'dan sarmalayıcılarla kullanılır). <b>spaCy</b>'nin Türkçe için temel tokenizasyon desteği ve topluluk tarafından eğitilmiş modelleri vardır. Hugging Face'te ise BERTurk gibi Türkçe ön-eğitimli transformer modelleri bulunur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yaklaşım</th><th>Artı</th><th>Eksi</th><th>Ne zaman?</th></tr>
+<tr><td>TF-IDF + LogisticRegression</td><td>Hızlı, ucuz, açıklanabilir, CPU yeter</td><td>Eş anlam ve ekleri yakalamaz</td><td>İlk model, temel çizgi (baseline)</td></tr>
+<tr><td>Karakter n-gram TF-IDF</td><td>Ek ve yazım hatasına dayanıklı</td><td>Sözlük büyür</td><td>Türkçe, kısa ve hatalı metin</td></tr>
+<tr><td>Cümle embedding + basit sınıflandırıcı</td><td>Anlam benzerliği, az etiketle iyi</td><td>Model indirme, GPU iyi olur</td><td>Semantik arama, kümeleme</td></tr>
+<tr><td>Transformer ince ayar (fine-tuning)</td><td>En yüksek isabet</td><td>Veri, GPU, MLOps maliyeti</td><td>Kritik ve yüksek hacimli görev</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Bir bankanın şikayet yönetiminde tipik akış: metin önce kişisel verilerden arındırılır (TC kimlik no, IBAN, telefon maskelenir; KVKK), sonra bir sınıflandırıcı şikayeti departmana (kart, kredi, dijital kanal) yönlendirir, güveni düşük olanlar insana gider. İlk sürüm neredeyse her zaman TF-IDF + LogisticRegression'dır; dakikalar içinde eğitilir, neden o kararı verdiğini katsayılarla açıklarsın. Transformer modeline ancak temel çizginin yetmediği kanıtlanınca geçilir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek müşteri yorumlarıyla metin analizi</h2><p>Dersteki metin teknikleri birkaç örnek cümleyle çalışıyordu. Şimdi bir yemek teslimat platformunun gerçek değerlendirme tablosuna geçelim: <code>lezzet_kurye</code> setindeki <code>lk_ratings</code>. Her satır bir siparişin değerlendirmesidir: <code>food_score</code> ve <code>courier_score</code> (1–5) ile isteğe bağlı <code>comment</code>. 3.979 değerlendirmenin 2.366'sında yorum var. Bu tablo, metin analizinde sık karşılaşılan iki gerçeği öğretir: <b>metin alanlarının önemli bir kısmı boştur</b> ve <b>kısa yorumlar sık tekrar eder</b> ("Güzeldi", "Süper" gibi).</p><pre class="py">import veri
+
+r = veri.oku("lezzet_kurye", "lk_ratings")
+print(len(r), "değerlendirme,", int(r["comment"].notna().sum()), "yorum")
+print("farklı yorum metni:", r["comment"].nunique())
+print(r["comment"].value_counts().head(5))
+</pre><p>2.366 yorumda 275 farklı metin var: bir metin ortalama 8-9 kez geçiyor. (Bu veri hayali: yorumlar yaklaşık 300 metinlik bir havuzdan seçildi, gerçek platformda çeşitlilik daha fazladır.) Böyle bir veride önce <b>metin başına özet</b> çıkarmak en verimli adımdır: her kalıp kaç kez geçiyor, ortalama yemek ve kurye puanı ne?</p><pre class="py">import veri
+
+r = veri.oku("lezzet_kurye", "lk_ratings").dropna(subset=["comment"])
+ozet = r.groupby("comment").agg(adet=("order_id", "size"), yemek=("food_score", "mean"),
+                                kurye=("courier_score", "mean"))
+print(ozet.round(2).sort_values("yemek").head(6))
+</pre><h3>Kural tabanlı konu etiketleme</h3><p>Model eğitmeden önce, iş birimiyle birlikte bir <b>anahtar kelime sözlüğü</b> kurmak çoğu zaman en hızlı ve açıklanabilir başlangıçtır. Türkçede kelimeler ek aldığı için tam kelime yerine <b>kök parçası</b> ara: "lezzet" hem "lezzetli" hem "lezzetliydi" ile eşleşir, "dökül" ise "dökülmüştü" ile. Küçük harfe çevirirken Türkçe I/İ kuralını unutma. Bir yorum birden çok konuya girebilir: "Biraz geç geldi ama lezzetli" hem gecikme hem lezzet konusudur.</p><pre class="py">def tr_kucuk(metin):
+    return metin.replace("I", "ı").replace("İ", "i").lower()
+KONULAR = {
+    "gecikme": ["geç"],
+    "sıcaklık": ["soğuk"],
+    "hatalı sipariş": ["eksik", "yanlış", "dökül"],
+    "porsiyon": ["porsiyon"],
+    "lezzet": ["lezzet"],
+}
+
+import veri
+from collections import Counter
+
+def konular(metin):
+    k = tr_kucuk(metin)
+    return [ad for ad, kokler in KONULAR.items() if any(x in k for x in kokler)]
+
+yorumlar = veri.oku("lezzet_kurye", "lk_ratings")["comment"].dropna()
+sayim = Counter(k for y in yorumlar for k in konular(y))
+print(dict(sayim.most_common()))
+print(konular("Biraz geç geldi ama lezzetli"))
+</pre><div class="warn"><b>Boş metin ve .str</b><code>r["comment"].str.contains("geç")</code> boş yorumlarda NaN döndürür ve bu maskeyle satır seçmek hata verir. <code>na=False</code> ver ya da önce <code>dropna</code> uygula. Boş yorumu "olumsuz" ya da "olumlu" saymak da hatadır: o müşteri yalnızca yazmamıştır.</div><h3>Puanı etiket yapmak ve sızıntı tuzağı</h3><p>Elinde elle etiketlenmiş duygu verisi yoksa, yıldız puanı <b>zayıf etiket</b> (weak label) olarak kullanılabilir: <code>food_score &gt;= 4</code> olumlu, <code>&lt;= 2</code> olumsuz, 3 belirsiz (dışarıda bırakılır). Ama burada büyük bir tuzak var: aynı metin tekrar ettiği için rastgele eğitim/test bölmesinde test cümlelerinin <b>çoğu</b> eğitimde de bulunur. Model ezberinden yararlanır, başarıyı olduğundan yüksek raporlarsın. Gerçek başarıyı görmek için bölmeyi <b>metne göre gruplu</b> yap (<code>GroupShuffleSplit</code>): böylece test setindeki kalıpları model hiç görmemiş olur.</p><pre class="py">def tr_kucuk(metin):
+    return metin.replace("I", "ı").replace("İ", "i").lower()
+
+import veri
+import numpy as np
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
+from sklearn.pipeline import make_pipeline
+from sklearn.model_selection import train_test_split, GroupShuffleSplit
+from sklearn.metrics import balanced_accuracy_score
+
+r = veri.oku("lezzet_kurye", "lk_ratings").dropna(subset=["comment"])
+r = r[r["food_score"] != 3]
+X = r["comment"]
+y = np.where(r["food_score"] &gt;= 4, "olumlu", "olumsuz")
+model = make_pipeline(TfidfVectorizer(preprocessor=tr_kucuk),
+                      LogisticRegression(max_iter=1000, class_weight="balanced"))
+
+a, b, ya, yb = train_test_split(X, y, test_size=0.3, random_state=0, stratify=y)
+print("rastgele bölme:", round(balanced_accuracy_score(yb, model.fit(a, ya).predict(b)), 3))
+tr, te = next(GroupShuffleSplit(n_splits=1, test_size=0.3, random_state=0).split(X, y, groups=X))
+model.fit(X.iloc[tr], y[tr])
+print("gruplu bölme:", round(balanced_accuracy_score(y[te], model.predict(X.iloc[te])), 3))
+</pre><p>Dengeli doğruluk rastgele bölmede 0,693 iken gruplu bölmede 0,588'e düşüyor: görülmemiş metinlerde model yazı turanın az üstünde. Puan gürültülü bir etiket, metinler de kısa. Ders: bu veriyle güçlü bir duygu modeli bekleme; konu sayımı ve metin başına puan özeti çok daha dürüst bir analizdir. Gerçek serbest metin biriktiğinde model sorusu yeniden açılır.</p><div class="note"><b>Gerçek işte</b>Müşteri deneyimi ekipleri haftalık "şikâyet konusu" raporunu tam olarak böyle kurar: kural tabanlı etiketleme, konu başına sayı ve ortalama puan, haftadan haftaya değişim. Model ancak elle etiketlenmiş birkaç bin serbest metin toplandıktan sonra devreye girer ve kural tabanlı sistemle yan yana karşılaştırılır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Türkçe ve sözlük patlaması</h3>
+<p>Eklemeli dillerde tek bir kökten onlarca biçim türer; kelime temelli sözlük hızla büyür ve her biçim az görülür. Üç çare: kök bulma (Zemberek), karakter n-gram (<code>TfidfVectorizer(analyzer="char_wb", ngram_range=(2, 4))</code>) ve alt-kelime (subword) tokenizasyonu kullanan transformer modelleri. Karakter n-gram'ı denemek tek parametre değiştirmektir ve Türkçede çoğu zaman belirgin kazanç getirir.</p>
+<h3>Değerlendirme ve dengesizlik</h3>
+<p>Şikayetlerin %80'i tek kategorideyse doğruluk (accuracy) yanıltır; sınıf bazında precision/recall ve <code>classification_report</code> kullan, gerekirse <code>class_weight="balanced"</code>. Etiketleme tutarlılığı da önemlidir: iki kişi aynı yorumu farklı etiketliyorsa modelin tavanı o anlaşma oranıdır.</p>
+<h3>Model ne öğrendi?</h3>
+<p>LogisticRegression'da <code>coef_</code> ile <code>get_feature_names_out()</code> eşleştirilerek her sınıf için en etkili kelimeler listelenir. Bu liste hem hata ayıklamaya (model "kargo" kelimesini olumsuzlukla mı eşleştirmiş?) hem iş ekibine güven vermeye yarar.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/nlp-metin">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ml-kumeleme/">← Denetimsiz öğrenme: kümeleme, PCA ve anomali tespiti</a><a href="../proje-ml/">Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

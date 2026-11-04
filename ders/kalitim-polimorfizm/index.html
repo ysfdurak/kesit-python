@@ -1,0 +1,361 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Kalıtım (inheritance) ve polimorfizm | Kesit Python</title><meta name="description" content="Ortak davranışı üst sınıfta toplar, super() ve metot ezmeyle özelleştirir, polimorfizmle farklı nesneleri aynı arayüzden kullanır; kompozisyon ve ABC ile…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kalitim-polimorfizm/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Kalıtım (inheritance) ve polimorfizm"><meta property="og:description" content="Ortak davranışı üst sınıfta toplar, super() ve metot ezmeyle özelleştirir, polimorfizmle farklı nesneleri aynı arayüzden kullanır; kompozisyon ve ABC ile…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kalitim-polimorfizm/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Kalıtım (inheritance) ve polimorfizm","description":"Ortak davranışı üst sınıfta toplar, super() ve metot ezmeyle özelleştirir, polimorfizmle farklı nesneleri aynı arayüzden kullanır; kompozisyon ve ABC ile…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/kalitim-polimorfizm/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Nesne yönelimli programlama</span><h1>Kalıtım (inheritance) ve polimorfizm</h1><p class="st-l">Ortak davranışı üst sınıfta toplar, super() ve metot ezmeyle özelleştirir, polimorfizmle farklı nesneleri aynı arayüzden kullanır; kompozisyon ve ABC ile tasarımı sağlamlaştırırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalitim-polimorfizm">Uygulamada aç, 21 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ta üç hesap türü var: vadesiz, vadeli ve kredili. Üçü de para yatırma, bakiye gösterme ve işlem kaydı tutma işini aynı yapar; ama para çekme kuralı farklıdır (vadelide vade dolmadan çekilmez, kredilide eksiye inilebilir). Üç ayrı sınıf yazıp ortak kodu kopyalarsan bir hata düzeltmesini üç yerde yapmak zorunda kalırsın. <b>Kalıtım</b> (inheritance) ortak kısmı bir üst sınıfa koyar, alt sınıflar yalnızca farkı yazar. <b>Polimorfizm</b> (polymorphism) ise bu üç türü tek bir döngüde "hesap" olarak işlemeni sağlar: her nesne kendi <code>cek</code> metodunu bilir.</p>
+
+<h2>Üst sınıf ve alt sınıf</h2>
+<p><code>class Alt(Ust):</code> yazımı Alt sınıfın Ust'ün tüm nitelik ve metotlarını miras almasını sağlar. Alt sınıf hiçbir şey eklemese bile çalışır.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no, self.sahip, self.bakiye = no, sahip, bakiye
+
+    def yatir(self, tutar):
+        self.bakiye += tutar
+
+    def cek(self, tutar):
+        if tutar &gt; self.bakiye:
+            raise ValueError("yetersiz bakiye")
+        self.bakiye -= tutar
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.no!r}, bakiye={self.bakiye})"
+
+class VadesizHesap(Hesap):
+    pass                       # her şeyi miras alır
+
+v = VadesizHesap("TR01", "Ayşe", 500)
+v.yatir(100)
+print(v)
+print(isinstance(v, VadesizHesap), isinstance(v, Hesap))
+print(VadesizHesap.__mro__)</pre>
+
+<div class="note"><b>type(self).__name__</b>__repr__ içinde sınıf adını sabit yazmak yerine <code>type(self).__name__</code> kullanırsan alt sınıflar kendi adlarıyla görünür. MRO (method resolution order) Python'ın bir metodu hangi sırayla aradığını gösterir.</div>
+
+<h2>super() ve kurucuyu genişletme</h2>
+<p>Alt sınıf <code>__init__</code> yazarsa üst sınıfınki <b>otomatik çağrılmaz</b>. <code>super().__init__(...)</code> ile üst sınıfın kurucusunu çağırıp ardından kendi niteliklerini eklersin.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, sahip, bakiye=0.0):
+        self.no, self.sahip, self.bakiye = no, sahip, bakiye
+
+    def cek(self, tutar):
+        if tutar &gt; self.bakiye:
+            raise ValueError("yetersiz bakiye")
+        self.bakiye -= tutar
+
+    def __repr__(self):
+        return f"{type(self).__name__}({self.no!r}, bakiye={self.bakiye})"
+
+class Kredili(Hesap):
+    def __init__(self, no, sahip, bakiye=0.0, limit=1000.0):
+        super().__init__(no, sahip, bakiye)    # ortak kısım üst sınıfta
+        self.limit = limit                      # ek nitelik
+
+    def cek(self, tutar):                       # metot ezme (override)
+        if tutar &gt; self.bakiye + self.limit:
+            raise ValueError("limit aşıldı")
+        self.bakiye -= tutar
+
+k = Kredili("TR02", "Mehmet", 200, limit=500)
+k.cek(600)
+print(k)
+try:
+    k.cek(200)
+except ValueError as e:
+    print("Hata:", e)</pre>
+
+<h3>Ezerken üst sınıfı da çağırmak</h3>
+<p>Bazen davranışı tamamen değiştirmek değil, <b>önüne bir kural eklemek</b> istersin. Kuralı kontrol edip gerisini <code>super()</code> ile üst sınıfa bırakmak kod tekrarını önler.</p>
+<pre class="py">from datetime import date
+
+class Hesap:
+    def __init__(self, no, bakiye=0.0):
+        self.no, self.bakiye = no, bakiye
+        self.islemler = []
+
+    def cek(self, tutar):
+        if tutar &gt; self.bakiye:
+            raise ValueError("yetersiz bakiye")
+        self.bakiye -= tutar
+        self.islemler.append(("çekme", tutar))
+
+class Vadeli(Hesap):
+    def __init__(self, no, bakiye, vade_bitis):
+        super().__init__(no, bakiye)
+        self.vade_bitis = vade_bitis
+
+    def cek(self, tutar):
+        if date.today() &lt; self.vade_bitis:
+            raise ValueError("vade dolmadan çekilemez")
+        super().cek(tutar)            # kural geçtiyse normal çekme
+
+v = Vadeli("TR03", 10000, date(2099, 1, 1))
+try:
+    v.cek(100)
+except ValueError as e:
+    print("Hata:", e)
+
+v2 = Vadeli("TR04", 10000, date(2000, 1, 1))
+v2.cek(100)
+print(v2.bakiye, v2.islemler)</pre>
+
+<h2>Polimorfizm: aynı çağrı, farklı davranış</h2>
+<p>Üç farklı hesap türünü tek listede tutup hepsine <code>cek</code> dersin; her nesne kendi sınıfının metodunu çalıştırır. Çağıran kod türleri bilmek zorunda değildir. Yeni bir hesap türü eklediğinde bu döngü değişmez; buna <b>açık-kapalı ilkesi</b> denir: genişlemeye açık, değişikliğe kapalı.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, bakiye):
+        self.no, self.bakiye = no, bakiye
+    def aylik_masraf(self):
+        return 0.0
+    def __repr__(self):
+        return f"{type(self).__name__}({self.no})"
+
+class Vadesiz(Hesap):
+    def aylik_masraf(self):
+        return 15.0
+
+class Kredili(Hesap):
+    def aylik_masraf(self):
+        return 25.0 if self.bakiye &lt; 0 else 0.0
+
+class Vadeli(Hesap):
+    pass        # masraf yok, üst sınıftan 0.0 gelir
+
+hesaplar = [Vadesiz("TR01", 500), Kredili("TR02", -300), Vadeli("TR03", 10000), Kredili("TR04", 50)]
+for h in hesaplar:
+    print(h, h.aylik_masraf())
+print("Toplam masraf:", sum(h.aylik_masraf() for h in hesaplar))</pre>
+
+<div class="tip"><b>Ördek tipleme (duck typing)</b>Python'da polimorfizm için kalıtım şart değildir: <code>aylik_masraf()</code> metodu olan herhangi bir nesne bu döngüye girebilir. "Ördek gibi yürüyüp ördek gibi ses çıkarıyorsa ördektir." Kalıtım ortak kodu paylaşmak için, ördek tipleme esneklik için kullanılır.</div>
+
+<h2>isinstance: ne zaman, ne zaman değil</h2>
+<p><code>isinstance(nesne, Sinif)</code> alt sınıfları da kapsar; <code>type(nesne) is Sinif</code> kapsamaz, bu yüzden neredeyse hep isinstance tercih edilir. Ama kodunun içinde <code>if isinstance(h, Vadeli): ... elif isinstance(h, Kredili): ...</code> zinciri görüyorsan bu bir koku: o dallanma aslında her sınıfın kendi metodunda olmalı (polimorfizm).</p>
+<pre class="py">class Hesap: pass
+class Vadeli(Hesap): pass
+
+v = Vadeli()
+print(isinstance(v, Hesap), type(v) is Hesap)
+print(isinstance(v, (Vadeli, int)))        # demet: herhangi biri
+print(issubclass(Vadeli, Hesap), issubclass(Hesap, Vadeli))
+
+# Meşru kullanım: dış girdiyi doğrulama
+def tutar_dogrula(x):
+    if not isinstance(x, (int, float)) or isinstance(x, bool):
+        raise TypeError(f"sayı bekleniyordu: {x!r}")
+    return float(x)
+
+print(tutar_dogrula(42))
+try:
+    tutar_dogrula("42")
+except TypeError as e:
+    print(e)</pre>
+
+<h2>Kompozisyon mu kalıtım mı?</h2>
+<p>Kalıtım "<b>-dır</b>" ilişkisidir: Vadeli hesap bir Hesap<b>tır</b>. Kompozisyon "<b>-ı var</b>" ilişkisidir: Müşterinin hesapları <b>vardır</b>; Müşteri Hesap'tan türemez, hesapları nitelik olarak tutar. Kalıtımı yalnızca gerçek -dır ilişkisinde ve ortak kod paylaşımı için kullan; "birkaç metodunu kullanmak istiyorum" diye kalıtım alma.</p>
+<pre class="py">class Hesap:
+    def __init__(self, no, bakiye):
+        self.no, self.bakiye = no, bakiye
+
+class Bildirim:
+    def gonder(self, kime, mesaj):
+        print(f"[SMS {kime}] {mesaj}")
+
+class Musteri:
+    def __init__(self, ad, telefon, bildirim):
+        self.ad = ad
+        self.telefon = telefon
+        self.hesaplar = []            # kompozisyon: hesapları var
+        self.bildirim = bildirim      # kompozisyon: bildirim kanalı var
+
+    def hesap_ac(self, no, bakiye=0.0):
+        h = Hesap(no, bakiye)
+        self.hesaplar.append(h)
+        self.bildirim.gonder(self.telefon, f"{no} hesabınız açıldı")
+        return h
+
+    @property
+    def toplam_varlik(self):
+        return sum(h.bakiye for h in self.hesaplar)
+
+m = Musteri("Ayşe Kaya", "05xx", Bildirim())
+m.hesap_ac("TR01", 1500)
+m.hesap_ac("TR02", 250)
+print(m.toplam_varlik)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Kalıtım</th><th>Kompozisyon</th></tr>
+<tr><td>İlişki</td><td>Alt, Üst'ün bir türüdür (-dır)</td><td>Nesne başka nesneyi içerir (-ı var)</td></tr>
+<tr><td>Bağlılık</td><td>Sıkı: üst sınıf değişince alt etkilenir</td><td>Gevşek: parça değiştirilebilir</td></tr>
+<tr><td>Test</td><td>Üst sınıfla birlikte test edilir</td><td>Parça sahte (mock) ile değiştirilir</td></tr>
+<tr><td>Örnek</td><td>Vadeli(Hesap)</td><td>Musteri.hesaplar, Musteri.bildirim</td></tr>
+<tr><td>Varsayılan tercih</td><td>Ortak kod + gerçek -dır ilişkisi</td><td>Diğer her durum</td></tr>
+</table></div>
+
+<h2>ABC: soyut sınıfa giriş</h2>
+<p>Bazen üst sınıfın tek amacı "alt sınıfların şu metotları tanımlaması <b>zorunludur</b>" demektir. <code>abc</code> modülünden <code>ABC</code> ve <code>@abstractmethod</code> bunu zorlar: soyut metodu tanımlamayan alt sınıf örneklenemez.</p>
+<pre class="py">from abc import ABC, abstractmethod
+
+class OdemeYontemi(ABC):
+    @abstractmethod
+    def ode(self, tutar):
+        """Ödemeyi yapar, işlem referansı döndürür."""
+
+    def makbuz(self, tutar):            # somut metot, miras alınır
+        return f"{type(self).__name__}: {tutar:.2f} TL -&gt; {self.ode(tutar)}"
+
+class KrediKarti(OdemeYontemi):
+    def ode(self, tutar):
+        return "KK-" + str(int(tutar * 100))
+
+class Havale(OdemeYontemi):
+    pass                               # ode tanımlanmadı
+
+print(KrediKarti().makbuz(149.9))
+try:
+    Havale()
+except TypeError as e:
+    print("Hata:", e)</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: ezmenin incelikleri ve hiyerarşi tasarımı</h2>
+<p>Kalıtımın sözdizimini artık biliyorsun. Gerçek kodda asıl sorular şunlardır: Üst sınıftaki bir metot alt sınıfın metodunu nasıl çağırır? Bir davranışı tamamen mi değiştirmeli, yoksa genişletmeli miyim? <code>dict</code> ya da <code>list</code>'ten türetmek neden beklenmedik sonuçlar verir? Bu bölüm bu soruları yanıtlıyor. Çoklu kalıtım ve MRO'nun ayrıntısını "Çoklu kalıtım" dersinde, <code>__init_subclass__</code> ile otomatik kayıt sistemlerini "Metaprogramlama" dersinde göreceksin.</p>
+
+<h3>1. Dinamik bağlama: self her zaman en alttaki sınıftır</h3>
+<p>Üst sınıftaki bir metot <code>self.baska_metot()</code> çağırdığında Python bu adı <b>nesnenin gerçek sınıfından</b> başlayarak arar. Yani üst sınıf, henüz yazılmamış alt sınıfların metotlarını çağırabilir. Buna dinamik bağlama (dynamic dispatch, late binding) denir ve <b>şablon metot</b> (template method) kalıbının temelidir: üst sınıf algoritmanın iskeletini sabitler, alt sınıflar yalnızca "kanca" (hook) metotları doldurur.</p>
+<pre class="py">class Rapor:
+    def olustur(self, satirlar):            # iskelet: sıra sabit
+        parcalar = [self.baslik()]
+        parcalar += [self.satir(s) for s in satirlar]
+        parcalar.append(self.altbilgi(len(satirlar)))
+        return "\n".join(parcalar)
+
+    def baslik(self):
+        return "RAPOR"
+    def satir(self, s):
+        return str(s)
+    def altbilgi(self, n):
+        return f"{n} kayıt"
+
+class SubeRaporu(Rapor):                    # yalnız farkı yaz
+    def baslik(self):
+        return "== Şube Cirosu =="
+    def satir(self, s):
+        return f"{s[0]:&lt;8}{s[1]:&gt;8,} TL"
+
+print(SubeRaporu().olustur([("Ankara", 125000), ("İzmir", 98500)]))</pre>
+<div class="tip"><b>Ne zaman şablon metot?</b>Birden çok sınıfın adımları aynı sırada yürüyüp yalnız bazı adımların içeriği değişiyorsa (rapor üretme, dosya içe aktarma, ödeme akışı). Sırayı üst sınıf korur; böylece hiçbir alt sınıf "doğrulamayı atlayıp kaydetme" gibi bir hata yapamaz.</div>
+
+<h3>2. Ezmenin dört biçimi</h3>
+<div class="tbl-wrap"><table>
+<tr><th>Biçim</th><th>Kod</th><th>Ne zaman</th></tr>
+<tr><td>Tamamen değiştir</td><td><code>def cek(self, t): ...</code> (super yok)</td><td>Davranış kökten farklı</td></tr>
+<tr><td>Öne kural ekle</td><td>kontrol + <code>super().cek(t)</code></td><td>Ek kısıt (vade, limit)</td></tr>
+<tr><td>Sonucu genişlet</td><td><code>return super().ozet() + " (VIP)"</code></td><td>Üst sonucu süsle/zenginleştir</td></tr>
+<tr><td>Sınıf niteliğini ez</td><td><code>masraf = 0.0</code> alt sınıf gövdesinde</td><td>Yalnız bir sabit farklı</td></tr>
+</table></div>
+<p>Son satır çok güçlüdür ve çoğu zaman metot ezmekten daha temizdir: üst sınıfın metodu <code>self.ORAN</code> okursa alt sınıf yalnız sabiti değiştirerek davranışı uyarlar.</p>
+<pre class="py">class Hesap:
+    FAIZ = 0.30
+    ETIKET = "Standart"
+
+    def __init__(self, no, bakiye):
+        self.no, self.bakiye = no, bakiye
+
+    def yillik_faiz(self):
+        return round(self.bakiye * self.FAIZ, 2)   # self.FAIZ: alt sınıfınki bulunur
+
+    def ozet(self):
+        return f"{self.no} [{self.ETIKET}] faiz={self.yillik_faiz()}"
+
+class Vip(Hesap):
+    FAIZ = 0.40
+    ETIKET = "VIP"
+
+    def ozet(self):                                 # sonucu genişlet
+        return super().ozet() + " + ücretsiz EFT"
+
+for h in [Hesap("TR01", 10000), Vip("TR02", 10000)]:
+    print(h.ozet())
+print(Hesap.FAIZ, Vip.FAIZ)</pre>
+<div class="warn"><b>Hesap.FAIZ değil self.FAIZ</b>Üst sınıfın metodunda sabiti <code>Hesap.FAIZ</code> diye okursan alt sınıfın ezdiği değer hiç kullanılmaz. Ezilebilir olmasını istediğin her sabiti <code>self.</code> (ya da <code>type(self).</code>) üzerinden oku.</div>
+
+<h3>3. Yerleşik türlerden türetmek: dict ve list tuzağı</h3>
+<p><code>class Ayarlar(dict)</code> yazmak cazip gelir, ama yerleşik türler C ile yazılmıştır ve kendi iç metotları senin ezdiğin metodu <b>çağırmaz</b>. Örneğin <code>__setitem__</code>'ı ezsen bile kurucu (<code>dict(...)</code>), <code>update</code> ve <code>setdefault</code> onu atlar. Çözüm <code>collections.UserDict</code> / <code>UserList</code>'tir: saf Python ile yazıldıkları için tüm yollar senin metodundan geçer.</p>
+<pre class="py">from collections import UserDict
+
+class AnahtarBuyuk(dict):
+    def __setitem__(self, k, v):
+        super().__setitem__(k.upper(), v)
+
+d = AnahtarBuyuk(ankara=1)        # kurucu __setitem__'ı ÇAĞIRMAZ
+d["izmir"] = 2                    # bu çağırır
+d.update(bursa=3)                 # bu da çağırmaz
+print(d)
+
+class AnahtarBuyuk2(UserDict):
+    def __setitem__(self, k, v):
+        super().__setitem__(k.upper(), v)
+
+u = AnahtarBuyuk2(ankara=1)
+u["izmir"] = 2
+u.update(bursa=3)
+print(u, isinstance(u, dict))
+print(u.data)                     # gerçek sözlük .data içinde</pre>
+<p><code>UserDict</code> bir <code>dict</code> alt sınıfı değildir (<code>isinstance(u, dict)</code> False); <code>json.dumps</code> gibi gerçek sözlük isteyen yerlere <code>u.data</code> ya da <code>dict(u)</code> verirsin. Çoğu durumda en iyisi ise türetmek değil, sözlüğü nitelik olarak tutmaktır (kompozisyon).</p>
+
+<h3>4. NotImplementedError mı, ABC mi?</h3>
+<p>Eski kodlarda soyut metot şöyle yazılır: <code>def ode(self): raise NotImplementedError</code>. Fark, hatanın <b>ne zaman</b> ortaya çıktığıdır: <code>NotImplementedError</code> ancak metot çağrıldığında patlar (belki üretimde, gece 3'te); <code>ABC</code> + <code>@abstractmethod</code> ise eksik alt sınıfı daha <b>nesne oluşturulurken</b> <code>TypeError</code> ile durdurur. Soyut property de yazabilirsin: <code>@property</code> ve <code>@abstractmethod</code> birlikte, <code>@property</code> en üstte.</p>
+<pre class="py">from abc import ABC, abstractmethod
+
+class Eski:
+    def ode(self, tutar):
+        raise NotImplementedError("alt sınıf yazmalı")
+
+class EskiHavale(Eski):
+    pass
+
+h = EskiHavale()                  # sorun yok gibi...
+try:
+    h.ode(100)                    # ...ta ki çağrılana kadar
+except NotImplementedError as e:
+    print("Geç fark edildi:", e)
+
+class Odeme(ABC):
+    @property
+    @abstractmethod
+    def komisyon(self): ...
+
+    def net(self, tutar):
+        return round(tutar - tutar * self.komisyon, 2)
+
+class Kart(Odeme):
+    komisyon = 0.02               # sınıf niteliği de soyut property'yi karşılar
+
+class Eksik(Odeme):
+    pass
+
+print(Kart().net(1000))
+try:
+    Eksik()
+except TypeError as e:
+    print("Erken fark edildi:", type(e).__name__)</pre>
+
+<h3>5. Liskov: alt sınıf sözü bozmasın</h3>
+<p>Liskov yerine koyma ilkesi (LSP) pratikte şu kontrol listesidir. Alt sınıfta bir metodu ezerken: aynı parametreleri kabul et (daha azını değil), aynı türde değer döndür, üst sınıfın fırlatmadığı yeni hata türleri fırlatma, üst sınıfın garanti ettiği değişmezleri (bakiye tutarlılığı gibi) koru. Klasik ihlal "Kare bir Dikdörtgendir" örneğidir: dikdörtgende genişliği değiştirmek yüksekliği etkilemez, karede etkiler; dikdörtgen bekleyen kod kareyle bozulur. Tersine bakarsan: alt sınıfta bir metodu <code>raise NotImplementedError("bu türde desteklenmez")</code> ile "kapatıyorsan" o sınıf aslında o üst sınıfın türü değildir.</p>
+
+<div class="note"><b>Gerçek işte</b>Django'nun sınıf tabanlı görünümleri (class-based views), unittest'in <code>TestCase</code>'i ve scikit-learn'ün tahminleyicileri (<code>fit</code>/<code>predict</code>) şablon metot ve sınıf niteliği ezme üzerine kuruludur: sen yalnız <code>template_name = "..."</code> ya da <code>setUp</code> yazarsın, iskeleti çerçeve çalıştırır. Bir kütüphanenin sınıfından türetmeden önce belgesinde "hangi metotları ezmen bekleniyor" kısmını oku; dokümante edilmemiş iç metotları ezmek sürüm yükseltmede kırılır.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Çoklu kalıtım ve mixin</h3>
+<p>Python birden çok üst sınıfa izin verir: <code>class Rapor(JsonMixin, CsvMixin, Temel)</code>. Mixin, tek bir yetenek (JSON'a çevirme gibi) ekleyen, kendi başına örneklenmeyen küçük sınıftır. MRO soldan sağa, derinlemesine ama tutarlı bir sırayla arar (C3 doğrusallaştırma). Çoklu kalıtımda <code>super()</code> "üst sınıf" değil "MRO'daki sonraki" demektir; bu yüzden mixin'lerde <code>super().__init__(**kwargs)</code> zincirini bozmamak gerekir.</p>
+<h3>Liskov yerine koyma ilkesi</h3>
+<p>Alt sınıf, üst sınıfın kullanıldığı her yerde sorunsuz kullanılabilmelidir. Vadeli hesabın <code>cek</code> metodu hata yükseltiyorsa bu, Hesap'ın da hata yükseltebildiği bir sözleşmeyle tutarlıdır. Ama alt sınıfta <code>cek</code>'in imzasını değiştirmek ya da üst sınıfın garanti ettiği bir davranışı bozmak kalıtımın yanlış kullanıldığını gösterir; o zaman kompozisyona dön.</p>
+<h3>Kalıtım derinliği</h3>
+<p>İki-üç seviye derin hiyerarşiler okunabilir sınırdır. Beş seviye derin bir "Hesap → Mevduat → Vadeli → DövizVadeli → AltınVadeli" zinciri, bir metodun nerede ezildiğini bulmayı işkenceye çevirir. Derinleşiyorsa stratejiyi (vade kuralı, masraf kuralı) ayrı küçük nesnelere taşı ve kompozisyonla birleştir; "Tasarım kalıpları" dersinde bunun adı Strategy olacak.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kalitim-polimorfizm">Alıştırmalara geç (21)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../siniflar-oop/">← Sınıflar: veri ve davranışı bir arada tutmak</a><a href="../dataclass-typing/">dataclass ve tip ipuçları (type hints) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

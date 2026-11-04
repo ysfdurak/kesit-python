@@ -1,0 +1,253 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Özyineleme (recursion) | Kesit Python</title><meta name="description" content="Kendini çağıran fonksiyonları temel durum ve özyinelemeli adımla kurar; çağrı yığınını girintili print ile izler, faktöriyel, fibonacci ve memoization, iç…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ozyineleme/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Özyineleme (recursion)"><meta property="og:description" content="Kendini çağıran fonksiyonları temel durum ve özyinelemeli adımla kurar; çağrı yığınını girintili print ile izler, faktöriyel, fibonacci ve memoization, iç…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ozyineleme/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Özyineleme (recursion)","description":"Kendini çağıran fonksiyonları temel durum ve özyinelemeli adımla kurar; çağrı yığınını girintili print ile izler, faktöriyel, fibonacci ve memoization, iç…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/ozyineleme/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Fonksiyonlar ve modüller</span><h1>Özyineleme (recursion)</h1><p class="st-l">Kendini çağıran fonksiyonları temel durum ve özyinelemeli adımla kurar; çağrı yığınını girintili print ile izler, faktöriyel, fibonacci ve memoization, iç içe liste, klasör ağacı ve ikili aramayı özyinelemeyle çözer, RecursionError'ı ve döngüyle karşılaştırmayı öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ozyineleme">Uygulamada aç, 17 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Kendine benzeyen problemler</h2>
+<p>Anadolu Market'in ürün kategorilerini düşün: "Elektronik" altında "Telefon", onun altında "Akıllı telefon" ve "Aksesuar", aksesuarın altında "Kılıf" ve "Şarj aleti". Kaç katman olduğu belli değil; yarın bir katman daha eklenebilir. Kategori ağacındaki toplam ürün sayısını nasıl hesaplarsın? İç içe kaç döngü yazacağını bilemezsin.</p>
+<p>Ama şu cümle her katman için doğrudur: "Bir kategorinin ürün sayısı, kendi ürünleri artı her alt kategorinin ürün sayısıdır." Cümlenin içinde aynı soru, daha küçük bir parça için tekrar soruluyor. İşte <b>özyineleme</b> (recursion) budur: bir fonksiyonun, problemi daha küçük bir parçası için <b>kendini çağırması</b>. Klasör ağaçları, organizasyon şemaları, iç içe yorum dizileri, JSON belgeleri, matematikteki faktöriyel ve fibonacci hep bu yapıdadır.</p>
+
+<h2>İki zorunlu parça</h2>
+<p>Her özyinelemeli fonksiyonun iki parçası vardır:</p>
+<ul>
+<li><b>Temel durum</b> (base case): cevabı doğrudan bilinen, kendini çağırmayan en küçük durum. Olmazsa fonksiyon sonsuza dek kendini çağırır.</li>
+<li><b>Özyinelemeli adım</b> (recursive step): problemi <b>küçültüp</b> kendini çağıran ve gelen cevabı kullanarak sonucu kuran kısım. Her çağrı temel duruma biraz daha yaklaşmalı.</li>
+</ul>
+<pre class="py">def geri_say(n):
+    if n == 0:                 # temel durum
+        print("Kampanya başladı!")
+        return
+    print(n)
+    geri_say(n - 1)            # özyinelemeli adım: n küçülüyor
+
+geri_say(3)
+
+def faktoriyel(n):
+    if n &lt;= 1:                 # temel durum: 0! = 1! = 1
+        return 1
+    return n * faktoriyel(n - 1)
+
+print(faktoriyel(5))
+print(faktoriyel(0))</pre>
+<p>Faktöriyelin matematiksel tanımı zaten özyinelemelidir: <code>n! = n × (n-1)!</code> ve <code>0! = 1</code>. Kod bu tanımın neredeyse birebir kopyası. Özyinelemeyi tasarlarken kendine iki soru sor: "En küçük, cevabını doğrudan bildiğim durum ne?" ve "Bir küçüğünün cevabını bilseydim, bunun cevabını nasıl kurardım?" İkinci soruda <b>küçüğün cevabının doğru geleceğine güvenirsin</b>; buna "özyinelemeli inanç sıçraması" (recursive leap of faith) denir.</p>
+
+<h2>Çağrı yığınını görmek</h2>
+<p>Bir fonksiyon çağrıldığında Python onun yerel değişkenlerini bir <b>çerçeve</b> (frame) içinde tutar ve çerçeveyi <b>çağrı yığınının</b> (call stack) tepesine koyar. Fonksiyon dönünce çerçeve yığından kalkar. Özyinelemede aynı fonksiyonun birçok çerçevesi aynı anda yığında bekler; her birinin kendi <code>n</code>'i vardır. Bunu görmenin en iyi yolu, derinliği bir parametreyle taşıyıp girintili yazdırmaktır.</p>
+<pre class="py">def faktoriyel_iz(n, derinlik=0):
+    girinti = "    " * derinlik
+    print(f"{girinti}faktoriyel({n}) çağrıldı")
+    if n &lt;= 1:
+        print(f"{girinti}temel durum → 1")
+        return 1
+    alt = faktoriyel_iz(n - 1, derinlik + 1)
+    sonuc = n * alt
+    print(f"{girinti}faktoriyel({n}) = {n} × {alt} = {sonuc}")
+    return sonuc
+
+faktoriyel_iz(4)</pre>
+<p>Çıktıda iki aşama görürsün: <b>iniş</b> sırasında çağrılar açılır ve hiçbiri henüz bitmemiştir (çarpma bekliyor); temel duruma varınca <b>çıkış</b> başlar ve her çerçeve, alttan gelen cevapla kendi çarpmasını yapıp yukarıya döner. Özyinelemeli adımdan <b>sonra</b> yazılan kod çıkış sırasında, yani ters sırayla çalışır.</p>
+<div class="tip"><b>Hata ayıklama (debugging) alışkanlığı</b>Özyinelemeli bir fonksiyon beklediğin sonucu vermiyorsa, ilk iş bu örnekteki gibi bir <code>derinlik</code> parametresi ekleyip giriş ve çıkışı girintili yazdır. Ağacın hangi dalında yanlış değer üretildiği hemen görünür.</div>
+
+<h2>Liste üzerinde özyineleme</h2>
+<p>Listeler de doğal olarak özyinelemelidir: bir liste, "ilk eleman" ile "geri kalan liste"den oluşur. Boş liste temel durumdur.</p>
+<pre class="py">def toplam(liste):
+    if not liste:                          # boş liste
+        return 0
+    return liste[0] + toplam(liste[1:])
+
+def ters(metin):
+    if len(metin) &lt;= 1:
+        return metin
+    return ters(metin[1:]) + metin[0]
+
+print(toplam([120, 80, 45.5]))
+print(ters("Anadolu"))</pre>
+<p>Bu örnekler kavramı öğretmek içindir; gerçek kodda <code>sum</code> ve <code>[::-1]</code> kullanırsın. Ayrıca <code>liste[1:]</code> her çağrıda yeni bir kopya oluşturur; uzun listelerde hem yavaş hem de yığın derinliği sınırına takılır. Özyinelemenin asıl gücü, düz listelerde değil, <b>derinliği bilinmeyen</b> yapılarda ortaya çıkar.</p>
+
+<h2>İç içe liste: derinliği bilinmeyen yapı</h2>
+<p>Bir depo sayım listesi, raflar içinde kutular, kutular içinde paketler olarak iç içe gelmiş olsun. Kaç katman olduğunu bilmeden tüm adetleri toplamak döngüyle zordur; özyinelemeyle doğaldır: her eleman ya bir sayıdır (temel durum) ya da yine bir listedir (özyinelemeli adım).</p>
+<pre class="py">depo = [12, [3, 4, [10, 2]], [], [[[7]]], 1]
+
+def ic_ice_toplam(veri):
+    toplam = 0
+    for x in veri:
+        if isinstance(x, list):
+            toplam += ic_ice_toplam(x)     # alt liste: aynı soruyu sor
+        else:
+            toplam += x                    # sayı: doğrudan ekle
+    return toplam
+
+def derinlik(veri):
+    if not isinstance(veri, list):
+        return 0
+    en = 0
+    for x in veri:
+        en = max(en, derinlik(x))
+    return 1 + en
+
+print(ic_ice_toplam(depo))
+print(derinlik(depo))</pre>
+<p>Burada döngü ve özyineleme birlikte çalışıyor: döngü bir katmandaki <b>kardeşleri</b> gezer, özyineleme bir katman <b>aşağı</b> iner. Ağaç gezen fonksiyonların çoğu bu şekildedir. Temel durum ayrı bir <code>if</code> olarak değil, "liste değilse doğrudan ekle" dalı olarak gizlenmiştir.</p>
+
+<h2>Klasör ağacı gezmek</h2>
+<p>Dosya sistemi en tanıdık ağaçtır. Gerçek diske dokunmadan iç içe sözlükle simüle edelim: değer bir sayıysa dosya (boyutu KB), sözlükse klasördür.</p>
+<pre class="py">disk = {
+    "raporlar": {
+        "2025": {"ocak.csv": 120, "subat.csv": 135},
+        "ozet.pdf": 900,
+    },
+    "gorseller": {"logo.png": 48, "kampanya": {"banner.png": 310}},
+    "notlar.txt": 4,
+}
+
+def toplam_boyut(klasor):
+    toplam = 0
+    for ad, icerik in klasor.items():
+        if isinstance(icerik, dict):
+            toplam += toplam_boyut(icerik)
+        else:
+            toplam += icerik
+    return toplam
+
+def agac_yazdir(klasor, derinlik=0):
+    for ad, icerik in klasor.items():
+        girinti = "  " * derinlik
+        if isinstance(icerik, dict):
+            print(f"{girinti}{ad}/  ({toplam_boyut(icerik)} KB)")
+            agac_yazdir(icerik, derinlik + 1)
+        else:
+            print(f"{girinti}{ad}  {icerik} KB")
+
+agac_yazdir(disk)
+print("Toplam:", toplam_boyut(disk), "KB")</pre>
+<p>Gerçek diskte aynı mantığı <code>pathlib.Path.iterdir()</code> ve <code>is_dir()</code> ile kurarsın; Python'un <code>os.walk</code> fonksiyonu da içeride tam olarak bu gezintiyi yapar.</p>
+
+<h2>Fibonacci ve memoization</h2>
+<p>Fibonacci dizisinde her sayı önceki ikisinin toplamıdır: 0, 1, 1, 2, 3, 5, 8, ... Tanımı özyinelemelidir ve koda doğrudan çevrilir. Ama bir sorun var: her çağrı <b>iki</b> çağrı daha yapar ve aynı değerler tekrar tekrar hesaplanır.</p>
+<pre class="py">cagri = 0
+
+def fib(n):
+    global cagri
+    cagri += 1
+    if n &lt; 2:
+        return n
+    return fib(n - 1) + fib(n - 2)
+
+for n in [10, 20, 25]:
+    cagri = 0
+    print(f"fib({n}) = {fib(n)}, çağrı sayısı: {cagri}")</pre>
+<p>fib(25) için iki yüz binden fazla çağrı yapılıyor; fib(40) yüz milyonları bulur. Çare: bir kez hesapladığın sonucu bir sözlükte saklayıp tekrar istendiğinde oradan vermek. Bu tekniğe <b>memoization</b> (ezberleme) denir.</p>
+<pre class="py">def fib_memo(n, memo=None):
+    if memo is None:
+        memo = {}
+    if n &lt; 2:
+        return n
+    if n in memo:
+        return memo[n]
+    memo[n] = fib_memo(n - 1, memo) + fib_memo(n - 2, memo)
+    return memo[n]
+
+print(fib_memo(80))
+
+from functools import lru_cache
+
+@lru_cache(maxsize=None)
+def fib_cache(n):
+    if n &lt; 2:
+        return n
+    return fib_cache(n - 1) + fib_cache(n - 2)
+
+print(fib_cache(80))
+print(fib_cache.cache_info())</pre>
+<p><code>memo=None</code> ile başlayıp içeride sözlük oluşturmamızın sebebi, Fonksiyonlar dersindeki değişebilir varsayılan tuzağıdır. <code>@lru_cache</code> ise aynı işi otomatik yapan hazır bir araçtır; başındaki <code>@</code> işaretiyle yazılan yapıya dekoratör (decorator) denir ve Orta seviyede ayrıntılı göreceksin. Ezberleme yalnızca aynı argümanla aynı sonucu veren (saf) fonksiyonlarda güvenlidir.</p>
+
+<h2>İkili arama: özyinelemeli</h2>
+<p>Sıralı bir listede arama yaparken her adımda ortadaki elemana bakıp aramayı yarıya indirebilirsin: aranan değer ortadakinden küçükse sol yarıda, büyükse sağ yarıda ara. "Yarıda ara" aynı problemin küçüğüdür; temel durum, aralığın boşalmasıdır.</p>
+<pre class="py">def ikili_ara(liste, hedef, bas=0, son=None):
+    if son is None:
+        son = len(liste) - 1
+    if bas &gt; son:                       # aralık boş: yok
+        return -1
+    orta = (bas + son) // 2
+    print(f"  aralık [{bas}, {son}], orta={orta} ({liste[orta]})")
+    if liste[orta] == hedef:
+        return orta
+    if hedef &lt; liste[orta]:
+        return ikili_ara(liste, hedef, bas, orta - 1)
+    return ikili_ara(liste, hedef, orta + 1, son)
+
+musteri_nolari = [101, 115, 220, 318, 402, 517, 640, 777, 812, 905]
+print("Sonuç:", ikili_ara(musteri_nolari, 640))
+print("Sonuç:", ikili_ara(musteri_nolari, 300))</pre>
+<p>On elemanlı listede en fazla dört adım; bir milyon elemanda yaklaşık yirmi adım. Doğrusal arama bir milyon adım sürebilirdi. Her çağrıda listeyi dilimlemek yerine <code>bas</code> ve <code>son</code> indekslerini taşıdığımıza dikkat et; böylece kopya oluşturmayız.</p>
+
+<h2>RecursionError ve yığın sınırı</h2>
+<p>Yığın sonsuz değildir. Python, çok derin özyinelemeyi bir koruma sınırıyla durdurur ve <code>RecursionError</code> fırlatır. Sınır varsayılan olarak yaklaşık 1000 çerçevedir.</p>
+<pre class="py">import sys
+print("Sınır:", sys.getrecursionlimit())
+
+def sonsuz(n):
+    return sonsuz(n + 1)               # temel durum yok!
+
+try:
+    sonsuz(0)
+except RecursionError as e:
+    print("Hata:", e)
+
+def toplam(liste):
+    return 0 if not liste else liste[0] + toplam(liste[1:])
+
+try:
+    print(toplam(list(range(5000))))
+except RecursionError:
+    print("5000 elemanlı listede özyinelemeli toplam sınırı aştı")</pre>
+<div class="warn"><b>Sınırı yükseltmek çözüm değildir</b><code>sys.setrecursionlimit(100000)</code> yazmak mümkündür ama gerçek yığın belleği tükenirse Python hata mesajı bile veremeden çökebilir. RecursionError genelde iki şeyden birini söyler: ya temel durum eksik/ulaşılamaz (hata), ya da problem bu derinlik için döngüyle çözülmelidir. Python, bazı dillerdeki gibi kuyruk çağrısı eniyilemesi (tail call optimization) yapmaz; özyinelemenin derinliği her zaman yığında yer kaplar.</div>
+
+<h2>Döngü mü, özyineleme mi?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Tercih</th><th>Neden</th></tr>
+<tr><td>Düz liste, sayaç, toplam, arama</td><td>Döngü</td><td>Daha hızlı, yığın sınırı yok, okunur</td></tr>
+<tr><td>Derinliği bilinmeyen ağaç (klasör, kategori, JSON)</td><td>Özyineleme</td><td>Yapının tanımıyla aynı şekilde yazılır</td></tr>
+<tr><td>Böl ve yönet (ikili arama, birleştirerek sıralama)</td><td>Özyineleme (ya da döngü)</td><td>Derinlik log n, sınır sorun olmaz</td></tr>
+<tr><td>Çok derin zincir (on binlerce adım)</td><td>Döngü + yığın listesi</td><td>RecursionError riski</td></tr>
+<tr><td>Tüm kombinasyonları deneme (sepet seçenekleri)</td><td>Özyineleme</td><td>"Al ya da alma" kararı doğal olarak dallanır</td></tr>
+</table></div>
+<div class="note"><b>Gerçek işte</b>Bir backend geliştiricisi özyinelemeyi en çok ağaç biçimli veride kullanır: e-ticaret sitesinin kategori menüsünü oluşturmak, bir yorumun tüm yanıt zincirini göstermek, organizasyon şemasında bir yöneticinin altındaki tüm çalışanları bulmak, bilinmeyen derinlikteki bir JSON yanıtında belirli bir anahtarı aramak, bir klasördeki tüm faturaları toplamak. Veri analistleri ise memoization fikrini sık kullanır: pahalı bir hesap ya da sorgu sonucunu önbelleğe almak, raporun dakikalar yerine saniyeler içinde çıkmasını sağlar.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Özyinelemeyi döngüye çevirmek: açık yığın</h3>
+<p>Her özyineleme, Python'un çağrı yığınının işini senin yöneteceğin bir listeyle (açık yığın, explicit stack) yapılabilir. Böylece derinlik sınırı ortadan kalkar. Klasör boyutunu yığınla hesaplayalım:</p>
+<pre class="py">disk = {"a": {"b": {"c.txt": 5}, "d.txt": 7}, "e.txt": 1}
+
+def toplam_boyut_yigin(kok):
+    toplam = 0
+    yigin = [kok]
+    while yigin:
+        klasor = yigin.pop()
+        for icerik in klasor.values():
+            if isinstance(icerik, dict):
+                yigin.append(icerik)       # sonra gezilecek
+            else:
+                toplam += icerik
+    return toplam
+
+print(toplam_boyut_yigin(disk))</pre>
+<p><code>pop()</code> sondan alırsa derinlik öncelikli (depth-first), <code>pop(0)</code> ya da <code>collections.deque.popleft()</code> baştan alırsa genişlik öncelikli (breadth-first) gezinti olur. Graf algoritmalarının temeli bu iki gezintidir.</p>
+<h3>Böl ve yönet</h3>
+<p>Birleştirerek sıralama (merge sort) listeyi ikiye böler, her yarıyı özyinelemeyle sıralar, sonra iki sıralı yarıyı birleştirir. Derinlik yalnızca log n olduğundan bir milyon elemanda bile yirmi katmanı geçmez. Python'un <code>sorted</code> fonksiyonu (Timsort) bu fikrin geliştirilmiş bir hâlini kullanır.</p>
+<h3>Özyinelemeli düşünmenin kontrol listesi</h3>
+<ol>
+<li>Temel durum(lar) her olası girdi için gerçekten ulaşılabilir mi? (Negatif sayı, boş liste, boş sözlük)</li>
+<li>Her çağrı problemi küçültüyor mu?</li>
+<li>Özyinelemeli çağrının <b>dönüş değerini kullanıyor musun</b>? (En sık hata: çağırıp sonucu atmak)</li>
+<li>Aynı alt problemler tekrar tekrar mı çözülüyor? Öyleyse memoization.</li>
+<li>Derinlik binleri bulabilir mi? Öyleyse açık yığınla döngü.</li>
+</ol>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ozyineleme">Alıştırmalara geç (17)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../match-case/">← match-case: yapısal desen eşleme</a><a href="../hata-ayiklama/">Hata ayıklama (debugging) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

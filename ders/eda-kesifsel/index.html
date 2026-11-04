@@ -1,0 +1,188 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Keşifsel veri analizi (EDA): sorudan bulguya | Kesit Python</title><meta name="description" content="Hipotez defteriyle başlayan yöntemli EDA: profil fonksiyonu, eksikliğin nedeni, çarpık dağılım ve aykırı değer, iki değişkenli analiz (Spearman, crosstab,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/eda-kesifsel/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Keşifsel veri analizi (EDA): sorudan bulguya"><meta property="og:description" content="Hipotez defteriyle başlayan yöntemli EDA: profil fonksiyonu, eksikliğin nedeni, çarpık dağılım ve aykırı değer, iki değişkenli analiz (Spearman, crosstab,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/eda-kesifsel/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Keşifsel veri analizi (EDA): sorudan bulguya","description":"Hipotez defteriyle başlayan yöntemli EDA: profil fonksiyonu, eksikliğin nedeni, çarpık dağılım ve aykırı değer, iki değişkenli analiz (Spearman, crosstab,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/eda-kesifsel/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>Keşifsel veri analizi (EDA): sorudan bulguya</h1><p class="st-l">Hipotez defteriyle başlayan yöntemli EDA: profil fonksiyonu, eksikliğin nedeni, çarpık dağılım ve aykırı değer, iki değişkenli analiz (Spearman, crosstab, grup özeti), zaman boyutu, veri hatası ile sinyali ayırma (raw_signups, kirli_veri) ve Kanat Havayolları rötar mini projesiyle bulgu yazımı.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eda-kesifsel">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>EDA neden ayrı bir beceri?</h2>
+<p>Keşifsel veri analizi (exploratory data analysis, EDA), modele, panoya ya da rapora geçmeden önce veriyi <b>tanıma</b> işidir: veri ne kadar, neyi temsil ediyor, nerede eksik, nerede yanlış, hangi örüntüler var? pandas'ı, gruplamayı ve grafikleri önceki derslerde gördün. EDA bunları bir <b>yöntem</b> içinde birleştirir. Yöntemsiz EDA, yüzlerce grafiğin içinde kaybolmaktır; yöntemli EDA ise üç beş net bulguyla biter.</p>
+<p>Bu derste Kanat Havayolları'nın Eylül–Aralık 2024 uçuşlarını (<code>hv_flights</code>, 3.173 uçuş) ve rötar nedenlerini (<code>hv_delays</code>) inceleyeceğiz. Veri hatası ile gerçek sinyali ayırmayı ise Anadolu Market'in form kayıtları (<code>raw_signups</code>) ve dağınık bayi raporu (<code>kirli_veri</code>) üzerinde göreceğiz.</p>
+
+<h2>1. Önce sorular, sonra kod: hipotez defteri</h2>
+<p>EDA'ya bir soru listesiyle başla. Operasyon müdürü "rötarlar kötüleşiyor mu, neden?" diye soruyorsa defterin şöyle görünebilir:</p>
+<div class="tbl-wrap"><table>
+<tr><th>#</th><th>Soru / hipotez</th><th>Nasıl bakarım?</th><th>Durum</th></tr>
+<tr><td>S1</td><td>Tipik bir uçuş ne kadar rötar yapıyor?</td><td>Kalkış rötarının dağılımı, medyan, %90'lık dilim</td><td>açık</td></tr>
+<tr><td>S2</td><td>Akşam uçuşları daha mı geç kalkıyor?</td><td>Saat dilimine göre medyan ve 15 dk üstü oranı</td><td>açık</td></tr>
+<tr><td>S3</td><td>Aralık'ta kötüleşme hava koşulundan mı?</td><td>Ay × neden çapraz tablosu (dakika payı)</td><td>açık</td></tr>
+<tr><td>S4</td><td>Rötar uçaktan uçağa yayılıyor mu?</td><td>Aynı uçağın önceki varış rötarı ile sonraki kalkış rötarı</td><td>açık</td></tr>
+<tr><td>S5</td><td>Dolu uçaklar daha mı geç kalkıyor?</td><td>Doluluk (pax/seats) ile rötar arasında Spearman korelasyonu</td><td>açık</td></tr>
+</table></div>
+<p>Her sorunun yanına sonradan kanıtı ve sonucu yazarsın. Böylece hem neyi neden incelediğini hatırlarsın hem de "her şeye baktım, bir şey bulamadım" tuzağına düşmezsin.</p>
+
+<h2>2. Veri profili: ilk 10 dakika</h2>
+<p>Her yeni tabloda aynı kontrolleri yap: şekil, türler, eksiklik, benzersizlik, aralıklar. Bunu bir fonksiyona dökersen her projede tekrar kullanırsın.</p>
+<pre class="py">import veri
+import pandas as pd
+
+f = veri.oku("kanat_havayollari", "hv_flights",
+             parse_dates=["sched_dep", "sched_arr", "actual_dep", "actual_arr"])
+
+def profil(df):
+    return pd.DataFrame({
+        "eksik": df.isna().sum(),
+        "eksik_yuzde": (df.isna().mean() * 100).round(2),
+        "benzersiz": df.nunique(),
+        "ornek": df.iloc[0],
+    }).sort_values("eksik", ascending=False)
+
+print(f.shape)
+print(profil(f))
+print(f["status"].value_counts())
+print(f["sched_dep"].min(), "→", f["sched_dep"].max())</pre>
+<p>Profilden çıkan ilk sorular: <code>actual_dep</code> 62, <code>actual_arr</code> 71 satırda boş. 62 iptal uçuşu var; peki fazladan 9 boş varış nereden geliyor? 9 uçuş başka meydana yönlendirilmiş (<code>diverted</code>): kalkış var, planlanan varış yok. Eksikliğin bir <b>nedeni</b> var; rastgele değil. Bu ayrım, eksik değeri nasıl ele alacağını belirler.</p>
+<div class="tip"><b>Aralık ve anahtar kontrolleri</b>Profile şu üç soruyu da ekle: (1) Birincil anahtar gerçekten tekil mi (<code>df["flight_id"].is_unique</code>)? (2) Sayılar mantıklı aralıkta mı (yolcu sayısı koltuk sayısını aşıyor mu)? (3) Tarihler beklenen dönemde mi? Bu kontroller veri hatalarının çoğunu ilk dakikada yakalar.</div>
+
+<h2>3. Tek değişkenli analiz: dağılımı tanı</h2>
+<p>Kalkış rötarını dakika olarak türetelim ve dağılımına bakalım. Rötar gibi "çoğu küçük, birkaçı çok büyük" değişkenler sağa çarpıktır (right-skewed): ortalama, uzun kuyruk tarafından yukarı çekilir.</p>
+<pre class="py">import veri
+import pandas as pd
+
+f = veri.oku("kanat_havayollari", "hv_flights", parse_dates=["sched_dep", "actual_dep"])
+f["rotar"] = (f["actual_dep"] - f["sched_dep"]).dt.total_seconds() / 60
+ucan = f[f["status"] != "cancelled"]
+
+r = ucan["rotar"]
+print("ortalama:", round(r.mean(), 1), "| medyan:", r.median(), "| çarpıklık:", round(r.skew(), 2))
+print(r.quantile([0.5, 0.75, 0.9, 0.99]))
+print("15 dk üstü oranı:", round((r &gt; 15).mean(), 3))
+
+# IQR kuralıyla aykırı değer sınırları
+q1, q3 = r.quantile([0.25, 0.75])
+ust = q3 + 1.5 * (q3 - q1)
+print("IQR üst sınırı:", ust, "| aykırı sayısı:", int((r &gt; ust).sum()))</pre>
+<p>Ortalama yaklaşık 25 dakika, medyan 7 dakika. "Tipik uçuş 25 dakika gecikiyor" demek yanıltıcıdır; tipik uçuş 7 dakika gecikir, uçuşların yaklaşık %10'u ise 77 dakikayı aşar. Raporlarda çarpık değişkenler için <b>medyan + yüzdelik dilimler</b> ver.</p>
+<div class="warn"><b>Aykırı değer silinecek bir şey değildir</b>IQR kuralı 374 uçuşu "aykırı" işaretler; bunlar gerçek, uzun rötarlardır ve operasyonun asıl sorunu tam da onlardır. Aykırı değeri yalnız <b>imkânsızsa</b> (negatif yaş, koltuktan fazla yolcu) ya da ölçüm hatası olduğu kanıtlanırsa ayıkla. Model için kırpma (winsorize) ya da log dönüşümü ayrı bir karardır.</div>
+<p>Kategorik değişkenlerde frekans tablosu ve uzun kuyruk sorusu gelir: "Rötar nedenlerinin kaçı toplam dakikanın %80'ini oluşturuyor?"</p>
+<pre class="py">import veri
+
+d = veri.oku("kanat_havayollari", "hv_delays")
+dakika = d.groupby("reason")["minutes"].sum().sort_values(ascending=False)
+pay = (dakika / dakika.sum()).round(3)
+print(pay)
+print("kümülatif:", pay.cumsum().round(3).tolist())</pre>
+
+<h2>4. İki değişkenli analiz</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Değişken çifti</th><th>Sayısal özet</th><th>Grafik</th></tr>
+<tr><td>Sayısal – sayısal</td><td>Pearson (doğrusal), Spearman (sıralı, aykırıya dayanıklı)</td><td>Saçılım (scatter), hexbin</td></tr>
+<tr><td>Kategorik – sayısal</td><td><code>groupby</code> ile medyan, yüzdelik, oran</td><td>Kutu grafiği (box), violin</td></tr>
+<tr><td>Kategorik – kategorik</td><td><code>pd.crosstab(..., normalize="index")</code></td><td>Yığılmış çubuk, ısı haritası</td></tr>
+<tr><td>Zaman – sayısal</td><td><code>resample</code> / ay bazında medyan</td><td>Çizgi grafik</td></tr>
+</table></div>
+<pre class="py">import veri
+import numpy as np
+import pandas as pd
+
+f = veri.oku("kanat_havayollari", "hv_flights", parse_dates=["sched_dep", "actual_dep"])
+f = f[f["status"] != "cancelled"].copy()
+f["rotar"] = (f["actual_dep"] - f["sched_dep"]).dt.total_seconds() / 60
+saat = f["sched_dep"].dt.hour
+f["dilim"] = np.select([saat &lt; 12, saat &lt; 18], ["sabah", "öğle"], "akşam")
+
+# kategorik – sayısal
+print(f.groupby("dilim")["rotar"].agg(medyan="median", gec_orani=lambda x: (x &gt; 15).mean()).round(3))
+
+# zaman boyutu
+print(f.groupby(f["sched_dep"].dt.strftime("%Y-%m"))["rotar"].median())
+
+# sayısal – sayısal: doluluk ile rötar
+u = veri.oku("kanat_havayollari", "hv_aircraft")
+f = f.merge(u[["tail_no", "seats"]], on="tail_no", how="left", validate="many_to_one")
+f["doluluk"] = f["pax"] / f["seats"]
+# Spearman = sıralar (rank) üzerinde Pearson; Series.corr(method="spearman") scipy ister
+print("Spearman:", round(f["doluluk"].rank().corr(f["rotar"].rank()), 3))</pre>
+<p>Üç bulgu çıktı: akşam dilimi (18:00 sonrası) belirgin biçimde kötü; Aralık'ta medyan rötar iki katına çıkıyor; doluluk ile rötar arasında ilişki yok (Spearman ≈ 0). "İlişki yok" da bir bulgudur: S5 kapanır, ekip boşuna kapasite kısıtı aramaz.</p>
+<pre class="py">import veri
+import pandas as pd
+import matplotlib.pyplot as plt
+
+f = veri.oku("kanat_havayollari", "hv_flights", parse_dates=["sched_dep", "actual_dep"])
+f["rotar"] = (f["actual_dep"] - f["sched_dep"]).dt.total_seconds() / 60
+f = f.dropna(subset=["rotar"])
+f["saat"] = f["sched_dep"].dt.hour
+
+fig, ax = plt.subplots(1, 2, figsize=(10, 3.5))
+ax[0].hist(f["rotar"].clip(upper=180), bins=36)
+ax[0].set_title("Kalkış rötarı (dk, 180'de kırpıldı)")
+f.boxplot(column="rotar", by="saat", ax=ax[1], showfliers=False)
+ax[1].set_title("Saate göre rötar")
+plt.suptitle("")
+plt.tight_layout()
+plt.show()
+print("grafik çizildi:", len(f), "uçuş")</pre>
+<div class="note"><b>Korelasyon nedensellik değildir</b>Akşam uçuşları daha geç kalkıyor; ama neden saat değil, gün boyunca biriken gecikme ya da akşam trafiği olabilir. EDA bulgusu bir <b>hipotez</b> üretir; nedeni kanıtlamak için deney, ek veri ya da daha dikkatli analiz gerekir (istatistik dersi).</div>
+
+<h2>5. Veri hatası mı, gerçek sinyal mi?</h2>
+<p>EDA'nın en değerli anı, "tuhaf" bir şey gördüğün andır. Önce sor: bu bir veri hatası mı, yoksa işin kendisi mi?</p>
+<div class="tbl-wrap"><table>
+<tr><th>Gözlem</th><th>Hata mı?</th><th>Nasıl anladık?</th></tr>
+<tr><td>62 uçuşta <code>pax = 0</code></td><td>Hayır: hepsi iptal</td><td><code>pd.crosstab(f["pax"] == 0, f["status"])</code></td></tr>
+<tr><td><code>raw_signups</code>'ta 52 satır, 40 kimlik</td><td>Evet: form iki kez gönderilmiş</td><td>E-posta küçük harfe çevrilince satırlar aynı</td></tr>
+<tr><td>Aynı e-posta, iki farklı kimlik ve tarih</td><td>Belirsiz: aynı kişi yeniden kayıt olmuş olabilir</td><td>İş birimine sorulur, kural yazılır</td></tr>
+<tr><td>Bayi raporunda Tutar <code>"1.430"</code></td><td>Biçim sorunu: Türkçe binlik ayırıcı</td><td>Diğer satırlarda <code>"1.250,50"</code> var</td></tr>
+<tr><td>Müşteri kaydında <code>2024-02-30</code></td><td>Evet: imkânsız tarih</td><td><code>pd.to_datetime(..., errors="coerce")</code> NaT verir</td></tr>
+</table></div>
+<pre class="py">import veri
+import pandas as pd
+
+r = veri.oku("anadolu_market", "raw_signups")
+print(len(r), "satır,", r["id"].nunique(), "kimlik,", int(r.duplicated().sum()), "birebir kopya")
+
+r["email"] = r["email"].str.strip().str.lower()
+print("e-posta normalleşince kopya:", int(r.duplicated().sum()))
+
+def sehir_anahtar(s):
+    return s.strip().replace("İ", "i").lower() if isinstance(s, str) else s
+
+print(r["city"].value_counts(dropna=False).head(8))       # 'ISTANBUL', 'istanbul', 'İstanbul'...
+print(r["city"].map(sehir_anahtar).value_counts(dropna=False))
+
+# iki tarih biçimi: önce ISO, olmazsa gün.ay.yıl
+t = pd.to_datetime(r["signup_date"], format="%Y-%m-%d", errors="coerce")
+t = t.fillna(pd.to_datetime(r["signup_date"], format="%d.%m.%Y", errors="coerce"))
+print("çözülemeyen tarih:", int(t.isna().sum()))
+
+ayni = r.drop_duplicates().groupby("email")["id"].nunique()
+print("aynı e-posta, farklı kimlik:", ayni[ayni &gt; 1].to_dict())</pre>
+<div class="warn"><b>Temizlik kararlarını kaydet</b>"Kopyaları sildim" yetmez: hangi kurala göre (birebir mi, e-posta mı?), kaç satır gitti, belirsiz durumda ne yaptın? Bu notlar bulguların güvenilirliğini belirler ve aynı temizliğin yarın tekrar çalışabilmesini sağlar.</div>
+
+<h2>6. Bulgu yazımı: gözlem → kanıt → olası açıklama → sonraki adım</h2>
+<p>EDA'nın çıktısı grafik yığını değil, karar verdiren kısa bir metindir. Her bulguyu dört parçayla yaz:</p>
+<div class="steps-list"><ol>
+<li><b>Gözlem:</b> Aralık'ta rötar belirgin biçimde arttı.</li>
+<li><b>Kanıt:</b> Medyan kalkış rötarı Eylül'de 5, Aralık'ta 16 dakika; hava kaynaklı dakikaların payı %25'ten %38'e çıktı.</li>
+<li><b>Olası açıklama:</b> Kış koşulları; ancak geç gelen uçak payı da yüksek, zincirleme etki olabilir.</li>
+<li><b>Sonraki adım:</b> Havalimanı bazında hava kaynaklı rötarı ayır; kış tarifesinde akşam bankosuna tampon süre ekleme senaryosunu hesapla.</li>
+</ol></div>
+
+<div class="note"><b>Gerçek işte</b>Analist işe alım vakalarında (take-home) değerlendiriciler grafiğin güzelliğine değil, bulguların yapısına bakar: soru net mi, veri kalitesi sorunları fark edilmiş ve belgelenmiş mi, sonuç sayıyla desteklenmiş mi, "bilmiyorum, şu veriyle anlarız" diyebilmiş mi? İş hayatında da EDA raporu çoğunlukla bir sayfadır: 3–5 bulgu, her biri bir grafik ve bir sonraki adım. Notebook'un geri kalanı ekte durur.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Otomatik profil araçları</h3>
+<p>ydata-profiling ve sweetviz tek satırda yüzlerce istatistik ve grafik içeren HTML rapor üretir. İlk bakış için hızlıdır; ama soruyu ve yorumu senin yerine yapmaz. Tarayıcıda çalışmazlar.</p>
+<pre class="code">pip install ydata-profiling
+from ydata_profiling import ProfileReport
+import pandas as pd
+df = pd.read_csv("hv_flights.csv")
+ProfileReport(df, title="Uçuşlar", minimal=True).to_file("profil.html")</pre>
+<p>Kendi bilgisayarında dene: yukarıdaki komutla kur, raporu tarayıcıda aç ve kendi <code>profil()</code> fonksiyonunun çıktısıyla karşılaştır.</p>
+<h3>Çatallanan yollar ve sızıntı</h3>
+<p>Yeterince çok kırılıma bakarsan bazıları şans eseri "anlamlı" görünür (çoklu karşılaştırma). EDA'da bulduğun bir örüntüyü kesin sonuç gibi sunma; ya yeni veride doğrula ya da hipotez olarak etiketle. Model kuracaksan EDA'yı yalnız <b>eğitim</b> verisinde yap; test verisine bakıp karar vermek veri sızıntısıdır (data leakage).</p>
+<h3>Simpson ve kompozisyon etkisi</h3>
+<p>Toplam ortalama değişirken her alt grup aynı kalabilir: örneğin Aralık'ta akşam uçuşlarının payı artarsa toplam rötar, hiçbir dilim kötüleşmese de yükselir. Zaman karşılaştırmalarında daima "karma (mix) değişti mi?" sorusunu sor. Bu konu <b>iş metrikleri</b> dersinde köprü analiziyle derinleşiyor.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/eda-kesifsel">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../test-ileri/">← İleri test teknikleri: mock, test ikizleri, özellik ve mutasyon testi</a><a href="../is-metrikleri/">İş metrikleri ve analitik kalıplar: KPI, huni, kohort, LTV →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

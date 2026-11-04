@@ -1,0 +1,210 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Temiz kod ve PEP 8 | Kesit Python</title><meta name="description" content="PEP 8 adlandırma, boşluk ve import kurallarını, docstring yazmayı, sihirli sayılardan kaçınmayı, DRY ve erken dönüşü öğrenir; dağınık kodu davranışını…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/kod-stili/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Temiz kod ve PEP 8"><meta property="og:description" content="PEP 8 adlandırma, boşluk ve import kurallarını, docstring yazmayı, sihirli sayılardan kaçınmayı, DRY ve erken dönüşü öğrenir; dağınık kodu davranışını…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/kod-stili/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Temiz kod ve PEP 8","description":"PEP 8 adlandırma, boşluk ve import kurallarını, docstring yazmayı, sihirli sayılardan kaçınmayı, DRY ve erken dönüşü öğrenir; dağınık kodu davranışını…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/kod-stili/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Dosya ve hata</span><h1>Temiz kod ve PEP 8</h1><p class="st-l">PEP 8 adlandırma, boşluk ve import kurallarını, docstring yazmayı, sihirli sayılardan kaçınmayı, DRY ve erken dönüşü öğrenir; dağınık kodu davranışını bozmadan yeniden düzenler, ruff ve black ile stili otomatiğe bağlarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kod-stili">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Kod bir kez yazılır, onlarca kez okunur: kod incelemesinde (code review), hata ayıklarken, altı ay sonra yeni özellik eklerken. Ilgaz Bank'ın faiz modülünü yazan kişi izne çıktığında, <code>def f(a, b, c)</code> ve içinde <code>* 0.0175</code> gibi açıklamasız sayılar gören ekip arkadaşı bir günü yalnızca "bu ne yapıyor" sorusuna harcar. Temiz kod (clean code), çalışan kodun bir üst basamağıdır: <b>doğru çalışan ve kolay anlaşılan</b> kod.</p>
+<p>Python topluluğunun ortak stil kılavuzu <b>PEP 8</b>'dir (Python Enhancement Proposal 8). Kuralların çoğu zevk meselesi gibi görünür ama asıl amaç tutarlılıktır: herkes aynı biçimde yazınca göz biçime değil içeriğe odaklanır. Değişken adlandırmanın temellerini "Değişkenler" dersinde gördün; burada bütün bir programa bakıyoruz.</p>
+
+<h2>Adlandırma kuralları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ne?</th><th>Biçim</th><th>Örnek</th></tr>
+<tr><td>Değişken, fonksiyon, parametre, modül</td><td>snake_case</td><td><code>aylik_taksit</code>, <code>hesap_ozeti()</code>, <code>rapor.py</code></td></tr>
+<tr><td>Sınıf</td><td>PascalCase (CapWords)</td><td><code>KrediBasvurusu</code>, <code>Siparis</code></td></tr>
+<tr><td>Sabit (modül düzeyinde, değişmeyen)</td><td>UPPER_CASE</td><td><code>KDV_ORANI</code>, <code>MAX_DENEME</code></td></tr>
+<tr><td>"İçeride kullan" işareti</td><td>_ ile başla</td><td><code>_yardimci()</code>, <code>_onbellek</code></td></tr>
+<tr><td>Kaçınılacak</td><td>l, O, I tek harfleri; yerleşik adlar</td><td><code>l = 1</code> (1 mi l mi?), <code>list = [...]</code></td></tr>
+</table></div>
+<p><b>Anlamlı ad</b> ise kuraldan da önemlidir. Adın uzunluğu kapsamıyla orantılı olsun: üç satırlık bir döngüde <code>i</code> yeterlidir, ama modül boyunca yaşayan bir değişken <code>d</code> olamaz. Mantıksal (bool) değerlere soru gibi okunan adlar ver: <code>odendi_mi</code>, <code>stok_var</code>. Fonksiyon adı bir fiil olsun: <code>hesapla</code>, <code>getir</code>, <code>dogrula</code>.</p>
+<pre class="py"># Önce: ne yaptığını anlamak için kodu çözmen gerekir
+def f(l):
+    t = 0
+    for x in l:
+        if x[1]:
+            t += x[0]
+    return t
+
+# Sonra: adlar kodu anlatır
+def odenen_toplam(faturalar):
+    toplam = 0
+    for tutar, odendi_mi in faturalar:
+        if odendi_mi:
+            toplam += tutar
+    return toplam
+
+faturalar = [(1200, True), (450, False), (300, True)]
+print(f(faturalar), odenen_toplam(faturalar))</pre>
+<div class="note"><b>Türkçe ad, Türkçe karakter?</b>Python 3 adlarda ş, ğ, ı gibi harflere izin verir (<code>öğrenci_sayısı = 5</code> çalışır). Yine de çoğu ekip klavye, arama ve araç uyumu için adları ASCII yazar: <code>ogrenci_sayisi</code>. Bu uygulamada da öyle yapıyoruz. Uluslararası ekiplerde adlar genellikle İngilizcedir; önemli olan bir projede <b>tek</b> dil seçmektir.</div>
+
+<h2>Girinti, boşluk ve satır uzunluğu</h2>
+<ul>
+<li>Girinti <b>4 boşluk</b>; sekme (tab) ile boşluk asla karışmaz.</li>
+<li>Atama ve karşılaştırma operatörlerinin iki yanında birer boşluk: <code>toplam = a + b</code>. Varsayılan parametrede boşluk yok: <code>def f(oran=0.2)</code>.</li>
+<li>Virgülden sonra boşluk, parantezin içine boşluk yok: <code>f(a, b)</code>, <code>f( a,b )</code> değil.</li>
+<li>Satır en fazla <b>79 karakter</b> (birçok ekip black'in varsayılanı olan 88'i kullanır). Uzun satırı ters bölü ile değil, <b>parantez içinde</b> böl.</li>
+<li>Üst düzey fonksiyon ve sınıflar arasında <b>iki</b> boş satır, sınıf içindeki metotlar arasında <b>bir</b> boş satır.</li>
+</ul>
+<pre class="py">KDV_ORANI = 0.20
+KARGO_UCRETI = 39.90
+INDIRIM_ESIGI = 1000
+
+
+def sepet_toplami(ara_toplam, uye_mi):
+    indirim = 0.05 if uye_mi and ara_toplam &gt;= INDIRIM_ESIGI else 0
+    genel_toplam = (
+        ara_toplam * (1 - indirim) * (1 + KDV_ORANI)
+        + KARGO_UCRETI
+    )
+    return round(genel_toplam, 2)
+
+
+print(sepet_toplami(1200, uye_mi=True))
+print(sepet_toplami(400, uye_mi=False))</pre>
+<p>Operatörün satır başında olması (<code>+ KARGO_UCRETI</code>) PEP 8'in güncel önerisidir: matematikte olduğu gibi gözün hangi işlemin yapıldığını satır başında görür.</p>
+
+<h2>Import sırası</h2>
+<p>Dosyanın en üstünde, docstring'den hemen sonra, üç grup hâlinde ve aralarında birer boş satırla:</p>
+<pre class="code">"""Anadolu Market günlük ciro raporu."""
+
+import csv                      # 1) standart kütüphane
+import datetime as dt
+from pathlib import Path
+
+import pandas as pd             # 2) üçüncü taraf (pip ile kurulanlar)
+
+from rapor.ayarlar import KDV_ORANI   # 3) projenin kendi modülleri</pre>
+<p>Her grup kendi içinde alfabetiktir; her satırda tek modül içe aktarılır (<code>import os, sys</code> değil). <code>from modul import *</code> hangi adların geldiğini gizlediği için kullanılmaz. Bu sırayı elle tutmana gerek yok: ruff (<code>ruff check --select I --fix</code>) ya da isort senin yerine dizer.</p>
+
+<h2>Yorum ve docstring</h2>
+<p>İyi yorum kodun <b>ne</b> yaptığını değil <b>neden</b> öyle yaptığını anlatır. <code># i'yi 1 artır</code> gürültüdür; <code># Banka hafta sonu çalışmadığı için valörü cumaya çekiyoruz</code> altın değerindedir. Kod değişip yorum değişmezse yorum yalan söylemeye başlar; bu yüzden kodu kendini anlatacak kadar açık yaz, yorumu iş kuralı ve tuhaflıklar için sakla.</p>
+<p><b>Docstring</b>, fonksiyonun, sınıfın ya da modülün ilk satırına yazılan üç tırnaklı metindir. Yorumdan farkı: Python onu saklar, <code>help()</code> ve editörler gösterir. İlk satır tek cümlelik özettir; ardından boş satır ve ayrıntılar gelir. İki yaygın biçim vardır:</p>
+<pre class="py">def aylik_taksit(anapara, yillik_faiz, vade_ay):
+    """Eşit taksitli kredinin aylık taksitini hesaplar.
+
+    Args:
+        anapara: Çekilen kredi tutarı (TL).
+        yillik_faiz: Yıllık faiz oranı, 0.42 gibi ondalık.
+        vade_ay: Taksit sayısı.
+
+    Returns:
+        2 ondalığa yuvarlanmış aylık taksit.
+
+    Raises:
+        ValueError: vade_ay pozitif değilse.
+    """
+    if vade_ay &lt;= 0:
+        raise ValueError("vade pozitif olmalı")
+    r = yillik_faiz / 12
+    if r == 0:
+        return round(anapara / vade_ay, 2)
+    return round(anapara * r / (1 - (1 + r) ** -vade_ay), 2)
+
+
+print(aylik_taksit(100_000, 0.42, 12))
+print(aylik_taksit.__doc__.splitlines()[0])</pre>
+<p>Yukarıdaki <b>Google stili</b>dir (Args / Returns / Raises). Veri bilimi kütüphanelerinde (numpy, pandas) yaygın olan <b>NumPy stili</b> başlıkları çizgiyle ayırır:</p>
+<pre class="code">def ortalama_sepet(tutarlar):
+    """Ortalama sepet tutarını döndürür.
+
+    Parameters
+    ----------
+    tutarlar : list of float
+        Sipariş tutarları.
+
+    Returns
+    -------
+    float
+        Ortalama; liste boşsa 0.0.
+    """</pre>
+<p>Hangisini seçtiğin değil, projede <b>tek</b> birini tutarlı kullanman önemlidir. Tip ipuçları (type hints) da belgelemenin parçasıdır: <code>def aylik_taksit(anapara: float, yillik_faiz: float, vade_ay: int) -&gt; float</code> yazınca docstring'de türleri tekrar etmene gerek kalmaz.</p>
+
+<h2>Sihirli sayılardan kaçın</h2>
+<p>Kodun ortasındaki açıklamasız sayı "sihirli sayı"dır (magic number). <code>if puan &gt; 1250</code> satırında 1250'nin ne olduğunu bilen tek kişi yazandır. Sayıyı adı olan bir sabite taşı: hem anlam kazanır hem de değiştiğinde tek yerden güncellenir.</p>
+<pre class="py"># Önce
+def kart_limiti(gelir):
+    if gelir &gt; 85000:
+        return gelir * 3
+    return gelir * 1.5
+
+# Sonra
+YUKSEK_GELIR_ESIGI = 85_000
+YUKSEK_GELIR_CARPANI = 3
+STANDART_CARPAN = 1.5
+
+def kart_limiti_temiz(aylik_gelir):
+    if aylik_gelir &gt; YUKSEK_GELIR_ESIGI:
+        return aylik_gelir * YUKSEK_GELIR_CARPANI
+    return aylik_gelir * STANDART_CARPAN
+
+print(kart_limiti(90000) == kart_limiti_temiz(90000), kart_limiti_temiz(40000))</pre>
+<p>0, 1, -1 gibi bariz değerler ve <code>range(len(x))</code> gibi kullanımlar sabite çevrilmez; kural "anlamı açık olmayan sayı"lar içindir. <code>85_000</code> yazımı da bir stil inceliğidir: alt çizgi sayıyı okunur yapar, değerini değiştirmez.</p>
+
+<h2>Küçük fonksiyon, DRY, erken dönüş</h2>
+<p><b>Tek sorumluluk:</b> bir fonksiyon tek iş yapsın ve adı o işi söylesin. Adında "ve" geçiyorsa (<code>oku_ve_hesapla_ve_yazdir</code>) bölme zamanıdır. Kabaca ekrana sığmayan fonksiyon, büyük olasılıkla fazla iş yapıyordur.</p>
+<p><b>DRY</b> (Don't Repeat Yourself, kendini tekrar etme): aynı mantık iki yerde yazılırsa bir gün yalnızca birinde güncellenir ve iki yer birbirini tutmaz. Üç kez kopyalanmış bir blok, bir fonksiyonun habercisidir.</p>
+<p><b>Erken dönüş</b> (early return, guard clause): iç içe if merdiveni yerine geçersiz durumları başta eleyip ana yolu düz bırak.</p>
+<pre class="py"># Önce: iç içe merdiven
+def kredi_karari_eski(yas, gelir, borc_orani):
+    if yas &gt;= 18:
+        if gelir &gt;= 20000:
+            if borc_orani &lt;= 0.5:
+                return "ön onay"
+            else:
+                return "red: borç"
+        else:
+            return "red: gelir"
+    else:
+        return "red: yaş"
+
+# Sonra: erken dönüş
+def kredi_karari(yas, gelir, borc_orani):
+    if yas &lt; 18:
+        return "red: yaş"
+    if gelir &lt; 20000:
+        return "red: gelir"
+    if borc_orani &gt; 0.5:
+        return "red: borç"
+    return "ön onay"
+
+for basvuru in [(17, 50000, 0.1), (30, 15000, 0.1), (30, 40000, 0.7), (30, 40000, 0.2)]:
+    print(kredi_karari(*basvuru), kredi_karari_eski(*basvuru) == kredi_karari(*basvuru))</pre>
+
+<h2>Zen of Python</h2>
+<p>Python'ın tasarım felsefesi 19 kısa ilkeyle yorumlayıcının içine gömülüdür. Çalıştır ve oku:</p>
+<pre class="py">import this</pre>
+<p>En çok alıntılananlar: <i>Beautiful is better than ugly</i> (güzel, çirkinden iyidir), <i>Explicit is better than implicit</i> (açık olan örtük olandan iyidir: <code>from x import *</code> bu yüzden kötüdür), <i>Readability counts</i> (okunabilirlik önemlidir), <i>Errors should never pass silently</i> (hatalar sessizce geçmemeli: çıplak <code>except: pass</code> bu yüzden kötüdür), <i>There should be one obvious way to do it</i> (bir işi yapmanın tek bariz yolu olmalı).</p>
+
+<h2>ruff ve black: stili makineye bırak</h2>
+<p>Kuralları ezberlemek yerine araçlara uygulat. <b>black</b> bir biçimlendiricidir (formatter): kodu tek ve tartışmasız bir stile sokar. <b>ruff</b> ise çok hızlı bir denetleyicidir (linter): kullanılmayan import, tanımsız ad, etkisiz ifade, import sırası gibi yüzlerce kuralı denetler; <code>ruff format</code> ile black uyumlu biçimlendirme de yapar.</p>
+<pre class="code">pip install ruff black
+ruff check .              # sorunları listele
+ruff check . --fix        # düzeltilebilenleri düzelt
+ruff format .             # biçimlendir (black uyumlu)
+black rapor.py            # ya da yalnızca black</pre>
+<p>Ayarlar proje kökündeki <code>pyproject.toml</code> içinde tutulur, böylece ekipteki herkes aynı kuralları kullanır:</p>
+<pre class="code">[tool.ruff]
+line-length = 88
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "B"]   # pycodestyle, pyflakes, import, adlandırma, bugbear</pre>
+<div class="note"><b>Kendi bilgisayarında dene</b>ruff ve black tarayıcıda çalışmaz; terminalde <code>pip install ruff</code> ile kur. VS Code'da "Ruff" eklentisini kurup "Format on Save" açarsan her kayıtta dosya kendiliğinden düzelir. Bu derste bazı denetimleri Python'ın kendi <code>re</code> ve <code>ast</code> modülleriyle nasıl yapabileceğini alıştırmalarda göreceksin.</div>
+<div class="tip"><b>Biçim tartışmasını kapat</b>"Bu virgülden sonra boşluk olmalı mı" tartışması kod incelemesinde vakit kaybıdır. Formatter'ı ekip kuralı yapınca bu yorumlar tamamen ortadan kalkar ve inceleme mantığa odaklanır.</div>
+
+<div class="note"><b>Gerçek işte</b>Çoğu şirkette kod, ana dala birleşmeden önce otomatik denetimden geçer: pre-commit kancası commit anında ruff ve black'i çalıştırır, CI hattı (GitHub Actions gibi) stil hatası olan değişikliği kırmızıya boyar. Kod incelemesinde en sık yazılan yorumlar da bu dersin konularıdır: "bu sayının adı ne olmalı?", "bu fonksiyon iki iş yapıyor", "bu blok şurada da var". İş görüşmelerinde verilen ev ödevlerinde (take-home) çalışan ama dağınık kod, çalışan ve temiz koda neredeyse her zaman kaybeder.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Tutarlılık, kuraldan önce gelir</h3>
+<p>PEP 8'in kendisi bir bölümüne "A Foolish Consistency is the Hobgoblin of Little Minds" başlığını koyar: proje içi tutarlılık PEP 8'den, fonksiyon içi tutarlılık proje kuralından önemlidir. Eski bir kod tabanına camelCase ile yazılmışsa, tek fonksiyonu snake_case'e çevirmek karmaşayı artırır; ya hepsini (bir araçla, ayrı bir değişiklikte) çevirirsin ya da mevcut stile uyarsın.</p>
+<h3>Bilişsel karmaşıklık</h3>
+<p>Kodun zorluğunu satır sayısı değil, okurun aklında aynı anda tutması gereken şey sayısı belirler. Her iç içe if, her döngü, her bayrak (flag) değişkeni bu yükü artırır. Erken dönüş, küçük yardımcı fonksiyonlar ve anlamlı ara değişkenler (<code>uygun_mu = yas &gt;= 18 and gelir &gt;= ESIK</code>) yükü azaltır. ruff'ın <code>C901</code> kuralı karmaşıklığı sayıp sınırı aşan fonksiyonları işaretler.</p>
+<h3>Yeniden düzenleme (refactoring) güvenli yapılır</h3>
+<p>Refactor, davranışı değiştirmeden yapıyı iyileştirmektir. Güvenli yolu: önce mevcut davranışı test et, küçük bir adım at, testleri çalıştır, tekrarla. Bu dersin refactor alıştırmaları tam olarak bunu yapar: testler hem eski davranışın korunduğunu hem de yapının düzeldiğini denetler. Orta seviyedeki "Test yazma" dersinde bu güvenlik ağını kendin kuracaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/kod-stili">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../hata-ayiklama/">← Hata ayıklama (debugging)</a><a href="../proje-oyunlar/">Mini projeler: oyunlar ve araçlar →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

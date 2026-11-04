@@ -1,0 +1,143 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye | Kesit Python</title><meta name="description" content="Ufuk, sıklık ve toplama seviyesi; naive ve mevsimsel naive temel çizgileri; STL ayrıştırma ve ADF; Holt-Winters (ETS) ve dışsal değişkenli SARIMAX; lag…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/zaman-serisi-tahmin/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye"><meta property="og:description" content="Ufuk, sıklık ve toplama seviyesi; naive ve mevsimsel naive temel çizgileri; STL ayrıştırma ve ADF; Holt-Winters (ETS) ve dışsal değişkenli SARIMAX; lag…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/zaman-serisi-tahmin/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye","description":"Ufuk, sıklık ve toplama seviyesi; naive ve mevsimsel naive temel çizgileri; STL ayrıştırma ve ADF; Holt-Winters (ETS) ve dışsal değişkenli SARIMAX; lag…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/zaman-serisi-tahmin/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Zaman serisi tahmini: temel çizgiden ETS, ARIMA ve ML'ye</h1><p class="st-l">Ufuk, sıklık ve toplama seviyesi; naive ve mevsimsel naive temel çizgileri; STL ayrıştırma ve ADF; Holt-Winters (ETS) ve dışsal değişkenli SARIMAX; lag özellikli ML, özyinelemeli ve doğrudan çok adımlı tahmin; genişleyen pencere backtest; MAE, RMSE, sMAPE, MASE ve tahmin aralığı. Pedal İzmir saatlik talep + hava verisiyle.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/zaman-serisi-tahmin">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Yarın kaç bisiklet gerekecek?</h2>
+<p>Pedal İzmir operasyon ekibi her gece kamyonlarla bisikletleri istasyonlar arasında taşıyor. Sabah 8'de Alsancak'ta bisiklet kalmazsa müşteri kaybediliyor, Bostanlı'da yığılırsa boş yuva kalmıyor. Bunun için <b>yarının saatlik talebini</b> bilmeleri gerekiyor. Bu bir <b>zaman serisi tahmini</b> (time series forecasting) problemidir: geçmiş gözlemlerin sırasından ve düzeninden geleceği çıkarmak.</p>
+<p>Zaman serisinin pandas tarafını (resample, shift, rolling) <a href="../pandas-zaman-serisi/">Zaman serisi analizi</a> dersinde gördün. Bu derste tahmin yapacaksın: önce yenmesi gereken <b>temel çizgiler</b>, sonra bileşen ayrıştırma, üstel düzeltme (ETS), ARIMA/SARIMAX, lag özellikli makine öğrenmesi ve hepsini dürüstçe karşılaştıran <b>geriye dönük test</b> (backtest). Veri: Pedal İzmir'in Haziran–Ağustos 2024 yolculukları (116 517 yolculuk) ve saatlik hava gözlemleri.</p>
+
+<h2>Tahmin problemini tanımla: ufuk, sıklık, toplama seviyesi</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Karar</th><th>Soru</th><th>Pedal İzmir örneği</th></tr>
+<tr><td>Ufuk (horizon)</td><td>Ne kadar ileriyi tahmin ediyorsun?</td><td>Yarının 24 saati (ufuk 1–24 saat ya da gün öncesi)</td></tr>
+<tr><td>Sıklık</td><td>Hangi zaman adımında?</td><td>Saatlik (operasyon), günlük (bütçe)</td></tr>
+<tr><td>Toplama seviyesi</td><td>Hangi birimde?</td><td>Şehir toplamı mı, istasyon başına mı?</td></tr>
+<tr><td>Bilgi anı</td><td>Tahmin anında ne biliniyor?</td><td>Dünün talebi ve yarının hava tahmini; bugünün öğleden sonrası değil</td></tr>
+</table></div>
+<p>Toplama seviyesi yükseldikçe seri düzgünleşir ve tahmin kolaylaşır: tek bir istasyonun saatlik talebi gürültülüdür, şehrin toplamı değildir. "Bilgi anı" ise sızıntının kaynağıdır: yarını tahmin ederken lag 1 (bir saat önce) kullanamazsın; en kısa lag 24 saattir.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+import veri
+
+yol = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
+saatlik = yol.set_index("started_at").resample("h").size()
+saatlik = saatlik.reindex(pd.date_range("2024-06-01", "2024-08-31 23:00", freq="h"),
+                          fill_value=0).rename("talep")       # yolculuksuz saat = 0
+gunluk = saatlik.resample("D").sum()
+print(len(saatlik), "saat,", len(gunluk), "gün; toplam", saatlik.sum())
+print("Saat profili:", saatlik.groupby(saatlik.index.hour).mean().round(0).astype(int).tolist())
+print("Gün profili:", gunluk.groupby(gunluk.index.dayofweek).mean().round(0).astype(int).tolist())
+</pre>
+<p>İki mevsimsellik var: <b>günlük</b> (sabah 8 ve akşam 18 tepeleri, gece neredeyse sıfır) ve <b>haftalık</b> (hafta sonu daha düşük). Saatlik seride haftalık döngü 168 adımdır.</p>
+
+<h2>Temel çizgiler: önce bunları yen</h2>
+<p>Karmaşık bir model kurmadan önce basit tahmincilerin skorunu bil. Şaşırtıcı sıklıkla en iyileri bunlardır.</p>
+<ul>
+<li><b>Naive:</b> geleceğin her adımı son gözlenen değere eşit.</li>
+<li><b>Mevsimsel naive</b> (seasonal naive): her adım, bir mevsim önceki değere eşit: saatlik seride geçen haftanın aynı saati (lag 168) ya da dünün aynı saati (lag 24).</li>
+<li><b>Hareketli ortalama:</b> son k gözlemin ortalaması (düz bir çizgi).</li>
+</ul>
+<pre class="py">egitim, test = saatlik[:-168], saatlik[-168:]          # son hafta test
+tahminler = {
+    "naive": np.repeat(egitim.iloc[-1], 168),
+    "mevsimsel_24": np.tile(egitim[-24:].to_numpy(), 7),
+    "mevsimsel_168": egitim[-168:].to_numpy(),
+    "ort_168": np.repeat(egitim[-168:].mean(), 168),
+}
+for ad, t in tahminler.items():
+    print(f"{ad:14s} MAE = {np.mean(np.abs(test.to_numpy() - t)):.2f}")
+</pre>
+<p>Geçen haftanın aynı saati (MAE ≈ 7.7) dünün aynı saatinden (≈ 26) çok daha iyi; çünkü hafta sonu ile hafta içini ayırıyor. Bu, yenmen gereken çıtadır.</p>
+
+<h2>Metrikler ve tuzakları</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Metrik</th><th>Formül (özet)</th><th>Tuzak</th></tr>
+<tr><td>MAE</td><td>ortalama |y − ŷ|</td><td>Ölçeğe bağlı; seriler arası kıyas yapılamaz</td></tr>
+<tr><td>RMSE</td><td>√ortalama (y − ŷ)²</td><td>Büyük hataları ağır cezalandırır (yağmurlu saatler)</td></tr>
+<tr><td>MAPE</td><td>ortalama |y − ŷ| / |y|</td><td><b>y = 0 olduğunda tanımsız</b>; gece saatleri sonsuz hata üretir; düşük tahmini kayırır</td></tr>
+<tr><td>sMAPE</td><td>ortalama 2|y − ŷ| / (|y| + |ŷ|)</td><td>0–200 arası; ikisi de 0 ise 0 say</td></tr>
+<tr><td>MASE</td><td>MAE / eğitimdeki mevsimsel naive MAE'si</td><td>1'in altı = mevsimsel naive'den iyi; ölçekten bağımsız</td></tr>
+</table></div>
+<div class="warn"><b>MAPE ve sıfırlar</b>Pedal İzmir serisinde 173 saat sıfır talep var. MAPE bu saatlerde sıfıra böler. Operasyon ekibine "yüzde hata" vermen gerekiyorsa toplam üzerinden WAPE (Σ|y − ŷ| / Σ|y|) kullan.</div>
+
+<h2>Bileşen ayrıştırma ve durağanlık</h2>
+<p><b>STL</b> (Seasonal-Trend decomposition using Loess) seriyi üç parçaya ayırır: trend, mevsimsel bileşen ve kalıntı. Kalıntının varyansı mevsimsel+kalıntıya göre küçükse mevsimsellik güçlüdür: <code>F = max(0, 1 − Var(kalıntı) / Var(mevsim + kalıntı))</code>. ARIMA ailesi ise <b>durağan</b> (stationary: ortalaması ve varyansı zamanla değişmeyen) seri ister. <b>ADF testi</b> (Augmented Dickey-Fuller) "seride birim kök var, durağan değil" boş hipotezini sınar; p &lt; 0.05 ise durağan kabul edilir. Durağan değilse fark alınır (ARIMA'daki d).</p>
+<pre class="py">from statsmodels.tsa.seasonal import STL
+from statsmodels.tsa.stattools import adfuller
+
+stl = STL(saatlik, period=24).fit()
+guc = max(0.0, 1 - np.var(stl.resid) / np.var(stl.seasonal + stl.resid))
+print("Günlük mevsimsellik gücü:", round(guc, 3))
+print("ADF p (günlük toplam):", f"{adfuller(gunluk)[1]:.2e}")
+</pre>
+
+<h2>Üstel düzeltme (ETS, Holt-Winters)</h2>
+<p>Üstel düzeltme yakın geçmişe daha çok ağırlık verir. <b>Holt-Winters</b> bunu üç bileşene uygular: seviye, trend ve mevsim. statsmodels'ta <code>ExponentialSmoothing</code> sınıfıyla kurulur; <code>seasonal="add"</code> mevsimsel etkinin sabit büyüklükte, <code>"mul"</code> seviyeyle orantılı olduğunu varsayar.</p>
+<pre class="py">import warnings
+from statsmodels.tsa.holtwinters import ExponentialSmoothing
+warnings.filterwarnings("ignore")
+
+g_egt, g_test = gunluk[:-14], gunluk[-14:]
+ets = ExponentialSmoothing(g_egt, seasonal="add", seasonal_periods=7).fit()
+ets_t = ets.forecast(14)
+mevs = np.tile(g_egt[-7:].to_numpy(), 2)
+print("ETS MAE:", round(np.mean(np.abs(g_test - ets_t)), 1),
+      " mevsimsel naive MAE:", round(np.mean(np.abs(g_test.to_numpy() - mevs)), 1))
+</pre>
+
+<h2>ARIMA ve SARIMAX: dışsal değişkenle tahmin</h2>
+<p><b>ARIMA(p, d, q)</b> seriyi kendi geçmiş değerleri (AR, p), fark alma (I, d) ve geçmiş hataları (MA, q) ile modeller. <b>SARIMA</b> buna mevsimsel bir parça ekler: <code>seasonal_order=(P, D, Q, s)</code>. <b>SARIMAX</b>'teki X, dışsal (exogenous) değişkendir: yağış gibi talebi etkileyen ama talepten etkilenmeyen bir seri. Günlük talep ile günlük yağış arasındaki korelasyon −0.90; yağmurlu bir günü yalnız geçmişe bakan bir model göremez.</p>
+<pre class="py">from statsmodels.tsa.statespace.sarimax import SARIMAX
+
+hava = veri.oku("pedal_izmir", "bk_weather", parse_dates=["obs_hour"]).set_index("obs_hour")
+yagis = hava["rain_mm"].resample("D").sum().rename("yagis").to_frame()
+sx = SARIMAX(g_egt, exog=yagis[:-14], order=(1, 0, 0), seasonal_order=(1, 0, 0, 7),
+             trend="c").fit(disp=False, maxiter=200)
+ongoru = sx.get_forecast(14, exog=yagis[-14:])         # gelecek yağış = hava tahmini
+print("yağış katsayısı:", round(sx.params["yagis"], 1))
+print("SARIMAX MAE:", round(np.mean(np.abs(g_test - ongoru.predicted_mean)), 1))
+print(ongoru.conf_int(alpha=0.2).round(0).head(3))    # %80 tahmin aralığı
+</pre>
+<div class="note"><b>Dışsal değişkenin bedeli</b>Test döneminde gerçek yağışı kullandık; canlıda elinde yalnız hava <b>tahmini</b> olacak ve o da hatalıdır. Dürüst bir backtest, o gün bilinen hava tahminiyle yapılır. Bilinmeyen dışsal değişken (ör. yarının gerçek sıcaklığı) sızıntıdır.</div>
+
+<h2>Lag özellikli makine öğrenmesi</h2>
+<p>Zaman serisini tablo problemine çevirebilirsin: her satır bir saat; özellikler saat, hafta sonu, lag 24, lag 168, hava; hedef o saatin talebi. Sonra Ridge, gradient boosting ya da herhangi bir regresyon modeli. Çok adımlı tahminde iki strateji var:</p>
+<ul>
+<li><b>Özyinelemeli</b> (recursive): tek adımlık modeli kullan, tahmini bir sonraki adımın lag'i olarak geri besle. Basit ama hata birikir.</li>
+<li><b>Doğrudan</b> (direct): her ufuk h için ayrı bir model eğit (y(t+h) ~ t anındaki bilgi). Hata birikmez ama H model gerekir.</li>
+</ul>
+<p>Lag'leri ufuktan küçük seçmezsen (gün öncesi tahminde lag ≥ 24) iki strateji de gerekmez: tüm özellikler tahmin anında bilinir.</p>
+<pre class="py">from sklearn.linear_model import Ridge
+from sklearn.model_selection import TimeSeriesSplit
+
+d = saatlik.to_frame().join(hava[["rain_mm", "temp_c"]])
+d["lag24"], d["lag168"] = d["talep"].shift(24), d["talep"].shift(168)
+d["hs"] = (d.index.dayofweek &gt;= 5).astype(int)
+d = d.dropna()
+X = pd.get_dummies(d.index.hour, prefix="s").astype(float).set_index(d.index)
+X = X.join(d[["hs", "lag24", "lag168", "rain_mm", "temp_c"]])
+for i, (egt, tst) in enumerate(TimeSeriesSplit(n_splits=3, test_size=168).split(X)):
+    m = Ridge().fit(X.iloc[egt], d["talep"].iloc[egt])
+    mae = np.mean(np.abs(m.predict(X.iloc[tst]) - d["talep"].iloc[tst]))
+    print(f"kat {i}: eğitim {len(egt)} saat, test {X.index[tst[0]].date()} → MAE {mae:.2f}")
+</pre>
+
+<h2>Geriye dönük test: genişleyen pencere</h2>
+<p>Zaman serisinde rastgele bölme, modelin geleceği görerek geçmişi tahmin etmesi demektir. Doğrusu <b>genişleyen pencere</b> (expanding window): 1 Ağustos'a kadar eğit, bir hafta tahmin et; 8 Ağustos'a kadar eğit, bir sonraki haftayı tahmin et... <code>TimeSeriesSplit</code> bunu otomatik yapar; <code>test_size</code> ufku, <code>gap</code> eğitim ile test arasındaki boşluğu (bilgi gecikmesi) ayarlar. Tek bir test haftası şanslı ya da şanssız olabilir; birkaç katın ortalaması ve dağılımı karar için gerekir.</p>
+<div class="tip"><b>Tahmin aralığı</b>Operasyon ekibi tek sayı değil aralık ister: "yarın 8–9 arası Alsancak'ta 18 ile 30 arası kiralama". Model tabanlı aralıklar (SARIMAX <code>conf_int</code>) varsayımlara dayanır. Daha sağlam yol: backtest hatalarının yüzdelikleri. Geçmiş hataların %10 ve %90 yüzdeliklerini tahmine ekle, sonra yeni dönemde gerçeklerin yüzde kaçının aralığa düştüğünü (kapsama) ölç.</div>
+<div class="note"><b>Gerçek işte</b>Bisiklet paylaşımı, yemek teslimatı ve perakende şirketlerinde talep tahmini genellikle iki katmanlıdır: şehir/gün düzeyinde istatistiksel model (ETS, SARIMAX) bütçe ve vardiya planı için; istasyon/saat düzeyinde lag ve hava özellikli gradient boosting operasyon için. Her sabah backtest panosu güncellenir ve model mevsimsel naive'i yenmediği hafta alarm üretir.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Hiyerarşik tahmin</h3>
+<p>İstasyon tahminlerinin toplamı şehir tahminine eşit olmalı (tutarlılık, coherence). Alttan yukarı topla, üstten aşağı oranla dağıt ya da MinT uzlaştırma kullan (Nixtla <code>hierarchicalforecast</code>).</p>
+<h3>Kütüphane manzarası</h3>
+<p><b>statsmodels</b> klasik modeller; <b>sktime</b> ve <b>Darts</b> tek arayüzde istatistiksel + ML modelleri ve backtest; <b>Nixtla statsforecast</b> binlerce seriyi hızlı ETS/ARIMA ile; <b>Prophet</b> tatil ve çoklu mevsimsellikte pratik; <b>LightGBM + lag</b> M5 yarışmasının kazananı. Derin öğrenme (N-BEATS, TFT) çok sayıda ilişkili seride öne çıkar.</p>
+<h3>Mülakat cümlesi</h3>
+<p>"Önce mevsimsel naive temel çizgisini ve MASE'i raporlarım. Bölmeyi zamana göre, genişleyen pencereyle yaparım; özellikleri tahmin anında bilinenlerle sınırlarım. MAPE'yi sıfırlı serilerde kullanmam; aralıkları backtest hatalarından kurar ve kapsamasını ölçerim."</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/zaman-serisi-tahmin">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ozellik-muhendisligi/">← Özellik mühendisliği: ham veriden modele hazır özelliğe</a><a href="../bulut-temelleri/">Bulut temelleri: nesne depolama, IAM, serverless ve maliyet →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

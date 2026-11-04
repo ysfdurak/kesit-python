@@ -1,0 +1,311 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Regresyon ve sınıflandırma modelleri | Kesit Python</title><meta name="description" content="Çoklu regresyon ve katsayı yorumu, Ridge/Lasso, lojistik regresyon ve predict_proba, karar ağacı, rastgele orman, gradient boosting; karışıklık matrisi,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ml-regresyon-siniflandirma/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Regresyon ve sınıflandırma modelleri"><meta property="og:description" content="Çoklu regresyon ve katsayı yorumu, Ridge/Lasso, lojistik regresyon ve predict_proba, karar ağacı, rastgele orman, gradient boosting; karışıklık matrisi,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ml-regresyon-siniflandirma/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Regresyon ve sınıflandırma modelleri","description":"Çoklu regresyon ve katsayı yorumu, Ridge/Lasso, lojistik regresyon ve predict_proba, karar ağacı, rastgele orman, gradient boosting; karışıklık matrisi,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/ml-regresyon-siniflandirma/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Makine öğrenmesi</span><h1>Regresyon ve sınıflandırma modelleri</h1><p class="st-l">Çoklu regresyon ve katsayı yorumu, Ridge/Lasso, lojistik regresyon ve predict_proba, karar ağacı, rastgele orman, gradient boosting; karışıklık matrisi, precision/recall/F1, ROC-AUC, dengesiz sınıflar ve maliyete dayalı eşik seçimi.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-regresyon-siniflandirma">Uygulamada aç, 28 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>İki iş sorusu, iki problem türü</h2>
+<p><i>ml-giris</i> dersinde ML'in iskeletini kurdun: bölme, fit, predict, metrik. Şimdi iki gerçekçi soruyu derinlemesine çözeceğiz. <b>Anadolu Market</b> "bir müşterinin sepet tutarı ne olacak?" diye soruyor; bu bir <b>regresyon</b> (sayısal hedef). <b>Ilgaz Bank</b> ise "bu kredi başvurusu temerrüde düşer mi?" diye soruyor; bu bir <b>sınıflandırma</b> (kategorik hedef). İkisinde de model kurmak işin yarısıdır; diğer yarısı modelin <b>ne söylediğini yorumlamak</b> ve iş kararına (kampanya bütçesi, kredi onayı) çevirmektir.</p>
+<p>Örnek veriler kurgusaldır ve <code>numpy.random.default_rng(seed)</code> ile üretilir; aynı tohumla her çalıştırmada aynı tablo gelir. Gerçek projede bunlar veri ambarından gelir, ama yöntem aynıdır.</p>
+<pre class="py">import numpy as np
+
+
+def sepet_verisi(n=500, seed=42):
+    """Anadolu Market kurgusal sepet verisi: ürün adedi, üye mi, kampanya, mesafe (km)."""
+    rng = np.random.default_rng(seed)
+    urun = rng.integers(1, 15, n)
+    uye = rng.integers(0, 2, n)
+    kampanya = rng.integers(0, 2, n)
+    mesafe = rng.uniform(1, 30, n)
+    sepet = 40 + 35 * urun + 60 * uye - 25 * kampanya + rng.normal(0, 30, n)
+    return np.column_stack([urun, uye, kampanya, mesafe]), sepet
+
+X, y = sepet_verisi()
+print(X.shape, round(y.mean(), 1))
+print(X[:3].round(1))
+</pre>
+
+<h2>Doğrusal ve çoklu regresyon: katsayıyı okumak</h2>
+<p>Çoklu doğrusal regresyon tahmini <code>ŷ = b0 + b1·urun + b2·uye + b3·kampanya + b4·mesafe</code> biçiminde kurar. Her katsayı (coefficient) şunu söyler: <b>diğer özellikler sabitken</b> bu özellik bir birim artarsa tahmin ne kadar değişir? Bu yorum, modeli iş birimine anlatmanın en güçlü aracıdır.</p>
+<pre class="py">import numpy as np
+
+
+def sepet_verisi(n=500, seed=42):
+    """Anadolu Market kurgusal sepet verisi: ürün adedi, üye mi, kampanya, mesafe (km)."""
+    rng = np.random.default_rng(seed)
+    urun = rng.integers(1, 15, n)
+    uye = rng.integers(0, 2, n)
+    kampanya = rng.integers(0, 2, n)
+    mesafe = rng.uniform(1, 30, n)
+    sepet = 40 + 35 * urun + 60 * uye - 25 * kampanya + rng.normal(0, 30, n)
+    return np.column_stack([urun, uye, kampanya, mesafe]), sepet
+
+from sklearn.linear_model import LinearRegression
+from sklearn.model_selection import train_test_split
+
+X, y = sepet_verisi()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.2, random_state=0)
+model = LinearRegression().fit(X_tr, y_tr)
+for ad, k in zip(["urun", "uye", "kampanya", "mesafe"], model.coef_):
+    print(f"{ad:&gt;9}: {k:+.2f} TL")
+print(f"    sabit: {model.intercept_:.2f} TL")
+print("Test R²:", round(model.score(X_te, y_te), 3))
+</pre>
+<p>Okuma: her ek ürün sepete yaklaşık 35 TL ekliyor, üye müşteriler ortalama 60 TL daha fazla harcıyor, kampanyalı sepetler ~25 TL daha düşük (indirim etkisi), mesafenin katsayısı sıfıra yakın: etkisi yok. Veriyi biz ürettiğimiz için gerçek değerleri biliyoruz ve modelin onları bulduğunu görüyoruz.</p>
+<div class="warn"><b>Katsayı nedensellik değildir</b>"Üyelik 60 TL artırıyor" demek, "herkesi üye yaparsak sepet 60 TL büyür" demek değildir; zaten çok alışveriş yapanlar üye oluyor olabilir. Katsayılar <b>ilişkiyi</b> ölçer. Ayrıca özellikler farklı ölçeklerdeyse (TL ile adet) katsayıların büyüklüğü karşılaştırılamaz; önce ölçeklemek gerekir (<i>ml-pipeline-degerlendirme</i>).</div>
+
+<h2>Düzenlileştirme: Ridge ve Lasso</h2>
+<p>Özellik sayısı arttıkça ya da özellikler birbiriyle güçlü ilişkiliyse (çoklu doğrusallık, multicollinearity) doğrusal regresyon katsayıları şişer ve aşırı öğrenir. <b>Düzenlileştirme</b> (regularization), büyük katsayılara ceza ekler:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Model</th><th>Ceza</th><th>Etkisi</th><th>Ne zaman</th></tr>
+<tr><td><code>LinearRegression</code></td><td>Yok</td><td>Saf en küçük kareler</td><td>Az ve anlamlı özellik</td></tr>
+<tr><td><code>Ridge(alpha)</code></td><td>Katsayıların karesi (L2)</td><td>Hepsini küçültür, sıfırlamaz</td><td>İlişkili çok özellik</td></tr>
+<tr><td><code>Lasso(alpha)</code></td><td>Katsayıların mutlak değeri (L1)</td><td>Gereksizleri <b>tam sıfıra</b> indirir</td><td>Özellik seçimi istendiğinde</td></tr>
+<tr><td><code>ElasticNet</code></td><td>L1 + L2 karışımı</td><td>İkisinin dengesi</td><td>Çok sayıda ilişkili özellik</td></tr>
+</table></div>
+<pre class="py">import numpy as np
+
+
+def sepet_verisi(n=500, seed=42):
+    """Anadolu Market kurgusal sepet verisi: ürün adedi, üye mi, kampanya, mesafe (km)."""
+    rng = np.random.default_rng(seed)
+    urun = rng.integers(1, 15, n)
+    uye = rng.integers(0, 2, n)
+    kampanya = rng.integers(0, 2, n)
+    mesafe = rng.uniform(1, 30, n)
+    sepet = 40 + 35 * urun + 60 * uye - 25 * kampanya + rng.normal(0, 30, n)
+    return np.column_stack([urun, uye, kampanya, mesafe]), sepet
+
+from sklearn.linear_model import Ridge, Lasso
+
+X, y = sepet_verisi()
+for alpha in [0.1, 10]:
+    r = Ridge(alpha=alpha).fit(X, y)
+    l = Lasso(alpha=alpha).fit(X, y)
+    print(f"alpha={alpha:&lt;4} Ridge: {r.coef_.round(1)}  Lasso: {l.coef_.round(1)}")
+</pre>
+<p><code>alpha</code> cezanın gücüdür: büyüdükçe katsayılar küçülür. Lasso yüksek alpha'da etkisiz <code>mesafe</code>'yi ve hatta zayıf <code>kampanya</code>'yı sıfırlar. Doğru alpha'yı çapraz doğrulamayla (cross-validation) seçersin (<code>RidgeCV</code>, <code>LassoCV</code> ya da <code>GridSearchCV</code>).</p>
+
+<h2>Lojistik regresyon ve olasılık</h2>
+<p>Adı regresyon olsa da <b>lojistik regresyon</b> (logistic regression) bir sınıflandırıcıdır. Doğrusal skoru sigmoid fonksiyonundan geçirip 0-1 arası bir <b>olasılığa</b> çevirir. <code>predict_proba</code> her sınıfın olasılığını verir; sütun sırası <code>model.classes_</code> ile aynıdır, ikili problemde pozitif sınıf (1 = temerrüt) <b>ikinci sütundur</b>: <code>[:, 1]</code>. <code>predict</code> ise varsayılan olarak 0.5 eşiğini uygular.</p>
+<pre class="py">import numpy as np
+
+
+def kredi_verisi(n=2000, seed=0):
+    """Ilgaz Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""
+    rng = np.random.default_rng(seed)
+    gelir = rng.normal(35, 12, n).clip(8, None)
+    borc_orani = rng.uniform(0, 0.9, n)
+    gecikme = rng.poisson(0.6, n)
+    yas = rng.integers(21, 66, n)
+    logit = -4.3 + 3.0 * borc_orani + 0.9 * gecikme - 0.05 * (gelir - 35)
+    y = (rng.random(n) &lt; 1 / (1 + np.exp(-logit))).astype(int)
+    return np.column_stack([gelir, borc_orani, gecikme, yas]), y
+
+from sklearn.linear_model import LogisticRegression
+from sklearn.model_selection import train_test_split
+
+X, y = kredi_verisi()
+print("temerrüt oranı:", round(y.mean(), 3))
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
+model = LogisticRegression(max_iter=1000).fit(X_tr, y_tr)
+olasilik = model.predict_proba(X_te[:5])
+print(model.classes_)
+print(olasilik.round(3))
+print("P(temerrüt):", olasilik[:, 1].round(3))
+print("predict    :", model.predict(X_te[:5]))
+</pre>
+
+<h2>Ağaçlar ve topluluklar</h2>
+<p><b>Karar ağacı</b> doğrusal olmayan ilişkileri ve etkileşimleri (yüksek borç oranı <i>ve</i> gecikme) kendiliğinden yakalar ama tek başına kolayca aşırı öğrenir. <b>Topluluk</b> (ensemble) yöntemleri birçok ağacı birleştirir:</p>
+<ul>
+<li><b>Rastgele orman</b> (<code>RandomForestClassifier</code>): yüzlerce ağacı verinin ve özelliklerin rastgele alt kümelerinde eğitip oylatır; varyansı düşürür, ayarlaması kolaydır.</li>
+<li><b>Gradient boosting</b> (<code>HistGradientBoostingClassifier</code>): ağaçları sırayla eğitir, her yeni ağaç öncekilerin hatasını düzeltir. Tablo verisinde genellikle en güçlü aile; eksik değerleri kendisi işler ve büyük veride hızlıdır (XGBoost, LightGBM aynı fikrin kütüphaneleridir).</li>
+</ul>
+<pre class="py">import numpy as np
+
+
+def kredi_verisi(n=2000, seed=0):
+    """Ilgaz Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""
+    rng = np.random.default_rng(seed)
+    gelir = rng.normal(35, 12, n).clip(8, None)
+    borc_orani = rng.uniform(0, 0.9, n)
+    gecikme = rng.poisson(0.6, n)
+    yas = rng.integers(21, 66, n)
+    logit = -4.3 + 3.0 * borc_orani + 0.9 * gecikme - 0.05 * (gelir - 35)
+    y = (rng.random(n) &lt; 1 / (1 + np.exp(-logit))).astype(int)
+    return np.column_stack([gelir, borc_orani, gecikme, yas]), y
+
+from sklearn.ensemble import RandomForestClassifier, HistGradientBoostingClassifier
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_auc_score
+from sklearn.model_selection import train_test_split
+
+X, y = kredi_verisi()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
+modeller = {
+    "lojistik": LogisticRegression(max_iter=1000),
+    "orman": RandomForestClassifier(n_estimators=200, min_samples_leaf=5, random_state=0),
+    "boosting": HistGradientBoostingClassifier(max_depth=3, random_state=0),
+}
+for ad, m in modeller.items():
+    m.fit(X_tr, y_tr)
+    print(f"{ad:&gt;9} ROC-AUC: {roc_auc_score(y_te, m.predict_proba(X_te)[:, 1]):.3f}")
+orman = modeller["orman"]
+for ad, o in zip(["gelir", "borc_orani", "gecikme", "yas"], orman.feature_importances_):
+    print(f"{ad:&gt;11}: {o:.3f}")
+</pre>
+<p>Bu veri gerçekte doğrusal bir kuralla üretildiği için lojistik regresyon çok iyi iş çıkarır; karmaşık model her zaman kazanmaz. <b>Özellik önemi</b> (feature importance) ise ağaç modellerinde her özelliğin bölmelere katkısını gösterir. Dikkat: <code>yas</code> hedefle ilgisiz olduğu hâlde sıfır olmayan önem alabilir; çok değerli sayısal özellikler ağaçlarda önemi şişirebilir. Daha güvenilir ölçü için <code>sklearn.inspection.permutation_importance</code> kullan.</p>
+
+<h2>Sınıflandırma metrikleri</h2>
+<p>Temerrüt oranı %10 civarındaysa "herkes öder" diyen model %90 doğruluk alır. Bu yüzden <b>karışıklık matrisine</b> (confusion matrix) bakarız:</p>
+<div class="tbl-wrap"><table>
+<tr><th></th><th>Tahmin: 0 (öder)</th><th>Tahmin: 1 (temerrüt)</th></tr>
+<tr><td><b>Gerçek: 0</b></td><td>TN (doğru negatif)</td><td>FP (yanlış alarm: iyi müşteriyi reddettin)</td></tr>
+<tr><td><b>Gerçek: 1</b></td><td>FN (kaçırılan: kötü krediyi onayladın)</td><td>TP (doğru yakalanan)</td></tr>
+</table></div>
+<ul>
+<li><b>Precision</b> (kesinlik) = TP / (TP + FP): "Riskli dediklerimin ne kadarı gerçekten riskli?"</li>
+<li><b>Recall</b> (duyarlılık) = TP / (TP + FN): "Gerçek temerrütlerin ne kadarını yakaladım?"</li>
+<li><b>F1</b> = precision ve recall'ın harmonik ortalaması; ikisini tek sayıda dengeler.</li>
+<li><b>ROC-AUC</b>: eşikten bağımsız sıralama kalitesi. Rastgele bir temerrütçüye, rastgele bir iyi müşteriden daha yüksek risk verme olasılığı; 0.5 yazı-tura, 1.0 kusursuz.</li>
+</ul>
+<pre class="py">from sklearn.metrics import confusion_matrix, precision_score, recall_score, f1_score, classification_report
+
+gercek = [0, 0, 0, 0, 0, 0, 1, 1, 1, 1]
+tahmin = [0, 0, 0, 0, 1, 1, 1, 1, 1, 0]
+print(confusion_matrix(gercek, tahmin).tolist())     # [[TN, FP], [FN, TP]]
+print("precision:", round(precision_score(gercek, tahmin), 3))
+print("recall   :", round(recall_score(gercek, tahmin), 3))
+print("f1       :", round(f1_score(gercek, tahmin), 3))
+print(classification_report(gercek, tahmin, target_names=["öder", "temerrüt"]))
+</pre>
+
+<h2>Dengesiz sınıflar ve eşik seçimi</h2>
+<p>Dengesiz veride model azınlık sınıfını görmezden gelmeye meyillidir. İki temel kol var: <b>class_weight="balanced"</b> ile azınlık sınıfının hatalarını daha pahalı yapmak, ve <b>eşiği</b> (threshold) iş maliyetine göre seçmek. Eşiği düşürmek daha çok başvuruyu riskli sayar: recall artar, precision düşer. Doğru eşik bir matematik sorusu değil, <b>iş sorusudur</b>: kaçırılan bir temerrüt bankaya ortalama ne kadara mal oluyor, yanlış reddedilen iyi müşteri ne kadar kâr kaybettiriyor?</p>
+<pre class="py">import numpy as np
+
+
+def kredi_verisi(n=2000, seed=0):
+    """Ilgaz Bank kurgusal kredi verisi: gelir (bin TL), borç oranı, gecikme sayısı, yaş."""
+    rng = np.random.default_rng(seed)
+    gelir = rng.normal(35, 12, n).clip(8, None)
+    borc_orani = rng.uniform(0, 0.9, n)
+    gecikme = rng.poisson(0.6, n)
+    yas = rng.integers(21, 66, n)
+    logit = -4.3 + 3.0 * borc_orani + 0.9 * gecikme - 0.05 * (gelir - 35)
+    y = (rng.random(n) &lt; 1 / (1 + np.exp(-logit))).astype(int)
+    return np.column_stack([gelir, borc_orani, gecikme, yas]), y
+
+import numpy as np
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import precision_score, recall_score
+from sklearn.model_selection import train_test_split
+
+X, y = kredi_verisi()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=0, stratify=y)
+for cw in [None, "balanced"]:
+    m = LogisticRegression(max_iter=1000, class_weight=cw).fit(X_tr, y_tr)
+    p = m.predict(X_te)
+    print(f"class_weight={str(cw):&lt;8} recall={recall_score(y_te, p):.2f} precision={precision_score(y_te, p, zero_division=0):.2f}")
+
+m = LogisticRegression(max_iter=1000).fit(X_tr, y_tr)
+risk = m.predict_proba(X_te)[:, 1]
+for esik in [0.5, 0.3, 0.15]:
+    p = (risk &gt;= esik).astype(int)
+    print(f"eşik={esik:&lt;4} recall={recall_score(y_te, p):.2f} precision={precision_score(y_te, p, zero_division=0):.2f} riskli sayılan={p.mean():.0%}")
+</pre>
+<div class="tip"><b>Model seçimi ile eşik seçimi ayrı işlerdir</b>Modelleri eşikten bağımsız bir metrikle (ROC-AUC, dengesiz veride PR-AUC / <code>average_precision_score</code>) karşılaştır. Kazanan modelin eşiğini sonra iş maliyetiyle belirle. Eşiği de test setinde değil doğrulama verisinde seç.</div>
+
+<h2>Model seçimi: bir yol haritası</h2>
+<p>Yeni bir regresyon ya da sınıflandırma problemine başladığında hangi modeli deneyeceğini rastgele seçme; aşağıdaki sıra hem zaman kazandırır hem de sonuçlarını savunmanı kolaylaştırır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Adım</th><th>Regresyon</th><th>Sınıflandırma</th><th>Neden</th></tr>
+<tr><td>1. Taban çizgi</td><td><code>DummyRegressor</code> (ortalama)</td><td><code>DummyClassifier</code> (en sık sınıf)</td><td>Her modelin geçmesi gereken alt sınır</td></tr>
+<tr><td>2. Basit ve yorumlanabilir</td><td><code>LinearRegression</code> / <code>Ridge</code></td><td><code>LogisticRegression</code></td><td>Katsayılar iş birimine anlatılabilir</td></tr>
+<tr><td>3. Doğrusal olmayan</td><td><code>RandomForestRegressor</code></td><td><code>RandomForestClassifier</code></td><td>Etkileşimleri kendiliğinden yakalar, az ayar ister</td></tr>
+<tr><td>4. En güçlü aday</td><td><code>HistGradientBoostingRegressor</code></td><td><code>HistGradientBoostingClassifier</code></td><td>Tablo verisinde genellikle en iyi skor</td></tr>
+<tr><td>5. Karar</td><td colspan="2">Skor farkı, yorumlanabilirlik ihtiyacı, eğitim/tahmin süresi ve bakım maliyeti birlikte tartılır</td><td>"En yüksek skor" tek ölçüt değildir</td></tr>
+</table></div>
+<p>Regresyonda hata metriklerini de iş diline çevirmeyi unutma. "RMSE 31.4" yerine "sepet tutarı tahminlerimiz tipik olarak ±30 TL sapıyor; bu, kampanya bütçesi planlamasında yüzde birkaçlık bir hata payı demek" cümlesi karar vericinin işine yarar. Hataların dağılımına da bak: model küçük sepetlerde iyi, büyük kurumsal siparişlerde kötüyse ortalama metrik bunu gizler. Tahmin ile gerçeği karşılaştıran bir saçılım grafiği ya da hataların segment bazında (üye/üye değil, şehir) ortalaması, tek bir sayının saklayacağı sorunları ortaya çıkarır. Sınıflandırmada da aynı ilke geçerli: genel AUC iyiyken belirli bir müşteri grubunda recall çok düşükse, bu hem iş hem de adalet (fairness) sorunudur ve model kartında açıkça yazılmalıdır.</p>
+<p>Son olarak, aynı veride çok sayıda model ve ayar deneyip en iyisini seçmek de bir tür aşırı öğrenmedir (overfitting). Karşılaştırmaları sabit bir çapraz doğrulama düzeninde yap, test setini yalnızca en sonda seçilen tek model için kullan. Bunun sistematik yolu (Pipeline, cross_val_score, GridSearchCV) bir sonraki dersin konusu.</p>
+
+<div class="note"><b>Gerçek işte</b>Kredi skorlama ekipleri tek bir "onay/red" eşiği yerine çoğu zaman bantlar kullanır: düşük risk otomatik onay, orta risk analist incelemesi, yüksek risk red. Her bandın sınırı geçmiş kayıp verisiyle belirlenir ve düzenleyici kurumlar modelin açıklanabilir olmasını ister. Bu yüzden bankalarda lojistik regresyon, daha güçlü boosting modellerine rağmen hâlâ yaygındır: katsayısı tek tek gerekçelendirilebilir.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gradient boosting uygulamada (HistGradientBoosting, XGBoost, LightGBM)</h2><p>Tablo verisinde (satış, kredi, lojistik) en sık kazanan model ailesi gradient boosting'dir: sığ ağaçlar sırayla eklenir ve her yeni ağaç öncekilerin <b>hatasını</b> (artıkları, residuals) düzeltmeye çalışır. Tahmin, başlangıç değeri artı her ağacın <code>learning_rate</code> ile küçültülmüş katkılarının toplamıdır. Bu bölümde scikit-learn'ün hızlı uygulaması <code>HistGradientBoosting</code>'i Lezzet Kurye'nin gerçek teslimat verisiyle (<code>lezzet_kurye</code>, 6638 teslim edilmiş sipariş) ayarlayacak, sonra aynı ayarların XGBoost ve LightGBM'deki karşılıklarını göreceksin.</p><pre class="py">artik_tahmin = [30.0] * 4                 # başlangıç: ortalama süre (dk)
+gercek = [25.0, 40.0, 35.0, 20.0]
+for tur in range(3):
+    artik = [g - t for g, t in zip(gercek, artik_tahmin)]
+    duzeltme = [a * 0.5 for a in artik]   # "ağaç" artığı mükemmel bilseydi; lr = 0.5
+    artik_tahmin = [t + d for t, d in zip(artik_tahmin, duzeltme)]
+    print(tur + 1, [round(t, 1) for t in artik_tahmin])</pre><p>Her tur hatanın yarısını kapatır; küçük <code>learning_rate</code> daha çok tur ister ama genellikle daha iyi genelleşir. Gerçekte ağaç artığı tam bilemez; derinliği ve yaprak sayısı sınırlı olduğu için genel örüntüyü öğrenir.</p><h3>Neden "Hist"?</h3><p>Klasik <code>GradientBoostingClassifier</code> her bölme için tüm benzersiz değerleri dener. <code>HistGradientBoostingRegressor/Classifier</code> ise önce her sütunu en fazla 255 kutuya (bin) ayırır ve bölmeleri kutu sınırlarında arar; on binlerce satırda çok daha hızlıdır. Ayrıca eksik değerleri (NaN) kendisi yönetir ve kategorik sütunları one-hot yapmadan doğrudan kullanabilir.</p><pre class="py">import veri
+import pandas as pd
+
+def kurye_verisi():
+    o = veri.oku("lezzet_kurye", "lk_orders")
+    r = veri.oku("lezzet_kurye", "lk_restaurants")
+    k = veri.oku("lezzet_kurye", "lk_couriers")
+    s = veri.oku("lezzet_kurye", "lk_order_lines")
+    o = o[o["status"] == "teslim"].copy()
+    zaman = pd.to_datetime(o["placed_at"])
+    o["saat"] = zaman.dt.hour
+    o["hafta_sonu"] = (zaman.dt.dayofweek &gt;= 5).astype(int)
+    o["sure_dk"] = (pd.to_datetime(o["delivered_at"]) - zaman).dt.total_seconds() / 60
+    adet = s.groupby("order_id")["qty"].sum().rename("adet").reset_index()
+    d = (o.merge(r[["restaurant_id", "cuisine", "city"]], on="restaurant_id")
+          .merge(k[["courier_id", "vehicle"]], on="courier_id")
+          .merge(adet, on="order_id"))
+    d["restoran"] = d["restaurant_id"].astype(str)
+    X = d[["saat", "hafta_sonu", "adet", "cuisine", "city", "vehicle", "restoran"]].copy()
+    for c in ["cuisine", "city", "vehicle", "restoran"]:
+        X[c] = X[c].astype("category")
+    return X, d["sure_dk"]
+from sklearn.model_selection import train_test_split
+X, y = kurye_verisi()
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=0)
+KATEGORIK = ["cuisine", "city", "vehicle", "restoran"]
+from sklearn.ensemble import HistGradientBoostingRegressor
+from sklearn.metrics import mean_absolute_error
+
+print(X.shape, "| ortalama süre:", round(y.mean(), 1), "dk")
+taban = mean_absolute_error(y_te, [y_tr.mean()] * len(y_te))
+model = HistGradientBoostingRegressor(
+    categorical_features=KATEGORIK,   # pandas category sütunları
+    learning_rate=0.1, max_iter=500, max_leaf_nodes=15,
+    early_stopping=True, validation_fraction=0.15, n_iter_no_change=10,
+    random_state=0)
+model.fit(X_tr, y_tr)
+print("taban MAE:", round(taban, 2), "| HGB MAE:", round(mean_absolute_error(y_te, model.predict(X_te)), 2))
+print("durduğu tur:", model.n_iter_)</pre><p>Model ortalamaya göre hatayı azaltıyor ama mucize beklenmemeli: teslimat süresini trafik, hava ve restoranın o anki yoğunluğu da belirler ve bunlar veride yok. Erken durdurma 500 tur yerine birkaç on turda durdu; <code>n_iter_</code> bunu gösterir.</p><h3>Önemli ayarlar</h3><div class="tbl-wrap"><table><tr><th>Parametre</th><th>Varsayılan</th><th>Etkisi</th></tr><tr><td><code>learning_rate</code></td><td>0.1</td><td>Her ağacın katkısını küçültür. Düşür (0.05) → daha çok tur, genelde daha iyi sonuç.</td></tr><tr><td><code>max_iter</code></td><td>100</td><td>En fazla ağaç sayısı. Erken durdurmayla birlikte üst sınır gibi düşün.</td></tr><tr><td><code>max_leaf_nodes</code></td><td>31</td><td>Ağaç başına yaprak; modelin karmaşıklığı. Asıl ayar budur.</td></tr><tr><td><code>max_depth</code></td><td>None</td><td>Derinlik sınırı; genelde max_leaf_nodes yeterli.</td></tr><tr><td><code>min_samples_leaf</code></td><td>20</td><td>Yapraktaki en az satır; büyütmek gürültüyü ezberlemeyi azaltır.</td></tr><tr><td><code>l2_regularization</code></td><td>0</td><td>Yaprak değerlerini küçülten ceza.</td></tr><tr><td><code>early_stopping</code></td><td>"auto"</td><td>10.000 satırdan büyük veride kendiliğinden açılır; <code>validation_fraction</code> ve <code>n_iter_no_change</code> ile birlikte çalışır.</td></tr><tr><td><code>categorical_features</code></td><td>"from_dtype" (yeni sürümler)</td><td>Kategorik sütunlar; ad listesi ya da bool maske ver. Kategori sayısı <code>max_bins</code>'i (255) aşmamalı.</td></tr><tr><td><code>monotonic_cst</code></td><td>None</td><td>"adet artınca süre azalmasın" gibi iş kuralını modele zorlar.</td></tr></table></div><div class="tip"><b>Ayar sırası</b>1) learning_rate=0.1 ve erken durdurmayla başla. 2) max_leaf_nodes (15–63) ve min_samples_leaf (20–200) ara. 3) l2_regularization ekle. 4) En sonda learning_rate'i düşürüp max_iter'i büyüt. Aramayı çapraz doğrulamayla yap (pipeline dersindeki HalvingGridSearchCV burada çok işe yarar).</div><h3>XGBoost ve LightGBM karşılıkları</h3><p>İş ilanlarında XGBoost ve LightGBM adları sık geçer. İkisi de aynı fikrin bağımsız, çok optimize uygulamalarıdır ve scikit-learn uyumlu sınıflar (<code>XGBRegressor</code>, <code>LGBMRegressor</code>) sunar; yani pipeline, çapraz doğrulama ve arama araçları aynen çalışır. Kavramlar birebir eşlenir, adlar değişir:</p><div class="tbl-wrap"><table><tr><th>scikit-learn HGB</th><th>XGBoost</th><th>LightGBM</th></tr><tr><td>learning_rate</td><td>learning_rate (eta)</td><td>learning_rate</td></tr><tr><td>max_iter</td><td>n_estimators</td><td>n_estimators (num_iterations)</td></tr><tr><td>max_leaf_nodes</td><td>max_leaves</td><td>num_leaves</td></tr><tr><td>max_depth</td><td>max_depth (varsayılan 6)</td><td>max_depth (varsayılan -1, sınırsız)</td></tr><tr><td>min_samples_leaf</td><td>min_child_weight (ağırlık toplamı, birebir değil)</td><td>min_child_samples</td></tr><tr><td>l2_regularization</td><td>reg_lambda</td><td>reg_lambda (lambda_l2)</td></tr><tr><td>max_bins</td><td>max_bin</td><td>max_bin</td></tr><tr><td>n_iter_no_change</td><td>early_stopping_rounds</td><td>callbacks=[early_stopping(n)]</td></tr><tr><td>categorical_features</td><td>enable_categorical=True + category dtype</td><td>category dtype ya da categorical_feature</td></tr><tr><td>(yok)</td><td>subsample, colsample_bytree</td><td>bagging_fraction, feature_fraction</td></tr></table></div><pre class="code"># pip install xgboost lightgbm
+from xgboost import XGBRegressor
+from lightgbm import LGBMRegressor, early_stopping
+
+xgb = XGBRegressor(n_estimators=500, learning_rate=0.1, max_leaves=15, tree_method="hist",
+                   enable_categorical=True, early_stopping_rounds=10, random_state=0)
+xgb.fit(X_tr, y_tr, eval_set=[(X_te, y_te)], verbose=False)   # gerçekte ayrı bir doğrulama seti kullan
+print(xgb.best_iteration)
+
+lgbm = LGBMRegressor(n_estimators=500, learning_rate=0.1, num_leaves=15, random_state=0, verbose=-1)
+lgbm.fit(X_tr, y_tr, eval_set=[(X_te, y_te)], callbacks=[early_stopping(10, verbose=False)])
+print(lgbm.best_iteration_)</pre><div class="warn"><b>Erken durdurmada test sızıntısı</b>Yukarıdaki kısa örnekte <code>eval_set</code> olarak test seti verildi; gerçek projede bu sızıntıdır, çünkü tur sayısını test setine bakarak seçersin. Eğitim verisinden ayrı bir doğrulama parçası ayır; HGB'nin <code>validation_fraction</code> ayarı bunu senin yerine yapar.</div><div class="note"><b>Gerçek işte</b>Kaggle tablo yarışmalarının ve bankaların kredi skor kartlarının büyük kısmı boosting modelleridir. Mülakatlarda sık sorulan sorular: "learning_rate ile n_estimators ilişkisi nedir?", "aşırı öğrenmeyi hangi ayarlarla kontrol edersin?", "kategorik sütunu nasıl verirsin?" Bu tabloyu bilmek üç soruyu da cevaplar. Kütüphane seçiminde ekip standardı belirleyicidir; scikit-learn HGB ek bağımlılık istemediği için iyi bir varsayılandır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Olasılık kalibrasyonu</h3>
+<p>Bir modelin 0.20 dediği başvuruların gerçekten yaklaşık %20'si temerrüde düşüyorsa model <b>kalibre</b>dir. Lojistik regresyon genellikle iyi kalibredir; rastgele orman ve <code>class_weight="balanced"</code> kullanılan modeller olasılıkları çarpıtır (balanced, olasılıkları yukarı iter). Beklenen kayıp gibi olasılığın kendisinin kullanıldığı hesaplarda <code>CalibratedClassifierCV</code> ile kalibre et, <code>sklearn.calibration.calibration_curve</code> ile kontrol et.</p>
+<h3>Çok sınıflı metrikler</h3>
+<p>Üç ve daha fazla sınıfta precision/recall her sınıf için ayrı hesaplanır ve birleştirilir: <code>average="macro"</code> (her sınıfa eşit ağırlık; azınlık sınıflarını önemser), <code>average="weighted"</code> (sınıf büyüklüğüyle ağırlıklı), <code>average="micro"</code> (tüm kararları havuzlar; doğruluğa eşittir). <code>classification_report</code> üçünü birden gösterir.</p>
+<h3>Beklenen kayıp</h3>
+<p>Bankacılıkta beklenen kayıp = PD (temerrüt olasılığı) × LGD (temerrüt hâlinde kayıp oranı) × EAD (temerrüt anındaki risk tutarı). Senin sınıflandırıcın PD'yi üretir; bu yüzden olasılıkların kalibre olması doğrudan para demektir.</p>
+<pre class="py">import numpy as np
+
+pd_ = np.array([0.02, 0.10, 0.35])          # model çıktısı
+lgd = 0.45                                   # teminata göre kayıp oranı
+ead = np.array([50_000, 120_000, 30_000])    # kredi tutarları (TL)
+beklenen = pd_ * lgd * ead
+print(beklenen.round(0), "toplam:", round(beklenen.sum()))
+</pre>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ml-regresyon-siniflandirma">Alıştırmalara geç (28)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../ml-pipeline-degerlendirme/">← Ön işleme, pipeline ve model değerlendirme</a><a href="../polars-duckdb/">polars, DuckDB ve Parquet: büyük veriye tek makinede →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

@@ -1,0 +1,164 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Listeler | Kesit Python</title><meta name="description" content="Sipariş ve tutar listelerini indeks ve dilimle okur; append, insert, pop, remove ile değiştirir; sort ve sorted ile sıralar; iç içe liste ve kopyalama…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/listeler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Listeler"><meta property="og:description" content="Sipariş ve tutar listelerini indeks ve dilimle okur; append, insert, pop, remove ile değiştirir; sort ve sorted ile sıralar; iç içe liste ve kopyalama…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/listeler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Listeler","description":"Sipariş ve tutar listelerini indeks ve dilimle okur; append, insert, pop, remove ile değiştirir; sort ve sorted ile sıralar; iç içe liste ve kopyalama…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/listeler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Veri yapıları</span><h1>Listeler</h1><p class="st-l">Sipariş ve tutar listelerini indeks ve dilimle okur; append, insert, pop, remove ile değiştirir; sort ve sorted ile sıralar; iç içe liste ve kopyalama tuzağını öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/listeler">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Tek değişken yetmeyince</h2>
+<p>Anadolu Market'e bugün 5 sipariş geldi. Tutarları <code>t1</code>, <code>t2</code>, <code>t3</code>... diye ayrı değişkenlerde tutmak hem yorucu hem de yarın 500 sipariş gelince imkânsız. <b>Liste</b> (list), birden fazla değeri sıralı biçimde tek değişkende tutar. Köşeli parantezle yazılır, elemanlar virgülle ayrılır ve her türden değer içerebilir.</p>
+<pre class="py">tutarlar = [1499.9, 250, 89.5, 3200, 475]
+sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "İstanbul"]
+karisik = ["AM-00417", 1499.9, True, None]
+print(tutarlar)
+print(len(tutarlar), "sipariş")
+print(sum(tutarlar), max(tutarlar), min(tutarlar))
+print(round(sum(tutarlar) / len(tutarlar), 2), "TL ortalama")</pre>
+<p><code>len</code>, <code>sum</code>, <code>max</code>, <code>min</code> hazır fonksiyonları listelerle doğrudan çalışır. Beş satırda bir günün özet raporu çıktı; analistin ilk Python kazancı budur.</p>
+
+<h2>İndeks ve dilim</h2>
+<p>Metinlerdeki kuralların aynısı: 0'dan başlar, negatif sondan sayar, dilimde bitiş hariçtir.</p>
+<pre class="py">sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "İstanbul"]
+print(sehirler[0], sehirler[-1])
+print(sehirler[1:3])
+print(sehirler[:2], sehirler[3:])
+print("Bursa" in sehirler)
+print(sehirler.index("Bursa"))
+print(sehirler.count("İzmir"))</pre>
+<p><code>in</code> elemanın var olup olmadığını, <code>index</code> ilk konumunu, <code>count</code> kaç kez geçtiğini verir. Var olmayan bir indeks IndexError, var olmayan bir değer için <code>index</code> ValueError verir; önce <code>in</code> ile sormak güvenlidir.</p>
+
+<h2>Listeyi değiştirmek</h2>
+<p>Metinlerden en büyük farkı burada: liste <b>değiştirilebilir</b> (mutable). Metotların çoğu listeyi yerinde değiştirir ve hiçbir şey döndürmez (<code>None</code>).</p>
+<pre class="py">bekleyen = ["AM-101", "AM-102", "AM-103"]
+bekleyen.append("AM-104")          # sona ekle
+bekleyen.insert(0, "AM-100")       # başa ekle (konum, değer)
+print(bekleyen)
+islenen = bekleyen.pop(0)          # konumdaki elemanı çıkar ve döndür
+print("İşlendi:", islenen, "| kalan:", bekleyen)
+bekleyen.remove("AM-102")          # değere göre ilk eşleşeni sil
+print(bekleyen)
+bekleyen.extend(["AM-105", "AM-106"])   # başka listeyi ekle
+print(bekleyen, len(bekleyen))
+bekleyen[0] = "AM-101-DUZELTME"    # yerinde değiştir
+print(bekleyen[0])</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Metot</th><th>Ne yapar</th><th>Döndürür</th></tr>
+<tr><td><code>append(x)</code></td><td>Sona tek eleman ekler</td><td>None</td></tr>
+<tr><td><code>insert(i, x)</code></td><td>i konumuna ekler</td><td>None</td></tr>
+<tr><td><code>extend(liste)</code></td><td>Başka listenin elemanlarını ekler</td><td>None</td></tr>
+<tr><td><code>pop(i)</code></td><td>i konumundakini çıkarır (varsayılan: son)</td><td>Çıkarılan eleman</td></tr>
+<tr><td><code>remove(x)</code></td><td>x değerinin ilkini siler</td><td>None</td></tr>
+<tr><td><code>sort()</code></td><td>Yerinde sıralar</td><td>None</td></tr>
+<tr><td><code>reverse()</code></td><td>Yerinde ters çevirir</td><td>None</td></tr>
+</table></div>
+<div class="warn"><b>append bir liste eklemez, elemanı ekler</b><code>a.append([1, 2])</code> listenin içine bir liste koyar (iç içe). İki listeyi birleştirmek için <code>extend</code> ya da <code>a + b</code> kullan.</div>
+
+<h2>sort ve sorted</h2>
+<p>En sık karıştırılan ikili. <code>liste.sort()</code> listeyi yerinde sıralar ve <code>None</code> döndürür. <code>sorted(liste)</code> ise orijinale dokunmaz, sıralı <b>yeni</b> bir liste döndürür.</p>
+<pre class="py">tutarlar = [1499.9, 250, 89.5, 3200, 475]
+sirali = sorted(tutarlar)
+print(sirali)
+print(tutarlar)                       # orijinal aynı
+tutarlar.sort(reverse=True)           # yerinde, büyükten küçüğe
+print(tutarlar)
+print("En büyük 3:", tutarlar[:3])
+sehirler = ["İzmir", "ankara", "Bursa"]
+print(sorted(sehirler))
+print(sorted(sehirler, key=str.lower))</pre>
+<p>Son iki satır önemli bir ayrıntıyı gösterir: sıralama büyük-küçük harfe duyarlıdır, büyük harfler önce gelir. <code>key=str.lower</code> ile "küçük harfli hâline göre sırala" dersin. Türkçe karakterler için tam alfabetik sıralama <code>locale</code> modülü gerektirir; raporda genellikle <code>key=str.lower</code> yeterlidir.</p>
+<div class="tip"><b>Hangisini seçmeli?</b>Orijinal sıralamaya tekrar ihtiyacın olacaksa <code>sorted</code>, olmayacaksa <code>sort</code> (bellek kullanmaz). Zincirleme bir ifadede, örneğin <code>sorted(x)[:3]</code>, yalnızca sorted çalışır.</div>
+
+<h2>İç içe liste: küçük bir tablo</h2>
+<p>Her sipariş birden fazla bilgi taşıyorsa her satır bir liste, tüm satırlar da bir liste olur. Bu, bir tablonun en basit hâlidir.</p>
+<pre class="py">siparisler = [
+    ["AM-101", "İzmir", 1499.9],
+    ["AM-102", "Ankara", 250],
+    ["AM-103", "İzmir", 89.5],
+]
+print(siparisler[1])            # ikinci satır
+print(siparisler[1][2])         # ikinci satırın tutarı
+siparisler[2][2] = 99.5         # tutarı düzelt
+print(siparisler[2])
+siparisler.append(["AM-104", "Bursa", 3200])
+print(len(siparisler), "satır")
+print(siparisler[0][1], siparisler[-1][1])</pre>
+<p>İlk indeks satırı, ikinci indeks sütunu seçer. Döngüleri öğrenince bu yapıyı satır satır gezip şehir bazlı toplam çıkaracaksın; sözlükler dersinde ise sütunlara isimle erişmenin daha okunur yolunu göreceksin.</p>
+
+<h2>Listeyi listeyle birleştirmek ve karşılaştırmak</h2>
+<pre class="py">sabah = ["AM-101", "AM-102"]
+ogle = ["AM-103"]
+gun = sabah + ogle              # yeni liste
+print(gun)
+print(sabah * 2)                # tekrar
+print(sabah == ["AM-101", "AM-102"])   # içerik karşılaştırma
+print([] == [], len([]))
+print(gun[1:] == ["AM-102", "AM-103"])</pre>
+<p><code>+</code> iki listeden yeni bir liste üretir; <code>extend</code> ise var olanı yerinde büyütür. <code>==</code> sıra ve içerik aynıysa True verir. Boş liste <code>[]</code>, koşullarda False gibi davranır; "sipariş var mı" sorusunu <code>if siparisler:</code> ile soracaksın.</p>
+
+<h2>Kopyalama tuzağı</h2>
+<p>Burası herkesin bir kere başına gelen hata. <code>b = a</code> yazmak listeyi kopyalamaz; aynı listeye ikinci bir etiket takar. Birini değiştirdiğinde diğeri de değişir çünkü ikisi de aynı nesnedir.</p>
+<pre class="py">onayli = ["AM-101", "AM-102"]
+yedek = onayli                 # kopya DEĞİL, aynı liste
+yedek.append("AM-103")
+print("onayli:", onayli)       # o da değişti!
+print(onayli is yedek)
+
+gercek_yedek = onayli.copy()   # ya da onayli[:] ya da list(onayli)
+gercek_yedek.append("AM-999")
+print("onayli:", onayli)
+print("gercek_yedek:", gercek_yedek)
+print(onayli is gercek_yedek)</pre>
+<p><code>is</code> operatörü "aynı nesne mi" diye sorar; <code>==</code> ise "içerikleri eşit mi". <code>copy()</code>, <code>[:]</code> ve <code>list()</code> üçü de yüzeysel kopya (shallow copy) alır: dış liste yeni, ama içindeki listeler hâlâ paylaşılır. İç içe listelerde tam bağımsız kopya için <code>copy.deepcopy</code> gerekir.</p>
+<div class="note"><b>Neden metinlerde bu sorun yoktu?</b>Metin değişmezdir; onu "değiştiren" her işlem yeni nesne üretir, dolayısıyla paylaşılan nesne hiç bozulmaz. Liste yerinde değiştiğinden paylaşım görünür hâle gelir. Aynı tuzak sözlük ve kümelerde de vardır.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Demet ve küme <b>Demetler ve kümeler</b>, iç içe veri yapıları <b>İç içe veri</b>, tek satırda liste üretme ise Orta seviyedeki <b>Kapsamlı ifadeler</b> dersinde. Bu bölüm listenin kendisini derinleştiriyor: dilimle değiştirme, yıldızlı açma, anahtarla sıralama, en sık tuzaklar ve hangi işlemin ne kadar pahalı olduğu.</p><h2>Dilimle okuma, dilimle yazma</h2><p>Dilim yalnızca okumak için değildir; bir dilime atama yaparak listenin bir bölümünü tek seferde değiştirebilir, silebilir ya da araya eleman ekleyebilirsin. Üçüncü parametre olan adım da listelerde metinlerdeki gibi çalışır.</p><pre class="py">kuyruk = ["AM-101", "AM-102", "AM-103", "AM-104", "AM-105", "AM-106"]
+print(kuyruk[::2])          # ikide bir: tek sıradakiler
+print(kuyruk[::-1])         # ters sıra (yeni liste)
+print(kuyruk[-3:])          # son üç
+
+kuyruk[1:3] = ["AM-102-D"]  # iki elemanı bir elemanla değiştir
+print(kuyruk)
+kuyruk[1:1] = ["ACIL-1", "ACIL-2"]   # araya ekle (hiçbir şey silmeden)
+print(kuyruk)
+del kuyruk[-2:]             # son ikisini sil
+print(kuyruk, len(kuyruk))
+kuyruk.clear()              # tamamını boşalt (aynı liste nesnesi)
+print(kuyruk)</pre><p>Dilime atamada sağ tarafın uzunluğu dilimle aynı olmak zorunda değildir; liste kendiliğinden büyür ya da küçülür. <code>del liste[i]</code> tek elemanı, <code>del liste[a:b]</code> bir aralığı siler. <code>clear()</code> ile <code>liste = []</code> arasındaki fark ise kopyalama tuzağıyla ilgilidir: <code>clear</code> aynı nesneyi boşaltır, dolayısıyla o listeyi gösteren diğer adlar da boş listeyi görür; <code>= []</code> ise yalnızca bu adı yeni bir listeye taşır.</p><h2>Liste oluşturmanın yolları ve yıldızlı açma</h2><pre class="py">sira_no = list(range(1, 6))           # [1, 2, 3, 4, 5]
+harfler = list("ABC")                 # her karakter bir eleman
+sehirler = "İzmir;Ankara;Bursa".split(";")
+bos = [0] * 4
+print(sira_no, harfler, sehirler, bos)
+
+ilk, *orta, son = [120, 340, 95, 410, 60]
+print(ilk, orta, son)
+basliklar, *veri = ["ad,tutar", "Ayşe,120", "Ali,95"]
+print(basliklar, "|", veri)
+print(*sehirler, sep=" &gt; ")           # listeyi argümanlara aç</pre><p>Yıldızlı ad (<code>*orta</code>) "geri kalan her şeyi bir listede topla" demektir; kalan yoksa boş liste olur. CSV'de başlık satırını veriden ayırmak gibi işlerde çok okunur bir kalıptır. Fonksiyon çağrısında <code>*liste</code> ise ters yönde çalışır ve elemanları ayrı ayrı argüman olarak verir.</p><h2>Anahtarla sıralama: key</h2><p><code>sort</code>, <code>sorted</code>, <code>min</code> ve <code>max</code> bir <code>key</code> fonksiyonu alabilir. Python her elemanı bu fonksiyondan geçirir ve karşılaştırmayı sonuca göre yapar; elemanların kendisi değişmez. Henüz kendi fonksiyonunu yazmadan da hazır fonksiyonlarla çok şey yaparsın:</p><pre class="py">urunler = ["Çay", "Kahve Makinesi", "Su", "Filtre Kahve"]
+print(sorted(urunler, key=len))               # kısadan uzuna
+print(max(urunler, key=len), min(urunler, key=len))
+farklar = [-120, 45, -15, 300, -310]
+print(sorted(farklar, key=abs))               # mutlak değere göre
+print(max(farklar, key=abs))                  # en büyük sapma
+etiketler = ["b-ürün", "A-ürün", "c-ürün"]
+print(sorted(etiketler), sorted(etiketler, key=str.lower))
+print(list(reversed(urunler)))                # ters sırada yeni liste</pre><p>Python'ın sıralaması <b>kararlıdır</b> (stable): anahtarları eşit olan elemanlar, orijinal sıralarını korur. Yukarıda "Çay" ve "Su" ikisi de kısa ama "Su" daha kısa olduğu için önce gelir; uzunluğu eşit olsaydı listedeki sırayla dizilirlerdi. Birden çok ölçüte göre sıralamayı (önce şehir, sonra tutar) fonksiyonlar dersinden sonra <code>lambda</code> ve demet anahtarlarla yapacaksın.</p><h2>Çarpmayla iç içe liste tuzağı</h2><p><code>[0] * 4</code> güvenlidir çünkü 0 değiştirilemez. Ama <code>[[0] * 3] * 2</code> yazdığında dış liste <b>aynı iç listeyi</b> iki kez içerir; birini değiştirince hepsi değişir. Tablo kurarken her satır için yeni bir liste oluşturman gerekir:</p><pre class="py">yanlis = [[0] * 3] * 2
+yanlis[0][0] = 99
+print(yanlis)                     # iki satır birden değişti
+print(yanlis[0] is yanlis[1])
+
+dogru = [[0] * 3 for _ in range(2)]   # her satır ayrı liste
+dogru[0][0] = 99
+print(dogru)
+print(dogru[0] is dogru[1])</pre><p>İkinci yazımdaki <code>for _ in range(2)</code> kısmı bir liste kavrayışıdır (list comprehension); döngüleri öğrendikten sonra tam olarak ne yaptığını anlayacaksın. Şimdilik kalıp olarak bil: "her satır için yeni <code>[0] * 3</code> üret".</p><h2>Hangi işlem ne kadar pahalı?</h2><p>Liste, elemanları bellekte art arda tutan bir dizidir. Bu yüzden sondaki işlemler ucuz, baştaki ve ortadaki işlemler pahalıdır: başa eleman eklemek, diğer bütün elemanları bir kaydırmayı gerektirir. Algoritmalar dersinde bunu büyük O gösterimiyle (Big O) tartışacağız; şimdilik tabloyu tanı:</p><div class="tbl-wrap"><table><tr><th>İşlem</th><th>Maliyet</th><th>Açıklama</th></tr><tr><td><code>liste[i]</code>, <code>liste[i] = x</code></td><td>Sabit, O(1)</td><td>Listenin boyundan bağımsız</td></tr><tr><td><code>append(x)</code>, <code>pop()</code></td><td>Sabit, O(1)</td><td>Sondan ekle/çıkar</td></tr><tr><td><code>len(liste)</code></td><td>Sabit, O(1)</td><td>Uzunluk saklanır, sayılmaz</td></tr><tr><td><code>insert(0, x)</code>, <code>pop(0)</code></td><td>Doğrusal, O(n)</td><td>Tüm elemanlar kayar</td></tr><tr><td><code>x in liste</code>, <code>index</code>, <code>count</code>, <code>remove</code></td><td>Doğrusal, O(n)</td><td>Baştan sona tarama</td></tr><tr><td><code>liste[a:b]</code>, <code>copy()</code></td><td>Dilim boyu kadar</td><td>Yeni liste oluşturur</td></tr><tr><td><code>sort()</code>, <code>sorted()</code></td><td>O(n log n)</td><td>Çok verimli Timsort algoritması</td></tr></table></div><div class="tip"><b>Yüz bin elemanda fark eder</b>On elemanlı bir listede bu tablonun hiçbir önemi yok. Ama 100.000 müşteri numarasında <code>in</code> ile arama yapan bir döngü saniyeler sürer, aynı iş kümeyle (set) anında biter. Kuyruk gibi iki uçtan çalışan yapılar için <code>collections.deque</code> vardır. Önce doğru çalışan kodu yaz, yavaşlık görürsen bu tabloya dön.</div><div class="note"><b>Gerçek işte</b>Web uygulamaları ve API'ler sonuçları sayfa sayfa döndürür: "2. sayfa, sayfa başına 20 kayıt". Bunun arkasında tam olarak dilimleme vardır: <code>kayitlar[(sayfa - 1) * boyut : sayfa * boyut]</code>. Dilim sınırları aşınca hata yerine boş liste döndüğü için son sayfanın ötesine geçen istekler de kendiliğinden güvenli olur. Veritabanında aynı iş <code>LIMIT</code> ve <code>OFFSET</code> ile, pandas'ta <code>df.iloc[a:b]</code> ile yapılır; mantık birebir aynıdır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Fonksiyona liste vermek</h3>
+<p>Bir fonksiyon parametre olarak liste alıp <code>append</code> yaparsa çağıranın listesi de değişir; bu kopyalama tuzağının fonksiyon hâlidir. İyi uygulama: fonksiyon ya listeyi değiştirdiğini adıyla belli eder (<code>listeye_ekle</code>) ya da hiç dokunmayıp yeni liste döndürür. Varsayılan parametre olarak <code>def f(x=[])</code> yazmak ise klasik bir tuzaktır; fonksiyonlar dersinde göreceksin.</p>
+<h3>Liste ne zaman yanlış araçtır?</h3>
+<p>Liste "var mı" sorusunu baştan sona tarayarak yanıtlar; yüz bin müşteri numarasının içinde arama yapacaksan küme (set) ya da sözlük (dict) çok daha hızlıdır. Listenin başından sürekli eleman çıkarmak (<code>pop(0)</code>) da yavaştır; kuyruk için <code>collections.deque</code> vardır. Sayısal hesaplar içinse numpy dizileri hem hızlı hem bellek dostudur. Liste, sıralı ve küçük-orta boyutlu veri için doğru araçtır.</p>
+<h3>Comprehension'a hazırlık</h3>
+<p>Orta seviyede <code>[t * 1.2 for t in tutarlar]</code> gibi tek satırda yeni liste üreten liste kavrayışlarını (list comprehension) öğreneceksin. Şimdi append ile adım adım yaptığın her şey orada tek ifadeye inecek; temel sağlamsa geçiş bir gün sürer.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/listeler">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../metinler/">← Metinler (string)</a><a href="../demet-kume/">Demet (tuple) ve küme (set) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

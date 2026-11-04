@@ -1,0 +1,431 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>FastAPI ile API geliştirme | Kesit Python</title><meta name="description" content="Tip ipuçlarından otomatik doğrulama ve dokümantasyon üreten FastAPI ile path/query parametreleri, pydantic şemaları, 422 hataları, HTTPException, Depends…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/fastapi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="FastAPI ile API geliştirme"><meta property="og:description" content="Tip ipuçlarından otomatik doğrulama ve dokümantasyon üreten FastAPI ile path/query parametreleri, pydantic şemaları, 422 hataları, HTTPException, Depends…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/fastapi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"FastAPI ile API geliştirme","description":"Tip ipuçlarından otomatik doğrulama ve dokümantasyon üreten FastAPI ile path/query parametreleri, pydantic şemaları, 422 hataları, HTTPException, Depends…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/fastapi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Web ve API</span><h1>FastAPI ile API geliştirme</h1><p class="st-l">Tip ipuçlarından otomatik doğrulama ve dokümantasyon üreten FastAPI ile path/query parametreleri, pydantic şemaları, 422 hataları, HTTPException, Depends ile bağımlılık enjeksiyonu, async uç noktalar, CORS, OAuth2/JWT, TestClient ve uvicorn'u öğrenir; mekanizmaları pydantic ve asyncio ile kendin kurarsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fastapi">Uygulamada aç, 29 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Flask dersinde bir web çatısının nasıl çalıştığını gördün: route kaydı, istek, yanıt, durum kodu. Ama JSON API yazarken Flask'ta işin büyük kısmı tekrar eden "bürokrasidir": gelen gövdeyi oku, her alanı elle doğrula, hatalı alanları toplayıp 400 döndür, dokümantasyonu ayrıca yaz ve kodla güncel tut. <b>FastAPI</b> bu bürokrasiyi <b>tip ipuçlarından</b> (type hints) otomatik üretir: fonksiyonunun parametrelerine yazdığın tiplere bakarak isteği ayrıştırır, pydantic ile doğrular, hatalıysa standart bir 422 yanıtı döner ve tüm API'nin etkileşimli dokümantasyonunu (<code>/docs</code>) kendisi oluşturur.</p>
+<p>Bugün bankacılık, e-ticaret ve makine öğrenmesi ekiplerinde yeni Python API'lerinin büyük bölümü FastAPI ile yazılıyor. API ve web dersinde istemci tarafını ve kısa bir FastAPI örneğini, Metaprogramlama dersinde <code>inspect.signature</code>'ı, async dersinde olay döngüsünü gördün. Bu ders hepsini birleştiriyor.</p>
+<div class="note"><b>Kendi bilgisayarında dene</b>FastAPI bir sunucu (uvicorn) ister ve bu sayfadaki motorda çalışmaz. Gri kutulardaki kodları kendi bilgisayarında dene. FastAPI'nin doğrulama motoru olan <b>pydantic</b> ise burada çalışır; yeşil kutularda ve alıştırmalarda FastAPI'nin arka planda yaptığını pydantic ve standart kütüphaneyle kendin kuracaksın.</div>
+
+<h2>Kurulum ve ilk API</h2>
+<pre class="code"># main.py
+from fastapi import FastAPI
+
+app = FastAPI(title="Anadolu Market API", version="1.0.0")
+
+URUNLER = {1: {"ad": "Çay", "fiyat": 85.5, "kategori": "İçecek"},
+           2: {"ad": "Kahve", "fiyat": 240.0, "kategori": "İçecek"}}
+
+@app.get("/saglik")
+def saglik():
+    return {"durum": "ok"}
+
+@app.get("/urunler/{urun_id}")
+def urun_getir(urun_id: int, detay: bool = False):
+    urun = URUNLER[urun_id]
+    return urun if detay else {"ad": urun["ad"]}</pre>
+
+<div class="steps-list"><ol>
+<li>Sanal ortam (virtual environment) kur ve etkinleştir (<code>python -m venv .venv</code>).</li>
+<li>Kur: <code>pip install "fastapi[standard]"</code> (uvicorn sunucusu ve yardımcı araçlar dahil).</li>
+<li>Geliştirme modunda çalıştır: <code>fastapi dev main.py</code> ya da <code>uvicorn main:app --reload</code></li>
+<li><code>http://127.0.0.1:8000/urunler/1?detay=true</code> adresini aç; sonra <code>/urunler/abc</code> dene ve otomatik 422 yanıtını gör.</li>
+<li><code>http://127.0.0.1:8000/docs</code> adresinde Swagger arayüzünü aç: her uç noktayı tarayıcıdan deneyebilirsin. <code>/redoc</code> alternatif görünüm, <code>/openapi.json</code> ham şemadır.</li>
+</ol></div>
+
+<h2>Tip ipuçlarının rolü: parametre nereden gelir?</h2>
+<p>FastAPI parametrenin kaynağını adından ve tipinden çıkarır. Bu kuralları bilmek, "neden 422 alıyorum?" sorusunun yarısını çözer.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Parametre</th><th>Kaynak</th><th>Örnek</th></tr>
+<tr><td>Adı yol kuralında <code>{urun_id}</code> olarak geçiyor</td><td>Yol (path)</td><td><code>urun_id: int</code></td></tr>
+<tr><td>Basit tip (int, str, bool, float), yolda yok</td><td>Sorgu dizesi (query)</td><td><code>detay: bool = False</code> → <code>?detay=true</code></td></tr>
+<tr><td>Varsayılanı yok</td><td>Zorunlu; yoksa 422 <code>missing</code></td><td><code>sehir: str</code></td></tr>
+<tr><td>pydantic <code>BaseModel</code> alt sınıfı</td><td>JSON gövde (body)</td><td><code>siparis: SiparisOlustur</code></td></tr>
+<tr><td><code>Depends(...)</code> varsayılanı</td><td>Bağımlılık enjeksiyonu</td><td><code>db = Depends(get_db)</code></td></tr>
+<tr><td><code>Header()</code>, <code>Cookie()</code>, <code>Form()</code>, <code>File()</code></td><td>Başlık, çerez, form, dosya</td><td><code>x_kanal: str = Header()</code></td></tr>
+</table></div>
+<pre class="code">from typing import Annotated
+from fastapi import FastAPI, Query, Path
+
+app = FastAPI()
+
+@app.get("/urunler")
+def urun_ara(
+    q: Annotated[str | None, Query(min_length=2, max_length=50)] = None,
+    sayfa: Annotated[int, Query(ge=1)] = 1,
+    boyut: Annotated[int, Query(ge=1, le=100)] = 20,
+    etiket: Annotated[list[str], Query()] = [],       # ?etiket=yeni&amp;etiket=indirim
+):
+    return {"q": q, "sayfa": sayfa, "boyut": boyut, "etiket": etiket}
+
+@app.get("/subeler/{kod}")
+def sube(kod: Annotated[str, Path(pattern=r"^[A-Z]{3}-\d{2}$")]):
+    return {"kod": kod}</pre>
+
+<p><code>Annotated[tip, Query(...)]</code> hem tipi hem de ek kuralları (en az/en çok, desen) bildirir. Bu kurallar hem doğrulamada hem de <code>/docs</code> sayfasında kullanılır: dokümantasyon kodla <b>asla</b> çelişmez, çünkü ikisi aynı kaynaktan üretilir.</p>
+
+<h2>pydantic modelleri: istek ve yanıt şeması</h2>
+<p>JSON gövdeyi bir pydantic modeliyle tanımlarsın. FastAPI gövdeyi okur, modele doğrulatır ve fonksiyonuna hazır bir nesne verir. Doğrulama başarısızsa fonksiyonun <b>hiç çağrılmaz</b>; istemci tüm hataların listesini 422 ile alır. Aynı mekanizma burada çalışıyor:</p>
+<pre class="py">from pydantic import BaseModel, Field, ValidationError, field_validator
+
+class SiparisKalemi(BaseModel):
+    urun_id: int = Field(gt=0)
+    adet: int = Field(ge=1, le=50)
+
+class SiparisOlustur(BaseModel):
+    musteri_id: int = Field(gt=0)
+    sehir: str = Field(min_length=2)
+    kalemler: list[SiparisKalemi] = Field(min_length=1)
+    kupon: str | None = None
+
+    @field_validator("sehir")
+    @classmethod
+    def sehri_duzenle(cls, v: str) -&gt; str:
+        return v.strip().title()
+
+govde = {"musteri_id": "42", "sehir": "  izmir ", "kalemler": [{"urun_id": 1, "adet": 2}]}
+s = SiparisOlustur.model_validate(govde)     # FastAPI bunu senin yerine yapar
+print(s.musteri_id, type(s.musteri_id).__name__, s.sehir, s.kalemler[0].adet, s.kupon)
+
+hatali = {"musteri_id": 0, "kalemler": [{"urun_id": 1, "adet": 99}]}
+try:
+    SiparisOlustur.model_validate(hatali)
+except ValidationError as e:
+    # FastAPI'nin 422 gövdesi: {"detail": [...]} ve konum başına "body" eklenir
+    for h in e.errors():
+        print(["body", *h["loc"]], h["type"])</pre>
+
+<p>Dikkat: <code>"42"</code> metni int'e çevrildi. pydantic varsayılan olarak "makul" dönüşümlere izin verir (lax mode); JSON'da sayıların bazen metin gelmesi yaygındır. Kesin tip istiyorsan <code>Field(strict=True)</code> ya da <code>model_config = ConfigDict(strict=True)</code> kullanırsın. Pydantic ile doğrulama dersinde gördüğün her şey burada geçerli.</p>
+
+<h3>Yanıt modeli: neyi döndürdüğünü kontrol et</h3>
+<p>Veritabanındaki kullanıcı kaydında şifre özeti (hash) vardır; bunu API yanıtında asla göstermemelisin. <code>response_model</code> yanıtı belirtilen şemaya göre <b>filtreler</b> ve doğrular:</p>
+<pre class="code">from fastapi import FastAPI, status
+from pydantic import BaseModel, EmailStr
+
+class KullaniciOlustur(BaseModel):
+    eposta: EmailStr
+    sifre: str
+
+class KullaniciYanit(BaseModel):
+    id: int
+    eposta: EmailStr
+
+@app.post("/kullanicilar", response_model=KullaniciYanit, status_code=status.HTTP_201_CREATED)
+def kayit(veri: KullaniciOlustur):
+    kayit = {"id": 7, "eposta": veri.eposta, "sifre_hash": "pbkdf2$..."}
+    return kayit                     # sifre_hash yanıtta GÖRÜNMEZ</pre>
+<pre class="py">from pydantic import BaseModel
+
+class KullaniciYanit(BaseModel):
+    id: int
+    eposta: str
+
+db_kaydi = {"id": 7, "eposta": "ayse@ilgazbank.com.tr", "sifre_hash": "pbkdf2$9f...", "rol": "admin"}
+print(KullaniciYanit.model_validate(db_kaydi).model_dump())
+print(KullaniciYanit.model_json_schema()["required"])</pre>
+
+
+<h2>Hata yönetimi: HTTPException ve durum kodları</h2>
+<pre class="code">from fastapi import FastAPI, HTTPException, Request
+from fastapi.responses import JSONResponse
+
+class StokYetersiz(Exception):
+    def __init__(self, urun):
+        self.urun = urun
+
+@app.get("/urunler/{urun_id}")
+def urun_getir(urun_id: int):
+    if urun_id not in URUNLER:
+        raise HTTPException(status_code=404, detail="Ürün bulunamadı")
+    return URUNLER[urun_id]
+
+@app.exception_handler(StokYetersiz)
+async def stok_hatasi(request: Request, hata: StokYetersiz):
+    return JSONResponse(status_code=409, content={"detail": f"{hata.urun} için stok yetersiz"})</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>Durum</th><th>Kim üretir?</th><th>Gövde</th></tr>
+<tr><td>422 Unprocessable Entity</td><td>FastAPI, doğrulama başarısız olunca otomatik</td><td><code>{"detail": [{"loc": [...], "msg": ..., "type": ...}]}</code></td></tr>
+<tr><td>404 / 403 / 409</td><td>Sen, <code>raise HTTPException(...)</code> ile</td><td><code>{"detail": "Ürün bulunamadı"}</code></td></tr>
+<tr><td>401 Unauthorized</td><td>Güvenlik bağımlılığı (OAuth2) ya da sen</td><td><code>{"detail": "Not authenticated"}</code> + <code>WWW-Authenticate</code> başlığı</td></tr>
+<tr><td>500</td><td>Yakalanmamış istisna</td><td><code>Internal Server Error</code> (ayrıntı günlükte)</td></tr>
+</table></div>
+<p>Flask'ta hatalı istek için genelde 400 dönülür; FastAPI şema doğrulamasında 422 kullanır. "İstek sözdizimsel olarak doğru (geçerli JSON) ama anlamsal olarak işlenemiyor" demektir. İstemci geliştiricileri <code>detail</code> listesindeki <code>loc</code> alanından hangi alanın hatalı olduğunu görür ve formda ilgili kutuyu işaretler.</p>
+
+<h2>Bağımlılık enjeksiyonu: Depends</h2>
+<p>Birçok uç nokta aynı hazırlığa ihtiyaç duyar: veritabanı oturumu açmak, giriş yapan kullanıcıyı bulmak, sayfalama parametrelerini okumak. FastAPI'de bu ortak parçalar <b>bağımlılık</b> (dependency) olarak yazılır ve <code>Depends</code> ile parametreye bağlanır. FastAPI her istekte bağımlılığı çağırır (onun da bağımlılıkları varsa önce onları), sonucu parametreye koyar. <code>yield</code> kullanan bağımlılıklarda <code>yield</code>'dan sonraki kod yanıt gönderildikten sonra çalışır: oturumu kapatmak için ideal.</p>
+<pre class="code">from typing import Annotated
+from fastapi import Depends, FastAPI, Header, HTTPException
+from sqlalchemy.orm import Session
+
+def get_db():
+    db = SessionLocal()           # SQLAlchemy dersindeki sessionmaker
+    try:
+        yield db
+    finally:
+        db.close()                # yanıt gittikten sonra çalışır
+
+def aktif_kullanici(authorization: Annotated[str | None, Header()] = None,
+                    db: Session = Depends(get_db)):
+    if not authorization or not authorization.startswith("Bearer "):
+        raise HTTPException(401, "Kimlik doğrulanamadı", headers={"WWW-Authenticate": "Bearer"})
+    kullanici = token_ile_bul(db, authorization.removeprefix("Bearer "))
+    if kullanici is None:
+        raise HTTPException(401, "Geçersiz token")
+    return kullanici
+
+class Sayfalama:
+    def __init__(self, sayfa: int = 1, boyut: int = 20):
+        self.sayfa, self.boyut = sayfa, min(boyut, 100)
+
+@app.get("/siparislerim")
+def siparislerim(kullanici=Depends(aktif_kullanici),
+                 db: Session = Depends(get_db),           # aynı istekte get_db bir kez çalışır
+                 s: Sayfalama = Depends()):
+    return listele(db, kullanici.id, s.sayfa, s.boyut)</pre>
+
+<p>Bu tasarımın en büyük faydası test sırasında görülür: <code>app.dependency_overrides[get_db] = sahte_db</code> ile gerçek veritabanını tek satırda sahte bir sürümle değiştirirsin. FastAPI bağımlılıkları nasıl çözüyor? Metaprogramlama dersindeki <code>inspect.signature</code> ile. Özünü burada çalıştırabilirsin:</p>
+<pre class="py">import inspect
+
+class Depends:
+    def __init__(self, bagimlilik):
+        self.bagimlilik = bagimlilik
+
+def coz(fn, istek):
+    kwargs = {}
+    for p in inspect.signature(fn).parameters.values():
+        if isinstance(p.default, Depends):
+            kwargs[p.name] = coz(p.default.bagimlilik, istek)   # özyinelemeli çöz
+        elif p.name in istek:
+            kwargs[p.name] = istek[p.name]
+    return fn(**kwargs)
+
+def sayfalama(sayfa=1, boyut=20):
+    return {"sayfa": int(sayfa), "boyut": min(int(boyut), 100)}
+
+def aktif_kullanici(token=None):
+    return {"tok-ayse": "ayse"}.get(token, "anonim")
+
+def siparislerim(kullanici=Depends(aktif_kullanici), s=Depends(sayfalama)):
+    return f"{kullanici} için sayfa {s['sayfa']} (boyut {s['boyut']})"
+
+print(coz(siparislerim, {"token": "tok-ayse", "sayfa": "3", "boyut": "500"}))
+print(coz(siparislerim, {}))</pre>
+
+
+<h2>async uç noktalar</h2>
+<p>FastAPI hem <code>def</code> hem <code>async def</code> uç noktaları destekler. <code>async def</code> ile tanımlanan uç nokta olay döngüsünde çalışır; içinde <code>await</code> ile asenkron HTTP istemcisi (httpx.AsyncClient), asenkron veritabanı sürücüsü kullanırsan tek işlem binlerce bekleyen isteği idare eder. Normal <code>def</code> ile tanımlananları FastAPI bir iş parçacığı havuzunda çalıştırır.</p>
+<pre class="py">import asyncio
+
+async def stok_sor(depo, urun):
+    await asyncio.sleep(0.05)              # dış servis gecikmesi
+    return {"İzmir": 12, "Ankara": 0, "Bursa": 5}[depo]
+
+async def urun_stok(urun_id):              # @app.get("/urunler/{urun_id}/stok")
+    depolar = ["İzmir", "Ankara", "Bursa"]
+    sonuclar = await asyncio.gather(*(stok_sor(d, urun_id) for d in depolar))
+    return {"urun_id": urun_id, "stok": dict(zip(depolar, sonuclar)), "toplam": sum(sonuclar)}
+
+loop = asyncio.new_event_loop()
+print(loop.run_until_complete(urun_stok(7)))
+loop.close()</pre>
+
+<div class="warn"><b>async def içinde bloklayan çağrı</b><code>async def</code> uç noktada <code>time.sleep</code>, <code>requests.get</code> ya da senkron veritabanı sürücüsü kullanırsan olay döngüsünü durdurursun ve <b>tüm</b> istekler bekler. Kural: içeride <code>await</code> edeceğin asenkron bir kütüphane yoksa uç noktayı düz <code>def</code> ile yaz; FastAPI onu iş parçacığında çalıştırır.</div>
+
+<h2>OpenAPI, CORS ve kimlik doğrulama</h2>
+<p>FastAPI tüm uç noktaları, parametreleri ve pydantic şemalarını OpenAPI standardında bir JSON belgesine çevirir. Bu belgeden Swagger arayüzü çıkar; ayrıca istemci kodu üreticileri (TypeScript, Kotlin) aynı belgeden otomatik istemci kütüphanesi üretebilir. Modelin JSON şemasını kendin de görebilirsin: <code>SiparisOlustur.model_json_schema()</code>.</p>
+<p>Tarayıcıda çalışan bir ön yüz (ör. <code>https://magaza.anadolumarket.com</code>) başka bir alan adındaki API'ye (<code>https://api.anadolumarket.com</code>) istek atacaksa tarayıcı CORS (Cross-Origin Resource Sharing) iznini kontrol eder:</p>
+<pre class="code">from fastapi.middleware.cors import CORSMiddleware
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["https://magaza.anadolumarket.com"],   # "*" üretimde kullanma
+    allow_methods=["GET", "POST"],
+    allow_headers=["Authorization", "Content-Type"],
+    allow_credentials=True,
+)</pre>
+
+<p>Kimlik doğrulamada yaygın kalıp <b>OAuth2 parola akışı + JWT</b>'dir: istemci <code>/token</code> uç noktasına kullanıcı adı ve şifre gönderir, sunucu imzalı bir <b>JWT</b> (JSON Web Token) döner; istemci sonraki isteklerde <code>Authorization: Bearer &lt;token&gt;</code> başlığını gönderir. JWT üç parçadır: başlık, yük (kullanıcı kimliği, son kullanma zamanı <code>exp</code>) ve imza. Sunucu imzayı gizli anahtarla doğrular; yük şifreli değildir, yalnızca <b>değiştirilemez</b>. Bu yüzden içine şifre ya da kişisel veri koyma.</p>
+<pre class="code"># pip install pyjwt "passlib[bcrypt]"
+from datetime import datetime, timedelta, timezone
+import jwt
+from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm
+
+GIZLI = os.environ["JWT_GIZLI_ANAHTAR"]
+oauth2 = OAuth2PasswordBearer(tokenUrl="token")
+
+@app.post("/token")
+def token_al(form: OAuth2PasswordRequestForm = Depends()):
+    kullanici = dogrula(form.username, form.password)       # bcrypt ile karşılaştır
+    if not kullanici:
+        raise HTTPException(401, "Hatalı kullanıcı adı ya da şifre")
+    yuk = {"sub": str(kullanici.id), "exp": datetime.now(timezone.utc) + timedelta(minutes=30)}
+    return {"access_token": jwt.encode(yuk, GIZLI, algorithm="HS256"), "token_type": "bearer"}
+
+def aktif_kullanici(token: str = Depends(oauth2)):
+    try:
+        yuk = jwt.decode(token, GIZLI, algorithms=["HS256"])
+    except jwt.PyJWTError:
+        raise HTTPException(401, "Geçersiz ya da süresi dolmuş token")
+    return kullanici_getir(int(yuk["sub"]))</pre>
+
+
+<h2>TestClient ve çalıştırma</h2>
+<pre class="code"># tests/test_api.py
+from fastapi.testclient import TestClient
+from main import app, get_db
+
+def sahte_db():
+    yield {"urunler": {1: {"ad": "Çay"}}}
+
+app.dependency_overrides[get_db] = sahte_db
+client = TestClient(app)
+
+def test_urun_bulunamadi():
+    yanit = client.get("/urunler/999")
+    assert yanit.status_code == 404
+    assert yanit.json() == {"detail": "Ürün bulunamadı"}
+
+def test_dogrulama():
+    yanit = client.post("/siparisler", json={"musteri_id": 0})
+    assert yanit.status_code == 422
+    alanlar = {tuple(h["loc"]) for h in yanit.json()["detail"]}
+    assert ("body", "musteri_id") in alanlar</pre>
+<pre class="code"># Geliştirme
+fastapi dev main.py
+# Üretim: birden çok işlem
+uvicorn main:app --host 0.0.0.0 --port 8000 --workers 4
+# ya da gunicorn yöneticisiyle
+gunicorn main:app -k uvicorn.workers.UvicornWorker -w 4 -b 0.0.0.0:8000</pre>
+
+
+<h2>Flask mı, FastAPI mı, Django mı?</h2>
+<div class="tbl-wrap"><table>
+<tr><th>Ölçüt</th><th>Flask</th><th>FastAPI</th><th>Django</th></tr>
+<tr><td>Felsefe</td><td>Mikro çatı, eklentiyle büyür</td><td>Tip ipucu odaklı API çatısı</td><td>"Piller dahil" tam çatı</td></tr>
+<tr><td>Doğrulama</td><td>Elle ya da eklenti (WTForms, marshmallow)</td><td>pydantic ile otomatik, 422</td><td>Forms / DRF serializers</td></tr>
+<tr><td>Dokümantasyon</td><td>Eklentiyle</td><td>Otomatik OpenAPI + Swagger</td><td>DRF + eklenti</td></tr>
+<tr><td>Async</td><td>Kısıtlı</td><td>Doğal (ASGI)</td><td>Kısmi, gelişiyor</td></tr>
+<tr><td>ORM ve yönetim paneli</td><td>Yok (Flask-SQLAlchemy)</td><td>Yok (SQLAlchemy, SQLModel)</td><td>Dahili ORM + admin paneli</td></tr>
+<tr><td>Tipik kullanım</td><td>İç araçlar, HTML panelleri, küçük servisler</td><td>JSON API, mikroservis, ML model sunumu</td><td>Büyük içerik siteleri, yönetim ağırlıklı ürünler</td></tr>
+</table></div>
+
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kredi ön değerlendirme servisi FastAPI ile yazılmış. Mobil uygulama ekibi API'yi <code>/docs</code> sayfasından keşfediyor ve OpenAPI belgesinden otomatik istemci üretiyor; sözleşme değişince derleme hatası alıyorlar. Başvuru gövdesi pydantic modeliyle doğrulanıyor (TC kimlik no biçimi, gelir pozitif, vade 3-36 ay); hatalı başvurular iş mantığına hiç ulaşmıyor. Skor servisi, kara liste ve gelir doğrulama sorguları <code>asyncio.gather</code> ile paralel atılıyor. Testlerde <code>dependency_overrides</code> ile dış servisler sahte sürümlerle değiştiriliyor ve tüm test paketi saniyeler içinde koşuyor.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: gerçek zamanlı uç noktalar, sayfalama, hız sınırı ve async veritabanı</h2><p>CRUD uç noktaları bir API'nin iskeletidir; canlıda ise şu sorular gelir: "Sipariş durumu değişince ekran kendiliğinden güncellensin", "910 siparişi sayfa sayfa getir ama yeni sipariş gelince kayma olmasın", "bir istemci saniyede 500 istek atıp sistemi düşürmesin", "veritabanı beklerken sunucu kilitlenmesin". Bu bölüm dört konuyu FastAPI kodu (kendi bilgisayarında) ve tarayıcıda çalışan çekirdek mantıkla anlatıyor; sayfalama örnekleri Anadolu Market'in gerçek <code>orders</code> tablosunu kullanıyor.</p><h3>WebSocket ve SSE</h3><p><b>WebSocket</b> iki yönlü, sürekli açık bir bağlantıdır: sohbet, canlı pano, ortak düzenleme. Sunucu birden çok istemciye aynı mesajı gönderecekse (yayın, broadcast) bağlantıları bir yöneticide tutar; kopan bağlantıyı listeden çıkarmayı unutmamalıdır. <b>SSE</b> ise tek yönlüdür (sunucu → istemci), düz HTTP üzerinden çalışır ve LLM cevabı ya da bildirim akışı için yeterlidir (LLM API dersindeki ek bölüm).</p><pre class="code">from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from fastapi.responses import StreamingResponse
+
+app = FastAPI()
+
+class Yonetici:
+    def __init__(self):
+        self.baglantilar: set[WebSocket] = set()
+    async def baglan(self, ws: WebSocket):
+        await ws.accept()
+        self.baglantilar.add(ws)
+    def ayril(self, ws: WebSocket):
+        self.baglantilar.discard(ws)
+    async def yayinla(self, mesaj: dict):
+        for ws in list(self.baglantilar):
+            try:
+                await ws.send_json(mesaj)
+            except Exception:
+                self.ayril(ws)          # kopmuş istemciyi temizle
+
+yonetici = Yonetici()
+
+@app.websocket("/ws/siparisler")
+async def siparis_akisi(ws: WebSocket):
+    await yonetici.baglan(ws)
+    try:
+        while True:
+            await ws.receive_text()     # istemciden gelen (ör. ping) mesajları dinle
+    except WebSocketDisconnect:
+        yonetici.ayril(ws)
+
+@app.get("/olaylar")
+async def olaylar():
+    async def uret():
+        for i in range(3):
+            yield f"data: {{\"sira\": {i}}}\n\n"
+    return StreamingResponse(uret(), media_type="text/event-stream")</pre><p>Birden çok sunucu süreci (worker) çalışıyorsa her sürecin kendi bağlantı listesi olur; yayını tüm süreçlere ulaştırmak için Redis Pub/Sub gibi ortak bir kanal gerekir.</p><h3>Sayfalama: offset mi, cursor mu?</h3><div class="tbl-wrap"><table><tr><th></th><th>Offset (<code>?sayfa=3&amp;boyut=20</code>)</th><th>Cursor / keyset (<code>?imlec=...</code>)</th></tr><tr><td>Sorgu</td><td><code>LIMIT 20 OFFSET 40</code></td><td><code>WHERE (tarih, id) &lt; (?, ?) LIMIT 20</code></td></tr><tr><td>Derin sayfa</td><td>Veritabanı atlanan satırları da okur; yavaşlar</td><td>İndeksle doğrudan konuma gider; hep hızlı</td></tr><tr><td>Araya kayıt girerse</td><td>Satırlar kayar: tekrar ya da atlama</td><td>Kayma yok</td></tr><tr><td>"7. sayfaya git"</td><td>Kolay</td><td>Yok; yalnız sonraki/önceki</td></tr></table></div><p>Cursor sayfalamanın kuralı: sıralama anahtarı <b>benzersiz</b> olmalıdır. Sipariş tarihi tek başına benzersiz değildir (aynı gün 6 sipariş olabiliyor); bu yüzden <code>(order_date, order_id)</code> ikilisi kullanılır. İmleç, son satırın anahtarını taşıyan opak bir metindir (base64 ile kodlanmış JSON).</p><pre class="py">import base64, json
+import veri
+
+con = veri.baglan("anadolu_market", tablolar=["orders"])
+
+def imlec_yap(tarih, sid):
+    return base64.urlsafe_b64encode(json.dumps([tarih, sid]).encode()).decode()
+
+def sayfa(imlec=None, limit=5):
+    sql, p = "SELECT order_id, order_date FROM orders", []
+    if imlec:
+        tarih, sid = json.loads(base64.urlsafe_b64decode(imlec))
+        sql += " WHERE (order_date, order_id) &lt; (?, ?)"
+        p = [tarih, sid]
+    satirlar = con.execute(sql + " ORDER BY order_date DESC, order_id DESC LIMIT ?", p + [limit]).fetchall()
+    sonraki = imlec_yap(*satirlar[-1][::-1]) if len(satirlar) == limit else None
+    return satirlar, sonraki
+
+s1, im = sayfa()
+print(s1)
+print("imleç:", im)
+s2, _ = sayfa(im)
+print(s2)</pre><p>Filtreleme de aynı uç noktada yapılır (<code>?status=delivered&amp;channel=mobile</code>). Güvenli kalıp: izin verilen filtreleri bir <b>beyaz listede</b> tut, değerleri her zaman <code>?</code> parametresiyle geçir, bilinmeyen parametreye 422 dön. Sütun adını kullanıcıdan alıp SQL'e yapıştırmak SQL enjeksiyonudur.</p><h3>Hız sınırı middleware'i</h3><p>En yaygın algoritma <b>jeton kovası</b>dır (token bucket): her istemcinin kovasında en fazla <code>kapasite</code> jeton vardır, kova saniyede <code>hiz</code> jeton dolar, her istek bir jeton harcar. Jeton yoksa <b>429 Too Many Requests</b> ve <code>Retry-After</code> başlığı dönülür. Kısa ani yüklere (burst) izin verir ama ortalama hızı sınırlar.</p><pre class="py">class Kova:
+    def __init__(self, kapasite, hiz):
+        self.kapasite, self.hiz = kapasite, hiz
+        self.jeton, self.son = float(kapasite), 0.0
+    def izin(self, simdi):
+        self.jeton = min(self.kapasite, self.jeton + (simdi - self.son) * self.hiz)
+        self.son = simdi
+        if self.jeton &gt;= 1:
+            self.jeton -= 1
+            return True
+        return False
+
+k = Kova(kapasite=3, hiz=1)          # 3'lük patlama, saniyede 1 istek
+print([k.izin(t) for t in (0, 0.1, 0.2, 0.3, 1.3, 1.4)])</pre><pre class="code">import time
+from fastapi import Request
+from fastapi.responses import JSONResponse
+
+kovalar: dict[str, Kova] = {}
+
+@app.middleware("http")
+async def hiz_siniri(request: Request, call_next):
+    anahtar = request.headers.get("X-API-Key") or request.client.host
+    kova = kovalar.setdefault(anahtar, Kova(kapasite=20, hiz=5))
+    if not kova.izin(time.monotonic()):
+        return JSONResponse({"detail": "Çok fazla istek"}, status_code=429, headers={"Retry-After": "1"})
+    return await call_next(request)</pre><p>Bu sözlük tek süreçte çalışır; çok süreçli üretimde sayaçlar Redis'te tutulur (ya da <code>slowapi</code> gibi bir kütüphane ve API ağ geçidi kullanılır). Zaman için <code>time.monotonic()</code> kullan: sistem saati geri alınsa bile ileri akar.</p><h3>Async veritabanı oturumu</h3><p><code>async def</code> uç noktada senkron veritabanı sürücüsü olay döngüsünü bloklar. SQLAlchemy 2'nin async motoru ve async sürücü (PostgreSQL için <code>asyncpg</code>, SQLite için <code>aiosqlite</code>) bekleme sırasında döngüyü serbest bırakır. Oturum, istek başına açılıp kapanan bir bağımlılıktır:</p><pre class="code"># pip install "sqlalchemy[asyncio]" asyncpg
+from typing import Annotated
+from fastapi import Depends
+from sqlalchemy import select
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker, create_async_engine
+
+motor = create_async_engine("postgresql+asyncpg://kullanici:sifre@db/market", pool_size=10)
+OturumYap = async_sessionmaker(motor, expire_on_commit=False)
+
+async def oturum_al():
+    async with OturumYap() as oturum:
+        yield oturum                    # istek bitince otomatik kapanır
+
+Oturum = Annotated[AsyncSession, Depends(oturum_al)]
+
+@app.get("/siparisler/{sid}")
+async def siparis(sid: int, oturum: Oturum):
+    sonuc = await oturum.execute(select(Siparis).where(Siparis.id == sid))
+    return sonuc.scalar_one_or_none()</pre><div class="note"><b>Gerçek işte</b>Mobil uygulamadaki sonsuz kaydırmalı listeler cursor sayfalamayla, kurye konumu ve sipariş durumu ekranları WebSocket ya da SSE ile çalışır. Kamuya açık API'lerde hız sınırı hem güvenlik hem maliyet konusudur; sınırı ve kalan kotayı <code>X-RateLimit-Remaining</code> gibi başlıklarla belgelemek iyi bir API tasarımıdır.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>ASGI ve Starlette</h3>
+<p>FastAPI, Starlette adlı ASGI çatısının üzerine pydantic doğrulaması ve bağımlılık enjeksiyonu ekler. ASGI, WSGI'nin async karşılığıdır: uygulama <code>async def app(scope, receive, send)</code> imzalı bir çağrılabilirdir. Ara katmanlar (middleware: CORS, sıkıştırma, istek süresi ölçümü) bu çağrılabiliri saran katmanlardır; Dekoratörler (decorator) dersindeki sarma fikrinin sunucu düzeyindeki hâli.</p>
+<h3>Yaşam döngüsü ve arka plan işleri</h3>
+<p>Uygulama açılırken bir kez yapılacak işler (veritabanı havuzu, ML modelini belleğe yükleme) <code>lifespan</code> bağlam yöneticisinde (context manager) yapılır. Yanıttan sonra yapılacak kısa işler için <code>BackgroundTasks</code> vardır; ama uzun ve kaybolmaması gereken işler (fatura üretimi, toplu e-posta) gerçek bir kuyruğa (Celery, RQ, Arq) gönderilmelidir: süreç yeniden başlarsa BackgroundTasks işleri kaybolur.</p>
+<h3>Sürümleme ve sözleşme</h3>
+<p>Yayındaki bir API'de alan adını değiştirmek, istemcileri kırar. Kalıcı API'lerde <code>APIRouter(prefix="/v1")</code> ile sürümle, alanları kaldırmadan önce kullanımdan kaldırıldı (<code>deprecated=True</code>) olarak işaretle ve OpenAPI belgesini CI'da önceki sürümle karşılaştırarak kırıcı değişiklikleri yakala.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/fastapi">Alıştırmalara geç (29)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-ml/">← Bitirme projesi 2: Ilgaz Bank müşteri kaybı (churn) tahmini</a><a href="../flask/">Flask ile web uygulaması →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

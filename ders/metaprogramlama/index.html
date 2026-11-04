@@ -1,0 +1,328 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast | Kesit Python</title><meta name="description" content="Kodu yöneten kod: type() ile sınıf üretir, __init_subclass__ ile eklenti kaydı kurar, descriptor ile alan doğrular, öznitelik kancalarını, metaclass'ı,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/metaprogramlama/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast"><meta property="og:description" content="Kodu yöneten kod: type() ile sınıf üretir, __init_subclass__ ile eklenti kaydı kurar, descriptor ile alan doğrular, öznitelik kancalarını, metaclass'ı,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/metaprogramlama/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast","description":"Kodu yöneten kod: type() ile sınıf üretir, __init_subclass__ ile eklenti kaydı kurar, descriptor ile alan doğrular, öznitelik kancalarını, metaclass'ı,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/metaprogramlama/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>Metaprogramlama: type, descriptor, __init_subclass__, inspect ve ast</h1><p class="st-l">Kodu yöneten kod: type() ile sınıf üretir, __init_subclass__ ile eklenti kaydı kurar, descriptor ile alan doğrular, öznitelik kancalarını, metaclass'ı, inspect ve ast'ı doğru yerde kullanır, eval tuzağından kaçınırsın.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/metaprogramlama">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Metaprogramlama (metaprogramming), <b>kodu yöneten kod</b> yazmaktır: sınıfları çalışma anında üretmek, bir sınıf tanımlandığı anda onu bir kayda eklemek, öznitelik atamasını araya girip doğrulamak, bir fonksiyonun imzasını okuyup ona göre davranmak ya da bir Python dosyasını çalıştırmadan çözümlemek. Kulağa egzotik gelir ama her gün kullandığın kütüphanelerin hepsi bunun üzerine kuruludur: <code>@dataclass</code> sınıfına <code>__init__</code> yazar, Django ve SQLAlchemy modelleri sınıf gövdesindeki alanları toplayıp tabloya çevirir, pytest test fonksiyonlarının parametre adlarına bakıp fixture enjekte eder, FastAPI fonksiyon imzasından API şeması çıkarır.</p>
+<p>Bu dersin amacı sana "her şeyi metaclass ile yaz" demek değil; tam tersi. Hangi ihtiyaca <b>en basit</b> aracın yettiğini bilmeni istiyoruz. İleri OOP dersinde descriptor ve metaclass'a kısaca baktın, Dekoratörler (decorator) dersinde fonksiyon saran fonksiyonları gördün. Burada hepsini bir araya getirip Anadolu Market ve Ilgaz Bank için gerçekçi araçlar kuracağız.</p>
+
+<h2>Her şey nesnedir</h2>
+<p>Python'da sayılar, metinler, fonksiyonlar, sınıflar ve modüller birer nesnedir (object). Fonksiyonu bir değişkene atayabilir, listeye koyabilir, ona öznitelik ekleyebilirsin. Sınıf da bir nesnedir ve onu üreten sınıfa <b>metaclass</b> denir; varsayılan metaclass <code>type</code>'tır.</p>
+<pre class="py">def kdv_ekle(tutar):
+    return round(tutar * 1.20, 2)
+
+islem = kdv_ekle                 # fonksiyon bir değerdir
+print(islem(100), islem.__name__)
+kdv_ekle.surum = "2.1"           # fonksiyona öznitelik eklenebilir
+print(kdv_ekle.surum)
+
+class Urun:
+    pass
+
+print(type(42), type(kdv_ekle).__name__)
+print(type(Urun))                # sınıfın türü: type
+print(type(type))                # type kendisinin örneği
+print(isinstance(Urun, object), isinstance(kdv_ekle, object))</pre>
+
+<p>Zincir şöyledir: <code>u</code> nesnesi <code>Urun</code>'un örneğidir, <code>Urun</code> de <code>type</code>'ın örneğidir. Bu, "sınıfı da bir fonksiyon çağrısıyla üretebilirim" demektir.</p>
+
+<h2>type() ile çalışma anında sınıf üretmek</h2>
+<p><code>type</code> tek argümanla türü söyler; üç argümanla <b>yeni bir sınıf üretir</b>: <code>type(ad, tabanlar, sozluk)</code>. <code>class</code> ifadesi aslında arka planda tam olarak bunu yapar.</p>
+<pre class="py">def fiyatla(self, adet):
+    return self.birim_fiyat * adet
+
+# class Kampanya: birim_fiyat = 50; fiyatla = fiyatla  ile aynı
+Kampanya = type("Kampanya", (object,), {"birim_fiyat": 50, "fiyatla": fiyatla})
+k = Kampanya()
+print(Kampanya.__name__, k.fiyatla(3))
+
+# Bir yapılandırma tablosundan rapor sınıfları üretmek
+tanimlar = {"GunlukRapor": "gün", "HaftalikRapor": "hafta"}
+siniflar = {ad: type(ad, (), {"donem": d}) for ad, d in tanimlar.items()}
+for ad, sinif in siniflar.items():
+    print(ad, "-&gt;", sinif.donem)</pre>
+
+<p>Ne zaman işe yarar? Bir JSON şemasından, veritabanı tablosundan ya da yapılandırma dosyasından gelen tanımlara göre sınıf üretmen gerektiğinde. Elle yazacağın onlarca neredeyse aynı sınıfı tek döngüyle üretirsin. Ama okunabilirlik düşer: IDE'n bu sınıfları göremez, otomatik tamamlama çalışmaz. Az sayıda sınıf için <code>class</code> ile yazmak hâlâ en iyisidir.</p>
+
+<h2>__init_subclass__: alt sınıfı otomatik kaydet</h2>
+<p>Eklenti (plugin) sistemlerinde klasik ihtiyaç şudur: "Bu temel sınıftan türeyen her sınıf kendiliğinden bir kayda (registry) girsin; kimse elle listeye eklemeyi unutmasın." Python 3.6'dan beri bunun için metaclass'a gerek yok: temel sınıfa <code>__init_subclass__</code> yazarsın. Bir alt sınıf tanımlandığı anda Python bu metodu o alt sınıfla çağırır.</p>
+<pre class="py">class Disari:
+    kayit = {}
+
+    def __init_subclass__(cls, bicim, **kwargs):
+        super().__init_subclass__(**kwargs)
+        if bicim in Disari.kayit:
+            raise ValueError(f"{bicim} zaten kayıtlı")
+        cls.bicim = bicim
+        Disari.kayit[bicim] = cls
+
+class CsvDisari(Disari, bicim="csv"):
+    def yaz(self, satirlar):
+        return "\n".join(",".join(map(str, s)) for s in satirlar)
+
+class JsonDisari(Disari, bicim="json"):
+    def yaz(self, satirlar):
+        import json
+        return json.dumps(satirlar)
+
+print(sorted(Disari.kayit))
+veri = [["AM-1", 120], ["AM-2", 80]]
+for b in ["csv", "json"]:
+    print(b, "=&gt;", Disari.kayit[b]().yaz(veri))</pre>
+
+<p>Sınıf satırındaki <code>bicim="csv"</code> gibi anahtar kelime argümanları doğrudan <code>__init_subclass__</code>'a gider. <code>super().__init_subclass__(**kwargs)</code> çağrısı, çoklu kalıtımda (inheritance) diğer tabanların da kendi kancalarını çalıştırabilmesi için önemlidir. Yeni bir dışa aktarım biçimi eklemek artık tek bir sınıf yazmaktan ibarettir; hiçbir <code>if/elif</code> zincirine dokunmazsın. Tasarım Kalıpları dersindeki kayıt tabanlı fabrikanın en temiz Python hâli budur.</p>
+
+<h2>Sınıf dekoratörleri</h2>
+<p>Dekoratör yalnızca fonksiyonlar için değildir. Sınıf dekoratörü sınıfı alır, değiştirir (ya da kaydeder) ve geri döndürür. <code>@dataclass</code>, <code>@functools.total_ordering</code> ve <code>@enum.unique</code> birer sınıf dekoratörüdür. Kalıtım gerektirmediği için mevcut sınıflara "yapıştırması" kolaydır.</p>
+<pre class="py">def alanlari_say(cls):
+    alanlar = [ad for ad in cls.__annotations__]
+    cls.alan_sayisi = len(alanlar)
+
+    def __repr__(self):
+        icerik = ", ".join(f"{a}={getattr(self, a)!r}" for a in alanlar)
+        return f"{cls.__name__}({icerik})"
+
+    cls.__repr__ = __repr__
+    return cls                     # sınıfı geri döndürmeyi unutma!
+
+@alanlari_say
+class Musteri:
+    ad: str
+    sehir: str
+
+    def __init__(self, ad, sehir):
+        self.ad, self.sehir = ad, sehir
+
+print(Musteri("Ayşe", "İzmir"), Musteri.alan_sayisi)</pre>
+
+<div class="tbl-wrap"><table>
+<tr><th>İhtiyaç</th><th>En basit araç</th><th>Neden</th></tr>
+<tr><td>Bir fonksiyonun davranışını sarmak</td><td>Fonksiyon dekoratörü</td><td>Tek fonksiyonu etkiler, okunur</td></tr>
+<tr><td>Bir sınıfa metot/öznitelik eklemek</td><td>Sınıf dekoratörü</td><td>Kalıtım gerekmez, açıkça görünür</td></tr>
+<tr><td>Alt sınıfları kaydetmek ya da denetlemek</td><td><code>__init_subclass__</code></td><td>Kalıtımla otomatik, metaclass çatışması yok</td></tr>
+<tr><td>Tek bir alanın okuma/yazmasını denetlemek</td><td><code>property</code> ya da descriptor</td><td>Alan düzeyinde kural</td></tr>
+<tr><td>Sınıf gövdesinin oluşumunu değiştirmek</td><td>Metaclass</td><td>Son çare; nadiren gerekir</td></tr>
+</table></div>
+
+<h2>Descriptor protokolü: doğrulanan alanlar</h2>
+<p><code>property</code> tek bir alan için harikadır ama on alanın hepsine "pozitif sayı olmalı" kuralı koyacaksan aynı kodu on kez yazarsın. Descriptor, öznitelik erişimini yöneten <b>yeniden kullanılabilir</b> bir nesnedir. Sınıf düzeyinde tanımlanır ve şu metotlardan birini taşır:</p>
+<ul>
+<li><code>__set_name__(self, sahip, ad)</code>: sınıf oluşturulurken bir kez çağrılır; descriptor hangi ada atandığını öğrenir.</li>
+<li><code>__get__(self, nesne, sahip)</code>: <code>u.fiyat</code> okunurken çağrılır. Sınıf üzerinden okunursa <code>nesne</code> <code>None</code> gelir.</li>
+<li><code>__set__(self, nesne, deger)</code>: <code>u.fiyat = 10</code> yazılırken çağrılır; doğrulamanın yeri burasıdır.</li>
+</ul>
+<pre class="py">class Pozitif:
+    def __set_name__(self, sahip, ad):
+        self.ad = ad
+
+    def __get__(self, nesne, sahip=None):
+        if nesne is None:
+            return self                      # Urun.fiyat -&gt; descriptor'ın kendisi
+        return nesne.__dict__[self.ad]
+
+    def __set__(self, nesne, deger):
+        if not isinstance(deger, (int, float)) or deger &lt;= 0:
+            raise ValueError(f"{self.ad} pozitif sayı olmalı, gelen: {deger!r}")
+        nesne.__dict__[self.ad] = deger      # değeri NESNEDE sakla
+
+class Urun:
+    fiyat = Pozitif()
+    stok = Pozitif()
+
+    def __init__(self, ad, fiyat, stok):
+        self.ad, self.fiyat, self.stok = ad, fiyat, stok
+
+cay = Urun("Çay", 85.5, 40)
+kahve = Urun("Kahve", 240, 12)
+print(cay.fiyat, kahve.fiyat)
+try:
+    cay.stok = -3
+except ValueError as h:
+    print("Hata:", h)</pre>
+
+<p>Değeri descriptor'ın kendisinde (<code>self.deger</code>) saklamak en sık yapılan hatadır: descriptor <b>sınıfa</b> aittir, yani tüm örnekler aynı descriptor'ı paylaşır ve bir ürünün fiyatı diğerini ezer. Değer her zaman <code>nesne.__dict__</code> içinde, <code>__set_name__</code> ile öğrenilen adla tutulur.</p>
+<div class="note"><b>Arama sırası</b><code>u.x</code> okunurken Python önce sınıfta <code>__set__</code> taşıyan bir <b>veri descriptor'ı</b> (data descriptor) arar; varsa o kazanır. Yoksa nesnenin <code>__dict__</code>'ine bakar, sonra sınıftaki sıradan öznitelik ya da yalnız <code>__get__</code> taşıyan descriptor'a (fonksiyonlar, <code>functools.cached_property</code>) gelir. Bu yüzden veri descriptor'ı değeri <code>__dict__</code>'te aynı adla saklasa da kontrolü kaybetmez.</div>
+
+<h2>__getattr__, __getattribute__ ve __setattr__</h2>
+<p>Bu üç kanca nesnenin öznitelik erişiminin tamamına araya girer:</p>
+<div class="tbl-wrap"><table>
+<tr><th>Kanca</th><th>Ne zaman çağrılır</th><th>Tipik kullanım</th><th>Risk</th></tr>
+<tr><td><code>__getattr__</code></td><td>Yalnızca normal arama başarısız olunca</td><td>Vekil (proxy), varsayılan değer, tembel yükleme</td><td>Düşük</td></tr>
+<tr><td><code>__getattribute__</code></td><td>HER öznitelik okumasında</td><td>Erişim günlüğü, çok özel durumlar</td><td>Yüksek: sonsuz özyineleme, yavaşlık</td></tr>
+<tr><td><code>__setattr__</code></td><td>HER atamada (<code>__init__</code> içindekiler dahil)</td><td>Salt okunur nesne, değişiklik izleme</td><td>Orta: içeride <code>self.x = ...</code> yazarsan özyineleme</td></tr>
+</table></div>
+<pre class="py">class Ayarlar:
+    """Eksik ayarlarda varsayılana düşen, değiştirilemeyen ayar nesnesi."""
+    VARSAYILAN = {"para_birimi": "TRY", "sayfa_boyu": 20}
+
+    def __init__(self, **degerler):
+        object.__setattr__(self, "_degerler", degerler)   # __setattr__'ı atla
+
+    def __getattr__(self, ad):          # yalnız bulunamayan adlarda çalışır
+        if ad in self._degerler:
+            return self._degerler[ad]
+        if ad in self.VARSAYILAN:
+            return self.VARSAYILAN[ad]
+        raise AttributeError(f"Bilinmeyen ayar: {ad}")
+
+    def __setattr__(self, ad, deger):
+        raise AttributeError("Ayarlar salt okunurdur")
+
+a = Ayarlar(sayfa_boyu=50)
+print(a.sayfa_boyu, a.para_birimi)
+for islem in (lambda: a.tema, lambda: setattr(a, "sayfa_boyu", 5)):
+    try:
+        islem()
+    except AttributeError as h:
+        print("AttributeError:", h)</pre>
+
+<div class="warn"><b>Özyineleme tuzağı</b><code>__setattr__</code> içinde <code>self.ad = deger</code> ya da <code>setattr(self, ad, deger)</code> yazarsan Python yine <code>__setattr__</code>'ı çağırır ve <code>RecursionError</code> alırsın. Gerçek atamayı <code>object.__setattr__(self, ad, deger)</code> ya da <code>self.__dict__[ad] = deger</code> ile yap. Aynı kural <code>__getattribute__</code> için de geçerlidir: içeride <code>object.__getattribute__(self, ad)</code> kullan.</div>
+
+<h2>Metaclass: ne zaman gerçekten gerekir?</h2>
+<p>Metaclass, sınıfın sınıfıdır; <code>type</code>'tan türetilir ve sınıf <b>oluşturulurken</b> araya girer. Python çekirdek geliştiricisi Tim Peters'ın sözü meşhurdur: "Metaclass'a ihtiyacın olup olmadığını merak ediyorsan, ihtiyacın yoktur." Yukarıdaki tablodaki araçlar vakaların çok büyük bölümünü çözer. Metaclass'ın gerçekten gerektiği yerler: sınıf gövdesinin sözlüğünü değiştirmek (<code>__prepare__</code>), sınıfın kendisine operatör kazandırmak (Enum'un <code>len(Renk)</code> ve <code>Renk["KIRMIZI"]</code> desteği gibi), ABC'nin <code>isinstance</code> davranışı gibi tür sistemi oyunları.</p>
+<pre class="py">class ZorunluMetotMeta(type):
+    """Alt sınıflarda 'hesapla' metodunu zorunlu kılar (gösterim)."""
+    def __new__(mcs, ad, tabanlar, sozluk):
+        cls = super().__new__(mcs, ad, tabanlar, sozluk)
+        if tabanlar and "hesapla" not in sozluk:
+            raise TypeError(f"{ad} sınıfı hesapla() tanımlamalı")
+        return cls
+
+    def __len__(cls):                  # sınıfın kendisine len() kazandırır
+        return len([a for a in vars(cls) if not a.startswith("_")])
+
+class Komisyon(metaclass=ZorunluMetotMeta):
+    pass
+
+class EftKomisyonu(Komisyon):
+    oran = 0.002
+    def hesapla(self, tutar):
+        return round(tutar * self.oran, 2)
+
+print(EftKomisyonu().hesapla(15000), len(EftKomisyonu))
+try:
+    class HataliKomisyon(Komisyon):
+        oran = 0.01
+except TypeError as h:
+    print("TypeError:", h)</pre>
+
+<p>Aynı zorunluluğu <code>abc.ABC</code> ve <code>@abstractmethod</code> ile ya da <code>__init_subclass__</code> içinde <code>hasattr</code> kontrolüyle de kurabilirsin; ikisi de daha okunurdur. <code>len(EftKomisyonu)</code> gibi sınıfın kendisine davranış eklemek ise yalnız metaclass ile mümkündür. Ayrıca iki farklı metaclass'a sahip tabanlardan türetmek "metaclass conflict" hatası verir; kütüphane kodunda metaclass kullanmak, kullanıcılarının elini bağlar.</p>
+
+<h2>inspect: kodu çalışırken incelemek</h2>
+<p><code>inspect</code> modülü fonksiyonların imzasını, sınıfların üyelerini ve çağrı yığınını okumanı sağlar. pytest'in fixture enjeksiyonu ve FastAPI'nin parametre çözümlemesi tam olarak <code>inspect.signature</code> üzerine kuruludur.</p>
+<pre class="py">import inspect
+
+def kredi_teklifi(musteri_no: int, tutar: float, vade: int = 12, *, sigorta: bool = False):
+    """Kredi teklifi üretir."""
+    return {"musteri_no": musteri_no, "tutar": tutar, "vade": vade}
+
+imza = inspect.signature(kredi_teklifi)
+print(imza)
+for p in imza.parameters.values():
+    varsayilan = "zorunlu" if p.default is inspect.Parameter.empty else p.default
+    print(f"{p.name:12} {p.kind.name:22} {varsayilan}")
+
+# Sözlükten yalnız fonksiyonun kabul ettiği alanları seçip çağır
+istek = {"musteri_no": 7, "tutar": 50000, "kanal": "mobil"}
+kabul = {k: v for k, v in istek.items() if k in imza.parameters}
+print(kredi_teklifi(**kabul))
+
+class Hesap:
+    def yatir(self, t): ...
+    def cek(self, t): ...
+    def _ic(self): ...
+
+print([ad for ad, _ in inspect.getmembers(Hesap, inspect.isfunction) if not ad.startswith("_")])</pre>
+
+<div class="tip"><b>Kaynak koda erişim</b><code>inspect.getsource</code> fonksiyonun kaynak dosyasını okur; tarayıcıda ve etkileşimli ortamlarda çoğu zaman çalışmaz. Kod çözümlemek istiyorsan kaynağı bir metin olarak al ve <code>ast</code> ile işle.</div>
+
+<h2>ast: kodu çalıştırmadan çözümlemek</h2>
+<p><code>ast.parse</code> Python kaynağını soyut sözdizimi ağacına (abstract syntax tree) çevirir. ruff, black, mypy ve bandit gibi araçlar böyle çalışır: kodu çalıştırmadan okur, kural ihlallerini bulur. <code>ast.NodeVisitor</code>'dan türetip <code>visit_DugumAdi</code> metotları yazarak ilgilendiğin düğümleri yakalarsın.</p>
+<pre class="py">import ast
+
+kaynak = """
+import os
+def rapor(siparisler, esik=100):
+    print("başladı")
+    return [s for s in siparisler if s &gt; esik]
+
+def temizle(metin):
+    return eval(metin)
+"""
+
+agac = ast.parse(kaynak)
+
+class Denetci(ast.NodeVisitor):
+    def __init__(self):
+        self.fonksiyonlar, self.uyarilar = {}, []
+
+    def visit_FunctionDef(self, dugum):
+        self.fonksiyonlar[dugum.name] = len(dugum.args.args)
+        self.generic_visit(dugum)          # iç düğümleri de gez
+
+    def visit_Call(self, dugum):
+        if isinstance(dugum.func, ast.Name) and dugum.func.id in {"eval", "exec", "print"}:
+            self.uyarilar.append(f"satır {dugum.lineno}: {dugum.func.id}() kullanımı")
+        self.generic_visit(dugum)
+
+d = Denetci()
+d.visit(agac)
+print(d.fonksiyonlar)
+print(*d.uyarilar, sep="\n")
+print(ast.dump(ast.parse("tutar * 1.2", mode="eval").body))</pre>
+
+
+<h2>Dinamik import ve eklenti yükleme</h2>
+<p>Modül adını çalışma anında bir metinden alıp yüklemek için <code>importlib.import_module</code> kullanılır; içinden nesneyi <code>getattr</code> ile çekersin. Yapılandırma dosyasında <code>"rapor.bicim": "json"</code> yazıyorsa ilgili modülü bu yolla yüklersin.</p>
+<pre class="py">import importlib
+
+def nesne_yukle(yol):
+    """'paket.modul:nesne' biçimindeki yolu yükler."""
+    modul_adi, _, nesne_adi = yol.partition(":")
+    modul = importlib.import_module(modul_adi)
+    return getattr(modul, nesne_adi) if nesne_adi else modul
+
+dumps = nesne_yukle("json:dumps")
+karekok = nesne_yukle("math:sqrt")
+print(dumps({"sehir": "İzmir"}, ensure_ascii=False), karekok(144))
+try:
+    nesne_yukle("olmayan_modul:x")
+except ModuleNotFoundError as h:
+    print("Yüklenemedi:", h.name)</pre>
+
+<p>Bu kalıp gunicorn'un <code>app:create_app</code> sözdiziminde, Django'nun <code>INSTALLED_APPS</code> listesinde ve setuptools'un <code>entry_points</code> tanımlarında karşına çıkar. Yalnızca <b>güvendiğin</b> yollardan yükle; kullanıcının yazdığı bir modül adını doğrudan import etmek, keyfi kod çalıştırmaya kapı açar.</p>
+
+<h2>exec ve eval: neden tehlikeli?</h2>
+<p><code>eval</code> bir ifadeyi, <code>exec</code> bir kod bloğunu çalıştırır. Kullanıcıdan gelen metni bunlara vermek, kullanıcıya sunucunda Python çalıştırma yetkisi vermektir. <code>eval(girdi, {"__builtins__": {}})</code> gibi "kısıtlama" denemeleri de bilinen yöntemlerle aşılır; güvenli kum havuzu (sandbox) değildir.</p>
+<pre class="py">import ast
+
+girdi = "[('AM-1', 120), ('AM-2', 80)]"
+veri = ast.literal_eval(girdi)        # yalnız sabit değerler: sayı, metin, liste, sözlük...
+print(veri, type(veri).__name__)
+
+for kotu in ["__import__('os').getcwd()", "open('x.txt', 'w')"]:
+    try:
+        ast.literal_eval(kotu)
+    except ValueError:
+        print("Reddedildi:", kotu)</pre>
+
+<div class="warn"><b>Kural</b>Dışarıdan gelen veriyi asla <code>eval</code>/<code>exec</code>'e verme. Sabit veri için <code>json.loads</code> ya da <code>ast.literal_eval</code>, formül için <code>ast</code> ile yalnız izin verilen düğümleri değerlendiren küçük bir yorumlayıcı (bu dersin meydan okuma görevi) kullan.</div>
+
+<div class="note"><b>Gerçek işte</b>Ilgaz Bank'ın kampanya ekibi faiz indirimi kurallarını bir yönetim panelinden formül olarak giriyor: <code>bakiye * 0.01 if segment == "premium" else 0</code>. İlk sürümde bu formüller <code>eval</code> ile çalıştırılıyordu; güvenlik denetiminde paneli kullanan biri sunucu dosyalarını okuyabildiği ortaya çıktı. Çözüm, <code>ast</code> ile yalnız sayı, izinli değişken adları ve aritmetik/karşılaştırma düğümlerini kabul eden bir değerlendiriciydi. Aynı ekip yeni kampanya türlerini <code>__init_subclass__</code> ile kaydedilen sınıflarla ekliyor; yeni tür eklemek merkezi koda dokunmayı gerektirmiyor.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Sınıf oluşturma sırası</h3>
+<p>Bir <code>class</code> ifadesi çalıştığında sıra şudur: metaclass'ın <code>__prepare__</code>'i gövde sözlüğünü hazırlar, gövde çalışır, <code>type.__new__</code> sınıfı oluşturur, bu sırada her descriptor için <code>__set_name__</code> çağrılır, ardından taban sınıfın <code>__init_subclass__</code>'ı çalışır, en son sınıf dekoratörleri aşağıdan yukarıya uygulanır. Bir kütüphane hata ayıklarken bu sırayı bilmek, "alan neden henüz kayıtlı değil?" sorusunu çözer.</p>
+<h3>Tip ipuçlarını okumak</h3>
+<p><code>cls.__annotations__</code> ham ipuçlarını verir; <code>from __future__ import annotations</code> kullanılan modüllerde bunlar metindir. Gerçek türler için <code>typing.get_type_hints(cls)</code> kullan. dataclass, pydantic ve SQLAlchemy'nin <code>Mapped[...]</code> sözdizimi bu bilgiyle alan üretir.</p>
+<h3>Maliyet</h3>
+<p>Her sihir bir bedel öder: hata izleri (traceback) uzar, IDE ve tip denetleyicisi dinamik üretilen öznitelikleri göremez, yeni gelen ekip arkadaşı kodun ne yaptığını anlamakta zorlanır. Kurumsal kodda kural: önce sade fonksiyon ve sınıf, sonra dekoratör, sonra <code>__init_subclass__</code>/descriptor, en son metaclass. Metaprogramlamayı uygulama kodunda değil, <b>çerçeve ve altyapı</b> katmanında, iyi test edilmiş ve belgelenmiş olarak kullan.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/metaprogramlama">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../flask/">← Flask ile web uygulaması</a><a href="../sqlalchemy-orm/">SQLAlchemy 2.0: Core, ORM, ilişkiler ve transaction →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

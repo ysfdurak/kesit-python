@@ -1,0 +1,348 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle | Kesit Python</title><meta name="description" content="iter/next protokolünü, __iter__/__next__ ile kendi yineleyici sınıfını ve yield ile üreteç fonksiyonlarını öğrenir; büyük log akışını belleğe almadan…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/iteratorler-uretecler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle"><meta property="og:description" content="iter/next protokolünü, __iter__/__next__ ile kendi yineleyici sınıfını ve yield ile üreteç fonksiyonlarını öğrenir; büyük log akışını belleğe almadan…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/iteratorler-uretecler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle","description":"iter/next protokolünü, __iter__/__next__ ile kendi yineleyici sınıfını ve yield ile üreteç fonksiyonlarını öğrenir; büyük log akışını belleğe almadan…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Orta","url":"https://ysfdurak.github.io/kesit-python/ders/iteratorler-uretecler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Orta · Pythonic kod</span><h1>Yineleyiciler ve üreteçler (iterators, generators): veriyi akıtarak işle</h1><p class="st-l">iter/next protokolünü, __iter__/__next__ ile kendi yineleyici sınıfını ve yield ile üreteç fonksiyonlarını öğrenir; büyük log akışını belleğe almadan satır satır işlersin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/iteratorler-uretecler">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Neden önemli?</h2>
+<p>Ilgaz Bank'ın işlem günlüğü (log) her gün milyonlarca satır üretir. "Dosyayı oku, listeye at, sonra işle" yaklaşımı küçük dosyada çalışır; büyük dosyada belleği doldurur ve program çöker. Python'ın çözümü, veriyi tek seferde değil <b>akıtarak</b> işlemektir: bir satır oku, işle, bırak, sonrakine geç. Bu akışın altyapısı yineleyici (iterator) protokolüdür; en kolay yazım biçimi de üreteç (generator) fonksiyonlarıdır. Bu dersi bitirdiğinde <code>for</code> döngüsünün aslında ne yaptığını, dosyaların neden satır satır okunabildiğini ve kendi veri akışlarını nasıl kuracağını bileceksin.</p>
+
+<h2>for döngüsünün perde arkası: iter ve next</h2>
+<p>Bir listeyi <code>for</code> ile gezdiğinde Python iki şey yapar: önce <code>iter(liste)</code> ile bir yineleyici alır, sonra bitene kadar <code>next(yineleyici)</code> çağırır. Bittiğini anlamanın yolu <code>StopIteration</code> istisnasıdır.</p>
+<pre class="py">islemler = ["EFT 500", "Havale 1200", "Kart 90"]
+
+it = iter(islemler)
+print(type(it).__name__)
+print(next(it))
+print(next(it))
+print(next(it))
+try:
+    next(it)
+except StopIteration:
+    print("Yineleyici tükendi")
+
+# for döngüsü tam olarak bunu yapar:
+it = iter(islemler)
+while True:
+    try:
+        satir = next(it)
+    except StopIteration:
+        break
+    print("işle:", satir)</pre>
+<p>İki kavramı ayır: <b>yinelenebilir</b> (iterable), üzerinde <code>iter()</code> çağrılabilen her şeydir: liste, demet, sözlük, metin, dosya, range. <b>Yineleyici</b> (iterator), <code>next()</code> ile öğe veren nesnedir. Liste yinelenebilirdir ama yineleyici değildir; <code>next(liste)</code> hata verir. <code>iter(liste)</code> ise yineleyici döndürür. Yineleyiciler tek yönlüdür: geri saramazsın, tükenince biter.</p>
+<div class="note"><b>next'in ikinci parametresi</b><code>next(it, None)</code> yazarsan tükendiğinde istisna yerine <code>None</code> döner. "İlk eşleşen öğe ya da yok" sorularında çok kullanışlıdır: <code>next((s for s in siparisler if s["no"] == 103), None)</code>.</div>
+
+<h2>Kendi yineleyici sınıfın: __iter__ ve __next__</h2>
+<p>Bir sınıf iki metot tanımlarsa yineleyici olur: <code>__iter__</code> kendisini döndürür, <code>__next__</code> sıradaki öğeyi döndürür ya da <code>StopIteration</code> fırlatır. Örnek: Ilgaz Bank'ta bir hesaba günlük faiz işleyen, verilen gün kadar bakiye üreten sayaç.</p>
+<pre class="py">class FaizAkisi:
+    """Her gün bakiyeye günlük faiz ekler; gun_sayisi kadar bakiye üretir."""
+
+    def __init__(self, bakiye, gunluk_oran, gun_sayisi):
+        self.bakiye = bakiye
+        self.oran = gunluk_oran
+        self.kalan = gun_sayisi
+
+    def __iter__(self):
+        return self
+
+    def __next__(self):
+        if self.kalan == 0:
+            raise StopIteration
+        self.kalan -= 1
+        self.bakiye = round(self.bakiye * (1 + self.oran), 2)
+        return self.bakiye
+
+for b in FaizAkisi(10000, 0.001, 3):
+    print(b)
+
+akis = FaizAkisi(500, 0.01, 2)
+print(next(akis), next(akis), next(akis, "bitti"))</pre>
+<p>Bu sınıf tüm günlerin listesini önceden hesaplamaz; her <code>next</code> çağrısında bir adım ilerler. Gün sayısı bir milyon olsa da bellekte yalnız üç sayı tutar. Fakat gördüğün gibi sınıf yazmak kalabalık: durum değişkenleri, iki metot, elle istisna. Python bunun kısa yolunu sunar.</p>
+
+<h2>yield: üreteç fonksiyonu</h2>
+<p>İçinde <code>yield</code> geçen bir fonksiyon, çağrıldığında çalışmaz; bir üreteç nesnesi döndürür. Her <code>next</code> çağrısında kod bir sonraki <code>yield</code>'e kadar koşar, değeri verir ve <b>olduğu yerde durur</b>; yerel değişkenler korunur. Fonksiyon bitince <code>StopIteration</code> kendiliğinden fırlar.</p>
+<pre class="py">def faiz_akisi(bakiye, gunluk_oran, gun_sayisi):
+    for _ in range(gun_sayisi):
+        bakiye = round(bakiye * (1 + gunluk_oran), 2)
+        yield bakiye
+
+g = faiz_akisi(10000, 0.001, 3)
+print(type(g).__name__)
+print(list(g))
+
+# Üreteç nerede durdu? Takip edelim
+def adimli():
+    print("  başladı")
+    yield 1
+    print("  1 ile 2 arası")
+    yield 2
+    print("  bitiyor")
+
+u = adimli()
+print("üreteç oluştu, henüz hiçbir şey basılmadı")
+print(next(u))
+print(next(u))
+print(next(u, "son"))</pre>
+<p>Önceki 15 satırlık sınıfın işini 4 satırlık fonksiyon yaptı. Çıktıdaki "başladı" yazısının ancak ilk <code>next</code>'te basıldığına dikkat et: üreteç <b>tembel</b>dir (lazy evaluation); istenmeden hiçbir şey hesaplamaz.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Özellik</th><th>Liste döndüren fonksiyon</th><th>Üreteç fonksiyonu</th></tr>
+<tr><td>Anahtar sözcük</td><td><code>return liste</code></td><td><code>yield öğe</code></td></tr>
+<tr><td>Ne zaman hesaplar</td><td>Çağrıda, hepsini</td><td>next geldikçe, birer birer</td></tr>
+<tr><td>Bellek</td><td>Tüm sonuç kadar</td><td>Tek öğe ve yerel değişkenler kadar</td></tr>
+<tr><td>Yeniden gezme</td><td>İstediğin kadar</td><td>Tek sefer; yeniden çağır</td></tr>
+<tr><td>Sonsuz dizi</td><td>İmkânsız</td><td>Doğal (while True + yield)</td></tr>
+<tr><td>len, indeks</td><td>Var</td><td>Yok</td></tr>
+</table></div>
+
+<h2>Büyük log akışını satır satır işleme</h2>
+<p>Asıl güç üreteçleri <b>zincirlemekte</b> ortaya çıkar. Her üreteç tek bir iş yapar ve sonucunu bir sonrakine akıtır; hiçbir aşamada tüm veri bellekte olmaz. Ilgaz Bank'ın işlem günlüğünden "HATA" satırlarını ayıklayıp tutarlarını toplayalım. Burada log'u bir metin olarak üretiyoruz; gerçekte dosya satırlarını gezersin ve dosya nesnesi de zaten tembel bir yineleyicidir.</p>
+<pre class="py">LOG = """2024-03-01 09:12 OK EFT 500
+2024-03-01 09:15 HATA Havale 1200
+2024-03-01 09:20 OK Kart 90
+
+2024-03-01 09:31 HATA EFT 2500
+2024-03-01 09:40 OK Havale 300
+"""
+
+def satirlar(metin):
+    """Ham satırları üret; boşları at."""
+    for satir in metin.splitlines():
+        satir = satir.strip()
+        if satir:
+            yield satir
+
+def ayristir(satirlar):
+    """Her satırı sözlüğe çevir."""
+    for s in satirlar:
+        tarih, saat, durum, tur, tutar = s.split()
+        yield {"saat": saat, "durum": durum, "tur": tur, "tutar": int(tutar)}
+
+def hatalar(kayitlar):
+    for k in kayitlar:
+        if k["durum"] == "HATA":
+            yield k
+
+boru = hatalar(ayristir(satirlar(LOG)))
+print(type(boru).__name__)   # henüz tek satır bile okunmadı
+
+toplam = 0
+for k in boru:
+    print(k["saat"], k["tur"], k["tutar"])
+    toplam += k["tutar"]
+print("Hatalı işlem toplamı:", toplam)</pre>
+<p>Üç üreteç üç küçük sorumluluk: temizle, ayrıştır, süz. Her birini ayrı ayrı test edebilir, yeniden kullanabilir, sıralarını değiştirebilirsin. Dosya büyüklüğü ne olursa olsun bellekte yalnız o anki satır bulunur. Gerçek dosyada ilk üreteci şöyle yazarsın: <code>with open(yol) as f: for satir in f: ...</code>.</p>
+<div class="tip"><b>Boru hattı deseni</b>Veri işleme kodunu "kaynak üreteci → dönüştürücü üreteçler → tüketici döngü" biçiminde kur. pandas'ta, Spark'ta, Unix borularında aynı desen vardır; burada öğrendiğin kafa yapısı oralara taşınır.</div>
+
+<h2>Sonsuz üreteçler ve erken durma</h2>
+<p>Üreteç tüm değerleri önceden üretmediği için sonsuz dizi tanımlamak güvenlidir; yeter ki tüketen taraf bir yerde dursun.</p>
+<pre class="py">def islem_no(baslangic=1000):
+    n = baslangic
+    while True:
+        yield f"TRX-{n}"
+        n += 1
+
+uretici = islem_no()
+for _ in range(3):
+    print(next(uretici))
+
+# break ile dur
+for no in islem_no(2000):
+    if no.endswith("3"):
+        print("durduk:", no)
+        break</pre>
+<div class="warn"><b>Sonsuz üreteci list() ile sarma</b><code>list(islem_no())</code> yazarsan program asla bitmez ve belleği tüketir. Sonsuz üreteçleri daima <code>next</code>, <code>break</code> ya da <code>itertools.islice</code> ile sınırla.</div>
+
+<h2>yield from: üreteçleri birleştir</h2>
+<p>Bir üreteç başka bir yinelenebilirin tüm öğelerini aynen aktaracaksa <code>for x in kaynak: yield x</code> yerine <code>yield from kaynak</code> yazarsın. Hem kısadır hem iç içe yapıları (ağaç, kategori ağacı) gezmek için doğal okunur.</p>
+<pre class="py">def ist_siparisleri():
+    yield from ["IST-1", "IST-2"]
+
+def ank_siparisleri():
+    yield "ANK-1"
+
+def tum_siparisler():
+    yield from ist_siparisleri()
+    yield from ank_siparisleri()
+    yield "MANUEL-1"
+
+print(list(tum_siparisler()))
+
+# Kategori ağacını düzleştir
+kategoriler = {
+    "ad": "Elektronik",
+    "alt": [
+        {"ad": "Telefon", "alt": []},
+        {"ad": "Bilgisayar", "alt": [{"ad": "Dizüstü", "alt": []}]},
+    ],
+}
+
+def adlar(kat):
+    yield kat["ad"]
+    for alt in kat["alt"]:
+        yield from adlar(alt)
+
+print(list(adlar(kategoriler)))</pre>
+<p><code>adlar</code> fonksiyonu kendini çağırıyor (özyineleme (recursion)) ve her alt dalın ürettiklerini <code>yield from</code> ile yukarı aktarıyor. Aynı şeyi iç içe döngülerle yazmak hem uzun hem hataya açıktır.</p>
+
+<h2>itertools'a köprü</h2>
+<p>Üreteçlerle yaptığın birçok işin hazır, C ile yazılmış ve tembel çalışan sürümü <code>itertools</code> modülündedir. Birkaç tanıdık:</p>
+<pre class="py">import itertools
+
+def islem_no(n=1):
+    while True:
+        yield f"TRX-{n}"
+        n += 1
+
+# Sonsuz üreteçten güvenle ilk 3'ü al
+print(list(itertools.islice(islem_no(), 3)))
+
+# Koşul bozulana kadar al
+tutarlar = [100, 250, 400, 90, 800]
+print(list(itertools.takewhile(lambda t: t &lt; 300, tutarlar)))
+
+# Birden fazla kaynağı tek akışta gez
+ist = ["IST-1", "IST-2"]
+ank = ["ANK-1"]
+print(list(itertools.chain(ist, ank)))
+
+# Koşarak toplam (running total)
+print(list(itertools.accumulate([100, 250, 400])))</pre>
+<p>Bunların hepsi üreteç döndürür; yani zincirine sorunsuz eklenirler. Ayrıntılı tur için ileride "collections/itertools" dersi var; bu derste bilmen gereken şu: kendi üretecini yazmadan önce itertools'ta hazırı var mı diye bak.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: akışlarla çalışmanın inceliği</h2>
+<p>iter/next, kendi yineleyici sınıfın, yield, yield from ve sonsuz üreteçleri gördün. Bu bölümde gerçek veri işlerinde en çok işine yarayacak kalıpları ekliyoruz: hangi nesnelerin "tek kullanımlık" olduğu, <code>next</code>'in varsayılan değeri ve <code>iter</code>'in az bilinen iki argümanlı biçimi, üreteçlerden boru hattı (pipeline) kurmak, veriyi parçalar (batch) hâlinde işlemek, tekrar tekrar gezilebilen sınıflar ve üretecin yaşam döngüsü. itertools araçlarının çoğu <b>collections ve itertools</b> dersinde ayrıca ele alınıyor.</p>
+
+<h3>Yinelenebilir mi, yineleyici mi? Kim tek kullanımlık?</h3>
+<p>Yinelenebilir (iterable), <code>iter()</code> verildiğinde her seferinde <b>yeni</b> bir yineleyici üreten nesnedir: liste, demet, sözlük, <code>range</code>. Yineleyici (iterator) ise kendi konumunu tutar ve bir kez tükenir. Python'un birçok yerleşik fonksiyonu yineleyici döndürür; bu yüzden ikinci kullanımda boş gelirler.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Nesne</th><th>Tür</th><th>İkinci for döngüsünde</th></tr>
+<tr><td><code>list</code>, <code>tuple</code>, <code>dict</code>, <code>str</code></td><td>yinelenebilir</td><td>Baştan gezer</td></tr>
+<tr><td><code>range(10)</code></td><td>yinelenebilir (tembel)</td><td>Baştan gezer</td></tr>
+<tr><td><code>zip</code>, <code>map</code>, <code>filter</code>, <code>enumerate</code>, <code>reversed</code></td><td>yineleyici</td><td>Boş</td></tr>
+<tr><td>Üreteç fonksiyonu/ifadesi</td><td>yineleyici</td><td>Boş</td></tr>
+<tr><td>Açık dosya nesnesi</td><td>yineleyici</td><td>Boş (imleç sonda)</td></tr>
+</table></div>
+<pre class="py">r = range(3)
+print(list(r), list(r))              # range tekrar gezilir
+
+eslesme = zip(["Ayşe", "Can"], [92, 61])
+print(list(eslesme), list(eslesme))  # zip ikinci kez boş
+
+it = iter([10, 20])
+print(iter(it) is it)                # yineleyicinin iter'i kendisidir
+print(next(it), next(it), next(it, "bitti"))   # varsayılan: StopIteration yok
+</pre>
+<div class="tip"><b>Basit kural</b><code>iter(x) is x</code> True ise x tek kullanımlık bir yineleyicidir. Bir fonksiyona veri verip içeride iki kez gezecek misin? Ya liste ver ya da fonksiyonun başında <code>veri = list(veri)</code> yaz.</div>
+
+<h3>iter(fonksiyon, bitiş_değeri)</h3>
+<p><code>iter</code>'e iki argüman verirsen anlamı değişir: birinci argüman argümansız bir fonksiyondur, Python onu tekrar tekrar çağırır ve dönen değer <b>bitiş değerine</b> (sentinel) eşit olunca durur. Dosyayı sabit boyutlu parçalarla okumanın klasik yoludur.</p>
+<pre class="py">import io
+from functools import partial
+
+akis = io.StringIO("TRX1TRX2TRX3TR")         # dosya gibi davranan metin
+for parca in iter(partial(akis.read, 4), ""):  # read(4) "" dönünce dur
+    print(repr(parca))
+
+kuyruk = [7, 3, 0, 9]                          # 0 gelince dur
+print(list(iter(kuyruk.pop, 9)))               # sondan: 9 hemen bitiş!
+print(list(iter(lambda: kuyruk.pop(0), 0)))    # baştan: 7, 3, sonra 0
+</pre>
+
+<h3>Üreteç boru hattı: her aşama bir fonksiyon</h3>
+<p>Büyük bir log dosyasını işlerken "oku → ayrıştır → süz → topla" aşamalarını ayrı üreteçler olarak yazıp birbirine bağlarsın. Hiçbir aşama listenin tamamını tutmaz; her satır boru hattından tek tek akar. Aşağıdaki çıktıda aşamaların iç içe (sırayla değil) çalıştığına dikkat et.</p>
+<pre class="py">LOG = """2026-10-27 09:01 TR01 havale 1500
+bozuk satır
+2026-10-27 09:05 TR02 eft 25000
+2026-10-27 09:07 TR01 havale 300"""
+
+def satirlar(metin):
+    for s in metin.splitlines():
+        print("  okundu:", s[:16])
+        yield s
+
+def ayristir(satir_akisi):
+    for s in satir_akisi:
+        parca = s.split()
+        if len(parca) == 5:
+            yield {"hesap": parca[2], "tur": parca[3], "tutar": float(parca[4])}
+
+def buyukler(kayitlar, esik):
+    return (k for k in kayitlar if k["tutar"] &gt;= esik)
+
+hat = buyukler(ayristir(satirlar(LOG)), 1000)
+print("Boru hattı kuruldu, henüz hiçbir şey okunmadı")
+for k in hat:
+    print("SONUÇ:", k)
+</pre>
+
+<h3>Parça parça (batch) işlemek</h3>
+<p>Veritabanına 100'erli gruplar hâlinde yazmak, API'ye 50'şer kayıt göndermek gibi işler için akışı sabit boyutlu parçalara bölersin. Python 3.12 bunun için <code>itertools.batched</code> getirdi; eski sürümlerde <code>islice</code> ile aynısını yazarsın.</p>
+<pre class="py">from itertools import islice, batched      # batched: Python 3.12+
+
+def parcalar(yinelenebilir, n):
+    it = iter(yinelenebilir)               # tek bir yineleyici şart
+    while parca := list(islice(it, n)):
+        yield parca
+
+print(list(parcalar(range(1, 8), 3)))
+print(list(batched(range(1, 8), 3)))      # demetler döndürür
+</pre>
+<div class="warn"><b>iter(...) satırını unutma</b><code>islice(liste, n)</code> her çağrıda listenin <b>başından</b> başlar; sonsuz döngüye girersin. Konumu tutan tek bir yineleyici oluşturup islice'a hep onu vermelisin.</div>
+
+<h3>Tekrar gezilebilen sınıf: __iter__ içinde yield</h3>
+<p>Kendi yineleyici sınıfında <code>__iter__</code> <code>self</code> döndürüyorsa nesne tek kullanımlıktır. Çoğu zaman istediğin ise "liste gibi davranan" bir koleksiyondur: her for döngüsünde baştan başlamalı. Çözüm: <code>__next__</code> yazma, <code>__iter__</code>'i üreteç fonksiyonu yap. Her çağrı yeni bir üreteç döndürür.</p>
+<pre class="py">class SiparisDefteri:
+    def __init__(self, siparisler):
+        self._siparisler = list(siparisler)
+
+    def __iter__(self):                    # her çağrıda yeni üreteç
+        for s in self._siparisler:
+            if s["durum"] != "iptal":
+                yield s
+
+defter = SiparisDefteri([{"no": 1, "durum": "ok"}, {"no": 2, "durum": "iptal"}, {"no": 3, "durum": "ok"}])
+print([s["no"] for s in defter])
+print([s["no"] for s in defter])          # yine baştan
+print(sum(1 for _ in defter), "geçerli sipariş")
+</pre>
+
+<h3>Üretecin yaşam döngüsü: return, close ve temizlik</h3>
+<p>Üreteç fonksiyonunda <code>return deger</code> yazabilirsin: akış biter ve değer <code>StopIteration.value</code> içinde taşınır; <code>yield from</code> bu değeri sonuç olarak verir. Tüketici akışı yarıda bırakırsa (break) üreteç çöp toplanırken ya da <code>close()</code> çağrılınca içerideki <code>finally</code> bloğu çalışır; dosya, bağlantı gibi kaynakları orada kapatırsın.</p>
+<pre class="py">def kayit_oku():
+    print("bağlantı açıldı")
+    try:
+        for i in range(1, 100):
+            yield i
+    finally:
+        print("bağlantı kapandı")
+
+g = kayit_oku()
+for x in g:
+    if x == 3:
+        break
+g.close()                                  # finally hemen çalışır
+
+def alt():
+    yield "a"
+    return 42
+
+def ust():
+    sonuc = yield from alt()
+    yield f"alt üreteç {sonuc} döndürdü"
+
+print(list(ust()))
+</pre>
+
+<div class="note"><b>Gerçek işte</b>Veri mühendisliğinde "akış" (streaming) düşüncesi her yerdedir: gigabaytlık CSV'yi satır satır okuyup 1000'erlik paketlerle veritabanına yazan bir ETL betiği, birkaç megabayt bellekle çalışır. Aynı işi önce <code>readlines()</code> ile listeye alıp yapan betik ise sunucuda bellek yetmeyince çöker. pandas'ın <code>read_csv(chunksize=...)</code>, veritabanı imleçlerinin <code>fetchmany</code>'si ve bulut SDK'larının sayfalama (pagination) yardımcıları bu bölümdeki kalıpların kütüphane hâlidir.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Üreteçle iki yönlü iletişim</h3>
+<p><code>yield</code> bir ifadedir, değer de alabilir: <code>alinan = yield verilen</code> yazdığında dışarıdan <code>g.send(deger)</code> ile üretece veri gönderebilirsin. Bu özellik, durumu koruyan işlemci (coroutine) yazmayı sağlar; örneğin koşan ortalama hesaplayan, her gönderilen tutarda güncel ortalamayı veren bir üreteç. <code>g.close()</code> üreteci düzgünce kapatır, içindeki <code>finally</code> bloklarını çalıştırır. Python'ın <code>asyncio</code> altyapısı tarihsel olarak bu mekanizmanın üstüne kuruldu; İleri seviyedeki async dersinde "await" gördüğünde "yield'in bir kuzeni" diye düşünebilirsin.</p>
+<h3>İş hayatında nasıl görünür?</h3>
+<p>Veri mühendisliği işlerinde "dosyayı bir seferde okuma" kuralı neredeyse kutsaldır. Bir ETL betiği 20 GB'lık CSV'yi satır satır gezer, her satırı dönüştürür ve hedefe parça parça yazar; bu dersin boru hattı deseni birebir oradadır. API sayfalama (pagination) kodu da tipik bir üreteçtir: "sayfa çek, kayıtları yield et, sonraki sayfa varsa devam et"; tüketici tarafı sayfa kavramını hiç görmez. Kod incelemesinde (code review) "bu fonksiyon liste döndürmek yerine yield etmeli" notu, bellek sorununu daha oluşmadan önleyen klasik bir yorumdur.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/iteratorler-uretecler">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../kapsamli-ifadeler/">← Comprehension'lar (liste, sözlük, küme kurma): tek satırda dönüştür ve süz</a><a href="../fonksiyonel/">Fonksiyonel araçlar: lambda, map, sorted key ve kapanış (closure) →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

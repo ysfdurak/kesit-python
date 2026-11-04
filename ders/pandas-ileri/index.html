@@ -1,0 +1,209 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri pandas: şekil, pencere ve zincir | Kesit Python</title><meta name="description" content="MultiIndex, melt/pivot ile yeniden şekillendirme, rolling/expanding/ewm pencereleri, rank ve cumcount, kategorik tür, assign/pipe/query zinciri, np.select…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/pandas-ileri/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri pandas: şekil, pencere ve zincir"><meta property="og:description" content="MultiIndex, melt/pivot ile yeniden şekillendirme, rolling/expanding/ewm pencereleri, rank ve cumcount, kategorik tür, assign/pipe/query zinciri, np.select…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/pandas-ileri/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri pandas: şekil, pencere ve zincir","description":"MultiIndex, melt/pivot ile yeniden şekillendirme, rolling/expanding/ewm pencereleri, rank ve cumcount, kategorik tür, assign/pipe/query zinciri, np.select…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/pandas-ileri/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Veri analizi ve bilimi</span><h1>İleri pandas: şekil, pencere ve zincir</h1><p class="st-l">MultiIndex, melt/pivot ile yeniden şekillendirme, rolling/expanding/ewm pencereleri, rank ve cumcount, kategorik tür, assign/pipe/query zinciri, np.select ile vektörleştirme ve validate/indicator ile güvenli merge.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-ileri">Uygulamada aç, 18 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden "ileri" pandas?</h2>
+<p>Seçme, filtreleme ve temizliği <b>pandas giriş</b> ile <b>veri temizleme</b> derslerinde, <code>groupby</code>, <code>pivot_table</code> ve <code>merge</code>'ü <b>groupby, pivot, merge</b> dersinde gördün. Gerçek işte bunlar yetmeye başladığı an şöyle sorular gelir: "Her şehirde ciroya göre ilk 3 ürün hangisi?", "Excel'den gelen ay sütunlarını nasıl tek sütuna çeviririm?", "Son 7 günün hareketli ortalaması düşüyor mu?", "Birleştirmeden sonra neden satır sayım arttı?". Bu ders, analistin günlük işindeki bu ikinci katmanı kapsar: çok seviyeli index (MultiIndex), yeniden şekillendirme (reshaping), pencere fonksiyonları (window functions), sıralama, kategorik tür, zincirleme yazım (method chaining), vektörleştirme (vectorization) ve güvenli birleştirme.</p>
+<p>Tüm örnekler Anadolu Market'in küçük bir satış tablosu üzerinde. Kodları çalıştır, çıktıyı oku, sonra bir değeri değiştirip tekrar çalıştır; ileri pandas en hızlı böyle oturur.</p>
+
+<h2>MultiIndex: iki anahtarlı index</h2>
+<p>Birden çok sütunla gruplayınca ya da <code>set_index(["sehir", "ay"])</code> yazınca index iki seviyeli olur. Her satırın adresi artık bir demettir (tuple): <code>("Ankara", 2)</code>. Bu yapı "şehir içinde ay" gibi hiyerarşik veriyi doğal biçimde taşır.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["Ankara", "Ankara", "İzmir", "İzmir", "Bursa", "Bursa"],
+    "ay": [1, 2, 1, 2, 1, 2],
+    "ciro": [1200, 1500, 800, 950, 600, 720],
+}).set_index(["sehir", "ay"]).sort_index()
+
+print(df)
+print(df.loc[("Ankara", 2), "ciro"])          # tek hücre: demetle adresle
+print(df.loc["İzmir"])                          # dış seviyeyle seç
+print(df.xs(1, level="ay"))                     # iç seviyeden kesit: tüm şehirlerin 1. ayı
+print(df.swaplevel().sort_index().head(3))      # seviyelerin yerini değiştir
+print(df["ciro"].unstack("ay"))                 # iç seviyeyi sütunlara aç</pre>
+<p><code>xs</code> (cross-section) iç seviyeden seçim yapmanın en okunur yoludur. <code>swaplevel</code> seviyelerin sırasını değiştirir; ardından mutlaka <code>sort_index()</code> çağır, çünkü sırasız MultiIndex üzerinde dilimleme hem yavaştır hem de <code>UnsortedIndexError</code> verebilir. <code>unstack</code> bir seviyeyi sütunlara açar, <code>stack</code> tersini yapar.</p>
+<div class="tip"><b>Ne zaman MultiIndex, ne zaman düz tablo?</b>Ara hesaplarda MultiIndex güçlüdür (<code>unstack</code>, <code>xs</code>). Rapor, CSV, Excel ya da başka bir sisteme gidecek tabloda <code>reset_index()</code> ile düz sütunlara dön; çoğu araç MultiIndex'i anlamaz.</div>
+
+<h2>Yeniden şekillendirme: geniş ↔ uzun</h2>
+<p>Aynı veri iki biçimde durabilir. <b>Geniş (wide)</b> biçimde her ay bir sütundur; insan okumak için rahattır, Excel raporları böyle gelir. <b>Uzun (long, tidy)</b> biçimde her satır tek bir gözlemdir: şehir, ay, ciro. Gruplama, grafik (özellikle seaborn) ve veritabanı uzun biçimi sever.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İşlem</th><th>Yön</th><th>Ne zaman</th></tr>
+<tr><td><code>melt(id_vars, var_name, value_name)</code></td><td>geniş → uzun</td><td>Excel'den gelen ay/ürün sütunlarını tek sütuna indirmek</td></tr>
+<tr><td><code>pivot(index, columns, values)</code></td><td>uzun → geniş</td><td>Anahtar çiftleri tekilse; yinelenen varsa hata verir</td></tr>
+<tr><td><code>pivot_table(..., aggfunc)</code></td><td>uzun → geniş</td><td>Yinelenen çiftler toplanacaksa (sum, mean)</td></tr>
+<tr><td><code>stack()</code> / <code>unstack()</code></td><td>sütun ↔ index seviyesi</td><td>MultiIndex ile çalışırken</td></tr>
+</table></div>
+<pre class="py">import pandas as pd
+
+genis = pd.DataFrame({
+    "sehir": ["Ankara", "İzmir"],
+    "Oca": [1200, 800], "Şub": [1500, 950], "Mar": [1400, 1010],
+})
+uzun = genis.melt(id_vars="sehir", var_name="ay", value_name="ciro")
+print(uzun)
+
+geri = uzun.pivot(index="sehir", columns="ay", values="ciro")
+print(geri[["Oca", "Şub", "Mar"]])          # sütun sırasını açıkça ver
+
+# Aynı şehir-ay çifti iki kez varsa pivot hata verir, pivot_table toplar
+uzun2 = pd.concat([uzun, pd.DataFrame({"sehir": ["Ankara"], "ay": ["Oca"], "ciro": [100]})])
+print(uzun2.pivot_table(index="sehir", columns="ay", values="ciro", aggfunc="sum"))</pre>
+<div class="warn"><b>pivot ile pivot_table farkı</b><code>pivot</code> yalnızca yeniden düzenler; aynı (index, columns) çifti iki kez geçerse <code>ValueError: Index contains duplicate entries</code> verir. Bu hata çoğu zaman veride beklemediğin bir yineleme olduğunu söyler: önce nedenini bul, sonra bilinçli olarak <code>pivot_table(aggfunc="sum")</code> seç.</div>
+
+<h2>Pencere fonksiyonları: rolling, expanding, ewm</h2>
+<p>Günlük ciro gürültülüdür; eğilimi görmek için <b>hareketli ortalama</b> (rolling mean) kullanılır. <code>rolling(3)</code> son 3 satırlık bir pencere kaydırır; pencere dolana kadar sonuç <code>NaN</code> olur, <code>min_periods=1</code> ile ilk satırlarda da değer alırsın. <code>expanding()</code> başlangıçtan bugüne biriken pencere (kümülatif ortalama), <code>ewm(span=3)</code> ise yakın geçmişe daha çok ağırlık veren üstel ağırlıklı ortalamadır (exponentially weighted).</p>
+<pre class="py">import pandas as pd
+
+satis = pd.DataFrame({
+    "sube": ["Kadıköy"] * 5 + ["Çankaya"] * 5,
+    "gun": list(range(1, 6)) * 2,
+    "adet": [10, 14, 9, 20, 18, 5, 7, 6, 9, 12],
+})
+satis["ort3"] = (satis.groupby("sube")["adet"]
+                 .transform(lambda s: s.rolling(3, min_periods=1).mean())
+                 .round(2))
+satis["kum_ort"] = satis.groupby("sube")["adet"].transform(lambda s: s.expanding().mean()).round(2)
+satis["ewm"] = satis.groupby("sube")["adet"].transform(lambda s: s.ewm(span=3).mean()).round(2)
+print(satis)</pre>
+<p>Grup içinde pencere istiyorsan (her şube kendi geçmişine baksın) <code>groupby(...).transform(lambda s: s.rolling(...))</code> kalıbını kullan. Gruplamadan <code>rolling</code> çağırırsan Kadıköy'ün son günleri Çankaya'nın ilk gününe karışır; bu, en sık yapılan pencere hatasıdır.</p>
+
+<h2>Sıralama, grup içi sıra ve kümülatif işlemler</h2>
+<p><code>rank</code> değerlere sıra numarası verir. Eşitlikleri nasıl ele aldığı <code>method</code> ile seçilir. SQL'deki <code>ROW_NUMBER</code>, <code>RANK</code>, <code>DENSE_RANK</code> karşılıkları buradadır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>method</th><th>[300, 200, 200, 100] azalan</th><th>SQL karşılığı</th></tr>
+<tr><td><code>"first"</code></td><td>1, 2, 3, 4</td><td>ROW_NUMBER</td></tr>
+<tr><td><code>"min"</code></td><td>1, 2, 2, 4</td><td>RANK</td></tr>
+<tr><td><code>"dense"</code></td><td>1, 2, 2, 3</td><td>DENSE_RANK</td></tr>
+<tr><td><code>"average"</code> (varsayılan)</td><td>1, 2.5, 2.5, 4</td><td>—</td></tr>
+</table></div>
+<pre class="py">import pandas as pd
+
+urun = pd.DataFrame({
+    "sehir": ["Ankara", "Ankara", "Ankara", "İzmir", "İzmir", "İzmir"],
+    "urun": ["Çay", "Kahve", "Süt", "Çay", "Kahve", "Süt"],
+    "ciro": [500, 900, 500, 300, 250, 700],
+})
+urun["sira"] = urun.groupby("sehir")["ciro"].rank(method="dense", ascending=False).astype(int)
+print(urun.sort_values(["sehir", "sira"]))
+print(urun[urun["sira"] == 1])            # her şehrin bir numarası (eşitse ikisi de)
+
+siparis = pd.DataFrame({"musteri": ["A", "B", "A", "A", "B"], "tutar": [100, 50, 70, 30, 20]})
+siparis["kacinci"] = siparis.groupby("musteri").cumcount() + 1
+siparis["kumulatif"] = siparis.groupby("musteri")["tutar"].cumsum()
+print(siparis)</pre>
+<p><code>cumcount</code> grup içinde 0'dan başlayan sıra numarasıdır; "müşterinin kaçıncı siparişi?" sorusunun cevabıdır ve "ilk siparişi olanları" bulmak için idealdir. <code>cumsum</code>, <code>cummax</code>, <code>cumprod</code> ise kümülatif değerleri verir. Bunlar satır sırasına bağlıdır: önce tarihe göre sırala.</p>
+
+<h2>Kategorik tür ve bellek</h2>
+<p>Bir milyon satırda "İstanbul" metni bir milyon kez saklanır. <code>category</code> türü her farklı değeri bir kez saklar, satırlarda yalnızca küçük tam sayı kodları tutar. Az sayıda farklı değeri olan sütunlarda (şehir, kategori, durum) bellek ciddi düşer ve <code>groupby</code> hızlanır. Sıralı kategori (<code>ordered=True</code>) ise "Bronz &lt; Gümüş &lt; Altın" gibi anlamlı sıralama ve karşılaştırma sağlar.</p>
+<pre class="py">import pandas as pd
+
+n = 30_000
+df = pd.DataFrame({
+    "sehir": ["İstanbul", "Ankara", "İzmir"] * (n // 3),
+    "segment": ["Bronz", "Altın", "Gümüş"] * (n // 3),
+})
+once = df.memory_usage(deep=True).sum()
+df["sehir"] = df["sehir"].astype("category")
+seg_tur = pd.CategoricalDtype(["Bronz", "Gümüş", "Altın"], ordered=True)
+df["segment"] = df["segment"].astype(seg_tur)
+sonra = df.memory_usage(deep=True).sum()
+print(f"bellek: {once:,} → {sonra:,} bayt")
+print((df["segment"] &gt;= "Gümüş").sum(), "satır Gümüş ve üstü")
+print(df["segment"].cat.categories.tolist())</pre>
+<p>Kategorik sütunla <code>groupby</code> yaparken <code>observed=True</code> ver; aksi hâlde veride olmayan kategoriler de sıfır satırı olarak gelir.</p>
+
+<h2>Zincirleme yazım: assign, pipe, query</h2>
+<p>Ara değişkenlerle dolu bir defter yerine tek bir okunur boru hattı (pipeline) yazabilirsin. <code>assign</code> yeni sütun ekler ve <b>yeni</b> DataFrame döndürür; içinde <code>lambda d:</code> kullanınca bir önceki adımın sonucuna erişirsin. <code>query</code> filtreyi metin olarak yazar (<code>@</code> ile Python değişkenine erişir). <code>pipe</code> kendi fonksiyonunu zincirin ortasına takar.</p>
+<pre class="py">import pandas as pd
+
+df = pd.DataFrame({
+    "sehir": ["Ankara", "İzmir", "Ankara", "Bursa", "İzmir"],
+    "adet": [3, 1, 5, 2, 4],
+    "fiyat": [120.0, 899.0, 45.5, 250.0, 129.9],
+})
+esik = 200
+
+def kdv_ekle(d, oran=0.20):
+    return d.assign(kdvli=lambda x: (x["tutar"] * (1 + oran)).round(2))
+
+rapor = (
+    df
+    .assign(tutar=lambda d: d["adet"] * d["fiyat"])
+    .query("tutar &gt; @esik")
+    .pipe(kdv_ekle, oran=0.20)
+    .sort_values("tutar", ascending=False)
+    .reset_index(drop=True)
+)
+print(rapor)</pre>
+<p>Zincir, her adımın girdisini değiştirmediği için yan etkisizdir; hata ayıklarken herhangi bir satırı yoruma alıp sonucu görebilirsin. Çok uzayan zinciri anlamlı adlı <code>pipe</code> fonksiyonlarına böl.</p>
+
+<h2>apply mı, vektörleştirme mi, np.where/np.select mi?</h2>
+<p><code>apply(axis=1)</code> her satır için Python fonksiyonu çağırır; okunur ama yavaştır. Aynı işi sütun aritmetiği, <code>np.where</code> (iki seçenek) ya da <code>np.select</code> (çok koşul) ile yazmak genellikle onlarca kat hızlıdır.</p>
+<pre class="py">import numpy as np
+import pandas as pd
+import time
+
+rng = np.random.default_rng(0)
+df = pd.DataFrame({"tutar": rng.integers(10, 2000, 100_000)})
+
+t0 = time.perf_counter()
+yavas = df.apply(lambda r: "Altın" if r["tutar"] &gt;= 1000 else ("Gümüş" if r["tutar"] &gt;= 500 else "Bronz"), axis=1)
+t1 = time.perf_counter()
+kosullar = [df["tutar"] &gt;= 1000, df["tutar"] &gt;= 500]
+hizli = np.select(kosullar, ["Altın", "Gümüş"], default="Bronz")
+t2 = time.perf_counter()
+print("aynı mı:", (yavas.to_numpy() == hizli).all())
+print(f"apply: {t1 - t0:.3f} sn, np.select: {t2 - t1:.4f} sn")
+print("iki seçenek:", np.where(df["tutar"].head(3) &gt;= 1000, "büyük", "küçük"))</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Araç</th><th>Hız</th><th>Kullan</th></tr>
+<tr><td>Sütun aritmetiği, <code>.str</code>, <code>.dt</code></td><td>En hızlı</td><td>Her zaman ilk tercih</td></tr>
+<tr><td><code>np.where</code> / <code>np.select</code></td><td>Çok hızlı</td><td>Koşula göre değer atama</td></tr>
+<tr><td><code>Series.map(sözlük)</code></td><td>Hızlı</td><td>Kod → ad eşleme</td></tr>
+<tr><td><code>apply(axis=1)</code></td><td>Yavaş</td><td>Gerçekten satır satır mantık (dış API, karmaşık metin)</td></tr>
+<tr><td><code>iterrows</code></td><td>En yavaş</td><td>Neredeyse hiç; gerekirse <code>itertuples</code></td></tr>
+</table></div>
+
+<h2>Güvenli birleştirme: validate, indicator, yinelenen anahtar</h2>
+<p><code>merge</code>'ün en tehlikeli sessiz hatası, sağ tabloda anahtarın yinelenmesidir: siparişler çoğalır, ciro şişer ve kimse fark etmez. <code>validate</code> beklentini yazar ve bozulursa <code>MergeError</code> verir. <code>indicator=True</code> her satıra <code>_merge</code> sütunu ekler: <code>both</code>, <code>left_only</code>, <code>right_only</code>.</p>
+<pre class="py">import pandas as pd
+
+siparis = pd.DataFrame({"siparis_id": [1, 2, 3, 4], "musteri_id": [10, 20, 10, 99], "tutar": [150, 80, 60, 40]})
+musteri = pd.DataFrame({"musteri_id": [10, 20, 20], "ad": ["Ayşe", "Mehmet", "Mehmet (eski kayıt)"]})
+
+print("yinelenen anahtar:", musteri["musteri_id"].duplicated().sum())
+try:
+    pd.merge(siparis, musteri, on="musteri_id", how="left", validate="many_to_one")
+except pd.errors.MergeError as e:
+    print("Yakalandı:", e)
+
+musteri = musteri.drop_duplicates("musteri_id", keep="first")
+b = pd.merge(siparis, musteri, on="musteri_id", how="left", validate="many_to_one", indicator=True)
+print(b)
+print("eşleşmeyen sipariş:", b.loc[b["_merge"] == "left_only", "siparis_id"].tolist())
+print("satır sayısı korundu mu:", len(b) == len(siparis))</pre>
+<p><code>validate</code> değerleri: <code>"one_to_one"</code>, <code>"one_to_many"</code>, <code>"many_to_one"</code>, <code>"many_to_many"</code>. Sipariş (çok) → müşteri (tek) için <code>"many_to_one"</code> yazılır. Birleştirmeden sonra <code>len</code> karşılaştırması da ucuz ve hayat kurtaran bir kontroldür.</p>
+<div class="warn"><b>Zincirleme atama çalışmaz</b><code>df[df["sehir"] == "Ankara"]["indirim"] = 0.1</code> önce bir kopya üretir, atama o kopyaya gider ve asıl tablo değişmez. pandas 2'de uyarı, pandas 3'te (Copy-on-Write) yine uyarı ve hiçbir etki. Doğrusu tek adımda: <code>df.loc[maske, "indirim"] = 0.1</code>.</div>
+
+<div class="note"><b>Gerçek işte</b>Bir perakende analiz ekibinde aylık "şehir × kategori" raporu genellikle şu boru hattıdır: ham sipariş tablosu → müşteri ve ürün tablolarıyla <code>validate</code>'li <code>merge</code> → <code>assign</code> ile tutar → <code>pivot_table</code> → şehir sıralaması için <code>rank</code> → <code>reset_index</code> ile Excel'e. Her birleştirmeden sonra satır sayısını loglamak ve <code>indicator</code> ile eşleşmeyenleri ayrı bir "veri kalitesi" sekmesine yazmak, raporun güvenilirliğini yöneticinin gözünde belirleyen alışkanlıktır.</div>
+
+<section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Performans ipuçları</h3>
+<ul>
+<li><b>Okurken küçült:</b> <code>read_csv(usecols=[...], dtype={"sehir": "category", "adet": "int32"})</code> gereksiz sütunu hiç yüklemez ve doğru türle başlar.</li>
+<li><b>Tür daralt:</b> <code>pd.to_numeric(s, downcast="integer")</code> int64'ü sığıyorsa int8/int16/int32'ye indirir.</li>
+<li><b>groupby'da sort=False:</b> sonuç sırası önemli değilse sıralama maliyetinden kurtulursun.</li>
+<li><b>Döngü gerekiyorsa itertuples:</b> <code>iterrows</code>'tan birkaç kat hızlıdır, çünkü her satır için Series üretmez.</li>
+<li><b>Önce ölç:</b> <code>%timeit</code> ya da <code>time.perf_counter</code> ile ölçmeden optimize etme; çoğu zaman darboğaz tek bir <code>apply</code>'dır.</li>
+<li><b>Sınırı bil:</b> Veri belleğe sığmıyorsa parça parça oku (<code>chunksize</code>) ya da sütunlu motorlara (polars, DuckDB) geç; pandas'ta pyarrow destekli türler de bellek kazandırır.</li>
+</ul>
+<h3>Grup içi ilk N</h3>
+<p>"Her şehirde en çok satan 3 ürün" için iki yol vardır: <code>sort_values("ciro", ascending=False).groupby("sehir").head(3)</code> (hızlı, eşitlikte keyfi) ya da <code>rank(method="dense")</code> ile <code>sira &lt;= 3</code> filtresi (eşitlikleri birlikte tutar). İş kuralı hangisini istiyorsa onu seç ve raporda belirt.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/pandas-ileri">Alıştırmalara geç (18)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../istatistik/">← İstatistik ve hipotez testi</a><a href="../pandas-zaman-serisi/">Zaman serisi analizi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

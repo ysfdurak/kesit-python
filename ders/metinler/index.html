@@ -1,0 +1,151 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Metinler (string) | Kesit Python</title><meta name="description" content="Metinleri dilimler, upper/strip/split/join/replace/find metotlarıyla temizler, f-string ile biçimler ve değişmezlik kuralını öğrenirsin."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/metinler/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Metinler (string)"><meta property="og:description" content="Metinleri dilimler, upper/strip/split/join/replace/find metotlarıyla temizler, f-string ile biçimler ve değişmezlik kuralını öğrenirsin."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/metinler/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Metinler (string)","description":"Metinleri dilimler, upper/strip/split/join/replace/find metotlarıyla temizler, f-string ile biçimler ve değişmezlik kuralını öğrenirsin.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"Temel","url":"https://ysfdurak.github.io/kesit-python/ders/metinler/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">Temel · Değerler ve metinler</span><h1>Metinler (string)</h1><p class="st-l">Metinleri dilimler, upper/strip/split/join/replace/find metotlarıyla temizler, f-string ile biçimler ve değişmezlik kuralını öğrenirsin.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/metinler">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory">
+<h2>Metin her yerde</h2>
+<p>Anadolu Market'in müşteri tablosunda e-posta adresleri bazen büyük harfli, bazen başında boşluklu; şehir alanında "istanbul", "İstanbul" ve "ISTANBUL" aynı anda var. Veri temizliğinin büyük kısmı metin (string) işlemidir. Python'ın metin desteği bu yüzden zengindir: dilimleme, onlarca metot ve f-string biçimleme.</p>
+
+<h2>Metin oluşturma ve temel işlemler</h2>
+<pre class="py">ad = "Ayşe"
+soyad = 'Yılmaz'
+tam_ad = ad + " " + soyad        # birleştirme
+print(tam_ad)
+print(len(tam_ad))                # karakter sayısı
+print("-" * 10)                   # tekrar
+print("Yıl" in tam_ad)            # içeriyor mu?
+adres = """Atatürk Cad. No: 5
+Konak / İzmir"""
+print(adres)</pre>
+<p>Üç tırnak, satır sonlarını içeren uzun metinler için. <code>len</code> karakter sayısını verir; Türkçe karakterler de tek karakter sayılır. <code>in</code> operatörü bir parçanın metinde geçip geçmediğini <code>True</code>/<code>False</code> olarak söyler ve büyük-küçük harfe duyarlıdır.</p>
+
+<h2>İndeks ve dilimleme</h2>
+<p>Metin, sıralı karakterlerden oluşur ve her karakterin bir konumu (index) vardır. Sayma 0'dan başlar; negatif indeks sondan sayar. <b>Dilimleme</b> (slicing) <code>metin[baslangic:bitis]</code> biçiminde bir parça alır; başlangıç dahil, bitiş hariçtir.</p>
+<pre class="py">siparis_kodu = "AM-2025-IZM-00417"
+print(siparis_kodu[0])        # A
+print(siparis_kodu[-1])       # 7
+print(siparis_kodu[3:7])      # 2025 (yıl)
+print(siparis_kodu[8:11])     # IZM (şehir)
+print(siparis_kodu[-5:])      # 00417 (sıra no)
+print(siparis_kodu[:2])       # AM
+print(siparis_kodu[::-1])     # ters çevir</pre>
+<p>Sınırı boş bırakırsan baştan ya da sona kadar gider. Üçüncü değer adımdır: <code>[::2]</code> ikide bir, <code>[::-1]</code> ters sıra. Var olmayan tek bir indeks (<code>siparis_kodu[50]</code>) IndexError verir, ama dilim sınırı aşarsa sessizce elindekini verir.</p>
+<div class="tbl-wrap"><table>
+<tr><th>İfade</th><th>Sonuç</th><th>Açıklama</th></tr>
+<tr><td><code>s[0]</code></td><td>ilk karakter</td><td>sayma 0'dan başlar</td></tr>
+<tr><td><code>s[-1]</code></td><td>son karakter</td><td>negatif sondan sayar</td></tr>
+<tr><td><code>s[2:5]</code></td><td>2, 3, 4. karakterler</td><td>bitiş hariç</td></tr>
+<tr><td><code>s[:3]</code></td><td>ilk 3 karakter</td><td>baştan</td></tr>
+<tr><td><code>s[3:]</code></td><td>3'ten sona</td><td>sona kadar</td></tr>
+<tr><td><code>s[::-1]</code></td><td>ters metin</td><td>adım -1</td></tr>
+</table></div>
+
+<h2>Metotlar: metni dönüştürmek</h2>
+<p>Metot (method), bir değere ait fonksiyondur ve nokta ile çağrılır. Metin metotları metni <b>değiştirmez</b>, yeni bir metin döndürür; bu yüzden sonucu bir değişkene atarsın.</p>
+<pre class="py">ham = "  ayse.yilmaz@ANADOLUMARKET.com  "
+temiz = ham.strip().lower()
+print(repr(temiz))
+print(temiz.upper())
+print(temiz.replace(".com", ".com.tr"))
+print(temiz.find("@"))           # @ işaretinin konumu
+print(temiz.startswith("ayse"), temiz.endswith(".com"))
+print("İzmir".upper(), "İZMİR".lower())</pre>
+<p><code>strip</code> baştaki ve sondaki boşlukları (ve satır sonlarını) temizler; <code>lstrip</code> ve <code>rstrip</code> tek taraflı çalışır. <code>repr</code> metni tırnaklarıyla gösterir; boşlukların gerçekten gittiğini görmek için işe yarar. <code>find</code> aranan parçanın ilk konumunu, bulamazsa <code>-1</code> döndürür. Metotlar zincirlenebilir: <code>ham.strip().lower()</code> önce temizler, sonra küçültür.</p>
+<div class="note"><b>Türkçe İ sorunu</b><code>"İzmir".upper()</code> doğru şekilde İZMİR verir, ama <code>"İZMİR".lower()</code> sonucu <code>i̇zmi̇r</code> gibi noktalı ek karakterler içerebilir; bu Unicode'un İ harfini iki parça olarak ele almasından kaynaklanır. Karşılaştırma yapmadan önce <code>casefold()</code> kullanmak ya da İ/I harflerini elle <code>replace</code> etmek daha güvenlidir.</div>
+
+<h2>split ve join: parçala, birleştir</h2>
+<p>Veri genellikle ayraçla gelir: "İzmir,Konak,35220" gibi. <code>split</code> metni ayraçtan böler ve liste döndürür; <code>join</code> bir listeyi ayraçla birleştirir. İkisi birbirinin tersidir.</p>
+<pre class="py">satir = "İzmir,Konak,35220"
+parcalar = satir.split(",")
+print(parcalar)
+print(parcalar[0], "-", parcalar[2])
+kelimeler = "  Kahve   Makinesi  Siyah ".split()
+print(kelimeler)
+print(" ".join(kelimeler))
+print(" | ".join(["Ad", "Şehir", "Tutar"]))</pre>
+<p><code>split()</code> ayraçsız çağrılırsa her türlü boşluktan böler ve fazla boşlukları yok sayar; dağınık metni kelimelere ayırmanın en kolay yolu budur. <code>join</code>'in yazımına dikkat: ayraç önde, liste parantez içinde. Listeleri ilerideki Listeler dersinde ayrıntılı göreceksin.</p>
+
+<h2>f-string: değişkeni metne yerleştirmek</h2>
+<p>Rapor satırı üretmek için + ile birleştirmek hem yorucu hem hataya açıktır (sayıları str'ye çevirmek gerekir). <b>f-string</b> çözümdür: tırnağın önüne <code>f</code> koy, süslü parantez içine değişken ya da ifade yaz.</p>
+<pre class="py">musteri = "Ayşe Yılmaz"
+tutar = 1499.9
+adet = 3
+print(f"Sayın {musteri}, {adet} ürün için toplam {adet * tutar} TL.")
+print(f"Tutar: {tutar:.2f} TL")          # 2 ondalık
+print(f"Toplam: {adet * tutar:,.2f} TL")  # binlik ayraç
+print(f"{'Ürün':&lt;12}{'Adet':&gt;6}")       # hizalama
+print(f"{'Kahve':&lt;12}{adet:&gt;6}")</pre>
+<p>İki nokta sonrası biçim belirtimidir: <code>.2f</code> iki ondalık, <code>,</code> binlik ayraç, <code>&lt;12</code> sola yaslayıp 12 karaktere tamamla, <code>&gt;6</code> sağa yasla. String Biçimleme dersinde bunu derinleştireceğiz; şimdilik bu dört kalıp raporların çoğunu karşılar.</p>
+<div class="tip"><b>f-string içinde ifade</b>Süslü parantez içine <code>{adet * tutar}</code> gibi hesap, <code>{ad.upper()}</code> gibi metot çağrısı yazabilirsin. Ama çok uzun ifadeyi önce değişkene al; okunurluk önce gelir.</div>
+
+<h2>Metin kontrolleri</h2>
+<p>Veri doğrulamada bazı sorular çok sık sorulur: bu değer yalnızca rakamdan mı oluşuyor, boş mu, belirli bir ekle mi bitiyor? Metin metotları bu sorulara <code>True</code>/<code>False</code> ile cevap verir.</p>
+<pre class="py">posta_kodu = "35220"
+print(posta_kodu.isdigit())
+print("abc12".isalpha(), "abc".isalpha())
+print("".strip() == "", "   ".strip() == "")
+dosya = "rapor_2025.csv"
+print(dosya.endswith(".csv"), dosya.startswith("rapor"))
+print("İZMİR".isupper(), "izmir".islower())
+print("kahve makinesi".title())</pre>
+<div class="warn"><b>isdigit ile int farkı</b><code>"-5".isdigit()</code> False döner çünkü eksi işareti rakam değildir; ama <code>int("-5")</code> çalışır. Boşluklu <code>" 42 "</code> için de isdigit False'tur. Doğrulamadan önce <code>strip</code> uygula, işaretli sayı bekliyorsan isdigit yerine dönüşümü deneyip hatayı yakala.</div>
+
+<h2>Değişmezlik (immutability)</h2>
+<p>Metinler <b>değişmezdir</b>: oluşturduktan sonra tek bir karakterini bile yerinde değiştiremezsin. <code>ad[0] = "a"</code> TypeError verir. Metotlar yeni metin döndürür ve eski metin olduğu gibi kalır; bu yüzden <code>ad.upper()</code> yazıp sonucu kullanmazsan hiçbir şey değişmez.</p>
+<pre class="py">sehir = "izmir"
+sehir.upper()                 # sonuç kayboldu
+print(sehir)
+sehir = sehir.upper()         # yeni metni aynı ada bağla
+print(sehir)
+yeni = "İ" + sehir[1:]        # ilk harfi değiştirmek: yeni metin kur
+print(yeni)</pre>
+<p>Değişmezlik ilk bakışta kısıtlama gibi dursa da bir güvencedir: bir metni fonksiyona verdiğinde fonksiyonun onu bozmayacağını bilirsin. Listelerde bu güvence yoktur ve bunun sonuçlarını Listeler dersinde göreceksin.</p>
+
+<section class="more"><span class="eyebrow">Derinleş</span><p>Unicode, Türkçe İ/ı sorunu ve kodlamalar <b>Unicode ve metin kodlaması</b> dersinde, biçim belirtimlerinin tamamı <b>String biçimleme</b> dersinde. Bu bölüm, günlük veri işinde en çok kullanılan ama temel derste yer bulamayan metin araçlarını topluyor.</p><h2>Metot haritası</h2><p>str türünün kırktan fazla metodu var. Hepsini ezberlemen gerekmez; ama hangi işin hazır bir metodu olduğunu bilmek seni gereksiz kod yazmaktan kurtarır.</p><div class="tbl-wrap"><table><tr><th>Amaç</th><th>Metotlar</th><th>Not</th></tr><tr><td>Arama</td><td><code>find</code>, <code>rfind</code>, <code>index</code>, <code>count</code>, <code>in</code></td><td>find bulamazsa -1, index ValueError</td></tr><tr><td>Önek / sonek</td><td><code>startswith</code>, <code>endswith</code>, <code>removeprefix</code>, <code>removesuffix</code></td><td>startswith demet de alır</td></tr><tr><td>Bölme</td><td><code>split</code>, <code>rsplit</code>, <code>partition</code>, <code>rpartition</code>, <code>splitlines</code></td><td>maxsplit ile en fazla N kez böl</td></tr><tr><td>Temizleme</td><td><code>strip</code>, <code>lstrip</code>, <code>rstrip</code></td><td>Parametre bir karakter KÜMESİDİR</td></tr><tr><td>Hizalama</td><td><code>ljust</code>, <code>rjust</code>, <code>center</code>, <code>zfill</code></td><td>Sabit genişlikli çıktı</td></tr><tr><td>Harf</td><td><code>lower</code>, <code>upper</code>, <code>title</code>, <code>capitalize</code>, <code>casefold</code></td><td>Karşılaştırma için casefold</td></tr><tr><td>Değiştirme</td><td><code>replace</code>, <code>translate</code> + <code>str.maketrans</code></td><td>replace'in üçüncü parametresi adet</td></tr><tr><td>Denetim</td><td><code>isdigit</code>, <code>isalpha</code>, <code>isalnum</code>, <code>isspace</code></td><td>Boş metinde hepsi False</td></tr></table></div><h2>Bölmenin ince ayarları: maxsplit, rsplit, partition</h2><p>Gerçek veride ayraç, alanın kendi içinde de geçebilir. Bir log satırının mesaj kısmında iki nokta, bir adresin içinde virgül olabilir. Bu yüzden "en fazla kaç kez böleceğini" söylemek önemlidir.</p><pre class="py">log = "2025-03-14 09:41:07 ERROR Ödeme reddedildi: kart limiti yetersiz"
+tarih, saat, seviye, mesaj = log.split(" ", 3)     # en fazla 3 kez böl
+print(seviye, "|", mesaj)
+
+dosya = "rapor.2025.mart.csv"
+ad, uzanti = dosya.rsplit(".", 1)                   # sağdan bir kez böl
+print(ad, "-&gt;", uzanti)
+
+anahtar, ayrac, deger = "SUBE=Konak=Merkez".partition("=")
+print(anahtar, "|", ayrac, "|", deger)
+print("ayraç yok".partition("="))                   # her zaman 3 parça
+
+satirlar = "AM-101\nAM-102\r\nAM-103\n".splitlines()
+print(satirlar)</pre><p><code>partition</code> her zaman üç elemanlı bir demet döndürür: önce, ayraç, sonra. Ayraç yoksa ikinci ve üçüncü eleman boş metindir; bu sayede açma (unpacking) hiç hata vermez. <code>splitlines</code> ise Windows (<code>\r\n</code>) ve Unix (<code>\n</code>) satır sonlarını aynı anda tanır; <code>split("\n")</code> Windows dosyalarında satır sonlarına <code>\r</code> bırakır.</p><h2>strip tuzağı ve removeprefix</h2><p><code>strip</code>, <code>lstrip</code> ve <code>rstrip</code> bir parametre alabilir, ama bu parametre bir önek değil <b>karakter kümesidir</b>: "baştan, bu karakterlerden herhangi biri olduğu sürece sil" der. Python 3.9 ile gelen <code>removeprefix</code> / <code>removesuffix</code> ise tam olarak verdiğin metni, yalnızca bir kez siler.</p><pre class="py">kod = "SKU-KS-0042"
+print(kod.lstrip("SKU-"))         # S, K, U, - bitene kadar siler: "0042"
+print(kod.removeprefix("SKU-"))   # yalnız öneki siler: "KS-0042"
+print("rapor_rapor.csv".removesuffix(".csv"))
+print("00042".lstrip("0"), "42".zfill(6))
+print("***İndirim***".strip("*"))</pre><div class="warn"><b>Sessiz veri kaybı</b><code>lstrip("SKU-")</code> çoğu kodda doğru çalışıyor gibi görünür, ta ki ürün kodu S, K ya da U harfiyle başlayana kadar. Bu tür hatalar testte değil canlıda çıkar. Bir öneki silmek istiyorsan her zaman <code>removeprefix</code> kullan.</div><h2>Hizalama ve dolgu</h2><p>Terminal raporu, sabit genişlikli banka dosyası ya da fiş çıktısı üretirken sütunları hizalaman gerekir. f-string biçimleme bunu yapar, ama metot karşılıkları da bilinmeye değer: <code>ljust</code> sola, <code>rjust</code> sağa, <code>center</code> ortaya yaslar; <code>zfill</code> soluna sıfır ekler.</p><pre class="py">print("ANADOLU MARKET".center(30, "="))
+print("Ürün".ljust(18) + "Adet".rjust(5) + "Tutar".rjust(7))
+print("Kahve Makinesi".ljust(18) + "1".rjust(5) + "1500".rjust(7))
+print("Filtre Kahve".ljust(18) + "3".rjust(5) + "360".rjust(7))
+print("-" * 30)
+print("Fiş no:", "417".zfill(8))</pre><h2>translate: çok karakteri tek seferde değiştirmek</h2><p>Beş farklı harfi değiştirmek için beş kez <code>replace</code> zincirlemek yerine bir dönüşüm tablosu kurabilirsin. <code>str.maketrans("eski", "yeni")</code> iki eşit uzunlukta metni karakter karakter eşler; üçüncü parametre silinecek karakterleri verir. URL, dosya adı ya da sistem kodu üretirken Türkçe karakterleri ASCII'ye çevirmenin en temiz yoludur.</p><pre class="py">TR_ASCII = str.maketrans("çğıöşüÇĞİÖŞÜ", "cgiosuCGIOSU", "'")
+baslik = "Şükrü'nün Ödeme Çizelgesi"
+print(baslik.translate(TR_ASCII))
+print(baslik.translate(TR_ASCII).lower().replace(" ", "-"))</pre><h2>Metin karşılaştırma ve birkaç küçük ayrıntı</h2><ul><li><b>Sözlük sırası:</b> Metinler karakter karakter, kod numarasına göre karşılaştırılır. Büyük harfler küçüklerden önce gelir (<code>"Z" &lt; "a"</code>) ve rakam olarak yazılmış sayılar metin gibi sıralanır: <code>"10" &lt; "9"</code> True'dur. Sayı karşılaştıracaksan önce çevir.</li><li><b>Demetle önek/sonek:</b> <code>dosya.endswith((".csv", ".xlsx"))</code> birden fazla uzantıyı tek seferde sorar.</li><li><b>replace adedi:</b> <code>"a-b-c".replace("-", "/", 1)</code> yalnızca ilk eşleşmeyi değiştirir.</li><li><b>Bitişik metinler:</b> Yan yana yazılan metin sabitleri birleşir: <code>("Anadolu " "Market")</code>. Uzun metinleri parantez içinde satırlara bölmenin PEP 8 uyumlu yoludur.</li></ul><pre class="py">print("10" &lt; "9", 10 &lt; 9)
+print("Zeytin" &lt; "armut", "zeytin" &lt; "armut")
+dosya = "ciro_mart.XLSX"
+print(dosya.lower().endswith((".csv", ".xlsx")))
+print("2025-03-14".replace("-", "/", 1))
+mesaj = ("Sayın müşterimiz, siparişiniz "
+         "kargoya verilmiştir.")
+print(mesaj)</pre><div class="note"><b>Gerçek işte</b>KVKK ve bankacılık düzenlemeleri, kart numarası, IBAN, T.C. kimlik numarası gibi verilerin loglarda ve ekranlarda açık görünmemesini ister. Bu yüzden Ilgaz Bank'ın her uygulamasında bir "maskeleme" fonksiyonu bulunur: kart numarasının yalnız son dört hanesi gösterilir (<code>**** **** **** 9012</code>), IBAN dörder hanelik gruplara ayrılarak okunur hâle getirilir. Bu fonksiyonlar tamamen bu bölümdeki araçlarla, dilimleme, <code>replace</code>, <code>rjust</code> ve <code>join</code> ile yazılır. Maskelemeyi veriyi loga yazmadan <b>önce</b> yapmak gerekir; sonradan log dosyasını temizlemek çok daha zordur.</div></section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Veri temizliğinin standart hattı</h3>
+<p>Kurumsal müşteri verisi temizlerken neredeyse hep aynı zincir kurulur: <code>deger.strip().casefold()</code> ile normalize et, <code>replace</code> ile bilinen yazım hatalarını düzelt, <code>split</code> ile alanlara ayır, sonra karşılaştır. Bu zincir, "İstanbul", " istanbul " ve "ISTANBUL" değerlerini tek şehre indirir. pandas'ta aynı metotlar <code>.str</code> erişimcisi altında vardır; burada öğrendiğin her şey oraya taşınır.</p>
+<h3>Metin birleştirmede performans</h3>
+<p>Döngü içinde binlerce kez <code>metin += parca</code> yapmak her seferinde yeni metin oluşturduğu için yavaştır. Pythonic yol, parçaları bir listede biriktirip sonda <code>"".join(liste)</code> ile tek seferde birleştirmektir. Küçük raporlarda fark edilmez, milyon satırlık log üretiminde belirleyicidir.</p>
+<h3>Ham metin ve kaçış dizileri</h3>
+<p><code>"\n"</code> satır sonu, <code>"\t"</code> sekme, <code>"\\"</code> ters eğik çizgidir. Windows dosya yolları ve düzenli ifadelerde ters eğik çizgi çok geçtiği için önüne <code>r</code> konmuş ham metin (raw string) kullanılır: <code>r"C:\raporlar\yeni"</code>. Regex dersinde buna sık sık ihtiyaç duyacaksın.</p>
+</section>
+</article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/metinler">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../sayilar-islemler/">← Sayılar ve işlemler</a><a href="../listeler/">Listeler →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

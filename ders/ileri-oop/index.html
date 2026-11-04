@@ -1,0 +1,350 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>İleri OOP: dunder metotlar, ABC, Protocol ve descriptor | Kesit Python</title><meta name="description" content="Sınıflarını Python'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ileri-oop/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="İleri OOP: dunder metotlar, ABC, Protocol ve descriptor"><meta property="og:description" content="Sınıflarını Python'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ileri-oop/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"İleri OOP: dunder metotlar, ABC, Protocol ve descriptor","description":"Sınıflarını Python'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/ileri-oop/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Mimari</span><h1>İleri OOP: dunder metotlar, ABC, Protocol ve descriptor</h1><p class="st-l">Sınıflarını Python'ın yerleşik türleri gibi davranacak şekilde tasarla: eşitlik, sıralama, uzunluk, indeksleme, çağrılabilirlik, soyut sınıflar, Protocol, descriptor, __slots__ ve metaclass'a kısa bakış.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ileri-oop">Uygulamada aç, 23 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Neden önemli?</h2>
+<p>Orta seviyede sınıf yazmayı, kalıtımı (inheritance) ve dataclass'ı öğrendin. Kurumsal kodda ise sınıfların "Python gibi" davranması beklenir: bir <code>Para</code> nesnesi <code>==</code> ile karşılaştırılabilmeli, bir kümeye konabilmeli, <code>sorted</code> ile sıralanabilmeli; bir <code>Sepet</code> nesnesi <code>len()</code> ve <code>for</code> ile kullanılabilmeli. Ilgaz Bank'ta bir işlem motoru yazarken "bu iki tutar eşit mi?" sorusunun cevabı <code>id()</code> karşılaştırması olursa raporlar yanlış çıkar. Bu dersin konusu, sınıflarını dil ile bütünleştiren <b>özel metotlar</b> (dunder methods, "double underscore") ve kodun sınırlarını tanımlayan soyutlama araçlarıdır.</p>
+
+<h2>Eşitlik, hash ve sıralama</h2>
+<p>Varsayılan olarak iki nesne yalnızca aynı nesneyse eşittir. <code>__eq__</code> yazarak "değer eşitliği" tanımlarsın. Dikkat: <code>__eq__</code> yazıp <code>__hash__</code> yazmazsan Python nesneyi <b>hashlenemez</b> yapar; küme ve sözlük anahtarı olarak kullanamazsın. Değişmez (immutable) nesnelerde <code>__hash__</code>'i eşitlikte kullandığın alanlardan üret.</p>
+<pre class="py">from functools import total_ordering
+
+@total_ordering
+class Para:
+    """Ilgaz Bank: kuruş hassasiyetinde tutar."""
+    __slots__ = ('kurus', 'birim')
+
+    def __init__(self, tutar: float, birim: str = 'TRY'):
+        self.kurus = round(tutar * 100)
+        self.birim = birim
+
+    def __repr__(self):
+        return f'Para({self.kurus / 100:.2f}, {self.birim!r})'
+
+    def __eq__(self, other):
+        if not isinstance(other, Para):
+            return NotImplemented
+        return (self.kurus, self.birim) == (other.kurus, other.birim)
+
+    def __hash__(self):
+        return hash((self.kurus, self.birim))
+
+    def __lt__(self, other):
+        if not isinstance(other, Para) or self.birim != other.birim:
+            return NotImplemented
+        return self.kurus &lt; other.kurus
+
+    def __add__(self, other):
+        if not isinstance(other, Para) or self.birim != other.birim:
+            return NotImplemented
+        return Para((self.kurus + other.kurus) / 100, self.birim)
+
+a, b, c = Para(10.10), Para(10.10), Para(3.5)
+print(a == b, a is b)          # True False
+print(len({a, b, c}))          # 2  -&gt; hash tutarlı
+print(sorted([a, c, Para(7)])) # küçükten büyüğe
+print(a + c, a &gt; c)
+</pre>
+<div class="tip"><b>total_ordering</b><code>functools.total_ordering</code>, yalnızca <code>__eq__</code> ve bir karşılaştırma metodu (örneğin <code>__lt__</code>) tanımladığında geri kalan <code>__le__</code>, <code>__gt__</code>, <code>__ge__</code> metotlarını üretir. <code>NotImplemented</code> döndürmek, "ben bilmiyorum, karşı taraf denesin" demektir; <code>raise</code> etmekten farklıdır.</div>
+
+<h2>Koleksiyon gibi davranmak</h2>
+<p>Dört metot yeter: <code>__len__</code>, <code>__getitem__</code>, <code>__iter__</code>, <code>__contains__</code>. Yalnızca <code>__getitem__</code> yazarsan Python 0, 1, 2 diye indeksleyerek <code>for</code> döngüsünü ve <code>in</code> kontrolünü bile üretir; ama açıkça <code>__iter__</code> yazmak daha hızlı ve nettir.</p>
+<pre class="py">class Sepet:
+    def __init__(self):
+        self._kalemler: list[tuple[str, int, float]] = []
+
+    def ekle(self, urun, adet, fiyat):
+        self._kalemler.append((urun, adet, fiyat))
+        return self            # zincirleme için
+
+    def __len__(self):
+        return len(self._kalemler)
+
+    def __getitem__(self, i):          # int ve dilim (slice) destekler
+        return self._kalemler[i]
+
+    def __iter__(self):
+        return iter(self._kalemler)
+
+    def __contains__(self, urun):
+        return any(k[0] == urun for k in self._kalemler)
+
+    def __call__(self, kdv=0.20):      # sepet(0.2) -&gt; toplam
+        return round(sum(a * f for _, a, f in self._kalemler) * (1 + kdv), 2)
+
+    def __bool__(self):
+        return bool(self._kalemler)
+
+s = Sepet().ekle('kahve', 2, 150.0).ekle('bardak', 4, 40.0)
+print(len(s), 'kahve' in s, 'çay' in s)
+print(s[0], s[-1:])
+for urun, adet, fiyat in s:
+    print(f'{urun:&lt;8}{adet:&gt;3} x {fiyat:&gt;7.2f}')
+print('KDV dahil:', s())
+print('boş sepet:', bool(Sepet()))
+</pre>
+<div class="note"><b>__bool__ yoksa __len__ kullanılır</b>Bir nesnenin doğruluk değeri önce <code>__bool__</code>, o yoksa <code>__len__</code> ile belirlenir. Koleksiyon sınıflarında <code>__len__</code> yazdığında <code>if sepet:</code> otomatik olarak "sepet boş mu?" anlamına gelir.</div>
+
+<h2>ABC: zorunlu arayüz</h2>
+<p><code>abc.ABC</code> ve <code>@abstractmethod</code>, alt sınıfın mutlaka gerçekleştirmesi gereken metotları tanımlar. Eksik bırakılan metot varsa sınıf <b>örneklenemez</b>; hata, nesne yaratılırken, yani erken çıkar. Ödeme sağlayıcıları, bildirim kanalları, depolama katmanları gibi "birden fazla gerçekleştirme, tek sözleşme" durumlarında kullan.</p>
+<pre class="py">from abc import ABC, abstractmethod
+
+class OdemeSaglayici(ABC):
+    @abstractmethod
+    def tahsil_et(self, tutar: float) -&gt; str: ...
+
+    def makbuz(self, tutar):            # somut metot: alt sınıflara miras
+        return f'{self.__class__.__name__}: {tutar:.2f} TL tahsil edildi'
+
+class KrediKarti(OdemeSaglayici):
+    def tahsil_et(self, tutar):
+        return self.makbuz(tutar)
+
+class Havale(OdemeSaglayici):
+    pass                                 # tahsil_et eksik!
+
+print(KrediKarti().tahsil_et(250))
+try:
+    Havale()
+except TypeError as e:
+    print('Hata:', e)
+print(issubclass(KrediKarti, OdemeSaglayici), isinstance(KrediKarti(), OdemeSaglayici))
+</pre>
+
+<h2>Protocol: yapısal tipleme</h2>
+<p>ABC "kalıtımla sözleşme" kurar; <code>typing.Protocol</code> ise "bu metotlara sahip olan herkes uyar" der (ördek tipleme, duck typing). Alt sınıf olmak gerekmez; <code>@runtime_checkable</code> eklersen <code>isinstance</code> da çalışır. Dış kütüphanelerin sınıflarını değiştiremediğin, ama onları kendi fonksiyonlarına parametre olarak almak istediğin durumlarda Protocol tek çözümdür.</p>
+<pre class="py">from typing import Protocol, runtime_checkable
+
+@runtime_checkable
+class Raporlanabilir(Protocol):
+    def satir(self) -&gt; str: ...
+
+class Siparis:
+    def __init__(self, no, tutar): self.no, self.tutar = no, tutar
+    def satir(self): return f'SIP-{self.no} {self.tutar:.2f}'
+
+class Musteri:
+    def __init__(self, ad): self.ad = ad
+    def satir(self): return f'MUS {self.ad}'
+
+def yazdir(kayitlar: list[Raporlanabilir]):
+    for k in kayitlar:
+        print(k.satir())
+
+yazdir([Siparis(1, 99.9), Musteri('Ayşe')])
+print(isinstance(Siparis(2, 1), Raporlanabilir), isinstance(3, Raporlanabilir))
+</pre>
+<div class="tbl-wrap"><table><tr><th>Özellik</th><th>ABC</th><th>Protocol</th></tr><tr><td>İlişki</td><td>Nominal: alt sınıf olmalı</td><td>Yapısal: metotlar uyuşmalı</td></tr><tr><td>Eksik metot</td><td>Örnekleme anında TypeError</td><td>Statik denetleyici (mypy) uyarır</td></tr><tr><td>Somut metot paylaşımı</td><td>Evet, miras alınır</td><td>Hayır (yalnızca imza)</td></tr><tr><td>Dış kütüphane sınıfı</td><td>Uyarlamak gerekir</td><td>Olduğu gibi uyar</td></tr><tr><td>Tipik kullanım</td><td>Kendi eklenti sistemin</td><td>Fonksiyon parametresi sözleşmesi</td></tr></table></div>
+
+<h2>Descriptor ve property</h2>
+<p><code>property</code> tek alana doğrulama eklemek için idealdir. Aynı doğrulamayı on sınıfta yirmi alana uygulayacaksan <b>descriptor</b> yaz: <code>__set_name__</code>, <code>__get__</code>, <code>__set__</code> metotlarına sahip bir sınıf. Pydantic, Django ORM ve dataclass'ın <code>field</code> mekanizması bu altyapıya dayanır.</p>
+<pre class="py">class Pozitif:
+    """Alan değeri pozitif sayı olmalı; aksi halde ValueError."""
+    def __set_name__(self, owner, name):
+        self.ad = name
+        self.gizli = '_' + name
+
+    def __get__(self, obj, objtype=None):
+        if obj is None:
+            return self
+        return getattr(obj, self.gizli)
+
+    def __set__(self, obj, deger):
+        if not isinstance(deger, (int, float)) or deger &lt;= 0:
+            raise ValueError(f'{self.ad} pozitif olmalı, gelen: {deger!r}')
+        setattr(obj, self.gizli, deger)
+
+class KrediBasvurusu:
+    tutar = Pozitif()
+    vade_ay = Pozitif()
+
+    def __init__(self, tutar, vade_ay):
+        self.tutar = tutar
+        self.vade_ay = vade_ay
+
+    @property
+    def aylik_taksit(self):             # salt okunur hesaplanmış alan
+        return round(self.tutar / self.vade_ay, 2)
+
+k = KrediBasvurusu(120_000, 24)
+print(k.tutar, k.vade_ay, k.aylik_taksit)
+try:
+    k.vade_ay = 0
+except ValueError as e:
+    print('Hata:', e)
+</pre>
+
+<h2>__slots__, classmethod, staticmethod</h2>
+<p><code>__slots__</code> nesnenin <code>__dict__</code> sözlüğünü kaldırır: bellek düşer, öznitelik erişimi hızlanır, yanlışlıkla <code>self.tutr = 5</code> yazmak AttributeError verir. Milyonlarca küçük nesne ürettiğin (işlem kayıtları, log satırları) sınıflarda değerlidir; dinamik öznitelik eklemen gereken yerlerde kullanma.</p>
+<p><code>@classmethod</code> alternatif kurucu (constructor) yazmanın standart yoludur: <code>Siparis.from_dict(...)</code>, <code>datetime.fromisoformat(...)</code>. İlk parametresi sınıfın kendisidir; alt sınıftan çağrılınca alt sınıfı üretir. <code>@staticmethod</code> ise sınıfla ilgili ama ne örneğe ne sınıfa ihtiyaç duyan yardımcı fonksiyondur (ör. doğrulama).</p>
+<pre class="py">from dataclasses import dataclass
+
+@dataclass(frozen=True, slots=True)
+class Islem:
+    hesap: str
+    tutar: float
+
+    @staticmethod
+    def hesap_gecerli(hesap: str) -&gt; bool:
+        return hesap.startswith('TR') and len(hesap) == 26
+
+    @classmethod
+    def from_dict(cls, d: dict):
+        if not cls.hesap_gecerli(d['hesap']):
+            raise ValueError('IBAN geçersiz')
+        return cls(hesap=d['hesap'], tutar=float(d['tutar']))
+
+i = Islem.from_dict({'hesap': 'TR' + '0' * 24, 'tutar': '150.75'})
+print(i)
+try:
+    i.ekstra = 1
+except (AttributeError, TypeError) as e:   # Python 3.12'de frozen+slots bazen TypeError verir
+    print('slots engelledi:', type(e).__name__)
+</pre>
+<div class="warn"><b>Kalıtım ve __slots__</b>Alt sınıf da <code>__slots__</code> tanımlamazsa <code>__dict__</code> geri gelir ve kazanım kaybolur. Çoklu kalıtımda iki ebeveynin ikisi de boş olmayan <code>__slots__</code> taşıyorsa "layout conflict" hatası alırsın.</div>
+
+<h2>Metaclass'a kısa bakış</h2>
+<p>Metaclass, sınıfın sınıfıdır: <code>type</code>. <code>class X:</code> ifadesi aslında <code>type('X', (), {...})</code> çağrısıdır. Kendi metaclass'ını yazarak sınıf tanımlanırken müdahale edebilirsin (otomatik kayıt, alan doğrulama). Uygulama kodunda nadiren gerekir; çoğu ihtiyaç <code>__init_subclass__</code> ile daha basit çözülür:</p>
+<pre class="py">class Eklenti:
+    kayit: dict[str, type] = {}
+
+    def __init_subclass__(cls, anahtar=None, **kw):
+        super().__init_subclass__(**kw)
+        Eklenti.kayit[anahtar or cls.__name__.lower()] = cls
+
+class CsvDisaAktar(Eklenti, anahtar='csv'): ...
+class JsonDisaAktar(Eklenti, anahtar='json'): ...
+
+print(sorted(Eklenti.kayit))
+print(type(Eklenti), type(type))
+</pre>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Nesnenin yüzü: __repr__, __str__ ve __format__</h2>
+<p>Bir nesneyi ekrana üç farklı yol taşır. <code>__repr__</code> geliştirici içindir: hata ayıklayıcıda, logda, liste içinde görünür; mümkünse nesneyi yeniden üretecek ifadeyi (<code>Para(1250, 'TRY')</code>) döndürmelidir. <code>__str__</code> son kullanıcı içindir ve <code>print</code>/<code>str()</code> çağırır; tanımlı değilse <code>__repr__</code> kullanılır. <code>__format__</code> ise f-string'deki biçim belirtecini (<code>f"{x:tl}"</code>) yorumlamanı sağlar.</p>
+<pre class="py">class Para:
+    def __init__(self, kurus, birim="TRY"):
+        self.kurus, self.birim = kurus, birim
+
+    def __repr__(self):
+        return f"Para({self.kurus!r}, {self.birim!r})"
+
+    def __str__(self):
+        return f"{self.kurus / 100:.2f} {self.birim}"
+
+    def __format__(self, spec):
+        if spec == "tl":           # Türkçe biçim: 1.234,50 TL
+            metin = f"{self.kurus / 100:,.2f}".replace(",", "_").replace(".", ",").replace("_", ".")
+            return f"{metin} TL"
+        return format(str(self), spec)
+
+p = Para(123450)
+print(p)                 # __str__
+print([p])               # liste içinde __repr__
+print(f"{p!r} | {p:tl} | {p:&gt;14}|")
+</pre>
+
+<h2>Aritmetik: yansıyan operatörler ve NotImplemented</h2>
+<p><code>a + b</code> önce <code>a.__add__(b)</code>'yi dener. Bu <code>NotImplemented</code> döndürürse Python <b>yansıyan</b> (reflected) metodu, <code>b.__radd__(a)</code>'yı dener. <code>sum()</code> toplamaya <code>0</code> ile başladığı için <code>0 + Para(...)</code> hesaplanır; sınıfın <code>sum</code> ile çalışması için <code>__radd__</code> şarttır. Yerinde işlemler (<code>+=</code>) için <code>__iadd__</code> tanımlamazsan Python <code>__add__</code> ile yeni nesne üretir; değişmez değer nesnelerinde (value object) istenen de budur.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Amaç</th><th>Dunder</th><th>Not</th></tr>
+<tr><td><code>a + b</code>, <code>b + a</code></td><td><code>__add__</code>, <code>__radd__</code></td><td>Tanımadığın türde <code>NotImplemented</code> döndür, hata fırlatma</td></tr>
+<tr><td><code>a += b</code></td><td><code>__iadd__</code></td><td>Yoksa <code>__add__</code> kullanılır</td></tr>
+<tr><td><code>-a</code>, <code>abs(a)</code></td><td><code>__neg__</code>, <code>__abs__</code></td><td>İade, ters kayıt</td></tr>
+<tr><td><code>if a:</code></td><td><code>__bool__</code></td><td>Yoksa <code>__len__</code>, o da yoksa hep True</td></tr>
+<tr><td>Sıralama</td><td><code>__eq__</code> + <code>__lt__</code> + <code>@total_ordering</code></td><td>Diğer dördünü dekoratör (decorator) üretir</td></tr>
+<tr><td><code>with a:</code></td><td><code>__enter__</code>, <code>__exit__</code></td><td><code>__exit__</code> True dönerse hata yutulur</td></tr>
+<tr><td><code>a.x</code> bulunamadı</td><td><code>__getattr__</code></td><td>Yalnızca normal arama başarısızsa çağrılır</td></tr>
+<tr><td>Alt sınıf tanımlandı</td><td><code>__init_subclass__</code></td><td>Metaclass'sız eklenti kaydı</td></tr>
+</table></div>
+<pre class="py">from functools import total_ordering
+
+@total_ordering
+class Tutar:
+    def __init__(self, kurus):
+        self.kurus = kurus
+    def __repr__(self):
+        return f"Tutar({self.kurus})"
+    def __add__(self, other):
+        if isinstance(other, Tutar):
+            return Tutar(self.kurus + other.kurus)
+        return NotImplemented
+    def __radd__(self, other):
+        if other == 0:                  # sum() başlangıç değeri
+            return self
+        return self.__add__(other)
+    def __eq__(self, other):
+        return isinstance(other, Tutar) and self.kurus == other.kurus
+    def __lt__(self, other):
+        if not isinstance(other, Tutar):
+            return NotImplemented
+        return self.kurus &lt; other.kurus
+    __hash__ = None                     # değişebilir: hash'lenmesin
+
+islemler = [Tutar(500), Tutar(1200), Tutar(300)]
+print(sum(islemler), max(islemler), sorted(islemler))
+print(Tutar(5) &gt;= Tutar(3), Tutar(5) != Tutar(5))
+</pre>
+
+<h2>Temsil ve sarmalama: __getattr__</h2>
+<p><code>__getattr__</code> yalnızca nitelik normal yollarla (örnek sözlüğü, sınıf, üst sınıflar) <b>bulunamadığında</b> çağrılır. Bu yüzden bir nesneyi sarıp bilmediğin her isteği içteki nesneye devretmek (delegation, proxy) için idealdir. <code>__getattribute__</code> ise <b>her</b> erişimde çağrılır; yanlış yazılırsa sonsuz özyinelemeye (recursion) girer, nadiren gerekir. <code>__setattr__</code> yazarken atamayı <code>super().__setattr__(ad, deger)</code> ile yap; <code>self.ad = deger</code> yine <code>__setattr__</code>'ı çağırır.</p>
+<pre class="py">class Loglu:
+    def __init__(self, hedef):
+        self._hedef = hedef
+        self.cagrilar = []
+    def __getattr__(self, ad):                 # yalnız bulunamayınca
+        nitelik = getattr(self._hedef, ad)
+        if callable(nitelik):
+            def sarmal(*a, **k):
+                self.cagrilar.append(ad)
+                return nitelik(*a, **k)
+            return sarmal
+        return nitelik
+
+stok = Loglu({"elma": 10})
+stok.get("elma"); stok.setdefault("armut", 0)
+print(stok.cagrilar, len(stok._hedef))
+</pre>
+
+<h2>Alt sınıfları otomatik kaydet: __init_subclass__</h2>
+<p>Tasarım kalıpları dersinde kayıt (registry) fabrikasını dekoratörle kurdun. Taban sınıfa <code>__init_subclass__</code> yazarsan her alt sınıf <b>tanımlandığı anda</b> taban sınıfa haber verir; dekoratörü unutmak mümkün olmaz. Sınıf satırındaki anahtar sözcükler (<code>class X(Taban, kod="pdf")</code>) bu metoda iletilir.</p>
+<pre class="py">class Disa:
+    turler = {}
+    def __init_subclass__(cls, kod, **kw):
+        super().__init_subclass__(**kw)
+        Disa.turler[kod] = cls
+
+class CSV(Disa, kod="csv"):
+    def yaz(self, satirlar): return "\n".join(",".join(map(str, s)) for s in satirlar)
+
+class JSONL(Disa, kod="jsonl"):
+    def yaz(self, satirlar): return "\n".join(str(list(s)) for s in satirlar)
+
+print(sorted(Disa.turler))
+print(Disa.turler["csv"]().yaz([(1, "İzmir"), (2, "Bursa")]))
+</pre>
+
+<h2>Bir kez hesapla: functools.cached_property</h2>
+<p><code>@cached_property</code> ilk erişimde metodu çalıştırır ve sonucu örnek sözlüğüne yazar; sonraki erişimler sözlükten gelir. Pahalı ve <b>değişmeyen</b> türetilmiş değerler (rapor özeti, ayrıştırılmış yapılandırma) için idealdir. Nesnenin durumu değişebiliyorsa önbellek bayatlar: ya <code>@property</code> kullan ya da değişiklikte <code>del self.ozellik</code> ile önbelleği sil. <code>__slots__</code> kullanan sınıfta <code>__dict__</code> olmadığı için çalışmaz.</p>
+<h3>Dunder disiplini: kısa kontrol listesi</h3>
+<ul>
+<li><b>__eq__ yazdıysan __hash__'ı düşün.</b> Değer nesnesi değişmezse <code>hash((alanlar))</code>, değişebiliyorsa <code>__hash__ = None</code> (sözlük anahtarı olmasın).</li>
+<li><b>Tanımadığın türe NotImplemented.</b> Karşılaştırma ve aritmetikte hata fırlatma; Python karşı tarafa sorsun.</li>
+<li><b>Sözleşmeyi bütün kur.</b> <code>__lt__</code> yazdıysan <code>total_ordering</code> ekle; <code>__len__</code> yazdıysan <code>__bool__</code> davranışının uzunluktan türeyeceğini unutma.</li>
+<li><b>Sürpriz yapma.</b> <code>+</code> operatörü yan etki üretmemeli, girdiyi değiştirmemeli; okuyan kişi aritmetik bekler.</li>
+<li><b>Önce dataclass'a bak.</b> <code>@dataclass(frozen=True, order=True)</code> eşitlik, hash, sıralama ve repr'i tek satırda üretir; elle dunder yalnızca özel kural gerektiğinde.</li>
+</ul>
+<div class="warn"><b>Dunder metodu sınıfta ara</b>Python örtük çağrılarda (<code>len(x)</code>, <code>x + y</code>, <code>with x</code>) dunder metodu <b>sınıfta</b> arar, örnekte değil. <code>nesne.__len__ = lambda: 5</code> yazmak <code>len(nesne)</code>'yi değiştirmez.</div>
+<div class="note"><b>Gerçek işte</b>Finans ve e-ticaret kodunda en değerli dunder'lar sıkıcı olanlardır: anlamlı bir <code>__repr__</code> (loglarda <code>&lt;Siparis object at 0x7f...&gt;</code> yerine <code>Siparis(no=1042, tutar=Para(...))</code>), doğru <code>__eq__</code>/<code>__hash__</code> ve para birimi karışınca hata veren aritmetik. Kod incelemesinde (code review) "bu nesne logda nasıl görünecek?" sorusunu sor.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Kurumsal kodda dunder disiplini</h3>
+<p>İş hayatında sık görülen hatalar: <code>__eq__</code> yazıp <code>__hash__</code> unutmak (nesne kümeye girince TypeError), değişebilir (mutable) nesneye <code>__hash__</code> vermek (sözlükte kaybolan anahtarlar), <code>__repr__</code> yazmamak (log dosyasında <code>&lt;Siparis object at 0x...&gt;</code>). Pratik kural: değer nesneleri için <code>@dataclass(frozen=True)</code> kullan, eşitlik ve hash hazır gelir; davranış sınıflarında yalnızca gerçekten gereken dunder'ları yaz.</p>
+<p>ABC mi Protocol mü sorusunda ekip kuralı genelde şudur: kendi yazdığın eklenti sistemi ve paylaşılan somut metotlar varsa ABC; fonksiyon parametresi için "şu metoda sahip olsun" diyorsan Protocol. İkisini birlikte de kullanabilirsin: ABC gerçekleştirmeyi zorunlu kılar, Protocol test çiftlerinin (test double) kalıtım olmadan geçmesini sağlar.</p>
+<p>Descriptor yazarken <code>__set_name__</code> kullan; alan adını elle tekrar etmek hata kaynağıdır. Performans kritik sınıflarda <code>__slots__</code> ile dataclass'ın <code>slots=True</code> seçeneğini birleştir. Metaclass'ı yalnızca bir çerçeve (framework) yazıyorsan düşün; uygulama kodunda görürsen önce <code>__init_subclass__</code> ya da sınıf dekoratörü ile çözülüp çözülemeyeceğini sor.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ileri-oop">Alıştırmalara geç (23)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../bellek-ic-yapi/">← Python'ın iç yapısı: nesne, referans, bellek</a><a href="../tasarim-kaliplari/">Tasarım kalıpları Python'da →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

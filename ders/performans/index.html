@@ -1,0 +1,277 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Profil ve optimizasyon | Kesit Python</title><meta name="description" content="timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy'a geçiş."><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/performans/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Profil ve optimizasyon"><meta property="og:description" content="timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy'a geçiş."><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/performans/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Profil ve optimizasyon","description":"timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy'a geçiş.","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/performans/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Eşzamanlılık ve performans</span><h1>Profil ve optimizasyon</h1><p class="st-l">timeit ve cProfile ile ölçme, Big-O sezgisi, set/dict ile sabit zamanlı arama, string birleştirme, üreteçle bellek, lru_cache ve numpy'a geçiş.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/performans">Uygulamada aç, 20 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<article class="panel theory"><h2>Önce ölç, sonra düzelt</h2>
+<p>Ilgaz Bank'ın gece raporu 40 dakika sürüyor ve ekip "Python yavaş" diyor. Çoğu zaman yavaş olan Python değil, bir listede milyon kez <code>in</code> aramak ya da döngüde string biriktirmektir. Optimizasyonun ilk kuralı: <b>tahmin etme, ölç</b>. İkinci kuralı: en çok zaman geçen yüzde 5'lik kodu düzelt, gerisine dokunma.</p>
+
+<h2>timeit: küçük parçayı ölç</h2>
+<p><code>timeit</code> bir ifadeyi çok kez çalıştırıp toplam süreyi verir; çöp toplayıcıyı kapatır, en küçük gürültüyle ölçer. İki alternatifi karşılaştırmak için idealdir.</p>
+<pre class="py">import timeit
+
+musteriler = list(range(50_000))
+kume = set(musteriler)
+aranan = [49_999, 25_000, -1, 10]
+
+t_liste = timeit.timeit(lambda: [x in musteriler for x in aranan], number=50)
+t_kume = timeit.timeit(lambda: [x in kume for x in aranan], number=50)
+print(f"liste in: {t_liste:.4f} s   set in: {t_kume:.6f} s")
+print(f"set yaklaşık {t_liste / t_kume:.0f} kat hızlı")
+</pre>
+
+<h2>cProfile: büyük programda nerede?</h2>
+<p>Bütün betikte hangi fonksiyonun süre yediğini <code>cProfile</code> gösterir. Bellek içinde çalıştırıp <code>pstats</code> ile en pahalı birkaç fonksiyonu sıralarsın. <code>tottime</code> fonksiyonun kendi süresi, <code>cumtime</code> çağırdıklarıyla birlikte toplam.</p>
+<pre class="py">import cProfile, pstats, io
+
+def musteri_bul(musteri_id, liste):
+    return musteri_id in liste                  # O(n)
+
+def rapor(n):
+    liste = list(range(n))
+    bulunan = 0
+    for i in range(0, n, 7):
+        if musteri_bul(i, liste):
+            bulunan += 1
+    return bulunan
+
+pr = cProfile.Profile()
+pr.enable()
+rapor(20_000)
+pr.disable()
+
+cikti = io.StringIO()
+pstats.Stats(pr, stream=cikti).sort_stats("cumulative").print_stats(4)
+satirlar = [s for s in cikti.getvalue().splitlines() if "musteri_bul" in s or "rapor" in s]
+print("\n".join(satirlar))
+</pre>
+<p>Çıktıda <code>musteri_bul</code> binlerce kez çağrılıyor ve toplam sürenin neredeyse tamamını alıyor. Düzeltme fonksiyonu hızlandırmak değil, <b>veri yapısını değiştirmek</b>: listeyi bir kez set'e çevir.</p>
+
+<h2>Big-O sezgisi</h2>
+<p>Big-O, girdi n büyüyünce sürenin nasıl büyüdüğünü söyler. Sabitleri değil eğilimi önemser; 10 bin satırda fark etmeyen şey 10 milyonda saatlere dönüşür.</p>
+<div class="tbl-wrap"><table><tr><th>İşlem</th><th>Karmaşıklık</th><th>Örnek</th></tr>
+<tr><td><code>x in set</code>, <code>d[k]</code>, <code>lst[i]</code>, <code>lst.append</code></td><td>O(1)</td><td>Hash ile sabit zaman</td></tr>
+<tr><td><code>x in list</code>, <code>lst.index</code>, <code>min/max/sum</code></td><td>O(n)</td><td>Baştan sona tarar</td></tr>
+<tr><td><code>lst.insert(0, x)</code>, <code>lst.pop(0)</code></td><td>O(n)</td><td>Her elemanı kaydırır (deque kullan)</td></tr>
+<tr><td><code>sorted</code>, <code>lst.sort</code></td><td>O(n log n)</td><td>Timsort</td></tr>
+<tr><td>İç içe iki döngü (her sipariş × her müşteri)</td><td>O(n·m)</td><td>Sözlükle O(n+m)'e iner</td></tr>
+<tr><td>Sıralı listede <code>bisect</code></td><td>O(log n)</td><td>İkili arama</td></tr>
+</table></div>
+<pre class="py">import timeit
+
+siparisler = [(i, i % 1000) for i in range(20_000)]          # (siparis, musteri_id)
+musteriler = [(m, f"Müşteri{m}") for m in range(1000)]
+
+def birlestir_yavas():                     # O(n·m)
+    return [(s, ad) for s, m in siparisler for mid, ad in musteriler if mid == m]
+
+def birlestir_hizli():                     # O(n+m)
+    ad = dict(musteriler)
+    return [(s, ad[m]) for s, m in siparisler]
+
+assert birlestir_yavas()[:3] == birlestir_hizli()[:3]
+print(f"yavaş: {timeit.timeit(birlestir_yavas, number=1):.3f} s")
+print(f"hızlı: {timeit.timeit(birlestir_hizli, number=1):.4f} s")
+</pre>
+
+<h2>Sık kazanımlar</h2>
+<h3>String birleştirme</h3>
+<p>Döngüde <code>s += parça</code> her seferinde yeni string üretir. Parçaları listede biriktirip <code>"".join(...)</code> ya da f-string kullan.</p>
+<h3>Üreteçle bellek</h3>
+<p><code>[f(x) for x in range(10**7)]</code> tüm listeyi belleğe koyar; <code>(f(x) for x in ...)</code> ya da <code>yield</code> tek seferde bir eleman üretir. <code>sum</code>, <code>max</code>, <code>any</code> gibi tüketiciler üreteçle (generator) çalışır. Büyük dosyayı satır satır okumak da aynı ilkedir.</p>
+<h3>lru_cache</h3>
+<p>Aynı girdiyle tekrar tekrar çağrılan saf (yan etkisiz) fonksiyonu <code>functools.lru_cache</code> ile ezberle. Özyinelemeli hesaplar ve pahalı sorgular için çarpıcıdır.</p>
+<pre class="py">import timeit, sys
+from functools import lru_cache
+
+def birlestir_arti(n):
+    s = ""
+    for i in range(n):
+        s += f"{i},"
+    return s
+
+def birlestir_join(n):
+    return ",".join(str(i) for i in range(n)) + ","
+
+assert birlestir_arti(100) == birlestir_join(100)
+print(f"+=: {timeit.timeit(lambda: birlestir_arti(20_000), number=5):.3f} s  "
+      f"join: {timeit.timeit(lambda: birlestir_join(20_000), number=5):.3f} s")
+
+liste = [x * x for x in range(100_000)]
+uretec = (x * x for x in range(100_000))
+print("liste:", sys.getsizeof(liste), "bayt | üreteç:", sys.getsizeof(uretec), "bayt")
+
+@lru_cache(maxsize=None)
+def taksit_katsayi(ay: int) -&gt; float:
+    return 1.0 if ay == 0 else taksit_katsayi(ay - 1) * 1.02
+
+t0 = timeit.default_timer()
+print(round(taksit_katsayi(400), 4), f"{timeit.default_timer() - t0:.5f} s")
+print(taksit_katsayi.cache_info())
+</pre>
+
+<h2>numpy'a geçiş</h2>
+<p>Sayısal bir döngüyü ne kadar iyileştirsen de yorumlayıcı maliyeti kalır. Veri tek tip sayı ve işlem eleman eleman ise numpy'a geç: döngü C'de döner, bellek yan yana olur. Kural: "for ile milyon sayı" gördüğünde numpy/pandas düşün.</p>
+<pre class="py">import timeit, numpy as np
+
+tutarlar = [float(i % 500) for i in range(300_000)]
+dizi = np.array(tutarlar)
+
+def kdv_python():
+    return sum(t * 1.2 for t in tutarlar if t &gt; 100)
+
+def kdv_numpy():
+    return float((dizi[dizi &gt; 100] * 1.2).sum())
+
+assert abs(kdv_python() - kdv_numpy()) &lt; 1e-3
+print(f"python: {timeit.timeit(kdv_python, number=3):.3f} s  numpy: {timeit.timeit(kdv_numpy, number=3):.4f} s")
+</pre>
+<div class="warn"><b>Erken optimizasyon</b>Okunur kodu "belki hızlanır" diye bozma. Önce doğru çalışan kod, sonra ölçüm, sonra yalnızca ölçümün gösterdiği yer. Çoğu rapor için sorun bir tane O(n·m) döngüdür.</div>
+
+<section class="more"><span class="eyebrow">Derinleş</span>
+<h2>Ölçüm araç kutusu: hangi soruya hangi araç?</h2>
+<p>Derste <code>timeit</code> ve <code>cProfile</code> ile tanıştın. Gerçek işte soru her zaman "ne kadar sürdü?" değildir; bazen "hangi satır?", bazen "çalışan bir sunucu neden takıldı?", bazen "bellek nereye gitti?" diye sorarsın. Her soru için ayrı bir araç vardır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Soru</th><th>Araç</th><th>Nerede çalışır?</th></tr>
+<tr><td>İki kısa alternatiften hangisi hızlı?</td><td><code>timeit</code> (<code>repeat</code> ile)</td><td>Standart kütüphane, tarayıcıda da</td></tr>
+<tr><td>Bir iş bloğu kaç saniye sürdü?</td><td><code>time.perf_counter()</code></td><td>Standart kütüphane</td></tr>
+<tr><td>Hangi fonksiyon zaman yiyor?</td><td><code>cProfile</code> + <code>pstats</code></td><td>Standart kütüphane</td></tr>
+<tr><td>Fonksiyonun hangi satırı?</td><td><code>line_profiler</code> (kernprof)</td><td>Kendi bilgisayarında, <code>pip install line_profiler</code></td></tr>
+<tr><td>Çalışan süreç neden yavaş? (kodu değiştirmeden)</td><td><code>py-spy</code></td><td>Kendi bilgisayarında, <code>pip install py-spy</code></td></tr>
+<tr><td>CPU + bellek birlikte, satır satır</td><td><code>scalene</code></td><td>Kendi bilgisayarında, <code>pip install scalene</code></td></tr>
+<tr><td>Hangi satır ne kadar bellek ayırdı?</td><td><code>tracemalloc</code></td><td>Standart kütüphane</td></tr>
+</table></div>
+
+<h3>perf_counter, time ve process_time</h3>
+<p><code>time.time()</code> duvar saatidir; sistem saati senkronize edilince geri bile gidebilir. Süre ölçmek için <b>tekdüze (monotonic)</b> ve yüksek çözünürlüklü <code>time.perf_counter()</code> kullan. <code>time.process_time()</code> yalnızca işlemcinin senin sürecin için harcadığı süreyi verir; ağ ya da disk beklerken artmaz. Fark büyükse kodun hesap yapmıyor, bekliyordur: çözüm algoritma değil, eşzamanlılıktır (bunu <i>eszamanlilik</i> ve <i>async</i> derslerinde gördün).</p>
+<pre class="py">import time
+from functools import wraps
+
+def zamanla(fn):
+    @wraps(fn)
+    def sarmal(*args, **kwargs):
+        t0, c0 = time.perf_counter(), time.process_time()
+        try:
+            return fn(*args, **kwargs)
+        finally:
+            duvar = time.perf_counter() - t0
+            cpu = time.process_time() - c0
+            print(f"{fn.__name__}: duvar={duvar:.3f}s cpu={cpu:.3f}s")
+    return sarmal
+
+@zamanla
+def hesapla():
+    return sum(i * i for i in range(300_000))
+
+@zamanla
+def bekle():
+    time.sleep(0.2)          # ağ/disk beklemesinin taklidi
+
+hesapla()
+bekle()                      # duvar ~0.2 s, cpu ~0: kod bekliyor, hesaplamıyor
+</pre>
+
+<h3>timeit.repeat: gürültüye karşı en küçük değer</h3>
+<p>Tek bir ölçüm arka plandaki işlere, önbelleğe, işlemci frekansına göre oynar. <code>timeit.repeat(..., repeat=5, number=N)</code> ölçümü beş kez tekrarlar; <b>ortalamayı değil en küçüğü</b> al. En küçük değer "kodun gerçekte ne kadar sürdüğüne" en yakın olandır; daha büyük değerler kodun değil makinenin gürültüsüdür.</p>
+<pre class="py">import timeit
+
+veri = list(range(10_000))
+sonuclar = timeit.repeat(lambda: sorted(veri, reverse=True), repeat=5, number=200)
+print("ölçümler:", [round(s, 4) for s in sonuclar])
+print(f"en iyi: {min(sonuclar) / 200 * 1e6:.1f} µs / çağrı")
+</pre>
+
+<h2>Komut satırından profil: kurulum ve sık hatalar</h2>
+<p>Aşağıdaki araçlar tarayıcıda çalışmaz; kendi bilgisayarında, projenin sanal ortamı (virtual environment) etkinken dene.</p>
+<pre class="code"># 1) cProfile'ı kod değiştirmeden çalıştır, kümülatif süreye göre sırala
+python -m cProfile -s cumtime gece_raporu.py | head -25
+
+# 2) Sonucu dosyaya kaydedip sonra incele
+python -m cProfile -o profil.out gece_raporu.py
+python -m pstats profil.out        # açılan kabukta: sort cumtime / stats 15
+
+# 3) Satır satır: fonksiyonun üstüne @profile yaz, kernprof ile çalıştır
+pip install line_profiler
+kernprof -l -v gece_raporu.py
+
+# 4) Çalışan sürece dışarıdan bak (sunucuyu durdurmadan)
+pip install py-spy
+py-spy top --pid 12345
+py-spy record -o profil.svg -- python gece_raporu.py   # alev grafiği (flame graph)
+</pre>
+<div class="tbl-wrap"><table>
+<tr><th>Belirti</th><th>Neden</th><th>Çözüm</th></tr>
+<tr><td><code>NameError: name 'profile' is not defined</code></td><td><code>@profile</code> dekoratörünü (decorator) yalnızca <code>kernprof</code> tanımlar; betiği düz <code>python</code> ile çalıştırdın</td><td><code>kernprof -l -v dosya.py</code> kullan ya da işin bitince dekoratörü sil</td></tr>
+<tr><td>py-spy: <code>Permission denied</code></td><td>macOS ve Linux başka sürece bağlanmayı kısıtlar</td><td>macOS'ta <code>sudo py-spy ...</code>; Linux'ta <code>sudo</code> ya da kendi başlattığın süreci <code>record -- python ...</code> ile izle</td></tr>
+<tr><td><code>kernprof: command not found</code></td><td>Paket başka bir ortama kuruldu ya da Scripts/bin klasörü PATH'te değil</td><td>Sanal ortamı etkinleştir; <code>python -m kernprof -l -v dosya.py</code></td></tr>
+<tr><td>cProfile çıktısında yüzlerce <code>{built-in method ...}</code> satırı</td><td>Sıralama yapılmadı</td><td><code>-s cumtime</code> ekle, ilk 20-30 satıra bak</td></tr>
+</table></div>
+<div class="warn"><b>Profilci de yavaşlatır</b>cProfile her fonksiyon çağrısını sayar; çok küçük fonksiyonları çok sık çağıran kod profil altında 2-3 kat yavaş görünebilir. Mutlak süreye değil, <b>oranlara</b> bak: "toplam sürenin yüzde 80'i şu fonksiyonda" bilgisi doğrudur.</div>
+
+<h2>Bellek profili: tracemalloc ile anlık görüntü karşılaştırma</h2>
+<p><code>tracemalloc</code> Python'ın ayırdığı belleği izler. İki anlık görüntü (snapshot) alıp farkını satır satır listelersen "bellek nerede büyüdü?" sorusunu yanıtlarsın. <code>get_traced_memory()</code> ise (şu an, tepe) çiftini verir; bir fonksiyonun en yüksek bellek kullanımını ölçmenin en kolay yoludur.</p>
+<pre class="py">import tracemalloc
+
+def liste_ile(n):
+    return sum([i * 2 for i in range(n)])
+
+def uretec_ile(n):
+    return sum(i * 2 for i in range(n))
+
+for fn in (liste_ile, uretec_ile):
+    tracemalloc.start()
+    fn(200_000)
+    simdi, tepe = tracemalloc.get_traced_memory()
+    tracemalloc.stop()
+    print(f"{fn.__name__:11}: tepe {tepe / 1024:8.1f} KB")
+</pre>
+
+<h2>Standart kütüphanenin hızlı yolları</h2>
+<p>Çoğu "hızlandırma" yeni bir şey yazmak değil, C ile yazılmış hazır aracı bulmaktır.</p>
+<div class="tbl-wrap"><table>
+<tr><th>Yavaş kalıp</th><th>Hızlı karşılığı</th><th>Neden</th></tr>
+<tr><td><code>sorted(x, reverse=True)[:10]</code></td><td><code>heapq.nlargest(10, x)</code></td><td>Tümünü sıralamaz: O(n log k)</td></tr>
+<tr><td>Sıralı listede <code>for</code> ile eşik arama</td><td><code>bisect.bisect_right</code></td><td>İkili arama: O(log n)</td></tr>
+<tr><td>Elle sayaç sözlüğü</td><td><code>collections.Counter</code></td><td>Sayım döngüsü C'de</td></tr>
+<tr><td>Döngüde <code>sonuc.append(f(x))</code></td><td>Liste kapsamı ya da <code>map</code></td><td>Metot araması her turda tekrarlanmaz</td></tr>
+<tr><td>Döngüde <code>math.sqrt</code>, <code>self.oran</code></td><td>Döngü öncesi yerel ada bağla</td><td>Yerel ad araması nitelik aramasından ucuzdur</td></tr>
+</table></div>
+<pre class="py">import heapq, bisect
+from collections import Counter
+
+tutarlar = [120, 5400, 80, 990, 15000, 300, 7200]
+print("en büyük 3:", heapq.nlargest(3, tutarlar))
+
+# Kademeli komisyon: 0-999 %3, 1000-4999 %2, 5000+ %1
+esikler = [1000, 5000]
+oranlar = [0.03, 0.02, 0.01]
+for t in (500, 1000, 7200):
+    print(t, "-&gt;", oranlar[bisect.bisect_right(esikler, t)])
+
+sehirler = ["İzmir", "Ankara", "İzmir", "Bursa", "İzmir", "Ankara"]
+print(Counter(sehirler).most_common(2))
+</pre>
+
+<h2>Python yetmediğinde: seçenekler</h2>
+<p>Algoritmayı düzelttin, numpy'a geçtin, hâlâ yavaş mı? Sırayla şu seçeneklere bakılır: <b>multiprocessing</b> (CPU işini çekirdeklere dağıtır, <i>eszamanlilik</i> dersinde), <b>Numba</b> (<code>pip install numba</code>, sayısal fonksiyonu <code>@njit</code> ile makine koduna derler), <b>Cython</b> (Python'a C tipleri ekleyip derler), <b>PyPy</b> (JIT'li alternatif yorumlayıcı; saf Python döngülerinde çok hızlı, bazı C eklentileriyle sorunlu). Python 3.13 ile deneysel JIT ve GIL'siz (free-threaded) sürüm de geldi; üretimde kullanmadan önce bağımlılıklarının desteklediğini doğrula.</p>
+<div class="tip"><b>Önce soruyu küçült</b>En büyük kazanç çoğu zaman daha az veri işlemektir: SQL'de filtreyi veritabanına yaptır, yalnız gereken sütunları oku, dünün sonucunu önbellekten al. Hiç çalışmayan kod en hızlı koddur.</div>
+<div class="note"><b>Gerçek işte</b>Performans düzeltmesini bir pull request'e koyarken "hızlandı" yazmak yetmez. Ölçümü de koy: hangi veri boyutuyla, kaç tekrarla, önce ve sonra kaç saniye. Ekip arkadaşın aynı komutu çalıştırıp sonucu doğrulayabilmeli. Kritik raporlar için basit bir süre testi (ör. "10 bin satır 2 saniyenin altında") CI'da gerilemeyi yakalar.</div>
+</section><section class="deep"><span class="eyebrow">Uzmanlaş</span>
+<h3>Optimizasyon sırası</h3>
+<div class="steps-list"><ol>
+<li>Ölç: cProfile ile en pahalı fonksiyonları bul, timeit ile alternatifi doğrula.</li>
+<li>Algoritma ve veri yapısı: O(n²)'yi O(n)'e indir; list → set/dict, pop(0) → deque, sıralı arama → bisect.</li>
+<li>Python düzeyi: üreteç, join, lru_cache, yerel değişken, gereksiz kopyadan kaçınma.</li>
+<li>Kütüphaneye devret: numpy/pandas, sqlite/veritabanı sorgusu, yerleşik fonksiyonlar (sum, sorted) C'de çalışır.</li>
+<li>Paralellik: I/O için thread/asyncio, CPU için süreçler. En son adım, çünkü karmaşıklık getirir.</li>
+</ol></div>
+<h3>Bellek de ölçülür</h3>
+<p><code>tracemalloc</code> hangi satırın ne kadar bellek ayırdığını gösterir; <code>sys.getsizeof</code> tek nesnenin boyutudur (içindekileri saymaz). Büyük veri için pandas'ta küçük dtype ve category, saf Python'da <code>__slots__</code> ve üreteç.</p>
+<h3>Ölçüm hataları</h3>
+<p>İlk çalıştırma önbellek yüzünden yavaştır; <code>number</code> ve <code>repeat</code> ile birkaç kez ölç, en küçüğü al. Dizüstünde pil modu, arka plan işleri ölçümü oynatır; karşılaştırmayı aynı oturumda ve arka arkaya yap.</p>
+</section></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/performans">Alıştırmalara geç (20)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../eszamanlilik/">← threading, concurrent.futures ve GIL</a><a href="../bellek-ic-yapi/">Python'ın iç yapısı: nesne, referans, bellek →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>
