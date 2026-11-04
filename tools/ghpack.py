@@ -49,7 +49,8 @@ for f in ['config.js', 'LICENSE', 'LICENSE-ICERIK.md']: shutil.copy('kaynak/gh/'
 shutil.copytree('kaynak/gh/static', O, dirs_exist_ok=True)
 # Service worker: içerik özetiyle sürümlenir, ilk ziyarette çekirdek dosyaları önbelleğe alır, eski sürümü siler
 import hashlib
-_pre = ['./', 'index.html', 'config.js', 'pyworker.js', 'vendor/fonts.css', 'data/manifest.json'] + tags
+_fontlar = ['vendor/' + u for u in re.findall(r'url\(([^)]+\.woff2)\)', open(O + '/vendor/fonts.css', encoding='utf-8').read())]
+_pre = ['./', 'index.html', 'config.js', 'pyworker.js', 'vendor/fonts.css', 'data/manifest.json'] + _fontlar + tags
 _h = hashlib.sha256()
 for f in sorted(set(x for x in _pre if x != './')):
     _h.update(open(O + '/' + f, 'rb').read())
