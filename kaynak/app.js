@@ -213,14 +213,16 @@ function outHTML(res, opt = {}) {
     h += '<div class="errbox"><b>' + esc(e.type) + (e.line ? ' — ' + (e.where === '<test>' ? 'test' : 'satır ' + e.line) : '') + '</b>' + esc(e.msg || '') + (tip ? '<small>' + esc(tip) + '</small>' : '') + '</div>';
   }
   if (res.images && res.images.length) h += res.images.map(b => '<img class="plotimg" alt="Kodun çizdiği grafik" src="data:image/png;base64,' + b + '">').join('');
-  if (!res.out && !res.err && !res.stderr && !(res.images && res.images.length)) h += '<p class="muted" style="margin:0">Çıktı yok. Sonucu görmek için print() kullan.</p>';
+  if (res.htmls && res.htmls.length) h += res.htmls.map(x => '<iframe class="plotframe" title="Kodun çizdiği etkileşimli grafik" sandbox="allow-scripts" srcdoc="' + esc(x) + '"></iframe>').join('');
+  if (res.dosyalar && res.dosyalar.length) h += '<div class="row dosyalar">' + res.dosyalar.map(f => '<a class="btn sm" download="' + esc(f.ad.split('/').pop()) + '" href="data:application/octet-stream;base64,' + f.b64 + '">İndir: ' + esc(f.ad.split('/').pop()) + '</a>').join('') + '</div>';
+  if (!res.out && !res.err && !res.stderr && !(res.images && res.images.length) && !(res.dosyalar && res.dosyalar.length) && !(res.htmls && res.htmls.length)) h += '<p class="muted" style="margin:0">Çıktı yok. Sonucu görmek için print() kullan.</p>';
   if (opt.ms != null) h += '<div class="ms">' + opt.ms + ' ms</div>';
   return h;
 }
 const MOTOR_MSG = 'Python motoru hazırlanıyor. İlk çalıştırmada yaklaşık 6 MB iner, sonra çok daha hızlı açılır.';
 const BUSY = { bos: MOTOR_MSG, yukleniyor: MOTOR_MSG, paket: 'Paket ve veri hazırlanıyor. pandas gibi kütüphaneler ilk kullanımda 10 MB civarı iner.', hazir: 'Çalışıyor…', yok: MOTOR_MSG };
 /* Süre geçtikçe mesaj dürüstleşir; kod çalışırken (hazir) değişmez */
-function busyText(st, sn) { if (st === 'hazir') return BUSY.hazir; if (sn >= 90) return 'Hâlâ inmedi. Durdur\'a basıp bağlantını kontrol edebilirsin; kurum ağı jsDelivr\'ı engelliyor olabilir.'; if (sn >= 15) return 'Bağlantı yavaş görünüyor, indirme sürüyor. Mobil veride bir dakikayı bulabilir; Wi-Fi daha hızlıdır.'; return BUSY[st] || BUSY.hazir; }
+function busyText(st, sn) { if (st === 'hazir') return BUSY.hazir; if (st === 'paket' && E.paketBilgi()) return 'Kütüphane iniyor: ' + E.paketBilgi() + '. Bir kez iner, sonra bu cihazdan açılır.' + (sn >= 15 ? ' Bağlantı yavaşsa biraz sürebilir.' : ''); if (sn >= 90) return 'Hâlâ inmedi. Durdur\'a basıp bağlantını kontrol edebilirsin; kurum ağı jsDelivr\'ı engelliyor olabilir.'; if (sn >= 15) return 'Bağlantı yavaş görünüyor, indirme sürüyor. Mobil veride bir dakikayı bulabilir; Wi-Fi daha hızlıdır.'; return BUSY[st] || BUSY.hazir; }
 setInterval(() => { $$('.busy-msg').forEach(el => { if (el.dataset.fixed) return; const t = busyText(E.state(), (Date.now() - (+el.dataset.t0 || Date.now())) / 1000); if (el.textContent !== t) el.textContent = t; }); }, 1000);
 function busyHTML(label) { return '<div class="busy"><span class="spin" aria-hidden="true"></span><span class="busy-msg" role="status"' + (label ? ' data-fixed="1"' : ' data-t0="' + Date.now() + '"') + '>' + esc(label || BUSY[E.state()] || BUSY.hazir) + '</span><button type="button" class="btn sm ghost" data-act="engine-stop">Durdur</button></div>'; }
 E.onState(st => { $$('.busy-msg').forEach(el => { if (!el.dataset.fixed) el.textContent = busyText(st, (Date.now() - (+el.dataset.t0 || Date.now())) / 1000); }); });

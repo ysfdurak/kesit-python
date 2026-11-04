@@ -50,6 +50,10 @@ def _pp_third(src):
         except Exception: return False
     return sorted(m for m in mods if not _ok(m))
 `);
+/* pypaket/ tekerlekleri: yerelGerek ile bulunur, site-packages'a açılır */
+const YK = new Function(engine.match(/\/\*YEREL\*\/([\s\S]*?)\/\*\/YEREL\*\//)[1] + ';return { YEREL, yerelGerek };')();
+const YLOADED = new Set();
+async function yerelYukle(src, ek) { const kok = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'pypaket'); for (const k of new Set(YK.yerelGerek(src).concat((ek || []).filter(x => YK.YEREL[x])))) { if (YLOADED.has(k)) continue; YLOADED.add(k); await py.loadPackage(YK.YEREL[k].dep, { messageCallback: () => {} }); for (const f of YK.YEREL[k].whl) py.unpackArchive(new Uint8Array(fs.readFileSync(path.join(kok, f))), 'wheel'); await py.runPythonAsync('import importlib\nimportlib.invalidate_caches()'); if (k === 'plotly') await py.runPythonAsync('_pp_plotly_kur()'); } }
 const third = py.globals.get('_pp_third'); const run = py.globals.get('_pp_run');
 const norm = s => String(s == null ? '' : s).replace(/\r\n/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').trim();
 const LOADED = new Set(); let ok = 0, bad = 0, skip = 0; const skipped = {};
@@ -65,7 +69,8 @@ for (const [name, e] of items) {
   const src = code + '\n' + tests + '\n' + (e.gen || '');
   if (process.env.NOPKG) { const t = third(src).toJs(); if (t.length || (e.needs && e.needs.length)) { skip++; (t.length ? t : e.needs).forEach(m => skipped[m] = (skipped[m] || 0) + 1); continue; } }
   else {
-    const need = [...(e.needs || [])]; if (/veri\.(oku|hepsi)\b/.test(src)) need.push('pandas'); if (/veri\.baglan\b/.test(src)) need.push('sqlite3'); if (/\bhashlib\b/.test(src)) need.push('hashlib');
+    await yerelYukle(src, e.needs);
+    const need = (e.needs || []).filter(x => !YK.YEREL[x]); if (/veri\.(oku|hepsi)\b/.test(src)) need.push('pandas'); if (/veri\.baglan\b/.test(src)) need.push('sqlite3'); if (/\bhashlib\b/.test(src)) need.push('hashlib');
     const nn = need.filter(x => !LOADED.has(x));
     if (nn.length) { try { await py.loadPackage(nn, { messageCallback: () => {} }); nn.forEach(x => LOADED.add(x)); if (nn.includes('hashlib')) await py.runPythonAsync('import sys\nfor _m in ("hashlib", "_hashlib", "hmac", "secrets"): sys.modules.pop(_m, None)'); } catch (x) { nn.forEach(m => skipped['yok:' + m] = (skipped['yok:' + m] || 0) + 1); } }
     try { await py.loadPackagesFromImports(src, { messageCallback: () => {} }); } catch (x) {}

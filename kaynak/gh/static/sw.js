@@ -4,7 +4,7 @@
 const PREFIX = 'kesit-python-';
 const CACHE = PREFIX + '__SURUM__';
 const CORE = __ONBELLEK__;
-/* Python motoru ve paketleri (sürümlü adres, değişmez): bir kez inince bu cihazda kalır, internetsiz de çalışır. */
+/* Python motoru, paketleri ve pypaket/ tekerlekleri (sürümlü ad, değişmez): bir kez inince bu cihazda kalır, internetsiz de çalışır. */
 const MOTOR = PREFIX + 'motor-0.27.8';
 const MOTOR_URL = 'https://cdn.jsdelivr.net/npm/pyodide@0.27.8/';
 self.addEventListener('install', e => {
@@ -15,7 +15,7 @@ self.addEventListener('activate', e => {
 });
 self.addEventListener('fetch', e => {
   const req = e.request;
-  if (req.method === 'GET' && req.url.startsWith(MOTOR_URL)) {
+  if (req.method === 'GET' && (req.url.startsWith(MOTOR_URL) || new URL(req.url).pathname.includes('/pypaket/'))) {
     e.respondWith(caches.open(MOTOR).then(c => c.match(req, { ignoreVary: true }).then(r => r || fetch(req).then(res => {
       if (res && (res.ok || res.type === 'opaque')) e.waitUntil(c.put(req, res.clone()).catch(() => {}));
       return res;

@@ -305,7 +305,7 @@ assert all(type(v) is int for v in fark_bul(_x, _y)), "int döndür"
    hints=['how="outer" ekle.', 'NaN kendine eşit değildir: tutar_b != tutar_d karşılaştırmasında eksik satırlar da doğru çıkar, ama güvenlisi ~(a == b).'],
    why='İç birleştirme, varsayılan olduğu için en sık yapılan mutabakat hatasıdır: yalnız bir tarafta olan satırı, yani asıl aradığın farkı, sessizce siler.'),
 dict(t='code', id='proje-mutabakat-7', stage='Mini proje', diff=3, needs=['pandas'],
-   q='<p><b>Son adım: rapor ve karar.</b> İki fonksiyon yaz.</p><p><code>rapor_sayfalari(sonuc, ozet)</code>: Excel\'e yazılacak sayfaları sözlük olarak döndürsün. <code>"Özet"</code>: başlık <code>["Ölçü", "Değer"]</code>; satırlar <code>Beklenen TL</code>, <code>Ödenen TL</code>, <code>Net fark TL</code>, sonra alfabetik durum adı ve adedi. <code>"Farklar"</code>: başlık <code>BASLIKLAR</code>, sonra yalnız <code>tamam</code> olmayan satırlar (Python <code>int</code> ve metin). Gerçek dosyayı sonraki adımda bilgisayarında yazacaksın; tarayıcıda openpyxl yok.</p><p><code>karar_notu(ozet)</code>: <code>tamam</code> dışında durum yoksa <code>"KABUL: Beklenen ve oluşan kuponlar tutuyor."</code>; varsa şu beş satırı döndürsün:</p><pre class="out">RET: {fark} siparişte fark var, net {net} TL.\nEksik {n}: müşteriye söz verilen kupon oluşmamış.\nÇift {n}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\nTutar farkı {n}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\nFazla {n}: zamanında teslime kupon verilmiş.</pre>',
+   q='<p><b>Son adım: rapor ve karar.</b> İki fonksiyon yaz.</p><p><code>rapor_sayfalari(sonuc, ozet)</code>: Excel\'e yazılacak sayfaları sözlük olarak döndürsün. <code>"Özet"</code>: başlık <code>["Ölçü", "Değer"]</code>; satırlar <code>Beklenen TL</code>, <code>Ödenen TL</code>, <code>Net fark TL</code>, sonra alfabetik durum adı ve adedi. <code>"Farklar"</code>: başlık <code>BASLIKLAR</code>, sonra yalnız <code>tamam</code> olmayan satırlar (Python <code>int</code> ve metin). Sayfaları dosyaya sonraki adımda yazacaksın.</p><p><code>karar_notu(ozet)</code>: <code>tamam</code> dışında durum yoksa <code>"KABUL: Beklenen ve oluşan kuponlar tutuyor."</code>; varsa şu beş satırı döndürsün:</p><pre class="out">RET: {fark} siparişte fark var, net {net} TL.\nEksik {n}: müşteriye söz verilen kupon oluşmamış.\nÇift {n}: aynı siparişe iki kupon, tekrar koruması çalışmıyor.\nTutar farkı {n}: 45 ve 60 dakika sınırı yanlış uygulanmış olabilir.\nFazla {n}: zamanında teslime kupon verilmiş.</pre>',
    start=H4 + '\nBASLIKLAR = ["order_id", "durum", "beklenen_tl", "odenen_tl", "fark_tl"]\n\ndef rapor_sayfalari(sonuc, ozet):\n    pass\n\ndef karar_notu(ozet):\n    pass\n', sol=H4 + '\n' + SAYFA + '\n' + KARAR,
    tests=f"""_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _r = mutabakat(_b, dosya_oku(kupon_dosyasi(_b, _s))); _o = ozet_cikar(_r)
 _p = rapor_sayfalari(_r, _o)
@@ -324,6 +324,23 @@ assert karar_notu({{"adet": {{"tamam": 5}}, "beklenen_tl": 150, "odenen_tl": 150
    hints=['sonuc[sonuc["durum"] != "tamam"] ile süz, itertuples ile gez.', 'int(r[0]) numpy tam sayısını Python int yapar; openpyxl ikisini de yazar ama karşılaştırma için net olsun.', 'a.get("eksik", 0): o durum hiç yoksa sayı 0.'],
    why='Çıktın artık paydaşın açıp bakabileceği sayfalar ve kabul ya da ret diyen bir not. Python\'ı burada yazılımcı olmak için değil, SQL\'den gelen hesabı tekrarlanabilir bir denetime çevirmek için kullandın.'),
 ]
+ex.append(dict(t='code', id='proje-mutabakat-8', stage='Mini proje', diff=2, needs=['pandas'],
+   q='<p><b>Gerçek Excel raporu.</b> <code>excel_yaz(sayfalar, yol)</code>: <code>rapor_sayfalari</code> çıktısını gerçek <code>.xlsx</code> dosyasına yaz. Her anahtar bir sayfa, her liste bir satır. İki sayfada da ilk satır kalın ve dondurulmuş olsun. Boş varsayılan sayfa kalmasın. Koduna <code>excel_yaz(rapor_sayfalari(r, o), "rapor.xlsx")</code> gibi bir çağrı ekleyip Çalıştır düğmesine basarsan <b>İndir</b> düğmesi çıkar, dosyayı Excel ile açarsın.</p>',
+   start=H4 + '\n' + SAYFA + '\nfrom openpyxl import Workbook\nfrom openpyxl.styles import Font\n\ndef excel_yaz(sayfalar, yol):\n    pass\n', sol=H4 + '\n' + SAYFA + '\n' + EXCEL,
+   tests=f"""import tempfile, os
+from openpyxl import load_workbook
+_y = os.path.join(tempfile.mkdtemp(), "kupon_mutabakat.xlsx")
+_s = siparisleri_oku(); _b = beklenen_kuponlar(_s); _r = mutabakat(_b, dosya_oku(kupon_dosyasi(_b, _s))); _o = ozet_cikar(_r)
+excel_yaz(rapor_sayfalari(_r, _o), _y)
+_w = load_workbook(_y)
+assert _w.sheetnames == ["Özet", "Farklar"], "Sayfalar: " + repr(_w.sheetnames)
+assert _w["Özet"]["B4"].value == {OZ['net_fark_tl']}, "Net fark {OZ['net_fark_tl']} olmalı"
+assert _w["Farklar"].max_row == 1 + {sum(v for k, v in OZ['adet'].items() if k != 'tamam')}, "Fark satırı sayısı farklı"
+assert _w["Özet"]["A1"].font.bold and _w["Farklar"]["A1"].font.bold, "Başlıklar kalın olmalı"
+assert _w["Özet"].freeze_panes == "A2" and _w["Farklar"].freeze_panes == "A2", "İlk satır dondurulmalı"
+""",
+   hints=['wb.remove(wb.active) boş sayfayı atar.', 'ws.append(satir); ws[1] ilk satır.'],
+   why='Paydaşın açacağı dosya budur. Test dosyayı yeniden açıp okuyor, yani görünmeyen bir sözlük değil gerçek bir .xlsx denetleniyor.'))
 YEREL = (H4.replace('veri.oku("lezzet_kurye", "lk_orders", parse_dates=["placed_at", "delivered_at"])', 'pd.read_csv("lk_orders.csv", parse_dates=["placed_at", "delivered_at"])').replace('import veri\n', '') + '\n' + SAYFA + '\n' + EXCEL + '\n' + KARAR + """
 if __name__ == "__main__":
     s = siparisleri_oku()
@@ -345,7 +362,7 @@ with tempfile.TemporaryDirectory() as td:
     assert _w.sheetnames == ['Özet', 'Farklar'] and _w['Farklar'].max_row == 1 + sum(v for k, v in OZ['adet'].items() if k != 'tamam') and _w['Özet']['A1'].font.bold
 print(YEREL_CIKTI)
 ex.append(dict(t='local', id='proje-mutabakat-yerel', stage='Kendi bilgisayarında',
-   q='<p>Gerçek Excel dosyasını bilgisayarında üret. Betik aynı hesabı yapar, sonra openpyxl ile iki sayfalı dosya yazar.</p>',
+   q='<p>Aynı raporu bilgisayarında dosya yollarıyla üret. Betik aynı hesabı yapar, sonra openpyxl ile iki sayfalı dosya yazar.</p>',
    steps=['Veri setleri sayfasından Lezzet Kurye\'nin <code>lk_orders.csv</code> dosyasını indir.', '<code>python -m pip install pandas openpyxl</code> yaz.', 'Aşağıdaki kodu aynı klasöre <code>mutabakat.py</code> olarak kaydet.', 'Komutu çalıştır, <code>kupon_mutabakat.xlsx</code> dosyasını aç: <code>Özet</code> ve <code>Farklar</code> sayfalarını incele.'],
    file=YEREL, fname='mutabakat.py', cmd='python mutabakat.py', expect=YEREL_CIKTI))
 GOVDE = f'''
@@ -375,7 +392,7 @@ print(m)""")}
 <h2>API cevabı da bir sözleşmedir</h2>
 <p>İş analisti API yazmaz ama cevabın sözleşmeye uyup uymadığını denetleyebilir. <b>http-api</b> dersindeki JSON okuma burada işe yarar; gerçek servise bağlanman gerekmez, örnek cevaplar dosyadan okunur.</p>
 <h2>Bitince göreceğin sonuç</h2>
-<p>Tarayıcıda openpyxl çalışmadığı için rapor sayfalarını burada Python listesi olarak kurarsın; gerçek Excel dosyasını son adımda kendi bilgisayarında aynı kodla yazarsın.</p>
+<p>Rapor sayfalarını önce Python listesi olarak kurarsın, sonra gerçek Excel dosyasına yazarsın. Dosya bu sayfada oluşur, indirip Excel'de açabilirsin (openpyxl ilk kullanımda iner, yaklaşık 270 KB).</p>
 <div class="tbl-wrap"><table><tr><th>Durum</th><th>Sipariş</th></tr><tr><td>Tamam</td><td>{tr(a['tamam'])}</td></tr><tr><td>Eksik</td><td>{a['eksik']}</td></tr><tr><td>Çift</td><td>{a['cift']}</td></tr><tr><td>Tutar farkı</td><td>{a['tutar_farki']}</td></tr><tr><td>Fazla</td><td>{a['fazla']}</td></tr></table></div>
 <section class="deep"><span class="eyebrow">Uzmanlaş</span><h3>Bunu işe taşı</h3><p>Aynı kalıp her kabul testinde çalışır: kuralı ayrı hesapla, anahtarla karşılaştır, farkı sınıflandır, dosya olarak paylaş. Kural Kesit SQL\'deki karar tablosundan geliyor; tablo değişirse betikte tek yer değişir. Bir sonraki adım olarak bu betiği bir sonraki sürümde yeniden çalıştırıp farkın kapandığını göster: buna regresyon denetimi denir.</p></section>
 '''

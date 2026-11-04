@@ -16,6 +16,7 @@ function worker() {
   w.onmessage = ev => {
     const m = ev.data;
     if (m.state) { if (w === S.w) setState(m.state); return; }
+    if (m.paketBilgi != null) { S.paketBilgi = m.paketBilgi; emit(); return; }
     if (m.partial != null) { S.partial = m.partial; return; }
     if (m.started != null) { if (S.cur && S.cur.id === m.started) armTimer(S.cur.limit); return; }
     const p = S.pend.get(m.id); if (!p) return; S.pend.delete(m.id);
@@ -99,7 +100,7 @@ const HINTS = {
   AttributeError: 'Nitelik hatası: nesnenin o metodu/niteliği yok; türünü print(type(x)) ile kontrol et.',
   AssertionError: 'Test başarısız: beklenen sonuç ile senin sonucun farklı.',
   SystemExit: 'Program sys.exit() ile sıfırdan farklı bir kodla sonlandı (argparse hatalı argümanda 2 koduyla çıkar).',
-  ModuleNotFoundError: 'Modül bulunamadı: tarayıcı ortamında standart kütüphane ve bilimsel paketler (pandas, numpy, scikit-learn, scipy, matplotlib, SQLAlchemy, pydantic, BeautifulSoup, polars, duckdb…) var; Flask, FastAPI, openpyxl gibi paketler yalnızca kendi bilgisayarında çalışır.',
+  ModuleNotFoundError: 'Modül bulunamadı: tarayıcı ortamında standart kütüphane ve bilimsel paketler (pandas, numpy, scikit-learn, scipy, matplotlib, SQLAlchemy, pydantic, BeautifulSoup, polars, duckdb…) var; Flask, FastAPI gibi paketler yalnızca kendi bilgisayarında çalışır.',
   RecursionError: 'Özyineleme derinliği aşıldı: durma koşulunu kontrol et.',
   EOFError: 'Kod editöründeysen "input() girdileri" bölümünü aç, her satıra bir değer yaz. Alıştırmada girdiler hazır gelir; fazladan input() çağırmış olabilirsin.'
 };
@@ -112,9 +113,10 @@ function explainAll(err) {
   if (/^(Süre sınırı|Durduruldu)$/.test(err.type)) return '';
   if (/[\u201C\u201D\u2018\u2019]/.test(String(err.msg || ''))) return 'Kıvrık tırnak: Python yalnız düz tırnağı tanır. “ ” yerine " yaz. Telefon klavyesi kıvrık tırnak üretebilir; akıllı noktalamayı kapatabilir ya da tırnağı buradaki gibi yazabilirsin.';
   if (err.type === 'NameError' && /name '[^']*[ıİ][^']*'/.test(String(err.msg || ''))) return 'Türkçe klavye: adda ı ya da İ var. Python komutları İngilizce harfle yazılır: prınt değil print, İnput değil input.';
+  if (err.type === 'ModuleNotFoundError' && /'(openpyxl|xlsxwriter|pypdf|docx|reportlab|seaborn|plotly)/.test(String(err.msg || ''))) return 'Bu paket inemedi: bağlantı kesilmiş olabilir. Bağlantını kontrol edip yeniden çalıştır.';
   if (err.type === 'ModuleNotFoundError' && typeof navigator !== 'undefined' && navigator.onLine === false) return 'Bağlantı yok: bu paket bu cihaza henüz inmedi. Bağlantı gelince yeniden çalıştır.';
   if (NET.test(String(err.msg || '')) || /^(ConnectionError|JsException|URLError|gaierror|ProxyError|SSLError)$/.test(err.type)) return 'Ağ isteği: tarayıcıdaki Python başka sitelere doğrudan bağlanamaz (CORS). Bu kodu kendi bilgisayarında çalıştır; buradaki alıştırmalar sahte yanıtlarla çalışır.';
   return explain0(err);
 }
-window.PY_ENGINE = { boot, run, stop, running, resetNs, dataManifest, ensurePkgs, sameOut, explain: explainAll, onState, state: () => S.state, cached, stoppedBoot, error: () => S.err, generation: () => S.gen };
+window.PY_ENGINE = { boot, run, stop, running, resetNs, dataManifest, ensurePkgs, sameOut, explain: explainAll, onState, state: () => S.state, paketBilgi: () => S.paketBilgi || '', cached, stoppedBoot, error: () => S.err, generation: () => S.gen };
 })();

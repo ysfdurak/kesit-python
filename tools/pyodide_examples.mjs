@@ -24,6 +24,9 @@ py.FS.mkdirTree('/data'); walk(path.join(root, 'data'), '/data');
 await py.runPythonAsync('import sys\nsys.path.insert(0, "/pp_lib")');
 const run = py.globals.get('_pp_run'); const LOADED = new Set(); const q = { messageCallback: () => {} };
 let total = 0, bad = 0, yok = 0;
+const YK = new Function(engine.match(/\/\*YEREL\*\/([\s\S]*?)\/\*\/YEREL\*\//)[1] + ';return { YEREL, yerelGerek };')();
+const YLOADED = new Set();
+async function yerelYukle(src) { const kok = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'pypaket'); for (const k of YK.yerelGerek(src)) { if (YLOADED.has(k)) continue; YLOADED.add(k); await py.loadPackage(YK.YEREL[k].dep, q); for (const f of YK.YEREL[k].whl) py.unpackArchive(new Uint8Array(fs.readFileSync(path.join(kok, f))), 'wheel'); await py.runPythonAsync('import importlib\nimportlib.invalidate_caches()'); if (k === 'plotly') await py.runPythonAsync('_pp_plotly_kur()'); } }
 for (const [lid, body, needs] of items) {
   const blocks = [...body.matchAll(/<pre class="py">([\s\S]*?)<\/pre>/g)].map(m => unesc(m[1]).replace(/^\n+|\n+$/g, ''));
   if (!blocks.length) continue;
@@ -31,6 +34,7 @@ for (const [lid, body, needs] of items) {
   for (let i = 0; i < blocks.length; i++) {
     const code = blocks[i]; total++;
     if (/input\(/.test(code)) continue;
+    await yerelYukle(code);
     const need = [...needs].filter(x => !LOADED.has(x));
     if (/veri\.(oku|hepsi)\b/.test(code)) need.push('pandas'); if (/veri\.baglan\b/.test(code)) need.push('sqlite3'); if (/\bhashlib\b/.test(code)) need.push('hashlib');
     const nn = need.filter(x => !LOADED.has(x));
