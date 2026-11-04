@@ -5,11 +5,7 @@ const L = W.PY_LESSONS = W.PY_LESSONS || [];
 L.push(Object.assign({ id: 'otomasyon-isletim', lv: 'ileri' }, {
  "mod": "Otomasyon, web ve araçlar",
  "min": 70,
- "needs": [
-  "ofis-otomasyon",
-  "logging",
-  "yapilandirma"
- ],
+ "needs": [],
  "title": "Otomasyonu işletmek: hata, tekrar, kilit, günlük",
  "sum": "Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON günlük, robots.txt ve hız sınırı, karantina, kaçan gün hesabı, paketleme ve test.",
  "goals": [

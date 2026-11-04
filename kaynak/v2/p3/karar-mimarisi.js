@@ -6,8 +6,7 @@ L.push(Object.assign({ id: 'karar-mimarisi', lv: 'ileri' }, {
  "mod": "Yapay Zekâ",
  "min": 65,
  "needs": [
-  "ajan-uretimde",
-  "pydantic-dogrulama"
+  "pydantic"
  ],
  "title": "Karar odaklı yapay zekâ mimarisi",
  "sum": "Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana yükseltme, denetim izi, geri alınabilirlik, karar kalitesi ölçümü.",

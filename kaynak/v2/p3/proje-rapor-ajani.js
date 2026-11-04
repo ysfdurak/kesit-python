@@ -6,8 +6,8 @@ L.push(Object.assign({ id: 'proje-rapor-ajani', lv: 'ileri' }, {
  "mod": "İleri bitirme",
  "min": 90,
  "needs": [
-  "ajan-uretimde",
-  "sql-analitik"
+  "pandas",
+  "sqlite3"
  ],
  "title": "Bitirme projesi: raporlama ajanı",
  "sum": "Anadolu Market verisinde sabit SQL araçlarıyla aylık rapor yazan ajan kurarsın. Modelin metnindeki her sayı araç sonucuyla karşılaştırılır; uydurma rakam reddedilir, rapor gerçek Excel dosyası olur.",

@@ -165,6 +165,11 @@ W.PY_ORDER = [
 "proje-ai",
 "proje-iade-ajani",
 "proje-rapor-ajani",
+"proje-oto-mutabakat",
+"proje-oto-fatura",
+"proje-oto-stok",
+"proje-oto-api",
+"proje-oto-onay",
 "proje-api"
 ];
 W.PY_MOD_FIX = {
@@ -317,6 +322,11 @@ W.PY_MOD_FIX = {
 "proje-ai": "İleri bitirme",
 "proje-iade-ajani": "İleri bitirme",
 "proje-rapor-ajani": "İleri bitirme",
+"proje-oto-mutabakat": "İleri bitirme",
+"proje-oto-fatura": "İleri bitirme",
+"proje-oto-stok": "İleri bitirme",
+"proje-oto-api": "İleri bitirme",
+"proje-oto-onay": "İleri bitirme",
 "proje-api": "İleri bitirme"
 };
 /* Zorluğa göre seviye (ders dosyasındaki lv alanını geçersiz kılar) */
@@ -361,6 +371,11 @@ W.PY_ALIAS = {
 "embedding-vektor-arama": "embedding vector search retrieval vektör getirme chunk chunking parçalama",
 "rag-uygulamasi": "rag retrieval chunk chunking",
 "llm-ajanlar": "agent ajan mcp tool",
+"proje-oto-mutabakat": "mutabakat reconciliation banka excel aylık otomasyon bitirme",
+"proje-oto-fatura": "fatura invoice pdf klasör izleme watch folder ayıklama otomasyon bitirme",
+"proje-oto-stok": "stok inventory uyarı alert email smtp reorder otomasyon bitirme",
+"proje-oto-api": "api pagination rate limit 429 watermark artımlı günlük rapor otomasyon bitirme",
+"proje-oto-onay": "onay approval workflow state machine durum makinesi word docx otomasyon bitirme",
 "otomasyon-isletim": "retry backoff idempotent lock kilit atomic config secret logging robots.txt quarantine cron scheduler pyproject paketleme",
 "ajan-uretimde": "agent ajan production prompt injection enjeksiyon tool registry json schema human in the loop eval multi agent",
 "mcp-protokolu": "mcp model context protocol host client server tools resources prompts stdio streamable http oauth json-rpc",

@@ -709,7 +709,7 @@ print(yol(20, 500, 700, 0.99, 500))
 print(yol(20, 200, 700, 0.90, 200))
 '''
 import html as _h
-ders = dict(id='proje-iade-ajani', lv='ileri', mod='İleri bitirme', min=120, needs=['ajan-uretimde', 'karar-mimarisi'],
+ders = dict(id='proje-iade-ajani', lv='ileri', mod='İleri bitirme', min=120, needs=['pydantic', 'pandas', 'sqlite3'],
  title='Bitirme projesi: iade kararı ajanı',
  sum='Lezzet Kurye\'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu, zincirli denetim izi, enjeksiyon vakalı eval seti ve iki kez çalıştırılsa da bir kez ödeyen gün sonu işi.',
  goals=['Modeli kararın yalnız gri alanına koyan bir hat kurabilirim.', 'Ajanı yazma yetkisi olmadan, yalnız öneri üretecek biçimde sınırlayabilirim.', 'Otomatik kararı güven ve tutar eşikleriyle insana yönlendirebilirim.', 'Kararları sonradan değişince fark edilen bir kayda yazabilirim.', 'Güvenlik vakası kalan sistemi yayından alan eval kurabilirim.', 'Aynı girdiyle iki kez çalışıp bir kez iade yapan bir iş yazabilirim.'],

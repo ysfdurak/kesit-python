@@ -377,7 +377,7 @@ for metin in ["Ciro 12.345,60 TL, 42 sipariş.", "Ciro 13.000,00 TL, 42 sipariş
     sayilar = [float(s.replace(".", "").replace(",", ".")) for s in re.findall(r"\\d[\\d.,]*\\d|\\d", metin)]
     print(metin, "->", "geçti" if all(s in gozlem.values() for s in sayilar) else "uydurma sayı var")
 '''
-ders = dict(id='proje-rapor-ajani', lv='ileri', mod='İleri bitirme', min=90, needs=['ajan-uretimde', 'sql-analitik'],
+ders = dict(id='proje-rapor-ajani', lv='ileri', mod='İleri bitirme', min=90, needs=['pandas', 'sqlite3'],
  title='Bitirme projesi: raporlama ajanı',
  sum='Anadolu Market verisinde sabit SQL araçlarıyla aylık rapor yazan ajan kurarsın. Modelin metnindeki her sayı araç sonucuyla karşılaştırılır; uydurma rakam reddedilir, rapor gerçek Excel dosyası olur.',
  goals=['Serbest SQL yerine sabit ve parametreli araçlar tasarlayabilirim.', 'Metindeki sayıları Türkçe biçimiyle çözüp kaynakla karşılaştırabilirim.', 'Düzeltme döngüsü ve adım sınırı olan bir rapor ajanı yazabilirim.', 'Sonucu formüllü bir Excel dosyasına atomik yazabilirim.'],

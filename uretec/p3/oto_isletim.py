@@ -713,7 +713,7 @@ d = tempfile.mkdtemp()
 rapor_saglam(d, {"toplam": 42})
 print(os.listdir(d), open(os.path.join(d, "rapor.json")).read())
 '''
-ders = dict(id='otomasyon-isletim', lv='ileri', mod='Otomasyon, web ve araçlar', min=70, needs=['ofis-otomasyon', 'logging', 'yapilandirma'],
+ders = dict(id='otomasyon-isletim', lv='ileri', mod='Otomasyon, web ve araçlar', min=70, needs=[],
  title='Otomasyonu işletmek: hata, tekrar, kilit, günlük',
  sum='Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON günlük, robots.txt ve hız sınırı, karantina, kaçan gün hesabı, paketleme ve test.',
  goals=['Geçici ve kalıcı hatayı ayırıp güvenle yeniden deneyebilirim.', 'Yarım dosya bırakmayan yazma ve çift çalışmayı önleyen kilit kurabilirim.', 'Ayarları katmanlı okuyup gizli değeri dosyadan ve günlükten uzak tutabilirim.', 'Web verisi çekerken robots.txt ve hız sınırına uyabilirim.', 'Kötü kaydı karantinaya alıp işi sürdürebilir, ne zaman duracağını bilirim.', 'İşi paketleyip pytest ile sınayabilir, zamanlayıcıya verebilirim.'],

@@ -116,6 +116,7 @@ Pyodide'ın kendi paketlerinde olmayanlar `pypaket/` klasöründen gerekince ine
 | `arena_a1/`, `a2gen/`, `a3gen/`, `a4gen/` | Python Arena `v3/a1–a4` |
 | `m1gen/`, `m2gen/`, `m3gen/`, `m4/` | Mülakat soruları `v3/m1–m4` |
 | `h1gen/` | Sık hatalar `v3/h1` |
+| `p3/` | `kaynak/v2/p3` (ajan-uretimde, mcp-protokolu, karar-mimarisi, iade ve rapor ajanı, otomasyon-isletim, beş otomasyon projesi), `kaynak/v3/m5/mulakat_m5_02.js`, `kaynak/v2/b3/bank_ileri_ajan.js`. Her ders ayrı betik (`python3 uretec/p3/ajan.py`). `ortak.py` üretirken her görevde çözümü, başlangıcı ve listedeki yanlış çözümleri çalıştırır; sorun varsa ekrana yazar. `P3_YANLIS=<klasör>` yanlış çözüm listelerini tarayıcı denemesi için dışa yazar, `P3_Y=<klasör>` yerel betikleri çıkarır. |
 | `p1/` | `kaynak/v2/p1` (proje-etl, proje-analist, proje-mutabakat), `kaynak/v3/m5` ve `kaynak/v2/b3/bank_ileri_etl.js`. Depo içi yollarla çalışır (`python3 uretec/p1/proje_etl.py`); beklenen sayılar her çalıştırmada gerçek veriden hesaplanır, `pcap-ortak.js` elle yazılıdır |
 | `e1`–`e7`, `t1gen`, `gen_t4`, `i1agent`, `i2gen`, `o3`, `o5b`, `b`, `b3`, kökteki `l_*.py`, `g_*.py`, `*_N.py` | Önceki sürümlerin dersleri, uzantıları ve pratik bankası parçaları |
 | `vf/` | Doğrulama zincirleri (`chain.sh`, `exchain.sh`), `pyrun.mjs` (bir .py dosyasını veri ile Pyodide'de çalıştırır), `showex.js` (bir alıştırmanın çözüm/testini yazdırır) |

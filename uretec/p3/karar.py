@@ -448,7 +448,7 @@ print("serbest metinde 'iade' var mı:", "iade" in serbest)  # peki onay mı, re
 print("karar türü:", karar["karar"], "| güven:", karar["guven"])
 print("insana gitmeli mi:", karar["karar"] == "yukselt" or karar["guven"] < 0.8)
 '''
-ders = dict(id='karar-mimarisi', lv='ileri', mod='Yapay Zekâ', min=65, needs=['ajan-uretimde', 'pydantic-dogrulama'],
+ders = dict(id='karar-mimarisi', lv='ileri', mod='Yapay Zekâ', min=65, needs=['pydantic'],
  title='Karar odaklı yapay zekâ mimarisi',
  sum='Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana yükseltme, denetim izi, geri alınabilirlik, karar kalitesi ölçümü.',
  goals=['Modelin çıktısını doğrulanan bir karar şemasına bağlayabilirim.', 'Kuralın kesin olduğu yerde modeli devre dışı bırakabilirim.', 'Güven eşiğini maliyete göre seçebilir, kalibrasyonu sınayabilirim.', 'Geri alınamaz eylemi insana yönlendirebilirim.', 'Sonradan değiştirilince fark edilen bir denetim izi yazabilirim.', 'Karar kalitesini doğru paydalarla ölçebilirim.'],

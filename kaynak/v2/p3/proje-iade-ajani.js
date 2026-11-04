@@ -6,8 +6,9 @@ L.push(Object.assign({ id: 'proje-iade-ajani', lv: 'ileri' }, {
  "mod": "İleri bitirme",
  "min": 120,
  "needs": [
-  "ajan-uretimde",
-  "karar-mimarisi"
+  "pydantic",
+  "pandas",
+  "sqlite3"
  ],
  "title": "Bitirme projesi: iade kararı ajanı",
  "sum": "Lezzet Kurye'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu, zincirli denetim izi, enjeksiyon vakalı eval seti ve iki kez çalıştırılsa da bir kez ödeyen gün sonu işi.",

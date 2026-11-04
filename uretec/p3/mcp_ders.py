@@ -99,8 +99,8 @@ assert _cagrilan == [], "Şemaya uymayan girdiyle araç çalışmaz"
 _r = _s.isle(_I("tools/call", {"name": "siparis_getir", "arguments": {"no": "x"}}))
 assert _r["result"]["isError"] is True and "bulunamadı" in _r["result"]["content"][0]["text"], "Araç hatası isError ile döner"
 _r = _s.isle(_I("tools/call", {"name": "yok", "arguments": {}}))
-assert _r["error"]["code"] == -32602 and "result" not in _r, "Bilinmeyen araç: -32602"
-assert _s.isle(_I("yok/yontem"))["error"]["code"] == -32601, "Bilinmeyen yöntem: -32601"
+assert _r.get("error", {}).get("code") == -32602 and "result" not in _r, "Bilinmeyen araç: -32602"
+assert _s.isle(_I("yok/yontem")).get("error", {}).get("code") == -32601, "Bilinmeyen yöntem: -32601"
 assert _s.isle({"jsonrpc": "2.0", "method": "notifications/cancelled"}) is None, "Bildirime cevap verilmez"
 '''
 P1Y = [(P1.replace('return self.tamam(kimlik, self.metin("; ".join(sorun), True))', 'return self.hata(kimlik, -32602, "; ".join(sorun))'), 'girdi hatasını protokol hatası yapıyor'),
@@ -185,19 +185,19 @@ _s.istemler["incele"] = {"zorunlu": ["no"], "sablon": "{no} siparişini incele"}
 _r = _s.isle(_I("server/discover"))["result"]
 assert _r["capabilities"] == {"resources": {}, "prompts": {}}, "Yetenekler: " + repr(_r["capabilities"])
 _e = _s.isle({"jsonrpc": "2.0", "id": 9, "method": "server/discover", "params": {"_meta": {"io.modelcontextprotocol/protocolVersion": "1999-01-01"}}})
-assert _e["id"] == 9 and _e["error"]["code"] == -32022, "Desteklenmeyen sürüm: " + repr(_e)
-assert _e["error"]["data"] == {"supported": ["2026-07-28"], "requested": "1999-01-01"}, "Hata desteklenen sürümleri söyler"
+assert _e["id"] == 9 and _e.get("error", {}).get("code") == -32022, "Desteklenmeyen sürüm: " + repr(_e)
+assert _e.get("error", {}).get("data") == {"supported": ["2026-07-28"], "requested": "1999-01-01"}, "Hata desteklenen sürümleri söyler"
 _e = _s.isle({"jsonrpc": "2.0", "id": 9, "method": "resources/read", "params": {"uri": "politika://iade", "_meta": {"io.modelcontextprotocol/protocolVersion": "2025-11-25"}}})
-assert _e["error"]["code"] == -32022, "Sürüm her istekte denetlenir"
+assert _e.get("error", {}).get("code") == -32022, "Sürüm her istekte denetlenir"
 _r = _s.isle(_I("resources/read", uri="politika://iade"))["result"]
 assert _r["contents"] == [{"uri": "politika://iade", "mimeType": "text/plain", "text": "14 gün"}], repr(_r)
 _e = _s.isle(_I("resources/read", uri="politika://yok"))
-assert _e["error"]["code"] == -32602 and _e["error"]["data"] == {"uri": "politika://yok"} and "result" not in _e, "Olmayan kaynak boş liste değil hatadır"
+assert _e.get("error", {}).get("code") == -32602 and _e.get("error", {}).get("data") == {"uri": "politika://yok"} and "result" not in _e, "Olmayan kaynak boş liste değil hatadır"
 _r = _s.isle(_I("prompts/get", name="incele", arguments={"no": "7"}))["result"]
 assert _r["messages"] == [{"role": "user", "content": {"type": "text", "text": "7 siparişini incele"}}], repr(_r)
-assert _s.isle(_I("prompts/get", name="yok"))["error"]["code"] == -32602, "Geçersiz istem adı"
-assert _s.isle(_I("prompts/get", name="incele", arguments={}))["error"]["code"] == -32602, "Eksik argüman"
-assert _s.isle(_I("yok"))["error"]["code"] == -32601, "Bilinmeyen yöntem"
+assert _s.isle(_I("prompts/get", name="yok")).get("error", {}).get("code") == -32602, "Geçersiz istem adı"
+assert _s.isle(_I("prompts/get", name="incele", arguments={})).get("error", {}).get("code") == -32602, "Eksik argüman"
+assert _s.isle(_I("yok")).get("error", {}).get("code") == -32601, "Bilinmeyen yöntem"
 '''
 P2Y = [(P2.replace('''            if uri not in self.kaynaklar:
                 return self.hata(kimlik, -32602, "Resource not found", {"uri": uri})
@@ -550,7 +550,7 @@ print(json.dumps(istek)[:60], "...")
 print("bu cevap hangi isteğin:", cevap["id"] == istek["id"])
 print("araç hatası mı:", cevap["result"]["isError"])
 '''
-ders = dict(id='mcp-protokolu', lv='ileri', mod='Yapay Zekâ', min=70, needs=['llm-ajanlar', 'ajan-uretimde'],
+ders = dict(id='mcp-protokolu', lv='ileri', mod='Yapay Zekâ', min=70, needs=['jsonschema'],
  title='MCP protokolü: ana makine, istemci, sunucu',
  sum='MCP\'nin mimarisini, tools, resources ve prompts ögelerini, stdio ve Streamable HTTP taşımalarını, yetki ve güvenliği 2026-07-28 belgesine göre öğrenir; protokol çekirdeğini Python ile yazar, sonra resmî SDK ile gerçek sunucu çalıştırırsın.',
  goals=['Host, client ve server ayrımını anlatabilirim.', 'tools, resources ve prompts farkını kimin denetlediğiyle açıklayabilirim.', 'Araç hatası ile protokol hatasını doğru yerde döndürebilirim.', 'stdio ve Streamable HTTP arasında seçim yapabilirim.', 'Yabancı köken, yanlış belirteç ve değişen araç tanımına karşı önlem alabilirim.', 'Resmî Python SDK ile çalışan bir sunucu ve istemci yazabilirim.'],

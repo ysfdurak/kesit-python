@@ -493,7 +493,7 @@ yan_etkili_cagir(lambda a, g, k: _a.append(k) or 1, "iade", {"t": 1, "s": 7})
 yan_etkili_cagir(lambda a, g, k: _a.append(k) or 1, "iade", {"s": 8, "t": 1})
 assert _a[0] == _a[1] and _a[0] != _a[2], "Anahtar işlemden türemeli: aynı işlem aynı anahtar"
 '''
-R1Y = [(R1.replace('anahtar = anahtar_uret(ad, girdi)\n', '').replace('servis(ad, girdi, anahtar)', 'servis(ad, girdi, __import__("uuid").uuid4().hex)'), 'her denemede yeni anahtar'),
+R1Y = [(R1.replace('    anahtar = anahtar_uret(ad, girdi)\n', '').replace('servis(ad, girdi, anahtar)', 'servis(ad, girdi, __import__("uuid").uuid4().hex)'), 'her denemede yeni anahtar'),
        (R1.replace('except GeciciHata as e:', 'except Exception as e:'), 'kalıcı hatayı da tekrarlıyor'),
        (R1.replace('            if i == deneme - 1:\n                return {"hata": True, "mesaj": "denemeler bitti: " + str(e)}\n            bekle(2 ** i)\n', '            bekle(2 ** i)\n            if i == deneme - 1:\n                return {"hata": True, "mesaj": "denemeler bitti: " + str(e)}\n'), 'son denemeden sonra da bekliyor')]
 # ---------- kayıt
@@ -728,7 +728,7 @@ print("tek ajan:", tek_ajan(), "jeton")
 print("yönetici ve uzman:", yonetici_uzman(), "jeton")
 print("oran:", round(yonetici_uzman() / tek_ajan(), 2))
 '''
-ders = dict(id='ajan-uretimde', lv='ileri', mod='Yapay Zekâ', min=75, needs=['llm-ajanlar'],
+ders = dict(id='ajan-uretimde', lv='ileri', mod='Yapay Zekâ', min=75, needs=['jsonschema'],
  title='Ajanı üretime hazırlamak',
  sum='llm-ajanlar dersindeki döngüyü sağlamlaştırırsın: ne zaman ajan gerekmediği, JSON şemalı araç kaydı, durdurma koşulları, bağlam, çok ajanlı düzenin bedeli, istem enjeksiyonu, insan onayı, kayıt ve eval.',
  goals=['Bir işin ajan gerektirip gerektirmediğini gerekçesiyle söyleyebilirim.', 'Araçları JSON şemayla doğrulayan bir kayıt yazabilirim.', 'Adım, takılma ve hata sınırlarıyla durabilen bir döngü kurabilirim.', 'İstem enjeksiyonuna karşı metin süzmek yerine yetki sınırı koyabilirim.', 'Onayı işleme bağlayabilir, yan etkili çağrıyı güvenle tekrarlayabilirim.', 'Ajanı yalnız cevabına değil izlediği yola göre değerlendirebilirim.'],
@@ -747,7 +747,8 @@ ders = dict(id='ajan-uretimde', lv='ileri', mod='Yapay Zekâ', min=75, needs=['l
 <p>İyi bir soru şudur: <b>akış şemasını şimdiden çizebiliyor muyum?</b> Çizebiliyorsan koda dök. Ajan, çizemediğin kısım içindir; o kısım da genellikle işin tamamı değil, bir parçasıdır.</p>
 <h2>2. Araç kaydı ve JSON şema</h2>
 <p>Modelin ürettiği araç girdisine güvenilmez: yanlış tür, eksik alan, uydurma alan gelebilir. Her aracı bir JSON şemayla kaydet, çağırmadan önce doğrula. Doğrulama hatasını istisna yapma, <b>sonuç olarak modele geri ver</b>; model mesajı görüp düzeltebilir. MCP de aynı ayrımı yapar: araç içindeki hatalar sonuçta <code>isError</code> ile döner.</p>
-<h2>3. Durdurma koşulları</h2>
+<h2>3. Döngü ve durdurma koşulları</h2>
+<p>Araç çağırma döngüsünün her turu dört adımdır: model mevcut bağlama bakıp <b>plan yapar</b>, bir <b>araç seçer</b>, kod aracı çalıştırıp <b>gözlemi</b> bağlama ekler, sonra <b>durma koşulu</b> denetlenir. Plan çoğu zaman modelin kafasındadır, ayrı bir veri değildir; önemli işlerde planı açıkça yazdırıp kaydetmek izlemeyi kolaylaştırır.</p>
 <p>Doğal bitiş modelin cevap vermesidir, ama buna güvenilmez. Üç ayrı sigorta gerekir ve her biri farklı arızayı yakalar:</p>
 <div class="tbl-wrap"><table><tr><th>Sigorta</th><th>Yakaladığı</th></tr><tr><td>Adım sınırı</td><td>Hiç bitmeyen, her seferinde farklı çağrı</td></tr><tr><td>Takılma (aynı araç, aynı girdi)</td><td>Aynı yerde dönme; farklı girdiyle aynı araç takılma değildir</td></tr><tr><td>Üst üste hata sınırı</td><td>Bozuk servis; araya başarılı çağrı girerse sayaç sıfırlanır</td></tr></table></div>
 <p>Her biri ayrı durum döndürür. "Bitti" ile "sınır doldu" aynı görünürse kullanıcıya yarım iş tamam diye gider.</p>

@@ -27,7 +27,10 @@ exec(compile(cfg["tests"], "<test>", "exec"), ns)
 print("\n@@GECTI")
 '''
 def _kos(code, tests):
-    p = subprocess.run([sys.executable, '-I', '-c', _R % (KOK + '/tools/pylib', KOK + '/data')], input=json.dumps(dict(code=code, tests=tests)), capture_output=True, text=True, timeout=120, cwd='/tmp')
+    try:
+        p = subprocess.run([sys.executable, '-I', '-c', _R % (KOK + '/tools/pylib', KOK + '/data')], input=json.dumps(dict(code=code, tests=tests)), capture_output=True, text=True, timeout=40, cwd='/tmp')
+    except subprocess.TimeoutExpired:
+        return False, 'zaman aşımı'
     return '@@GECTI' in p.stdout, (p.stderr.strip().splitlines() or [''])[-1][:300]
 def _sina(e):
     y = []
@@ -36,6 +39,10 @@ def _sina(e):
     ok, m = _kos(e['start'], e['tests'])
     if ok: y.append(f"{e['id']} başlangıç geçti")
     for i, (kod_, ad) in enumerate(e['_yanlis']):
+        try:
+            compile(kod_, 'y', 'exec')
+        except SyntaxError as h:
+            y.append(f"{e['id']} YANLIŞ ÇÖZÜM SÖZDİZİMİ BOZUK #{i}: {ad}: {h}")
         ok, m = _kos(kod_, e['tests'])
         if ok: y.append(f"{e['id']} YANLIŞ KABUL #{i}: {ad}")
     return y
