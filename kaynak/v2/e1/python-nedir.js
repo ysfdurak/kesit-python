@@ -5,6 +5,7 @@ const X = W.PY_EXT = W.PY_EXT || [];
 X.push(
   {
     id: 'python-nedir',
+    kapali: 'Derinleş: Python kodu nasıl çalıştırır? (isteğe bağlı)',
     min: 20,
     html: `<h2>Python bir programı nasıl çalıştırır?</h2><p>"Yorumlanan dil" ifadesi doğru ama eksik. Sen <code>python rapor.py</code> yazdığında perde arkasında üç adım olur:</p><div class="steps-list"><ol><li><b>Ayrıştırma (parsing):</b> Yorumlayıcı dosyanın tamamını okur ve sözdizimini denetler. Kapanmamış bir parantez varsa program <i>hiç başlamaz</i>; SyntaxError bu yüzden ilk satır bile çalışmadan gelir.</li><li><b>Bayt koduna derleme (bytecode):</b> Kod, Python sanal makinesinin anlayacağı ara bir dile çevrilir. Bir modülü içe aktardığında oluşan <code>__pycache__</code> klasöründeki <code>.pyc</code> dosyaları bu bayt kodudur; bir dahaki sefere derleme adımı atlanır.</li><li><b>Yürütme:</b> Python sanal makinesi (PVM) bayt kodunu satır satır çalıştırır. NameError, TypeError gibi hatalar bu aşamada, o satıra sıra geldiğinde çıkar.</li></ol></div><p>Bayt kodunu merak ediyorsan standart kütüphanedeki <code>dis</code> modülü onu gösterir. Çıktının ayrıntısı sürümden sürüme değişir; amaç ezberlemek değil, "kod önce çevriliyor, sonra çalışıyor" fikrini görmek:</p><pre class="py">import dis
 dis.dis("toplam = 3 * 250")

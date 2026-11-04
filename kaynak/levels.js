@@ -15,6 +15,7 @@ W.PY_LEVELS = [
 ];
 /* Ders sırası ve modüller. Modül adları PY_MOD_FIX ile, seviye düzeltmeleri PY_LV_FIX ile verilir. */
 W.PY_ORDER = [
+"ilk-kod",
 "python-nedir",
 "ilk-program",
 "fonksiyon-iskeleti",
@@ -378,6 +379,6 @@ W.PY_ALIAS = {
 /* İsteğe bağlı dersler: sıradaki ders hesabında ve ilerleme yüzdesinde sayılmaz */
 W.PY_OPTIONAL = ['kurulum-araclar', 'kurulum-windows', 'kurulum-macos-linux', 'vscode', 'jupyter-colab', 'terminal-temelleri', 'gui-tkinter'];
 /* "Temelleri bilmiyorum" diyene yolun başına eklenen dersler */
-W.PY_PREREQ = ['python-nedir', 'ilk-program', 'fonksiyon-iskeleti', 'degiskenler', 'metinler', 'kosullar', 'donguler', 'listeler', 'sozlukler', 'fonksiyonlar', 'dosya-islemleri', 'hatalar'];
+W.PY_PREREQ = ['ilk-kod', 'python-nedir', 'ilk-program', 'fonksiyon-iskeleti', 'degiskenler', 'metinler', 'kosullar', 'donguler', 'listeler', 'sozlukler', 'fonksiyonlar', 'dosya-islemleri', 'hatalar'];
 W.PY_MODS = {"temel": ["Başlangıç", "Değerler ve metinler", "Akış kontrolü", "Veri yapıları", "Fonksiyonlar ve modüller", "Dosya ve hata", "Bitirme", "Bilgisayarına geç"], "orta": ["Pythonic kod", "Modüller, paketler ve Git", "Nesne yönelimli programlama", "Standart kütüphane", "Veritabanı (giriş)", "Veri yapıları ve algoritmalar", "Veri analizine giriş", "Otomasyon, web ve araçlar", "Test", "Orta bitirme"], "ileri": ["Veri analizi ve bilimi", "Makine öğrenmesi", "Eşzamanlılık ve performans", "Mimari", "Veritabanı", "Web ve API", "Yapay Zekâ", "Veri mühendisliği", "Üretime hazırlık", "Mülakat", "İleri bitirme"]};
 })(window);
