@@ -82,6 +82,11 @@ Dosya başına toplu çalıştırma betikleri: `uretec/vf/chain.sh cp|pyo <dosya
 
 Süre: `sureDk`, `dkAralik`, `saatAralik`: okuma (600 karakter/dk, en az 3 dk) + kod görevi başına 2-3 dk + çoktan seçmeli, tahmin ve sıralama başına 0,5-1 dk. Üç uygulamada aynı formül; ölçülmüş değildir.
 
+## Pilot özeti ve çevrimdışı
+`P.pilot` (`pythonpatika.v1` içinde): `tests` en fazla 20 seviye testi, ilk test silinmez; `aktifDk` sayfa görünür ve son 60 saniyede etkileşim varken dakika sayacı (bir dakikayı doldurmayan oturum sayılmaz); `dersBaslangic`, `dersBitis`. Yedek, içe aktarma ve sıfırlama bu alanla çalışır. Profil'deki "Özeti kopyala" `uygulama, surum, tests, aktifDk, tamamlananDers, cozulenAlistirma, sonDers, enCokTakilinan` verir; ağ isteği yoktur. `surum`: `kaynak/app.js` içindeki `APP_SURUM`, elle güncellenir.
+
+Service worker (`kaynak/gh/static/sw.js`) jsDelivr'daki sürümlü Pyodide dosyalarını ayrı önbellekte (`kesit-python-motor-0.27.8`) tutar: motor ve kullanılan paketler bir kez inince internetsiz çalışır. Pyodide sürümü değişirse `sw.js`, `engine.js` (`cached`) ve `pyworker.js` birlikte güncellenir.
+
 ## Yayın
 
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.
