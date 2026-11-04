@@ -29,8 +29,8 @@ L.push({
 <tr><td>Veri</td><td>numpy</td><td>Sayısal diziler, vektör işlemleri, lineer cebir</td><td><code>pip install numpy</code></td><td>Evet</td><td>numpy dersi</td></tr>
 <tr><td>Veri</td><td>duckdb</td><td>Dosya ve DataFrame üzerinde SQL</td><td><code>pip install duckdb</code></td><td>Evet</td><td>Veri boru hattı</td></tr>
 <tr><td>Görsel</td><td>matplotlib</td><td>Her tür statik grafik, tam kontrol</td><td><code>pip install matplotlib</code></td><td>Evet</td><td>matplotlib ile görselleştirme</td></tr>
-<tr><td>Görsel</td><td>seaborn</td><td>İstatistiksel grafiklerin kısa yolu (matplotlib üstüne)</td><td><code>pip install seaborn</code></td><td>Hayır</td><td>Görselleştirme (not)</td></tr>
-<tr><td>Görsel</td><td>plotly</td><td>Etkileşimli, tarayıcıda yakınlaştırılabilir grafik</td><td><code>pip install plotly</code></td><td>Hayır</td><td>Görselleştirme (not)</td></tr>
+<tr><td>Görsel</td><td>seaborn</td><td>İstatistiksel grafiklerin kısa yolu (matplotlib üstüne)</td><td><code>pip install seaborn</code></td><td>Evet, gerekince iner</td><td>Görselleştirme (not)</td></tr>
+<tr><td>Görsel</td><td>plotly</td><td>Etkileşimli, tarayıcıda yakınlaştırılabilir grafik</td><td><code>pip install plotly</code></td><td>Evet, gerekince iner</td><td>Görselleştirme (not)</td></tr>
 <tr><td>ML</td><td>scikit-learn</td><td>Klasik makine öğrenmesi: regresyon, sınıflandırma, kümeleme</td><td><code>pip install scikit-learn</code></td><td>Evet</td><td>İleri seviye projeler</td></tr>
 <tr><td>ML</td><td>xgboost</td><td>Gradyan artırma; tablo verisinde yarışma favorisi</td><td><code>pip install xgboost</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
 <tr><td>ML</td><td>pytorch</td><td>Derin öğrenme, sinir ağları, GPU</td><td><code>pip install torch</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
@@ -40,7 +40,7 @@ L.push({
 <tr><td>Kazıma</td><td>requests / httpx</td><td>HTTP istekleri; httpx async da destekler</td><td><code>pip install requests httpx</code></td><td>httpx (ağsız)</td><td>API ve web</td></tr>
 <tr><td>Kazıma</td><td>BeautifulSoup</td><td>HTML ayrıştırma ve veri çekme</td><td><code>pip install beautifulsoup4</code></td><td>Evet</td><td>API ve web</td></tr>
 <tr><td>Kazıma</td><td>Playwright</td><td>Gerçek tarayıcı sürerek JavaScript'li sayfa kazıma, test</td><td><code>pip install playwright</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
-<tr><td>Ofis</td><td>openpyxl</td><td>Excel (.xlsx) oku, yaz, biçimlendir</td><td><code>pip install openpyxl</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
+<tr><td>Ofis</td><td>openpyxl</td><td>Excel (.xlsx) oku, yaz, biçimlendir</td><td><code>pip install openpyxl</code></td><td>Evet, gerekince iner</td><td>Excel otomasyonu</td></tr>
 <tr><td>Ofis</td><td>python-docx</td><td>Word belgesi üret ve düzenle</td><td><code>pip install python-docx</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
 <tr><td>Ofis</td><td>pypdf</td><td>PDF birleştir, böl, metin çıkar</td><td><code>pip install pypdf</code></td><td>Hayır</td><td>Kendi bilgisayarında</td></tr>
 <tr><td>CLI</td><td>argparse</td><td>Komut satırı argümanları (standart kütüphane)</td><td>Kurulum yok</td><td>Evet</td><td>Standart kütüphane turu</td></tr>

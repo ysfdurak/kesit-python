@@ -110,7 +110,7 @@ KORPUS += ik_istatistik_belgeleri() + urun_belgeleri()
 print(len(KORPUS), "belge")
 print(KORPUS[2].metin)
 print(KORPUS[-1].metin)</pre>
-<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Tarayıcıda PDF okuyucu yok; kendi makinende <code>pip install pypdf python-docx</code> ile <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
+<div class="tip"><b>Kendi bilgisayarında dene: PDF ve Word</b>Kendi makinende <code>pip install pypdf python-docx</code> ile (ikisi bu sayfada da çalışır, bkz. <b>pdf-word-otomasyon</b>) <code>PdfReader("yonetmelik.pdf").pages[i].extract_text()</code> ve <code>Document("form.docx").paragraphs</code> kullanırsın. Taranmış (resim) PDF'ler için OCR gerekir; tablo içeren PDF'lerde metin sırası bozulabileceği için çıktıyı mutlaka gözle kontrol et.</div>
 
 <h2>2. Parçalama ve meta veri</h2>
 <p>Parçalama stratejilerini (sabit pencere, cümle, başlık, örtüşme) embedding dersinde ayrıntılı gördün. Üretimde bunları <b>birleştirirsin</b>: önce başlıklara göre bölümlere ayır, bölüm içinde cümleleri karakter sınırına kadar topla, ardışık parçalar arasında bir cümle örtüştür. En önemli iki ek:</p>

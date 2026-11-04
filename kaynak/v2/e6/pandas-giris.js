@@ -73,7 +73,7 @@ print(df["sehir"].tolist())
 df["ciro"] = df["ciro"] / 3
 df.to_csv("rapor.csv", sep=";", decimal=",", encoding="utf-8-sig", index=False, float_format="%.2f")
 print(open("rapor.csv", encoding="utf-8-sig").read())
-</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir; tarayıcıda çalışmaz, kendi bilgisayarında dene:</p><pre class="code"># python -m pip install openpyxl
+</pre><h3>Excel, JSON ve SQL kaynakları</h3><p><code>read_excel</code> için <code>openpyxl</code> paketi gerekir. Bu sayfada ilk kullanımda kendiliğinden iner (yaklaşık 270 KB); bilgisayarında şöyle kurarsın:</p><pre class="code"># python -m pip install openpyxl
 import pandas as pd
 
 df = pd.read_excel("satislar.xlsx", sheet_name="Mart", skiprows=2,
@@ -227,7 +227,7 @@ con.close()
       { q: 'UnicodeDecodeError: \'utf-8\' codec can\'t decode byte hatası alıyorum.',
         a: 'Dosya UTF-8 değil. Türkçe Windows/eski sistem çıktısıysa encoding="cp1254", Excel\'in BOM\'lu UTF-8\'iyse encoding="utf-8-sig" dene. latin-1 her baytı okur ama Türkçe harfleri (ş, ğ, ı) yanlış gösterir; son çare değil, yanlış çözümdür.' },
       { q: 'read_excel "Missing optional dependency \'openpyxl\'" diyor.',
-        a: 'pandas Excel dosyalarını kendi okumaz, motor paketine ihtiyaç duyar: .xlsx için python -m pip install openpyxl, eski .xls için xlrd. Bu paketler tarayıcı motorunda yoktur; kendi bilgisayarında kur.' }
+        a: 'pandas Excel dosyalarını kendi okumaz, motor paketine ihtiyaç duyar: .xlsx için python -m pip install openpyxl, eski .xls için xlrd. Bu sayfada openpyxl gerekince iner; xlrd yoktur, bilgisayarında kur.' }
     ],
     mistakes: [
       { bad: 'df = pd.read_csv("musteri.csv")\n# musteri_no: 412',

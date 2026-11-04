@@ -87,6 +87,9 @@ Süre: `sureDk`, `dkAralik`, `saatAralik`: okuma (600 karakter/dk, en az 3 dk) +
 
 Service worker (`kaynak/gh/static/sw.js`) jsDelivr'daki sürümlü Pyodide dosyalarını ayrı önbellekte (`kesit-python-motor-0.27.8`) tutar: motor ve kullanılan paketler bir kez inince internetsiz çalışır. Pyodide sürümü değişirse `sw.js`, `engine.js` (`cached`) ve `pyworker.js` birlikte güncellenir.
 
+## pypaket: yerel Python paketleri
+Pyodide'ın kendi paketlerinde olmayanlar `pypaket/` klasöründen gerekince iner: openpyxl, XlsxWriter, pypdf, python-docx, reportlab, seaborn, plotly. Sürüm, boyut ve lisans `pypaket/LISANSLAR.md` içinde. Tanım `kaynak/pyworker.js` içindeki `YEREL` ve `yerelGerek` (kod metninden bulur); `tools/pyodide_verify.mjs` ve `pyodide_examples.mjs` aynı tanımı okur, `tools/ghpack.py` klasörü pakete kopyalar. Service worker açılışta indirmez, inince sürüm değişse de silinmeyen motor önbelleğinde tutar. CPython doğrulaması için `pip install openpyxl xlsxwriter pypdf python-docx reportlab seaborn plotly sqlalchemy`.
+
 ## Yayın
 
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.

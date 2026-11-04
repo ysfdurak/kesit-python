@@ -181,7 +181,7 @@ with smtplib.SMTP_SSL("smtp.gmail.com", 465, timeout=30) as sunucu:
 <div class="note"><b>Kendi bilgisayarında dene</b>Gmail ve Outlook, hesap şifrenle SMTP girişine izin vermez. İki adımlı doğrulamayı aç, hesap ayarlarından 16 karakterlik bir <b>uygulama şifresi</b> (app password) üret ve ortam değişkenine koy: Windows'ta <code>setx SMTP_SIFRE "..."</code>, macOS/Linux'ta <code>export SMTP_SIFRE="..."</code>. Kurumsal ortamda genellikle şirketin iç SMTP sunucusu (port 587 + <code>starttls()</code>) kullanılır. Denemelerde mesajı göndermek yerine <code>open("taslak.eml", "wb").write(bytes(msg))</code> ile dosyaya yazıp e-posta istemcinde açabilirsin.</div>
 
 <h2>PDF ve Word dokunuşları</h2>
-<p>Ofiste en sık istenen iki iş: birçok PDF'i birleştirmek ve şablon bir Word belgesine veri doldurmak. <code>pypdf</code> ve <code>python-docx</code> tarayıcıda çalışmaz; kendi bilgisayarında <code>pip install pypdf python-docx</code> ile kur.</p>
+<p>Ofiste en sık istenen iki iş: birçok PDF'i birleştirmek ve şablon bir Word belgesine veri doldurmak. <code>pypdf</code> ve <code>python-docx</code> bilgisayarında <code>pip install pypdf python-docx</code> ile kurulur; gerçek dosyayla görevler <b>pdf-word-otomasyon</b> dersinde, tarayıcıda çalışır.</p>
 <pre class="code">from pathlib import Path
 from pypdf import PdfReader, PdfWriter
 
@@ -483,7 +483,7 @@ print("eklenen:", eklenen, "| silinen:", silinen, "| değişen:", degisen)</pre>
     { q: 'E-postayı test ederken gerçekten göndermem gerekiyor mu?',
       a: 'Hayır. Mesajı bytes(msg) ile .eml dosyasına yaz ve e-posta istemcinde aç; ya da yerelde python -m aiosmtpd -n -l localhost:1025 gibi bir sahte SMTP sunucusu çalıştırıp smtplib.SMTP("localhost", 1025) ile gönder. Testlerde yalnızca başlıkları ve ekleri kontrol etmek çoğu zaman yeterlidir.' },
     { q: 'Excel dosyalarını da otomatikleştirebilir miyim?',
-      a: 'Evet. Kendi bilgisayarında openpyxl (pip install openpyxl) hücre okuma-yazma ve biçimlendirme yapar; pandas read_excel/to_excel ile tabloyu toptan işler. Tarayıcı motorunda bu paketler çalışmadığı için bu derste CSV kullandık; mantık aynıdır.' },
+      a: 'Evet. Kendi bilgisayarında openpyxl (pip install openpyxl) hücre okuma-yazma ve biçimlendirme yapar; pandas read_excel/to_excel ile tabloyu toptan işler. Bu derste CSV kullandık; gerçek Excel görevleri <b>excel-otomasyon</b> dersinde, tarayıcıda çalışır.' },
     { q: 'Betik yanlış dosyaları taşırsa ne yapmalıyım?',
       a: 'Önce durdur, sonra geri alma günlüğünü (kaynak, hedef çiftleri) ters sırayla uygula. Bu yüzden her taşımayı log\'a ve bir günlük listesine yazmak zorunlu bir alışkanlıktır. Günlük yoksa yedekten geri dön; yedek de yoksa bir dahaki sefere varsayılan modu dry-run yap.' }
   ],

@@ -43,7 +43,7 @@ for h in ["A", "Z", "AA", "AZ", "BA", "XFD"]:
 <p>Son satırdaki <code>XFD</code> Excel'in en son sütunudur (16.384). Bir sayfada en fazla 1.048.576 satır bulunur; daha büyük veri için Excel doğru araç değildir.</p>
 
 <h2>openpyxl ile rapor yazmak</h2>
-<p>openpyxl tarayıcı motorunda çalışmaz; aşağıdaki kodu kendi bilgisayarında dene. Mantığını ise birazdan tarayıcıda çalışan alıştırmalarla kuracaksın.</p>
+<p>Aşağıdaki kod hem bilgisayarında hem de bu sayfada çalışır: dersin sonundaki "Gerçek .xlsx dosyasıyla çalışmak" bölümünde ve alıştırmalarda openpyxl tarayıcıda gerçek dosya yazar. İlk bölüm hücre modelini saf Python ile kurar, mantığı görmen için.</p>
 <pre class="code">from openpyxl import Workbook
 from openpyxl.styles import Font, PatternFill, Alignment
 from openpyxl.chart import BarChart, Reference
@@ -84,7 +84,7 @@ grafik.set_categories(etiket)
 ws.add_chart(grafik, "E2")
 
 wb.save("haftalik_rapor.xlsx")</pre>
-<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install openpyxl</code> (pandas ile Excel yazmak için de gerekir). Dosyayı Excel ya da LibreOffice ile açıp sonucu gör. Tarayıcıdaki motorda openpyxl bulunmaz.</div>
+<div class="note"><b>Kendi bilgisayarında dene</b>Kurulum: <code>pip install openpyxl</code> (pandas ile Excel yazmak için de gerekir). Dosyayı Excel ya da LibreOffice ile açıp sonucu gör. Bu sayfada openpyxl ilk kullanımda iner (yaklaşık 270 KB); pandas ile Excel de aynı paketi kullanır.</div>
 <p>Okumak için <code>load_workbook</code> kullanılır. <code>iter_rows(values_only=True)</code> hücre nesneleri yerine doğrudan değerleri demet (tuple) olarak verir; veriyi işlemenin en pratik yoludur:</p>
 <pre class="code">from openpyxl import load_workbook
 
@@ -152,7 +152,7 @@ with pd.ExcelWriter("rapor.xlsx", engine="openpyxl") as yazici:
     ozet.to_excel(yazici, sheet_name="Özet")
     yazici.sheets["Özet"].column_dimensions["A"].width = 18   # openpyxl sayfasına erişim</pre>
 <div class="note"><b>Kendi bilgisayarında dene</b><code>pip install pandas openpyxl</code>. pandas <code>.xlsx</code> okumak ve yazmak için arka planda openpyxl kullanır; eski <code>.xls</code> için <code>xlrd</code> gerekir.</div>
-<p>Tarayıcıda Excel dosyası yazamayız ama aynı pivot mantığını CSV ile çalıştırabiliriz. Rapor üretiminin "hesap" kısmı her iki durumda da aynıdır:</p>
+<p>Rapor üretiminin "hesap" kısmı dosya biçiminden bağımsızdır. Aynı pivot mantığını CSV ile görelim; Excel'e yazmayı dersin sonundaki görevlerde yapacaksın:</p>
 <pre class="py">import io
 import pandas as pd
 
@@ -355,7 +355,7 @@ print(date(2026, 10, 28).strftime("%d.%m.%Y"))</pre>
   faq: [
     { q: 'openpyxl mi pandas mı kullanmalıyım?', a: 'Veriyi okuyup dönüştürüyor ve tablo halinde yazıyorsan pandas; hücre biçimi, birleştirme, grafik, var olan şablonu doldurma gibi hücre düzeyinde kontrol gerekiyorsa openpyxl. Çoğu raporda ikisi birlikte kullanılır: pandas hesaplar, ExcelWriter ile yazar, yazici.sheets üzerinden openpyxl ile biçimlendirirsin.' },
     { q: 'Dosyayı Excel açıkken Python ile kaydedebilir miyim?', a: 'Windows\'ta Excel açık dosyayı kilitler; PermissionError alırsın. Otomasyonda çıktıyı tarihli yeni bir dosyaya yazmak hem bu sorunu hem de üzerine yazma riskini ortadan kaldırır.' },
-    { q: 'Tarayıcıda neden openpyxl çalışmıyor?', a: 'Tarayıcı motorunda bu paket hazır değil. Excel\'e özgü kodu kendi bilgisayarında (pip install openpyxl) çalıştırırsın; hesap ve hücre modeli mantığını ise burada çalışan saf Python ile kurar ve test edersin.' },
+    { q: 'Excel kodu tarayıcıda çalışır mı?', a: 'Evet. openpyxl ve XlsxWriter gerçek .xlsx dosyasını tarayıcının belleğinde yazar ve okur; dosyayı indirip Excel\'de açabilirsin. Çalışmayan: formül hesaplama (Excel yapar), grafik önizleme ve kurulu Excel isteyen xlwings.' },
     { q: 'CSV\'yi Excel\'de açınca Türkçe karakterler bozuk çıkıyor.', a: 'Dosyayı encoding="utf-8-sig" ile yaz; Excel BOM işaretini görünce UTF-8 olarak açar. Türkçe Excel için ayrıca sep=";" ve decimal="," kullanmak sütunların doğru bölünmesini sağlar.' },
     { q: 'Hücreye yazdığım tarih Excel\'de sayı olarak görünüyor.', a: 'Excel tarihleri seri numarası olarak saklar; görünüm number_format ile belirlenir. Hücreye date nesnesi yaz ve number_format = "DD.MM.YYYY" ver.' }
   ],
