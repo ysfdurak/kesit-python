@@ -467,7 +467,7 @@ const C_LINKS = {};
 document.addEventListener('click', ev => { const b = ev.target.closest('[data-pl]'); if (!b) return; if (b.dataset.pl === 'iv' && C_LINKS.iv) C_LINKS.iv(b.dataset.role); if (b.dataset.pl === 'ar' && C_LINKS.ar) C_LINKS.ar(b.dataset.role); });
 /* Bitirme projeleri: uygulamadaki proje dersleri ve role göre portföy önerileri */
 VIEWS.projects = { html() {
-  const pf = window.PY_PORTFOLIO || {}; const ids = ['proje-temel', 'proje-oyunlar', 'proje-orta', 'proje-orta-otomasyon', 'proje-analist', 'proje-mutabakat', 'proje-ileri', 'proje-etl', 'proje-ml', 'proje-ai', 'proje-api'];
+  const pf = window.PY_PORTFOLIO || {}; const ids = ['proje-temel', 'proje-oyunlar', 'proje-orta', 'proje-orta-otomasyon', 'proje-analist', 'proje-mutabakat', 'proje-ileri', 'proje-etl', 'proje-ml', 'proje-ai', 'proje-iade-ajani', 'proje-rapor-ajani', 'proje-api'];
   const role = PMAP[V.id] ? V.id : '';
   let h = '<div class="sec-head"><div><h1>Bitirme projeleri</h1></div></div><p class="muted" style="margin:0;max-width:72ch">Önce uygulamadaki bitirme derslerini çöz; sonra rolüne uygun bir projeyi kendi bilgisayarında, Veri setleri\'ndeki verilerle kur ve GitHub\'a koy. Öneriler ödev değildir, otomatik denetlenmez.</p>';
   h += '<section class="lvl-block"><div class="sec-head"><h2>Uygulamadaki bitirme dersleri</h2></div><div class="panel lessons">' + ids.map(id => LMAP[id]).filter(Boolean).map(lessonRow).join('') + '</div></section>';

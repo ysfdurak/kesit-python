@@ -5,7 +5,7 @@ q='Bir fonksiyonun imzasından LLM araç şeması üreten küçük bir yardımc�
 a='''
 <p><b>Kısa cevap:</b> <code>inspect.signature</code> parametreleri sırasıyla verir. Tip ipucu JSON Schema türüne çevrilir, <code>Literal</code> bir <code>enum</code> olur, varsayılan değeri olmayan parametreler <code>required</code> listesine girer. Açıklama docstring\'in ilk satırından gelir.</p>
 <p><b>Çıktı:</b> Ad ve açıklama <code>kargo_takip | Kargo gönderisinin son durumunu döndürür.</code> olur; <code>inspect.getdoc</code> girintiyi temizler, ilk satır alınır. Özelliklerde <code>firma</code> için izin verilen üç değer <code>enum</code> olarak görünür. <code>detayli</code> varsayılanı olduğu için zorunlu değildir: <code>[\'takip_no\', \'firma\']</code>.</p>
-<p><b>Neden değerli:</b> Şema ile fonksiyon tek kaynaktan gelir; biri değişince öteki eskimez. Anthropic SDK\'sının araç yardımcıları, MCP\'nin <code>FastMCP</code> sınıfı ve pydantic tabanlı kütüphaneler aynı fikri uygular.</p>
+<p><b>Neden değerli:</b> Şema ile fonksiyon tek kaynaktan gelir; biri değişince öteki eskimez. Anthropic SDK\'sının araç yardımcıları, MCP\'nin <code>MCPServer</code> sınıfı ve pydantic tabanlı kütüphaneler aynı fikri uygular.</p>
 <p><b>Nerede bozulur?</b></p>
 <ul><li>Dosyada <code>from __future__ import annotations</code> varsa ipuçları string olarak gelir ve <code>TIP[t]</code> <code>KeyError</code> verir. Çözüm <code>typing.get_type_hints(fn)</code>.</li>
 <li><code>Optional[str]</code>, <code>list[int]</code> ve iç içe modeller desteklenmez. Gerçekte pydantic\'in <code>TypeAdapter</code> ya da <code>model_json_schema()</code> özelliği kullanılır.</li>

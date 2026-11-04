@@ -258,7 +258,7 @@ function startSim(role, lv) {
 
 
 /* ================= PYTHON İLE YAPAY ZEKÂ ================= */
-function aiSets() { const L = C.LESSONS; return { llm: L.filter(l => l.mod === 'Yapay Zekâ' || l.id === 'proje-ai'), ml: L.filter(l => l.mod === 'Makine öğrenmesi' || ['ml-giris', 'mlops-yasam-dongusu', 'proje-ml'].includes(l.id)) }; }
+function aiSets() { const L = C.LESSONS; return { llm: L.filter(l => l.mod === 'Yapay Zekâ' || ['proje-ai', 'proje-iade-ajani', 'proje-rapor-ajani'].includes(l.id)), ml: L.filter(l => l.mod === 'Makine öğrenmesi' || ['ml-giris', 'mlops-yasam-dongusu', 'proje-ml'].includes(l.id)) }; }
 VIEWS.ai = { html() {
   const L = C.LESSONS, row = C.lessonRow;
   const { llm, ml } = aiSets();

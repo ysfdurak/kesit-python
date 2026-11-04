@@ -154,11 +154,11 @@ for m in kirp(gecmis, 5):
 <h2>4. MCP: Model Context Protocol</h2>
 <p>Her uygulama her araç için ayrı entegrasyon yazınca N × M sorunu doğar. <b>MCP</b> (Model Context Protocol), araçları ve verileri LLM uygulamalarına standart bir yolla sunmak için açık bir protokoldür. Bir <b>MCP sunucusu</b> üç şey sunar: <b>araçlar</b> (tools: modelin çağırabileceği fonksiyonlar), <b>kaynaklar</b> (resources: okunabilir veri, ör. bir dosya ya da tablo) ve <b>istemler</b> (prompts: hazır şablonlar). Claude Desktop, Claude Code ve birçok IDE gibi <b>istemciler</b> sunucuya bağlanıp araç listesini alır ve modelin isteğiyle çağırır. Mesajlar JSON-RPC 2.0 biçimindedir.</p>
 ''' + CODE(r'''
-# pip install "mcp[cli]"  — resmi Python SDK ile küçük bir MCP sunucusu
-from mcp.server.fastmcp import FastMCP
+# python -m pip install mcp  (resmî Python SDK, 2.x sürümü; eski sürümlerde sınıfın adı FastMCP idi)
+from mcp.server.mcpserver import MCPServer
 import sqlite3
 
-mcp = FastMCP("anadolu-market")
+mcp = MCPServer("anadolu-market")
 
 @mcp.tool()
 def siparis_sayisi(durum: str) -> int:
@@ -174,7 +174,7 @@ def sema() -> str:
 if __name__ == "__main__":
     mcp.run()          # stdio üzerinden; istemci yapılandırmasına bu komutu eklersin
 ''') + '''
-<p>Arka planda istemci ile sunucu şu mesajları değiş tokuş eder. Protokolü anlamak için küçük bir dağıtıcı yazalım:</p>
+<p>Arka planda istemci ile sunucu şu mesajları değiş tokuş eder. Protokolü anlamak için küçük bir dağıtıcı yazalım. Protokolün güncel ayrıntıları (sürüm, taşıma, yetki) ve SDK ile çalışan gerçek sunucu <b>mcp-protokolu</b> dersinde:</p>
 ''' + PY(r'''
 import json
 

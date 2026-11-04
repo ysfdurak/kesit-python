@@ -96,6 +96,7 @@ W.PY_ORDER = [
 "pytest",
 "proje-orta",
 "proje-orta-otomasyon",
+"otomasyon-isletim",
 "proje-analist",
 "proje-mutabakat",
 "sql-analitik",
@@ -136,6 +137,9 @@ W.PY_ORDER = [
 "rag-uygulamasi",
 "llm-ajanlar",
 "llm-degerlendirme",
+"ajan-uretimde",
+"mcp-protokolu",
+"karar-mimarisi",
 "yerel-modeller-hf",
 "yapay-zeka-ile-kod",
 "veri-boru-hatti",
@@ -159,6 +163,8 @@ W.PY_ORDER = [
 "proje-etl",
 "proje-ml",
 "proje-ai",
+"proje-iade-ajani",
+"proje-rapor-ajani",
 "proje-api"
 ];
 W.PY_MOD_FIX = {
@@ -236,6 +242,7 @@ W.PY_MOD_FIX = {
 "ofis-otomasyon": "Otomasyon, web ve araçlar",
 "sablon-rapor": "Otomasyon, web ve araçlar",
 "pdf-word-otomasyon": "Otomasyon, web ve araçlar",
+"otomasyon-isletim": "Otomasyon, web ve araçlar",
 "pydantic-dogrulama": "Otomasyon, web ve araçlar",
 "gui-tkinter": "Otomasyon, web ve araçlar",
 "test-yazma": "Test",
@@ -282,6 +289,9 @@ W.PY_MOD_FIX = {
 "rag-uygulamasi": "Yapay Zekâ",
 "llm-ajanlar": "Yapay Zekâ",
 "llm-degerlendirme": "Yapay Zekâ",
+"ajan-uretimde": "Yapay Zekâ",
+"mcp-protokolu": "Yapay Zekâ",
+"karar-mimarisi": "Yapay Zekâ",
 "yerel-modeller-hf": "Yapay Zekâ",
 "yapay-zeka-ile-kod": "Yapay Zekâ",
 "veri-boru-hatti": "Veri mühendisliği",
@@ -305,6 +315,8 @@ W.PY_MOD_FIX = {
 "proje-etl": "İleri bitirme",
 "proje-ml": "İleri bitirme",
 "proje-ai": "İleri bitirme",
+"proje-iade-ajani": "İleri bitirme",
+"proje-rapor-ajani": "İleri bitirme",
 "proje-api": "İleri bitirme"
 };
 /* Zorluğa göre seviye (ders dosyasındaki lv alanını geçersiz kılar) */
@@ -349,6 +361,12 @@ W.PY_ALIAS = {
 "embedding-vektor-arama": "embedding vector search retrieval vektör getirme chunk chunking parçalama",
 "rag-uygulamasi": "rag retrieval chunk chunking",
 "llm-ajanlar": "agent ajan mcp tool",
+"otomasyon-isletim": "retry backoff idempotent lock kilit atomic config secret logging robots.txt quarantine cron scheduler pyproject paketleme",
+"ajan-uretimde": "agent ajan production prompt injection enjeksiyon tool registry json schema human in the loop eval multi agent",
+"mcp-protokolu": "mcp model context protocol host client server tools resources prompts stdio streamable http oauth json-rpc",
+"karar-mimarisi": "decision architecture karar şema güven eşiği confidence threshold audit trail denetim izi kalibrasyon",
+"proje-iade-ajani": "iade refund agent ajan eval human approval audit bitirme",
+"proje-rapor-ajani": "rapor report agent ajan text to sql hallucination sayı denetimi bitirme",
 "kalitim-polimorfizm": "inheritance polymorphism",
 "siniflar-oop": "class oop nesne",
 "hatalar": "exception try except istisna",

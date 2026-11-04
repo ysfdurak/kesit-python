@@ -156,9 +156,9 @@ I.append(dict(id='m-322', roles=['ai', 'backend'], lv='orta', topic='Python ile 
 q='Model Context Protocol (MCP) nedir? Python\'da bir MCP sunucusu nasıl yazılır ve bir aracın şeması nereden gelir?',
 a='''
 <p><b>Kısa cevap:</b> MCP, LLM uygulamalarının (istemci) dış araçlara ve verilere standart bir yoldan bağlanmasını sağlayan açık bir protokoldür. Sunucu araçlar (tools), kaynaklar (resources) ve istem şablonları (prompts) sunar. İletişim JSON-RPC iledir. Yerel sunucularda taşıma katmanı genelde <b>stdio</b>, uzak sunucularda HTTP\'dir.</p>
-<p><b>Python ile:</b> Resmî <code>mcp</code> paketindeki <code>FastMCP</code> sınıfı işi kısaltır:</p>
-<pre><code>from mcp.server.fastmcp import FastMCP
-mcp = FastMCP("stok")
+<p><b>Python ile:</b> Resmî <code>mcp</code> paketindeki <code>MCPServer</code> sınıfı (2.x öncesi adıyla <code>FastMCP</code>) işi kısaltır:</p>
+<pre><code>from mcp.server.mcpserver import MCPServer
+mcp = MCPServer("stok")
 
 @mcp.tool()
 def stok_sorgula(urun_kodu: str) -&gt; int:
