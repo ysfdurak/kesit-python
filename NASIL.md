@@ -92,6 +92,8 @@ Pyodide'ın kendi paketlerinde olmayanlar `pypaket/` klasöründen gerekince ine
 
 ## Yayın
 
+`python3 tools/ghpack.py` Pages paketini `gh/kesit-python/` altında üretir. Yayın için gereken yapılandırma, lisanslar, görseller ve yerel yazı tipleri `kaynak/gh/` içinde sürümlenir; kökte üretilen `/gh/` çıktısı git dışında tutulur. Mevcut `main` dalına paket uygulanırken `ders/` ve `sitemap.xml` gibi önceki kalıcı yayın sayfaları korunur.
+
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.
 - **claude.ai artifact:** kökteki `index.html` sayfa, diğer kök `*.js` dosyaları, `data/**` (CSV + manifest) ve `pypaket/**` ek dosya olarak yayımlanır (yaklaşık 110 dosya, 43 MB). `pypaket/` atlanırsa Excel, Word, PDF, seaborn ve plotly görevleri "Bu paket inemedi" der; `.whl` dosyalarının artifact olarak yayımlanması denenmedi. Yayından önce U+FFFD karakteri olmadığını denetleyin: `grep -c $'\xef\xbf\xbd' *.js index.html`.
 

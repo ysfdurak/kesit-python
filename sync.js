@@ -8,11 +8,11 @@ const C = window.PY_CORE; if (!C) return; const P = C.P;
 const SY = { state: 'kapali', ref: null, busy: false, last: '' };
 let pushT = null;
 function pushSoon() { if (!SY.ref) return; clearTimeout(pushT); pushT = setTimeout(push, 4000); }
-async function push() {
+async function push() { if (KESIT_STORAGE.isBlocked()) return;
   if (!SY.ref || SY.busy) return; const json = JSON.stringify(P); if (json === SY.last || json.length > 240000) return;
   SY.busy = true; try { await SY.ref.set({ json, ts: P._ts || Date.now(), v: 1 }); SY.last = json; SY.state = 'acik'; } catch (e) { SY.state = 'hata'; } finally { SY.busy = false; }
 }
-async function connect() {
+async function connect() { if (KESIT_STORAGE.isBlocked()) return;
   try {
     const cl = window.claude; if (!cl || !cl.use) return;
     const [db, user] = await Promise.all([cl.use('db'), cl.use('user')]); if (!db || !user) return;
