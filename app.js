@@ -51,8 +51,8 @@ function pilotNorm(p) { const b = pilotBos(); if (!p || typeof p !== 'object') r
 const pilotKirp = t => t.length > 20 ? [t[0]].concat(t.slice(-19)) : t;
 function pilotBirlestir(a, b) { a = pilotNorm(a); b = pilotNorm(b); const seen = new Set(); const tests = a.tests.concat(b.tests).filter(t => { const k = JSON.stringify(t); if (seen.has(k)) return false; seen.add(k); return true; }).sort((x, y) => String(x.tarih || '') < String(y.tarih || '') ? -1 : 1); const erken = (x, y) => { const o = Object.assign({}, y); Object.entries(x).forEach(([k, v]) => { if (!(k in o) || String(v) < String(o[k])) o[k] = v; }); return o; }; return { tests: pilotKirp(tests), aktifDk: Math.max(a.aktifDk, b.aktifDk), dersBaslangic: erken(a.dersBaslangic, b.dersBaslangic), dersBitis: erken(a.dersBitis, b.dersBitis) }; }
 const FRESH = () => ({ done: {}, ex: {}, bank: {}, exams: {}, rv: {}, xp: 0, days: {}, goal: '', theme: '', name: '', level: '', wrong: [], pg: '', _ts: 0, skip: {}, read: {}, ctx: '', os: '', base: {}, ar: {}, iv: {}, cont: null, conts: [], sims: [], drafts: {}, last: '', pilot: pilotBos() });
-function storeOk() { try { localStorage.setItem('__t', '1'); localStorage.removeItem('__t'); return true; } catch (e) { return false; } }
-function load() { try { const o = JSON.parse(localStorage.getItem(KEY) || 'null'); return o && typeof o === 'object' ? Object.assign(FRESH(), o) : FRESH(); } catch (e) { return FRESH(); } }
+function storeOk() { try { KESIT_STORAGE.setItem('__t', '1'); KESIT_STORAGE.removeItem('__t'); return true; } catch (e) { return false; } }
+function load() { try { const o = JSON.parse(KESIT_STORAGE.getItem(KEY) || 'null'); return o && typeof o === 'object' ? Object.assign(FRESH(), o) : FRESH(); } catch (e) { return FRESH(); } }
 const P = load();
 P.pilot = pilotNorm(P.pilot);
 /* Eski kayıtlar: seviye testi yanlışları tekrar kuyruğuna girmez */
@@ -62,8 +62,8 @@ function solvedEx() { return Object.keys(P.ex || {}).filter(k => LMAP[k.split('#
 /* İlerleme var mı: "Başla" ya da "Devam et" kararı buna bakar. Yalnız ders açmak ilerleme sayılmaz. */
 function hasProgress() { return validDone() > 0 || solvedEx() > 0 || Object.keys(P.read || {}).some(id => LMAP[id]); }
 function validDone() { return Object.keys(P.done || {}).filter(id => LMAP[id]).length; }
-function writeNow() { try { localStorage.setItem(KEY, JSON.stringify(P)); localStorage.setItem('kesit.ozet.python', JSON.stringify({ bitti: validDone(), toplam: ORDERED.length, alistirma: solvedEx() })); } catch (e) { if (!saveWarned) { saveWarned = true; toast('Tarayıcı ilerlemeni kaydedemedi: depolama dolu ya da kapalı. Profil\'den dosya yedeği al.'); } } window.dispatchEvent(new CustomEvent('py-saved')); }
-function save() { P._ts = Date.now(); clearTimeout(saveT); saveT = setTimeout(writeNow, 150); }
+function writeNow() { if (KESIT_STORAGE.isBlocked()) return; try { KESIT_STORAGE.setItem(KEY, JSON.stringify(P)); KESIT_STORAGE.setItem('kesit.ozet.python', JSON.stringify({ bitti: validDone(), toplam: ORDERED.length, alistirma: solvedEx() })); } catch (e) { if (!saveWarned) { saveWarned = true; toast('Tarayıcı ilerlemeni kaydedemedi: depolama dolu ya da kapalı. Profil\'den dosya yedeği al.'); } } window.dispatchEvent(new CustomEvent('py-saved')); }
+function save() { if (KESIT_STORAGE.isBlocked()) return; P._ts = Date.now(); clearTimeout(saveT); saveT = setTimeout(writeNow, 150); }
 window.addEventListener('pagehide', () => { if (saveT) { clearTimeout(saveT); writeNow(); } });
 function replaceProgress(o) { Object.keys(P).forEach(k => delete P[k]); Object.assign(P, FRESH(), o); P.pilot = pilotNorm(P.pilot); save(); render(); }
 /* Yedek: birleştirme. Yerel ilerleme asla kaybolmaz; aynı kayıtta ileride olan kazanır. */
@@ -467,7 +467,7 @@ const C_LINKS = {};
 document.addEventListener('click', ev => { const b = ev.target.closest('[data-pl]'); if (!b) return; if (b.dataset.pl === 'iv' && C_LINKS.iv) C_LINKS.iv(b.dataset.role); if (b.dataset.pl === 'ar' && C_LINKS.ar) C_LINKS.ar(b.dataset.role); });
 /* Bitirme projeleri: uygulamadaki proje dersleri ve role göre portföy önerileri */
 VIEWS.projects = { html() {
-  const pf = window.PY_PORTFOLIO || {}; const ids = ['proje-temel', 'proje-oyunlar', 'proje-orta', 'proje-orta-otomasyon', 'proje-analist', 'proje-mutabakat', 'proje-ileri', 'proje-etl', 'proje-ml', 'proje-ai', 'proje-api'];
+  const pf = window.PY_PORTFOLIO || {}; const ids = ['proje-temel', 'proje-oyunlar', 'proje-orta', 'proje-orta-otomasyon', 'proje-analist', 'proje-mutabakat', 'proje-ileri', 'proje-etl', 'proje-ml', 'proje-ai', 'proje-iade-ajani', 'proje-rapor-ajani', 'proje-api', 'proje-oto-mutabakat', 'proje-oto-fatura', 'proje-oto-stok', 'proje-oto-api', 'proje-oto-onay'];
   const role = PMAP[V.id] ? V.id : '';
   let h = '<div class="sec-head"><div><h1>Bitirme projeleri</h1></div></div><p class="muted" style="margin:0;max-width:72ch">Önce uygulamadaki bitirme derslerini çöz; sonra rolüne uygun bir projeyi kendi bilgisayarında, Veri setleri\'ndeki verilerle kur ve GitHub\'a koy. Öneriler ödev değildir, otomatik denetlenmez.</p>';
   h += '<section class="lvl-block"><div class="sec-head"><h2>Uygulamadaki bitirme dersleri</h2></div><div class="panel lessons">' + ids.map(id => LMAP[id]).filter(Boolean).map(lessonRow).join('') + '</div></section>';

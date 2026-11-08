@@ -7,9 +7,9 @@
 ![Tarayıcıda çalışan Python](ekran/alistirma.png)
 
 ## Neler var?
-- **145 ders, 3.125 ders içi alıştırma, 553 pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
+- **156 ders, 3.240 ders içi alıştırma, 562 pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
 - **11 öğrenme yolu:** veri analisti, veri bilimci, veri mühendisi, backend, web, makine öğrenmesi, yapay zekâ, otomasyon ve diğerleri. Her yolda ön koşul, sınav, role süzülmüş mülakat soruları ve portföy önerileri.
-- **250 Python Arena problemi, 281 Python mülakat sorusu, 160 sık hata kaydı, 18 sınav.**
+- **250 Python Arena problemi, 292 Python mülakat sorusu, 160 sık hata kaydı, 18 sınav.**
 - **8 kurgusal veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
 
 | Karşılama | Ders | Yapay zekâ |
