@@ -67,7 +67,7 @@ out.append('exams.js')
 for nm, key in [('arena.js', 'arena'), ('interview.js', 'interview'), ('mistakes.js', 'mistakes')]:
     bundle(nm, groups[key])
 extra = [x for x in ('arena.js', 'interview.js', 'mistakes.js') if x in out]
-for f in ['levels.js', 'paths.js', 'engine.js', 'pyworker.js', 'ex_anahtar.js', 'bilinen-sinirlar.js', 'app.js', 'app2.js', 'portfolio.js', 'sync.js']:
+for f in ['recovery.js', 'levels.js', 'paths.js', 'engine.js', 'pyworker.js', 'ex_anahtar.js', 'bilinen-sinirlar.js', 'app.js', 'app2.js', 'portfolio.js', 'sync.js']:
     shutil.copy(f'{ROOT}/{f}', f'{DIST}/{f}')
 
 html = open(f'{ROOT}/index.html', encoding='utf-8').read()

@@ -1,3 +1,5 @@
+> **ARŞİV — 2 Kasım 2026 kaynak anlık görüntüsü.** Aşağıdaki 111 ders / 10 patika sayıları ve eksik listesi güncel yayın envanteri değildir. Güncel yayın 4 Kasım 2026 tabanında 145 ders / 11 yol içerir; güncel `main/README.md` ve yayın manifestini esas al. Maddelerin tamamı yeniden doğrulanmış veya kapatılmış sayılmaz.
+
 # Kesit Python: rol patikaları müfredat denetimi
 
 Tarih: 2 Kasım 2026 · Kapsam: `levels.js` (PY_ORDER, 111 ders), `paths.js` (10 patika), tüm ders gövdeleri ve alıştırmalar (`tools/show.py` ile çıkarıldı), `data/manifest.json` (8 veri seti)
