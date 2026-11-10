@@ -27,7 +27,7 @@
 - input() girdileri kod çalışmadan önce verilir.
 
 ## Kaynak kod ve kardeş projeler
-Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)** ve **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.
+Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)**, **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)** ve **[Kesit İstatistik](https://ysfdurak.github.io/kesit-istatistik/)**. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.
 
 ## Yapay zekâ kullanımı
 Ürün kararlarını ve kapsamı Yusuf Durak belirledi; kod ve içerik yapay zekâ (Claude) ile geliştirildi.

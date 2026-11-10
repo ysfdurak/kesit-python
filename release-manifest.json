@@ -29,7 +29,7 @@
     "app2.js": "77734ca521055a9fa1bd6a6877ccdb8ae9333ec91b1bde2c979181eac01970e3",
     "n_temel.js": "fc1963698fd281a235c46965ed5e1407f64947cd5a420af63b272722657d51e0",
     "LICENSE": "349fb85fa132c5860c53dc0f74595e3ac13a493014bd529cb668d7ddad56f598",
-    "README.md": "ac88671022121b9b6b28da845e8c271b24744d54206043276599317d2edc714f",
+    "README.md": "296c4482c1b9b4edb1e0521553786486d08e32781ee96a00b834b7f9fb509d59",
     "arena.js": "158ba1b5d487b54c247ab1a19f06ad992198988fdcd9282783e4d6b15d044662",
     "apple-touch-icon.png": "41a89750bb1b70b3d71b49fc4b45f9b10c9d49c0be3dfbcc47c7c3c4a538749c",
     "engine.js": "cf6b358b3c21e1045a22cc0b22484e632311d3549f33e8ba76335d1c5bc633c3",
@@ -39,11 +39,11 @@
     "n_ileri.js": "9dd131935d0c6a6939f6b8f262968273cda3384df6095d1f84b599dfc96a4b68",
     "pyworker.js": "7571dac5ec05224d8c16cc4fb5d4b737411dddeb1d89f58770afe5544c9e2190",
     "x_1.js": "632bfac74121957837bb29db11b4dc9d0f713d181aaf7951ffbbd5288f2d5305",
-    "app.js": "375fc28c0d5b01231eb51710485e88eb6e8c8d9d6387f6e42f19c0654726755c",
+    "app.js": "5bb1d07dadeed5fbe4640a5a577b879632ee98561d56f1b239b8fd3971e200b3",
     "og.png": "ca1574fb61d18b12862ec6c392a61ca04d4c93f7029f093537586e83b675e83f",
     "ex_anahtar.js": "2608799d10fb7510408370c47adc8e9877a65f6dca40b5beeaa931f3a2219419",
     "LICENSE-ICERIK.md": "f334249818f13cc5080635440cb9f44461b885c8d21abc1e1e87c3ba2e1f1fb9",
-    "config.js": "577f30010dda055dbd7ab5fe05a4b4941f37739718eba072062d4bdc5f20333d",
+    "config.js": "377118c50e502cff1e139004d1a3d95a616db246ee2c6a992b1182f0fce5579a",
     "bank.js": "40801303d3a83f947f90430a445f7f9a14e228525b91208928c9d764f44c9e6f",
     "x_2.js": "b8ccc72f8bcff29f49ea517b4dc68b2dfc5d9833e7d317f7719a7b24214c101f",
     "paths.js": "fed6191d476268d9ce377ca8662342719a7d59a2deaeefae23d6ac68c3a50d2d",
@@ -167,5 +167,16 @@
     "data/anadolu_market/products.csv": "bf275268862209e918a3433525de563727781d4cd5d88f13e0828d28dbface62",
     "data/anadolu_market/orders.csv": "cc20d25badfc97be74c50d115b0790b1f00ba93c89e6613b3fb4303de0a80f02",
     "data/anadolu_market/employees.csv": "f357fc739e5051ce1ad04e4add593605377e4daf42bb57df7844d4c7c872ec22"
-  }
+  },
+  "patches": [
+    {
+      "date": "2026-11-10",
+      "files": [
+        "README.md",
+        "app.js",
+        "config.js"
+      ],
+      "note": "Kesit İstatistik Kesit ailesi bağlantılarına eklendi (config statUrl, menü ve Hakkında bağlantıları, README). Değişiklik kaynak dalında da uygulandı; kurtarma ve sözdizimi kontrolleri yeniden çalıştırıldı."
+    }
+  ]
 }
