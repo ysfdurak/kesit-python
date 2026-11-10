@@ -14,9 +14,18 @@
     "tests/artifact.cjs": "1ab82740817f37d2934e90f25997c4a6e7d07d50138d538c70de82f27fa0ddfc",
     "tests/recovery.cjs": "9990ef25ded436773fef0d4659d287bdbb3a3caa94817eb768a0b4ac129a31f8",
     "belgeler/AUDIT.md": "f336741624ad00d157d3208781fa4f9f5b58dcb8bf02a9d973a0a5ecbc43819e",
-    "kaynak/app.js": "375fc28c0d5b01231eb51710485e88eb6e8c8d9d6387f6e42f19c0654726755c",
+    "kaynak/app.js": "5bb1d07dadeed5fbe4640a5a577b879632ee98561d56f1b239b8fd3971e200b3",
     "kaynak/index.html": "c58c597416bb94b9d08a85239534d65d47256ed2ec51aec9d782f43d5313dc34",
     "kaynak/sync.js": "ddb04af7b67ed2a3f3f126002742f94c7d2ff44583df6760b7b3b91be8588f4b",
     "tools/build.py": "b461bad7bd8359386460818ea41595e579c19823a3214983a9c8b5e2f26e606e"
-  }
+  },
+  "patches": [
+    {
+      "date": "2026-11-10",
+      "files": [
+        "kaynak/app.js"
+      ],
+      "note": "Kesit İstatistik Kesit ailesi bağlantılarına eklendi; dosya özetleri güncellendi."
+    }
+  ]
 }
