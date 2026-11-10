@@ -2,7 +2,7 @@
 
 Sıfırdan ileri seviyeye, tarayıcıda **gerçek Python** çalıştırarak Türkçe Python öğrenme uygulaması. Kurulum gerektirmez: Python, [Pyodide](https://pyodide.org) (WebAssembly'e derlenmiş CPython 3.12) ile sayfanın içinde çalışır; pandas, numpy, scikit-learn, polars, DuckDB, statsmodels gibi paketler ihtiyaç anında yüklenir.
 
-[Kesit SQL](https://github.com/ysfdurak/kesit-sql) ve [Kesit Power BI](https://github.com/ysfdurak/kesit-powerbi) ile aynı kurgusal şirket verilerini kullanır.
+[Kesit SQL](https://github.com/ysfdurak/kesit-sql) ve [Kesit Power BI](https://github.com/ysfdurak/kesit-powerbi) ile aynı kurgusal şirket verilerini kullanır; [Kesit İstatistik](https://github.com/ysfdurak/kesit-istatistik) aynı verilerle istatistik vakaları içerir.
 
 ## İçerik
 
