@@ -21,7 +21,7 @@
   "files": {
     "exams.js": "e6447b3675f6dbab43b485a0d35f31bd82c31309b5ff49e60a07b7d4b91ed07a",
     "icon-512-maskable.png": "7d6362bf905215994073ec8c641638a0362d32b5ac2231f2abe5f26407b7c091",
-    "sw.js": "0a0c75eca3be5ccf82e6047e582c4d73e1eacecbdede093a99e08ca5aa99cda7",
+    "sw.js": "5fcce3b4b8c23b9e835ccb1c982c85744caec6688d180255c46b798c65c911a7",
     "interview.js": "8a851eff7520be3dc12c5da41ad7143a8772efb684fca6c83d53e866c8a6a59e",
     "recovery.js": "91d44875843230ab79adc416398ac333fcfe1782b078fe07fd5c1bb8ae9906a2",
     "icon-192.png": "c331edf7ac8249ec9e521bf2ed55e59b2b13fb8a20838db4cbceefd4e85d2f06",
@@ -167,7 +167,7 @@
     "data/anadolu_market/products.csv": "bf275268862209e918a3433525de563727781d4cd5d88f13e0828d28dbface62",
     "data/anadolu_market/orders.csv": "cc20d25badfc97be74c50d115b0790b1f00ba93c89e6613b3fb4303de0a80f02",
     "data/anadolu_market/employees.csv": "f357fc739e5051ce1ad04e4add593605377e4daf42bb57df7844d4c7c872ec22",
-    "en-tour.js": "aada9130c7d909edf2dbfd1013bfb8124fe9d3e7ea452da158191c76f01b3a58"
+    "en-tour.js": "d9988ea6a8727185f624e170f65bafdf202ed16fbd8ab0ce3dcacde971c8bc69"
   },
   "patches": [
     {
