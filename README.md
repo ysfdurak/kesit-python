@@ -39,6 +39,19 @@ Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dal
 - [Pyodide](https://pyodide.org) (MPL-2.0) ve içinde gelen paketler, kendi lisanslarıyla
 - Yazı tipleri: Bricolage Grotesque, IBM Plex Sans, JetBrains Mono (SIL Open Font License; metinler `vendor/fonts` içinde)
 
+## English
+
+**Kesit Python** teaches Python from scratch to job-ready level, in Turkish. Code runs in the browser on real Python (Pyodide, in a Web Worker) and exercises are checked by automated tests: no install, no account.
+
+- 156 lessons, 3,240 in-lesson exercises and 562 practice tasks, from the basics to automation, data analysis, web, machine learning and LLM apps.
+- 11 learning paths with prerequisites, exams, role-specific interview questions and portfolio ideas.
+- 250 Python Arena problems, 292 interview questions, 160 common-mistake notes, 18 exams and 8 fictional datasets.
+- Progress stays in the browser and can be backed up to a file. The Python engine is downloaded from jsDelivr on first run.
+
+The interface and lessons are in Turkish. Add `?lang=en` to the address ([ysfdurak.github.io/kesit-python/?lang=en](https://ysfdurak.github.io/kesit-python/?lang=en)) for an English guide that explains each screen.
+
+Try it: https://ysfdurak.github.io/kesit-python/ · Sister apps: [SQL](https://github.com/ysfdurak/kesit-sql), [Power BI](https://github.com/ysfdurak/kesit-powerbi), [Statistics](https://github.com/ysfdurak/kesit-istatistik).
+
 ## Sorumluluk notu
 Ücretsiz, ticari olmayan bir eğitim ve portföy projesidir; içerik “olduğu gibi” sunulur. Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir. Python Software Foundation ya da Python Institute ile bağlantılı değildir.
 
