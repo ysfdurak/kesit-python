@@ -21,7 +21,7 @@
   "files": {
     "exams.js": "e6447b3675f6dbab43b485a0d35f31bd82c31309b5ff49e60a07b7d4b91ed07a",
     "icon-512-maskable.png": "7d6362bf905215994073ec8c641638a0362d32b5ac2231f2abe5f26407b7c091",
-    "sw.js": "e745a010af5bc01902b4691dc1aee93e484410311f64ca0ae104d0a099526fb6",
+    "sw.js": "0a0c75eca3be5ccf82e6047e582c4d73e1eacecbdede093a99e08ca5aa99cda7",
     "interview.js": "8a851eff7520be3dc12c5da41ad7143a8772efb684fca6c83d53e866c8a6a59e",
     "recovery.js": "91d44875843230ab79adc416398ac333fcfe1782b078fe07fd5c1bb8ae9906a2",
     "icon-192.png": "c331edf7ac8249ec9e521bf2ed55e59b2b13fb8a20838db4cbceefd4e85d2f06",
@@ -29,7 +29,7 @@
     "app2.js": "77734ca521055a9fa1bd6a6877ccdb8ae9333ec91b1bde2c979181eac01970e3",
     "n_temel.js": "fc1963698fd281a235c46965ed5e1407f64947cd5a420af63b272722657d51e0",
     "LICENSE": "349fb85fa132c5860c53dc0f74595e3ac13a493014bd529cb668d7ddad56f598",
-    "README.md": "296c4482c1b9b4edb1e0521553786486d08e32781ee96a00b834b7f9fb509d59",
+    "README.md": "c454d76779ebea116f1403038c6523fd37ae490f24f2557ba052f8a94c073ccb",
     "arena.js": "158ba1b5d487b54c247ab1a19f06ad992198988fdcd9282783e4d6b15d044662",
     "apple-touch-icon.png": "41a89750bb1b70b3d71b49fc4b45f9b10c9d49c0be3dfbcc47c7c3c4a538749c",
     "engine.js": "cf6b358b3c21e1045a22cc0b22484e632311d3549f33e8ba76335d1c5bc633c3",
@@ -52,7 +52,7 @@
     "c_temel.js": "989129670d53bfffdd5312a5b956386918a9f68d57c7d8c901fc001264842972",
     "portfolio.js": "289d035d27ee4ad69e2b2d6ef89d90637d03f19798c94f9d7ec03fbc0a50d43e",
     "c_orta.js": "7dd90401b2106a3ebe42c617d60c327e7e857fdcd798fbb5d4183500115c11f7",
-    "index.html": "cd8ec0323a6d932fbd4cac06d911cf7269ea19143ad39c545c187d4354c2380f",
+    "index.html": "ee7ef4e4de9fb3754201a16a5055365a24978e6f320b676ab3c505c09e1d526a",
     "c_ileri.js": "1df4f27e7e5bb83de34a484e4bc1b1983b34ad3ede9f63769f6fbe5d4b79f749",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "manifest.webmanifest": "224f56be34d66da9132edc66837f559c084256dc65b0dcbdbd9c84d04c0e96c7",
@@ -166,7 +166,8 @@
     "data/anadolu_market/departments.csv": "92eaeae0cbd18550749364006965d1e69bf88ab0738fccf5239b56a18c226815",
     "data/anadolu_market/products.csv": "bf275268862209e918a3433525de563727781d4cd5d88f13e0828d28dbface62",
     "data/anadolu_market/orders.csv": "cc20d25badfc97be74c50d115b0790b1f00ba93c89e6613b3fb4303de0a80f02",
-    "data/anadolu_market/employees.csv": "f357fc739e5051ce1ad04e4add593605377e4daf42bb57df7844d4c7c872ec22"
+    "data/anadolu_market/employees.csv": "f357fc739e5051ce1ad04e4add593605377e4daf42bb57df7844d4c7c872ec22",
+    "en-tour.js": "aada9130c7d909edf2dbfd1013bfb8124fe9d3e7ea452da158191c76f01b3a58"
   },
   "patches": [
     {
