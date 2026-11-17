@@ -10,7 +10,7 @@ window.KESIT_CONFIG = {
     repo: 'https://github.com/ysfdurak/kesit-python'
   },
   story: 'Operasyon geliştirme işinde tekrar eden elle yapılan işler en büyük israflardan biri. Python bu işleri otomatikleştirmenin ve veriden sonuç çıkarmanın en güçlü yollarından biri; ama Türkçe, kurulum gerektirmeyen ve yaparak öğreten bir kaynak bulmak zor. Kesit Python\'ı bu boşluğu doldurmak için tasarladım. Ürün sahibi gibi çalıştım: hedef kitleyi, Temel–Orta–İleri seviye yapısını, öğrenme yollarını, müfredatın kapsamını ve mülakat bölümünün rollere göre düzenini ben kurguladım; kodu ve içeriği yapay zekâ (Claude) ile geliştirdim. Kaliteyi otomatik denetimlerle sağladım: alıştırma çözümleri gerçek Python\'da çalıştırılıyor, başlangıç kodlarının testleri geçmediği kontrol ediliyor, bulunan hatalar düzeltilip içerik yeniden denetleniyor. Kardeş projeleri Kesit SQL ve Kesit Power BI ile aynı ürün mantığını paylaşıyor.',
-  license: '',           // boşsa: içerik CC BY-NC 4.0, kod PolyForm Shield 1.0.0
+  license: '',           // boşsa: kod ve içerik PolyForm Shield 1.0.0
   homeUrl: 'https://ysfdurak.github.io/',
   sqlUrl: 'https://ysfdurak.github.io/kesit-sql/',
   pbiUrl: 'https://ysfdurak.github.io/kesit-powerbi/',
