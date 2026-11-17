@@ -56,5 +56,9 @@ Try it: https://ysfdurak.github.io/kesit-python/ · Sister apps: [SQL](https://g
 Ücretsiz, ticari olmayan bir eğitim ve portföy projesidir; içerik “olduğu gibi” sunulur. Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir. Python Software Foundation ya da Python Institute ile bağlantılı değildir.
 
 ## Lisans
-- Uygulama kodu: [MIT](LICENSE)
+- Uygulama kodu: [PolyForm Shield 1.0.0](LICENSE.md). Kişiler, okullar ve şirketler kendi işlerinde ücretsiz kullanabilir; satmak ya da rakip ürün yapmak yazılı izin gerektirir.
 - Ders içerikleri ve veri setleri: [CC BY-NC 4.0](LICENSE-ICERIK.md)
+
+Kurumunuzda kullanıyorsanız haber verirseniz sevinirim: kurulumda yardımcı olabilir, kurumunuza özel ihtiyaçları birlikte değerlendirebiliriz. İletişim: iletisim@ysfdurak.com
+
+**English:** the app code is released under [PolyForm Shield 1.0.0](LICENSE.md): individuals, schools and companies may use, change and self-host it for free; selling it or offering a competing product needs written permission. Lesson content and datasets stay under [CC BY-NC 4.0](LICENSE-ICERIK.md). Contact: contact@ysfdurak.com
