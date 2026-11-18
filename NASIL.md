@@ -129,3 +129,6 @@ Mülakat bankası temizliği `kaynak/v3/mz/mulakat_temizlik.js` içindedir: davr
 
 ## Ortak veri setleri
 `data/` altındaki Ilgaz Bank, Kanat Havayolları, Lezzet Kurye, Pusula İK ve Pedal İzmir CSV'leri Kesit SQL üreteçlerinden gelir (Kesit SQL `NASIL.md` → Ortak veri setleri). Python'da elle düzenlenmez: Power BI `scratchpad/ds/csv` dosyasının BOM'suz kopyasıdır. Kopyalamadan sonra `data/manifest.json` içinde `rows` ve `bytes` güncellenir; `name` alanları (`Anadolu Market (Power BI modeli)`, `Kirli veri` kaynağı dahil) elle verilmiştir, korunur. Kanat ve Pedal'a `hv_repositioning` ve `bk_rebalancing` eklendi; `web_events` de Kesit SQL'den gelir (`ds/csv/db`). Beklenen değerler `kaynak/` içindeki testlerde sabit yazılıdır: veri değişince `tools/verify.py` hangi görevlerin değiştiğini gösterir; `uretec/` betikleri eskimiş olabilir, doğrudan `kaynak/` düzenlenir.
+
+## Uçtan uca depo vakası (vaka/depo/)
+`vaka/depo/` dört uygulamalı vakanın 2. adımıdır; `tools/build.py` üretmez, kökte durur ve `main`'e olduğu gibi kopyalanır. Sayfa `pyworker.js` motorunu kullanır. Üreteç `ysfdurak.github.io` deposunda `vaka/depo-kaynak/`. Denetim `python tests/vaka_depo.py` (CPython + pandas, CI).
