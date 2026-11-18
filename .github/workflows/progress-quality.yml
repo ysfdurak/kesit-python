@@ -12,3 +12,13 @@ jobs:
           node-version: '22'
       - run: node tests/recovery.cjs kaynak/recovery.js
       - run: node tests/artifact.cjs
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas
+      - run: python tests/vaka_depo.py
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: pip install pandas
+      - run: python tests/vaka_depo.py

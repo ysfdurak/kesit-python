@@ -54,6 +54,14 @@ tools/                        derleme ve doğrulama araçları; tools/pylib/veri
 belgeler/                     içerik şemaları ve uzman denetim raporu
 ```
 
+## Uçtan uca vaka: depo toplama süresi
+Dört Kesit uygulaması tek bir iş sorusunda birleşir: Anadolu Market Gebze deposunda raf düzeni değişti; toplama süresi kısaldı mı, kısaldıysa yaymaya yeter mi? SQL → Python → Power BI → İstatistik. Her adım öncekinin beklenen çıktısıyla başlar ve sonrakini açar; ilerleme tarayıcıda `kesit.vaka.depo` anahtarında ortaktır.
+
+- Bu uygulamadaki adım: [/kesit-python/vaka/depo/](https://ysfdurak.github.io/kesit-python/vaka/depo/). 2. adım: SQL çıktısını pandas ile denetle (temizlik, vardiya karışımı, vardiya içi fark). Sayfa uygulamanın Python motorunu (`pyworker.js`) kullanır; çözüm `tests/vaka_depo.py` ile CI'da CPython + pandas ile denetlenir.
+- Veri ve sayfa üreteci: [ysfdurak.github.io › vaka/depo-kaynak](https://github.com/ysfdurak/ysfdurak.github.io/tree/main/vaka/depo-kaynak). Sayfayı elle düzenleme; üreteçte değiştirip dört depoya yeniden yaz.
+
+- `vaka/depo/` kökte durur ve `tools/build.py` tarafından üretilmez; `main`'e olduğu gibi kopyalanır.
+
 ## Derleme ve doğrulama
 
 ```bash

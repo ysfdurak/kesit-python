@@ -9,7 +9,7 @@
     "Chromium ilk görev / ilk ekran axe kontrolü"
   ],
   "files": {
-    ".github/workflows/progress-quality.yml": "de882c5a0ff83fef2277d348761a20ddf0db34fe2649b699a78bf917f278cb3e",
+    ".github/workflows/progress-quality.yml": "d88491fc9701f725f4ca06c0eb6fc63fd3a11e1b85900583e8bc840910af53dc",
     "kaynak/recovery.js": "91d44875843230ab79adc416398ac333fcfe1782b078fe07fd5c1bb8ae9906a2",
     "tests/artifact.cjs": "1ab82740817f37d2934e90f25997c4a6e7d07d50138d538c70de82f27fa0ddfc",
     "tests/recovery.cjs": "9990ef25ded436773fef0d4659d287bdbb3a3caa94817eb768a0b4ac129a31f8",
@@ -17,7 +17,10 @@
     "kaynak/app.js": "5bb1d07dadeed5fbe4640a5a577b879632ee98561d56f1b239b8fd3971e200b3",
     "kaynak/index.html": "e3994e423e30d07edf1d9a6a0f71be5ef1cfe56fbb6b80c90ae553325680d05d",
     "kaynak/sync.js": "ddb04af7b67ed2a3f3f126002742f94c7d2ff44583df6760b7b3b91be8588f4b",
-    "tools/build.py": "b461bad7bd8359386460818ea41595e579c19823a3214983a9c8b5e2f26e606e"
+    "tools/build.py": "b461bad7bd8359386460818ea41595e579c19823a3214983a9c8b5e2f26e606e",
+    "vaka/depo/index.html": "8374edbe979204dd7b622714c0ead3eac557fd7a402485a795fefef18c2639a9",
+    "vaka/depo/beklenen.json": "491c33107a7dc22aaa897c1b219a012510b2e224e889e257b2be7a6342a426f3",
+    "tests/vaka_depo.py": "0f92c75629101d2b0900776e83742c0a5bc5d0dca438bbf26a8c5fe182d9421d"
   },
   "patches": [
     {
@@ -26,6 +29,16 @@
         "kaynak/app.js"
       ],
       "note": "Kesit İstatistik Kesit ailesi bağlantılarına eklendi; dosya özetleri güncellendi."
+    },
+    {
+      "date": "2026-11-19",
+      "files": [
+        ".github/workflows/progress-quality.yml",
+        "vaka/depo/index.html",
+        "vaka/depo/beklenen.json",
+        "tests/vaka_depo.py"
+      ],
+      "note": "Uçtan uca depo vakası kaynak dalına eklendi (main'de 19 Kasım 2026'da yayımlandı). Ayrıntı NASIL.md › Uçtan uca depo vakası."
     }
   ]
 }
