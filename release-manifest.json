@@ -39,7 +39,7 @@
     "n_ileri.js": "9dd131935d0c6a6939f6b8f262968273cda3384df6095d1f84b599dfc96a4b68",
     "pyworker.js": "7571dac5ec05224d8c16cc4fb5d4b737411dddeb1d89f58770afe5544c9e2190",
     "x_1.js": "632bfac74121957837bb29db11b4dc9d0f713d181aaf7951ffbbd5288f2d5305",
-    "app.js": "5bb1d07dadeed5fbe4640a5a577b879632ee98561d56f1b239b8fd3971e200b3",
+    "app.js": "3ba934835191f38344a8506963f7952d8a253ae7e13e02148d4313451297fd24",
     "og.png": "ca1574fb61d18b12862ec6c392a61ca04d4c93f7029f093537586e83b675e83f",
     "ex_anahtar.js": "2608799d10fb7510408370c47adc8e9877a65f6dca40b5beeaa931f3a2219419",
     "LICENSE-ICERIK.md": "2e6e1bf83e923626d3b42a2fce6b25741e418d608ffc89c43adbc34f38f8a349",
@@ -52,7 +52,7 @@
     "c_temel.js": "989129670d53bfffdd5312a5b956386918a9f68d57c7d8c901fc001264842972",
     "portfolio.js": "cf723394b9921db899a72d238744ac2d1d64fdcb4c877405ffba0f9931dc3bc2",
     "c_orta.js": "7dd90401b2106a3ebe42c617d60c327e7e857fdcd798fbb5d4183500115c11f7",
-    "index.html": "ee7ef4e4de9fb3754201a16a5055365a24978e6f320b676ab3c505c09e1d526a",
+    "index.html": "0760c235d5611a4c846705d4295f10a228d1a5616050e6e28bc25f12825c1955",
     "c_ileri.js": "1df4f27e7e5bb83de34a484e4bc1b1983b34ad3ede9f63769f6fbe5d4b79f749",
     ".nojekyll": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
     "manifest.webmanifest": "224f56be34d66da9132edc66837f559c084256dc65b0dcbdbd9c84d04c0e96c7",
@@ -178,6 +178,14 @@
         "config.js"
       ],
       "note": "Kesit İstatistik Kesit ailesi bağlantılarına eklendi (config statUrl, menü ve Hakkında bağlantıları, README). Değişiklik kaynak dalında da uygulandı; kurtarma ve sözdizimi kontrolleri yeniden çalıştırıldı."
+    },
+    {
+      "date": "2026-11-18",
+      "files": [
+        "app.js",
+        "index.html"
+      ],
+      "note": "Mobil alt menü Kesit ailesiyle aynı (Ana sayfa · Yolum · Dersler · Pratik · Menü); ders seçenekleri dersin sonunda; en küçük yazı .75rem. Chrome 390/1366 px: ders ekranı ve alt menü, axe hata yok."
     }
   ]
 }

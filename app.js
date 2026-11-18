@@ -152,7 +152,8 @@ const NAVG = [
   ['', [['profile', 'Profil'], ['hakkinda', 'Hakkında']]]
 ];
 const NAV = NAVG.reduce((a, g) => a.concat(g[1]), []);
-const TABNAV = ['home', 'lessons', 'ai', 'interview', 'menu'];   /* mobil alt menü; 'Menü' tüm bölümleri açar */
+const TABNAV = ['home', 'paths', 'lessons', 'practice', 'menu'];   /* Kesit SQL ve Power BI ile aynı düzen: Ana sayfa · Yolum · Dersler · Pratik · Menü */
+const TABLBL = { paths: 'Yolum' };   /* mobil alt menü; 'Menü' tüm bölümleri açar */
 const V = { name: 'home', id: null, sub: null };
 const SCROLL = {}; try { history.scrollRestoration = 'manual'; } catch (e) {}
 function hashFor(v) { return '#/' + v.name + (v.id ? '/' + v.id : '') + (v.sub ? '/' + v.sub : ''); }
@@ -367,7 +368,7 @@ function familyHTML() { const c = window.KESIT_CONFIG || {}; const L = [[c.homeU
 function renderNav() {
   const nav = $('#nav'); const due = dueReviews().length;
   nav.innerHTML = NAVG.map(([g, items]) => (g ? '<span class="navgrp">' + g + '</span>' : '<span class="navsep"></span>') + items.map(it => navBtn(it, due)).join('')).join('') + familyHTML();
-  $('#tabbar').innerHTML = TABNAV.map(k => '<button type="button" data-go="' + k + '" aria-current="' + (V.name === k || (k === 'lessons' && V.name === 'lesson') || (k === 'interview' && /^interview/.test(V.name)) || (k === 'menu' && !TABNAV.includes(V.name) && V.name !== 'lesson' && !/^interview/.test(V.name))) + '">' + ICON[k] + '<span>' + (k === 'menu' ? 'Menü' : NAV.find(x => x[0] === k)[1]) + '</span></button>').join('');
+  $('#tabbar').innerHTML = TABNAV.map(k => '<button type="button" data-go="' + k + '" aria-current="' + (V.name === k || (k === 'lessons' && V.name === 'lesson') || (k === 'paths' && V.name === 'path') || (k === 'practice' && V.name === 'task') || (k === 'menu' && !TABNAV.includes(V.name) && !['lesson', 'path', 'task'].includes(V.name))) + '">' + ICON[k] + '<span>' + (k === 'menu' ? 'Menü' : TABLBL[k] || NAV.find(x => x[0] === k)[1]) + '</span></button>').join('');
 }
 function renderStats() {
   const done = validDone(); const s = streak(); const st = E.state();
@@ -411,8 +412,9 @@ VIEWS.lesson = { html() {
   const tab = V.sub || 'ders'; const ex = l.ex || []; const sq = lessonSeq(l); const prev = sq.prev, next = sq.next;
   const ctxChip = sq.ctx ? '<button class="chip lk" data-go="path" data-id="' + sq.ctx.id + '" title="Öğrenme yolunu aç">' + esc(sq.ctx.name) + ' ' + (sq.i + 1) + '/' + sq.list.length + '</button>' : '';
   const rqEx = reqEx(l); const nEx = rqEx.filter(e => P.ex[l.id + '#' + (e.id || e._k)]).length;
+  /* Ders seçenekleri (okudum say, atla, sorun bildir) dersin sonunda durur; ilk bakışta içerik görünür */
+  const lacts = '<div class="row lacts">' + (lessonState(l) === 'done' ? '' : (P.read && P.read[l.id] ? '' : '<button type="button" class="btn sm ghost" data-act="l-read" title="Alıştırmaları çözmeden bitmiş say; XP verilmez">Okudum, tamam say</button>')) + (P.read && P.read[l.id] ? '<button type="button" class="btn sm ghost" data-act="l-unread">Tamam işaretini kaldır</button>' : '') + (isSkipped(l) ? '<button type="button" class="btn sm ghost" data-act="l-unskip">Atlamayı geri al</button>' : lessonState(l) === 'done' ? '' : '<button type="button" class="btn sm ghost" data-act="l-skip" title="Sıradaki ders hesabında atlanır; tamamlanmış sayılmaz">Bu dersi atla</button>') + issueLink('Ders: ' + l.title, 'Ders: ' + l.title + ' (' + l.id + ')\n\nSorun:\n') + '</div>';
   let h = '<div class="lhead"><div class="crumbs"><button data-go="lessons" data-id="' + TIER(l.lv) + '">' + esc(lvName(TIER(l.lv))) + '</button> › <span>' + esc(l.mod || '') + '</span></div><div class="row" style="justify-content:space-between"><div><h1>' + esc(l.title) + '</h1><p class="muted" style="margin:6px 0 0">' + esc(l.sum || '') + '</p></div><div class="row">' + ctxChip + lvBadge(l.lv) + (l.opt ? '<span class="chip">İsteğe bağlı</span>' : '') + '<span class="chip" title="Tahmin: okuma ve alıştırmalar dahil">' + dkAralik(l) + '</span>' + (l.needs && l.needs.length ? '<span class="chip">' + esc(l.needs.join(', ')) + '</span>' : '') + '</div></div>' +
-    '<div class="row lacts">' + (lessonState(l) === 'done' ? '' : (P.read && P.read[l.id] ? '' : '<button type="button" class="btn sm ghost" data-act="l-read" title="Alıştırmaları çözmeden bitmiş say; XP verilmez">Okudum, tamam say</button>')) + (P.read && P.read[l.id] ? '<button type="button" class="btn sm ghost" data-act="l-unread">Tamam işaretini kaldır</button>' : '') + (isSkipped(l) ? '<button type="button" class="btn sm ghost" data-act="l-unskip">Atlamayı geri al</button>' : lessonState(l) === 'done' ? '' : '<button type="button" class="btn sm ghost" data-act="l-skip" title="Sıradaki ders hesabında atlanır; tamamlanmış sayılmaz">Bu dersi atla</button>') + issueLink('Ders: ' + l.title, 'Ders: ' + l.title + ' (' + l.id + ')\n\nSorun:\n') + '</div>' +
     '<div class="steps">' + [['ders', 'Ders'], ['alistirma', 'Alıştırmalar (' + nEx + '/' + rqEx.length + ')'], ['sss', 'Sık hatalar ve SSS']].map(([k, t]) => '<button type="button" data-go="lesson" data-id="' + l.id + '" data-sub="' + k + '" aria-current="' + (tab === k) + '" class="' + (k === 'alistirma' && nEx === rqEx.length && rqEx.length ? 'done' : '') + '">' + t + '</button>').join('') + '</div></div>';
   if (tab === 'ders') {
     h += '<article class="panel theory">' + (l.goals && l.goals.length ? '<div class="note goals"><b>Bu dersin sonunda</b><ul>' + l.goals.map(g => '<li>' + esc(g) + '</li>').join('') + '</ul></div>' : '') + l.body + '</article>';
@@ -431,6 +433,7 @@ VIEWS.lesson = { html() {
   } else {
     h += '<section class="lvl-block">' + ((l.mistakes || []).length ? '<div class="sec-head"><h2>Sık yapılan hatalar</h2></div><div class="mist">' + l.mistakes.map(m => '<div class="panel mrow"><div class="cmp2"><div><span class="eyebrow bad">Hatalı</span>' + codebox(m.bad, { run: false, label: 'hatalı' }) + '</div><div><span class="eyebrow good">Doğru</span>' + codebox(m.good, { run: false, label: 'doğru' }) + '</div></div><p class="muted" style="margin:6px 0 0">' + esc(m.why) + '</p></div>').join('') + '</div>' : '') + ((l.faq || []).length ? '<div class="sec-head"><h2>Sık sorulan sorular</h2></div><div class="faq">' + l.faq.map(f => '<details class="panel"><summary>' + f.q + '</summary><div class="fa">' + f.a + '</div></details>').join('') + '</div>' : '<p class="muted">Bu derste SSS yok.</p>') + '</section>';
   }
+  h += '<div class="lfoot">' + lacts + '</div>';
   return h;
 }, mount(m) {
   const l = LMAP[V.id]; if (!l) return;
