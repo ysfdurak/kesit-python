@@ -29,7 +29,7 @@
     "app2.js": "77734ca521055a9fa1bd6a6877ccdb8ae9333ec91b1bde2c979181eac01970e3",
     "n_temel.js": "fc1963698fd281a235c46965ed5e1407f64947cd5a420af63b272722657d51e0",
     "LICENSE.md": "eb182f21b6afad27726556b57c249818b7e5bc57037e8dacc06e4754e939cc2d",
-    "README.md": "957194040838b8734a870962d76c0626ca20f8f44f05b246ffe26144786e6365",
+    "README.md": "c91b8b2cd41ed46e96beb3ecc6c1867e0f9d3c5c2f4886a90b1fa455c8b15342",
     "arena.js": "158ba1b5d487b54c247ab1a19f06ad992198988fdcd9282783e4d6b15d044662",
     "apple-touch-icon.png": "41a89750bb1b70b3d71b49fc4b45f9b10c9d49c0be3dfbcc47c7c3c4a538749c",
     "engine.js": "cf6b358b3c21e1045a22cc0b22484e632311d3549f33e8ba76335d1c5bc633c3",
@@ -167,7 +167,12 @@
     "data/anadolu_market/products.csv": "bf275268862209e918a3433525de563727781d4cd5d88f13e0828d28dbface62",
     "data/anadolu_market/orders.csv": "cc20d25badfc97be74c50d115b0790b1f00ba93c89e6613b3fb4303de0a80f02",
     "data/anadolu_market/employees.csv": "f357fc739e5051ce1ad04e4add593605377e4daf42bb57df7844d4c7c872ec22",
-    "en-tour.js": "d9988ea6a8727185f624e170f65bafdf202ed16fbd8ab0ce3dcacde971c8bc69"
+    "en-tour.js": "d9988ea6a8727185f624e170f65bafdf202ed16fbd8ab0ce3dcacde971c8bc69",
+    "vaka/depo/index.html": "8374edbe979204dd7b622714c0ead3eac557fd7a402485a795fefef18c2639a9",
+    "vaka/depo/beklenen.json": "491c33107a7dc22aaa897c1b219a012510b2e224e889e257b2be7a6342a426f3",
+    "tests/vaka_depo.py": "0f92c75629101d2b0900776e83742c0a5bc5d0dca438bbf26a8c5fe182d9421d",
+    "sitemap.xml": "2826ac5ad24c9822343ce22f355c656724b5d47de517a3c6508ff037f3f4de3b",
+    ".github/workflows/progress-quality.yml": "3bda184e3a4908f97180025f36b7783253f10ccfa4f0328646e436521e8cf730"
   },
   "patches": [
     {
@@ -186,6 +191,18 @@
         "index.html"
       ],
       "note": "Mobil alt menü Kesit ailesiyle aynı (Ana sayfa · Yolum · Dersler · Pratik · Menü); ders seçenekleri dersin sonunda; en küçük yazı .75rem. Chrome 390/1366 px: ders ekranı ve alt menü, axe hata yok."
+    },
+    {
+      "date": "2026-11-19",
+      "files": [
+        "README.md",
+        "vaka/depo/index.html",
+        "vaka/depo/beklenen.json",
+        "tests/vaka_depo.py",
+        "sitemap.xml",
+        ".github/workflows/progress-quality.yml"
+      ],
+      "note": "Uçtan uca depo vakası 2. adım (vaka/depo/): SQL çıktısını pandas ile denetle; uygulamanın pyworker.js motorunu kullanır. Çözüm ve gizli denetimler tests/vaka_depo.py ile CPython + pandas'ta denetleniyor (CI'a eklendi). Chrome 390/1366 px gerçek Pyodide 0.27.8 ile denendi, axe hata yok. Kaynak dalına da uygulanmalı."
     }
   ]
 }
