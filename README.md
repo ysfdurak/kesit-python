@@ -18,6 +18,7 @@
 
 ## Nasıl çalışıyor?
 - Sunucu yok: Python kodu CPython'ın WebAssembly sürümü olan Pyodide ile tarayıcıda, ayrı bir iş parçacığında (Web Worker) çalışır. Sonsuz döngü sayfayı dondurmaz; Durdur düğmesi ve 60 saniyelik süre sınırı motoru yeniden başlatır.
+- Her alıştırmanın nasıl çalıştığı başlığında yazar: **Gerçek Python · tarayıcıda** (kod ve kütüphane burada gerçekten çalışır), **Benzetim · dış sistem taklit** (FastAPI, PostgreSQL, bulut, LLM gibi burada çalışmayan bir aracın yerine aynı mantık Python'da kurulur), **Kendi bilgisayarında · burada çalışmaz** (gerçek araçla yapılıp işaretlenir). Ders içindeki kod kutuları da "Python · burada çalışır" ya da "Kendi bilgisayarında · burada çalışmaz" etiketlidir. Kural `app.js › kosuKipi`.
 - İlerleme yalnızca kullanıcının tarayıcısında saklanır; Profil sayfasından dosyaya kaydedilip başka cihazda birleştirilerek yüklenebilir. Site kişisel veri toplamaz.
 - Python motoru ve kütüphaneler ilk kod çalıştırmada jsDelivr'dan iner; site dosyaları ilk ziyarette tarayıcı önbelleğine alınır, yeni sürümde eski önbellek silinir.
 - Alıştırma çözümleri otomatik testlerle gerçek Python'da denetlenir; denetim araçları `kaynak` dalındadır.

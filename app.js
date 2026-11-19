@@ -196,9 +196,36 @@ function noteRight(key) { const r = P.rv[key]; if (!r) return; const iv = Math.m
 function dueReviews() { const now = Date.now(); return Object.entries(P.rv).filter(([k, r]) => r.due <= now).map(([k]) => k); }
 
 /* ---------- Ortak parçalar ---------- */
+/* Alıştırmanın nasıl çalıştığı (dış inceleme, Kasım 2026): gerçek Python mı, dış sistemin benzetimi mi?
+   Benzetim: kod gerçek Python'da çalışır ama API, sunucu, model ya da bulut yerine aynı arayüzü taklit eden küçük bir
+   sınıf/sözlük kullanılır. Gerçek araçla çalışan kod dersteki gri kutulardadır ve kendi bilgisayarında çalıştırılır.
+   Veri alanı e.kosu ('gercek' | 'benzetim') varsa o geçer; yoksa görev metninden çıkarılır. unittest.mock gerçek bir
+   test aracıdır, benzetim sayılmaz. */
+const BENZETIM_RE = /taklit|\b[Ss]ahte ?(API|istemci|model|modül|yanıt|LLM|Redis|S3|sunucu|servis|bağlantı)|\bSahte[A-ZÇĞİÖŞÜ]\w*|\bFake[A-Z]\w*|\bMini[A-Z]\w*|\bmoto\b/;
+/* Dersin asıl aracı bu tarayıcıda çalışmayan dersler (sunucu, ağ, bulut, model, GUI): buradaki kod alıştırmaları aracın
+   kendisini değil, aynı mantığı Python'da kurar. Araç burada da çalışıyorsa (openpyxl, pandas, bs4) ders bu listede yok. */
+const ARAC_DISARIDA = new Set(['api-web', 'http-api', 'entegrasyon-saas', 'fastapi', 'flask', 'django-giris', 'django-ileri', 'kimlik-yetki',
+  'postgresql-python', 'redis-kuyruk', 'spark-dagitik', 'akis-isleme', 'bulut-temelleri', 'docker-deploy', 'orkestrasyon', 'dbt-elt',
+  'mlops-yasam-dongusu', 'sistem-tasarimi', 'gui-tkinter', 'prompt-muhendisligi', 'llm-api', 'llm-ajanlar', 'llm-degerlendirme',
+  'rag-uygulamasi', 'yerel-modeller-hf', 'ajan-uretimde', 'mcp-protokolu', 'proje-api', 'proje-ai', 'proje-iade-ajani',
+  'proje-rapor-ajani', 'proje-oto-api']);
+function kosuKipi(e, lessonId) {
+  if (e && e.t === 'local') return 'yerel';
+  if (!e || e.t !== 'code') return null;
+  if (e.kosu) return e.kosu;
+  if (lessonId && ARAC_DISARIDA.has(lessonId)) return 'benzetim';
+  return BENZETIM_RE.test((e.q || '') + '\n' + (e.start || '')) ? 'benzetim' : 'gercek';
+}
+function kosuChip(e, lessonId) {
+  const k = kosuKipi(e, lessonId); if (!k) return '';
+  if (k === 'yerel') return '<span class="chip kosu-chip yerel" title="Bu adım tarayıcıda çalışmaz: gerçek araçla kendi bilgisayarında yapılır, sonra Yaptım diye işaretlenir.">Kendi bilgisayarında · burada çalışmaz</span>';
+  return k === 'benzetim'
+    ? '<span class="chip kosu-chip benzetim" title="Kodun gerçek Python\'da çalışır; dış sistem (API, sunucu, model, bulut) yerine aynı arayüzü taklit eden küçük bir parça kullanılır. Gerçek araçla çalışan kod dersteki gri kutularda; onları kendi bilgisayarında dene.">Benzetim · dış sistem taklit</span>'
+    : '<span class="chip kosu-chip gercek" title="Kodun bu sayfadaki gerçek Python motorunda (Pyodide) olduğu gibi çalışır ve testler gerçek sonuca bakar.">Gerçek Python · tarayıcıda</span>';
+}
 function codebox(code, opt = {}) {
   const id = 'cb' + Math.random().toString(36).slice(2, 8);
-  return '<div class="codebox" data-cb="' + id + '"><pre><code>' + hl(code) + '</code></pre><div class="tools"><span class="lbl">' + esc(opt.label || 'Python') + '</span>' + (opt.run === false ? '' : '<button type="button" data-act="cb-run">Çalıştır</button><button type="button" data-act="cb-open">Kod editöründe aç</button>') + '<button type="button" data-act="cb-copy">Kopyala</button></div><div class="out" hidden></div><textarea class="sr-only" aria-hidden="true" tabindex="-1" data-src>' + esc(code) + '</textarea></div>';
+  return '<div class="codebox" data-cb="' + id + '"><pre><code>' + hl(code) + '</code></pre><div class="tools"><span class="lbl">' + esc(opt.label || (opt.run === false ? 'Kendi bilgisayarında · burada çalışmaz' : 'Python · burada çalışır')) + '</span>' + (opt.run === false ? '' : '<button type="button" data-act="cb-run">Çalıştır</button><button type="button" data-act="cb-open">Kod editöründe aç</button>') + '<button type="button" data-act="cb-copy">Kopyala</button></div><div class="out" hidden></div><textarea class="sr-only" aria-hidden="true" tabindex="-1" data-src>' + esc(code) + '</textarea></div>';
 }
 function enhance(root) {
   $$('pre.py', root).forEach(pre => { const code = unesc(pre.innerHTML).replace(/^\n+|\s+$/g, ''); const w = document.createElement('div'); w.innerHTML = codebox(code); pre.replaceWith(w.firstChild); });
@@ -427,7 +454,7 @@ VIEWS.lesson = { html() {
     let curStage = null, openOne = false;
     const stageDone = sg => ex.every((e, k) => e.stage !== sg || P.ex[exKey(l, k)]);
     let exNo = 0; const exTop = ex.filter(e => !e.erken).length;
-    ex.forEach((e, k) => { const key = exKey(l, k); if (e.stage !== curStage) { if (curStage) h += '</details>'; curStage = e.stage; const isOpen = !openOne && !stageDone(curStage); if (isOpen) openOne = true; h += '<details class="stagebox" id="st-' + esc(curStage) + '"' + (isOpen || stages.length === 1 ? ' open' : '') + '><summary class="stagehead"><h2>' + esc(curStage) + '</h2><span class="muted">' + esc(STAGE_DESC[curStage] || '') + '</span></summary>'; } h += '<div class="exblock" data-k="' + k + '"><div class="exhead"><span class="eyebrow">' + (e.erken ? 'Ek alıştırma' : 'Alıştırma ' + (++exNo) + ' / ' + exTop) + (e.diff ? ' · ' + '★'.repeat(e.diff) : '') + '</span>' + (e.erken ? '<span class="chip warn-chip" title="Bu görev henüz görmediğin bir yapı kullanıyor">Erken meydan okuma · isteğe bağlı</span>' : '') + issueLink('Alıştırma: ' + l.title + ' / ' + key, 'Ders: ' + l.title + ' (' + l.id + ')\nAlıştırma: ' + key + '\n\nSorun:\n') + '</div>' + exView(e, key) + '</div>'; });
+    ex.forEach((e, k) => { const key = exKey(l, k); if (e.stage !== curStage) { if (curStage) h += '</details>'; curStage = e.stage; const isOpen = !openOne && !stageDone(curStage); if (isOpen) openOne = true; h += '<details class="stagebox" id="st-' + esc(curStage) + '"' + (isOpen || stages.length === 1 ? ' open' : '') + '><summary class="stagehead"><h2>' + esc(curStage) + '</h2><span class="muted">' + esc(STAGE_DESC[curStage] || '') + '</span></summary>'; } h += '<div class="exblock" data-k="' + k + '"><div class="exhead"><span class="eyebrow">' + (e.erken ? 'Ek alıştırma' : 'Alıştırma ' + (++exNo) + ' / ' + exTop) + (e.diff ? ' · ' + '★'.repeat(e.diff) : '') + '</span>' + kosuChip(e, l.id) + (e.erken ? '<span class="chip warn-chip" title="Bu görev henüz görmediğin bir yapı kullanıyor">Erken meydan okuma · isteğe bağlı</span>' : '') + issueLink('Alıştırma: ' + l.title + ' / ' + key, 'Ders: ' + l.title + ' (' + l.id + ')\nAlıştırma: ' + key + '\n\nSorun:\n') + '</div>' + exView(e, key) + '</div>'; });
     if (curStage) h += '</details>';
     h += '<div class="row lnav" style="justify-content:space-between">' + (prev ? '<button class="btn" data-go="lesson" data-id="' + prev.id + '">← ' + esc(prev.title) + '</button>' : '<span></span>') + (next ? '<button class="btn pri" data-go="lesson" data-id="' + next.id + '">Sonraki: ' + esc(next.title) + ' →</button>' : sq.ctx ? '<button class="btn pri" data-go="path" data-id="' + sq.ctx.id + '">Yolun sonu: ' + esc(sq.ctx.name) + '</button>' : '') + '</div>' + (l.id === 'proje-temel' ? '<div class="note"><b>İsteğe bağlı: Bilgisayarına geç</b> Temel projeni bitirdiysen Python\'ı kendi bilgisayarına kurmanın tam zamanı. <button class="btn sm" data-go="lesson" data-id="kurulum-araclar">Kuruluma başla</button></div>' : '');
   } else {
