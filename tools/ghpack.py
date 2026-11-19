@@ -25,7 +25,8 @@ html = html[:first] + '<script>function __b(p){var e=document.getElementById("bo
 html = re.sub(r'<link rel="preconnect" href="https://fonts\.g[^>]*>\n?', '', html)
 html = re.sub(r'<link rel="stylesheet" href="https://fonts\.googleapis\.com[^>]*>', '<link rel="stylesheet" href="vendor/fonts.css">', html)
 html = html.replace('<meta name="claude:viewport-fit-sides" content="cover">\n', '')
-meta = '''<meta name="theme-color" content="#3B6FD6">
+meta = '''<meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; img-src 'self' data: blob:; font-src 'self' data:; connect-src 'self' https://cdn.jsdelivr.net; worker-src 'self' blob:; object-src 'none'; base-uri 'self'; form-action 'self'">
+<meta name="theme-color" content="#3B6FD6">
 <link rel="icon" href="favicon.svg" type="image/svg+xml">
 <link rel="icon" href="icon-192.png" type="image/png" sizes="192x192">
 <link rel="apple-touch-icon" href="apple-touch-icon.png">
