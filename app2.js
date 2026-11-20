@@ -3,10 +3,33 @@
 'use strict';
 const C = window.PY_CORE, E = window.PY_ENGINE;
 const { P, save, esc, go, render, toast, codebox, hl, editor, bindEditor, outHTML, engineFail, lvBadge, addXP, noteWrong, noteRight, VIEWS, V, $, $$ } = C;
-const ARENA = window.PY_ARENA || [], AMAP = {}; ARENA.forEach(a => AMAP[a.id] = a);
+/* Arena, mülakat ve sık hata verisi (≈2 MB) açılışta yüklenmez: ana sayfa çizildikten sonra arka planda gelir
+   (tembelYukle), diziler yerinde doldurulur ve ekran yeniden çizilir. Bu ekranlara yükleme bitmeden girilirse
+   "yükleniyor" görünür. Dosyalar sayfada zaten varsa (test, eski paket) hemen kullanılır. */
+const ARENA = [], AMAP = {};
 /* Mülakat bölümü yalnız Python odaklıdır: davranışsal sorular gösterilmez */
-const IV = (window.PY_INTERVIEW || []).filter(q => q.kind !== 'davranissal' && !(q.roles || []).includes('davranissal')), IVMAP = {}; IV.forEach(q => { IVMAP[q.id] = q; q.roles = q.roles || []; });
-const MS = window.PY_MISTAKES || [];
+const IV = [], IVMAP = {};
+const MS = [];
+const TEMBEL = ['arena.js', 'interview.js', 'mistakes.js'];
+let tembelHazir = false, tembelP = null;
+function tembelDoldur() {
+  if (tembelHazir) return;
+  (window.PY_ARENA || []).forEach(a => { AMAP[a.id] = a; ARENA.push(a); });
+  /* Mülakat bölümü yalnız Python odaklıdır: davranışsal sorular gösterilmez */
+  (window.PY_INTERVIEW || []).filter(q => q.kind !== 'davranissal' && !(q.roles || []).includes('davranissal')).forEach(q => { q.roles = q.roles || []; IVMAP[q.id] = q; IV.push(q); });
+  (window.PY_MISTAKES || []).forEach(m => MS.push(m));
+  tembelHazir = true;
+}
+function tembelYukle() {
+  if (tembelHazir) return Promise.resolve();
+  if (window.PY_ARENA && window.PY_INTERVIEW && window.PY_MISTAKES) { tembelDoldur(); return Promise.resolve(); }
+  if (!tembelP) tembelP = Promise.all(TEMBEL.map(src => new Promise((ok, no) => {
+    const sc = document.createElement('script'); sc.src = src; sc.charset = 'utf-8'; sc.async = true; sc.onload = ok; sc.onerror = () => no(new Error(src)); document.head.appendChild(sc);
+  }))).then(() => { tembelDoldur(); render(); }, e => { tembelP = null; throw e; });
+  return tembelP;
+}
+if (window.PY_ARENA && window.PY_INTERVIEW && window.PY_MISTAKES) tembelDoldur();
+else setTimeout(() => tembelYukle().catch(() => {}), 50);
 const norm = s => String(s == null ? '' : s).replace(/\r\n/g, '\n').split('\n').map(l => l.replace(/\s+$/, '')).join('\n').trim();
 const today = C.today;
 const ensure = () => { P.ar = P.ar && typeof P.ar === 'object' ? P.ar : {}; P.iv = P.iv && typeof P.iv === 'object' ? P.iv : {}; P.cont = P.cont || null; P.conts = P.conts || []; P.sims = P.sims || []; P.drafts = P.drafts && typeof P.drafts === 'object' ? P.drafts : {}; };
@@ -373,4 +396,15 @@ VIEWS.profile.html = function () {
   const sc = arenaScore(), rk = rankOf(sc);
   return profHtml.call(this) + '<section class="lvl-block"><div class="sec-head"><h2>Arena ve mülakat</h2></div><div class="kpis kpis4"><div class="panel kpi"><b class="num">' + sc + '</b><span>Arena puanı · unvan: ' + esc(rk.name) + '</span></div><div class="panel kpi"><b class="num">' + ARENA.filter(a => solved(a.id)).length + '</b><span>problem çözüldü</span></div><div class="panel kpi"><b class="num">' + P.conts.length + '</b><span>zamanlı set</span></div><div class="panel kpi"><b class="num">' + IV.filter(q => ivState(q.id) === 2).length + '/' + IV.length + '</b><span>mülakat sorusu</span></div></div></section>';
 };
+/* Tembel veriye bağlı ekranlar: veri gelmeden çizilirse yer tutucu gösterir, gelince yeniden çizilir. */
+['arena', 'arena-p', 'arena-c', 'interview', 'interview-sim', 'mistakes', 'ai'].forEach(k => {
+  const v = VIEWS[k]; if (!v) return;
+  const html = v.html, mount = v.mount;
+  v.html = function () {
+    if (tembelHazir) return html.apply(this, arguments);
+    tembelYukle().catch(() => toast('Bölüm yüklenemedi; bağlantını kontrol edip sayfayı yenile.'));
+    return '<div class="panel" style="padding:18px" role="status">Bölüm yükleniyor…</div>';
+  };
+  if (mount) v.mount = function () { if (tembelHazir) return mount.apply(this, arguments); };
+});
 })();
