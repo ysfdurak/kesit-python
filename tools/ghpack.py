@@ -47,7 +47,7 @@ assert 'vendor/fonts.css' in html and 'serviceWorker' in html and 'fonts.googlea
 open(O + '/index.html', 'w', encoding='utf-8').write(html)
 shutil.copytree('data', O + '/data')
 shutil.copytree('pypaket', O + '/pypaket')
-for f in ['config.js', 'LICENSE', 'LICENSE-ICERIK.md']: shutil.copy('kaynak/gh/' + f, O + '/' + f)
+for f in ['config.js', 'LICENSE.md', 'LICENSE-ICERIK.md']: shutil.copy('kaynak/gh/' + f, O + '/' + f)
 shutil.copytree('kaynak/gh/static', O, dirs_exist_ok=True)
 # Service worker: içerik özetiyle sürümlenir, ilk ziyarette çekirdek dosyaları önbelleğe alır, eski sürümü siler
 import hashlib
