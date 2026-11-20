@@ -2,6 +2,8 @@
 const fs = require('fs'), vm = require('vm');
 global.window = global; const h = fs.readFileSync('index.html', 'utf8');
 const files = h.match(/src="[^"]+\.js"/g).map(s => s.slice(5, -1)).filter(f => !/^(app|app2|engine|sync|portfolio|config)\.js$/.test(f));
+// Arena, mülakat ve sık hata dosyaları sayfada etiketsiz (app2.js açılıştan sonra yükler); sayım için ayrıca okunur.
+for (const f of ['arena.js', 'interview.js', 'mistakes.js']) if (!files.includes(f)) files.push(f);
 for (const f of files) vm.runInThisContext(fs.readFileSync(f, 'utf8'));
 const lm = {}; const L = (window.PY_LESSONS || []).filter(l => (window.PY_ORDER || []).includes(l.id)); L.forEach(l => lm[l.id] = l);
 (window.PY_EXT || []).forEach(x => { if (lm[x.id] && x.ex) lm[x.id].ex = (lm[x.id].ex || []).concat(x.ex); });

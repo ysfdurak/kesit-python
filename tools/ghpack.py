@@ -12,6 +12,9 @@ tags = re.findall(r'<script charset="utf-8" src="([^"]+)"></script>', html)
 tags = [t for t in tags if t != 'sync.js']
 for t in tags: shutil.copy(t, O + '/' + t)
 shutil.copy('pyworker.js', O + '/pyworker.js')
+# Açılıştan sonra app2.js'in yüklediği veri dosyaları (etiketsiz; önbelleğe yine alınır)
+TEMBEL = ['arena.js', 'interview.js', 'mistakes.js']
+for t in TEMBEL: shutil.copy(t, O + '/' + t)
 tot = sum(os.path.getsize(t) for t in tags); seen = 0
 def tag(m):
     global seen
@@ -52,7 +55,7 @@ shutil.copytree('kaynak/gh/static', O, dirs_exist_ok=True)
 # Service worker: içerik özetiyle sürümlenir, ilk ziyarette çekirdek dosyaları önbelleğe alır, eski sürümü siler
 import hashlib
 _fontlar = ['vendor/' + u for u in re.findall(r'url\(([^)]+\.woff2)\)', open(O + '/vendor/fonts.css', encoding='utf-8').read())]
-_pre = ['./', 'index.html', 'config.js', 'pyworker.js', 'vendor/fonts.css', 'data/manifest.json'] + _fontlar + tags
+_pre = ['./', 'index.html', 'config.js', 'pyworker.js', 'vendor/fonts.css', 'data/manifest.json'] + _fontlar + tags + TEMBEL
 _h = hashlib.sha256()
 for f in sorted(set(x for x in _pre if x != './')):
     _h.update(open(O + '/' + f, 'rb').read())
