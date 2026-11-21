@@ -74,6 +74,32 @@ mkdir pyfull && tar -xjf pyodide.tar.bz2 -C pyfull --wildcards 'pyodide/*.whl' '
 cp -n pyfull/pyodide/*.whl pyfull/pyodide/*.zip node_modules/pyodide/
 ```
 
+### Gerçek Python ve Windows'la karşılaştırma (Kasım 2026)
+
+Site Pyodide'da (Python 3.12, pandas 2.2) çalışır; öğrenci kodunu kendi bilgisayarında güncel Python'la çalıştırır. İki ortamı karşılaştırmak için:
+
+```bash
+# Ders örneklerinin çıktıları: Pyodide ve CPython
+OUTJSON=/tmp/pyo.json node --max-old-space-size=4000 tools/pyodide_examples.mjs kaynak/c_*.js kaynak/v2/*/*.js
+python3 tools/cpy_outs.py /tmp/cpy.json kaynak/c_*.js kaynak/v2/*/*.js
+
+# Node olmayan makine (ör. Windows) için içeriği önceden dök, sonra orada çalıştır
+DUMPITEMS=items_verify.json python3 tools/verify.py kaynak/c_*.js kaynak/bank.js kaynak/exams.js kaynak/v2/*/*.js kaynak/v3/*/*.js
+ITEMS=items_verify.json python tools/verify.py -q
+
+# "Bilgisayarında dene" (t: 'local') görevlerini gerçekten çalıştır: dosyaları yazar, paketleri kurar, sunucuları başlatır
+python3 tools/local_run.py local_tasks.json sonuc.json --kur
+```
+
+`local_run.py` çok satırlı komutları `&&` ile birleştirir (Windows'ta cmd.exe yalnız ilk satırı çalıştırır), dış hesap ya da grafik arayüz isteyen görevleri `ATLA` listesinde atlar.
+
+Windows'ta görülen farklar ve kurallar:
+- Metin modunda `\n` diske `\r\n` yazılır. Bayt sayısı ya da özet ölçen testlerde dosyayı `write_bytes` veya `"wb"` ile yaz.
+- Windows yolları ters eğik çizgilidir ve `Path` sıralaması büyük/küçük harfe duyarsızdır. Çıktıda yol gösterirken `as_posix()`, sıralarken `key=lambda p: p.name` kullan.
+- `open()` kodlama verilmezse Türkçe Windows'ta cp1254 kullanır; her zaman `encoding="utf-8"` yaz.
+- PowerShell 5.1: `&&` yok, `where` ve `curl` takma addır (`where.exe`, `curl.exe` kullan), `echo ... > dosya` UTF-16 yazar, çıkış kodu `$LASTEXITCODE`'dur.
+- Python 3.14'te sınıfın tip açıklamaları `cls.__dict__` içinde durmaz; `inspect.get_annotations(cls)` kullan.
+
 Dosya başına toplu çalıştırma betikleri: `uretec/vf/chain.sh cp|pyo <dosyalar>` (verify veya pyodide_verify, her dosya ayrı süreç, log klasörüne yazar) ve `uretec/vf/exchain.sh <dosyalar>` (pyodide_examples). Bu iki betik eski ortamın mutlak yollarını kullanır; çalıştırmadan önce içindeki `V=` ve `cd` yollarını düzeltin.
 
 ## Terim parantezi ve süre
