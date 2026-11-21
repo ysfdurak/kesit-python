@@ -112,7 +112,7 @@ print(dosya.exists(), dosya.name, dosya.suffix, dosya.parent)
 print(dosya.read_text(encoding="utf-8"))
 
 for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
-    print("bulundu:", p)</pre>
+    print("bulundu:", p.as_posix())   # as_posix: Windows'ta da / ile yazar</pre>
 
 <section class="more"><span class="eyebrow">Derinleş</span><h2>Derinleş: dosyalarla günlük iş</h2>
 <p>Temeli kurdun: <code>open</code>, <code>with</code>, modlar, satır satır okuma, <code>pathlib</code>. Bu bölümde iş hayatında her hafta karşına çıkacak işleri ele alıyoruz: "dosya bulunamadı" hatasının asıl nedeni, yolu parçalarına ayırmak, aynı anda iki dosyayla çalışmak, şubelerden gelen dosyaları birleştirmek ve Excel'den gelen bozuk görünen CSV'ler. İkili (binary) mod, <code>seek</code>, arşivler ve atomik yazmanın ayrıntısı orta seviyedeki <b>İleri dosya işlemleri</b> dersinde; <code>csv</code> ve <code>json</code> modülleri de <b>JSON ve CSV</b> dersinde.</p>
@@ -157,7 +157,7 @@ p.write_text("id,tutar\n1,250\n2,400\n", encoding="utf-8")
 print(p.name, "|", p.stem, "|", p.suffix)
 print("Klasör:", p.parent.as_posix())
 print("JSON çıktısı:", p.with_suffix(".json").as_posix())
-print("Boyut:", p.stat().st_size, "bayt")
+print("Boyut:", p.stat().st_size, "bayt")   # Windows'ta satır sonu \r\n olduğu için 3 bayt fazla
 
 for dosya in sorted(Path("veri").rglob("*.csv")):
     print("CSV bulundu:", dosya.as_posix())

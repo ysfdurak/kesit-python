@@ -63,7 +63,7 @@ with ThreadPoolExecutor(max_workers=4) as havuz:
 coklu = time.perf_counter() - t0
 print(f"sıralı {tek:.2f} s, 4 thread {coklu:.2f} s -&gt; GIL yüzünden kazanç yok")
 </pre>
-<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14'te resmî destek kazanan "free-threaded" yapı GIL'siz çalışabiliyor ama varsayılan değil ve henüz varsayılan değil.</div>
+<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14'te resmî destek kazanan "free-threaded" yapı GIL'siz çalışabiliyor ama henüz varsayılan değil.</div>
 
 <h2>Yarış durumu ve Lock</h2>
 <p>İki thread aynı sayacı artırırsa ne olur? <code>sayac += 1</code> aslında oku-artır-yaz üç adımdır; GIL adımların arasında thread değiştirebilir ve bir artış kaybolur. Buna <b>yarış durumu</b> (race condition) denir. Çözüm: paylaşılan veriye erişimi <code>threading.Lock</code> ile tek seferde bir thread'e vermek.</p>
