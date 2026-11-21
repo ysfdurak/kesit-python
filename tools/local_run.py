@@ -127,7 +127,11 @@ def gorev(t, kok):
             if not os.environ.get('MYSQL_URL'): return {'durum': 'atlandi', 'neden': 'MYSQL_URL yok'}
             env['VERITABANI_URL'] = os.environ['MYSQL_URL']
         if not cmd.strip(): return {'durum': 'atlandi', 'neden': 'komut yok'}
+        cmd = ' && '.join(l for l in cmd.splitlines() if l.strip())   # çok satırlı komut: cmd.exe yalnız ilk satırı çalıştırır
         if t['id'] == 'proje-etl': cmd = cmd + ' && ' + cmd   # görev: komutu iki kez çalıştır
+        if t['id'] == 'git-proje-yapisi':   # görev bu iki dosyayı editörle oluşturmayı söylüyor
+            open(os.path.join(td, 'app.py'), 'w', encoding='utf-8', newline='\n').write("print('merhaba')\n")
+            open(os.path.join(td, '.gitignore'), 'w', encoding='utf-8', newline='\n').write('.venv/\n')
         cmd = py_cmd(cmd)
         if WIN: cmd = cmd.replace('curl ', 'curl.exe ')
         rc, out, err, sure = sh(cmd, td, 900, env)
