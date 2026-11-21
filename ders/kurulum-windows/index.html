@@ -34,7 +34,7 @@
 <pre class="code">python --version
 py --version
 python -m pip --version
-where python</pre>
+where.exe python</pre>
 <p>Python'a kendisini anlattırmak da mümkün. Aşağıdaki kod, hangi yorumlayıcının çalıştığını ve nereye kurulduğunu gösterir; "yanlış Python çalışıyor" şüphesinde ilk bakılacak yer burasıdır.</p>
 <pre class="py">import sys, platform
 
@@ -68,7 +68,7 @@ print("3.10+ mı   :", sys.version_info &gt;= (3, 10))</pre>
 
 <h2>PATH nedir, Windows bir komutu nasıl bulur?</h2>
 <p><b>PATH</b>, klasör yollarını <b>noktalı virgülle</b> (Windows) ayırarak tutan bir <b>ortam değişkenidir (environment variable)</b>. Terminale <code>python</code> yazdığında Windows önce bulunduğun klasöre, sonra PATH'teki klasörlere <b>soldan sağa</b> bakar ve <code>python.exe</code> (ya da .bat, .cmd) bulduğu <b>ilk</b> klasördekini çalıştırır. Gerisine bakmaz. İki Python kuruluysa hangisinin çalışacağını PATH sırası belirler.</p>
-<pre class="code">where python                       # CMD ve PowerShell: tüm eşleşmeleri sırayla gösterir
+<pre class="code">where.exe python                       # CMD ve PowerShell: tüm eşleşmeleri sırayla gösterir (PowerShell'de .exe şart: yalın where, Where-Object kısaltmasıdır)
 $env:Path -split ';'               # PowerShell: PATH'i satır satır göster
 echo %PATH%                        # CMD: PATH'i tek satırda göster
 Get-Command python | Format-List   # PowerShell: çalışacak olanın tam yolu</pre>
@@ -115,7 +115,7 @@ for komut in ["python", "pip", "git"]:
 <tr><td>PATH'i görmek</td><td><code>$env:Path -split ';'</code></td><td><code>echo %PATH%</code></td></tr>
 <tr><td>Geçici değişken</td><td><code>$env:PYTHONUTF8 = "1"</code></td><td><code>set PYTHONUTF8=1</code></td></tr>
 <tr><td>venv etkinleştirme</td><td><code>.venv\Scripts\Activate.ps1</code></td><td><code>.venv\Scripts\activate.bat</code></td></tr>
-<tr><td>Komutun yeri</td><td><code>Get-Command python</code></td><td><code>where python</code></td></tr>
+<tr><td>Komutun yeri</td><td><code>Get-Command python</code></td><td><code>where.exe python</code></td></tr>
 <tr><td>Ekranı temizle</td><td><code>cls</code> / <code>Clear-Host</code></td><td><code>cls</code></td></tr>
 </table></div>
 <p>Windows Terminal ve VS Code varsayılan olarak <b>PowerShell</b> açar. Sanal ortamı (ayrıntısı <b>Sanal ortam ve paket yönetimi</b> dersinde) oluşturup etkinleştirdiğinde ilk karşılaşacağın engel şudur:</p>
@@ -158,14 +158,14 @@ winget uninstall Python.Python.3.11</pre>
 <tr><td><code>SSL: CERTIFICATE_VERIFY_FAILED</code> (pip install)</td><td>Kurumsal ağ trafiği kendi sertifikasıyla inceliyor</td><td>BT'den kurum sertifikasını iste: <code>pip config set global.cert C:\certs\kurum.pem</code>; <code>--trusted-host</code> yalnız geçici çözüm</td></tr>
 <tr><td><code>PermissionError</code> / "Access is denied"</td><td>Program Files'a yöneticisiz paket kurmaya çalışmak ya da dosya başka programda açık</td><td>venv kullan; VS Code ve açık terminalleri kapatıp tekrar dene</td></tr>
 <tr><td>Kullanıcı adı "Şükrü" ya da "Ayşe Yılmaz": bazı araçlar yol hatası veriyor</td><td>Türkçe karakter ve boşluk eski araçlarda kodlama/tırnak sorunu yaratır</td><td>Python'ı <code>C:\Python312</code>'ye, projeleri <code>C:\dev</code>'e koy; yolları tırnakla yaz</td></tr>
-<tr><td>Yanlış sürüm çalışıyor (3.9 bekliyorsun 3.12 geliyor)</td><td>PATH sırası; <code>where python</code>'da ilk satır başka kurulum</td><td>PATH'te sırayı değiştir ya da <code>py -3.12</code> / venv kullan</td></tr>
+<tr><td>Yanlış sürüm çalışıyor (3.9 bekliyorsun 3.12 geliyor)</td><td>PATH sırası; <code>where.exe python</code>'da ilk satır başka kurulum</td><td>PATH'te sırayı değiştir ya da <code>py -3.12</code> / venv kullan</td></tr>
 <tr><td><code>UnicodeEncodeError</code>: Türkçe karakter yazdırırken</td><td>Eski konsol kod sayfası (cp857/cp1254)</td><td>Windows Terminal kullan; <code>PYTHONUTF8=1</code> ortam değişkenini ayarla</td></tr>
 <tr><td>Kurdum ama komut hâlâ yok</td><td>Terminal PATH değişmeden önce açılmıştı</td><td>Yeni terminal aç; VS Code'u tamamen kapatıp aç</td></tr>
 <tr><td>pip: "No such file or directory" çok uzun yolda</td><td>260 karakter yol sınırı</td><td>Yükleyicideki "Disable path length limit" ya da projeyi kısa yola taşı</td></tr>
 </table></div>
 <div class="warn"><b>Hata mesajının ilk satırı değil son satırı</b>pip ve Python hatalarında asıl neden genellikle en alttaki satırdadır. Uzun bir kırmızı metin gördüğünde aşağıdan yukarı oku ve son satırı aynen arat.</div>
 
-<div class="note"><b>Gerçek işte</b>Kurumsal bilgisayarlarda çoğu zaman yönetici iznin olmaz, internet bir vekil sunucu (proxy) üzerinden geçer ve trafik kurum sertifikasıyla incelenir. Bu yüzden ekipler kurulum adımlarını README'ye yazar: "python.org 3.14, kurulum adımları, ardından <code>py -3.14 -m venv .venv</code>". Yeni gelen kişi bu listeyi izler, sorun çıkarsa <code>where python</code>, <code>py --list</code> ve <code>python -m pip config list</code> çıktılarını destek kanalına yapıştırır. Bu üç çıktı, sorunların büyük kısmını uzaktan teşhis etmeye yeter.</div>
+<div class="note"><b>Gerçek işte</b>Kurumsal bilgisayarlarda çoğu zaman yönetici iznin olmaz, internet bir vekil sunucu (proxy) üzerinden geçer ve trafik kurum sertifikasıyla incelenir. Bu yüzden ekipler kurulum adımlarını README'ye yazar: "python.org 3.14, kurulum adımları, ardından <code>py -3.14 -m venv .venv</code>". Yeni gelen kişi bu listeyi izler, sorun çıkarsa <code>where.exe python</code>, <code>py --list</code> ve <code>python -m pip config list</code> çıktılarını destek kanalına yapıştırır. Bu üç çıktı, sorunların büyük kısmını uzaktan teşhis etmeye yeter.</div>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Sessiz kurulum ve otomasyon</h3>

@@ -42,7 +42,7 @@ KURAL = {".pdf": "Belgeler", ".docx": "Belgeler", ".txt": "Belgeler",
 
 def plan_yap(kok):
     plan = []
-    for dosya in sorted(p for p in kok.iterdir() if p.is_file()):
+    for dosya in sorted((p for p in kok.iterdir() if p.is_file()), key=lambda p: p.name):
         kategori = KURAL.get(dosya.suffix.lower(), "Diğer")
         plan.append((dosya, kok / kategori / dosya.name))
     return plan
@@ -61,7 +61,7 @@ for ad in ["Fatura_Ekim.PDF", "satislar.csv", "fis01.jpg", "README"]:
 
 uygula(plan_yap(kok))              # önce yalnızca göster
 uygula(plan_yap(kok), dry_run=False)
-print(sorted(str(p.relative_to(kok)) for p in kok.rglob("*") if p.is_file()))</pre>
+print(sorted(p.relative_to(kok).as_posix() for p in kok.rglob("*") if p.is_file()))</pre>
 <div class="tip"><b>Plan-uygula ayrımı</b>Planı bir liste olarak döndürmek; onu test etmeyi, ekrana basmayı, kullanıcıdan onay almayı ve log'a yazmayı kolaylaştırır. Dosyaya dokunan kod ne kadar küçük olursa hata ihtimali o kadar düşer.</div>
 <p><code>mkdir(parents=True, exist_ok=True)</code> ara klasörleri de oluşturur ve klasör zaten varsa hata vermez. <code>shutil.move</code> farklı disk bölümleri arasında da çalışır; <code>Path.rename</code> ise aynı bölüm içinde daha hızlıdır ama Windows'ta hedef varsa hata verir.</p>
 

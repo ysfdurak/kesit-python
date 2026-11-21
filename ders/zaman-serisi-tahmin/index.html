@@ -30,7 +30,7 @@ saatlik = saatlik.reindex(pd.date_range("2024-06-01", "2024-08-31 23:00", freq="
 gunluk = saatlik.resample("D").sum()
 print(len(saatlik), "saat,", len(gunluk), "gün; toplam", saatlik.sum())
 print("Saat profili:", saatlik.groupby(saatlik.index.hour).mean().round(0).astype(int).tolist())
-print("Gün profili:", gunluk.groupby(gunluk.index.dayofweek).mean().round(0).astype(int).tolist())
+print("Gün profili:", gunluk.groupby(gunluk.index.day_of_week).mean().round(0).astype(int).tolist())
 </pre>
 <p>İki mevsimsellik var: <b>günlük</b> (sabah 8 ve akşam 18 tepeleri, gece neredeyse sıfır) ve <b>haftalık</b> (hafta sonu daha düşük). Saatlik seride haftalık döngü 168 adımdır.</p>
 
@@ -116,7 +116,7 @@ from sklearn.model_selection import TimeSeriesSplit
 
 d = saatlik.to_frame().join(hava[["rain_mm", "temp_c"]])
 d["lag24"], d["lag168"] = d["talep"].shift(24), d["talep"].shift(168)
-d["hs"] = (d.index.dayofweek &gt;= 5).astype(int)
+d["hs"] = (d.index.day_of_week &gt;= 5).astype(int)
 d = d.dropna()
 X = pd.get_dummies(d.index.hour, prefix="s").astype(float).set_index(d.index)
 X = X.join(d[["hs", "lag24", "lag168", "rain_mm", "temp_c"]])
