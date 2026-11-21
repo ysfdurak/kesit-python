@@ -14,7 +14,7 @@ KURYE = d('''
         o = o[o["status"] == "teslim"].copy()
         zaman = pd.to_datetime(o["placed_at"])
         o["saat"] = zaman.dt.hour
-        o["hafta_sonu"] = (zaman.dt.dayofweek >= 5).astype(int)
+        o["hafta_sonu"] = (zaman.dt.day_of_week >= 5).astype(int)
         o["sure_dk"] = (pd.to_datetime(o["delivered_at"]) - zaman).dt.total_seconds() / 60
         adet = s.groupby("order_id")["qty"].sum().rename("adet").reset_index()
         d = (o.merge(r[["restaurant_id", "cuisine", "city"]], on="restaurant_id")

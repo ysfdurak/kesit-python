@@ -32,7 +32,7 @@ with tempfile.TemporaryDirectory() as d:
     print("yazılan karakter:", yazilan)
     with open(yol, "rb") as f:
         ham = f.read()
-    print(type(ham).__name__, len(ham), "bayt")
+    print(type(ham).__name__, len(ham), "bayt")   # Windows'ta 16: metin modu \\n'yi \\r\\n yazar (newline="\\n" verirsen 14)
     print(ham)
     print(ham.decode("utf-8").splitlines())</pre>
 <p>12 karakter yazdın ama dosya 14 bayt: UTF-8'de <code>İ</code> ve <code>Ç</code> ikişer bayt tutar. Metin modunda <code>write</code> yazılan <b>karakter</b> sayısını, ikili modda <b>bayt</b> sayısını döndürür.</p>
@@ -195,7 +195,8 @@ with tempfile.TemporaryDirectory() as d:
     hedef = os.path.join(d, "rapor.json")
     atomik_json_yaz(hedef, {"sehir": "Ankara", "ciro": 1250})
     atomik_json_yaz(hedef, {"sehir": "İzmir", "ciro": 975})
-    print(open(hedef, encoding="utf-8").read(), os.listdir(d))</pre>
+    with open(hedef, encoding="utf-8") as f:
+        print(f.read(), os.listdir(d))</pre>
 <p>Geçici dosyanın hedefle <b>aynı klasörde</b> olması şarttır; <code>/tmp</code> başka bir disk bölümündeyse <code>os.replace</code> atomik olamaz ya da hata verir.</p>
 <p>İki süreç aynı dosyaya aynı anda yazıyorsa <b>kilit</b> (lock) gerekir. En taşınabilir basit yöntem bir kilit dosyasıdır: <code>open("is.lock", "x")</code> dosya zaten varsa <code>FileExistsError</code> verir, yani kilidi yalnızca bir süreç alabilir; iş bitince <code>os.remove</code> ile bırakırsın. İşletim sistemi düzeyinde kilit için Linux/macOS'ta <code>fcntl.flock</code>, Windows'ta <code>msvcrt.locking</code>, ikisini birden saran üçüncü parti <code>filelock</code> paketi vardır.</p>
 <div class="tip"><b>Kilit dosyası çökmeye dayanıklı olmalı</b>Program kilidi aldıktan sonra çökerse kilit dosyası kalır ve sonraki çalışma sonsuza dek bekler. Kilidi <code>try/finally</code> içinde bırak, kilit dosyasına süreç numarası (PID) ve zaman yaz ki eski kilitleri tanıyabilesin.</div>
@@ -410,7 +411,7 @@ with tempfile.TemporaryDirectory() as d:
       q: '<p>Lojistik ekibi sevkiyat belgelerini <code>.tar.gz</code> olarak yolluyor. <code>tar_icerik(tar_yolu)</code> fonksiyonunu yaz: arşivi <b>açmadan</b> (diske çıkarmadan) içindeki <b>yalnız dosyaların</b> <code>(ad, boyut)</code> demetlerini ada göre sıralı liste olarak döndürsün. Klasör girdileri listeye girmez.</p>',
       start: 'import tarfile\n\ndef tar_icerik(tar_yolu):\n    pass\n',
       sol: 'import tarfile\n\ndef tar_icerik(tar_yolu):\n    with tarfile.open(tar_yolu, "r:*") as t:\n        return sorted((m.name, m.size) for m in t.getmembers() if m.isfile())\n',
-      tests: 'import tempfile, tarfile as _tf\nfrom pathlib import Path as _P\n_t = _P(tempfile.mkdtemp())\n_k = _t / "sevk"\n(_k / "irsaliye").mkdir(parents=True)\n(_k / "irsaliye" / "IRS-1.txt").write_text("A" * 120, encoding="utf-8")\n(_k / "liste.csv").write_text("kod\\n1\\n", encoding="utf-8")\n_y = _t / "sevk.tar.gz"\nwith _tf.open(_y, "w:gz") as t:\n    t.add(_k, arcname="sevk")\n_s = tar_icerik(_y)\nassert _s == [("sevk/irsaliye/IRS-1.txt", 120), ("sevk/liste.csv", 6)], f"yalnız dosyalar, (ad, boyut) ve sıralı olmalı: {_s}"\n',
+      tests: 'import tempfile, tarfile as _tf\nfrom pathlib import Path as _P\n_t = _P(tempfile.mkdtemp())\n_k = _t / "sevk"\n(_k / "irsaliye").mkdir(parents=True)\n(_k / "irsaliye" / "IRS-1.txt").write_text("A" * 120, encoding="utf-8")\n(_k / "liste.csv").write_bytes(b"kod\\n1\\n")\n_y = _t / "sevk.tar.gz"\nwith _tf.open(_y, "w:gz") as t:\n    t.add(_k, arcname="sevk")\n_s = tar_icerik(_y)\nassert _s == [("sevk/irsaliye/IRS-1.txt", 120), ("sevk/liste.csv", 6)], f"yalnız dosyalar, (ad, boyut) ve sıralı olmalı: {_s}"\n',
       hints: ['tarfile.open(yol) sıkıştırmayı kendisi tanır ("r:*").', 't.getmembers() TarInfo listesi verir; m.isfile(), m.name, m.size alanlarını kullan.', 'return sorted((m.name, m.size) for m in t.getmembers() if m.isfile())'],
       why: 'getmembers arşivin başlık bilgilerini okur, içeriği diske çıkarmaz. Bu hem hızlıdır hem de güvenilmeyen arşivleri açmadan incelemenin güvenli yoludur.'
     },

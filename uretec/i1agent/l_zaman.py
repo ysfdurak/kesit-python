@@ -35,7 +35,7 @@ print(ciro.index.min().date(), "→", ciro.index.max().date(), len(ciro), "gün"
 <div class="tbl-wrap"><table>
 <tr><th>İfade</th><th>Sonuç (2024-03-04 Pazartesi)</th><th>Kullanım</th></tr>
 <tr><td><code>.dt.year</code>, <code>.dt.month</code>, <code>.dt.day</code></td><td>2024, 3, 4</td><td>Yıl/ay kırılımı</td></tr>
-<tr><td><code>.dt.dayofweek</code></td><td>0 (Pazartesi=0, Pazar=6)</td><td>Hafta içi/sonu analizi</td></tr>
+<tr><td><code>.dt.day_of_week</code></td><td>0 (Pazartesi=0, Pazar=6)</td><td>Hafta içi/sonu analizi</td></tr>
 <tr><td><code>.dt.quarter</code></td><td>1</td><td>Çeyrek raporu</td></tr>
 <tr><td><code>.dt.hour</code></td><td>0</td><td>Saatlik yoğunluk</td></tr>
 <tr><td><code>.dt.to_period("M")</code></td><td>2024-03</td><td>Ay anahtarı (raporda gruplama)</td></tr>
@@ -48,13 +48,13 @@ islem = pd.DataFrame({
     "zaman": pd.to_datetime(["2024-03-04 09:15", "2024-03-09 23:40", "2024-03-10 14:05", "2024-03-29 18:30"]),
     "tutar": [1500, 250, 980, 4300],
 })
-islem["gun"] = islem["zaman"].dt.dayofweek
+islem["gun"] = islem["zaman"].dt.day_of_week
 islem["hafta_sonu"] = islem["gun"] >= 5
 islem["saat"] = islem["zaman"].dt.hour
 islem["ay"] = islem["zaman"].dt.to_period("M").astype(str)
 print(islem)
 print(islem.groupby("hafta_sonu")["tutar"].sum())</pre>
-<div class="tip"><b>Gün adı için sözlük kullan</b><code>dt.day_name()</code> İngilizce ad döndürür ve Türkçe yerel ayarı her ortamda bulunmaz. Raporda Türkçe ad istiyorsan <code>dayofweek</code> ile bir listeden eşle: <code>["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]</code>.</div>
+<div class="tip"><b>Gün adı için sözlük kullan</b><code>dt.day_name()</code> İngilizce ad döndürür ve Türkçe yerel ayarı her ortamda bulunmaz. Raporda Türkçe ad istiyorsan <code>day_of_week</code> ile bir listeden eşle: <code>["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]</code>.</div>
 
 <h2>resample: zamanı kovalara bölmek</h2>
 <p><code>resample</code> bir DatetimeIndex'i düzenli aralıklara böler, her aralığa bir özet uygular: günlük işlemlerden haftalık ciro, aylık ortalama, çeyreklik toplam. groupby'ın zamana özel hâlidir; fark, veride hiç kaydı olmayan aralıkları da üretmesidir (boş ay 0 ya da NaN olarak görünür).</p>
@@ -165,7 +165,7 @@ hafta_deseni = np.array([90, 80, 85, 95, 110, 140, 130])          # Pzt..Paz
 trend = np.linspace(0, 20, len(gun))
 satis = pd.Series(np.tile(hafta_deseni, 8) + trend + rng.normal(0, 3, len(gun)), index=gun)
 
-endeks = (satis.groupby(satis.index.dayofweek).mean() / satis.mean()).round(2)
+endeks = (satis.groupby(satis.index.day_of_week).mean() / satis.mean()).round(2)
 print("gün endeksi:", endeks.tolist())
 
 ayrisim = seasonal_decompose(satis, model="additive", period=7)
@@ -218,9 +218,9 @@ LESSON = dict(
              o=['[300, 50]', '[300, 0, 50]', '[100, 200, 50]', '[300, nan, 50]'], a=1,
              why='resample, veride kaydı olmayan Şubat\'ı da kova olarak üretir; boş kovanın toplamı 0\'dır (sum için). groupby ile ay sütununa göre gruplasaydın Şubat hiç görünmezdi ve [300, 50] alırdın.'),
         dict(t='predict', id='pandas-zaman-serisi-6', stage='Kodu oku', q='2024-03-04 bir Pazartesi. Bu kod ne yazdırır?',
-             code='import pandas as pd\na = pd.Timestamp("2024-03-04")\nb = pd.Timestamp("2024-03-10")\nprint(a.dayofweek, b.dayofweek, (b - a).days)\n',
+             code='import pandas as pd\na = pd.Timestamp("2024-03-04")\nb = pd.Timestamp("2024-03-10")\nprint(a.day_of_week, b.day_of_week, (b - a).days)\n',
              o=['1 7 6', '0 6 6', '0 6 7', '1 0 6'], a=1,
-             why='dayofweek Pazartesi için 0, Pazar için 6\'dır. İki tarih arasındaki fark 6 gündür (10 - 4). 1\'den başlayan numaralama isoweekday() ile gelir.'),
+             why='day_of_week Pazartesi için 0, Pazar için 6\'dır. İki tarih arasındaki fark 6 gündür (10 - 4). 1\'den başlayan numaralama isoweekday() ile gelir.'),
         dict(t='order', id='pandas-zaman-serisi-7', stage='Kodu oku',
              q='<p>Eksik günleri 0 ile doldurup tam takvimli günlük satış listesini yazdıran programın satırlarını sırala.</p>',
              lines=['import pandas as pd', 's = pd.Series([5, 7], index=pd.to_datetime(["2024-05-01", "2024-05-03"]))', 'gunler = pd.date_range(s.index.min(), "2024-05-04", freq="D")', 'dolu = s.reindex(gunler, fill_value=0)', 'print(dolu.tolist())'],
@@ -229,12 +229,12 @@ LESSON = dict(
              why='date_range tam takvimi üretir; reindex seriyi bu takvime hizalar ve kaydı olmayan günlere fill_value yazar.'),
         dict(t='code', id='pandas-zaman-serisi-8', stage='Rehberli', diff=1,
              q='<p><code>tarihleri_hazirla(df)</code> fonksiyonunu yaz. <code>df</code>\'te <code>"05.03.2024"</code> biçiminde metin <code>tarih</code> ve sayısal <code>tutar</code> sütunları var; bazı tarihler bozuk. Fonksiyon:</p><ul><li><code>tarih</code>\'i <code>format="%d.%m.%Y"</code> ve <code>errors="coerce"</code> ile çevirsin, tarihi bozuk satırları atsın,</li><li><code>yil</code>, <code>ay</code>, <code>gun</code> (haftanın günü, Pazartesi=0) sütunlarını eklesin,</li><li>tarihe göre sıralayıp index\'i sıfırlanmış yeni DataFrame döndürsün.</li></ul>',
-             guide=['df.copy() ile başla; pd.to_datetime(..., format="%d.%m.%Y", errors="coerce") ile tarih sütununu çevir.', 'dropna(subset=["tarih"]) ile NaT satırlarını at.', '.dt.year, .dt.month, .dt.dayofweek ile üç sütunu ekle.', 'sort_values("tarih").reset_index(drop=True) ile döndür.'],
+             guide=['df.copy() ile başla; pd.to_datetime(..., format="%d.%m.%Y", errors="coerce") ile tarih sütununu çevir.', 'dropna(subset=["tarih"]) ile NaT satırlarını at.', '.dt.year, .dt.month, .dt.day_of_week ile üç sütunu ekle.', 'sort_values("tarih").reset_index(drop=True) ile döndür.'],
              example='import pandas as pd\nd = pd.DataFrame({"gun": ["2024/01/15", "hatalı", "2024/02/01"]})\nd["gun"] = pd.to_datetime(d["gun"], format="%Y/%m/%d", errors="coerce")\nd = d.dropna(subset=["gun"])\nd["ceyrek"] = d["gun"].dt.quarter\nprint(d)\n',
              start='import pandas as pd\n\ndef tarihleri_hazirla(df):\n    y = df.copy()\n    # TODO 1: y["tarih"] = pd.to_datetime(..., format="%d.%m.%Y", errors="coerce")\n    # TODO 2: tarihi NaT olan satırları at\n    # TODO 3: yil, ay, gun sütunlarını .dt ile ekle\n    # TODO 4: tarihe göre sırala, index\'i sıfırla\n    return y\n',
-             sol='import pandas as pd\n\ndef tarihleri_hazirla(df):\n    y = df.copy()\n    y["tarih"] = pd.to_datetime(y["tarih"], format="%d.%m.%Y", errors="coerce")\n    y = y.dropna(subset=["tarih"])\n    y["yil"] = y["tarih"].dt.year\n    y["ay"] = y["tarih"].dt.month\n    y["gun"] = y["tarih"].dt.dayofweek\n    return y.sort_values("tarih").reset_index(drop=True)\n',
-             tests='import pandas as pd\nd = pd.DataFrame({"tarih": ["17.03.2024", "05.03.2024", "31.02.2024", "2024-03-09", "01.01.2025"], "tutar": [10, 20, 30, 40, 50]})\nr = tarihleri_hazirla(d)\nassert len(r) == 3, "31.02.2024 (olmayan gün) ve 2024-03-09 (yanlış biçim) atılmalı; 3 satır kalmalı"\nassert pd.api.types.is_datetime64_any_dtype(r["tarih"]), "tarih datetime türünde olmalı"\nassert r["tutar"].tolist() == [20, 10, 50], "Tarihe göre sıralı olmalı: 5 Mart, 17 Mart, 1 Ocak 2025"\nassert r["yil"].tolist() == [2024, 2024, 2025] and r["ay"].tolist() == [3, 3, 1], "yil/ay yanlış"\nassert r["gun"].tolist() == [1, 6, 2], "gun = dayofweek: 5 Mart 2024 Salı (1), 17 Mart Pazar (6), 1 Ocak 2025 Çarşamba (2)"\nassert r.index.tolist() == [0, 1, 2], "index sıfırlanmalı"\n',
-             hints=['Dönüşüm için pd.to_datetime, bozuklar için errors="coerce".', 'Parçalar: y["tarih"].dt.year / .dt.month / .dt.dayofweek', 'Son satır: return y.sort_values("tarih").reset_index(drop=True)'],
+             sol='import pandas as pd\n\ndef tarihleri_hazirla(df):\n    y = df.copy()\n    y["tarih"] = pd.to_datetime(y["tarih"], format="%d.%m.%Y", errors="coerce")\n    y = y.dropna(subset=["tarih"])\n    y["yil"] = y["tarih"].dt.year\n    y["ay"] = y["tarih"].dt.month\n    y["gun"] = y["tarih"].dt.day_of_week\n    return y.sort_values("tarih").reset_index(drop=True)\n',
+             tests='import pandas as pd\nd = pd.DataFrame({"tarih": ["17.03.2024", "05.03.2024", "31.02.2024", "2024-03-09", "01.01.2025"], "tutar": [10, 20, 30, 40, 50]})\nr = tarihleri_hazirla(d)\nassert len(r) == 3, "31.02.2024 (olmayan gün) ve 2024-03-09 (yanlış biçim) atılmalı; 3 satır kalmalı"\nassert pd.api.types.is_datetime64_any_dtype(r["tarih"]), "tarih datetime türünde olmalı"\nassert r["tutar"].tolist() == [20, 10, 50], "Tarihe göre sıralı olmalı: 5 Mart, 17 Mart, 1 Ocak 2025"\nassert r["yil"].tolist() == [2024, 2024, 2025] and r["ay"].tolist() == [3, 3, 1], "yil/ay yanlış"\nassert r["gun"].tolist() == [1, 6, 2], "gun = day_of_week: 5 Mart 2024 Salı (1), 17 Mart Pazar (6), 1 Ocak 2025 Çarşamba (2)"\nassert r.index.tolist() == [0, 1, 2], "index sıfırlanmalı"\n',
+             hints=['Dönüşüm için pd.to_datetime, bozuklar için errors="coerce".', 'Parçalar: y["tarih"].dt.year / .dt.month / .dt.day_of_week', 'Son satır: return y.sort_values("tarih").reset_index(drop=True)'],
              why='Biçimi açıkça vermek gün/ay karışıklığını önler; coerce bozuk değerleri NaT yapar, sen de onları bilinçli olarak atarsın. dt erişimcisi tarih parçalarını vektörel çıkarır.'),
         dict(t='code', id='pandas-zaman-serisi-9', stage='Rehberli', diff=1,
              q='<p><code>haftalik_ciro(df)</code> fonksiyonu <code>tarih</code> (datetime) ve <code>tutar</code> sütunlu sipariş tablosundan <b>haftalık</b> (Pazartesi–Pazar, etiket Pazar) toplam ciroyu bir <code>pd.Series</code> olarak döndürsün. Orijinal tabloyu değiştirme.</p>',
@@ -299,16 +299,16 @@ LESSON = dict(
         dict(t='code', id='pandas-zaman-serisi-17', stage='Meydan okuma', diff=3,
              q='<p><code>gun_endeksi(s)</code> fonksiyonu Anadolu Market\'in <b>işlem bazlı</b> satış serisini alsın: index zaman damgası (aynı gün birden çok kayıt olabilir, sırasız olabilir), değer tutar. Fonksiyon:</p><ol><li>Seriyi günlük toplama indirsin; kaydı olmayan günler 0 sayılsın (ilk ve son gün arası tam takvim).</li><li>Günlük seride en az 14 gün yoksa <code>ValueError</code> fırlatsın.</li><li>Haftanın her günü (0=Pazartesi … 6=Pazar) için <code>o günlerin ortalaması / tüm günlerin ortalaması</code> oranını 2 basamakla hesaplayıp <code>{0: ..., ..., 6: ...}</code> sözlüğü döndürsün (anahtarlar Python int).</li></ol>',
              start='import pandas as pd\n\ndef gun_endeksi(s):\n    pass\n',
-             sol='import pandas as pd\n\ndef gun_endeksi(s):\n    gunluk = s.sort_index().resample("D").sum()\n    if len(gunluk) < 14:\n        raise ValueError("En az iki haftalık veri gerekir")\n    oran = gunluk.groupby(gunluk.index.dayofweek).mean() / gunluk.mean()\n    return {int(k): round(float(v), 2) for k, v in oran.items()}\n',
+             sol='import pandas as pd\n\ndef gun_endeksi(s):\n    gunluk = s.sort_index().resample("D").sum()\n    if len(gunluk) < 14:\n        raise ValueError("En az iki haftalık veri gerekir")\n    oran = gunluk.groupby(gunluk.index.day_of_week).mean() / gunluk.mean()\n    return {int(k): round(float(v), 2) for k, v in oran.items()}\n',
              tests='import pandas as pd\ndesen = [90, 80, 85, 95, 110, 140, 130]\ngun = pd.date_range("2024-01-01", periods=14, freq="D")\nzaman = []\ntutar = []\nfor i, g in enumerate(gun):\n    if i == 9:\n        continue  # 10 Ocak Çarşamba: kayıt yok → 0 sayılmalı\n    zaman += [g + pd.Timedelta(hours=10), g + pd.Timedelta(hours=18)]\n    tutar += [desen[i % 7] / 2, desen[i % 7] / 2]\ns = pd.Series(tutar, index=pd.DatetimeIndex(zaman))[::-1]\nr = gun_endeksi(s)\nassert set(r) == set(range(7)), "Anahtarlar 0..6 olmalı"\nassert all(type(k) is int for k in r), "Anahtarlar Python int olmalı"\nort = (sum(desen) * 2 - 85) / 14\nassert r[5] == round(140 / ort, 2), "Cumartesi endeksi yanlış: önce günlük topla, sonra gün ortalaması / genel ortalama"\nassert r[2] == round(85 / 2 / ort, 2), "Çarşamba: bir hafta 85, bir hafta 0 (kayıt yok) → ortalama 42.5; eksik günü 0 saymalısın"\ntry:\n    gun_endeksi(s[s.index < "2024-01-08"])\n    assert False, "14 günden az veride ValueError bekleniyordu"\nexcept ValueError:\n    pass\n',
-             hints=['İşlemleri günlüğe indirmek için sort_index().resample("D").sum(); kaydı olmayan gün 0 olur.', 'Haftanın günü: gunluk.index.dayofweek ile groupby, sonra mean() / gunluk.mean().', 'Sözlüğü {int(k): round(float(v), 2) ...} ile kur; uzunluk kontrolünü hesaplamadan önce yap.'],
+             hints=['İşlemleri günlüğe indirmek için sort_index().resample("D").sum(); kaydı olmayan gün 0 olur.', 'Haftanın günü: gunluk.index.day_of_week ile groupby, sonra mean() / gunluk.mean().', 'Sözlüğü {int(k): round(float(v), 2) ...} ile kur; uzunluk kontrolünü hesaplamadan önce yap.'],
              why='Günlük indirgeme yapılmazsa aynı gündeki iki işlem ayrı gözlem sayılır; eksik gün 0 sayılmazsa o günün ortalaması şişer. resample("D") iki sorunu birden çözer.'),
         dict(t='code', id='pandas-zaman-serisi-18', stage='Mini proje', diff=3,
              q='<p>Ilgaz Bank günlük işlem raporu. <code>gunluk_rapor(islem)</code> fonksiyonu <code>zaman</code> (datetime, İstanbul saati, dilimsiz) ve <code>tutar</code> sütunlu işlem tablosundan, index\'i ilk günden son güne <b>her günü</b> içeren bir DataFrame döndürsün. Sütunlar:</p><ul><li><code>adet</code>: o günkü işlem sayısı (işlem yoksa 0),</li><li><code>toplam</code>: o günkü tutar toplamı (yoksa 0),</li><li><code>ort7</code>: <code>toplam</code>\'ın son 7 takvim günü ortalaması, 2 basamak,</li><li><code>hafta_sonu</code>: Cumartesi/Pazar ise True.</li></ul>',
              start='import pandas as pd\n\ndef gunluk_rapor(islem):\n    pass\n',
-             sol='import pandas as pd\n\ndef gunluk_rapor(islem):\n    g = islem.set_index("zaman").sort_index()["tutar"].resample("D")\n    r = pd.DataFrame({"adet": g.count(), "toplam": g.sum()})\n    r["ort7"] = r["toplam"].rolling("7D").mean().round(2)\n    r["hafta_sonu"] = r.index.dayofweek >= 5\n    return r\n',
+             sol='import pandas as pd\n\ndef gunluk_rapor(islem):\n    g = islem.set_index("zaman").sort_index()["tutar"].resample("D")\n    r = pd.DataFrame({"adet": g.count(), "toplam": g.sum()})\n    r["ort7"] = r["toplam"].rolling("7D").mean().round(2)\n    r["hafta_sonu"] = r.index.day_of_week >= 5\n    return r\n',
              tests='import pandas as pd\nd = pd.DataFrame({\n    "zaman": pd.to_datetime(["2024-03-01 09:00", "2024-03-01 15:30", "2024-03-03 11:00", "2024-03-04 10:00", "2024-03-08 17:45", "2024-03-02 12:00"]),\n    "tutar": [100.0, 300.0, 50.0, 700.0, 140.0, 0.0],\n})\nr = gunluk_rapor(d)\nassert list(r.columns) == ["adet", "toplam", "ort7", "hafta_sonu"], "Sütunlar: adet, toplam, ort7, hafta_sonu"\nassert len(r) == 8, "1-8 Mart: 8 gün"\nassert r["adet"].tolist() == [2, 1, 1, 1, 0, 0, 0, 1], "adet: işlem yoksa 0; 2 Mart\'taki 0 TL\'lik işlem de sayılır"\nassert r["toplam"].tolist() == [400.0, 0.0, 50.0, 700.0, 0.0, 0.0, 0.0, 140.0], "günlük toplamlar yanlış"\nassert r["ort7"].tolist()[:2] == [400.0, 200.0], "ort7 ilk günler: 400, (400+0)/2"\nassert r["ort7"].iloc[-1] == 127.14, "8 Mart: 2-8 Mart (0+50+700+0+0+0+140)/7 = 127.14"\nassert r["hafta_sonu"].tolist() == [False, True, True, False, False, False, False, False], "2 ve 3 Mart 2024 hafta sonu"\n',
-             hints=['set_index("zaman")["tutar"].resample("D") nesnesinden hem count() hem sum() alabilirsin.', 'resample boş günleri kendiliğinden üretir: count 0, sum 0 verir.', 'ort7 için rolling("7D").mean().round(2); hafta sonu için index.dayofweek >= 5.'],
+             hints=['set_index("zaman")["tutar"].resample("D") nesnesinden hem count() hem sum() alabilirsin.', 'resample boş günleri kendiliğinden üretir: count 0, sum 0 verir.', 'ort7 için rolling("7D").mean().round(2); hafta sonu için index.day_of_week >= 5.'],
              why='Tek bir resample nesnesi birden çok özet üretir ve takvimi otomatik tamamlar. Zaman tabanlı pencere, boş günleri 0 olarak hesaba katan doğru 7 günlük ortalamayı verir.'),
     ],
     faq=[

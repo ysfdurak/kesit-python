@@ -6,7 +6,7 @@ print(t.head(3))
 g=t.set_index('started_at').resample('D').size(); print(len(g), g.sum(), g.idxmax(), g.max(), g.idxmin(), g.min(), g.head(3).tolist())
 h=t.started_at.dt.hour.value_counts(); print(h.idxmax(), h.max())
 dur=(t.ended_at-t.started_at).dt.total_seconds()/60; print(dur.median(), round(dur.mean(),2))
-wd=g.groupby(g.index.dayofweek).mean().round(1); print(wd.to_dict())
+wd=g.groupby(g.index.day_of_week).mean().round(1); print(wd.to_dict())
 hh=t.started_at.dt.hour; night=((hh>=22)|(hh<5)).sum(); bad=hh.between(22,5).sum(); print(night,bad)
 nd=dur[((hh>=22)|(hh<5))]; print(round(nd.median(),1), round(nd.mean(),2))
 w=veri.oku('pedal_izmir','bk_weather',parse_dates=['obs_hour']); print(w.head(), len(w), w.obs_hour.min(), w.obs_hour.max(), (w.rain_mm>0).sum())
@@ -16,7 +16,7 @@ print(m.groupby(pd.cut(m.temp_c,[0,25,30,35,50])).n.mean().round(1))
 r7=g.rolling('7D').mean(); print(round(r7.iloc[-1],1), round(r7.iloc[6],1))
 print('----')
 ts=t.set_index('started_at')
-we=ts.index.dayofweek>=5
+we=ts.index.day_of_week>=5
 for flag in (False,True):
     s=ts[we==flag]; print(flag, s.index.hour.value_counts().idxmax())
 mo=ts['fare'].resample('MS').sum(); print(mo.round(2).to_dict(), (mo.pct_change()*100).round(1).tolist())

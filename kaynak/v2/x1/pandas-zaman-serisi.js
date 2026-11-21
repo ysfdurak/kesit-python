@@ -24,9 +24,9 @@ print("en yoğun:", gunluk.idxmax().date(), int(gunluk.max()))
 print("7 günlük hareketli ortalama (son gün):", round(gunluk.rolling("7D").mean().iloc[-1], 1))
 
 GUNLER = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
-hafta = gunluk.groupby(gunluk.index.dayofweek).mean().round(0)
+hafta = gunluk.groupby(gunluk.index.day_of_week).mean().round(0)
 print(dict(zip(GUNLER, hafta.astype(int).tolist())))
-</pre><div class="tip"><b>Gün adlarını sen ver</b><code>dt.day_name()</code> İngilizce ad döndürür; <code>locale</code> parametresi işletim sistemine bağlıdır ve tarayıcıda çalışmayabilir. <code>dayofweek</code> (0 = Pazartesi) ile bir Türkçe ad listesi kullanmak her ortamda aynı sonucu verir.</div><h3>Saatlik profil ve iki seriyi zamanda eşlemek</h3><p>Hava durumu saatlik ölçülür (<code>obs_hour</code> tam saat). Yolculukları saatlik seriye çevirirsen iki tabloyu aynı zaman anahtarıyla birleştirebilirsin. Sayım serisinde yolculuk olmayan saat 0 olmalıdır; bunu <code>how="left"</code> ve <code>fillna(0)</code> sağlar.</p><pre class="py">import veri
+</pre><div class="tip"><b>Gün adlarını sen ver</b><code>dt.day_name()</code> İngilizce ad döndürür; <code>locale</code> parametresi işletim sistemine bağlıdır ve tarayıcıda çalışmayabilir. <code>day_of_week</code> (0 = Pazartesi) ile bir Türkçe ad listesi kullanmak her ortamda aynı sonucu verir.</div><h3>Saatlik profil ve iki seriyi zamanda eşlemek</h3><p>Hava durumu saatlik ölçülür (<code>obs_hour</code> tam saat). Yolculukları saatlik seriye çevirirsen iki tabloyu aynı zaman anahtarıyla birleştirebilirsin. Sayım serisinde yolculuk olmayan saat 0 olmalıdır; bunu <code>how="left"</code> ve <code>fillna(0)</code> sağlar.</p><pre class="py">import veri
 
 t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
 w = veri.oku("pedal_izmir", "bk_weather", parse_dates=["obs_hour"])
@@ -40,7 +40,7 @@ print("yağmurlu saatler:", sorted(m.index[m["rain_mm"] &gt; 0].hour.unique().to
 
 t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
 saatlik = t.set_index("started_at").resample("h").size().rename("n").to_frame()
-saatlik["gun"] = saatlik.index.dayofweek
+saatlik["gun"] = saatlik.index.day_of_week
 saatlik["saat"] = saatlik.index.hour
 matris = saatlik.pivot_table(index="gun", columns="saat", values="n", aggfunc="mean").round(0)
 print(matris.loc[:, [8, 12, 18, 23]])
@@ -71,7 +71,7 @@ print(matris.loc[:, [8, 12, 18, 23]])
         stage: 'Kodu oku',
         q: '<p>Haftanın her günü için ortalama günlük yolculuk sayısını Türkçe gün adlarıyla yazdıran programın satırlarını sırala.</p>',
         needs: ['pandas'],
-        lines: ['import veri', 'GUNLER = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]', 't = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])', 'gunluk = t.set_index("started_at").resample("D").size()', 'ort = gunluk.groupby(gunluk.index.dayofweek).mean()', 'print({GUNLER[i]: round(float(v)) for i, v in ort.items()})'],
+        lines: ['import veri', 'GUNLER = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]', 't = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])', 'gunluk = t.set_index("started_at").resample("D").size()', 'ort = gunluk.groupby(gunluk.index.day_of_week).mean()', 'print({GUNLER[i]: round(float(v)) for i, v in ort.items()})'],
         expect: '{\'Pzt\': 1305, \'Sal\': 1252, \'Çar\': 1300, \'Per\': 1336, \'Cum\': 1334, \'Cmt\': 1222, \'Paz\': 1120}\n',
         hint: 'Önce günlük seri, sonra gün numarasına göre ortalama.',
         why: 'Önce günlük seriye inmek şarttır: yolculukları doğrudan gün adına göre saymak, her gün adının kaç kez geçtiğini (12 ya da 14 hafta) hesaba katmaz.'
@@ -98,12 +98,12 @@ print(matris.loc[:, [8, 12, 18, 23]])
         diff: 2,
         needs: ['pandas'],
         q: '<p><code>zirve_saatler()</code>: yolculukların başlangıç saatine bakarak <b>hafta içi</b> ve <b>hafta sonu</b> için en yoğun saati bul; <code>{"hafta_ici": saat, "hafta_sonu": saat}</code> döndür (saatler <code>int</code>).</p>',
-        guide: ['started_at\'ı datetime oku.', 'Hafta sonu maskesi: dt.dayofweek >= 5.', 'Her parçada dt.hour.value_counts().idxmax().', 'int() ile Python tamsayısına çevir.'],
-        example: 'import pandas as pd\nz = pd.Series(pd.to_datetime(["2024-06-01 09:10", "2024-06-01 09:40", "2024-06-03 18:00"]))\nhs = z.dt.dayofweek >= 5\nprint(int(z[hs].dt.hour.value_counts().idxmax()))\n',
+        guide: ['started_at\'ı datetime oku.', 'Hafta sonu maskesi: dt.day_of_week >= 5.', 'Her parçada dt.hour.value_counts().idxmax().', 'int() ile Python tamsayısına çevir.'],
+        example: 'import pandas as pd\nz = pd.Series(pd.to_datetime(["2024-06-01 09:10", "2024-06-01 09:40", "2024-06-03 18:00"]))\nhs = z.dt.day_of_week >= 5\nprint(int(z[hs].dt.hour.value_counts().idxmax()))\n',
         start: 'import veri\n\ndef zirve_saatler():\n    t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])\n    z = t["started_at"]\n    # TODO: hafta sonu maskesi ve iki zirve saati\n    return {}\n',
-        sol: 'import veri\n\ndef zirve_saatler():\n    t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])\n    z = t["started_at"]\n    hs = z.dt.dayofweek >= 5\n    return {"hafta_ici": int(z[~hs].dt.hour.value_counts().idxmax()),\n            "hafta_sonu": int(z[hs].dt.hour.value_counts().idxmax())}\n',
+        sol: 'import veri\n\ndef zirve_saatler():\n    t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])\n    z = t["started_at"]\n    hs = z.dt.day_of_week >= 5\n    return {"hafta_ici": int(z[~hs].dt.hour.value_counts().idxmax()),\n            "hafta_sonu": int(z[hs].dt.hour.value_counts().idxmax())}\n',
         tests: 'r = zirve_saatler()\nassert r == {"hafta_ici": 18, "hafta_sonu": 17}, f"Zirve saatler farklı: {r}"\nassert all(type(v) is int for v in r.values()), "Saatler int olmalı"\n',
-        hints: ['dayofweek: 0 Pazartesi, 5 Cumartesi, 6 Pazar.', '~maske tersini alır.'],
+        hints: ['day_of_week: 0 Pazartesi, 5 Cumartesi, 6 Pazar.', '~maske tersini alır.'],
         why: 'Hafta içi zirve 18:00 (işten dönüş), hafta sonu bir saat önce. Kapasite planı iki profil için ayrı yapılır.'
       },
       {

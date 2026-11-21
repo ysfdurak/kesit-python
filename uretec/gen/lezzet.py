@@ -824,7 +824,7 @@ def saat_dilimi(saat):
 
 
 def yogunluk_tablosu(sip):
-    gun = sip['placed_at'].dt.dayofweek.map(dict(enumerate(GUNLER)))
+    gun = sip['placed_at'].dt.day_of_week.map(dict(enumerate(GUNLER)))
     # TODO: dilim = saat sütununa saat_dilimi uygula (.map)
     # TODO: pd.crosstab(gun, dilim) ve reindex(index=GUNLER, columns=DILIMLER, fill_value=0)
     pass
@@ -854,7 +854,7 @@ def saat_dilimi(saat):
 
 
 def yogunluk_tablosu(sip):
-    gun = sip['placed_at'].dt.dayofweek.map(dict(enumerate(GUNLER)))
+    gun = sip['placed_at'].dt.day_of_week.map(dict(enumerate(GUNLER)))
     dilim = sip['placed_at'].dt.hour.map(saat_dilimi)
     tablo = pd.crosstab(gun, dilim)
     return tablo.reindex(index=GUNLER, columns=DILIMLER, fill_value=0)
@@ -879,7 +879,7 @@ df = pd.DataFrame({'kanal': ['web', 'mobil', 'web', 'web'], 'odeme': ['kart', 'k
 t = pd.crosstab(df['kanal'], df['odeme']).reindex(index=['mobil', 'web', 'çağrı'], columns=['kart', 'havale'], fill_value=0)
 print(t)
 ''',
-'hints': ['dt.dayofweek 0=Pazartesi; dict(enumerate(GUNLER)) ile ada çevir (iskelette hazır).', 'pd.crosstab satır ve sütunları alfabetik sıralar; reindex ile düzelt.', 'return pd.crosstab(gun, dilim).reindex(index=GUNLER, columns=DILIMLER, fill_value=0)'],
+'hints': ['dt.day_of_week 0=Pazartesi; dict(enumerate(GUNLER)) ile ada çevir (iskelette hazır).', 'pd.crosstab satır ve sütunları alfabetik sıralar; reindex ile düzelt.', 'return pd.crosstab(gun, dilim).reindex(index=GUNLER, columns=DILIMLER, fill_value=0)'],
 'why': '''<code>crosstab</code> iki kategorinin frekans tablosunu tek satırda kurar; <code>pivot_table(aggfunc='size')</code> ile de yapılabilir. Türkçe adlar alfabetik sıralanınca "Cuma, Cumartesi, Çarşamba..." gibi anlamsız bir düzen çıkar; <code>reindex</code> iş sırasını garanti eder ve eksik hücreyi 0 yapar. Kategorik tip (<code>pd.Categorical(..., ordered=True)</code>) başka bir çözümdür ama pandas sürümleri arasında groupby davranışı (observed) farklıdır; reindex her sürümde aynı çalışır. Tablo doğrudan ısı haritasına (heatmap) dönüştürülebilir.''',
 'tags': ['pandas', 'crosstab', 'reindex', 'map', 'ısı haritası'],
 },

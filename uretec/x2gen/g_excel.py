@@ -127,8 +127,8 @@ ex.append(dict(t='order', stage='Kodu oku', q='<p>Düz tablodan ürün boyutunu 
     hint='Boyut, tekrarlar atılarak çıkarılır; sıralama ve indeks sıfırlama ondan sonra gelir.', why='Boyut tablosu düz tablonun tanımlayıcı sütunlarından tekrarlar atılarak çıkar; tekillik denetimi ilişkinin bire-çok kurulabileceğini garanti eder.'))
 ex.append(dict(t='code', id='excel-otomasyon-w1', stage='Rehberli', diff=2, needs=['pandas'],
     q='<p>Power BI için tarih boyutu üret: <code>tarih_boyutu(bas, bit)</code> iki <code>"YYYY-AA-GG"</code> metni alıp her gün için bir satır içeren DataFrame döndürsün. Sütunlar: <code>TarihKey</code> (int, 20240131 biçimi), <code>Tarih</code> (metin, ISO), <code>Yil</code>, <code>AyNo</code>, <code>Ay</code> (Türkçe kısa ad, liste hazır), <code>Ceyrek</code> (<code>"Ç1"</code>…<code>"Ç4"</code>), <code>HaftaSonu</code> (<code>"Evet"</code>/<code>"Hayır"</code>). Test, Kesit Power BI\'daki gerçek <code>kesit_bi.Tarih</code> tablosuyla karşılaştırır.</p>',
-    guide=['pd.date_range(bas, bit, freq="D") ile günleri üret.', 'Tarih metni ve TarihKey için strftime kullan (TarihKey\'i int\'e çevir).', 'Yıl, ay ve çeyrek için .year, .month, .quarter; Türkçe ay adını listeden al.', 'Hafta sonu: .dayofweek >= 5.'],
-    example='import pandas as pd\ng = pd.date_range("2024-03-30", "2024-04-01", freq="D")\nprint(list(g.strftime("%Y%m%d").astype(int)), list(g.quarter), list(g.dayofweek))\n',
+    guide=['pd.date_range(bas, bit, freq="D") ile günleri üret.', 'Tarih metni ve TarihKey için strftime kullan (TarihKey\'i int\'e çevir).', 'Yıl, ay ve çeyrek için .year, .month, .quarter; Türkçe ay adını listeden al.', 'Hafta sonu: .day_of_week >= 5.'],
+    example='import pandas as pd\ng = pd.date_range("2024-03-30", "2024-04-01", freq="D")\nprint(list(g.strftime("%Y%m%d").astype(int)), list(g.quarter), list(g.day_of_week))\n',
     start='import veri\nimport pandas as pd\n\nAYLAR = ' + AYLAR + '\n\ndef tarih_boyutu(bas, bit):\n    gunler = pd.date_range(bas, bit, freq="D")\n    # TODO: sütunları üret\n    return pd.DataFrame()\n',
     sol=d('''
         import veri
@@ -145,7 +145,7 @@ ex.append(dict(t='code', id='excel-otomasyon-w1', stage='Rehberli', diff=2, need
                 "AyNo": g.month,
                 "Ay": [AYLAR[m - 1] for m in g.month],
                 "Ceyrek": ["Ç" + str(q) for q in g.quarter],
-                "HaftaSonu": ["Evet" if w >= 5 else "Hayır" for w in g.dayofweek],
+                "HaftaSonu": ["Evet" if w >= 5 else "Hayır" for w in g.day_of_week],
             })
     '''),
     tests=d('''
@@ -158,7 +158,7 @@ ex.append(dict(t='code', id='excel-otomasyon-w1', stage='Rehberli', diff=2, need
         assert t["Ay"].tolist() == ref["Ay"].tolist(), "Türkçe ay adları kesit_bi ile aynı olmalı"
         assert t["Ceyrek"].tolist() == ref["Ceyrek"].tolist() and t["HaftaSonu"].tolist() == ref["HaftaSonu"].tolist()
     '''),
-    hints=['DatetimeIndex\'in year, month, quarter, dayofweek alanları dizi döndürür.', 'g.strftime("%Y%m%d").astype(int) anahtar sütununu verir.', 'Ay adı: AYLAR[m - 1]; çeyrek: "Ç" + str(q).'],
+    hints=['DatetimeIndex\'in year, month, quarter, day_of_week alanları dizi döndürür.', 'g.strftime("%Y%m%d").astype(int) anahtar sütununu verir.', 'Ay adı: AYLAR[m - 1]; çeyrek: "Ç" + str(q).'],
     why='Power BI\'da zaman zekâsı (time intelligence) fonksiyonları kesintisiz bir tarih tablosu ister; kaynakta satış olmayan günler de bulunmalıdır. Tamsayı anahtar ilişkiyi hızlandırır, Türkçe ad ve çeyrek sütunları rapor eksenleri içindir.'))
 ex.append(dict(t='code', id='excel-otomasyon-w2', stage='Rehberli', diff=2, needs=['pandas'],
     q='<p>Anadolu Market\'in gerçek tablolarını birleştiren düz tablo (<code>duz</code>) hazır. <code>yildiz_semasi(duz)</code> yaz ve <code>{"olgu": .., "dim_urun": .., "dim_musteri": ..}</code> sözlüğü döndür:</p><ul><li><code>dim_urun</code>: <code>product_id, name, category</code>, tekrarsız, product_id\'ye göre sıralı, indeks sıfırlanmış.</li><li><code>dim_musteri</code>: <code>customer_id, city, segment</code>, aynı kurallarla.</li><li><code>olgu</code>: <code>item_id, order_id, TarihKey, product_id, customer_id, quantity, tutar</code>; TarihKey = order_date\'ten int (20240131), tutar = quantity × unit_price × (1 − discount), 2 basamak.</li></ul>',

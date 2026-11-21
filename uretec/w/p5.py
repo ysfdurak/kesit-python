@@ -9,7 +9,7 @@ tr=veri.oku("pedal_izmir","bk_trips",usecols=["started_at"],parse_dates=["starte
 s=tr.set_index("started_at").resample("h").size().rename("talep")
 w=veri.oku("pedal_izmir","bk_weather",parse_dates=["obs_hour"]).set_index("obs_hour")
 d=w.join(s).fillna({"talep":0})
-d["saat"]=d.index.hour; d["haftasonu"]=(d.index.dayofweek>=5).astype(int)
+d["saat"]=d.index.hour; d["haftasonu"]=(d.index.day_of_week>=5).astype(int)
 X=["saat","haftasonu","temp_c","rain_mm","wind_kmh"]
 egt=d[d.index<"2024-06-24"]; dog=d[(d.index>="2024-06-24")&(d.index<"2024-07-01")]
 m=make_pipeline(make_column_transformer((OneHotEncoder(handle_unknown="ignore"),["saat"]),remainder="passthrough"),Ridge(alpha=1.0)).fit(egt[X],egt.talep)

@@ -229,7 +229,7 @@ assert r == [3840.0, 381.0, 765.0, 38100.0], f"Beklenen [3840.0, 381.0, 765.0, 3
 
 dict(id='b-328', topic='pandas Zaman Serisi', diff=2, kind='tamamla', needs=['pandas'],
   title='Hafta sonu ciro payı',
-  q='<p>Pazarlama ekibi cironun yüzde kaçının hafta sonu (Cumartesi-Pazar) geldiğini soruyor. <code>hafta_sonu_payi(df)</code> fonksiyonundaki <code>___</code> boşluklarını doldur. <code>dayofweek</code> pazartesiyi 0, pazarı 6 kabul eder.</p>',
+  q='<p>Pazarlama ekibi cironun yüzde kaçının hafta sonu (Cumartesi-Pazar) geldiğini soruyor. <code>hafta_sonu_payi(df)</code> fonksiyonundaki <code>___</code> boşluklarını doldur. <code>day_of_week</code> pazartesiyi 0, pazarı 6 kabul eder.</p>',
   start=r'''
 import pandas as pd
 
@@ -243,7 +243,7 @@ import pandas as pd
 
 def hafta_sonu_payi(df):
     t = pd.to_datetime(df["tarih"])
-    hafta_sonu = t.dt.dayofweek >= 5
+    hafta_sonu = t.dt.day_of_week >= 5
     return round(df.loc[hafta_sonu, "ciro"].sum() / df["ciro"].sum() * 100, 1)
 ''',
   tests=r'''
@@ -254,9 +254,9 @@ assert abs(r - 50.0) < 1e-9, f"24 Ekim Cumartesi + 25 Ekim Pazar = 500 / 1000 �
 df2 = pd.DataFrame({"tarih": ["2026-10-26", "2026-10-27"], "ciro": [10, 20]})
 assert hafta_sonu_payi(df2) == 0, "Hiç hafta sonu yoksa pay 0"
 ''',
-  hints=['Datetime Series\'in tarih bileşenlerine <code>.dt</code> erişimcisiyle ulaşırsın.', 'Haftanın günü: <code>.dt.dayofweek</code> (0=Pzt … 6=Paz).', 'loc\'a satır seçici olarak boolean maskeyi (<code>hafta_sonu</code>) ver.'],
-  why='.dt erişimcisi tüm sütun için tarih bileşenlerini vektörel üretir: O(n). dayofweek sayı döndürdüğü için yerel ayardan (dil) bağımsızdır; day_name() ise İngilizce gün adı verir ve karşılaştırmada dil sorunu çıkarır. Alternatif: df.groupby(t.dt.dayofweek >= 5)["ciro"].sum() ile iki grubu birden görmek; resmî tatilleri de saymak için ayrı bir tatil takvimi tablosu ile isin() kullanılır.',
-  tags=['dt', 'dayofweek', 'boolean maske'], min=3),
+  hints=['Datetime Series\'in tarih bileşenlerine <code>.dt</code> erişimcisiyle ulaşırsın.', 'Haftanın günü: <code>.dt.day_of_week</code> (0=Pzt … 6=Paz).', 'loc\'a satır seçici olarak boolean maskeyi (<code>hafta_sonu</code>) ver.'],
+  why='.dt erişimcisi tüm sütun için tarih bileşenlerini vektörel üretir: O(n). day_of_week sayı döndürdüğü için yerel ayardan (dil) bağımsızdır; day_name() ise İngilizce gün adı verir ve karşılaştırmada dil sorunu çıkarır. Alternatif: df.groupby(t.dt.day_of_week >= 5)["ciro"].sum() ile iki grubu birden görmek; resmî tatilleri de saymak için ayrı bir tatil takvimi tablosu ile isin() kullanılır.',
+  tags=['dt', 'day_of_week', 'boolean maske'], min=3),
 
 dict(id='b-329', topic='İstatistik', diff=2, kind='predict', needs=['numpy', 'pandas'],
   title='İki standart sapma, iki sonuç',

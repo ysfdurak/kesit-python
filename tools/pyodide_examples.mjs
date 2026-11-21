@@ -23,7 +23,7 @@ const walk = (d, rel) => { for (const n of fs.readdirSync(d)) { const p = path.j
 py.FS.mkdirTree('/data'); walk(path.join(root, 'data'), '/data');
 await py.runPythonAsync('import sys\nsys.path.insert(0, "/pp_lib")');
 const run = py.globals.get('_pp_run'); const LOADED = new Set(); const q = { messageCallback: () => {} };
-let total = 0, bad = 0, yok = 0;
+let total = 0, bad = 0, yok = 0; const OUTS = [];
 const YK = new Function(engine.match(/\/\*YEREL\*\/([\s\S]*?)\/\*\/YEREL\*\//)[1] + ';return { YEREL, yerelGerek };')();
 const YLOADED = new Set();
 async function yerelYukle(src) { const kok = path.join(path.dirname(new URL(import.meta.url).pathname), '..', 'pypaket'); for (const k of YK.yerelGerek(src)) { if (YLOADED.has(k)) continue; YLOADED.add(k); await py.loadPackage(YK.YEREL[k].dep, q); for (const f of YK.YEREL[k].whl) py.unpackArchive(new Uint8Array(fs.readFileSync(path.join(kok, f))), 'wheel'); await py.runPythonAsync('import importlib\nimportlib.invalidate_caches()'); if (k === 'plotly') await py.runPythonAsync('_pp_plotly_kur()'); } }
@@ -46,6 +46,7 @@ for (const [lid, body, needs] of items) {
     let r; const t1 = Date.now();
     try { r = JSON.parse(run(code, '', [], '<ornek>', ns, null)); } catch (x) { r = { err: { type: 'JS', msg: String(x).slice(-300) } }; }
     if (Date.now() - t1 > 8000) console.log('YAVAŞ ' + lid + ' örnek#' + i + ' ' + Math.round((Date.now() - t1) / 1000) + ' sn');
+    if (process.env.OUTJSON) OUTS.push([lid, i, r.out || '', r.err ? r.err.type + ': ' + String(r.err.msg).slice(0, 200) : null]);
     if (r.err) {
       if (r.err.type === 'ModuleNotFoundError') { yok++; console.log('YOK ' + lid + ' örnek#' + i + ': ' + r.err.msg); }
       else { bad++; console.log('HATA ' + lid + ' örnek#' + i + ': ' + r.err.type + ': ' + String(r.err.msg).slice(0, 300)); }
@@ -53,4 +54,5 @@ for (const [lid, body, needs] of items) {
   }
   await py.runPythonAsync('_PP_NS.clear()');
 }
+if (process.env.OUTJSON) fs.writeFileSync(process.env.OUTJSON, JSON.stringify(OUTS));
 console.log(`pyodide örnek: ${total}, hata=${bad}, paket-yok=${yok}`);

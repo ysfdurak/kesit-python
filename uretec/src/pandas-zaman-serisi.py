@@ -11,7 +11,7 @@ gunluk = zaman.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=
 gunluk.name = "yolculuk"
 print(len(gunluk), gunluk.index.min().date(), gunluk.index.max().date())
 print(gunluk.head(7).tolist())
-print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..Paz</pre>
+print(gunluk.groupby(gunluk.index.day_of_week).mean().round(0).tolist())   # Pzt..Paz</pre>
 <p><code>asfreq("D", fill_value=0)</code> hiç yolculuk olmayan günleri de 0 olarak ekler; eksik gün, gecikme (lag) hesabını sessizce kaydırır. Haftanın günü ortalamaları mevsimselliği (seasonality) gösterir: modelin bunu öğrenmesi için ona "geçen haftanın aynı günü" bilgisini vermen gerekir.</p>
 <h2>Gecikme ve pencere özellikleri</h2>
 <p>Klasik makine öğrenmesi modelleri (doğrusal regresyon, gradyan artırma) sırayı bilmez; her satırı bağımsız görür. Zaman bilgisini ona sütun olarak verirsin:</p>
@@ -19,7 +19,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
 <tr><td>lag_1</td><td><code>s.shift(1)</code></td><td>Dünkü değer</td></tr>
 <tr><td>lag_7</td><td><code>s.shift(7)</code></td><td>Geçen haftanın aynı günü</td></tr>
 <tr><td>ort_7</td><td><code>s.shift(1).rolling(7).mean()</code></td><td>Dünden geriye son 7 günün ortalaması</td></tr>
-<tr><td>haftanin_gunu</td><td><code>s.index.dayofweek</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
+<tr><td>haftanin_gunu</td><td><code>s.index.day_of_week</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
 <div class="warn"><b>Sızıntının en sinsi biçimi: shift'siz rolling</b><code>s.rolling(7).mean()</code> bugünün değerini de içerir. Tahmin anında bugünün değeri henüz bilinmediği için model eğitimde "cevabı görür", testte harika, canlıda kötü sonuç verir. Kural: tahmin edilen an t ise, özellik yalnız t'den <b>önce</b> bilinen bilgiyle hesaplanmalı. Pencereyi her zaman <code>shift(1)</code>'den sonra uygula.</div>
 <pre class="py">X = pd.DataFrame({
     "y": gunluk,
@@ -27,7 +27,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
     "lag_7": gunluk.shift(7),
     "ort_7": gunluk.shift(1).rolling(7).mean(),
     "sizan_ort_7": gunluk.rolling(7).mean(),          # YANLIŞ: bugünü içerir
-    "haftanin_gunu": gunluk.index.dayofweek,
+    "haftanin_gunu": gunluk.index.day_of_week,
 }).dropna()
 print(len(X))
 print(X[["y", "ort_7", "sizan_ort_7"]].corr().round(3).loc["y"].tolist())</pre>
@@ -52,7 +52,7 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
 ex=[
 dict(t='mc', id='pandas-zaman-serisi-y1', stage='Isınma',
   q='Yarının satışını tahmin eden bir model için hangi özellik <b>sızıntı</b> içerir?',
-  o=['<code>s.shift(1)</code>', '<code>s.shift(7)</code>', '<code>s.rolling(7).mean()</code>', '<code>s.index.dayofweek</code>'],
+  o=['<code>s.shift(1)</code>', '<code>s.shift(7)</code>', '<code>s.rolling(7).mean()</code>', '<code>s.index.day_of_week</code>'],
   a=2,
   why='rolling(7).mean() o günün değerini de pencereye katar; tahmin anında bu değer bilinmez. shift(1).rolling(7).mean() doğrusudur. Haftanın günü ise takvimden gelir ve gelecek için de bilinir, sızıntı değildir.'),
 dict(t='mc', id='pandas-zaman-serisi-y2', stage='Isınma',
@@ -82,7 +82,7 @@ dict(t='order', id='pandas-zaman-serisi-y4', stage='Kodu oku', needs=['pandas'],
   why='lag_3 ilk üç satırı NaN yapar; dropna sonrası 7 satır kalır. Son 3 gün test, ilk 4 gün eğitim olur. Bölme her zaman sıralı ve iloc ile yapılır.'),
 dict(t='code', id='pandas-zaman-serisi-y5', stage='Rehberli', diff=2, needs=['pandas'],
   q='<p>Pedal İzmir için sızıntısız özellik tablosu kur. <code>ozellikler(s)</code> yaz: günlük yolculuk serisi <code>s</code> (DatetimeIndex) alsın ve şu sütunlarla, NaN içeren satırları atılmış bir DataFrame döndürsün: <code>y</code> (seri), <code>lag_1</code>, <code>lag_7</code>, <code>ort_7</code> (dünden geriye 7 günün ortalaması), <code>haftanin_gunu</code> (0 = Pazartesi). Testler gerçek veriyle çalışır.</p>',
-  guide=['DataFrame\'i sözlükle kur: her sütun s üzerinde bir dönüşüm.', 'Gecikmeler için shift(1) ve shift(7).', 'Pencere için önce shift(1), sonra rolling(7).mean().', 'haftanin_gunu = s.index.dayofweek; en sonda dropna().'],
+  guide=['DataFrame\'i sözlükle kur: her sütun s üzerinde bir dönüşüm.', 'Gecikmeler için shift(1) ve shift(7).', 'Pencere için önce shift(1), sonra rolling(7).mean().', 'haftanin_gunu = s.index.day_of_week; en sonda dropna().'],
   example=r'''import pandas as pd
 satis = pd.Series([5, 7, 6, 9], index=pd.date_range("2024-01-01", periods=4))
 print(pd.DataFrame({"y": satis, "dun": satis.shift(1), "ay": satis.index.month}).dropna())
@@ -116,7 +116,7 @@ def ozellikler(s):
         "lag_1": s.shift(1),
         "lag_7": s.shift(7),
         "ort_7": s.shift(1).rolling(7).mean(),
-        "haftanin_gunu": s.index.dayofweek,
+        "haftanin_gunu": s.index.day_of_week,
     })
     return X.dropna()
 ''',

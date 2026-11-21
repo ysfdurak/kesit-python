@@ -142,13 +142,13 @@ B.push(
     kind: 'tamamla',
     needs: ['pandas'],
     title: 'Hafta sonu ciro payı',
-    q: '<p>Pazarlama ekibi cironun yüzde kaçının hafta sonu (Cumartesi-Pazar) geldiğini soruyor. <code>hafta_sonu_payi(df)</code> fonksiyonundaki <code>___</code> boşluklarını doldur. <code>dayofweek</code> pazartesiyi 0, pazarı 6 kabul eder.</p>',
+    q: '<p>Pazarlama ekibi cironun yüzde kaçının hafta sonu (Cumartesi-Pazar) geldiğini soruyor. <code>hafta_sonu_payi(df)</code> fonksiyonundaki <code>___</code> boşluklarını doldur. <code>day_of_week</code> pazartesiyi 0, pazarı 6 kabul eder.</p>',
     start: 'import pandas as pd\n\ndef hafta_sonu_payi(df):\n    t = pd.to_datetime(df["tarih"])\n    hafta_sonu = t.dt.___ >= 5\n    return round(df.loc[___, "ciro"].sum() / df["ciro"].sum() * 100, 1)\n',
-    sol: 'import pandas as pd\n\ndef hafta_sonu_payi(df):\n    t = pd.to_datetime(df["tarih"])\n    hafta_sonu = t.dt.dayofweek >= 5\n    return round(df.loc[hafta_sonu, "ciro"].sum() / df["ciro"].sum() * 100, 1)\n',
+    sol: 'import pandas as pd\n\ndef hafta_sonu_payi(df):\n    t = pd.to_datetime(df["tarih"])\n    hafta_sonu = t.dt.day_of_week >= 5\n    return round(df.loc[hafta_sonu, "ciro"].sum() / df["ciro"].sum() * 100, 1)\n',
     tests: 'df = pd.DataFrame({"tarih": ["2026-10-23", "2026-10-24", "2026-10-25", "2026-10-26"],\n                   "ciro": [100, 300, 200, 400]})\nr = hafta_sonu_payi(df)\nassert abs(r - 50.0) < 1e-9, f"24 Ekim Cumartesi + 25 Ekim Pazar = 500 / 1000 → 50.0; gelen {r}"\ndf2 = pd.DataFrame({"tarih": ["2026-10-26", "2026-10-27"], "ciro": [10, 20]})\nassert hafta_sonu_payi(df2) == 0, "Hiç hafta sonu yoksa pay 0"\n',
-    hints: ['Datetime Series\'in tarih bileşenlerine <code>.dt</code> erişimcisiyle ulaşırsın.', 'Haftanın günü: <code>.dt.dayofweek</code> (0=Pzt … 6=Paz).', 'loc\'a satır seçici olarak boolean maskeyi (<code>hafta_sonu</code>) ver.'],
-    why: '.dt erişimcisi tüm sütun için tarih bileşenlerini vektörel üretir: O(n). dayofweek sayı döndürdüğü için yerel ayardan (dil) bağımsızdır; day_name() ise İngilizce gün adı verir ve karşılaştırmada dil sorunu çıkarır. Alternatif: df.groupby(t.dt.dayofweek >= 5)["ciro"].sum() ile iki grubu birden görmek; resmî tatilleri de saymak için ayrı bir tatil takvimi tablosu ile isin() kullanılır.',
-    tags: ['dt', 'dayofweek', 'boolean maske'],
+    hints: ['Datetime Series\'in tarih bileşenlerine <code>.dt</code> erişimcisiyle ulaşırsın.', 'Haftanın günü: <code>.dt.day_of_week</code> (0=Pzt … 6=Paz).', 'loc\'a satır seçici olarak boolean maskeyi (<code>hafta_sonu</code>) ver.'],
+    why: '.dt erişimcisi tüm sütun için tarih bileşenlerini vektörel üretir: O(n). day_of_week sayı döndürdüğü için yerel ayardan (dil) bağımsızdır; day_name() ise İngilizce gün adı verir ve karşılaştırmada dil sorunu çıkarır. Alternatif: df.groupby(t.dt.day_of_week >= 5)["ciro"].sum() ile iki grubu birden görmek; resmî tatilleri de saymak için ayrı bir tatil takvimi tablosu ile isin() kullanılır.',
+    tags: ['dt', 'day_of_week', 'boolean maske'],
     min: 3
   },
 

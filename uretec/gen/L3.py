@@ -39,7 +39,7 @@ saatlik = saatlik.reindex(pd.date_range("2024-06-01", "2024-08-31 23:00", freq="
 gunluk = saatlik.resample("D").sum()
 print(len(saatlik), "saat,", len(gunluk), "gün; toplam", saatlik.sum())
 print("Saat profili:", saatlik.groupby(saatlik.index.hour).mean().round(0).astype(int).tolist())
-print("Gün profili:", gunluk.groupby(gunluk.index.dayofweek).mean().round(0).astype(int).tolist())
+print("Gün profili:", gunluk.groupby(gunluk.index.day_of_week).mean().round(0).astype(int).tolist())
 </pre>
 <p>İki mevsimsellik var: <b>günlük</b> (sabah 8 ve akşam 18 tepeleri, gece neredeyse sıfır) ve <b>haftalık</b> (hafta sonu daha düşük). Saatlik seride haftalık döngü 168 adımdır.</p>
 
@@ -125,7 +125,7 @@ from sklearn.model_selection import TimeSeriesSplit
 
 d = saatlik.to_frame().join(hava[["rain_mm", "temp_c"]])
 d["lag24"], d["lag168"] = d["talep"].shift(24), d["talep"].shift(168)
-d["hs"] = (d.index.dayofweek &gt;= 5).astype(int)
+d["hs"] = (d.index.day_of_week &gt;= 5).astype(int)
 d = d.dropna()
 X = pd.get_dummies(d.index.hour, prefix="s").astype(float).set_index(d.index)
 X = X.join(d[["hs", "lag24", "lag168", "rain_mm", "temp_c"]])
@@ -385,7 +385,7 @@ def lag_tablosu(seri):
     df["lag168"] = df["talep"].shift(168)
     df["ort24"] = df["talep"].shift(24).rolling(24).mean()
     df["saat"] = df.index.hour
-    df["haftasonu"] = (df.index.dayofweek >= 5).astype(int)
+    df["haftasonu"] = (df.index.day_of_week >= 5).astype(int)
     return df.dropna()
 
 
@@ -402,7 +402,7 @@ bek = saatlik[z - pd.Timedelta(hours=47): z - pd.Timedelta(hours=24)].mean()
 assert abs(t.loc[z, "ort24"] - bek) < 1e-9, "ort24, 24 ile 47 saat öncesi arasındaki 24 saatin ortalaması olmalı (shift(24) sonra rolling)"
 assert t.loc[pd.Timestamp("2024-07-13 10:00"), "haftasonu"] == 1 and t.loc[z, "saat"] == 8, "13 Temmuz Cumartesi"
 ''',
-    hints=['Lag: df["talep"].shift(24)', 'Sızıntısız pencere: df["talep"].shift(24).rolling(24).mean()', 'df.index.hour ve (df.index.dayofweek &gt;= 5).astype(int)'],
+    hints=['Lag: df["talep"].shift(24)', 'Sızıntısız pencere: df["talep"].shift(24).rolling(24).mean()', 'df.index.hour ve (df.index.day_of_week &gt;= 5).astype(int)'],
     why='Gün öncesi tahminde bilgi anı "dün gece yarısı"dır; yarının 17:00\'sini tahmin ederken bugünün 16:00\'sı bilinmez. shift(24) her özelliği en az 24 saat geriye iter. rolling\'i shift\'ten önce uygularsan pencere tahmin saatine kadar uzanır: sızıntı.'))
 
 ex.append(dict(t='code', stage='Kendin yaz', id='zaman-serisi-tahmin-5', diff=2, needs=['pandas'],
@@ -568,7 +568,7 @@ from sklearn.model_selection import train_test_split
 
 d = saatlik.to_frame("talep")
 d["lag24"], d["lag168"] = d["talep"].shift(24), d["talep"].shift(168)
-d["saat"], d["haftasonu"] = d.index.hour, (d.index.dayofweek >= 5).astype(int)
+d["saat"], d["haftasonu"] = d.index.hour, (d.index.day_of_week >= 5).astype(int)
 tablo = d.dropna()
 
 
@@ -583,7 +583,7 @@ from sklearn.model_selection import train_test_split
 
 d = saatlik.to_frame("talep")
 d["lag24"], d["lag168"] = d["talep"].shift(24), d["talep"].shift(168)
-d["saat"], d["haftasonu"] = d.index.hour, (d.index.dayofweek >= 5).astype(int)
+d["saat"], d["haftasonu"] = d.index.hour, (d.index.day_of_week >= 5).astype(int)
 tablo = d.dropna()
 
 
@@ -750,7 +750,7 @@ KESIMLER = pd.to_datetime(["2024-08-04", "2024-08-11", "2024-08-18", "2024-08-25
 
 def ozellikler(d):
     X = pd.get_dummies(d.index.hour, prefix="s").astype(float).set_index(d.index)
-    X["hs"] = (d.index.dayofweek >= 5).astype(int)
+    X["hs"] = (d.index.day_of_week >= 5).astype(int)
     X["lag24"] = d["talep"].shift(24)
     X["lag168"] = d["talep"].shift(168)
     X["rain_mm"], X["temp_c"] = d["rain_mm"], d["temp_c"]

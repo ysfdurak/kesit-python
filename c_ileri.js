@@ -1575,7 +1575,7 @@ def kdv(tutar):
     return tutar * 1.2
 
 komutlar = [i.opname for i in dis.get_instructions(kdv)]
-print(komutlar)
+print(komutlar)        # komut adları sürüme göre değişir: 3.14'te LOAD_FAST_BORROW görürsün
 print("sabit katlama:", [i.argval for i in dis.get_instructions(lambda: 60 * 60 * 24) if i.opname == "RETURN_CONST" or i.opname == "LOAD_CONST"])
 </pre>
 

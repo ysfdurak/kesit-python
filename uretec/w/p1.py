@@ -22,7 +22,7 @@ print(oz.shape); print(oz.loc[[1,2,3]]); print(oz.mean().round(2)); print(oz.son
 # time features
 t2=time.time()
 df = islem.copy()
-df["saat"]=df.txn_time.dt.hour; df["haftasonu"]=(df.txn_time.dt.dayofweek>=5).astype(int)
+df["saat"]=df.txn_time.dt.hour; df["haftasonu"]=(df.txn_time.dt.day_of_week>=5).astype(int)
 df["saat_sin"]=np.sin(2*np.pi*df.saat/24).round(4); df["saat_cos"]=np.cos(2*np.pi*df.saat/24).round(4)
 print(df.haftasonu.mean(), df.saat.value_counts().head(3), df.saat.min(), df.saat.max())
 print(df.groupby('haftasonu').amount.apply(lambda s:s.abs().mean()))

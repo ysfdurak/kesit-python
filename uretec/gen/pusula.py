@@ -936,7 +936,7 @@ izin = veri.oku('pusula_ik', 'ik_leaves', parse_dates=['start_date'])
 
 def pazartesi_ciler(izin):
     h = izin[izin['leave_type'] == 'hastalık'].copy()
-    h['pzt'] = h['start_date'].dt.dayofweek == 1
+    h['pzt'] = h['start_date'].dt.day_of_week == 1
     ozet = h.groupby('emp_id')['pzt'].agg(['size', 'mean'])
     secim = ozet[(ozet['size'] >= 4) & (ozet['mean'] >= 0.5)]
     return sorted(secim.index.tolist())
@@ -953,7 +953,7 @@ izin = veri.oku('pusula_ik', 'ik_leaves', parse_dates=['start_date'])
 
 def pazartesi_ciler(izin):
     h = izin[izin['leave_type'] == 'hastalık'].copy()
-    h['pzt'] = h['start_date'].dt.dayofweek == 0
+    h['pzt'] = h['start_date'].dt.day_of_week == 0
     ozet = h.groupby('emp_id')['pzt'].agg(['size', 'mean'])
     secim = ozet[(ozet['size'] >= 4) & (ozet['mean'] >= 0.5)]
     return sorted(secim.index.tolist())
@@ -968,9 +968,9 @@ assert _r[:5] == ⟨_r[:5]⟩, "İlk beş emp_id beklenenden farklı"
 _k = pd.DataFrame({'emp_id': [9, 9, 9, 9], 'leave_type': ['hastalık'] * 4, 'start_date': pd.to_datetime(['2024-11-04', '2024-11-11', '2024-11-12', '2024-11-19'])})
 assert pazartesi_ciler(_k) == [9], "4 iznin 2'si Pazartesi (4 ve 11 Kasım 2024) → %50, listede olmalı"
 ''',
-'hints': ['Kod çalışıyor ama yanlış gün seçiyor olabilir.', 'pandas .dt.dayofweek: Pazartesi=0, Pazar=6.', 'Tek karakterlik düzeltme: == 1 yerine == 0.'],
-'why': '''Hatalı kod Salı'yı seçiyordu: pandas <code>dayofweek</code> (ve Python <code>weekday()</code>) Pazartesi'yi 0 sayar. Bu tür "off-by-one" hatalar hiçbir uyarı üretmez; bilinen bir tarihle (4 Kasım 2024 = Pazartesi) küçük test kurmak yakalamanın en ucuz yolu. Okunurluk için <code>dt.day_name()</code> ile ad karşılaştırmak da bir seçenek (ama dil ayarına bağlıdır). <code>agg(['size', 'mean'])</code> tek geçişte hem sayıyı hem oranı verir. Etik not: bu tür listeler kişisel veri içerir; KVKK gereği amaç sınırlı ve erişim kısıtlı olmalıdır.''',
-'tags': ['pandas', 'dt.dayofweek', 'agg', 'hata avı'],
+'hints': ['Kod çalışıyor ama yanlış gün seçiyor olabilir.', 'pandas .dt.day_of_week: Pazartesi=0, Pazar=6.', 'Tek karakterlik düzeltme: == 1 yerine == 0.'],
+'why': '''Hatalı kod Salı'yı seçiyordu: pandas <code>day_of_week</code> (ve Python <code>weekday()</code>) Pazartesi'yi 0 sayar. Bu tür "off-by-one" hatalar hiçbir uyarı üretmez; bilinen bir tarihle (4 Kasım 2024 = Pazartesi) küçük test kurmak yakalamanın en ucuz yolu. Okunurluk için <code>dt.day_name()</code> ile ad karşılaştırmak da bir seçenek (ama dil ayarına bağlıdır). <code>agg(['size', 'mean'])</code> tek geçişte hem sayıyı hem oranı verir. Etik not: bu tür listeler kişisel veri içerir; KVKK gereği amaç sınırlı ve erişim kısıtlı olmalıdır.''',
+'tags': ['pandas', 'dt.day_of_week', 'agg', 'hata avı'],
 },
 {
 'id': 'b-497', 'lv': 'ileri', 'diff': 3, 'kind': 'yaz', 'needs': ['sqlite3'], 'min': 15,

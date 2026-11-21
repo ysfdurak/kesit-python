@@ -211,7 +211,7 @@ print("Uygulama:", platform.python_implementation())</pre>
 <h3>Kurumsal bilgisayarda kurulum</h3>
 <p>Şirket dizüstünde yönetici yetkisi olmayabilir. python.org kurulumu "Install for me only" seçeneğiyle yönetici istemeden kurulur. Bazı kurumlar Python'ı yazılım merkezinden dağıtır; önce oraya bak. Vekil sunucu (proxy) arkasındaysan pip paket indiremeyebilir; bu durumda BT ekibinden proxy ayarını iste, kendi başına çözüm aramaya çalışma.</p>
 <h3>Birden fazla Python sürümü</h3>
-<p>Bir süre sonra makinede birkaç Python olur: sistemle gelen, python.org'dan kurulan, belki bir de Anaconda. Hangisinin çalıştığını <code>python --version</code> ve Windows'ta <code>where python</code>, macOS ve Linux'ta <code>which python3</code> söyler. Karışıklığı önlemenin yolu yine sanal ortamdır: ortam etkinken <code>python</code> hep o projenin Python'ıdır.</p>
+<p>Bir süre sonra makinede birkaç Python olur: sistemle gelen, python.org'dan kurulan, belki bir de Anaconda. Hangisinin çalıştığını <code>python --version</code> ve Windows'ta <code>where.exe python</code>, macOS ve Linux'ta <code>which python3</code> söyler. Karışıklığı önlemenin yolu yine sanal ortamdır: ortam etkinken <code>python</code> hep o projenin Python'ıdır.</p>
 <h3>Editör alternatifleri</h3>
 <p>PyCharm, Python'a özel güçlü bir editördür ve büyük projelerde tercih edilir. Jupyter Lab veri keşfi için, Thonny ise tamamen yeni başlayanlar için sadeleştirilmiştir. Hangisini seçersen seç, temel beceriler aynıdır: dosya oluştur, kaydet, terminalden çalıştır, hata mesajını oku.</p>
 </section>

@@ -18,6 +18,6 @@ print((m.nedenli - m.dep_delay).describe())
 print(m[['dep_delay','nedenli']].head(20))
 f['saat']=f.sched_dep.dt.hour
 print(f.groupby('saat').dep_delay.agg(['mean','median','count']).round(1))
-f['gun']=f.sched_dep.dt.dayofweek
+f['gun']=f.sched_dep.dt.day_of_week
 print(f.groupby('gun').dep_delay.agg(['mean','median','count']).round(1))
 print(f.groupby(f.sched_dep.dt.to_period('M')).dep_delay.agg(['mean','median','count']).round(1))

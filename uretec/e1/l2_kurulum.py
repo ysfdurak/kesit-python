@@ -117,7 +117,7 @@ uv run main.py                # projenin ortamında çalıştır
 '<p>Yeni bir bilgisayarda ya da sunucuda işe başlamadan önce bu listeyi sırayla geç. Her satır bir öncekinin varsayımını doğrular:</p>'
 '<div class="steps-list"><ol>'
 '<li><code>python --version</code> (ya da <code>python3</code>, <code>py</code>): beklenen sürüm mü?</li>'
-'<li><code>where python</code> (Windows) / <code>which -a python3</code> (macOS/Linux): kaç Python var, ilki hangisi?</li>'
+'<li><code>where.exe python</code> (Windows) / <code>which -a python3</code> (macOS/Linux): kaç Python var, ilki hangisi?</li>'
 '<li><code>python -c "import sys; print(sys.executable)"</code>: çalışan yorumlayıcının tam yolu.</li>'
 '<li><code>python -m pip --version</code>: pip aynı yolu mu gösteriyor?</li>'
 '<li><code>python -c "import ssl, sqlite3, venv; print(\'tamam\')"</code>: ağ, veritabanı ve sanal ortam modülleri sağlam mı?</li>'

@@ -729,7 +729,7 @@ print(int(hata.sum()), g.loc[hata, 'plaka'].unique())
 'id': 'b-546', 'lv': 'ileri', 'diff': 3, 'kind': 'yaz', 'needs': ['pandas'], 'min': 15,
 'title': 'Saatlik talep profili: hafta içi ve hafta sonu',
 'q': '''<p>Operasyon planlaması için: <b>"Hafta içi ve hafta sonu, ortalama bir günde her saatte kaç yolculuk başlıyor?"</b> Toplam sayı yanıltır, çünkü hafta içi gün sayısı hafta sonundan fazla.</p>
-<p><code>saatlik_profil(t)</code> fonksiyonunu yaz. Satırlar saat (0–23), sütunlar <code>['hafta içi', 'hafta sonu']</code>; değer = o saat ve gün türündeki yolculuk sayısı / o gün türündeki <b>farklı tarih sayısı</b> (1 ondalık). Hafta sonu = Cumartesi ve Pazar (<code>dayofweek &gt;= 5</code>).</p>''',
+<p><code>saatlik_profil(t)</code> fonksiyonunu yaz. Satırlar saat (0–23), sütunlar <code>['hafta içi', 'hafta sonu']</code>; değer = o saat ve gün türündeki yolculuk sayısı / o gün türündeki <b>farklı tarih sayısı</b> (1 ondalık). Hafta sonu = Cumartesi ve Pazar (<code>day_of_week &gt;= 5</code>).</p>''',
 'start': '''
 import pandas as pd
 import veri
@@ -756,7 +756,7 @@ t = veri.oku('pedal_izmir', 'bk_trips', parse_dates=['started_at'])
 def saatlik_profil(t):
     d = pd.DataFrame({
         'saat': t['started_at'].dt.hour,
-        'tur': (t['started_at'].dt.dayofweek >= 5).map({False: 'hafta içi', True: 'hafta sonu'}),
+        'tur': (t['started_at'].dt.day_of_week >= 5).map({False: 'hafta içi', True: 'hafta sonu'}),
         'tarih': t['started_at'].dt.normalize(),
     })
     sayim = d.groupby(['saat', 'tur']).size().unstack(fill_value=0)
@@ -880,11 +880,11 @@ ist = veri.oku('pedal_izmir', 'bk_stations')
 
 def sabah_kaybi(t, ist, n=5):
     bas = t['started_at']
-    c = t[(bas.dt.dayofweek < 5) & bas.dt.hour.between(7, 9)]
+    c = t[(bas.dt.day_of_week < 5) & bas.dt.hour.between(7, 9)]
     gun_sayisi = c['started_at'].dt.normalize().nunique()
     k = t.dropna(subset=['ended_at'])
     bit = k['ended_at']
-    v = k[(bit.dt.dayofweek < 5) & bit.dt.hour.between(7, 9)]
+    v = k[(bit.dt.day_of_week < 5) & bit.dt.hour.between(7, 9)]
     cikis = c.groupby('start_station').size()
     varis = v.groupby(v['end_station'].astype(int)).size()
     net = varis.sub(cikis, fill_value=0) / gun_sayisi

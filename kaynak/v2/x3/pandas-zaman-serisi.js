@@ -17,7 +17,7 @@ gunluk = zaman.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=
 gunluk.name = "yolculuk"
 print(len(gunluk), gunluk.index.min().date(), gunluk.index.max().date())
 print(gunluk.head(7).tolist())
-print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..Paz</pre>
+print(gunluk.groupby(gunluk.index.day_of_week).mean().round(0).tolist())   # Pzt..Paz</pre>
 <p><code>asfreq("D", fill_value=0)</code> hiç yolculuk olmayan günleri de 0 olarak ekler; eksik gün, gecikme (lag) hesabını sessizce kaydırır. Haftanın günü ortalamaları mevsimselliği (seasonality) gösterir: modelin bunu öğrenmesi için ona "geçen haftanın aynı günü" bilgisini vermen gerekir.</p>
 <h2>Gecikme ve pencere özellikleri</h2>
 <p>Klasik makine öğrenmesi modelleri (doğrusal regresyon, gradyan artırma) sırayı bilmez; her satırı bağımsız görür. Zaman bilgisini ona sütun olarak verirsin:</p>
@@ -25,7 +25,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
 <tr><td>lag_1</td><td><code>s.shift(1)</code></td><td>Dünkü değer</td></tr>
 <tr><td>lag_7</td><td><code>s.shift(7)</code></td><td>Geçen haftanın aynı günü</td></tr>
 <tr><td>ort_7</td><td><code>s.shift(1).rolling(7).mean()</code></td><td>Dünden geriye son 7 günün ortalaması</td></tr>
-<tr><td>haftanin_gunu</td><td><code>s.index.dayofweek</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
+<tr><td>haftanin_gunu</td><td><code>s.index.day_of_week</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
 <div class="warn"><b>Sızıntının en sinsi biçimi: shift'siz rolling</b><code>s.rolling(7).mean()</code> bugünün değerini de içerir. Tahmin anında bugünün değeri henüz bilinmediği için model eğitimde "cevabı görür", testte harika, canlıda kötü sonuç verir. Kural: tahmin edilen an t ise, özellik yalnız t'den <b>önce</b> bilinen bilgiyle hesaplanmalı. Pencereyi her zaman <code>shift(1)</code>'den sonra uygula.</div>
 <pre class="py">X = pd.DataFrame({
     "y": gunluk,
@@ -33,7 +33,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
     "lag_7": gunluk.shift(7),
     "ort_7": gunluk.shift(1).rolling(7).mean(),
     "sizan_ort_7": gunluk.rolling(7).mean(),          # YANLIŞ: bugünü içerir
-    "haftanin_gunu": gunluk.index.dayofweek,
+    "haftanin_gunu": gunluk.index.day_of_week,
 }).dropna()
 print(len(X))
 print(X[["y", "ort_7", "sizan_ort_7"]].corr().round(3).loc["y"].tolist())</pre>
@@ -60,7 +60,7 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
         id: 'pandas-zaman-serisi-y1',
         stage: 'Isınma',
         q: 'Yarının satışını tahmin eden bir model için hangi özellik <b>sızıntı</b> içerir?',
-        o: ['<code>s.shift(1)</code>', '<code>s.shift(7)</code>', '<code>s.rolling(7).mean()</code>', '<code>s.index.dayofweek</code>'],
+        o: ['<code>s.shift(1)</code>', '<code>s.shift(7)</code>', '<code>s.rolling(7).mean()</code>', '<code>s.index.day_of_week</code>'],
         a: 2,
         why: 'rolling(7).mean() o günün değerini de pencereye katar; tahmin anında bu değer bilinmez. shift(1).rolling(7).mean() doğrusudur. Haftanın günü ise takvimden gelir ve gelecek için de bilinir, sızıntı değildir.'
       },
@@ -113,11 +113,11 @@ print("mevsimsel naive MAE:", round((test - mevsimsel).abs().mean(), 1))</pre>
           'DataFrame\'i sözlükle kur: her sütun s üzerinde bir dönüşüm.',
           'Gecikmeler için shift(1) ve shift(7).',
           'Pencere için önce shift(1), sonra rolling(7).mean().',
-          'haftanin_gunu = s.index.dayofweek; en sonda dropna().'
+          'haftanin_gunu = s.index.day_of_week; en sonda dropna().'
         ],
         example: 'import pandas as pd\nsatis = pd.Series([5, 7, 6, 9], index=pd.date_range("2024-01-01", periods=4))\nprint(pd.DataFrame({"y": satis, "dun": satis.shift(1), "ay": satis.index.month}).dropna())\n',
         start: 'import veri\nimport pandas as pd\n\ndef gunluk_seri():\n    z = pd.to_datetime(veri.oku("pedal_izmir", "bk_trips")["started_at"])\n    return z.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=0)\n\ndef ozellikler(s):\n    X = pd.DataFrame({\n        "y": s,\n        # TODO: lag_1, lag_7\n        # TODO: ort_7 (sızıntısız)\n        # TODO: haftanin_gunu\n    })\n    return X\n',
-        sol: 'import veri\nimport pandas as pd\n\ndef gunluk_seri():\n    z = pd.to_datetime(veri.oku("pedal_izmir", "bk_trips")["started_at"])\n    return z.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=0)\n\ndef ozellikler(s):\n    X = pd.DataFrame({\n        "y": s,\n        "lag_1": s.shift(1),\n        "lag_7": s.shift(7),\n        "ort_7": s.shift(1).rolling(7).mean(),\n        "haftanin_gunu": s.index.dayofweek,\n    })\n    return X.dropna()\n',
+        sol: 'import veri\nimport pandas as pd\n\ndef gunluk_seri():\n    z = pd.to_datetime(veri.oku("pedal_izmir", "bk_trips")["started_at"])\n    return z.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=0)\n\ndef ozellikler(s):\n    X = pd.DataFrame({\n        "y": s,\n        "lag_1": s.shift(1),\n        "lag_7": s.shift(7),\n        "ort_7": s.shift(1).rolling(7).mean(),\n        "haftanin_gunu": s.index.day_of_week,\n    })\n    return X.dropna()\n',
         tests: 's = gunluk_seri()\nX = ozellikler(s)\nassert list(X.columns) == ["y", "lag_1", "lag_7", "ort_7", "haftanin_gunu"], f"Sütunlar: {list(X.columns)}"\nassert len(X) == 85, f"92 gün - 7 (lag_7 ve ort_7 için) = 85 satır, gelen {len(X)}"\nson = X.loc["2024-08-31"]\nassert son["y"] == 1388 and son["lag_1"] == 1399 and son["lag_7"] == 1341, "31 Ağustos: y=1388, dün 1399, geçen hafta 1341"\nassert round(son["ort_7"], 2) == 1312.71, f"ort_7 o günü İÇERMEMELİ: 24-30 Ağustos ortalaması 1312.71, gelen {son[\'ort_7\']:.2f}"\nassert son["haftanin_gunu"] == 5, "31 Ağustos 2024 Cumartesi (5)"\n',
         hints: ['Her özellik "o güne kadar bilinen" bilgiyle hesaplanmalı.', 'ort_7 = s.shift(1).rolling(7).mean(); sıralama önemli.', 'İlk 7 satırda lag_7 ve ort_7 NaN olur; dropna ile at.'],
         why: 'Bu tablo bir regresyon ya da gradyan artırma modelinin girdisidir. ort_7 testindeki değer, bugünü içeren hatalı pencereden farklıdır; sızıntıyı test ile yakalamanın yolu tam olarak budur: bilinen bir gün için özelliği elle hesaplayıp karşılaştırmak.'

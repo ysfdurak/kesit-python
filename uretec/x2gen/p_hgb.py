@@ -7,7 +7,7 @@ print(r.cuisine.value_counts().to_dict(), k.vehicle.value_counts().to_dict(), r.
 o = o[o.status == "teslim"].copy()
 o["sure_dk"] = (pd.to_datetime(o.delivered_at) - pd.to_datetime(o.placed_at)).dt.total_seconds() / 60
 o["saat"] = pd.to_datetime(o.placed_at).dt.hour
-o["hafta_sonu"] = (pd.to_datetime(o.placed_at).dt.dayofweek >= 5).astype(int)
+o["hafta_sonu"] = (pd.to_datetime(o.placed_at).dt.day_of_week >= 5).astype(int)
 adet = l.groupby("order_id")["qty"].sum().rename("adet")
 d = o.merge(r[["restaurant_id","cuisine","city"]], on="restaurant_id").merge(k[["courier_id","vehicle"]], on="courier_id").merge(adet, on="order_id")
 print(len(d), d.sure_dk.describe().round(1).to_dict())

@@ -41,11 +41,11 @@ islem = veri.oku("ilgaz_bank", "bank_txns",
                  parse_dates=["txn_time"])
 df = islem.copy()
 df["saat"] = df["txn_time"].dt.hour
-df["gun"] = df["txn_time"].dt.dayofweek            # 0 = Pazartesi
+df["gun"] = df["txn_time"].dt.day_of_week            # 0 = Pazartesi
 df["haftasonu"] = (df["gun"] &gt;= 5).astype(int)
 df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24)
 df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24)
-print(df[["txn_time", "saat", "haftasonu", "saat_sin", "saat_cos"]].head(3).round(3))
+print(df[["txn_time", "saat", "haftasonu", "saat_sin", "saat_cos"]].head(3).round({"saat_sin": 3, "saat_cos": 3}))   # tarih sütununa round uygulanmaz
 print("Hafta sonu payı:", round(df["haftasonu"].mean(), 3))
 </pre>
 <div class="tip"><b>Tatil takvimi</b>Resmî tatil, ramazan ve kurban bayramı gibi günler Türkiye'de harcama davranışını ciddi biçimde değiştirir. Tatilleri bir küme olarak tutup <code>df["tarih"].dt.date.isin(tatiller)</code> ile bayrak üret. Ağaç modelleri sin/cos'a ihtiyaç duymaz (saat 22'den büyük mü diye bölebilir); doğrusal modeller ve sinir ağları için döngüsel kodlama fark yaratır.</div>
@@ -280,14 +280,14 @@ print("öğrenilen sınırlar:", model[0].sinir_.round(0))
       q: '<p><b>Ilgaz Bank dolandırıcılık ekibi</b> işlemlerin zaman desenini modele vermek istiyor. <code>tarih_ozellikleri(df)</code> fonksiyonunu yaz: <code>txn_time</code> (datetime) sütunlu tablonun <b>kopyasına</b> şu sütunları eklesin ve kopyayı döndürsün:</p><ul><li><code>saat</code>: 0–23</li><li><code>gun</code>: haftanın günü (0 = Pazartesi)</li><li><code>haftasonu</code>: Cumartesi/Pazar ise 1, değilse 0 (int)</li><li><code>saat_sin</code>, <code>saat_cos</code>: <code>sin/cos(2π·saat/24)</code>, 4 basamağa yuvarlanmış</li></ul><p>Veri: <code>veri.oku("ilgaz_bank", "bank_txns", ...)</code> (start kodunda hazır).</p>',
       guide: [
         'df.copy() ile kopya al; orijinali değiştirme.',
-        '.dt.hour ve .dt.dayofweek ile saat ve günü çıkar.',
+        '.dt.hour ve .dt.day_of_week ile saat ve günü çıkar.',
         'haftasonu: (gun &gt;= 5).astype(int).',
         'np.sin / np.cos ile döngüsel kodla, .round(4) uygula.',
         'Kopyayı döndür.'
       ],
       example: 'import numpy as np\nimport pandas as pd\n\n# Benzer teknik: ay (1-12) da döngüseldir\ns = pd.Series(pd.to_datetime(["2024-01-15", "2024-07-01", "2024-12-31"]))\nay = s.dt.month\nprint(np.sin(2 * np.pi * ay / 12).round(3).tolist())\n',
       start: 'import numpy as np\nimport veri\n\nislem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])\n\n\ndef tarih_ozellikleri(df):\n    df = df.copy()\n    # TODO 1: saat ve gun sütunları\n    # TODO 2: haftasonu (int)\n    # TODO 3: saat_sin, saat_cos (4 basamak)\n    return df\n',
-      sol: 'import numpy as np\nimport veri\n\nislem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])\n\n\ndef tarih_ozellikleri(df):\n    df = df.copy()\n    df["saat"] = df["txn_time"].dt.hour\n    df["gun"] = df["txn_time"].dt.dayofweek\n    df["haftasonu"] = (df["gun"] >= 5).astype(int)\n    df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24).round(4)\n    df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24).round(4)\n    return df\n\n\nprint(tarih_ozellikleri(islem).head(3))\n',
+      sol: 'import numpy as np\nimport veri\n\nislem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amount"], parse_dates=["txn_time"])\n\n\ndef tarih_ozellikleri(df):\n    df = df.copy()\n    df["saat"] = df["txn_time"].dt.hour\n    df["gun"] = df["txn_time"].dt.day_of_week\n    df["haftasonu"] = (df["gun"] >= 5).astype(int)\n    df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24).round(4)\n    df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24).round(4)\n    return df\n\n\nprint(tarih_ozellikleri(islem).head(3))\n',
       tests: 'r = tarih_ozellikleri(islem)\nassert "saat" not in islem.columns, "Orijinal tablo değişmemeli: önce df.copy() al"\nfor c in ["saat", "gun", "haftasonu", "saat_sin", "saat_cos"]:\n    assert c in r.columns, f"{c} sütunu eksik"\nilk = r.iloc[0]\nassert ilk["saat"] == 7 and ilk["gun"] == 0 and ilk["haftasonu"] == 0, "İlk işlem 2024-01-01 07:05 (Pazartesi): saat 7, gun 0, haftasonu 0"\nassert ilk["saat_sin"] == 0.9659 and ilk["saat_cos"] == -0.2588, f"Saat 7 için sin 0.9659, cos -0.2588 olmalı; gelen {ilk[\'saat_sin\']}, {ilk[\'saat_cos\']}"\nassert round(r["haftasonu"].mean(), 4) == 0.2846, f"İşlemlerin %28.46\'sı hafta sonunda; gelen {r[\'haftasonu\'].mean():.4f}"\nassert str(r["haftasonu"].dtype).startswith("int"), "haftasonu 0/1 tam sayı olmalı (astype(int))"\n',
       hints: [
         'Datetime sütunun .dt erişimcisi saat ve gün parçalarını verir.',

@@ -93,7 +93,7 @@ sys.stdout = sys.__stdout__
 print(json.dumps({"out": buf.getvalue(), "err": err, "etype": etype}))
 '''
 KOK = __import__('os').path.dirname(__import__('os').path.dirname(__import__('os').path.abspath(__file__)))
-RUNNER = RUNNER.replace('__KOK__', KOK)
+RUNNER = RUNNER.replace('__KOK__', KOK.replace('\\', '/'))
 
 
 def py(code, tests='', stdin=None, raw=None, timeout=60):
@@ -317,13 +317,17 @@ def run_item(it):
 
 def main():
     files = [f for f in sys.argv[1:] if not f.startswith('-')]
-    if not files: print(__doc__); sys.exit(1)
-    for f in files:
-        r = subprocess.run(['node', '--check', f], capture_output=True, text=True)
-        if r.returncode: print('SÖZDİZİMİ HATASI', f, r.stderr[:1500]); sys.exit(2)
-    p = subprocess.run(['node', '-e', DUMP] + files, capture_output=True, text=True)
-    if p.returncode: print('YÜKLEME HATASI', p.stderr[:2000]); sys.exit(2)
-    data = json.loads(p.stdout)
+    if not files and not os.environ.get('ITEMS'): print(__doc__); sys.exit(1)
+    if os.environ.get('ITEMS'):  # önceden dökülmüş içerik (node'suz makinede, ör. Windows denemesi)
+        data = json.load(open(os.environ['ITEMS'], encoding='utf-8'))
+    else:
+        for f in files:
+            r = subprocess.run(['node', '--check', f], capture_output=True, text=True)
+            if r.returncode: print('SÖZDİZİMİ HATASI', f, r.stderr[:1500]); sys.exit(2)
+        p = subprocess.run(['node', '-e', DUMP] + files, capture_output=True, text=True)
+        if p.returncode: print('YÜKLEME HATASI', p.stderr[:2000]); sys.exit(2)
+        data = json.loads(p.stdout)
+        if os.environ.get('DUMPITEMS'): json.dump(data, open(os.environ['DUMPITEMS'], 'w', encoding='utf-8'), ensure_ascii=False)
     items = collect(data)
     with ThreadPoolExecutor(max_workers=int(os.environ.get("VW","8"))) as tp: res = list(tp.map(run_item, items))
     ok = bad = 0

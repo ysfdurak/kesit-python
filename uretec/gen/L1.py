@@ -26,7 +26,7 @@ islem = veri.oku("ilgaz_bank", "bank_txns",
                  parse_dates=["txn_time"])
 df = islem.copy()
 df["saat"] = df["txn_time"].dt.hour
-df["gun"] = df["txn_time"].dt.dayofweek            # 0 = Pazartesi
+df["gun"] = df["txn_time"].dt.day_of_week            # 0 = Pazartesi
 df["haftasonu"] = (df["gun"] &gt;= 5).astype(int)
 df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24)
 df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24)
@@ -240,7 +240,7 @@ ex.append(dict(t='order', stage='Kodu oku',
 # ---------------- Rehberli
 ex.append(dict(t='code', stage='Rehberli', id='ozellik-muhendisligi-1', diff=1, needs=['pandas'],
     q='<p><b>Ilgaz Bank dolandırıcılık ekibi</b> işlemlerin zaman desenini modele vermek istiyor. <code>tarih_ozellikleri(df)</code> fonksiyonunu yaz: <code>txn_time</code> (datetime) sütunlu tablonun <b>kopyasına</b> şu sütunları eklesin ve kopyayı döndürsün:</p><ul><li><code>saat</code>: 0–23</li><li><code>gun</code>: haftanın günü (0 = Pazartesi)</li><li><code>haftasonu</code>: Cumartesi/Pazar ise 1, değilse 0 (int)</li><li><code>saat_sin</code>, <code>saat_cos</code>: <code>sin/cos(2π·saat/24)</code>, 4 basamağa yuvarlanmış</li></ul><p>Veri: <code>veri.oku("ilgaz_bank", "bank_txns", ...)</code> (start kodunda hazır).</p>',
-    guide=['df.copy() ile kopya al; orijinali değiştirme.', '.dt.hour ve .dt.dayofweek ile saat ve günü çıkar.', 'haftasonu: (gun &gt;= 5).astype(int).', 'np.sin / np.cos ile döngüsel kodla, .round(4) uygula.', 'Kopyayı döndür.'],
+    guide=['df.copy() ile kopya al; orijinali değiştirme.', '.dt.hour ve .dt.day_of_week ile saat ve günü çıkar.', 'haftasonu: (gun &gt;= 5).astype(int).', 'np.sin / np.cos ile döngüsel kodla, .round(4) uygula.', 'Kopyayı döndür.'],
     example=r'''import numpy as np
 import pandas as pd
 
@@ -271,7 +271,7 @@ islem = veri.oku("ilgaz_bank", "bank_txns", usecols=["txn_id", "txn_time", "amou
 def tarih_ozellikleri(df):
     df = df.copy()
     df["saat"] = df["txn_time"].dt.hour
-    df["gun"] = df["txn_time"].dt.dayofweek
+    df["gun"] = df["txn_time"].dt.day_of_week
     df["haftasonu"] = (df["gun"] >= 5).astype(int)
     df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24).round(4)
     df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24).round(4)

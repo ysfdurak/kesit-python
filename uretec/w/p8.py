@@ -27,7 +27,7 @@ fc=m.get_forecast(14,exog=gw[["yagis"]][-14:]); ci=fc.conf_int(alpha=0.2); print
 # hourly backtest
 from sklearn.linear_model import Ridge
 d=pd.DataFrame({"talep":s}).join(w)
-d["saat"]=d.index.hour; d["hs"]=(d.index.dayofweek>=5).astype(int)
+d["saat"]=d.index.hour; d["hs"]=(d.index.day_of_week>=5).astype(int)
 d["lag24"]=d.talep.shift(24); d["lag168"]=d.talep.shift(168)
 d=d.dropna()
 X=pd.get_dummies(d.saat, prefix="s").astype(float).join(d[["hs","lag24","lag168","rain_mm","temp_c"]])

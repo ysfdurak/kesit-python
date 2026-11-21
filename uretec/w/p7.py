@@ -17,7 +17,7 @@ print(te.round(0).tolist()); print(gw.yagis[-14:].round(1).tolist())
 # hourly ML
 from sklearn.linear_model import Ridge
 d=pd.DataFrame({"talep":s}); d=d.join(w)
-d["saat"]=d.index.hour; d["gun"]=d.index.dayofweek
+d["saat"]=d.index.hour; d["gun"]=d.index.day_of_week
 d["lag24"]=d.talep.shift(24); d["lag168"]=d.talep.shift(168)
 d["ort24_lag24"]=d.talep.shift(24).rolling(24).mean()
 d=d.dropna()

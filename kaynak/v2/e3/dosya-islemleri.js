@@ -69,8 +69,10 @@ with open("banka_islem.log", encoding="utf-8") as kaynak, \\
             hata_sayisi += 1
     print(f"Toplam {hata_sayisi} hata", file=hedef)   # print satır sonunu ekler
 
-print(open("hatalar.log", encoding="utf-8").read())
-n = open("deneme.txt", "w", encoding="utf-8").write("Ankara\\n")
+with open("hatalar.log", encoding="utf-8") as f:
+    print(f.read())
+with open("deneme.txt", "w", encoding="utf-8") as f:
+    n = f.write("Ankara\\n")
 print("write dönen değer (yazılan karakter):", n)
 </pre>
 <div class="warn"><b>write sayı kabul etmez</b><code>f.write(1500)</code> → <code>TypeError: write() argument must be str, not int</code>. Önce <code>str()</code> ya da f-string kullan: <code>f.write(f"{ciro:.2f}\\n")</code>. Ayrıca son örnekteki gibi <code>with</code> kullanmadan açılan dosya kapanmayabilir; o satır yalnızca dönen değeri göstermek için.</div>
