@@ -2554,7 +2554,7 @@ print(dosya.exists(), dosya.name, dosya.suffix, dosya.parent)
 print(dosya.read_text(encoding="utf-8"))
 
 for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
-    print("bulundu:", p)</pre>
+    print("bulundu:", p.as_posix())   # as_posix: Windows'ta da / ile yazar</pre>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Büyük dosyada bellek</h3>

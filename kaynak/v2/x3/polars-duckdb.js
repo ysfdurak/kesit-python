@@ -21,7 +21,7 @@ duckdb.sql(f"""
     COPY (SELECT *, strftime(started_at::TIMESTAMP, '%Y-%m') AS ay FROM read_csv_auto('{yol}'))
     TO 'gol' (FORMAT parquet, PARTITION_BY (ay))
 """)
-print(sorted(str(p) for p in pathlib.Path("gol").rglob("*.parquet")))
+print(sorted(p.as_posix() for p in pathlib.Path("gol").rglob("*.parquet")))
 print(duckdb.sql("""
     SELECT ay, COUNT(*) AS yolculuk, ROUND(SUM(fare), 2) AS ciro
     FROM read_parquet('gol/**/*.parquet', hive_partitioning = true)

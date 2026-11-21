@@ -36,7 +36,7 @@ for (const [lid, body, needs] of items) {
     if (/input\(/.test(code)) continue;
     await yerelYukle(code);
     const need = [...needs].filter(x => !LOADED.has(x));
-    if (/veri\.(oku|hepsi)\b/.test(code)) need.push('pandas'); if (/veri\.baglan\b/.test(code)) need.push('sqlite3'); if (/\bhashlib\b/.test(code)) need.push('hashlib');
+    if (/veri\.(oku|hepsi)\b/.test(code)) need.push('pandas'); if (/veri\.baglan\b|\bsqlite3\b/.test(code)) need.push('sqlite3'); if (/\bzoneinfo\b|ZoneInfo/.test(code)) need.push('tzdata'); if (/\bhashlib\b/.test(code)) need.push('hashlib');
     const nn = need.filter(x => !LOADED.has(x));
     if (nn.length) { try { await py.loadPackage(nn, q); nn.forEach(x => LOADED.add(x)); if (nn.includes('hashlib')) await py.runPythonAsync('import sys\nfor _m in ("hashlib", "_hashlib", "hmac", "secrets"): sys.modules.pop(_m, None)'); } catch (x) {} }
     try { await py.loadPackagesFromImports(code, q); } catch (x) {}

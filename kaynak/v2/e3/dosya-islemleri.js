@@ -48,7 +48,7 @@ p.write_text("id,tutar\\n1,250\\n2,400\\n", encoding="utf-8")
 print(p.name, "|", p.stem, "|", p.suffix)
 print("Klasör:", p.parent.as_posix())
 print("JSON çıktısı:", p.with_suffix(".json").as_posix())
-print("Boyut:", p.stat().st_size, "bayt")
+print("Boyut:", p.stat().st_size, "bayt")   # Windows'ta satır sonu \\r\\n olduğu için 3 bayt fazla
 
 for dosya in sorted(Path("veri").rglob("*.csv")):
     print("CSV bulundu:", dosya.as_posix())

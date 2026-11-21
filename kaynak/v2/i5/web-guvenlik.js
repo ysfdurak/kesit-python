@@ -145,7 +145,7 @@ def guvenli_yol(ad: str) -&gt; Path:
 
 for ad in ["2025/ocak.csv", "../../etc/passwd", "/etc/shadow", "../raporlar_gizli/x.csv"]:
     try:
-        print("OK  ", guvenli_yol(ad))
+        print("OK  ", guvenli_yol(ad))   # Windows'ta C:\\srv\\raporlar\\... görünür
     except PermissionError as e:
         print("RED ", e)</pre>
 

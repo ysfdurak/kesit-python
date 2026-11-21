@@ -428,6 +428,12 @@ async function run(opt) {
   await ensureData(py, src);
   try { await ensureYerel(py, yerelGerek(src)); } catch (e) {}
   try {
+    { /* Pyodide sqlite3'ü ve saat dilimi veritabanını (tzdata) ayrı paket olarak verir; import satırı olmasa da (ör. find_spec('sqlite3')) yükle */
+      const ek = [];
+      if (/\bsqlite3\b/.test(src) && !S.pkgs.has('sqlite3')) ek.push('sqlite3');
+      if (/\bzoneinfo\b|ZoneInfo/.test(src) && !S.pkgs.has('tzdata')) ek.push('tzdata');
+      if (ek.length) { try { await py.loadPackage(ek); ek.forEach(p => S.pkgs.add(p)); } catch (e) {} }
+    }
     if (/\bhashlib\b/.test(src) && !S.pkgs.has('hashlib')) {
       try { await py.loadPackage(['hashlib']); S.pkgs.add('hashlib'); await py.runPythonAsync('import sys\nfor _m in ("hashlib", "_hashlib", "hmac", "secrets"): sys.modules.pop(_m, None)'); } catch (e) {}
     }

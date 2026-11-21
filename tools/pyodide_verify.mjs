@@ -70,7 +70,7 @@ for (const [name, e] of items) {
   if (process.env.NOPKG) { const t = third(src).toJs(); if (t.length || (e.needs && e.needs.length)) { skip++; (t.length ? t : e.needs).forEach(m => skipped[m] = (skipped[m] || 0) + 1); continue; } }
   else {
     await yerelYukle(src, e.needs);
-    const need = (e.needs || []).filter(x => !YK.YEREL[x]); if (/veri\.(oku|hepsi)\b/.test(src)) need.push('pandas'); if (/veri\.baglan\b/.test(src)) need.push('sqlite3'); if (/\bhashlib\b/.test(src)) need.push('hashlib');
+    const need = (e.needs || []).filter(x => !YK.YEREL[x]); if (/veri\.(oku|hepsi)\b/.test(src)) need.push('pandas'); if (/veri\.baglan\b|\bsqlite3\b/.test(src)) need.push('sqlite3'); if (/\bzoneinfo\b|ZoneInfo/.test(src)) need.push('tzdata'); if (/\bhashlib\b/.test(src)) need.push('hashlib');
     const nn = need.filter(x => !LOADED.has(x));
     if (nn.length) { try { await py.loadPackage(nn, { messageCallback: () => {} }); nn.forEach(x => LOADED.add(x)); if (nn.includes('hashlib')) await py.runPythonAsync('import sys\nfor _m in ("hashlib", "_hashlib", "hmac", "secrets"): sys.modules.pop(_m, None)'); } catch (x) { nn.forEach(m => skipped['yok:' + m] = (skipped['yok:' + m] || 0) + 1); } }
     try { await py.loadPackagesFromImports(src, { messageCallback: () => {} }); } catch (x) {}
