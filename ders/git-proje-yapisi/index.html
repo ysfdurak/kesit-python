@@ -96,7 +96,7 @@ with tempfile.TemporaryDirectory() as d:
         hedef = kok / yol
         hedef.parent.mkdir(parents=True, exist_ok=True)
         hedef.write_text(icerik, encoding="utf-8")
-    for p in sorted(kok.rglob("*")):
+    for p in sorted(kok.rglob("*"), key=lambda p: p.relative_to(kok).parts):   # Windows da aynı sırayı versin
         derinlik = len(p.relative_to(kok).parts) - 1
         print("  " * derinlik + ("+ " if p.is_dir() else "- ") + p.name)
     print("README ilk satır:", (kok / "README.md").read_text(encoding="utf-8").splitlines()[0])</pre>

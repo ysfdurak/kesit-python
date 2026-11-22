@@ -43,7 +43,7 @@ print(ciro.index.min().date(), "→", ciro.index.max().date(), len(ciro), "gün"
 <div class="tbl-wrap"><table>
 <tr><th>İfade</th><th>Sonuç (2024-03-04 Pazartesi)</th><th>Kullanım</th></tr>
 <tr><td><code>.dt.year</code>, <code>.dt.month</code>, <code>.dt.day</code></td><td>2024, 3, 4</td><td>Yıl/ay kırılımı</td></tr>
-<tr><td><code>.dt.dayofweek</code></td><td>0 (Pazartesi=0, Pazar=6)</td><td>Hafta içi/sonu analizi</td></tr>
+<tr><td><code>.dt.day_of_week</code></td><td>0 (Pazartesi=0, Pazar=6)</td><td>Hafta içi/sonu analizi</td></tr>
 <tr><td><code>.dt.quarter</code></td><td>1</td><td>Çeyrek raporu</td></tr>
 <tr><td><code>.dt.hour</code></td><td>0</td><td>Saatlik yoğunluk</td></tr>
 <tr><td><code>.dt.to_period("M")</code></td><td>2024-03</td><td>Ay anahtarı (raporda gruplama)</td></tr>
@@ -56,13 +56,13 @@ islem = pd.DataFrame({
     "zaman": pd.to_datetime(["2024-03-04 09:15", "2024-03-09 23:40", "2024-03-10 14:05", "2024-03-29 18:30"]),
     "tutar": [1500, 250, 980, 4300],
 })
-islem["gun"] = islem["zaman"].dt.dayofweek
+islem["gun"] = islem["zaman"].dt.day_of_week
 islem["hafta_sonu"] = islem["gun"] &gt;= 5
 islem["saat"] = islem["zaman"].dt.hour
 islem["ay"] = islem["zaman"].dt.to_period("M").astype(str)
 print(islem)
 print(islem.groupby("hafta_sonu")["tutar"].sum())</pre>
-<div class="tip"><b>Gün adı için sözlük kullan</b><code>dt.day_name()</code> İngilizce ad döndürür ve Türkçe yerel ayarı her ortamda bulunmaz. Raporda Türkçe ad istiyorsan <code>dayofweek</code> ile bir listeden eşle: <code>["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]</code>.</div>
+<div class="tip"><b>Gün adı için sözlük kullan</b><code>dt.day_name()</code> İngilizce ad döndürür ve Türkçe yerel ayarı her ortamda bulunmaz. Raporda Türkçe ad istiyorsan <code>day_of_week</code> ile bir listeden eşle: <code>["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]</code>.</div>
 
 <h2>resample: zamanı kovalara bölmek</h2>
 <p><code>resample</code> bir DatetimeIndex'i düzenli aralıklara böler, her aralığa bir özet uygular: günlük işlemlerden haftalık ciro, aylık ortalama, çeyreklik toplam. groupby'ın zamana özel hâlidir; fark, veride hiç kaydı olmayan aralıkları da üretmesidir (boş ay 0 ya da NaN olarak görünür).</p>
@@ -173,7 +173,7 @@ hafta_deseni = np.array([90, 80, 85, 95, 110, 140, 130])          # Pzt..Paz
 trend = np.linspace(0, 20, len(gun))
 satis = pd.Series(np.tile(hafta_deseni, 8) + trend + rng.normal(0, 3, len(gun)), index=gun)
 
-endeks = (satis.groupby(satis.index.dayofweek).mean() / satis.mean()).round(2)
+endeks = (satis.groupby(satis.index.day_of_week).mean() / satis.mean()).round(2)
 print("gün endeksi:", endeks.tolist())
 
 ayrisim = seasonal_decompose(satis, model="additive", period=7)
@@ -199,9 +199,9 @@ print("en yoğun:", gunluk.idxmax().date(), int(gunluk.max()))
 print("7 günlük hareketli ortalama (son gün):", round(gunluk.rolling("7D").mean().iloc[-1], 1))
 
 GUNLER = ["Pzt", "Sal", "Çar", "Per", "Cum", "Cmt", "Paz"]
-hafta = gunluk.groupby(gunluk.index.dayofweek).mean().round(0)
+hafta = gunluk.groupby(gunluk.index.day_of_week).mean().round(0)
 print(dict(zip(GUNLER, hafta.astype(int).tolist())))
-</pre><div class="tip"><b>Gün adlarını sen ver</b><code>dt.day_name()</code> İngilizce ad döndürür; <code>locale</code> parametresi işletim sistemine bağlıdır ve tarayıcıda çalışmayabilir. <code>dayofweek</code> (0 = Pazartesi) ile bir Türkçe ad listesi kullanmak her ortamda aynı sonucu verir.</div><h3>Saatlik profil ve iki seriyi zamanda eşlemek</h3><p>Hava durumu saatlik ölçülür (<code>obs_hour</code> tam saat). Yolculukları saatlik seriye çevirirsen iki tabloyu aynı zaman anahtarıyla birleştirebilirsin. Sayım serisinde yolculuk olmayan saat 0 olmalıdır; bunu <code>how="left"</code> ve <code>fillna(0)</code> sağlar.</p><pre class="py">import veri
+</pre><div class="tip"><b>Gün adlarını sen ver</b><code>dt.day_name()</code> İngilizce ad döndürür; <code>locale</code> parametresi işletim sistemine bağlıdır ve tarayıcıda çalışmayabilir. <code>day_of_week</code> (0 = Pazartesi) ile bir Türkçe ad listesi kullanmak her ortamda aynı sonucu verir.</div><h3>Saatlik profil ve iki seriyi zamanda eşlemek</h3><p>Hava durumu saatlik ölçülür (<code>obs_hour</code> tam saat). Yolculukları saatlik seriye çevirirsen iki tabloyu aynı zaman anahtarıyla birleştirebilirsin. Sayım serisinde yolculuk olmayan saat 0 olmalıdır; bunu <code>how="left"</code> ve <code>fillna(0)</code> sağlar.</p><pre class="py">import veri
 
 t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
 w = veri.oku("pedal_izmir", "bk_weather", parse_dates=["obs_hour"])
@@ -215,7 +215,7 @@ print("yağmurlu saatler:", sorted(m.index[m["rain_mm"] &gt; 0].hour.unique().to
 
 t = veri.oku("pedal_izmir", "bk_trips", usecols=["started_at"], parse_dates=["started_at"])
 saatlik = t.set_index("started_at").resample("h").size().rename("n").to_frame()
-saatlik["gun"] = saatlik.index.dayofweek
+saatlik["gun"] = saatlik.index.day_of_week
 saatlik["saat"] = saatlik.index.hour
 matris = saatlik.pivot_table(index="gun", columns="saat", values="n", aggfunc="mean").round(0)
 print(matris.loc[:, [8, 12, 18, 23]])
@@ -229,7 +229,7 @@ gunluk = zaman.dt.floor("D").value_counts().sort_index().asfreq("D", fill_value=
 gunluk.name = "yolculuk"
 print(len(gunluk), gunluk.index.min().date(), gunluk.index.max().date())
 print(gunluk.head(7).tolist())
-print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..Paz</pre>
+print(gunluk.groupby(gunluk.index.day_of_week).mean().round(0).tolist())   # Pzt..Paz</pre>
 <p><code>asfreq("D", fill_value=0)</code> hiç yolculuk olmayan günleri de 0 olarak ekler; eksik gün, gecikme (lag) hesabını sessizce kaydırır. Haftanın günü ortalamaları mevsimselliği (seasonality) gösterir: modelin bunu öğrenmesi için ona "geçen haftanın aynı günü" bilgisini vermen gerekir.</p>
 <h2>Gecikme ve pencere özellikleri</h2>
 <p>Klasik makine öğrenmesi modelleri (doğrusal regresyon, gradyan artırma) sırayı bilmez; her satırı bağımsız görür. Zaman bilgisini ona sütun olarak verirsin:</p>
@@ -237,7 +237,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
 <tr><td>lag_1</td><td><code>s.shift(1)</code></td><td>Dünkü değer</td></tr>
 <tr><td>lag_7</td><td><code>s.shift(7)</code></td><td>Geçen haftanın aynı günü</td></tr>
 <tr><td>ort_7</td><td><code>s.shift(1).rolling(7).mean()</code></td><td>Dünden geriye son 7 günün ortalaması</td></tr>
-<tr><td>haftanin_gunu</td><td><code>s.index.dayofweek</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
+<tr><td>haftanin_gunu</td><td><code>s.index.day_of_week</code></td><td>Takvimden gelir; gelecek için de bilinir</td></tr></table></div>
 <div class="warn"><b>Sızıntının en sinsi biçimi: shift'siz rolling</b><code>s.rolling(7).mean()</code> bugünün değerini de içerir. Tahmin anında bugünün değeri henüz bilinmediği için model eğitimde "cevabı görür", testte harika, canlıda kötü sonuç verir. Kural: tahmin edilen an t ise, özellik yalnız t'den <b>önce</b> bilinen bilgiyle hesaplanmalı. Pencereyi her zaman <code>shift(1)</code>'den sonra uygula.</div>
 <pre class="py">X = pd.DataFrame({
     "y": gunluk,
@@ -245,7 +245,7 @@ print(gunluk.groupby(gunluk.index.dayofweek).mean().round(0).tolist())   # Pzt..
     "lag_7": gunluk.shift(7),
     "ort_7": gunluk.shift(1).rolling(7).mean(),
     "sizan_ort_7": gunluk.rolling(7).mean(),          # YANLIŞ: bugünü içerir
-    "haftanin_gunu": gunluk.index.dayofweek,
+    "haftanin_gunu": gunluk.index.day_of_week,
 }).dropna()
 print(len(X))
 print(X[["y", "ort_7", "sizan_ort_7"]].corr().round(3).loc["y"].tolist())</pre>

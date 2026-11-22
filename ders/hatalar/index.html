@@ -82,7 +82,8 @@ except (ZeroDivisionError, ValueError) as e:
         print("dosya yok:", yol)
         return 0
     else:
-        toplam = sum(float(s) for s in f if s.strip())
+        with f:                                  # dosya her durumda kapanır
+            toplam = sum(float(s) for s in f if s.strip())
         print("okundu:", yol)
         return toplam
     finally:

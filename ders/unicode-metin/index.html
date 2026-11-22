@@ -74,7 +74,7 @@ with open("musteriler.csv", encoding="utf-8") as f:
     print(f.read())
 
 with open("musteriler.csv", "rb") as f:          # ikili mod: bytes gelir
-    print(f.read()[:12])</pre>
+    print(f.read()[:12])                         # Windows'ta satır sonu \r\n görünür</pre>
 
 <h2>Türkçe I/İ/ı/i: büyük-küçük harf tuzağı</h2>
 <p>Türkçede dört ayrı i harfi vardır: noktalı <b>i/İ</b> ve noktasız <b>ı/I</b>. Python'un <code>upper()</code> ve <code>lower()</code> metotları Unicode'un <b>dilden bağımsız</b> kurallarını uygular; o kurallarda <code>i</code>'nin büyüğü <code>I</code>'dır. Sonuç:</p>

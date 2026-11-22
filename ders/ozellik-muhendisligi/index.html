@@ -30,11 +30,11 @@ islem = veri.oku("ilgaz_bank", "bank_txns",
                  parse_dates=["txn_time"])
 df = islem.copy()
 df["saat"] = df["txn_time"].dt.hour
-df["gun"] = df["txn_time"].dt.dayofweek            # 0 = Pazartesi
+df["gun"] = df["txn_time"].dt.day_of_week            # 0 = Pazartesi
 df["haftasonu"] = (df["gun"] &gt;= 5).astype(int)
 df["saat_sin"] = np.sin(2 * np.pi * df["saat"] / 24)
 df["saat_cos"] = np.cos(2 * np.pi * df["saat"] / 24)
-print(df[["txn_time", "saat", "haftasonu", "saat_sin", "saat_cos"]].head(3).round(3))
+print(df[["txn_time", "saat", "haftasonu", "saat_sin", "saat_cos"]].head(3).round({"saat_sin": 3, "saat_cos": 3}))   # tarih sütununa round uygulanmaz
 print("Hafta sonu payı:", round(df["haftasonu"].mean(), 3))
 </pre>
 <div class="tip"><b>Tatil takvimi</b>Resmî tatil, ramazan ve kurban bayramı gibi günler Türkiye'de harcama davranışını ciddi biçimde değiştirir. Tatilleri bir küme olarak tutup <code>df["tarih"].dt.date.isin(tatiller)</code> ile bayrak üret. Ağaç modelleri sin/cos'a ihtiyaç duymaz (saat 22'den büyük mü diye bölebilir); doğrusal modeller ve sinir ağları için döngüsel kodlama fark yaratır.</div>

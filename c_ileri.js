@@ -1120,7 +1120,7 @@ with ThreadPoolExecutor(max_workers=4) as havuz:
 coklu = time.perf_counter() - t0
 print(f"sıralı {tek:.2f} s, 4 thread {coklu:.2f} s -&gt; GIL yüzünden kazanç yok")
 </pre>
-<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL\'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python\'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14\'te resmî destek kazanan "free-threaded" yapı GIL\'siz çalışabiliyor ama varsayılan değil ve henüz varsayılan değil.</div>
+<div class="note"><b>Çıkış yolu</b>CPU işi için <code>ProcessPoolExecutor</code>: her işçi ayrı bir süreçtir, kendi GIL\'i vardır, çekirdekler gerçekten paralel çalışır. Bedeli: veri süreçler arasında kopyalanır (pickle), başlatma maliyeti vardır. Kullanımı ThreadPoolExecutor ile aynı arayüzdür; yalnızca sınıf adı değişir ve fonksiyon modül düzeyinde tanımlı olmalıdır. Tarayıcıdaki Python\'da süreç oluşturulamadığı için bu derste yalnızca anlatıyoruz; kendi makinende dene. Python 3.13 ile deneysel gelen, 3.14\'te resmî destek kazanan "free-threaded" yapı GIL\'siz çalışabiliyor ama henüz varsayılan değil.</div>
 
 <h2>Yarış durumu ve Lock</h2>
 <p>İki thread aynı sayacı artırırsa ne olur? <code>sayac += 1</code> aslında oku-artır-yaz üç adımdır; GIL adımların arasında thread değiştirebilir ve bir artış kaybolur. Buna <b>yarış durumu</b> (race condition) denir. Çözüm: paylaşılan veriye erişimi <code>threading.Lock</code> ile tek seferde bir thread\'e vermek.</p>
@@ -1575,7 +1575,7 @@ def kdv(tutar):
     return tutar * 1.2
 
 komutlar = [i.opname for i in dis.get_instructions(kdv)]
-print(komutlar)
+print(komutlar)        # komut adları sürüme göre değişir: 3.14'te LOAD_FAST_BORROW görürsün
 print("sabit katlama:", [i.argval for i in dis.get_instructions(lambda: 60 * 60 * 24) if i.opname == "RETURN_CONST" or i.opname == "LOAD_CONST"])
 </pre>
 
@@ -2685,7 +2685,7 @@ for k in (GELEN, ISLENEN, HATALI):
 (GELEN / 'notlar.txt').write_text('bu dosya ETL konusu değil')
 
 for p in sorted(GELEN.glob('satis_*.csv')):
-    print(p.name, p.stem, p.suffix, p.stat().st_size, 'bayt')
+    print(p.name, p.stem, p.suffix, p.stat().st_size, 'bayt')   # Windows'ta satır sonları \\r\\n: birkaç bayt fazla
 shutil.move(str(GELEN / 'notlar.txt'), str(HATALI / 'notlar.txt'))
 print('hatali:', [p.name for p in HATALI.iterdir()])
 </pre>

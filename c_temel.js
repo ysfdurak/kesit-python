@@ -232,7 +232,7 @@ print("Uygulama:", platform.python_implementation())</pre>
 <h3>Kurumsal bilgisayarda kurulum</h3>
 <p>Şirket dizüstünde yönetici yetkisi olmayabilir. python.org kurulumu "Install for me only" seçeneğiyle yönetici istemeden kurulur. Bazı kurumlar Python'ı yazılım merkezinden dağıtır; önce oraya bak. Vekil sunucu (proxy) arkasındaysan pip paket indiremeyebilir; bu durumda BT ekibinden proxy ayarını iste, kendi başına çözüm aramaya çalışma.</p>
 <h3>Birden fazla Python sürümü</h3>
-<p>Bir süre sonra makinede birkaç Python olur: sistemle gelen, python.org'dan kurulan, belki bir de Anaconda. Hangisinin çalıştığını <code>python --version</code> ve Windows'ta <code>where python</code>, macOS ve Linux'ta <code>which python3</code> söyler. Karışıklığı önlemenin yolu yine sanal ortamdır: ortam etkinken <code>python</code> hep o projenin Python'ıdır.</p>
+<p>Bir süre sonra makinede birkaç Python olur: sistemle gelen, python.org'dan kurulan, belki bir de Anaconda. Hangisinin çalıştığını <code>python --version</code> ve Windows'ta <code>where.exe python</code>, macOS ve Linux'ta <code>which python3</code> söyler. Karışıklığı önlemenin yolu yine sanal ortamdır: ortam etkinken <code>python</code> hep o projenin Python'ıdır.</p>
 <h3>Editör alternatifleri</h3>
 <p>PyCharm, Python'a özel güçlü bir editördür ve büyük projelerde tercih edilir. Jupyter Lab veri keşfi için, Thonny ise tamamen yeni başlayanlar için sadeleştirilmiştir. Hangisini seçersen seç, temel beceriler aynıdır: dosya oluştur, kaydet, terminalden çalıştır, hata mesajını oku.</p>
 </section>
@@ -2554,7 +2554,7 @@ print(dosya.exists(), dosya.name, dosya.suffix, dosya.parent)
 print(dosya.read_text(encoding="utf-8"))
 
 for p in klasor.glob("*.txt"):       # klasördeki txt dosyaları
-    print("bulundu:", p)</pre>
+    print("bulundu:", p.as_posix())   # as_posix: Windows'ta da / ile yazar</pre>
 
 <section class="deep"><span class="eyebrow">Uzmanlaş</span>
 <h3>Büyük dosyada bellek</h3>
@@ -2711,7 +2711,8 @@ except (ZeroDivisionError, ValueError) as e:
         print("dosya yok:", yol)
         return 0
     else:
-        toplam = sum(float(s) for s in f if s.strip())
+        with f:                                  # dosya her durumda kapanır
+            toplam = sum(float(s) for s in f if s.strip())
         print("okundu:", yol)
         return toplam
     finally:
@@ -2964,7 +2965,8 @@ print(rapor)
 
 with open("gunluk_rapor.txt", "w", encoding="utf-8") as f:
     f.write(rapor + "\\n")
-print("\\nDosyadan geri okundu, satır sayısı:", len(open("gunluk_rapor.txt", encoding="utf-8").read().splitlines()))</pre>
+with open("gunluk_rapor.txt", encoding="utf-8") as f:
+    print("\\nDosyadan geri okundu, satır sayısı:", len(f.read().splitlines()))</pre>
 
 <h2>Kontrol listesi</h2>
 <div class="tbl-wrap"><table>

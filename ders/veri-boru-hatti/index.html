@@ -26,7 +26,7 @@ for k in (GELEN, ISLENEN, HATALI):
 (GELEN / 'notlar.txt').write_text('bu dosya ETL konusu değil')
 
 for p in sorted(GELEN.glob('satis_*.csv')):
-    print(p.name, p.stem, p.suffix, p.stat().st_size, 'bayt')
+    print(p.name, p.stem, p.suffix, p.stat().st_size, 'bayt')   # Windows'ta satır sonları \r\n: birkaç bayt fazla
 shutil.move(str(GELEN / 'notlar.txt'), str(HATALI / 'notlar.txt'))
 print('hatali:', [p.name for p in HATALI.iterdir()])
 </pre>

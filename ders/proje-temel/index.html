@@ -136,7 +136,8 @@ print(rapor)
 
 with open("gunluk_rapor.txt", "w", encoding="utf-8") as f:
     f.write(rapor + "\n")
-print("\nDosyadan geri okundu, satır sayısı:", len(open("gunluk_rapor.txt", encoding="utf-8").read().splitlines()))</pre>
+with open("gunluk_rapor.txt", encoding="utf-8") as f:
+    print("\nDosyadan geri okundu, satır sayısı:", len(f.read().splitlines()))</pre>
 
 <h2>Kontrol listesi</h2>
 <div class="tbl-wrap"><table>
