@@ -102,6 +102,11 @@ Windows'ta görülen farklar ve kurallar:
 
 Dosya başına toplu çalıştırma betikleri: `uretec/vf/chain.sh cp|pyo <dosyalar>` (verify veya pyodide_verify, her dosya ayrı süreç, log klasörüne yazar) ve `uretec/vf/exchain.sh <dosyalar>` (pyodide_examples). Bu iki betik eski ortamın mutlak yollarını kullanır; çalıştırmadan önce içindeki `V=` ve `cd` yollarını düzeltin.
 
+
+**pandas 3 durumu (22.11.2026):** Tarayıcı motoru Pyodide 0.27.8 (pandas 2.2) olarak kalıyor. Aynı içerik CPython 3.13 + pandas 3.0.5 ile `tools/verify.py` (PASS=4866, FAIL=0) ve `tools/examples.py` (1.224 örnek, yalnız bilerek hata veren 1 örnek) ile; Windows'ta Python 3.14 + pandas 3.1.1 ile de denendi ve geçti. Yani alıştırmaların beklenen çıktıları iki pandas sürümünde de aynı; motor yükseltmesi (Pyodide 314.x, pandas 3.0) zorunlu değil. Yükseltilirse önce bu iki komut ve `pyodide_verify.mjs` tüm dosyalarla çalıştırılmalı.
+
+**Windows kendi bilgisayarında görevleri (37 görev):** 22.11.2026'da Windows 11 + PowerShell 5.1 + Python 3.14 ile 23 görev geçti, 14'ü dış servis/hesap gerektirdiği için atlandı (Docker, Redis, Spark, bulut hesapları, grafik pencere vb.), fark yok. PowerShell yoklaması: `&&` geçersiz, `where` sessiz (`where.exe` gerekir), `curl` = `Invoke-WebRequest`, `echo > dosya` UTF-16 yazar, `$?` False ve `$LASTEXITCODE` 3, cmd'de `echo ".venv/"` tırnakları da yazar, `git init` varsayılan dalı `master`.
+
 ## Terim parantezi ve süre
 
 `kaynak/app.js` içindeki `termify`, `PY_TERMS` terimlerine ilk geçişte İngilizce karşılık ekler. Yalnız kök + izinli ad eki eşleşir. Çok anlamlı sözcükler (istem, getirme, kapanış) listeye girmez, derste elle yazılır. `tools/metinval.js` her otomatik biçimi `tools/gloss_onayli.json` ile karşılaştırır; yeni biçim çıkınca bağlamı okunup eklenir. `GLOSS_ONLY=1 node tools/metinval.js` yalnız bu denetimi yapar.
