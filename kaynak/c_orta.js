@@ -3973,9 +3973,9 @@ print("iki koşulu da sağlayan sürüm:", uygun or "YOK -> çatışma")</pre>
   ],
   mistakes: [
     { bad: '"2.10.0" > "2.9.0"  # False', good: 'tuple(map(int, "2.10.0".split("."))) > tuple(map(int, "2.9.0".split(".")))  # True', why: 'Metin karşılaştırması karakter karakter gider: "1" < "9" olduğu için 10, 9\'dan küçük görünür. Sürümler tam sayı parçalarıyla karşılaştırılır.' },
-    { bad: 'git add .venv/', good: 'echo ".venv/" >> .gitignore', why: 'Sanal ortam makineye özgü ve büyüktür; depoya girmez. Paylaşılan şey bağımlılık listesidir.' },
+    { bad: 'git add .venv/', good: '# .gitignore dosyasını editörde aç, şu satırı ekle:\n.venv/', why: 'Sanal ortam makineye özgü ve büyüktür; depoya girmez. Paylaşılan şey bağımlılık listesidir. Windows\'ta echo ile yazma: cmd tırnakları da dosyaya yazar, PowerShell 5.1 UTF-16 kaydeder; Git ikisinde de satırı tanımaz.' },
     { bad: 'pandas\nrequests\n# requirements.txt (sürümsüz)', good: 'pandas==2.2.2\nrequests~=2.31.0', why: 'Sürümsüz liste her kurulumda farklı sürüm getirir; "dün çalışıyordu" sorununa yol açar. Dağıtımda sürüm sabitle.' },
-    { bad: 'pip install pandas  # (.venv) etkin değilken', good: 'source .venv/bin/activate\npip install pandas', why: 'Ortam etkin değilse paket global kuruluma gider ve proje ortamında bulunamaz.' }
+    { bad: 'pip install pandas  # (.venv) etkin değilken', good: 'source .venv/bin/activate     # macOS/Linux\n.venv\\Scripts\\activate       # Windows\npip install pandas', why: 'Ortam etkin değilse paket global kuruluma gider ve proje ortamında bulunamaz.' }
   ]
 },
 /* ───────────────────────── 5. git-proje-yapisi ───────────────────────── */
