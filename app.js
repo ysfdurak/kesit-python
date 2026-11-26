@@ -38,7 +38,7 @@ const BANK = window.PY_BANK || [], BMAP = {}; BANK.forEach(t => BMAP[t.id] = t);
 const EXAMS = window.PY_EXAMS || [], XMAP = {}; EXAMS.forEach(x => XMAP[x.id] = x);
 const lvName = id => (LEVELS.find(l => l.id === id) || {}).name || id;
 const fmtN = n => Number(n).toLocaleString('tr-TR');
-const lvBadge = id => '<span class="lv lv-' + TIER(id) + '">' + esc(lvName(TIER(id))) + '</span>';
+const lvBadge = id => '<span class="lv lv-' + esc(TIER(id)) + '">' + esc(lvName(TIER(id))) + '</span>';
 const today = () => new Date().toISOString().slice(0, 10);
 
 /* ---------- İlerleme ---------- */
@@ -54,6 +54,9 @@ const FRESH = () => ({ done: {}, ex: {}, bank: {}, exams: {}, rv: {}, xp: 0, day
 function storeOk() { try { KESIT_STORAGE.setItem('__t', '1'); KESIT_STORAGE.removeItem('__t'); return true; } catch (e) { return false; } }
 function load() { try { const o = JSON.parse(KESIT_STORAGE.getItem(KEY) || 'null'); return o && typeof o === 'object' ? Object.assign(FRESH(), o) : FRESH(); } catch (e) { return FRESH(); } }
 const P = load();
+// Seviye yalnız bilinen değerlerden biri olabilir: kayıttan ya da yedekten gelen başka metin HTML'e girmesin.
+const LV_OK = v => ['', 'temel', 'orta', 'ileri'].includes(v);
+if (!LV_OK(P.level || '')) P.level = '';
 P.pilot = pilotNorm(P.pilot);
 /* Eski kayıtlar: seviye testi yanlışları tekrar kuyruğuna girmez */
 Object.keys(P.rv || {}).forEach(k => { if (k.startsWith('exam:seviye-tespit#')) delete P.rv[k]; });
@@ -80,6 +83,7 @@ function mergeProgress(o) {
   ['conts', 'sims'].forEach(k => { const seen = new Set(); P[k] = (P[k] || []).concat(o[k] || []).filter(x => { const s = JSON.stringify(x); if (seen.has(s)) return false; seen.add(s); return true; }).slice(-30); });
   P.xp = Math.max(P.xp || 0, o.xp || 0);
   ['goal', 'level', 'name', 'theme', 'os', 'ctx'].forEach(k => { if (!P[k] && o[k]) P[k] = o[k]; });
+  if (!LV_OK(P.level || '')) P.level = '';
   if (o.pg && typeof o.pg === 'object') { P.pg = P.pg && typeof P.pg === 'object' ? P.pg : {}; keep(P.pg, o.pg); }
   keep(P.drafts, o.drafts); if (!P.welcomed && o.welcomed) P.welcomed = true; P.pilot = pilotBirlestir(P.pilot, o.pilot); if (!P.last && o.last) P.last = o.last;
   save(); return added;
