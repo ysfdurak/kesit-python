@@ -31,7 +31,7 @@ Arayüz Türkçe kalır. İngilizce okuyan ziyaretçi için adresin sonuna `?lan
 - input() girdileri kod çalışmadan önce verilir.
 
 ## Kaynak kod ve kardeş projeler
-Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)**, **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)** ve **[Kesit İstatistik](https://ysfdurak.github.io/kesit-istatistik/)**. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.
+Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dalındadır](https://github.com/ysfdurak/kesit-python/tree/kaynak). Aynı mantıkla hazırlanmış diğer eğitimler: **[Kesit SQL](https://ysfdurak.github.io/kesit-sql/)**, **[Kesit Power BI](https://ysfdurak.github.io/kesit-powerbi/)**, **[Kesit İstatistik](https://ysfdurak.github.io/kesit-istatistik/)** ve **[Kesit Excel](https://ysfdurak.github.io/kesit-excel/)**. Banka, İK, teslimat, havayolu ve bisiklet veri setleri üç uygulamada aynıdır; Anadolu Market'te aynı şirket ve siparişler kullanılır, Power BI modeli zenginleştirilmiştir.
 
 ## Yapay zekâ kullanımı
 Ürün kararlarını ve kapsamı Yusuf Durak belirledi; kod ve içerik yapay zekâ (Claude) ile geliştirildi.
@@ -51,7 +51,7 @@ Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dal
 
 The interface and lessons are in Turkish. Add `?lang=en` to the address ([ysfdurak.github.io/kesit-python/?lang=en](https://ysfdurak.github.io/kesit-python/?lang=en)) for an English guide that explains each screen.
 
-Try it: https://ysfdurak.github.io/kesit-python/ · Sister apps: [SQL](https://github.com/ysfdurak/kesit-sql), [Power BI](https://github.com/ysfdurak/kesit-powerbi), [Statistics](https://github.com/ysfdurak/kesit-istatistik).
+Try it: https://ysfdurak.github.io/kesit-python/ · Sister apps: [SQL](https://github.com/ysfdurak/kesit-sql), [Power BI](https://github.com/ysfdurak/kesit-powerbi), [Statistics](https://github.com/ysfdurak/kesit-istatistik), [Excel](https://github.com/ysfdurak/kesit-excel).
 
 ## Sorumluluk notu
 Ücretsiz, ticari olmayan bir eğitim ve portföy projesidir; içerik “olduğu gibi” sunulur. Veri setlerindeki tüm şirketler, kişiler ve kayıtlar hayalidir. Python Software Foundation ya da Python Institute ile bağlantılı değildir.
