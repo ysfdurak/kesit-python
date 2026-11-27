@@ -4,6 +4,8 @@ import threading, http.server, socketserver, functools, json, sys
 from playwright.sync_api import sync_playwright
 import os as _os
 ROOT = _os.path.dirname(_os.path.dirname(_os.path.abspath(__file__)))
+# UI_KOK=gh/kesit-python: yayın paketini (ders gövdeleri modül modül yüklenen sürüm) aynı testlerle dene
+ROOT = _os.path.abspath(_os.environ.get('UI_KOK', ROOT))
 class Q(http.server.SimpleHTTPRequestHandler):
     def log_message(self, *a): pass
 H = functools.partial(Q, directory=ROOT)

@@ -14,7 +14,7 @@
     "tests/artifact.cjs": "1ab82740817f37d2934e90f25997c4a6e7d07d50138d538c70de82f27fa0ddfc",
     "tests/recovery.cjs": "9990ef25ded436773fef0d4659d287bdbb3a3caa94817eb768a0b4ac129a31f8",
     "belgeler/AUDIT.md": "f336741624ad00d157d3208781fa4f9f5b58dcb8bf02a9d973a0a5ecbc43819e",
-    "kaynak/app.js": "201946dc327f9382b42988ea5567ce84ccb2a1e175399c0f6d9ed2905e4c4242",
+    "kaynak/app.js": "27232621ce10011af0111935bb8d744aaff03582e6f170abda4ed2cb413dd17c",
     "kaynak/index.html": "2d900b9bcb75fed8e5103cf5b3e42795f0b14820e6acbfa1b9e1cf7dc77d7e01",
     "kaynak/sync.js": "ddb04af7b67ed2a3f3f126002742f94c7d2ff44583df6760b7b3b91be8588f4b",
     "tools/build.py": "7f39c35e6776c247187103630275b59ff7f407d0217c548c869b89a9925524f6",
@@ -39,6 +39,13 @@
         "tests/vaka_depo.py"
       ],
       "note": "Uçtan uca depo vakası kaynak dalına eklendi (main'de 19 Kasım 2026'da yayımlandı). Ayrıntı NASIL.md › Uçtan uca depo vakası."
+    },
+    {
+      "date": "2026-11-27",
+      "files": [
+        "kaynak/app.js"
+      ],
+      "note": "Ders gövdeleri yayın paketinde modül modül yüklenir (tools/govde.cjs); kaynak sürümünde davranış aynı."
     }
   ]
 }
