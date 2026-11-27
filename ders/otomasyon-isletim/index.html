@@ -1,0 +1,46 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Otomasyonu işletmek: hata, tekrar, kilit, günlük | Kesit Python</title><meta name="description" content="Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/otomasyon-isletim/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Otomasyonu işletmek: hata, tekrar, kilit, günlük"><meta property="og:description" content="Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/otomasyon-isletim/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Otomasyonu işletmek: hata, tekrar, kilit, günlük","description":"Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/otomasyon-isletim/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Otomasyon, web ve araçlar</span><h1>Otomasyonu işletmek: hata, tekrar, kilit, günlük</h1><p class="st-l">Çalışan betiği gece kimse bakmadan çalışan işe çevirirsin: geçici hatayı tekrarlama, atomik yazma, kilit, katmanlı ayar ve gizli değer, maskeli JSON günlük, robots.txt ve hız sınırı, karantina, kaçan gün hesabı, paketleme ve test.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/otomasyon-isletim">Uygulamada aç, 13 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><h2>Betik ile iş arasındaki fark</h2>
+<p>Dosya, Excel, PDF, e-posta ve web işlerinin nasıl yapıldığını <a href="../ofis-otomasyon/">Ofis ve iş akışı otomasyonu</a>, <a href="../pdf-word-otomasyon/">PDF ve Word belgeleriyle otomasyon</a>, <a href="../excel-otomasyon/">Excel otomasyonu: openpyxl, pandas ve rapor üretimi</a> ve <a href="../web-scraping/">Web kazıma: HTML, BeautifulSoup ve etik</a> derslerinde gördün. Bu ders işin görünmeyen yarısını anlatır: kimse başında değilken ne olur?</p>
+<div class="tbl-wrap"><table><tr><th>Soru</th><th>Parça</th></tr><tr><td>Ağ gidip geldi</td><td>Yeniden deneme: yalnız geçici hata</td></tr><tr><td>Elektrik kesildi, dosya yarım kaldı</td><td>Atomik yazma</td></tr><tr><td>Dünkü iş bitmeden bugünkü başladı</td><td>Kilit</td></tr><tr><td>İki kez çalıştı</td><td>İdempotent tasarım: işlenmiş kaydı dosyada tut</td></tr><tr><td>Sunucu değişti, parola değişti</td><td>Katmanlı ayar, gizli değer ortamda</td></tr><tr><td>Gece 3'te patladı, neden?</td><td>JSON günlük, koşu numarası, maskeleme</td></tr><tr><td>1000 satırın 3'ü bozuk</td><td>Karantina ve hata oranı</td></tr><tr><td>Bilgisayar 4 gün kapalıydı</td><td>Kaçan gün hesabı</td></tr><tr><td>Başka makinede nasıl çalışacak?</td><td>Paket, test, zamanlayıcı</td></tr></table></div>
+<pre class="py"># Aynı iş, iki yazım. Çalışan betik ile işletilebilen iş arasındaki fark tablodaki sorulardır.
+import json, os, tempfile
+
+def rapor_kirilgan(klasor, veri):
+    with open(os.path.join(klasor, "rapor.json"), "w") as f:     # yarıda kesilirse bozuk dosya
+        f.write(json.dumps(veri))
+
+def rapor_saglam(klasor, veri):
+    yol = os.path.join(klasor, "rapor.json")
+    fd, gecici = tempfile.mkstemp(dir=klasor)
+    with os.fdopen(fd, "w", encoding="utf-8") as f:
+        f.write(json.dumps(veri, ensure_ascii=False))
+    os.replace(gecici, yol)                                      # ya eski dosya ya yeni dosya, arası yok
+
+d = tempfile.mkdtemp()
+rapor_saglam(d, {"toplam": 42})
+with open(os.path.join(d, "rapor.json"), encoding="utf-8") as f:   # Windows'ta encoding yazmazsan cp1254 ile okur
+    print(os.listdir(d), f.read())</pre>
+<h2>Yeniden deneme</h2>
+<p>Yalnız düzelebilecek hatayı tekrarla: zaman aşımı, bağlantı kopması, 429, 5xx. 400, 401, 404 tekrarla düzelmez, sunucuyu yorarsın. Bekleme üstel artar, üst sınırı olur, biraz rastgelelik eklenir ki aynı anda düşen işler aynı anda dönmesin. Sunucu <code>Retry-After</code> gönderdiyse ona uy. Yan etkili işlemlerde (para, e-posta) önce idempotent yap, sonra tekrarla.</p>
+<h2>Atomik yazma ve kilit</h2>
+<p><code>os.replace</code> aynı dosya sisteminde atomiktir: okuyan ya eski dosyayı ya yeniyi görür. Geçici dosya bu yüzden hedefle <b>aynı klasörde</b> açılır. Kilit için <code>O_CREAT | O_EXCL</code> kullanılır: dosyayı oluşturma ve var mı bakma tek adımdır, "önce bak sonra oluştur" iki sürecin de geçmesine izin verir. Süreç ölürse kilit kalır; bu yüzden zaman damgası tutulur ve bayat kilit devralınır. Bu kilit paylaşımlı ağ sürücüsünde güvenilir olmayabilir, tek makine için düşün.</p>
+<h2>Ayar ve gizli değer</h2>
+<p>Sıra: varsayılan, dosya, ortam değişkeni, komut satırı. Sonraki öncekini ezer. Ortamdan gelen değer hep metindir: <code>bool("false")</code> <code>True</code> verir, dönüştürmeyi kendin yap. Parola ve anahtar dosyaya, koda ve Git'e girmez, ortam değişkeni ya da kurumun gizli değer kasasından gelir. Dosyada bulursan çalışmayı reddet.</p>
+<h2>Günlük</h2>
+<p>Satır başına bir JSON, her satırda koşu numarası. Böylece <code>grep</code> ve pandas ile okunur. Maskeleme filtrede yapılır, çağıran kişinin hatırlamasına bırakılmaz. Maskelemeyi biçimlenmiş mesajda yap: gizli değer <code>%s</code> argümanı olarak da gelebilir. Bu desen her sızıntıyı yakalamaz; en iyisi gizli değeri günlüğe hiç vermemektir.</p>
+<h2>Web veri çekmede etik ve sınırlar</h2>
+<ul><li><b>Önce API.</b> Sitenin resmî API'si ya da dışa aktarma özelliği varsa onu kullan.</li><li><b>Kullanım koşulları.</b> Sitenin şartlarını oku. <code>robots.txt</code> erişim kuralını bildirir, ama izin veya hukuk belgesi değildir: yasaklıyorsa uy, izin veriyor diye her şey serbest olmaz.</li><li><b>Kişisel veri.</b> Herkese açık olması serbestçe toplanabileceği anlamına gelmez; KVKK gibi düzenlemeler geçerlidir. Şüphede hukuk birimine sor. Bu ders hukuki danışmanlık değildir.</li><li><b>Yük.</b> Kimliğini <code>User-Agent</code> ile söyle, aralık bırak, aynı sayfayı önbellekten (cache) oku.</li><li><b>Kimlik doğrulaması ve engel.</b> Girişle korunan alanı ya da CAPTCHA'yı aşmaya çalışma.</li></ul>
+<h2>Kötü kayıt: durmak mı, devam mı?</h2>
+<p>Tek bozuk satır bütün işi durdurmamalı, ama sessizce de atılmamalı: <b>karantina</b> dosyasına nedenle yazılır. Hata oranı çok yükselince devam etmek de yanlıştır, kaynak bozuk olabilir. Çıkış kodu zamanlayıcıya durumu söyler: 0 temiz, 1 kısmi, 2 durdu.</p>
+<h2>Zamanlama</h2>
+<p>Zamanlayıcı (cron, Windows Görev Zamanlayıcı) işi başlatır, sonucu umursamaz; kaçırılan çalışmayı da telafi etmez. Bu yüzden son başarılı günü dosyada tut, kaçan iş günlerini hesapla, çok fazlaysa kendi başına çalışma, insana sor. Tarih ve saat için tek bir saat dilimi seç.</p></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/otomasyon-isletim/alistirma">Alıştırmalara geç (13)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-orta-otomasyon/">← Bitirme projesi: haftalık satış raporu otomasyonu</a><a href="../proje-analist/">Bitirme projesi: Kanat Havayolları gecikme analizi →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

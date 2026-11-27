@@ -1,0 +1,28 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Otomasyon projesi: klasör izleme ve fatura ayıklama | Kesit Python</title><meta name="description" content="Gelen klasörüne düşen PDF faturaları gerçekten okur, alanları ayıklar, toplamı denetler, tekrarı içerik ve numarayla yakalar, bozuk dosyayı nedeniyle…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-oto-fatura/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Otomasyon projesi: klasör izleme ve fatura ayıklama"><meta property="og:description" content="Gelen klasörüne düşen PDF faturaları gerçekten okur, alanları ayıklar, toplamı denetler, tekrarı içerik ve numarayla yakalar, bozuk dosyayı nedeniyle…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-oto-fatura/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Otomasyon projesi: klasör izleme ve fatura ayıklama","description":"Gelen klasörüne düşen PDF faturaları gerçekten okur, alanları ayıklar, toplamı denetler, tekrarı içerik ve numarayla yakalar, bozuk dosyayı nedeniyle…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-oto-fatura/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Otomasyon projesi: klasör izleme ve fatura ayıklama</h1><p class="st-l">Gelen klasörüne düşen PDF faturaları gerçekten okur, alanları ayıklar, toplamı denetler, tekrarı içerik ve numarayla yakalar, bozuk dosyayı nedeniyle karantinaya alır, yazılmakta olan dosyayı bekler, Excel özeti çıkarır.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oto-fatura">Uygulamada aç, 9 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><h2>İş</h2>
+<p>Tedarikçilerin faturaları ortak klasöre düşüyor, biri her gün tek tek açıp tabloya yazıyor. Görevlerdeki PDF'ler <code>reportlab</code> ile gerçekten üretilir, <code>pypdf</code> ile gerçekten okunur, tarayıcının belleğindeki dosya sisteminde arşive taşınır. Faturalar, VKN ve firma kurgudur.</p>
+<div class="warn"><b>Bu yöntemin sınırı</b>Yalnız metin katmanı olan PDF okunur. Taranmış görüntü için OCR gerekir, bu ders onu kapsamaz. Her tedarikçi biçimi farklıysa desen listesi büyür; biçim değişince alan bulunamaz, dosya karantinaya gider. Sessizce yanlış okumaktan iyisi budur. e-Fatura kullanıyorsan kaynağı PDF değil UBL XML'dir: <a href="../json-csv/">JSON ve CSV: veri alışverişinin iki ortak dili</a> dersindeki XML yöntemi çok daha güvenilirdir.</div>
+<pre class="py"># Dosya kimliği neden ad değil de içerik özetidir?
+import hashlib
+a = b"Fatura No: F-1 Toplam: 120,00"
+b = b"Fatura No: F-1 Toplam: 120,00"
+c = b"Fatura No: F-1 Toplam: 999,00"
+oz = lambda x: hashlib.sha256(x).hexdigest()[:12]
+print("aynı içerik, farklı dosya adı:", oz(a) == oz(b))
+print("aynı numara, farklı içerik:", oz(a) == oz(c), "(bunu VKN ve numara yakalar)")</pre>
+<h2>Tekrarın iki yüzü</h2>
+<div class="tbl-wrap"><table><tr><th>Durum</th><th>Yakalayan</th></tr><tr><td>Aynı dosya farklı adla</td><td>SHA-256 özeti</td></tr><tr><td>Tedarikçi aynı faturayı yeniden düzenledi</td><td>VKN ve fatura numarası</td></tr><tr><td>Başka firmanın aynı numarası</td><td>Tekrar değil: anahtar VKN ile birlikte</td></tr></table></div>
+<h2>Yarım dosya</h2>
+<p>Ağ paylaşımına kopyalanan büyük dosya yazılırken görünür. Hemen okursan bozuk sanırsın. Basit ve taşınabilir yöntem: <b>iki taramada boyut aynıysa hazırdır</b>. Kesin bir garanti değildir; en temiz yol, gönderenin önce geçici adla yazıp sonra adlandırmasıdır. <code>watchdog</code> gibi kütüphaneler olay bildirir, ama ağ sürücüsünde olay kaçabilir; bu yüzden düzenli tarama sağlam bir başlangıçtır.</p>
+<h2>Adımlar</h2>
+<ol><li>PDF metni ve alan ayıklama, tutar denetimi.</li><li>Defter, arşiv, karantina, tekrar.</li><li>Boyut kararlılığıyla tarama.</li><li>Excel özeti ve zamanlanabilir iş.</li></ol></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oto-fatura/alistirma">Alıştırmalara geç (9)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-oto-mutabakat/">← Otomasyon projesi: aylık banka mutabakatı</a><a href="../proje-oto-stok/">Otomasyon projesi: stok uyarısı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

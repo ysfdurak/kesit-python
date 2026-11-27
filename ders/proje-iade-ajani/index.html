@@ -1,0 +1,37 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Bitirme projesi: iade kararı ajanı | Kesit Python</title><meta name="description" content="Lezzet Kurye'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu,…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-iade-ajani/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Bitirme projesi: iade kararı ajanı"><meta property="og:description" content="Lezzet Kurye'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu,…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-iade-ajani/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Bitirme projesi: iade kararı ajanı","description":"Lezzet Kurye'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu,…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-iade-ajani/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Bitirme projesi: iade kararı ajanı</h1><p class="st-l">Lezzet Kurye'nin gerçek sipariş verisi üstünde iade kararı hattı kurarsın: araçlar, politika kuralları, sahte modelli ajan, güven eşiği, insan kuyruğu, zincirli denetim izi, enjeksiyon vakalı eval seti ve iki kez çalıştırılsa da bir kez ödeyen gün sonu işi.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-iade-ajani">Uygulamada aç, 12 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><div class="note"><b>Neyin gerçek, neyin kurgu olduğu</b><code>lezzet_kurye</code> sipariş verisi gerçek veri setidir (kurgusal şirket, veri setinden okunur). İade talepleri ve şikâyet metinleri bu proje için yazılmıştır. <b>Model sahtedir</b>: senaryolu, deterministik bir sınıf. Bu projede modelin ne kadar iyi karar verdiğini ölçmüyoruz, modelin yanlış yaptığı gün sistemin nasıl davrandığını ölçüyoruz. Gerçek modelli sürüm son görevde.</div>
+<h2>İş</h2>
+<p>Lezzet Kurye'de iade talepleri elle inceleniyor. İstek: basit olanlar otomatik çözülsün, gerisi nedeniyle birlikte insana gitsin, altı ay sonra "bu para neden ödendi" sorusuna cevap verilebilsin.</p>
+<div class="tbl-wrap"><table><tr><th>Politika</th><th>Sonuç</th></tr><tr><td>Sipariş teslim değil ya da zaten iade</td><td>Ret</td></tr><tr><td>Teslimden 72 saat geçti</td><td>Ret</td></tr><tr><td>İstenen, ödenenden fazla</td><td>İnsana</td></tr><tr><td>İstenen 50 TL ve altı</td><td>Otomatik onay</td></tr><tr><td>Geri kalan</td><td>Model önerir; güven 0,80 altı ya da tutar 300 TL üstü insana</td></tr></table></div>
+<pre class="py"># Hat bir bakışta. Model yok, her satırın kararını kural ya da eşik veriyor.
+SURE, KUCUK, ESIK, UST = 72, 50, 0.80, 300
+def yol(saat, istenen, odenen, guven, oneri_tutar):
+    if saat &gt; SURE: return "ret: süre"
+    if istenen &gt; odenen: return "insan: tutar"
+    if istenen &lt;= KUCUK: return "onay: küçük tutar"
+    if oneri_tutar &gt; istenen: return "insan: model tutarı aştı"
+    if guven &lt; ESIK or oneri_tutar &gt; UST: return "insan: eşik"
+    return "onay: model"
+print(yol(100, 200, 700, 0.99, 200))
+print(yol(20, 900, 700, 0.99, 900))
+print(yol(20, 40, 700, 0.10, 40))
+print(yol(20, 200, 700, 0.99, 9999))
+print(yol(20, 500, 700, 0.99, 500))
+print(yol(20, 200, 700, 0.90, 200))</pre>
+<h2>Tasarımın en önemli kararı</h2>
+<p><b>Ajanın yazma aracı yok.</b> Ajan okur ve öneri üretir, parayı <code>Isletme</code> sınıfı hareket ettirir ve o da model çıktısını değil, kuraldan ve eşikten geçmiş kararı görür. Böylece enjeksiyon başarılı olsa bile en kötü ihtimalle yanlış öneri çıkar, o da sınırlara takılır. Bu, ajan-uretimde dersindeki yetki kapatmanın daha sert halidir: yetkiyi sonradan kapatmak yerine hiç vermiyoruz.</p>
+<h2>Adımlar</h2>
+<ol><li>Gerçek veriden siparişi getiren, parametreli sorgu.</li><li>Politika kuralları, sınır değerleriyle.</li><li>Sahte modelli, salt okunur ajan ve şemalı öneri.</li><li>Kural, model ve eşiği birleştiren karar hattı.</li><li>Zincirli kayıt, iade defteri ve insan kararı: gerçek dosyalar.</li><li>Eval seti: enjeksiyon ve büyük tutar güvenlik vakası.</li><li>Tekrar çalışınca bir şey bozmayan gün sonu işi.</li></ol>
+<p>Her adımın başlangıç kodunda önceki adımların çözümü hazırdır. İstersen önce kendi çözümünü yerleştir.</p>
+<h2>Bitince neyi anlatabilmelisin?</h2>
+<p>Mülakatta bu proje için şu sorulara hazır ol: Model 9999 TL dedi, ne oldu? Enjeksiyon cümlesi nereye kadar gitti? İş yarıda kesilirse iki kez ödeme olur mu? Yayın kararını hangi ölçü veriyor, neden ortalama değil? Eşiği nasıl seçerdin? Bu son soru için <a href="../karar-mimarisi/">Karar odaklı yapay zekâ mimarisi</a> dersindeki maliyet hesabını kullan: buradaki 0,80 sabit bir başlangıç değeridir, ölçülmüş değildir.</p></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-iade-ajani/alistirma">Alıştırmalara geç (12)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-ai/">← Bitirme projesi: Python ile yapay zekâ asistanı</a><a href="../proje-rapor-ajani/">Bitirme projesi: raporlama ajanı →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

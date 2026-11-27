@@ -7,7 +7,7 @@
 ![Tarayıcıda çalışan Python](ekran/alistirma.png)
 
 ## Neler var?
-- **156 ders, 3.240 ders içi alıştırma, 562 pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
+- **156 ders, 3.255 ders içi alıştırma, 562 pratik görevi.** Dili sıfırdan öğretir; otomasyon, veri analizi, web, makine öğrenmesi ve LLM uygulamalarına uzanır. Kurulum isteğe bağlıdır ("Bilgisayarına geç" bölümü).
 - **11 öğrenme yolu:** veri analisti, veri bilimci, veri mühendisi, backend, web, makine öğrenmesi, yapay zekâ, otomasyon ve diğerleri. Her yolda ön koşul, sınav, role süzülmüş mülakat soruları ve portföy önerileri.
 - **250 Python Arena problemi, 292 Python mülakat sorusu, 160 sık hata kaydı, 18 sınav.**
 - **8 kurgusal veri seti:** e-ticaret, banka, İK, yemek teslimatı, havayolu, bisiklet paylaşımı, Power BI modeli ve kirli veri.
@@ -44,7 +44,7 @@ Uygulamanın düzenlenebilir kaynağı, derleme ve test araçları [`kaynak` dal
 
 **Kesit Python** teaches Python from scratch to job-ready level, in Turkish. Code runs in the browser on real Python (Pyodide, in a Web Worker) and exercises are checked by automated tests: no install, no account.
 
-- 156 lessons, 3,240 in-lesson exercises and 562 practice tasks, from the basics to automation, data analysis, web, machine learning and LLM apps.
+- 156 lessons, 3,255 in-lesson exercises and 562 practice tasks, from the basics to automation, data analysis, web, machine learning and LLM apps.
 - 11 learning paths with prerequisites, exams, role-specific interview questions and portfolio ideas.
 - 250 Python Arena problems, 292 interview questions, 160 common-mistake notes, 18 exams and 8 fictional datasets.
 - Progress stays in the browser and can be backed up to a file. The Python engine is downloaded from jsDelivr on first run.

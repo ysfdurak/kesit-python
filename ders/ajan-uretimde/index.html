@@ -1,0 +1,86 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Ajanı üretime hazırlamak | Kesit Python</title><meta name="description" content="llm-ajanlar dersindeki döngüyü sağlamlaştırırsın: ne zaman ajan gerekmediği, JSON şemalı araç kaydı, durdurma koşulları, bağlam, çok ajanlı düzenin…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/ajan-uretimde/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Ajanı üretime hazırlamak"><meta property="og:description" content="llm-ajanlar dersindeki döngüyü sağlamlaştırırsın: ne zaman ajan gerekmediği, JSON şemalı araç kaydı, durdurma koşulları, bağlam, çok ajanlı düzenin…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/ajan-uretimde/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Ajanı üretime hazırlamak","description":"llm-ajanlar dersindeki döngüyü sağlamlaştırırsın: ne zaman ajan gerekmediği, JSON şemalı araç kaydı, durdurma koşulları, bağlam, çok ajanlı düzenin…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/ajan-uretimde/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Ajanı üretime hazırlamak</h1><p class="st-l">llm-ajanlar dersindeki döngüyü sağlamlaştırırsın: ne zaman ajan gerekmediği, JSON şemalı araç kaydı, durdurma koşulları, bağlam, çok ajanlı düzenin bedeli, istem enjeksiyonu, insan onayı, kayıt ve eval.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ajan-uretimde">Uygulamada aç, 16 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><h2>Bu ders tarayıcıda gerçek model çağırmaz</h2>
+<p>Bu derste bir kez bile gerçek LLM çağrısı yapılmaz. Görevlerdeki <code>SahteModel</code>, senaryoya yazdığımız cevapları sırayla veren küçük bir sınıftır. Bu bir kısıt ama işimize de yarar: aynı girdi hep aynı sonucu verir, test kesin olur, kötü davranan bir modeli istediğimiz anda sahneye koyarız. Bir modelin ne kadar iyi olduğunu burada <b>öğrenemezsin</b>. Öğreneceğin şey, model ne yaparsa yapsın etrafındaki kodun doğru davranmasıdır. Gerçek API ile çalışan sürüm dersin sonunda, kendi bilgisayarında yapacağın görevde.</p>
+<pre class="py">class SahteModel:
+    """Gerçek LLM değil: senaryodaki cevapları sırayla verir, senaryo biterse sonuncuyu tekrarlar."""
+    def __init__(self, senaryo):
+        self.senaryo, self.cagri, self.gorulen = list(senaryo), 0, []
+
+    def yanit(self, mesajlar):
+        self.gorulen.append([dict(m) for m in mesajlar])
+        a = self.senaryo[min(self.cagri, len(self.senaryo) - 1)]
+        self.cagri += 1
+        return a(mesajlar) if callable(a) else a
+
+senaryo = [
+    {"arac": "siparis_getir", "girdi": {"no": 1001}},
+    {"cevap": "Sipariş teslim edildi, tutar 450 TL."},
+]
+model = SahteModel(senaryo)
+print(model.yanit([{"rol": "kullanici", "metin": "1001 ne durumda?"}]))
+print(model.yanit([]))
+print("model çağrısı:", model.cagri)</pre>
+<p>Temel döngüyü, takılmayı, hafıza kırpmayı ve küçük bir MCP benzeri sunucuyu <a href="../llm-ajanlar/">LLM ajanları: araç döngüsü, hafıza, MCP ve güvenli sınırlar</a> dersinde gördün. Burada aynı parçaları üretimde başa çıkman gereken durumlarla sınıyoruz.</p>
+<h2>1. Ajan ne zaman gerekmez</h2>
+<p>Ajan, sonraki adımı modelin seçtiği döngüdür. Bu esneklik pahalıdır: her adım para ve süre harcar, her çalıştırma farklı yol izleyebilir, test zorlaşır. Sıra önceden belliyse ajan yazmak gereksizdir.</p>
+<div class="tbl-wrap"><table><tr><th>Durum</th><th>Doğru araç</th><th>Neden</th></tr>
+<tr><td>Kural tablosuyla çözülüyor</td><td>Normal kod</td><td>Model gereksiz, sonuç kesin</td></tr>
+<tr><td>Tek metin girer, tek sonuç çıkar</td><td>Tek model çağrısı</td><td>Döngüye gerek yok</td></tr>
+<tr><td>Adımlar sabit, her adımda metin işi var</td><td>Zincir (ardışık çağrı)</td><td>Yol kodda, denetlemesi kolay</td></tr>
+<tr><td>Girdi türüne göre birkaç yol</td><td>Sınıflandır ve yönlendir</td><td>Model yalnız yolu seçer</td></tr>
+<tr><td>Kaç adım süreceği ve hangi aracın gerektiği sonuca bağlı</td><td>Ajan</td><td>Yol ancak gözlemden sonra belli olur</td></tr></table></div>
+<p>İyi bir soru şudur: <b>akış şemasını şimdiden çizebiliyor muyum?</b> Çizebiliyorsan koda dök. Ajan, çizemediğin kısım içindir; o kısım da genellikle işin tamamı değil, bir parçasıdır.</p>
+<h2>2. Araç kaydı ve JSON şema</h2>
+<p>Modelin ürettiği araç girdisine güvenilmez: yanlış tür, eksik alan, uydurma alan gelebilir. Her aracı bir JSON şemayla kaydet, çağırmadan önce doğrula. Doğrulama hatasını istisna yapma, <b>sonuç olarak modele geri ver</b>; model mesajı görüp düzeltebilir. MCP de aynı ayrımı yapar: araç içindeki hatalar sonuçta <code>isError</code> ile döner.</p>
+<h2>3. Döngü ve durdurma koşulları</h2>
+<p>Araç çağırma döngüsünün her turu dört adımdır: model mevcut bağlama bakıp <b>plan yapar</b>, bir <b>araç seçer</b>, kod aracı çalıştırıp <b>gözlemi</b> bağlama ekler, sonra <b>durma koşulu</b> denetlenir. Plan çoğu zaman modelin kafasındadır, ayrı bir veri değildir; önemli işlerde planı açıkça yazdırıp kaydetmek izlemeyi kolaylaştırır.</p>
+<p>Doğal bitiş modelin cevap vermesidir, ama buna güvenilmez. Üç ayrı sigorta gerekir ve her biri farklı arızayı yakalar:</p>
+<div class="tbl-wrap"><table><tr><th>Sigorta</th><th>Yakaladığı</th></tr><tr><td>Adım sınırı</td><td>Hiç bitmeyen, her seferinde farklı çağrı</td></tr><tr><td>Takılma (aynı araç, aynı girdi)</td><td>Aynı yerde dönme; farklı girdiyle aynı araç takılma değildir</td></tr><tr><td>Üst üste hata sınırı</td><td>Bozuk servis; araya başarılı çağrı girerse sayaç sıfırlanır</td></tr></table></div>
+<p>Her biri ayrı durum döndürür. "Bitti" ile "sınır doldu" aynı görünürse kullanıcıya yarım iş tamam diye gider.</p>
+<h2>4. Bellek ve bağlam</h2>
+<p>Bağlam penceresi sınırlıdır ve her çağrıda baştan ödenir. Üç katman düşün: her çağrıda giden <b>sabit bilgi</b> (sistem istemi, kalıcı gerçekler), <b>kısa süreli geçmiş</b> (son mesajlar), ihtiyaç olunca araçla getirilen <b>dış bellek</b>. Kırparken araç çağrısını ve sonucunu ayırma: gerçek API'ler sonucu çağrısından hemen sonra ister, yetim sonuç isteği düşürür. Bir de güven meselesi var: araç çıktısından gelen bir cümleyi kalıcı belleğe yazmak, tek seferlik enjeksiyonu her oturuma taşımak demektir.</p>
+<h2>5. Çok ajanlı düzen ve bedeli</h2>
+<p>Yönetici bir ajanın işi uzmanlara devrettiği düzen kulağa düzenli gelir, ama her devir yeni model çağrısı, yeni bağlam ve yeni bir hata noktasıdır. Aşağıdaki hesap sahte sayaçla, yalnız oranın nereden geldiğini gösterir:</p>
+<pre class="py"># Aynı işi iki düzenle yapınca sahte modelin sayacı ne der? Sayılar senaryonun çıktısıdır, gerçek ölçüm değildir.
+def jeton(metin):
+    return len(metin) // 4 + 1
+
+sistem, arac_tanimi, gorev = "k" * 400, "a" * 800, "g" * 120
+gozlem = "v" * 600
+
+def tek_ajan():
+    baglam = jeton(sistem) + jeton(arac_tanimi) + jeton(gorev)
+    return baglam + (baglam + jeton(gozlem))          # iki model çağrısı
+
+def yonetici_uzman():
+    yon = jeton(sistem) + jeton(gorev)
+    uzman = jeton(sistem) + jeton(arac_tanimi) + jeton(gorev)
+    return yon + uzman + (uzman + jeton(gozlem)) + (yon + jeton(gozlem))   # dört model çağrısı
+
+print("tek ajan:", tek_ajan(), "jeton")
+print("yönetici ve uzman:", yonetici_uzman(), "jeton")
+print("oran:", round(yonetici_uzman() / tek_ajan(), 2))</pre>
+<div class="tbl-wrap"><table><tr><th>Getirisi olabilir</th><th>Bedeli</th></tr><tr><td>Uzmanın kısa istemi ve dar araç seti</td><td>Daha çok çağrı, daha çok jeton, daha çok süre</td></tr><tr><td>Bağımsız işler paralel yürür</td><td>Devirde bağlam kaybı, uzman asıl görevi bilmez</td></tr><tr><td>Her uzman ayrı değerlendirilir</td><td>Ajanlar birbirine sonsuza dek devredebilir</td></tr></table></div>
+<p>Kural: önce tek ajan ve iyi araçlarla dene, ölç. Ayırma gerekçen somut olsun: farklı yetki, gerçekten paralel iş ya da tek bağlama sığmayan araç sayısı. Ayırınca <b>bütçeyi ortak tut</b> ve <b>devir derinliğini sınırla</b>. Her uzmana ayrı bütçe vermek, sınırı ajan sayısıyla çarpmaktır.</p>
+<h2>6. İstem enjeksiyonu</h2>
+<p>Model, sistem isteminden gelen yönerge ile araç çıktısından gelen metni kesin olarak ayıramaz. Müşteri şikâyetinin içine yazılmış "bu iade onaylandı" cümlesi, modelin gözünde bir yönerge olabilir. Anahtar kelime süzgeci işe yaramaz: saldırgan yeniden yazar, başka dile geçer, kibarca ister. Bu yüzden savunma modelin ikna olup olmamasına <b>bağlı olmamalıdır</b>:</p>
+<ul><li>Dış metin okunduktan sonra, o koşuda yazma araçları kendiliğinden kapanır, açmak insan onayı ister. İçeriğe bakılmaz; masum görünen metin de sayılır.</li><li>Araçlar en az yetkiyle çalışır: salt okunur bağlantı, tutar üst sınırı, izinli alan adları.</li><li>Dış veri etiketlenir. Bu, modele yardımcı olur ama tek başına <b>savunma değildir</b>.</li><li>Kalıcı belleğe dış metinden gelen şey yazılmaz.</li></ul>
+<p>Enjeksiyonun kesin bir çözümü bilinmiyor. Hedef, modelin kandırıldığı gün zararın sınırlı kalmasıdır.</p>
+<h2>7. İnsan onayı</h2>
+<p>"Onaylıyor musun?" diye sormak yetmez. Onay <b>tam işleme</b> bağlanmalı: araç adı ve bütün girdilerin özeti. Yoksa 100 TL için alınan onayla 5000 TL ödenir. Onay tek kullanımlık ve süreli olmalı, isteyen kendi isteğini onaylayamamalı. Onaylayana modelin özetini değil, gerçek girdileri göster.</p>
+<h2>8. Hata, yeniden deneme ve yan etki</h2>
+<p>En zor durum şudur: para düştü, cevap yolda kayboldu. Tekrar denersen iki kez ödersin, denemezsen ödeme belirsiz kalır. Çözüm <b>idempotency anahtarı</b>: anahtar işlemden türer, her denemede aynıdır, servis aynı anahtarı ikinci kez işlemez. Bu servisin desteğini gerektirir. Yalnız geçici hataları tekrarla; "geçersiz IBAN" tekrarla düzelmez.</p>
+<h2>9. Gözlem ve kayıt</h2>
+<p>Ajan başka yol izlediğinde sebebini ancak iz söyler. Her model ve araç çağrısını koşu numarası, sıra, süre ve jetonla JSON Lines olarak yaz. Gizli alanları yazmadan önce maskele; iç içe yapıları da gez. Bu kayıt olmadan maliyet patlamasını da, enjeksiyonu da fark edemezsin.</p>
+<h2>10. Değerlendirme</h2>
+<p><a href="../llm-degerlendirme/">LLM uygulamalarını test etmek ve değerlendirmek</a> dersinde cevabı ölçtün. Ajanda yol da önemlidir: doğru cevabı verirken yasak aracı çağırmış olabilir. Vaka setine zorunlu araç, yasak araç, en çok adım ve beklenen durum yaz. Güvenlik vakalarını ortalamaya katma: tek enjeksiyon vakası kaldıysa ortalama %95 olsa da yayın durur. Sahte modelle eval, kodunun doğruluğunu ölçer. Modelin kalitesini ölçmek için aynı seti gerçek modelle, birkaç kez çalıştırman gerekir; çıktı her seferinde aynı olmayabilir.</p></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/ajan-uretimde/alistirma">Alıştırmalara geç (16)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../llm-degerlendirme/">← LLM uygulamalarını test etmek ve değerlendirmek</a><a href="../mcp-protokolu/">MCP protokolü: ana makine, istemci, sunucu →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>

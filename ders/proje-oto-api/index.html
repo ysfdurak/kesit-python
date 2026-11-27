@@ -1,0 +1,28 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Otomasyon projesi: API verisinden günlük rapor | Kesit Python</title><meta name="description" content="Sayfalı ve hız sınırlı bir API'den artımlı veri çeker, geçici hatayı aşar, sözleşmeye uymayan kaydı karantinaya alır, SQLite'a çiftlemeden yazar, günlük…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/proje-oto-api/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Otomasyon projesi: API verisinden günlük rapor"><meta property="og:description" content="Sayfalı ve hız sınırlı bir API'den artımlı veri çeker, geçici hatayı aşar, sözleşmeye uymayan kaydı karantinaya alır, SQLite'a çiftlemeden yazar, günlük…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/proje-oto-api/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Otomasyon projesi: API verisinden günlük rapor","description":"Sayfalı ve hız sınırlı bir API'den artımlı veri çeker, geçici hatayı aşar, sözleşmeye uymayan kaydı karantinaya alır, SQLite'a çiftlemeden yazar, günlük…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/proje-oto-api/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · İleri bitirme</span><h1>Otomasyon projesi: API verisinden günlük rapor</h1><p class="st-l">Sayfalı ve hız sınırlı bir API'den artımlı veri çeker, geçici hatayı aşar, sözleşmeye uymayan kaydı karantinaya alır, SQLite'a çiftlemeden yazar, günlük rapor üretir ve boş sonucu başarı saymaz. Yerel sürüm gerçek HTTP kullanır.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oto-api">Uygulamada aç, 7 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><div class="note"><b>Ağ burada sahte</b>Tarayıcıdaki Python genel ağa serbestçe çıkamaz. Görevlerde <code>SahteSunucu</code> gerçek <code>lk_orders</code> satırlarıyla cevap veren bellek içi bir API'dir: sayfalama, 429, 503 ve 401 davranışı kodda yazılı. <code>tasima</code> işlevi dışarıdan geldiği için aynı kod gerçek HTTP ile de çalışır; yerel sürümde <code>urllib</code> ile gerçekten sınandı.</div>
+<h2>İş</h2>
+<p>Lezzet Kurye sipariş verisi başka bir ekibin API'sinden geliyor. Her sabah önceki günün özeti isteniyor.</p>
+<pre class="py"># Filigran (watermark): "buraya kadar aldım" notu. Ne zaman ilerletildiği her şeyi değiştirir.
+sayfalar = [[("a", 1), ("d", 4)], [("b", 2), ("c", 3)]]
+filigran = 0
+try:
+    for i, sayfa in enumerate(sayfalar):
+        if i == 1:
+            raise ConnectionError("ikinci sayfada ağ koptu")
+        filigran = max(z for _, z in sayfa)     # yanlış yer: iş bitmeden ilerledi
+except ConnectionError as e:
+    print(e, "| filigran:", filigran, "| zamanı 2 ve 3 olan b ile c bir daha hiç alınmaz")</pre>
+<h2>Sık kaçırılan dört şey</h2>
+<ul><li><b>Filigran ne zaman ilerler?</b> Veri ile aynı işlemde. Yarım kalan çekimde ikisi de geri alınır.</li><li><b>Aynı anda düşen kayıtlar.</b> <code>placed_at &gt; since</code> aynı saniyedeki kaydı atlayabilir. Bu projede kurgusal API böyle çalışıyor; gerçekte bir pay bırakıp (biraz geriden başlayıp) çiftlenmeyi anahtarla önlersin.</li><li><b>Kayıt sonradan değişir.</b> Sipariş iade olabilir. <code>ON CONFLICT DO UPDATE</code> bunu karşılar, ama <code>placed_at</code> filigranı değişen eski kaydı görmez; gerçek API'de <code>updated_at</code> varsa onu izle.</li><li><b>Boş sonuç başarı değildir.</b> Hiç kayıt gelmemesi çoğu zaman API'nin ya da filtrenin bozulduğunu gösterir. Çıkış kodu ayrı olsun.</li></ul>
+<h2>Bu proje ile etl bitirmesinin farkı</h2>
+<p><a href="../proje-etl/">Bitirme projesi: Anadolu Market web olayları ETL</a> dosyadan katmanlı depoya yükleme üstüne kuruludur. Burası API'nin işletme tarafına odaklanır: hız sınırı, kimlik, sayfalama, sözleşme.</p></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/proje-oto-api/alistirma">Alıştırmalara geç (7)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../proje-oto-stok/">← Otomasyon projesi: stok uyarısı</a><a href="../proje-oto-onay/">Otomasyon projesi: çok adımlı onaylı satın alma →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>
