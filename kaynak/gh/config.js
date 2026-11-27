@@ -16,6 +16,7 @@ window.KESIT_CONFIG = {
   pbiUrl: 'https://ysfdurak.github.io/kesit-powerbi/',
   pythonUrl: 'https://ysfdurak.github.io/kesit-python/',
   statUrl: 'https://ysfdurak.github.io/kesit-istatistik/',
+  excelUrl: 'https://ysfdurak.github.io/kesit-excel/',
   feedbackFormUrl: '',   // boşsa geri bildirim GitHub Issues'a gider; doluysa adreste {ders} yazan yere ders adı gelir
   giscus: { repo: 'ysfdurak/kesit-python', repoId: '', category: 'Dersler', categoryId: '' },
   goatcounter: ''
