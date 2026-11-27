@@ -1,0 +1,48 @@
+<!doctype html><html lang="tr"><head><meta charset="utf-8"><meta http-equiv="Content-Security-Policy" content="default-src 'none'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self' data:; base-uri 'none'; form-action 'none'"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Karar odaklı yapay zekâ mimarisi | Kesit Python</title><meta name="description" content="Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana…"><link rel="canonical" href="https://ysfdurak.github.io/kesit-python/ders/karar-mimarisi/">
+<meta property="og:type" content="article"><meta property="og:locale" content="tr_TR"><meta property="og:site_name" content="Kesit Python"><meta property="og:title" content="Karar odaklı yapay zekâ mimarisi"><meta property="og:description" content="Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana…"><meta property="og:url" content="https://ysfdurak.github.io/kesit-python/ders/karar-mimarisi/"><meta property="og:image" content="https://ysfdurak.github.io/kesit-python/og.png"><meta name="twitter:card" content="summary_large_image">
+<link rel="icon" href="../../favicon.svg" type="image/svg+xml"><link rel="stylesheet" href="/vendor/fonts.css"><link rel="stylesheet" href="../statik.css"><script type="application/ld+json">{"@context":"https://schema.org","@type":"LearningResource","name":"Karar odaklı yapay zekâ mimarisi","description":"Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana…","inLanguage":"tr","isAccessibleForFree":true,"learningResourceType":"Ders","educationalLevel":"İleri","url":"https://ysfdurak.github.io/kesit-python/ders/karar-mimarisi/","isPartOf":{"@type":"Course","name":"Kesit Python","url":"https://ysfdurak.github.io/kesit-python/","provider":{"@type":"Person","name":"Yusuf Durak"}}}</script></head>
+<body class="st"><a class="st-skip" href="#icerik">Ana içeriğe geç</a><header class="st-h"><a class="st-b" href="../../">Kesit Python</a><nav aria-label="Konum"><a href="../">Tüm dersler</a></nav></header>
+<main id="icerik" class="st-m"><span class="st-e">İleri · Yapay Zekâ</span><h1>Karar odaklı yapay zekâ mimarisi</h1><p class="st-l">Modeli serbest metin yazan değil, denetlenebilir karar üreten bir bileşen olarak kurarsın: karar şeması, kurallarla birlikte çalışma, güven eşiği, insana yükseltme, denetim izi, geri alınabilirlik, karar kalitesi ölçümü.</p>
+<div class="st-c"><a class="st-p" href="../../#/lesson/karar-mimarisi">Uygulamada aç, 11 alıştırmayı çöz</a><span>Ücretsiz, hesap gerekmez, kurulum yok.</span></div>
+<p class="st-not">Bu sayfa dersin okuma sürümüdür. Metin bir kutuyu çalıştırmanı ya da adıma geçmeni söylüyorsa dersi uygulamada aç.</p>
+<article class="panel theory"><div class="note"><b>Bu başlık hakkında dürüst bir not</b>"Karar odaklı yapay zekâ mimarisi" yerleşik bir standart ya da tek tanımı olan bir terim <b>değildir</b>. Benzer ifadeleri ("decision-centric architecture", "decision intelligence") danışmanlık ve ürün yazılarında farklı anlamlarla görürsün; bilinen bir standart kurumu tanımı bulamadık. Bu derste ifadeyi şöyle <b>yorumluyoruz</b>: <b>modelin serbest metin değil, kararı ürettiği, kararın da kurallar ve insanla birlikte denetlendiği yapı</b>. Parçaların her biri (şemalı çıktı, kural motoru, insan onayı, denetim izi) yerleşik uygulamalardır; bir araya getiriş bizim önerimizdir. Mülakatta bu adı duyarsan önce ne kastedildiğini sor.</div>
+<h2>Neden serbest metin yetmez?</h2>
+<p>İade, kredi ön değerlendirme, destek önceliği gibi işlerde sonuç bir cümle değil, bir <b>karardır</b>: kim, neye, ne kadar, neden. Serbest metin ne kodla işlenir ne de ölçülür.</p>
+<pre class="py"># Aynı iade talebi, iki çıktı biçimi. Hangisini kod işleyebilir, hangisi denetlenebilir?
+serbest = "Müşteri haklı görünüyor, sanırım iade edilebilir ama tutar biraz yüksek."
+karar = {"karar": "yukselt", "tutar": 0, "guven": 0.55, "gerekce": ["BILGI_EKSIK"], "kanit": ["fotoğraf yok"]}
+
+print("serbest metinde 'iade' var mı:", "iade" in serbest)  # peki onay mı, ret mi?
+print("karar türü:", karar["karar"], "| güven:", karar["guven"])
+print("insana gitmeli mi:", karar["karar"] == "yukselt" or karar["guven"] &lt; 0.8)</pre>
+<p>Bu derste de model yok: görevlerdeki model yerine sabit bir işlev ya da sahte öneri kullanıyoruz. Amaç modelin kararını değil, kararın etrafındaki yapıyı sınamak.</p>
+<h2>Altı parça</h2>
+<div class="tbl-wrap"><table><tr><th>Parça</th><th>Soru</th><th>Yoksa ne olur</th></tr>
+<tr><td><b>Karar şeması</b></td><td>Çıktı hangi alanlardan oluşur?</td><td>Metni kim yorumlayacak belli olmaz</td></tr>
+<tr><td><b>Kural ve model</b></td><td>Kim neye karar verir?</td><td>Model politikayı çiğner</td></tr>
+<tr><td><b>Güven eşiği</b></td><td>Ne zaman otomatik?</td><td>Ya her şey otomatik ya her şey insanda</td></tr>
+<tr><td><b>Yükseltme</b></td><td>İnsan ne görür?</td><td>İnsan önüne bağlamsız iş düşer</td></tr>
+<tr><td><b>Denetim izi</b></td><td>Altı ay sonra neden sorulursa?</td><td>Karar savunulamaz</td></tr>
+<tr><td><b>Geri alınabilirlik</b></td><td>Yanlışsa dönüş var mı?</td><td>Küçük hata büyük zarar olur</td></tr></table></div>
+<h2>Karar şeması</h2>
+<p>Modelden doğrudan bu şemaya uyan JSON iste, sağlayıcının yapılandırılmış çıktı özelliği varsa kullan, ama <b>sonucu yine kendin doğrula</b>. Gerekçe serbest metin değil, kapalı bir kod listesi olsun: sayılabilir, kümelenebilir. Kanıt alanı zorunlu olsun. Alanlar arası kuralları da yaz: ret kararında tutar sıfır olmalı. Doğrulamadan geçemeyen çıktı insana gider, sessizce düzeltilmez.</p>
+<h2>Kural önce, model gri alanda</h2>
+<p>Politikanın kesin olduğu yerde model çağırmak hem para kaybıdır hem risktir. Süre dolduysa cevap bellidir. Sıra şöyledir: kesin kurallar, sonra model, sonra modelin sonucunu sınırlayan kurallar. Model "onayla" dese bile <b>istenenden fazla tutar veremez</b>. Kuralları sürüm numarasıyla sakla; karar hangi sürümle verildi, izde görünür.</p>
+<h2>Güven eşiği</h2>
+<p>İki yanılgı var. Birincisi modelin söylediği güvene olduğu gibi inanmak: dil modellerinin kendi bildirdiği güven genellikle kalibre değildir, 0,9 dediği işlerde doğruluk 0,9 çıkmayabilir. Bu yüzden önce etiketli veriyle <b>kalibrasyon tablosu</b> çıkarırsın. İkincisi eşiği "yüksek olsun" diye seçmek. Eşik bir iş kararıdır: yanlış otomatik karar ne kadara mal oluyor, insan incelemesi ne kadara? Bu iki rakamla eşik hesaplanır. Yanlışın bedeli büyükse eşik yükselir, insan pahalıysa düşer.</p>
+<h2>Yükseltme ve geri alınabilirlik</h2>
+<p>Eylemleri geri alınabilirliğe göre ayır. Kupon tanımlamak geri alınır, para göndermek alınmaz. Geri alınamaz eylem güven kaç olursa olsun insan onayı ister. Geri alma "silmek" değil <b>telafi eylemidir</b>, tek kez çalışır, süresi olabilir ve o da izde görünür. Yükseltmede insan modelin önerisini, kanıtı ve kuralın sonucunu görür; yalnız önerinin kopyasını onaylayan insan ise gerçek bir denetim sayılmaz, bu yüzden değiştirme oranını da ölçersin.</p>
+<h2>Denetim izi</h2>
+<p>Her karar için girdi özeti, kural ve model sürümü, eşik, sonuç ve kararı veren yazılır. Her kayıt öncekinin özetini içerirse sonradan değişiklik zincirde görünür. Zincirin sınırı da var: <b>sondan silinen kayıt zincirle anlaşılmaz</b>, son özeti başka bir yerde saklamak gerekir. Dosya yazma izni olan biri zinciri baştan da üretebilir; gerçek sistemde kayıt yetkisi ayrı tutulur. Kişisel veriyi ize açık yazma: özet ya da numara yeter.</p>
+<h2>Karar kalitesi</h2>
+<div class="tbl-wrap"><table><tr><th>Ölçü</th><th>Payda</th><th>Tuzak</th></tr>
+<tr><td>Otomatik oran</td><td>Tüm kararlar</td><td>Tek başına hedef olursa kalite düşer</td></tr>
+<tr><td>Otomatik doğruluk</td><td>Sonucu bilinen <b>otomatik</b> kararlar</td><td>İnsan kararları ve etiketsizler karışmasın</td></tr>
+<tr><td>Etiket oranı</td><td>Otomatik kararlar</td><td>Düşükse doğruluk rakamı zayıf kanıttır</td></tr>
+<tr><td>İnsanın değiştirme oranı</td><td>Model önerisi olan yükseltmeler</td><td>Sıfıra yakınsa insan körlemesine onaylıyor olabilir</td></tr>
+<tr><td>Grup kırılımı</td><td>Şehir, kanal, müşteri tipi</td><td>Ortalama, bir grubun kötü sonucunu gizler</td></tr></table></div>
+<p>Etiketler geç gelir: iadenin doğru olup olmadığı haftalar sonra anlaşılır. Bilinmeyeni yanlış saymak da doğru saymak da hatadır, "bilinmiyor" olarak bırak.</p></article>
+<div class="st-c"><a class="st-p" href="../../#/lesson/karar-mimarisi/alistirma">Alıştırmalara geç (11)</a></div>
+<nav class="st-n" aria-label="Ders sırası"><a href="../mcp-protokolu/">← MCP protokolü: ana makine, istemci, sunucu</a><a href="../yerel-modeller-hf/">Hugging Face ve yerel modellerle Python →</a></nav></main>
+<footer class="st-f">Kesit ücretsiz bir eğitim ve portföy projesidir. Veri setleri hayalidir. <a href="/">Kesit ana sayfası</a> · <a href="/vaka/">Nasıl yapıldı</a></footer></body></html>
