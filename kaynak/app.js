@@ -12,11 +12,12 @@ Object.entries(window.PY_MOD_FIX || {}).forEach(([id, m]) => { if (LMAP[id]) LMA
 Object.entries(window.PY_LV_FIX || {}).forEach(([id, v]) => { if (LMAP[id]) LMAP[id].lv = v; });
 Object.entries(window.PY_TITLE_FIX || {}).forEach(([id, t]) => { if (LMAP[id]) LMAP[id].title = t; });
 (window.PY_OPTIONAL || []).forEach(id => { if (LMAP[id]) LMAP[id].opt = true; });
-(window.PY_EXT || []).forEach(x => { const l = LMAP[x.id]; if (!l) return; if (x.ex) l.ex = (l.ex || []).concat(x.ex); if (x.html) { const k = l.body.lastIndexOf('<section class="deep">'); const add = x.kapali ? '<details class="more"><summary>' + x.kapali + '</summary>' + x.html + '</details>' : '<section class="more"><span class="eyebrow">Derinleş</span>' + x.html + '</section>'; l.body = k > 0 ? l.body.slice(0, k) + add + l.body.slice(k) : l.body + add; } if (x.min) l.min = (l.min || 15) + x.min; if (x.faq) l.faq = (l.faq || []).concat(x.faq); if (x.mistakes) l.mistakes = (l.mistakes || []).concat(x.mistakes); });
+/* Yayın paketinde (tools/govde.mjs) bu hazırlık derlemede yapılmıştır: PY_HAZIR */
+if (!window.PY_HAZIR) (window.PY_EXT || []).forEach(x => { const l = LMAP[x.id]; if (!l) return; if (x.ex) l.ex = (l.ex || []).concat(x.ex); if (x.html) { const k = l.body.lastIndexOf('<section class="deep">'); const add = x.kapali ? '<details class="more"><summary>' + x.kapali + '</summary>' + x.html + '</details>' : '<section class="more"><span class="eyebrow">Derinleş</span>' + x.html + '</section>'; l.body = k > 0 ? l.body.slice(0, k) + add + l.body.slice(k) : l.body + add; } if (x.min) l.min = (l.min || 15) + x.min; if (x.faq) l.faq = (l.faq || []).concat(x.faq); if (x.mistakes) l.mistakes = (l.mistakes || []).concat(x.mistakes); });
 const STAGE_ORDER = ['Isınma', 'Teşhis', 'Kodu oku', 'Adım sırası', 'Rehberli', 'Kendin yaz', 'Hata avı', 'Meydan okuma', 'Mini proje', 'Kendi bilgisayarında'];
 const fnv = s => { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return h >>> 0; };
 const sameLessonSig = {};
-LESSONS.forEach(l => { (l.ex || []).forEach(e => { if (!e.stage) e.stage = e.t === 'mc' ? 'Isınma' : e.t === 'predict' || e.t === 'order' ? 'Kodu oku' : e.t === 'local' ? 'Kendi bilgisayarında' : 'Kendin yaz'; });
+if (!window.PY_HAZIR) LESSONS.forEach(l => { (l.ex || []).forEach(e => { if (!e.stage) e.stage = e.t === 'mc' ? 'Isınma' : e.t === 'predict' || e.t === 'order' ? 'Kodu oku' : e.t === 'local' ? 'Kendi bilgisayarında' : 'Kendin yaz'; });
   /* Kimliği olmayan alıştırmaların ilerleme anahtarı: eski sürümdeki sıra numarası korunur (ex_anahtar.js), yeni alıştırma içerik özetiyle anahtarlanır */
   const old = (window.PY_EXKEY || {})[l.id] || {}, seen = {};
   (l.ex || []).forEach(e => { if (e.id) return; let sig = String(fnv(e.t + '|' + (e.q || '') + '|' + (e.code || e.sol || ''))); seen[sig] = (seen[sig] || 0) + 1; if (seen[sig] > 1) sig += '.' + seen[sig]; e._k = old[sig] != null ? String(old[sig]) : 'h' + sig; });
@@ -28,7 +29,7 @@ const GLOSS_EK = '(?:l[ae]r)?(?:s?[ıiuü])?(?:[ny]?[ıiuü]|[ny]?[ae]|n?[dt][ae
 const TERMS = (window.PY_TERMS || []).map(([tr, en]) => [new RegExp('(?<![\\p{L}\\p{N}])(?:' + tr + ')' + GLOSS_EK + '(?![\\p{L}\\p{N}])(?!\\s*\\()', 'iu'), en]);
 window.PY_GLOSS_LOG = [];
 function termify(h, id) { const parts = String(h).split(/(<pre[\s\S]*?<\/pre>|<code[\s\S]*?<\/code>|<a [\s\S]*?<\/a>|<h[1-6][\s\S]*?<\/h[1-6]>|<[^>]+>)/); TERMS.forEach(([re, en]) => { if (new RegExp(en.replace(/[.*+?^${}()|[\]\\]/g, '\\$&'), 'i').test(h)) return; for (let i = 0; i < parts.length; i += 2) { const m = re.exec(parts[i]); if (m) { const end = m.index + m[0].length; window.PY_GLOSS_LOG.push({ id, en, s: m[0], c: parts[i].slice(Math.max(0, m.index - 45), end + 35) }); parts[i] = parts[i].slice(0, end) + ' (' + en + ')' + parts[i].slice(end); break; } } }); return parts.join(''); }
-LESSONS.forEach(l => { l.body = termify(linkIds(l.body), l.id); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
+if (!window.PY_HAZIR) LESSONS.forEach(l => { l.body = termify(linkIds(l.body), l.id); (l.ex || []).forEach(e => { if (e.why) e.why = linkIds(e.why); if (e.q) e.q = linkIds(e.q); }); (l.faq || []).forEach(f => { f.a = linkIds(f.a); }); });
 const ORDERED = ORDER.map(id => LMAP[id]).filter(Boolean);
 LESSONS.forEach(l => { if (!ORDER.includes(l.id)) ORDERED.push(l); });
 ORDERED.forEach((l, i) => { l._i = i; });
@@ -407,7 +408,18 @@ function renderStats() {
   $('#sideStats').innerHTML = '<div class="stat"><b class="num">' + fmtN(P.xp) + '</b><span>XP</span></div><div class="stat"><b class="num">' + done + '/' + ORDERED.length + '</b><span>ders</span></div><div class="stat"><b class="num">' + s + '</b><span>gün seri</span></div>' + eng;
   $('#miniStats').textContent = P.xp + ' XP · ' + s + ' gün';
 }
-function render() { renderNav(); renderStats(); const m0 = $('#main'); const m = m0.cloneNode(false); m0.replaceWith(m); /* görünümlerin mount'ta eklediği dinleyiciler birikmesin */ m.innerHTML = '<div class="wrap">' + (VIEWS[V.name] || VIEWS.home).html() + '</div>'; enhance(m); if (VIEWS[V.name] && VIEWS[V.name].mount) VIEWS[V.name].mount(m); const tt = (NAV.find(x => x[0] === V.name) || [, ''])[1]; document.title = 'Kesit Python' + (V.name !== 'home' && tt ? ' · ' + tt : ''); }
+/* Ders gövdeleri yayın paketinde modül modül, ders açılınca yüklenir (govde/<modül>.js). Kaynak sürümünde her şey açılışta yüklüdür (_g yok). */
+const GOVDE = {}, GOVDE_P = {};
+window.PY_GOVDE_YUKLE = (g, obj) => { Object.keys(obj).forEach(id => { if (LMAP[id]) Object.assign(LMAP[id], obj[id]); }); GOVDE[g] = true; };
+function govdeYukle(gs) { return Promise.all(gs.map(g => GOVDE[g] ? null : (GOVDE_P[g] = GOVDE_P[g] || new Promise((ok, no) => { const sc = document.createElement('script'); sc.charset = 'utf-8'; sc.async = true; sc.src = 'govde/' + g + '.js?v=' + (window.PY_GOVDE_SURUM || ''); sc.onload = () => GOVDE[g] ? ok() : no(new Error(g)); sc.onerror = () => { delete GOVDE_P[g]; no(new Error(g)); }; document.head.appendChild(sc); })))); }
+const gEksik = l => l && l._g && !GOVDE[l._g] ? l._g : null;
+function bekleyenGovde() {
+  if (V.name === 'lesson') { const g = gEksik(LMAP[V.id]); return g ? [g] : []; }
+  if (V.name === 'review') return Array.from(new Set(dueReviews().map(k => { const mm = k.match(/^(.+?)#/); return mm ? gEksik(LMAP[mm[1]]) : null; }).filter(Boolean)));
+  return [];
+}
+function render() { const bk = bekleyenGovde(); if (bk.length) { renderNav(); renderStats(); const mm = $('#main'); const ad = V.name; mm.innerHTML = '<div class="wrap"><div class="panel" role="status" style="padding:24px"><p class="muted" style="margin:0">Ders yükleniyor…</p></div></div>'; govdeYukle(bk).then(() => { if (V.name === ad) render(); }, () => { mm.innerHTML = '<div class="wrap"><div class="panel" role="alert" style="padding:24px"><p style="margin:0">Ders yüklenemedi. Bağlantını kontrol edip sayfayı yenile.</p></div></div>'; }); return; }
+  renderNav(); renderStats(); const m0 = $('#main'); const m = m0.cloneNode(false); m0.replaceWith(m); /* görünümlerin mount'ta eklediği dinleyiciler birikmesin */ m.innerHTML = '<div class="wrap">' + (VIEWS[V.name] || VIEWS.home).html() + '</div>'; enhance(m); if (VIEWS[V.name] && VIEWS[V.name].mount) VIEWS[V.name].mount(m); const tt = (NAV.find(x => x[0] === V.name) || [, ''])[1]; document.title = 'Kesit Python' + (V.name !== 'home' && tt ? ' · ' + tt : ''); }
 
 /* Ana sayfa */
 VIEWS.home = { html() {
@@ -696,7 +708,9 @@ window.PY_CORE = { hasProgress, C_LINKS, busyHTML, optOrder, validDone, issueLin
 /* Diğer modüller (arena, mülakat, veri setleri) kendi görünümlerini kaydettikten sonra ilk çizim yapılır */
 /* İlk çizim: tüm betikler (app2.js'teki Arena, Mülakat, Sık hatalar, Yapay Zekâ görünümleri dahil) yüklendikten sonra.
    setTimeout(0) yavaş ağda sonraki betik inmeden çalışabiliyor ve #/mistakes gibi adresler ana sayfaya düşüyordu. */
-const _init = () => { applyTheme(); fromHash(); render(); };
+const _init = () => { applyTheme(); fromHash(); render();
+  /* Boşta: son açılan dersin ve sıradakinin modülünü önceden indir (yayın paketinde) */
+  setTimeout(() => { try { const l = LMAP[P.last] || ORDERED[0]; const n = l ? ORDERED[l._i + 1] : null; govdeYukle([gEksik(l), gEksik(n)].filter(Boolean)).catch(() => {}); } catch (e) {} }, 1500); };
 if (document.readyState === 'loading') document.addEventListener('DOMContentLoaded', _init); else setTimeout(_init, 0);
 /* Motor burada yüklenmez: ilk Çalıştır / Kontrol et tıklamasında iner (gizlilik metni bunu söyler). */
 })();

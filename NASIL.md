@@ -125,6 +125,14 @@ Pyodide'ın kendi paketlerinde olmayanlar `pypaket/` klasöründen gerekince ine
 
 `python3 tools/ghpack.py` Pages paketini `gh/kesit-python/` altında üretir. Yayın için gereken yapılandırma, lisanslar, görseller ve yerel yazı tipleri `kaynak/gh/` içinde sürümlenir; kökte üretilen `/gh/` çıktısı git dışında tutulur. Mevcut `main` dalına paket uygulanırken `ders/` ve `sitemap.xml` gibi önceki kalıcı yayın sayfaları korunur.
 
+**Ders gövdeleri modül modül (Kasım 2026):** `ghpack.py`, `tools/govde.cjs`'i çalıştırır. Bu betik `app.js`'in açılış hazırlığını (uzantı birleştirme, alıştırma aşaması ve ilerleme anahtarı, terim ve bağlantı) derlemede bir kez yapar ve paketi böler:
+- `dersler.js` (~250 KB): bütün derslerin hafif kaydı (gövdesiz; alıştırmalar yalnız `t`, `stage`, `id`, `_k`, `erken`), `PY_HAZIR = true`. `c_*`, `n_*`, `x_*`, `ex_anahtar.js` pakette yüklenmez.
+- `govde/<modül>.js` (29 dosya, ortalama ~350 KB): ders açılınca ya da tekrar ekranında gerekince `app.js` › `govdeYukle` indirir; boştayken son dersin ve sıradakinin modülü önceden iner.
+- Açılış: 12,1 MB / 3,5 MB gzip → 2,1 MB / 0,6 MB gzip. Kaynak sürümünde (`index.html` kökte) her şey eskisi gibi açılışta yüklüdür; `PY_HAZIR` yoktur.
+- Denetim: iki sürümde 156 dersin alıştırma anahtarları, sırası ve gövde uzunlukları birebir aynı (Playwright karşılaştırması); `UI_KOK=gh/kesit-python python3 tools/uitest.py` → TEMİZ.
+- **Dikkat:** `app.js`'in hazırlık satırları (`const LEVELS` → `termify` satırı ve `sureDk`) `govde.cjs` tarafından metin olarak okunur. Bu bölümü değiştirirsen `node tools/govde.cjs /tmp/x` ile dene; satırlar bulunamazsa betik durur.
+- **Statik ders sayfaları:** aynı betik `tools/statik.cjs` ile `ders/<id>/` sayfalarını, ders dizinini ve `sitemap.xml`'i her derlemede üretir (biçim Kesit SQL'in `araclar/statik.js`'iyle aynı). Daha önce elle çalıştırıldığı için 11 ders sayfası eksikti.
+
 - **GitHub Pages:** Settings → Pages → Branch `main`, `/ (root)`.
 - **claude.ai artifact:** kökteki `index.html` sayfa, diğer kök `*.js` dosyaları, `data/**` (CSV + manifest) ve `pypaket/**` ek dosya olarak yayımlanır (yaklaşık 110 dosya, 43 MB). `pypaket/` atlanırsa Excel, Word, PDF, seaborn ve plotly görevleri "Bu paket inemedi" der; `.whl` dosyalarının artifact olarak yayımlanması denenmedi. Yayından önce U+FFFD karakteri olmadığını denetleyin: `grep -c $'\xef\xbf\xbd' *.js index.html`.
 
@@ -163,3 +171,7 @@ Mülakat bankası temizliği `kaynak/v3/mz/mulakat_temizlik.js` içindedir: davr
 
 ## Uçtan uca depo vakası (vaka/depo/)
 `vaka/depo/` dört uygulamalı vakanın 2. adımıdır; `tools/build.py` üretmez, kökte durur ve `main`'e olduğu gibi kopyalanır. Sayfa `pyworker.js` motorunu kullanır. Üreteç `ysfdurak.github.io` deposunda `vaka/depo-kaynak/`. Denetim `python tests/vaka_depo.py` (CPython + pandas, CI).
+
+## Kurulum derslerine kod görevleri (Kasım 2026)
+`kaynak/v3/k1/kurulum_kod.js`: 8 kurulum ve araç dersine tarayıcıda çalışan 15 kod görevi (sürüm metni, pathlib ile Windows/macOS yolları, PATH, `pip freeze`, VS Code `settings.json`, `.ipynb` JSON, `git status --porcelain`, `.gitignore` kalıpları, argparse). CPython ve Pyodide'da PASS=15.
+

@@ -8,19 +8,28 @@ os.chdir(KOK)
 subprocess.run(['python3', 'tools/build.py'], check=True, stdout=subprocess.DEVNULL)
 shutil.rmtree(O, ignore_errors=True); os.makedirs(O)
 html = open('index.html', encoding='utf-8').read()
+# Ders içeriği: açılışta yalnız dizin (dersler.js), gövdeler ders açılınca govde/<modül>.js (tools/govde.cjs)
+subprocess.run(['node', 'tools/govde.cjs', O], check=True)
+ICERIK = ['c_temel.js', 'c_orta.js', 'c_ileri.js', 'n_temel.js', 'n_orta.js', 'n_ileri.js', 'x_1.js', 'x_2.js', 'ex_anahtar.js']
+for i, t in enumerate(ICERIK):
+    eski = f'<script charset="utf-8" src="{t}"></script>'
+    assert eski in html, t
+    html = html.replace(eski + '\n', '' if i else '<script charset="utf-8" src="dersler.js"></script>\n', 1)
 tags = re.findall(r'<script charset="utf-8" src="([^"]+)"></script>', html)
 tags = [t for t in tags if t != 'sync.js']
-for t in tags: shutil.copy(t, O + '/' + t)
+for t in tags:
+    if t != 'dersler.js': shutil.copy(t, O + '/' + t)
+_boy = lambda t: os.path.getsize(O + '/' + t)
 shutil.copy('pyworker.js', O + '/pyworker.js')
 # Açılıştan sonra app2.js'in yüklediği veri dosyaları (etiketsiz; önbelleğe yine alınır)
 TEMBEL = ['arena.js', 'interview.js', 'mistakes.js']
 for t in TEMBEL: shutil.copy(t, O + '/' + t)
-tot = sum(os.path.getsize(t) for t in tags); seen = 0
+tot = sum(_boy(t) for t in tags); seen = 0
 def tag(m):
     global seen
     t = m.group(1)
     if t == 'sync.js': return ''
-    seen += os.path.getsize(t)
+    seen += _boy(t)
     return f'<script charset="utf-8" src="{t}"></script>\n<script>__b({round(100 * seen / tot)})</script>'
 html = re.sub(r'<script charset="utf-8" src="([^"]+)"></script>', tag, html)
 first = re.search(r'<script charset="utf-8" src="', html).start()
@@ -62,6 +71,8 @@ for f in sorted(set(x for x in _pre if x != './')):
 _sw = open(O + '/sw.js', encoding='utf-8').read().replace('__SURUM__', _h.hexdigest()[:12]).replace('__ONBELLEK__', json.dumps(_pre, ensure_ascii=False))
 open(O + '/sw.js', 'w', encoding='utf-8').write(_sw)
 if os.path.isdir('kaynak/gh/ekran'): shutil.copytree('kaynak/gh/ekran', O + '/ekran')
+# Statik ders sayfaları ve site haritası (index.html ve stiller yerinde olduktan sonra)
+subprocess.run(['node', 'tools/govde.cjs', O], check=True)
 open(O + '/.nojekyll', 'w').close()
 r = subprocess.run(['node', 'tools/readme.js'], check=True, capture_output=True, text=True, cwd=KOK)
 open(O + '/README.md', 'w', encoding='utf-8').write(r.stdout)
